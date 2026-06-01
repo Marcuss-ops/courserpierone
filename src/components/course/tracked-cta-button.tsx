@@ -17,10 +17,10 @@ function detectUserCurrency(): string {
     };
     const parts = locale.split("-");
     const region = parts.length > 1 ? parts[1].toUpperCase() : parts[0].toUpperCase();
-    return regionMap[region] || "EUR";
-  } catch {
-    return "EUR";
-  }
+    return regionMap[region] || "EUR";    } catch (e) {
+      console.warn("[Currency] Failed to detect currency:", e);
+      return "EUR";
+    }
 }
 
 interface TrackedCtaButtonProps {
@@ -64,7 +64,8 @@ export function TrackedCtaButton({
           setError(data.error || "Checkout non disponibile");
           setLoading(false);
         }
-      } catch {
+      } catch (e) {
+        console.warn("[Checkout] Failed to create checkout:", e);
         setError("Errore di connessione. Riprova.");
         setLoading(false);
       }

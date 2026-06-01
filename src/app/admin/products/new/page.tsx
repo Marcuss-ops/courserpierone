@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import TemplateSelector from "@/components/admin/template-selector";
 import { ImageUpload } from "@/components/admin/image-upload";
 import type { TemplateId } from "@/components/funnel";
+import type { TranslateApiResponse } from "@/lib/api-types";
 import { 
   ArrowLeft, 
   ArrowRight, 
@@ -44,7 +45,7 @@ export default function NewProductPage() {
   const [texts, setTexts] = useState<Record<string, string>>(
     Object.fromEntries(FUNNEL_SECTIONS.map((s) => [s.key, ""]))
   );
-  const [lessons, setLessons] = useState<Array<{ title: string; videoUrl: string }>>([
+  const [lessons, setLessons] = useState<{ title: string; videoUrl: string }[]>([
     { title: "", videoUrl: "" },
   ]);
   const [aiPrompt, setAiPrompt] = useState("");
@@ -73,7 +74,7 @@ export default function NewProductPage() {
           currentTexts: texts,
         }),
       });
-      const data = await res.json();
+      const data = await res.json() as TranslateApiResponse;
       setAiResult(JSON.stringify(data, null, 2));
     } catch {
       alert("Errore nella richiesta AI");
@@ -94,7 +95,7 @@ export default function NewProductPage() {
           sections: texts,
         }),
       });
-      const data = await res.json();
+      const data = await res.json() as TranslateApiResponse;
       if (data.translations) {
         setTranslationsByLocale(data.translations);
         const locales = Object.keys(data.translations).filter(l => l !== "it");

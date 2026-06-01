@@ -2,30 +2,19 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { 
-  Package, 
-  Plus, 
-  Search,
-  Filter,
-  Edit,
-  Eye,
-  ChevronDown,
-  Globe,
-  Settings,
-  Calendar,
-  Loader2
-} from "lucide-react";
+import { Package, Plus, Search, Filter, Edit, Eye, ChevronDown, Globe, Calendar, Loader2 } from "lucide-react";
+import type { ProductApiItem } from "@/lib/api-types";
+
 export default function ProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/products")
-      .then((r) => r.json())
+      .then((r) => r.json() as Promise<ProductApiItem[]>)
       .then((data) => {
         if (Array.isArray(data)) {
-          // Map API data to ProductMetric format
-          setProducts(data.map((p: any) => ({
+          setProducts(data.map((p) => ({
             id: p.id,
             slug: p.slug,
             title: p.slug,
@@ -38,7 +27,9 @@ export default function ProductsPage() {
           })));
         }
       })
-      .catch(() => {})
+      .catch(() => {
+          // ignore fetch error
+        })
       .finally(() => setLoading(false));
   }, []);
 

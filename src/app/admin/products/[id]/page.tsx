@@ -6,6 +6,7 @@ import TemplateSelector from "@/components/admin/template-selector";
 import { ImageUpload } from "@/components/admin/image-upload";
 import { CurrencyPricesSection } from "@/components/admin/currency-prices";
 import type { TemplateId } from "@/components/funnel";
+import type { ProductApiDetail, TranslateApiResponse } from "@/lib/api-types";
 import {
   ArrowLeft,
   ArrowRight,
@@ -39,7 +40,7 @@ export default function EditProductPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const [product, setProduct] = useState<any>(null);
+  const [product, setProduct] = useState<ProductApiDetail | null>(null);
   const [slug, setSlug] = useState("");
   const [price, setPrice] = useState("4900");
   const [status, setStatus] = useState("draft");
@@ -47,7 +48,7 @@ export default function EditProductPage() {
   const [lemonVariantId, setLemonVariantId] = useState("");
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [texts, setTexts] = useState<Record<string, string>>({});
-  const [lessons, setLessons] = useState<Array<{ id?: string; title: string; videoUrl: string }>>([]);
+  const [lessons, setLessons] = useState<{ id?: string; title: string; videoUrl: string }[]>([]);
   const [locale, setLocale] = useState("it");
   const [toast, setToast] = useState("");
   const [isTranslating, setIsTranslating] = useState(false);
@@ -56,7 +57,7 @@ export default function EditProductPage() {
   const [pricesByCurrency, setPricesByCurrency] = useState<Record<string, { price: number; lemonVariantId?: string | null; stripePriceId?: string | null }>>({});
 
   useEffect(() => {
-    fetchProduct();
+    void fetchProduct();
   }, [id]);
 
   async function fetchProduct() {
@@ -64,12 +65,12 @@ export default function EditProductPage() {
     try {
       const res = await fetch(`/api/products/${id}`);
       if (!res.ok) throw new Error("Failed to fetch");
-      const data = await res.json();
+      const data = await res.json() as ProductApiDetail;
       setProduct(data);
       setSlug(data.slug || "");
       setPrice(String(data.price || 4900));
       setStatus(data.status || "draft");
-      setTemplateId(data.templateId || "lumio");
+      setTemplateId((data.templateId || "lumio") as TemplateId);
       setLemonVariantId(data.lemonVariantId || "");
       setCoverPreview(data.coverUrl || null);
 
@@ -92,7 +93,7 @@ export default function EditProductPage() {
       setTexts(txts);
 
       if (data.lessons) {
-        const les = data.lessons.map((l: any) => ({
+        const les = data.lessons.map((l) => ({
           id: l.id,
           title: l.translations?.[0]?.title || "",
           videoUrl: l.translations?.[0]?.videoUrl || "",
@@ -148,7 +149,7 @@ export default function EditProductPage() {
           sections: texts,
         }),
       });
-      const data = await res.json();
+      const data = await res.json() as TranslateApiResponse;
       if (data.translations) {
         setTranslationsByLocale(prev => ({ ...prev, ...data.translations }));
         const locales = Object.keys(data.translations).filter(l => l !== locale);

@@ -76,13 +76,13 @@ export default function FunnelVisualization({ productId }: { productId?: string 
         const res = await fetch(`/api/analytics/funnel?${params}`);
         const json = await res.json();
         setData(json);
-      } catch {
-        // keep null
+      } catch (e) {
+        console.warn("[Funnel] Failed to fetch data:", e);
       } finally {
         setLoading(false);
       }
     }
-    fetchFunnel();
+    void fetchFunnel();
   }, [productId, days]);
 
   if (loading) {

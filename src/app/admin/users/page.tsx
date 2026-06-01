@@ -49,7 +49,7 @@ export default function AdminUsersPage() {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetchUsers();
+    void fetchUsers();
   }, []);
 
   async function fetchUsers() {

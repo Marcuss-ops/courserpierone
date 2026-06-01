@@ -91,7 +91,7 @@ export default async function LandingPage({
   // Helper per prezzo localizzato
   const displayPrice = getPriceString(data, currentLang);
 
-  if (data.template === "lumio" || data.template === "h612" || data.template === "horizon" || data.template === "book-claude") {
+  if (data.template === "lumio" || data.template === "h612" || data.template === "horizon" || data.template === "book-claude" || data.template === "default") {
     const templateData = mapConfigToTemplateData(data, currentLang);
     if (templateData) {
       let TemplateComponent;

@@ -6,7 +6,8 @@ import Link from "next/link";
 import TemplateSelector from "@/components/admin/template-selector";
 import FunnelVisualization from "@/components/admin/funnel-visualization";
 import type { TemplateId } from "@/components/funnel";
-import { DASHBOARD_DATA } from "@/lib/dashboard-data";
+import { DASHBOARD_DATA, type ProductMetric } from "@/lib/dashboard-data";
+import type { ProductApiItem, DashboardApiResponse } from "@/lib/api-types";
 import { 
   Plus, 
   Package, 
@@ -32,7 +33,7 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [showSelector, setShowSelector] = useState(false);
   const [data, setData] = useState(DASHBOARD_DATA);
-  const [analytics, setAnalytics] = useState<any>(null);
+  const [analytics, setAnalytics] = useState<DashboardApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"overview" | "funnel">("overview");
@@ -42,11 +43,11 @@ export default function AdminDashboard() {
       try {
         // Fetch products
         const prodRes = await fetch("/api/products");
-        const products = await prodRes.json();
+        const products = await prodRes.json() as ProductApiItem[];
 
         // Fetch analytics
         const analyticsRes = await fetch("/api/analytics/dashboard");
-        const analyticsData = await analyticsRes.json();
+        const analyticsData = await analyticsRes.json() as DashboardApiResponse | null;
 
         if (Array.isArray(products)) {
           setData({
@@ -55,17 +56,17 @@ export default function AdminDashboard() {
               totalRevenueTrend: (analyticsData?.ctr || "0") + "%",
               netSales: analyticsData?.purchases || 0,
               netSalesTrend: "-",
-              activeFunnels: products.filter((p: any) => p.status === "published").length,
+              activeFunnels: products.filter((p: { status: string }) => p.status === "published").length,
               activeFunnelsTrend: "/" + products.length,
               averageCR: (analyticsData?.cr || "0") + "%",
               averageCRTrend: "-",
             },
-            products: products.map((p: any) => ({
+            products: products.map((p: { id: string; slug: string; templateId: string; status: string; locales: string[]; lessonsCount: number }) => ({
               id: p.id,
               slug: p.slug,
               title: p.slug,
-              template: p.templateId || "lumio",
-              status: p.status || "draft",
+              template: p.templateId as "lumio" | "h612" | "horizon",
+              status: (p.status || "draft") as "published" | "draft" | "archived",
               locales: p.locales || [],
               sales: p.lessonsCount || 0,
               revenue: 0,
@@ -84,7 +85,7 @@ export default function AdminDashboard() {
         setLoading(false);
       }
     }
-    fetchData();
+    void fetchData();
   }, []);
 
   const handleCreateProduct = (templateId: TemplateId, domain: string) => {
@@ -362,11 +363,11 @@ export default function AdminDashboard() {
             </div>
             <div className="grid grid-cols-2 gap-10 pt-8 border-t border-white/5 relative">
               <div>
-                <div className="text-3xl font-black text-white text-contrast">{analytics?.ctr || "0"}%</div>
+                <div className="text-3xl font-black text-white text-contrast">{String(analytics?.ctr || "0")}%</div>
                 <div className="text-[9px] text-zinc-500 mt-2 font-black uppercase tracking-[0.2em]">Click-Through Rate</div>
               </div>
               <div>
-                <div className="text-3xl font-black text-white text-contrast">{analytics?.conversion || "0"}%</div>
+                <div className="text-3xl font-black text-white text-contrast">{String(analytics?.conversion || "0")}%</div>
                 <div className="text-[9px] text-zinc-500 mt-2 font-black uppercase tracking-[0.2em]">Conv. Rate</div>
               </div>
             </div>

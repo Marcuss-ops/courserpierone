@@ -20,7 +20,7 @@ export interface PriceByLocale {
 export interface CourseConfig {
   slug: string;
   productId?: string;
-  template?: "lumio" | "h612" | "horizon" | "default";
+  template?: "lumio" | "h612" | "horizon" | "book-claude" | "default";
   defaultLanguage: string;
   cover: string;
   checkoutUrl: string;
@@ -39,7 +39,7 @@ export interface CourseConfig {
     ebookContent: string;
   }>;
   lessons: LessonConfig[];
-  ebookChapters: Array<{ it: string; en: string; page: number }>;
+  ebookChapters: { it: string; en: string; page: number }[];
 }
 
 export async function getCourseConfig(slug: string): Promise<CourseConfig | null> {

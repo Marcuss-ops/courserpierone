@@ -15,7 +15,7 @@ interface HorizonProps {
     cta?: string;
     prezzo?: string;
     coverUrl?: string;
-    lezioni?: Array<{ titolo: string; descrizione: string }>;
+    lezioni?: { titolo: string; descrizione: string }[];
   };
   locale?: string;
 }

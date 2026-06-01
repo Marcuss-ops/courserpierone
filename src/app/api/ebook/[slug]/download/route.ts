@@ -158,7 +158,7 @@ export async function GET(
 
   // Table of contents
   for (const ch of course.ebookChapters) {
-    const chTitle = ch[lang as "it" | "en"] || ch.it;
+    const chTitle = ch[lang] || ch.it;
     addText(`${chTitle}`, 12, false, [80, 80, 90]);
     y += 2;
   }

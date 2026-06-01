@@ -3,7 +3,7 @@ import TemplateH612 from "@/components/funnel/template-h612";
 const sampleData = {
   titolo: "Corso Completo di Fotografia",
   sottotitolo: "Impara a scattare foto professionali con il tuo smartphone o reflex. Dai fundamenti alla composizione avanzata.",
-  problema: "Sei stanco di scattare foto sfocate, scure o prive di composizione? Il 90% delle persone ha un\'ottima fotamera in tasca ma non sa come usarla.",
+  problema: "Sei stanco di scattare foto sfocate, scure o prive di composizione? Il 90% delle persone ha un'ottima fotamera in tasca ma non sa come usarla.",
   storia: `Ho iniziato a scattare foto a 15 anni con una vecchia fotamera mia padre.
 
 Dopo 20 anni di esperienza, migliaia di scatti e decine di workshop tenuti in tutto il mondo, ho raccolto tutto quello che ho imparato in un unico corso.

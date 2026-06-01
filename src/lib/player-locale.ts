@@ -89,7 +89,7 @@ export const playerLocale: Record<string, Record<string, string>> = {
 };
 
 export function t(locale: string, key: string, params?: Record<string, string | number>): string {
-  const text = playerLocale[locale]?.[key] || playerLocale["it"]?.[key] || key;
+  const text = playerLocale[locale]?.[key] || playerLocale.it?.[key] || key;
   if (!params) return text;
   return text.replace(/\{(\w+)\}/g, (_, k) => String(params[k] ?? `{${k}}`));
 }

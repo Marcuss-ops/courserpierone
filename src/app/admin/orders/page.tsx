@@ -48,7 +48,7 @@ export default function AdminOrdersPage() {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetchOrders();
+    void fetchOrders();
   }, []);
 
   async function fetchOrders() {

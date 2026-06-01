@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
   // Gestisci il evento checkout.session.completed
   if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session;
+    const session = event.data.object;
 
     const userId = session.metadata?.userId;
     const productId = session.metadata?.productId;
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
             metadata: JSON.stringify({ amount: session.amount_total, currency: session.currency }),
             userId,
           },
-        }).catch(() => {});
+        }).catch((e) => console.warn("[Stripe Webhook] Failed to track analytics event:", e));
       }
 
       console.log(`Order created for user ${userId}, product ${productId}`);

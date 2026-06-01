@@ -26,7 +26,7 @@ function sendEvent(eventType: string, productSlug: string, extra?: Record<string
         ...utm,
       },
     }),
-  }).catch(() => {});
+  }).catch((e) => console.warn("[Analytics] sendEvent failed:", e));
 }
 
 export function usePageViewTracking(productSlug: string) {

@@ -302,11 +302,11 @@ async function ContinueAndCertificatesSection({
   orders,
 }: {
   userId: string;
-  orders: Array<{
+  orders: {
     id: string;
     product: { id: string; slug: string; coverUrl: string | null; templateId: string; _count: { lessons: number } };
     createdAt: Date;
-  }>;
+  }[];
 }) {
   // Trova l'ultima lezione guardata
   const lastWatch = await prisma.lessonProgress.findFirst({

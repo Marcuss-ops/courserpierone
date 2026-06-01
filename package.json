@@ -6,11 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "tsc --noEmit",
+    "lint": "tsc --noEmit && eslint src/",
+    "lint:eslint": "eslint src/ --fix",
     "typecheck": "tsc --noEmit",
     "db:push": "npx prisma db push",
     "db:studio": "npx prisma studio",
     "db:generate": "npx prisma generate",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -26,12 +29,12 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "jspdf": "^4.2.1",
-    "lucide-react": "^1.16.0",
+    "lucide-react": "^1.17.0",
     "next": "^16.2.6",
     "next-auth": "^4.24.14",
-    "next-intl": "^4.12.0",
+    "next-intl": "^4.13.0",
     "nodemailer": "^7.0.13",
-    "openai": "^6.39.0",
+    "openai": "^6.39.1",
     "postcss": "^8.5.15",
     "prisma": "^5.22.0",
     "react": "^19.2.6",
@@ -43,6 +46,12 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/nodemailer": "^8.0.0"
+    "@eslint/js": "^10.0.1",
+    "@types/nodemailer": "^8.0.0",
+    "eslint": "^10.4.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "typescript-eslint": "^8.60.0",
+    "vitest": "^4.1.8"
   }
 }

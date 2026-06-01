@@ -36,14 +36,14 @@ export function LessonProgressButton({
           setProgressPercent(Math.round((completedCount / total) * 100));
         }
       }
-    } catch {
-      // Not authenticated or network error
+    } catch (e) {
+      console.warn("[Progress] Failed to fetch progress:", e);
     }
   }, [lessonId, productSlug]);
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetchProgress();
+      void fetchProgress();
     }
   }, [isAuthenticated, fetchProgress]);
 
@@ -71,12 +71,12 @@ export function LessonProgressButton({
               productId: productSlug,
               metadata: { lessonId },
             }),
-          }).catch(() => {});
+          }).catch((e) => console.warn("[Analytics] Failed to track lesson complete:", e));
         }
         await fetchProgress(); // Refresh progress
       }
-    } catch {
-      // silent
+    } catch (e) {
+      console.warn("[Progress] Failed to toggle completion:", e);
     } finally {
       setLoading(false);
     }
@@ -143,7 +143,7 @@ export function ProgressBar({
           setPercent(Math.round((completed / totalLessons) * 100));
         }
       })
-      .catch(() => {});
+      .catch((e) => console.warn("[Progress] Failed to load stats:", e));
   }, [productSlug, totalLessons, isAuthenticated]);
 
   if (!isAuthenticated) return null;

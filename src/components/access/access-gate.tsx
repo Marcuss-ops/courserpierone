@@ -24,13 +24,14 @@ export function AccessGate({ children, productSlug, token }: AccessGateProps) {
         const res = await fetch(`/api/access?${params.toString()}`);
         const data = await res.json();
         setHasAccess(data.hasAccess);
-      } catch {
+      } catch (e) {
+        console.warn("[AccessGate] Failed to check access:", e);
         setHasAccess(false);
       } finally {
         setChecking(false);
       }
     }
-    checkAccess();
+    void checkAccess();
   }, [productSlug, token]);
 
   if (checking) {

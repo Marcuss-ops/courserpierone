@@ -17,28 +17,28 @@ export function useAnalytics(productId?: string) {
         }),
       });
     } catch (e) {
-      // Silently fail analytics
+      console.warn("[Analytics] Failed to track event:", eventType, e);
     }
   }
 
   function trackPageView() {
-    track("pageview");
+    void track("pageview");
   }
 
   function trackClickBuy(extra?: object) {
-    track("click_buy", extra);
+    void track("click_buy", extra);
   }
 
   function trackCheckoutStart(extra?: object) {
-    track("checkout_start", extra);
+    void track("checkout_start", extra);
   }
 
   function trackPurchase(amount?: number, extra?: object) {
-    track("purchase", { amount, ...extra });
+    void track("purchase", { amount, ...extra });
   }
 
   function trackLessonComplete(lessonId: string) {
-    track("lesson_complete", { lessonId });
+    void track("lesson_complete", { lessonId });
   }
 
   useEffect(() => {
@@ -46,7 +46,7 @@ export function useAnalytics(productId?: string) {
     fetch(`/api/analytics/dashboard?productId=${productId}`)
       .then((r) => r.json())
       .then((d) => setStats(d))
-      .catch(() => {});
+      .catch((e) => console.warn("[Analytics] Failed to load stats:", e));
   }, [productId]);
 
   return { stats, track, trackPageView, trackClickBuy, trackCheckoutStart, trackPurchase, trackLessonComplete };

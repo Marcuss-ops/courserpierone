@@ -65,11 +65,8 @@ export async function POST(request: NextRequest) {
       });
 
       // Salva le traduzioni (lingua sorgente)
-      for (const [section, content] of Object.entries(translations) as [
-        string,
-        string
-      ][]) {
-        if (content && content.trim() !== "") {
+      for (const [section, content] of Object.entries(translations)) {
+        if (typeof content === "string" && content.trim() !== "") {
           await tx.productTranslation.create({
             data: {
               productId: p.id,
@@ -83,26 +80,28 @@ export async function POST(request: NextRequest) {
 
       // Salva le traduzioni AI per altre lingue
       if (translationsByLocale && typeof translationsByLocale === "object") {
-        for (const [locale, sections] of Object.entries(translationsByLocale) as [string, Record<string, string>][]) {
+        for (const [locale, sections] of Object.entries(translationsByLocale)) {
           if (locale === (sourceLocale || "it")) continue; // già salvate sopra
-          for (const [section, content] of Object.entries(sections)) {
-            if (content && content.trim() !== "") {
-              await tx.productTranslation.upsert({
-                where: {
-                  productId_locale_section: {
+          if (typeof sections === "object" && sections !== null) {
+            for (const [section, content] of Object.entries(sections)) {
+              if (typeof content === "string" && content.trim() !== "") {
+                await tx.productTranslation.upsert({
+                  where: {
+                    productId_locale_section: {
+                      productId: p.id,
+                      locale,
+                      section,
+                    },
+                  },
+                  update: { content },
+                  create: {
                     productId: p.id,
                     locale,
                     section,
+                    content,
                   },
-                },
-                update: { content },
-                create: {
-                  productId: p.id,
-                  locale,
-                  section,
-                  content,
-                },
-              });
+                });
+              }
             }
           }
         }

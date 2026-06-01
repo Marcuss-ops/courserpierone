@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   let payload: any;
   try {
     payload = JSON.parse(body);
@@ -155,7 +156,7 @@ export async function POST(request: NextRequest) {
             userId: user.id,
           },
         })
-        .catch(() => {});
+        .catch((e) => console.warn("[LS Webhook] Failed to track analytics event:", e));
 
       console.log(`[LS] Order ${orderId} created for user ${user.id}, product ${product.slug}`);
     } catch (error) {

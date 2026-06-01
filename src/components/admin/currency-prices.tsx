@@ -2,11 +2,11 @@
 
 import { Globe } from "lucide-react";
 
-type CurrencyPrice = {
+interface CurrencyPrice {
   price: number;
   lemonVariantId?: string | null;
   stripePriceId?: string | null;
-};
+}
 
 type PricesByCurrency = Record<string, CurrencyPrice>;
 
@@ -25,12 +25,20 @@ export function CurrencyPricesSection({
     { code: "GBP", label: "GBP (£)" },
   ];
 
-  const setCurrency = (code: string, field: string, value: any) => {
+  type CurrencyField = keyof CurrencyPrice;
+
+  const setCurrency = (code: string, field: CurrencyField, value: string | number | null) => {
     const updated = { ...pricesByCurrency };
     if (!updated[code]) {
       updated[code] = { price: 0 };
     }
-    (updated[code] as any)[field] = value;
+    if (field === "price") {
+      updated[code].price = value as number;
+    } else if (field === "lemonVariantId") {
+      updated[code].lemonVariantId = value as string | null;
+    } else if (field === "stripePriceId") {
+      updated[code].stripePriceId = value as string | null;
+    }
     onChange(updated);
   };
 

@@ -40,7 +40,7 @@ export function LessonNotes({ lessonId, locale, isAuthenticated }: LessonNotesPr
   }, [lessonId, isAuthenticated]);
 
   useEffect(() => {
-    loadNotes();
+    void loadNotes();
   }, [loadNotes]);
 
   const handleSave = async () => {

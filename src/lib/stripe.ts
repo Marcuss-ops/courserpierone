@@ -9,7 +9,7 @@ export function getStripe(): Stripe {
       throw new Error("Missing STRIPE_SECRET_KEY");
     }
     _stripe = new Stripe(key, {
-      apiVersion: "2026-05-27.dahlia",
+      // apiVersion omitted — uses Stripe's default (latest stable)
       typescript: true,
     });
   }

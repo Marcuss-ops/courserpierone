@@ -33,7 +33,7 @@ export const DASHBOARD_DATA = {
     activeFunnelsTrend: "0",
     averageCR: "0%",
     averageCRTrend: "0%",
-  } as DashboardStats,
+  },
   
   products: [] as ProductMetric[],
 

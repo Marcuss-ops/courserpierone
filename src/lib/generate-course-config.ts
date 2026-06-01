@@ -7,7 +7,7 @@ const IS_VERCEL = process.env.VERCEL === "1";
 export interface CourseConfig {
   slug: string;
   productId: string;
-  template: "lumio" | "h612" | "horizon";
+  template: "lumio" | "h612" | "horizon" | "book-claude";
   defaultLanguage: string;
   cover: string;
   checkoutUrl: string;
@@ -24,15 +24,15 @@ export interface CourseConfig {
     ebookTitle: string;
     ebookContent: string;
   }>;
-  lessons: Array<{
+  lessons: {
     number: number;
     id: string;
     titles: Record<string, string>;
     descriptions: Record<string, string>;
     videos: Record<string, string>;
     duration: string;
-  }>;
-  ebookChapters: Array<{ it: string; en: string; page: number }>;
+  }[];
+  ebookChapters: { it: string; en: string; page: number }[];
 }
 
 export async function generateCourseConfig(slug: string) {
@@ -85,7 +85,7 @@ export async function generateCourseConfig(slug: string) {
     const videos: Record<string, string> = {};
 
     for (const locale of locales) {
-      titles[locale] = ltByLocale[locale]?.title || ltByLocale["it"]?.title || "Lezione";
+      titles[locale] = ltByLocale[locale]?.title || ltByLocale.it?.title || "Lezione";
       descriptions[locale] = ltByLocale[locale]?.description || "";
       videos[locale] = ltByLocale[locale]?.videoUrl || "";
     }

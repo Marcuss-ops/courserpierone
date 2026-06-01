@@ -64,7 +64,7 @@ export default async function EbookPage({
 
         <nav className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-1">
           {data.ebookChapters.map((chapter, idx) => (
-            <ChapterLink key={idx} title={chapter[currentLang as "it" | "en"] || chapter.it} page={chapter.page} active={idx === 0} />
+            <ChapterLink key={idx} title={chapter[currentLang] || chapter.it} page={chapter.page} active={idx === 0} />
           ))}
         </nav>
 

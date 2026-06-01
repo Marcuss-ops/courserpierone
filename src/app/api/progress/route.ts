@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { progressSchema } from "@/lib/validations";
+import type { Prisma } from "@prisma/client";
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,7 +17,7 @@ export async function GET(request: NextRequest) {
     const user = await prisma.user.findUnique({ where: { email: session.user.email } });
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-    const where: any = { userId: user.id };
+    const where: Prisma.LessonProgressWhereInput = { userId: user.id };
     if (productId) where.lesson = { productId };
 
     const progress = await prisma.lessonProgress.findMany({ where });

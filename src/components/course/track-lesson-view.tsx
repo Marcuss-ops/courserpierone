@@ -21,7 +21,7 @@ export function TrackLessonView({ lessonId, isAuthenticated }: TrackLessonViewPr
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ lessonId }),
-      }).catch(() => {});
+      }).catch((e) => console.warn("[TrackLesson] Failed to track view:", e));
     }, 5000);
 
     return () => clearTimeout(timer);

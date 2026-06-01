@@ -29,13 +29,13 @@ export function LessonAssets({ lessonId, locale, isAuthenticated }: LessonAssets
           const data = await res.json();
           setAssets(data.assets || []);
         }
-      } catch {
-        // silent
+      } catch (e) {
+        console.warn("[Assets] Failed to fetch:", e);
       } finally {
         setLoading(false);
       }
     }
-    fetchAssets();
+    void fetchAssets();
   }, [lessonId, locale]);
 
   if (!isAuthenticated || loading) return null;

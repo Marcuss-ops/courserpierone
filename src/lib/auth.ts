@@ -1,8 +1,9 @@
-import NextAuth from "next-auth";
+import NextAuth, { type NextAuthOptions } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "./prisma";
 import GoogleProvider from "next-auth/providers/google";
 import EmailProvider from "next-auth/providers/email";
+import type { Adapter } from "next-auth/adapters";
 
 // Warn if NEXTAUTH_SECRET is the default dev value (skip during build to keep logs clean)
 if (
@@ -17,8 +18,8 @@ if (
   );
 }
 
-export const authOptions = {
-  adapter: PrismaAdapter(prisma) as any,
+export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
@@ -44,14 +45,14 @@ export const authOptions = {
     strategy: "jwt" as const,
   },
   callbacks: {
-    async session({ session, token }: any) {
+    session({ session, token }: { session: any; token: any }) {
       if (session.user && token) {
         session.user.id = token.sub as string;
         session.user.role = token.role as string;
       }
       return session;
     },
-    async jwt({ token, user }: any) {
+    jwt({ token, user }: { token: any; user: any }) {
       if (user) {
         token.role = user.role;
       }

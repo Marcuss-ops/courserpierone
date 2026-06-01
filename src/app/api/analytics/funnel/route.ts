@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
         const domain = ref !== "direct" && ref ? new URL(ref).hostname : "direct";
         referrerCounts[domain] = (referrerCounts[domain] || 0) + 1;
       } catch {
-        referrerCounts["direct"] = (referrerCounts["direct"] || 0) + 1;
+        referrerCounts.direct = (referrerCounts.direct || 0) + 1;
       }
     }
 

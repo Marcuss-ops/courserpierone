@@ -57,7 +57,8 @@ export function VideoPaywall({
         const res = await fetch(`/api/access?productId=${productSlug}`);
         const data = await res.json();
         setHasAccess(data.hasAccess);
-      } catch {
+      } catch (e) {
+        console.warn("[VideoPaywall] Failed to check access:", e);
         setHasAccess(false);
       } finally {
         setChecking(false);
@@ -69,7 +70,7 @@ export function VideoPaywall({
       setChecking(false);
       return;
     }
-    checkAccess();
+    void checkAccess();
   }, [productSlug, isAuthenticated]);
 
   // Timer countdown — starts 3s after page load for preview duration
