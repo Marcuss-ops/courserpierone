@@ -1,0 +1,33 @@
+{
+  "slug": "amish-secrets",
+  "productId": "amish-id-1",
+  "template": "lumio",
+  "defaultLanguage": "it",
+  "cover": "/placeholder-cover.jpg",
+  "checkoutUrl": "#",
+  "author": "Brand",
+  "price": 49,
+  "lemonVariantId": "1106218",
+  "languages": {
+    "en": {
+      "title": "Amish Secrets: How to Live Frugally and Manage Money",
+      "problem": "Tired of living paycheck to paycheck? Modern society pushes us to overspend.",
+      "story": "The Amish live rich and full lives while spending a fraction of what we do. In this course, we reveal how they do it.",
+      "cta": "Get Started Now",
+      "description": "Learn the frugal living secrets of the Amish community. Includes full video course modules and downloadable PDFs.",
+      "ebookTitle": "Amish Secrets: How to Live Frugally and Manage Money",
+      "ebookContent": "The Amish live rich and full lives while spending a fraction of what we do. In this course, we reveal how they do it."
+    },
+    "it": {
+      "title": "Amish Secrets: Come vivere con risparmio e gestire il denaro",
+      "problem": "Stanco di arrivare a fine mese senza risparmi? La società moderna ci spinge al consumo eccessivo.",
+      "story": "Gli Amish vivono vite ricche e piene spendendo una frazione di quello che spendiamo noi. In questo corso ti sveliamo come fanno.",
+      "cta": "Inizia Ora",
+      "description": "Scopri i segreti del vivere frugale della comunità Amish. Include moduli video completi e PDF scaricabili.",
+      "ebookTitle": "Amish Secrets: Come vivere con risparmio e gestire il denaro",
+      "ebookContent": "Gli Amish vivono vite ricche e piene spendendo una frazione di quello che spendiamo noi. In questo corso ti sveliamo come fanno."
+    }
+  },
+  "lessons": [],
+  "ebookChapters": []
+}

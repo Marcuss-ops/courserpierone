@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import dynamic from "next/dynamic";
 import { 
   Play, 
@@ -74,11 +75,15 @@ export default async function LandingPage({
 
   if (!data) return notFound();
 
-  const currentLang = (lang as "it" | "en") || (data.defaultLanguage as "it" | "en") || "it";
-  const content = data.languages[currentLang] || data.languages[data.defaultLanguage];
-  if (!content) return notFound();
+  const cookieStore = await cookies();
+  const cookieLocale = cookieStore.get("locale")?.value;
 
-  const firstLessonId = data.lessons[0]?.id || "#";
+  const currentLang = (lang as "it" | "en") || (cookieLocale as "it" | "en") || (data?.defaultLanguage as "it" | "en") || "it";
+  const content = data?.languages?.[currentLang] || data?.languages?.[data.defaultLanguage] || Object.values(data?.languages || {})[0];
+  
+  if (!data || !content) return notFound();
+
+  const firstLessonId = data.lessons?.[0]?.id || "#";
   const checkoutUrl = data.checkoutUrl || "#";
 
   // ─── Multi-Template: Render the template from config ──────
