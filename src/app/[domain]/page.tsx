@@ -111,23 +111,23 @@ export default async function LandingPage({
     }
   }
 
-  // ─── DEFAULT TEMPLATE (Built-in Dark Theme) ────────────────
+  // ─── DEFAULT TEMPLATE (Built-in Clean Theme) ────────────────
   return (
     <>
       <AnalyticsTracker productSlug={domain} />
-      <div className="min-h-screen bg-[#050505] text-[#e5e2e1] font-hanken overflow-x-hidden">
+      <div className="min-h-screen bg-white text-gray-900 font-hanken overflow-x-hidden">
         {/* Navbar Locale */}
-        <nav className="fixed top-0 w-full z-50 bg-black/40 backdrop-blur-md border-b border-white/5">
+        <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
           <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <div className="flex items-center gap-3">
-               <div className="w-10 h-10 premium-glass rounded-xl flex items-center justify-center font-bold text-xl border border-white/10 text-white">C</div>
-               <span className="text-2xl font-black tracking-tighter text-white uppercase">{data.slug}.</span>
+               <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center font-bold text-xl text-white">C</div>
+               <span className="text-2xl font-black tracking-tighter text-gray-900 uppercase">{data.slug}.</span>
             </div>
-            <div className="hidden md:flex items-center gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
-               <Link href={`/${domain}?lang=it`} className={currentLang === 'it' ? 'text-accent-primary' : 'hover:text-white transition-colors'}>IT</Link>
-               <Link href={`/${domain}?lang=en`} className={currentLang === 'en' ? 'text-accent-primary' : 'hover:text-white transition-colors'}>EN</Link>
+            <div className="hidden md:flex items-center gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+               <Link href={`/${domain}?lang=it`} className={currentLang === 'it' ? 'text-accent-primary' : 'hover:text-gray-900 transition-colors'}>IT</Link>
+               <Link href={`/${domain}?lang=en`} className={currentLang === 'en' ? 'text-accent-primary' : 'hover:text-gray-900 transition-colors'}>EN</Link>
             </div>
-            <Link href={`/${domain}/curso/${firstLessonId}?lang=${currentLang}`} className="glow-btn px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-white premium-glass">
+            <Link href={`/${domain}/curso/${firstLessonId}?lang=${currentLang}`} className="bg-gray-900 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-white hover:bg-gray-800 transition-all">
                {content.cta}
             </Link>
           </div>
@@ -135,31 +135,15 @@ export default async function LandingPage({
 
         {/* Hero Section */}
         <section className="relative pt-40 pb-20 px-6 overflow-hidden">
-           <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-accent-primary/10 rounded-full blur-[120px] -z-10" />
-           <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-accent-secondary/10 rounded-full blur-[120px] -z-10" />
-
            <div className="max-w-5xl mx-auto text-center space-y-8 relative">
-              <div className="inline-flex items-center gap-2 px-4 py-2 premium-glass rounded-full border border-white/10 text-accent-primary text-[10px] font-black uppercase tracking-[0.3em]">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-full border border-gray-100 text-gray-600 text-[10px] font-black uppercase tracking-[0.3em]">
                  <Zap className="w-3 h-3 fill-current" />
                  New: {content.title}
               </div>
-              <h1 className="text-5xl lg:text-8xl font-black text-white text-contrast tracking-tighter leading-[0.9]">
-                 {(() => {
-                   const parts = content.title.split(":");
-                   return parts.length > 1 ? (
-                     <>
-                       {parts[0]}
-                       <br />
-                       <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-primary via-accent-secondary to-accent-tertiary">
-                         {parts.slice(1).join(":").trim()}
-                       </span>
-                     </>
-                   ) : (
-                     content.title
-                   );
-                 })()}
+              <h1 className="text-5xl lg:text-8xl font-black text-gray-900 tracking-tighter leading-[0.9]">
+                 {content.title}
               </h1>
-              <p className="max-w-2xl mx-auto text-zinc-400 text-lg lg:text-xl font-medium leading-relaxed">
+              <p className="max-w-2xl mx-auto text-gray-500 text-lg lg:text-xl font-medium leading-relaxed">
                  {content.description}
               </p>
                <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-4">
@@ -168,12 +152,12 @@ export default async function LandingPage({
                    productSlug={domain}
                    productId={data.productId}
                    locale={currentLang}
-                   className="glow-btn px-10 py-5 rounded-3xl text-sm font-black text-white flex items-center gap-3 group"
+                   className="bg-gray-900 px-10 py-5 rounded-3xl text-sm font-black text-white flex items-center gap-3 group hover:bg-gray-800 transition-all shadow-xl"
                  >
                    {content.cta}
                  </TrackedCtaButton>
-                 <Link href={`/${domain}/curso/${firstLessonId}?lang=${currentLang}${accessToken ? `&token=${accessToken}` : ''}`} className="px-10 py-5 premium-glass rounded-3xl text-sm font-black text-white border border-white/10 hover:bg-white/5 transition-all flex items-center gap-3">
-                    <Play className="w-5 h-5 text-accent-primary" /> Area Membri
+                 <Link href={`/${domain}/curso/${firstLessonId}?lang=${currentLang}${accessToken ? `&token=${accessToken}` : ''}`} className="px-10 py-5 bg-white rounded-3xl text-sm font-black text-gray-900 border border-gray-200 hover:bg-gray-50 transition-all flex items-center gap-3">
+                    <Play className="w-5 h-5 text-gray-400" /> Area Membri
                  </Link>
               </div>
            </div>
@@ -182,64 +166,27 @@ export default async function LandingPage({
         {/* Story & Problem */}
         <section className="py-20 px-6 max-w-4xl mx-auto space-y-16">
            <div className="text-center space-y-4">
-              <h2 className="text-3xl lg:text-5xl font-black text-white tracking-tight">{content.problem}</h2>
-              <div className="w-20 h-1 bg-accent-primary mx-auto rounded-full" />
+              <h2 className="text-3xl lg:text-5xl font-black text-gray-900 tracking-tight">{content.problem}</h2>
+              <div className="w-20 h-1 bg-gray-900 mx-auto rounded-full" />
            </div>
-           <div className="premium-glass p-10 lg:p-16 rounded-[3rem] border border-white/5 relative">
-              <div className="absolute top-8 left-8 text-6xl text-white/5 font-black font-serif">&quot;</div>
-              <p className="text-xl lg:text-2xl text-zinc-300 leading-relaxed font-medium italic relative z-10">
+           <div className="bg-gray-50 p-10 lg:p-16 rounded-[3rem] border border-gray-100 relative">
+              <div className="absolute top-8 left-8 text-6xl text-gray-200 font-black font-serif">&quot;</div>
+              <p className="text-xl lg:text-2xl text-gray-600 leading-relaxed font-medium italic relative z-10">
                  {content.story}
               </p>
            </div>
         </section>
 
-        {/* Product Preview Section */}
-        <section className="py-20 px-6">
-           <div className="max-w-6xl mx-auto premium-glass rounded-[3rem] border border-white/10 overflow-hidden shadow-2xl relative">
-              <div className="aspect-video bg-zinc-900 flex items-center justify-center relative group cursor-pointer">
-                 <img src={data.cover} className="w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-1000" alt="Preview" />
-                 <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
-                 <a 
-                   href={checkoutUrl}
-                   className="w-20 h-20 premium-glass rounded-full flex items-center justify-center text-white border-white/20 shadow-2xl relative z-10 group-hover:scale-110 transition-transform"
-                 >
-                    <Play className="w-8 h-8 fill-current ml-1" />
-                 </a>
-              </div>
-           </div>
-        </section>
-
-        {/* Features Grid */}
-        <section id="features" className="py-20 px-6 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-           <FeatureCard 
-              icon={<Zap className="text-accent-primary" />}
-              title="Velocità Estrema"
-              desc="Ottimizzato per caricamenti istantanei su ogni dispositivo."
-           />
-           <FeatureCard 
-              icon={<Globe className="text-accent-tertiary" />}
-              title="Multi-lingua"
-              desc="Raggiungi clienti in tutto il mondo con un solo click."
-           />
-           <FeatureCard 
-              icon={<ShieldCheck className="text-accent-secondary" />}
-              title="White Label"
-              desc="La tua identità, i tuoi colori, il tuo brand. Senza compromessi."
-           />
-        </section>
-
         {/* Purchase Section */}
         <section className="py-20 px-6">
-           <div className="max-w-3xl mx-auto premium-glass p-12 lg:p-20 rounded-[3rem] border border-white/10 text-center space-y-8 relative overflow-hidden group">
-              <div className="absolute -right-20 -top-20 w-64 h-64 bg-accent-primary/10 rounded-full blur-[100px] group-hover:bg-accent-primary/20 transition-all duration-700" />
-              
-              <img src={data.cover} alt="Bundle" className="w-32 h-32 mx-auto rounded-3xl object-cover shadow-2xl border border-white/10 group-hover:scale-110 transition-transform duration-500" />
+           <div className="max-w-3xl mx-auto bg-gray-900 p-12 lg:p-20 rounded-[3rem] text-center space-y-8 relative overflow-hidden group">
+              <img src={data.cover} alt="Bundle" className="w-32 h-32 mx-auto rounded-3xl object-cover shadow-2xl border border-white/10" />
               
               <div className="space-y-4">
-                 <h2 className="text-3xl lg:text-4xl font-black text-white text-contrast tracking-tight">
+                 <h2 className="text-3xl lg:text-4xl font-black text-white tracking-tight">
                     {content.title}
                  </h2>
-                 <p className="text-zinc-500 font-medium">
+                 <p className="text-gray-400 font-medium">
                     Ottieni l&apos;accesso immediato a tutte le lezioni video <br className="hidden md:block"/> e scarica il manuale in formato PDF.
                  </p>
               </div>
@@ -247,29 +194,29 @@ export default async function LandingPage({
               <div className="pt-6">
                  <div className="text-5xl font-black text-white mb-8 tracking-tighter">
                     {data.prices?.EUR || data.prices?.USD ? getDisplayPriceForCurrency(data) : displayPrice}
-                    <span className="text-sm text-zinc-600 font-bold ml-2 uppercase tracking-widest">{currentLang === 'en' ? 'One-Time Payment' : 'Pagamento Unico'}</span>
+                    <span className="text-sm text-gray-500 font-bold ml-2 uppercase tracking-widest">{currentLang === 'en' ? 'One-Time Payment' : 'Pagamento Unico'}</span>
                  </div>
-                 <a 
+                 <TrackedCtaButton 
                    href={checkoutUrl}
-                   className="glow-btn block w-full py-5 rounded-3xl text-sm font-black text-white premium-glass uppercase tracking-[0.2em]"
+                   productSlug={domain}
+                   productId={data.productId}
+                   locale={currentLang}
+                   className="block w-full py-5 rounded-3xl text-sm font-black text-gray-900 bg-white uppercase tracking-[0.2em] hover:bg-gray-100 transition-all"
                  >
                     Acquista e Accedi Istantaneamente
-                 </a>
-                 <p className="mt-6 text-[10px] text-zinc-600 font-bold uppercase tracking-widest flex items-center justify-center gap-2">
-                    <ShieldCheck className="w-3 h-3" /> {currentLang === 'en' ? 'Secure encrypted transaction' : 'Transazione sicura crittografata via Stripe'}
-                 </p>
+                 </TrackedCtaButton>
               </div>
            </div>
         </section>
 
         {/* Footer Mock */}
-        <footer className="py-20 px-6 border-t border-white/5 mt-20">
-           <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10 opacity-40">
+        <footer className="py-20 px-6 border-t border-gray-100 mt-20">
+           <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10 opacity-60">
               <div className="flex items-center gap-3">
-                 <div className="w-8 h-8 premium-glass rounded-lg flex items-center justify-center font-bold text-sm border border-white/10 text-white">C</div>
-                 <span className="text-xl font-black tracking-tighter text-white">{data.slug}.</span>
+                 <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center font-bold text-sm text-white">C</div>
+                 <span className="text-xl font-black tracking-tighter text-gray-900">{data.slug}.</span>
               </div>
-              <p className="text-xs font-medium text-zinc-500">&copy; 2026 {data.author}. All rights reserved.</p>
+              <p className="text-xs font-medium text-gray-500">&copy; 2026 {data.author}. All rights reserved.</p>
            </div>
         </footer>
       </div>
