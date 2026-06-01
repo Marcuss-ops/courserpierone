@@ -16,6 +16,7 @@ import { TrackedCtaButton } from "@/components/course/tracked-cta-button";
 const TemplateLumio = dynamic(() => import("@/components/funnel/template-lumio"));
 const TemplateH612 = dynamic(() => import("@/components/funnel/template-h612"));
 const TemplateHorizon = dynamic(() => import("@/components/funnel/template-horizon"));
+const TemplateBookClaude = dynamic(() => import("@/components/funnel/template-book-claude"));
 
 function getPriceString(data: CourseConfig, locale: string): string {
   // Prezzo localizzato se disponibile
@@ -90,12 +91,17 @@ export default async function LandingPage({
   // Helper per prezzo localizzato
   const displayPrice = getPriceString(data, currentLang);
 
-  if (data.template === "lumio" || data.template === "h612" || data.template === "horizon") {
+  if (data.template === "lumio" || data.template === "h612" || data.template === "horizon" || data.template === "book-claude") {
     const templateData = mapConfigToTemplateData(data, currentLang);
     if (templateData) {
-      const TemplateComponent = data.template === "lumio" ? TemplateLumio 
-        : data.template === "h612" ? TemplateH612 
-        : TemplateHorizon;
+      let TemplateComponent;
+      switch(data.template) {
+        case "lumio": TemplateComponent = TemplateLumio; break;
+        case "h612": TemplateComponent = TemplateH612; break;
+        case "horizon": TemplateComponent = TemplateHorizon; break;
+        case "book-claude": TemplateComponent = TemplateBookClaude; break;
+        default: TemplateComponent = TemplateLumio;
+      }
       return (
         <>
           <AnalyticsTracker productSlug={domain} />
