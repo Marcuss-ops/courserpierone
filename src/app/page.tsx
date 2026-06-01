@@ -19,9 +19,51 @@ const inter = Inter({
 export default function HomePage() {
   return (
     <div
-      className={`${instrumentSerif.variable} ${inter.variable} min-h-screen bg-white text-black font-sans`}
+      className={`${instrumentSerif.variable} ${inter.variable} min-h-screen text-black font-sans relative overflow-hidden`}
+      style={{ background: "#FAFAF8" }}
     >
-      <div className="max-w-[720px] mx-auto px-6">
+      {/* Soft gradient orbs for modern premium feel */}
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{ background: `
+          radial-gradient(ellipse 800px 600px at 20% 20%, rgba(255, 248, 240, 0.8) 0%, transparent 70%),
+          radial-gradient(ellipse 600px 800px at 80% 80%, rgba(255, 245, 235, 0.6) 0%, transparent 70%),
+          radial-gradient(ellipse 500px 500px at 50% 50%, rgba(255, 250, 245, 0.4) 0%, transparent 60%),
+          linear-gradient(180deg, #FAFAF8 0%, #F5F0E8 100%)
+        ` }}
+      />
+
+      {/* Glowing accent orb top-right */}
+      <div
+        className="fixed w-[400px] h-[400px] rounded-full pointer-events-none"
+        style={{
+          background: "radial-gradient(circle, rgba(255, 230, 210, 0.5) 0%, transparent 70%)",
+          top: "-100px",
+          right: "-100px",
+          filter: "blur(80px)",
+        }}
+      />
+
+      {/* Glowing accent orb bottom-left */}
+      <div
+        className="fixed w-[500px] h-[500px] rounded-full pointer-events-none"
+        style={{
+          background: "radial-gradient(circle, rgba(255, 240, 225, 0.4) 0%, transparent 70%)",
+          bottom: "-150px",
+          left: "-150px",
+          filter: "blur(100px)",
+        }}
+      />
+
+      {/* Subtle warm gradient top */}
+      <div
+        className="fixed inset-x-0 top-0 h-[300px] pointer-events-none"
+        style={{
+          background: "linear-gradient(180deg, rgba(255, 245, 235, 0.6) 0%, transparent 100%)",
+        }}
+      />
+
+      <div className="relative max-w-[720px] mx-auto px-6">
         {/* Header */}
         <header className="flex justify-between items-center py-8">
           <div
@@ -47,23 +89,9 @@ export default function HomePage() {
             >
               Crea funnel per corsi online.
             </h1>
-            <p className="text-[22px] mb-12 font-light">
+            <p className="text-[22px] font-light">
               In minuti, non in settimane.
             </p>
-            <div className="flex gap-3 flex-wrap sm:flex-col sm:items-stretch">
-              <Link
-                href="/admin"
-                className="inline-block px-7 py-3.5 border border-black text-[16px] font-normal no-underline bg-black text-white hover:bg-white hover:text-black transition-all duration-150"
-              >
-                Inizia gratis
-              </Link>
-              <Link
-                href="#demo"
-                className="inline-block px-7 py-3.5 border border-black text-[16px] font-normal no-underline bg-white text-black hover:bg-black hover:text-white transition-all duration-150"
-              >
-                Vedi demo
-              </Link>
-            </div>
           </section>
 
           {/* Come funziona */}
@@ -74,16 +102,16 @@ export default function HomePage() {
             >
               Come funziona
             </h2>
-            <div className="border-t border-black">
-              <div className="flex gap-4 sm:gap-4 py-5 sm:py-6 border-b border-black text-[18px] sm:text-[20px] font-light">
+            <div className="border-t border-black/20">
+              <div className="flex gap-4 sm:gap-4 py-5 sm:py-6 border-b border-black/20 text-[18px] sm:text-[20px] font-light">
                 <span className="min-w-[48px] font-normal tabular-nums sm:min-w-[40px]">01 —</span>
                 <span>Carica il corso</span>
               </div>
-              <div className="flex gap-4 sm:gap-4 py-5 sm:py-6 border-b border-black text-[18px] sm:text-[20px] font-light">
+              <div className="flex gap-4 sm:gap-4 py-5 sm:py-6 border-b border-black/20 text-[18px] sm:text-[20px] font-light">
                 <span className="min-w-[48px] font-normal tabular-nums sm:min-w-[40px]">02 —</span>
                 <span>Costruisci il funnel (pagina, checkout, email)</span>
               </div>
-              <div className="flex gap-4 sm:gap-4 py-5 sm:py-6 border-b border-black text-[18px] sm:text-[20px] font-light">
+              <div className="flex gap-4 sm:gap-4 py-5 sm:py-6 border-b border-black/20 text-[18px] sm:text-[20px] font-light">
                 <span className="min-w-[48px] font-normal tabular-nums sm:min-w-[40px]">03 —</span>
                 <span>Vendi. Automaticamente.</span>
               </div>
@@ -98,7 +126,7 @@ export default function HomePage() {
             >
               Perché Courssy
             </h2>
-            <ul className="list-none border-t border-black">
+            <ul className="list-none border-t border-black/20">
               {[
                 "Nessun builder complicato",
                 "Pagine velocissime",
@@ -108,7 +136,7 @@ export default function HomePage() {
               ].map((item) => (
                 <li
                   key={item}
-                  className="py-[22px] pl-7 border-b border-black text-[19px] relative font-light"
+                  className="py-[22px] pl-7 border-b border-black/20 text-[19px] relative font-light"
                 >
                   <span className="absolute left-0">—</span>
                   {item}
@@ -125,8 +153,8 @@ export default function HomePage() {
             >
               Pricing
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 border border-black border-b-none">
-              <div className="p-9 border-b border-r sm:border-r-0 border-black">
+            <div className="grid grid-cols-1 sm:grid-cols-2 border border-black/20 border-b-none">
+              <div className="p-9 border-b border-r sm:border-r-0 border-black/20">
                 <div
                   className="font-serif italic text-[34px] mb-1 leading-none"
                   style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
@@ -143,7 +171,7 @@ export default function HomePage() {
                   ))}
                 </ul>
               </div>
-              <div className="p-9 border-b border-black sm:border-l border-black">
+              <div className="p-9 border-b border-black/20 sm:border-l border-black/20">
                 <div
                   className="font-serif italic text-[34px] mb-1 leading-none"
                   style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
@@ -164,7 +192,7 @@ export default function HomePage() {
           </section>
 
           {/* CTA */}
-          <section className="py-[100px] text-center border-t border-b border-black mb-0">
+          <section className="py-[100px] text-center border-t border-b border-black/20 mb-0">
             <h2
               className="font-serif italic font-normal text-[clamp(44px,8vw,64px)] leading-[1] mb-9"
               style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
