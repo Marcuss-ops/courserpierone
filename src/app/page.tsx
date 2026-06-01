@@ -17,6 +17,7 @@ const inter = Inter({
 });
 
 export default function HomePage() {
+  // Ultra-minimal landing - hero + footer only
   return (
     <div
       className={`${instrumentSerif.variable} ${inter.variable} min-h-screen text-black font-sans relative overflow-hidden`}
