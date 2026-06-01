@@ -1,88 +1,197 @@
 import Link from "next/link";
+import { Instrument_Serif, Inter } from "next/font/google";
+
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["italic", "normal"],
+  variable: "--font-serif",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["300", "400"],
+  variable: "--font-sans",
+  display: "swap",
+});
 
 export default function HomePage() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-8 p-8">
-      <div className="text-center">
-        <h1 className="text-5xl font-bold tracking-tight">Courser</h1>
-        <p className="mt-4 text-xl text-gray-500">
-          Il Cervellone — Generatore automatico di Funnel multilingua
-        </p>
-      </div>
-
-      <div className="flex gap-4">
-        <Link
-          href="/dashboard"
-          className="rounded-lg bg-gradient-to-r from-accent-primary to-accent-secondary px-6 py-3 text-white transition hover:opacity-90 shadow-lg"
-        >
-          Il Mio Corso
-        </Link>
-        <Link
-          href="/admin"
-          className="rounded-lg bg-gray-900 px-6 py-3 text-white transition hover:bg-gray-700"
-        >
-          Dashboard Admin
-        </Link>
-        <Link
-          href="/demo"
-          className="rounded-lg border border-gray-300 px-6 py-3 transition hover:bg-gray-50"
-        >
-          Demo Templates
-        </Link>
-      </div>
-
-      <div className="mt-8 grid max-w-4xl grid-cols-1 gap-6 text-left md:grid-cols-3">
-        <div className="rounded-xl border p-5">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-pink-100 text-xl">☀️</div>
-          <h3 className="font-semibold">Lumio</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            Minimalismo + Glassmorphism, ivory calda, gradienti sunset
-          </p>
-          <Link href="/demo/lumio" className="mt-3 inline-block text-sm text-gray-900 underline">
-            Vedi Demo →
+    <div
+      className={`${instrumentSerif.variable} ${inter.variable} min-h-screen bg-white text-black font-sans`}
+    >
+      <div className="max-w-[720px] mx-auto px-6">
+        {/* Header */}
+        <header className="flex justify-between items-center py-8">
+          <div
+            className="font-serif italic text-[28px] leading-none tracking-[-0.2px]"
+            style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
+          >
+            courssy
+          </div>
+          <Link
+            href="/login"
+            className="text-[15px] font-normal underline underline-offset-4 hover:opacity-60 transition-opacity"
+          >
+            accedi
           </Link>
-        </div>
-        <div className="rounded-xl border p-5">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-xl">🌑</div>
-          <h3 className="font-semibold">Obsidian Scholar</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            Dark monochrome, tonal layering, serif + sans, liquid orbs
-          </p>
-          <Link href="/demo/h612" className="mt-3 inline-block text-sm text-gray-900 underline">
-            Vedi Demo →
-          </Link>
-        </div>
-        <div className="rounded-xl border p-5">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 text-xl">🌅</div>
-          <h3 className="font-semibold">Horizon</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            Airy minimalism, glassmorphism, gradienti atmosferici, cursor glow
-          </p>
-          <Link href="/demo/horizon" className="mt-3 inline-block text-sm text-gray-900 underline">
-            Vedi Demo →
-          </Link>
-        </div>
-      </div>
+        </header>
 
-      <div className="mt-4 grid max-w-4xl grid-cols-1 gap-4 text-left md:grid-cols-3">
-        <div className="rounded-xl border border-dashed p-4">
-          <h3 className="font-semibold">1. Inserisci</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            Scegli un template, carica il PNG, scrivi i testi in italiano
-          </p>
-        </div>
-        <div className="rounded-xl border border-dashed p-4">
-          <h3 className="font-semibold">2. Modifica con AI</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            L&apos;AI riscrive i testi, li traduce in 20 lingue, li salva nel DB
-          </p>
-        </div>
-        <div className="rounded-xl border border-dashed p-4">
-          <h3 className="font-semibold">3. Pubblica</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            Il funnel è online, lo Stripe è collegato, le vendite partono da solo
-          </p>
-        </div>
+        <main>
+          {/* Hero */}
+          <section className="pt-24 pb-30 md:pt-24 md:pb-30 sm:pt-16 sm:pb-20">
+            <h1
+              className="font-serif italic font-normal text-[clamp(48px,9vw,84px)] leading-[0.95] tracking-[-0.5px] mb-6"
+              style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
+            >
+              Crea funnel per corsi online.
+            </h1>
+            <p className="text-[22px] mb-12 font-light">
+              In minuti, non in settimane.
+            </p>
+            <div className="flex gap-3 flex-wrap sm:flex-col sm:items-stretch">
+              <Link
+                href="/admin"
+                className="inline-block px-7 py-3.5 border border-black text-[16px] font-normal no-underline bg-black text-white hover:bg-white hover:text-black transition-all duration-150"
+              >
+                Inizia gratis
+              </Link>
+              <Link
+                href="#demo"
+                className="inline-block px-7 py-3.5 border border-black text-[16px] font-normal no-underline bg-white text-black hover:bg-black hover:text-white transition-all duration-150"
+              >
+                Vedi demo
+              </Link>
+            </div>
+          </section>
+
+          {/* Come funziona */}
+          <section id="demo" className="my-[140px]">
+            <h2
+              className="font-serif italic font-normal text-[42px] leading-[1.1] mb-10"
+              style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
+            >
+              Come funziona
+            </h2>
+            <div className="border-t border-black">
+              <div className="flex gap-4 sm:gap-4 py-5 sm:py-6 border-b border-black text-[18px] sm:text-[20px] font-light">
+                <span className="min-w-[48px] font-normal tabular-nums sm:min-w-[40px]">01 —</span>
+                <span>Carica il corso</span>
+              </div>
+              <div className="flex gap-4 sm:gap-4 py-5 sm:py-6 border-b border-black text-[18px] sm:text-[20px] font-light">
+                <span className="min-w-[48px] font-normal tabular-nums sm:min-w-[40px]">02 —</span>
+                <span>Costruisci il funnel (pagina, checkout, email)</span>
+              </div>
+              <div className="flex gap-4 sm:gap-4 py-5 sm:py-6 border-b border-black text-[18px] sm:text-[20px] font-light">
+                <span className="min-w-[48px] font-normal tabular-nums sm:min-w-[40px]">03 —</span>
+                <span>Vendi. Automaticamente.</span>
+              </div>
+            </div>
+          </section>
+
+          {/* Perché */}
+          <section className="my-[140px]">
+            <h2
+              className="font-serif italic font-normal text-[42px] leading-[1.1] mb-10"
+              style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
+            >
+              Perché Courssy
+            </h2>
+            <ul className="list-none border-t border-black">
+              {[
+                "Nessun builder complicato",
+                "Pagine velocissime",
+                "Checkout integrato",
+                "Email e automazioni incluse",
+                "Analytics essenziali",
+              ].map((item) => (
+                <li
+                  key={item}
+                  className="py-[22px] pl-7 border-b border-black text-[19px] relative font-light"
+                >
+                  <span className="absolute left-0">—</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          {/* Pricing */}
+          <section className="my-[140px]">
+            <h2
+              className="font-serif italic font-normal text-[42px] leading-[1.1] mb-10"
+              style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
+            >
+              Pricing
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 border border-black border-b-none">
+              <div className="p-9 border-b border-r sm:border-r-0 border-black">
+                <div
+                  className="font-serif italic text-[34px] mb-1 leading-none"
+                  style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
+                >
+                  Starter
+                </div>
+                <div className="text-[17px] mb-7 font-normal">€0 /mese</div>
+                <ul className="list-none space-y-1.5 text-[15px] leading-[1.7]">
+                  {["1 funnel", "100 studenti", "branding Courssy"].map((f) => (
+                    <li key={f}>
+                      <span className="mr-1">— </span>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="p-9 border-b border-black sm:border-l border-black">
+                <div
+                  className="font-serif italic text-[34px] mb-1 leading-none"
+                  style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
+                >
+                  Pro
+                </div>
+                <div className="text-[17px] mb-7 font-normal">€29 /mese</div>
+                <ul className="list-none space-y-1.5 text-[15px] leading-[1.7]">
+                  {["funnel illimitati", "dominio personalizzato", "zero commissioni"].map((f) => (
+                    <li key={f}>
+                      <span className="mr-1">— </span>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          {/* CTA */}
+          <section className="py-[100px] text-center border-t border-b border-black mb-0">
+            <h2
+              className="font-serif italic font-normal text-[clamp(44px,8vw,64px)] leading-[1] mb-9"
+              style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
+            >
+              Pronto?
+            </h2>
+            <Link
+              href="/admin"
+              className="inline-block px-7 py-3.5 border border-black text-[16px] font-normal no-underline bg-black text-white hover:bg-white hover:text-black transition-all duration-150"
+            >
+              Crea il tuo primo funnel
+            </Link>
+          </section>
+        </main>
+
+        {/* Footer */}
+        <footer className="py-10 pb-20 flex sm:flex-col sm:items-start justify-between items-center text-[14px] font-light gap-3 sm:gap-3 flex-wrap">
+          <div>© 2026 Courssy</div>
+          <div className="flex gap-5">
+            <Link href="/privacy" className="hover:underline underline-offset-3 no-underline hover:no-underline">
+              privacy
+            </Link>
+            <Link href="/terms" className="hover:underline underline-offset-3 no-underline hover:no-underline">
+              termini
+            </Link>
+          </div>
+        </footer>
       </div>
     </div>
   );
