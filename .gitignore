@@ -8,3 +8,7 @@ node_modules/
 next-env.d.ts
 .vercel
 nul
+
+# Product Cache (White Label)
+public/courses/*
+!public/courses/.gitkeep
