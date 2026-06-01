@@ -40,13 +40,22 @@ export const authOptions = {
     signIn: "/login",
     verifyRequest: "/login/magic-link",
   },
+  session: {
+    strategy: "jwt" as const,
+  },
   callbacks: {
-    async session({ session, user }: any) {
-      if (session.user && user) {
-        session.user.id = user.id;
-        session.user.role = user.role;
+    async session({ session, token }: any) {
+      if (session.user && token) {
+        session.user.id = token.sub as string;
+        session.user.role = token.role as string;
       }
       return session;
+    },
+    async jwt({ token, user }: any) {
+      if (user) {
+        token.role = user.role;
+      }
+      return token;
     },
   },
 };

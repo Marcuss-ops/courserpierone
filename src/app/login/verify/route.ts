@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
-import { randomBytes } from "crypto";
+import { encode } from "next-auth/jwt";
 
 async function getProductSlug(productId: string): Promise<string | null> {
   try {
@@ -48,23 +48,33 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  // ─── Crea sessione NextAuth persistente ─────────────────────
-  const sessionToken = randomBytes(32).toString("hex");
-  const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 giorni
+  // ─── Crea sessione NextAuth (JWT) ──────────────────────────
+  const secret = process.env.NEXTAUTH_SECRET;
+  if (!secret) {
+    throw new Error("NEXTAUTH_SECRET is not configured in environment variables");
+  }
 
-  await prisma.session.create({
-    data: {
-      sessionToken,
-      userId: user.id,
-      expires,
+  const jwt = await encode({
+    token: {
+      sub: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
     },
+    secret,
+    maxAge: 30 * 24 * 60 * 60, // 30 giorni
   });
 
+  const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 giorni
+
+  const isProd = process.env.NODE_ENV === "production" || request.headers.get("x-forwarded-proto") === "https";
+  const cookieName = isProd ? "__Secure-next-auth.session-token" : "next-auth.session-token";
+
   const cookieStore = await cookies();
-  cookieStore.set("next-auth.session-token", sessionToken, {
+  cookieStore.set(cookieName, jwt, {
     expires,
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: isProd,
     sameSite: "lax",
     path: "/",
   });
