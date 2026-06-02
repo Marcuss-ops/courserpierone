@@ -12,7 +12,7 @@ export async function GET() {
   }
 
   const redirectUri = `${nextAuthUrl}/api/tiktok/callback`;
-  const scope = "user.info.basic,user.info.profile,video.upload";
+  const scope = "user.info.basic,user.info.profile,user.info.stats,video.list,video.upload";
   const state = crypto.randomUUID();
 
   const params = new URLSearchParams({
