@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getOpenAI, type Locale } from "@/lib/openai";
+import { getOpenAI, type Locale, translateContent } from "@/lib/openai";
 
+/**
+ * POST /api/translate
+ *
+ * Traduce sezioni multiple di una landing page in più lingue.
+ * Usa getOpenAI() da @/lib/openai per il client condiviso.
+ *
+ * Per traduzioni di singoli testi, usa direttamente translateContent() da @/lib/openai.
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -26,6 +34,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No text to translate" }, { status: 400 });
     }
 
+    // Per batch di sezioni multiple, usiamo un prompt specializzato
+    // (diverso da translateContent() che traduce un singolo testo)
     const prompt = `Sei un traduttore professionale specializzato in marketing e vendite online.
 Traduci le seguenti sezioni di una landing page nelle lingue richieste.
 

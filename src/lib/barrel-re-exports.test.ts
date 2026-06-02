@@ -45,15 +45,6 @@ describe("@/lib/db — barrel re-exports", () => {
     expect(typeof mod.getSupabaseAdmin).toBe("function");
   });
 
-  it("exports supabase (legacy singleton)", async () => {
-    const mod = await import("@/lib/db");
-    expect(mod.supabase).toBeDefined();
-  });
-
-  it("exports supabaseAdmin (legacy singleton)", async () => {
-    const mod = await import("@/lib/db");
-    expect(mod.supabaseAdmin).toBeDefined();
-  });
 });
 
 // ─── @/lib/i18n ─────────────────────────────────────────────

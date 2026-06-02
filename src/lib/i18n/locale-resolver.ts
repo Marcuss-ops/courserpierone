@@ -13,8 +13,15 @@
  */
 
 // ─── Locale database (in-memory per edge middleware) ──
-// Sincronizzato con il DB. Per 100+ lingue, teniamo tutto qui
-// per performance nel middleware edge.
+// I dati qui sotto (COUNTRY_LOCALE, LANG_TO_DEFAULT_LOCALE, LOCALE_CURRENCY)
+// sono hardcodati per performance nel middleware Edge (no accesso DB).
+//
+// NOTA: Il DB Prisma ha tabelle parallele (Locale, CountryLocaleRule)
+// che contengono gli stessi dati per query admin. Se modifichi queste
+// mappe, aggiorna ANCHE il DB. Sono due viste della stessa verità.
+//
+// In futuro: si potrebbe generare questo file automaticamente dal DB
+// durante il build (es. prisma generate → locale-resolver.ts)
 
 export interface LocaleInfo {
   code: string;            // "fr-fr"

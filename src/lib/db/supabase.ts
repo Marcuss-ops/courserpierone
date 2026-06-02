@@ -34,30 +34,4 @@ export function getSupabaseAdmin() {
   return _supabaseAdmin;
 }
 
-// Legacy exports for backward compatibility
 
-function createLegacyProxy<T>(getClient: () => T | null, name: string): T {
-  return new Proxy(
-    {},
-    {
-      get(_, prop: string | symbol) {
-        console.warn(`⚠️ ${name} singleton is deprecated — use get${name === "supabase" ? "Supabase" : "SupabaseAdmin"}() instead`);
-        const client = getClient();
-        if (client && typeof client === "object") {
-          return (client as Record<string | symbol, unknown>)[prop];
-        }
-        return undefined;
-      },
-    }
-  ) as T;
-}
-
-export const supabase = createLegacyProxy<ReturnType<typeof createClient>>(
-  () => getSupabase(),
-  "supabase"
-);
-
-export const supabaseAdmin = createLegacyProxy<ReturnType<typeof createClient>>(
-  () => getSupabaseAdmin(),
-  "supabaseAdmin"
-);
