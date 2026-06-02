@@ -111,13 +111,25 @@ export default withAuth(
       const browserLang = detectFromAcceptLanguage(req.headers.get("accept-language"));
       const ipCountryLang = detectFromCountry(req.headers.get("x-vercel-ip-country"));
 
-      // Redirect root or non-language-prefixed paths
-      if (pathname === "/" || (!firstSegment || !SUPPORTED_LANGUAGES.includes(firstSegment))) {
+      // ── Root path /: set cookie but DON'T redirect (homepage exists) ──
+      if (pathname === "/") {
+        const targetLang = cookieLang ?? browserLang ?? ipCountryLang ?? DEFAULT_LANGUAGE;
+        const safeLang = SUPPORTED_LANGUAGES.includes(targetLang) ? targetLang : DEFAULT_LANGUAGE;
+        response.cookies.set("locale", safeLang, {
+          path: "/",
+          maxAge: 60 * 60 * 24 * 365,
+          sameSite: "lax",
+        });
+        return response;
+      }
+
+      // ── Non-language-prefixed paths (e.g. /amish-secrets): redirect to /{lang}/{path} ──
+      if (!firstSegment || !SUPPORTED_LANGUAGES.includes(firstSegment)) {
         const targetLang = cookieLang ?? browserLang ?? ipCountryLang ?? DEFAULT_LANGUAGE;
         const safeLang = SUPPORTED_LANGUAGES.includes(targetLang) ? targetLang : DEFAULT_LANGUAGE;
 
         const url = req.nextUrl.clone();
-        url.pathname = `/${safeLang}${pathname === "/" ? "" : pathname}`;
+        url.pathname = `/${safeLang}${pathname}`;
         const redirect = NextResponse.redirect(url);
         redirect.cookies.set("locale", safeLang, {
           path: "/",

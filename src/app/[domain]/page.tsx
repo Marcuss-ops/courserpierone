@@ -32,6 +32,11 @@ export default async function LegacyLandingPage({
   const { lang, verified_token, token } = await searchParams;
   const accessToken = verified_token || token;
 
+  // ── If domain is actually a language code (e.g. /it, /fr), redirect to / ──
+  if (SUPPORTED_LANGUAGES.includes(domain.toLowerCase())) {
+    redirect("/");
+  }
+
   const headersList = await headers();
   const cookieStore = await cookies();
 
