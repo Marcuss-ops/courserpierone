@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
 
       const checkout = await createCheckout(storeId, variantId, {
         checkoutData: {
-          email: userEmail ?? undefined,
+          email: userEmail || undefined,
           custom: customData,
         },
         productOptions: {
