@@ -37,6 +37,11 @@ export interface CourseConfig {
     description: string;
     ebookTitle: string;
     ebookContent: string;
+    ui?: {
+      labels: Record<string, string>;
+      benefits: { title: string; desc: string }[];
+      faq: { q: string; a: string }[];
+    };
   }>;
   lessons: LessonConfig[];
   ebookChapters: { it: string; en: string; page: number }[];

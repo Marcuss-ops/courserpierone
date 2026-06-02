@@ -247,7 +247,7 @@ export default function TemplateBookClaude({
               {/* Story / Hook */}
               {data.storia && (
                 <p className="text-base text-[#6B7280] leading-relaxed border-l-4 border-[#FF6B00]/30 pl-5 italic">
-                  &ldquo;{data.storia.split("\n")[0] || data.storia}&rdquo;
+                  &ldquo;{data.storia.split(String.fromCharCode(10))[0] || data.storia}&rdquo;
                 </p>
               )}
 
@@ -414,8 +414,6 @@ export default function TemplateBookClaude({
           </div>
         </div>
       </section>
-
-      </section>
       )}
 
       {/* ================================================================ */}
@@ -510,8 +508,6 @@ export default function TemplateBookClaude({
             </div>
           </div>
         </div>
-      </section>
-
       </section>
       )}
 
