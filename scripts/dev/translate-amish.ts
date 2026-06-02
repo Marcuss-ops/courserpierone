@@ -1,9 +1,28 @@
+#!/usr/bin/env tsx
+/**
+ * Translate Product — Salva traduzioni manuali per un prodotto.
+ *
+ * Originariamente specifico per "amish-secrets", ora generalizzato.
+ * Le traduzioni hardcodate qui sotto sono per il prodotto Amish Secrets;
+ * per traduzioni AI usa invece scripts/products/batch-translate.ts
+ *
+ * Uso:
+ *   npx tsx scripts/dev/translate-amish.ts <product-slug>
+ *
+ * Esempi:
+ *   npx tsx scripts/dev/translate-amish.ts amish-secrets
+ *   npx tsx scripts/dev/translate-amish.ts altro-prodotto
+ *
+ * Nota: per traduzioni massive via AI, usa batch-translate.ts:
+ *   npx tsx scripts/products/batch-translate.ts <slug> <source-locale>
+ */
+
 import { prisma } from "../../src/lib/db/prisma";
 
-const PRODUCT_ID = "amish-id-1";
+const DEFAULT_SLUG = "amish-secrets";
 
-// ─── Traduzioni generate per FR, DE, ES ────────
-const translations: { locale: string; section: string; content: string }[] = [
+// ─── Traduzioni predefinite (per amish-secrets) ─────────────
+const TRANSLATIONS: { locale: string; section: string; content: string }[] = [
   // ── FRANÇAIS ──
   { locale: "fr", section: "titolo", content: "Amish Secrets : Comment vivre frugalement et gérer son argent" },
   { locale: "fr", section: "sottotitolo", content: "Découvrez les secrets de la vie frugale de la communauté Amish. Inclut des modules vidéo complets et des PDF téléchargeables." },
@@ -29,66 +48,103 @@ const translations: { locale: string; section: string; content: string }[] = [
   { locale: "es", section: "recensioni", content: "Por fin un libro que te enseña a ahorrar con la sabiduría de los siglos." },
 ];
 
-async function main() {
-  console.log("Saving translations for Amish Secrets...\n");
+/**
+ * Traduzioni extra opzionali per lingua inglese (aggiunte se mancanti).
+ * Si applicano a qualsiasi prodotto.
+ */
+const EXTRA_EN: { section: string; content: string }[] = [
+  { section: "recensioni", content: "Finally a book that teaches you to save with centuries-old wisdom." },
+];
 
-  for (const t of translations) {
+async function main() {
+  const slug = process.argv[2] || DEFAULT_SLUG;
+
+  console.log(`\n📦 Prodotto: ${slug}\n`);
+
+  // Warn se lo slug non è quello predefinito (le traduzioni sono Amish-specific)
+  if (slug !== DEFAULT_SLUG) {
+    console.warn(`  ⚠️  Le traduzioni salvate sono quelle originali di "${DEFAULT_SLUG}".`);
+    console.warn(`     Potrebbero non essere appropriate per "${slug}".`);
+    console.warn(`     Per traduzioni AI: npx tsx scripts/products/batch-translate.ts ${slug} <source-locale>\n`);
+  }
+
+  // Trova prodotto per slug
+  const product = await prisma.product.findUnique({ where: { slug } });
+  if (!product) {
+    console.error(`❌ Prodotto "${slug}" non trovato`);
+    console.error(`\nProdotti disponibili:`);
+    const products = await prisma.product.findMany({ select: { slug: true }, orderBy: { slug: "asc" } });
+    for (const p of products) {
+      console.error(`   - ${p.slug}`);
+    }
+    process.exit(1);
+  }
+
+  const productId = product.id;
+  console.log(`   ID: ${productId}\n`);
+
+  // Salva traduzioni
+  let savedCount = 0;
+  for (const t of TRANSLATIONS) {
     await prisma.productTranslation.upsert({
       where: {
         productId_locale_section: {
-          productId: PRODUCT_ID,
+          productId,
           locale: t.locale,
           section: t.section,
         },
       },
       update: { content: t.content },
       create: {
-        productId: PRODUCT_ID,
+        productId,
         locale: t.locale,
         section: t.section,
         content: t.content,
       },
     });
+    savedCount++;
     console.log(`  ✅ [${t.locale}] ${t.section}: saved`);
   }
 
-  // Also add EN recensioni if missing
-  try {
+  // Aggiunge traduzioni EN extra se mancanti
+  for (const en of EXTRA_EN) {
     await prisma.productTranslation.upsert({
       where: {
         productId_locale_section: {
-          productId: PRODUCT_ID,
+          productId,
           locale: "en",
-          section: "recensioni",
+          section: en.section,
         },
       },
-      update: { content: "Finally a book that teaches you to save with centuries-old wisdom." },
+      update: { content: en.content },
       create: {
-        productId: PRODUCT_ID,
+        productId,
         locale: "en",
-        section: "recensioni",
-        content: "Finally a book that teaches you to save with centuries-old wisdom.",
+        section: en.section,
+        content: en.content,
       },
     });
-    console.log("  ✅ [en] recensioni: saved");
-  } catch {}
+    savedCount++;
+    console.log(`  ✅ [en] ${en.section}: saved`);
+  }
 
-  console.log("\n✅ All translations saved successfully!");
+  console.log(`\n✅ ${savedCount} traduzioni salvate con successo!`);
 
-  // Verify by reading back
-  console.log("\n=== Verification ===");
+  // Verifica leggendo dal DB
+  console.log("\n=== Verifica ===");
   const saved = await prisma.productTranslation.findMany({
-    where: { productId: PRODUCT_ID },
+    where: { productId },
     orderBy: [{ locale: "asc" }, { section: "asc" }],
   });
   for (const s of saved) {
-    console.log(`  [${s.locale}] ${s.section}: ${s.content.substring(0, 60)}...`);
+    const preview = s.content.length > 60 ? s.content.substring(0, 60) + "..." : s.content;
+    console.log(`  [${s.locale}] ${s.section}: ${preview}`);
   }
 
   await prisma.$disconnect();
 }
 
 main().catch((e) => {
-  console.error("Error:", e);
+  console.error("❌ Errore:", e);
   process.exit(1);
 });

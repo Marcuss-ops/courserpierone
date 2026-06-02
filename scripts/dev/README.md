@@ -6,7 +6,7 @@
 |---|---|
 | `add-currency-prices.ts` | Aggiunge prezzi in valute multiple a un prodotto |
 | `check-prices.ts` | Verifica i prezzi configurati per un prodotto |
-| `translate-amish.ts` | Script di traduzione specifico Amish (vecchio, usare batch-translate.ts) |
+| `translate-amish.ts` | Salva traduzioni manuali FR/DE/ES + EN per slug prodotto (param: <slug>) |
 | `update-imports.ts` | Utility di refactoring — aggiorna import path dopo riorganizzazione |
 
 ## `add-currency-prices.ts`
@@ -30,10 +30,18 @@ Verifica e stampa tutti i prezzi configurati per un prodotto (EUR, USD, GBP, JPY
 
 ## `translate-amish.ts`
 
-Script legacy specifico per Amish Secrets — **non usare più**.
-Usare invece:
+Salva le traduzioni manuali FR/DE/ES + EN per un prodotto.
+Originariamente specifico per Amish Secrets, ora accetta qualsiasi slug.
+Le traduzioni salvate sono quelle del prodotto originale "amish-secrets".
+
 ```bash
-npx tsx scripts/products/batch-translate.ts amish-secrets it
+npx tsx scripts/dev/translate-amish.ts <product-slug>
+# Es: npx tsx scripts/dev/translate-amish.ts amish-secrets
+```
+
+Per traduzioni massiva via AI, usa batch-translate.ts:
+```bash
+npx tsx scripts/products/batch-translate.ts <slug> <source-locale>
 ```
 
 ## `update-imports.ts`
