@@ -1,7 +1,19 @@
 import { prisma } from "@/lib/prisma";
 import type { MetadataRoute } from "next";
 
-const LANGUAGES = ["it", "en", "fr", "es", "de", "pt", "nl", "pl", "sv", "da", "no", "fi", "ro", "cs", "hu", "el", "ja", "ko", "zh", "ar", "hi", "tr", "th", "vi", "id", "ms", "ru"];
+const ALL_LOCALES = [
+  "it-it", "en-us", "en-gb", "fr-fr", "de-de", "es-es", "pt-pt",
+  "nl-nl", "pl-pl", "sv-se", "da-dk", "nb-no", "fi-fi", "ro-ro",
+  "cs-cz", "hu-hu", "el-gr", "bg-bg", "hr-hr", "sk-sk", "sl-si",
+  "lt-lt", "lv-lv", "et-ee", "de-at", "de-ch", "fr-ch", "it-ch",
+  "nl-be", "fr-be", "en-ie", "en-ca", "fr-ca", "es-mx", "pt-br",
+  "es-ar", "es-co", "es-cl", "es-pe", "en-au", "en-nz",
+  "ja-jp", "ko-kr", "zh-cn", "zh-tw", "zh-hk", "hi-in", "en-in",
+  "tr-tr", "th-th", "vi-vn", "id-id", "ms-my", "en-sg", "en-ph",
+  "ur-pk", "bn-bd", "ar-ae", "ar-sa", "ar-eg", "he-il",
+  "ta-in", "te-in", "mr-in", "en-za", "en-ng", "en-ke", "fr-ma",
+  "ru-ru", "uk-ua", "ro-md",
+];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const host = process.env.VERCEL_ENV === "production"
@@ -10,7 +22,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const entries: MetadataRoute.Sitemap = [];
 
-  // ── Root static pages (no language prefix — these exist) ──
+  // ── Root static pages ──
   entries.push({ url: host, lastModified: new Date(), changeFrequency: "weekly", priority: 1.0 });
   entries.push({ url: `${host}/privacy`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.3 });
   entries.push({ url: `${host}/terms`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.3 });
@@ -24,7 +36,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
 
     for (const product of products) {
-      // Root product URL (redirects to detected language)
+      // Root product URL (redirects to detected locale)
       entries.push({
         url: `${host}/${product.slug}`,
         lastModified: product.updatedAt,
@@ -32,13 +44,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.9,
       });
 
-      // Language-prefixed product pages (these exist: /{lang}/{slug})
-      for (const lang of LANGUAGES) {
+      // Locale-prefixed product pages
+      for (const loc of ALL_LOCALES) {
         entries.push({
-          url: `${host}/${lang}/${product.slug}`,
+          url: `${host}/${loc}/${product.slug}`,
           lastModified: product.updatedAt,
           changeFrequency: "weekly",
-          priority: lang === "en" ? 0.8 : 0.7,
+          priority: loc === "en-us" ? 0.8 : 0.7,
         });
       }
     }

@@ -8,18 +8,38 @@ import { getCourseConfig, type CourseConfig } from "@/lib/white-label-data";
 import { AnalyticsTracker } from "@/components/course/analytics-tracker";
 import { TrackedCtaButton } from "@/components/course/tracked-cta-button";
 
-// ─── Lingue supportate ─────────────────────────
-const SUPPORTED_LANGUAGES = ["it", "en", "fr", "es", "de", "pt", "nl", "pl", "sv", "da", "no", "fi", "ro", "cs", "hu", "el", "ja", "ko", "zh", "ar", "hi", "tr", "th", "vi", "id", "ms", "ru"];
+// ─── All supported locale codes ────────────────
+const ALL_LOCALES = [
+  "it-it", "en-us", "en-gb", "fr-fr", "de-de", "es-es", "pt-pt",
+  "nl-nl", "pl-pl", "sv-se", "da-dk", "nb-no", "fi-fi", "ro-ro",
+  "cs-cz", "hu-hu", "el-gr", "bg-bg", "hr-hr", "sk-sk", "sl-si",
+  "lt-lt", "lv-lv", "et-ee", "de-at", "de-ch", "fr-ch", "it-ch",
+  "nl-be", "fr-be", "en-ie", "en-ca", "fr-ca", "es-mx", "pt-br",
+  "es-ar", "es-co", "es-cl", "es-pe", "en-au", "en-nz",
+  "ja-jp", "ko-kr", "zh-cn", "zh-tw", "zh-hk", "hi-in", "en-in",
+  "tr-tr", "th-th", "vi-vn", "id-id", "ms-my", "en-sg", "en-ph",
+  "ur-pk", "bn-bd", "ar-ae", "ar-sa", "ar-eg", "he-il",
+  "ta-in", "te-in", "mr-in", "en-za", "en-ng", "en-ke", "fr-ma",
+  "ru-ru", "uk-ua", "ro-md",
+];
 
-const DEFAULT_LANGUAGE = "en";
+// Backward compat: also accept 2-letter language codes
+const LANG_CODES = [...new Set(ALL_LOCALES.map((l) => l.split("-")[0]))];
+
+const DEFAULT_LOCALE = "en-us";
+
+// ─── Extract language code from locale ──────────
+function localeToLang(locale: string): string {
+  return locale.split("-")[0]?.toLowerCase() ?? "en";
+}
 
 // ─── Generate hreflang metadata ────────────────
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ lang: string; domain: string }>;
+  params: Promise<{ locale: string; domain: string }>;
 }): Promise<Metadata> {
-  const { lang, domain } = await params;
+  const { locale, domain } = await params;
 
   let host = "www.courssy.com";
   try {
@@ -31,14 +51,16 @@ export async function generateMetadata({
   const baseUrl = `${scheme}://${host}`;
 
   const languages: Record<string, string> = {};
-  for (const l of SUPPORTED_LANGUAGES) {
-    languages[l] = `${baseUrl}/${l}/${domain}`;
+  for (const loc of ALL_LOCALES) {
+    // Use full locale code for hreflang
+    const hreflangKey = loc.replace("-", "-"); // already correct format
+    languages[loc] = `${baseUrl}/${loc}/${domain}`;
   }
-  languages["x-default"] = `${baseUrl}/${DEFAULT_LANGUAGE}/${domain}`;
+  languages["x-default"] = `${baseUrl}/${DEFAULT_LOCALE}/${domain}`;
 
   return {
     alternates: {
-      canonical: `${baseUrl}/${lang}/${domain}`,
+      canonical: `${baseUrl}/${locale}/${domain}`,
       languages,
     },
   };
@@ -50,8 +72,8 @@ const TemplateH612 = dynamic(() => import("@/components/funnel/template-h612"));
 const TemplateHorizon = dynamic(() => import("@/components/funnel/template-horizon"));
 const TemplateBookClaude = dynamic(() => import("@/components/funnel/template-book-claude"));
 
-function getPriceString(data: CourseConfig, locale: string): string {
-  const priceConfig = data.prices?.[locale] ?? data.prices?.default;
+function getPriceString(data: CourseConfig, lang: string): string {
+  const priceConfig = data.prices?.[lang] ?? data.prices?.default;
   if (priceConfig) return `${priceConfig.symbol}${priceConfig.amount}`;
   return `€${data.price ?? 0}`;
 }
@@ -66,8 +88,7 @@ function getDisplayPriceForCurrency(data: CourseConfig): string {
   return prices.join(" / ");
 }
 
-function mapConfigToTemplateData(data: CourseConfig, locale: string) {
-  const lang = locale ?? data.defaultLanguage ?? DEFAULT_LANGUAGE;
+function mapConfigToTemplateData(data: CourseConfig, lang: string) {
   const content = data.languages[lang] ?? data.languages[Object.keys(data.languages)[0]];
   if (!content) return null;
 
@@ -88,20 +109,26 @@ function mapConfigToTemplateData(data: CourseConfig, locale: string) {
   };
 }
 
-export default async function LangLandingPage({
+export default async function LocaleLandingPage({
   params,
   searchParams,
 }: {
-  params: Promise<{ lang: string; domain: string }>;
+  params: Promise<{ locale: string; domain: string }>;
   searchParams: Promise<{ verified_token?: string; token?: string }>;
 }) {
-  const { lang, domain } = await params;
+  const { locale, domain } = await params;
   const searchParamsResolved = await searchParams;
   const { verified_token, token } = searchParamsResolved;
   const accessToken = verified_token || token;
 
-  // Validate language
-  const safeLang = SUPPORTED_LANGUAGES.includes(lang) ? lang : DEFAULT_LANGUAGE;
+  // Extract language from locale (fr-fr → fr) for translation lookup
+  const lang = localeToLang(locale);
+
+  // Validate locale
+  const safeLocale = ALL_LOCALES.includes(locale) || LANG_CODES.includes(locale)
+    ? locale
+    : DEFAULT_LOCALE;
+  const safeLang = localeToLang(safeLocale);
 
   const data = await getCourseConfig(domain);
   if (!data) return notFound();
@@ -109,8 +136,15 @@ export default async function LangLandingPage({
   const cookieStore = await cookies();
   const cookieLocale = cookieStore.get("locale")?.value;
 
-  const currentLang = (safeLang as string) ?? (cookieLocale as string) ?? (data?.defaultLanguage as string) ?? DEFAULT_LANGUAGE;
-  const content = data?.languages?.[currentLang] ?? data?.languages?.[data.defaultLanguage] ?? Object.values(data?.languages ?? {})[0];
+  const currentLang = safeLang ?? localeToLang(cookieLocale ?? "") ?? data?.defaultLanguage ?? "en";
+  const currentLocale = safeLocale;
+
+  // Try: full locale code → language code → data default → first
+  const content =
+    data?.languages?.[currentLocale] ??
+    data?.languages?.[currentLang] ??
+    data?.languages?.[data.defaultLanguage] ??
+    Object.values(data?.languages ?? {})[0];
 
   if (!data || !content) return notFound();
 
@@ -156,11 +190,11 @@ export default async function LangLandingPage({
                <span className="text-2xl font-black tracking-tighter text-gray-900 uppercase">{data.slug}.</span>
             </div>
             <div className="hidden md:flex items-center gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
-               <Link href={`/${currentLang === "it" ? "en" : "it"}/${domain}`} className="hover:text-gray-900 transition-colors">
-                 {currentLang === "it" ? "EN" : "IT"}
+               <Link href={`/${currentLocale === "it-it" ? "en-us" : "it-it"}/${domain}`} className="hover:text-gray-900 transition-colors">
+                 {currentLocale === "it-it" ? "EN" : "IT"}
                </Link>
             </div>
-            <Link href={`/${currentLang}/${domain}/curso/${firstLessonId}${accessToken ? `?token=${accessToken}` : ""}`} className="bg-gray-900 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-white hover:bg-gray-800 transition-all">
+            <Link href={`/${currentLocale}/${domain}/curso/${firstLessonId}${accessToken ? `?token=${accessToken}` : ""}`} className="bg-gray-900 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-white hover:bg-gray-800 transition-all">
                {content.cta}
             </Link>
           </div>
@@ -188,7 +222,7 @@ export default async function LangLandingPage({
                  >
                    {content.cta}
                  </TrackedCtaButton>
-                 <Link href={`/${currentLang}/${domain}/curso/${firstLessonId}${accessToken ? `?token=${accessToken}` : ""}`} className="px-10 py-5 bg-white rounded-3xl text-sm font-black text-gray-900 border border-gray-200 hover:bg-gray-50 transition-all flex items-center gap-3">
+                 <Link href={`/${currentLocale}/${domain}/curso/${firstLessonId}${accessToken ? `?token=${accessToken}` : ""}`} className="px-10 py-5 bg-white rounded-3xl text-sm font-black text-gray-900 border border-gray-200 hover:bg-gray-50 transition-all flex items-center gap-3">
                     <Play className="w-5 h-5 text-gray-400" /> Area Membri
                  </Link>
               </div>

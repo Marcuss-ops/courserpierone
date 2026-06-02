@@ -224,6 +224,51 @@ model CourseConfigCache {
   updatedAt DateTime @updatedAt
 }
 
+// ─── Tabella Locale: codici lingua-paese completi ─────────
+model Locale {
+  id             String   @id @default(cuid())
+  code           String   @unique // "fr-fr", "pt-br", "en-us"...
+  languageCode   String // "fr", "pt", "en"...
+  countryCode    String? // "FR", "BR", "US"... (null per lingue senza paese es. "en")
+  name           String // "French (France)"
+  nativeName     String // "Français (France)"
+  isActive       Boolean  @default(true)
+  fallbackLocale String? // "en-us" — catena di fallback
+  currency       String? // "EUR", "USD", "BRL"...
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  youtubeChannels YouTubeChannel[]
+}
+
+// ─── Regole paese → locale preferito ──────────────────────────
+model CountryLocaleRule {
+  id                 String   @id @default(cuid())
+  countryCode        String   @unique // "FR", "DE", "BR"...
+  preferredLocale    String   // "fr-fr"
+  alternativeLocales String?  // JSON array: ["en-us", "de-de"]
+  createdAt          DateTime @default(now())
+}
+
+// ─── Canali YouTube localizzati ───────────────────────────────
+model YouTubeChannel {
+  id                 String   @id @default(cuid())
+  channelName        String
+  channelUrl         String   @unique
+  localeId           String
+  locale             String // denormalizzato per query veloci: "fr-fr"
+  languageCode       String // "fr"
+  countryCode        String?
+  niche              String?
+  defaultLandingSlug String? // slug prodotto predefinito
+  trackingCode       String?
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  localeRef Locale @relation(fields: [localeId], references: [id])
+}
+
 // ─── Checkout abbandonati (per email di recupero) ─────────
 model AbandonedCheckout {
   id              String    @id @default(cuid())
@@ -255,9 +300,9 @@ model MagicLink {
 // Una tabella unica per memorizzare le traduzioni di TUTTE le landing page
 // in TUTTE le lingue. Ogni sito/slug ha il suo set di traduzioni.
 model LandingTranslation {
-  id        String   @id @default(cuid())
-  slug      String   // chiave della landing (es. "amish-secrets")
-  locale    String   // it, en, fr, es, de, pt, ja, zh...
+  id              String   @id @default(cuid())
+  slug            String // chiave della landing (es. "amish-secrets")
+  locale          String // it, en, fr, es, de, pt, ja, zh...
   // Testi della landing page
   heroTitle       String?
   heroSubtitle    String?
@@ -273,8 +318,8 @@ model LandingTranslation {
   bonusLabel      String?
   guaranteeText   String?
   // Metadati
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@unique([slug, locale])
 }
