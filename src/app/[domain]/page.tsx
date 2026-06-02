@@ -76,7 +76,7 @@ function mapConfigToTemplateData(data: CourseConfig, locale: string) {
     recensioni: content.story ?? "",
     cta: content.cta,
     prezzo: getPriceString(data, lang),
-    coverUrl: data.cover,
+    coverUrl: data.cover ?? "",
     lezioni: data.lessons.map((l) => ({
       titolo: l.titles[lang] ?? Object.values(l.titles)[0] ?? "",
       descrizione: l.descriptions[lang] ?? Object.values(l.descriptions)[0] ?? "",
