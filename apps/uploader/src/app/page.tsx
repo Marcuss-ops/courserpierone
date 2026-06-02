@@ -133,25 +133,20 @@ export default function HomePage() {
   if (!user) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-center px-6">
-        {/* Animated logo */}
-        <div className="relative mb-10">
-          <div className="w-28 h-28 rounded-[32px] bg-gradient-to-br from-[var(--cyan)] via-[var(--pink)] to-black flex items-center justify-center shadow-2xl">
-            <svg viewBox="0 0 24 24" className="w-14 h-14 fill-white">
+        {/* Sleek icon */}
+        <div className="relative mb-8">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[var(--cyan)] via-[var(--pink)] to-black flex items-center justify-center shadow-xl">
+            <svg viewBox="0 0 24 24" className="w-10 h-10 fill-white">
               <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.77a8.19 8.19 0 0 0 4.77 1.52V6.79a4.85 4.85 0 0 1-1-.1z"/>
             </svg>
           </div>
-          <div className="absolute inset-0 rounded-[32px] bg-gradient-to-br from-[var(--cyan)] via-[var(--pink)] to-black blur-2xl opacity-30 -z-10 pulse" />
-          <div className="absolute inset-0 rounded-[32px] bg-gradient-to-br from-[var(--cyan)] via-[var(--pink)] to-black blur-3xl opacity-15 -z-20 float" />
         </div>
 
-        <h1 className="text-5xl md:text-6xl font-extrabold text-white tracking-tight mb-4" style={{ letterSpacing: "-0.03em" }}>
+        <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-3" style={{ letterSpacing: "-0.02em" }}>
           TikShare
         </h1>
-        <p className="text-lg text-[var(--muted)] max-w-lg mb-2">
-          Upload videos to TikTok in one click.<br/>Manage drafts, analytics, and profile — all from here.
-        </p>
-        <p className="text-sm text-[var(--dimmed)] mb-8">
-          Powered by TikTok Login Kit + Content Posting API
+        <p className="text-base text-[var(--muted)] max-w-md mb-8 leading-relaxed">
+          Upload video drafts to TikTok in one click. No watermarks. Simple and secure.
         </p>
 
         {error && (
@@ -162,36 +157,23 @@ export default function HomePage() {
 
         <a
           href="/api/tiktok/login"
-          className="flex items-center gap-3 rounded-full px-10 py-4 text-base font-bold text-black transition-all hover:scale-105 active:scale-95"
+          className="flex items-center gap-3 rounded-full px-8 py-3.5 text-sm font-bold text-black transition-all hover:scale-105 active:scale-95"
           style={{
             background: "linear-gradient(90deg, var(--cyan), var(--pink))",
             backgroundSize: "200% 200%",
             animation: "gradientShift 3s ease infinite",
           }}
         >
-          <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current">
+          <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
             <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.77a8.19 8.19 0 0 0 4.77 1.52V6.79a4.85 4.85 0 0 1-1-.1z"/>
           </svg>
           Sign in with TikTok
         </a>
 
-        <div className="mt-6 flex items-center gap-6 text-xs text-[var(--dimmed)]">
-          <span>🔒 OAuth 2.0</span>
-          <span>🚫 No password stored</span>
+        <div className="mt-8 flex items-center gap-6 text-xs text-[var(--dimmed)]">
+          <span>🔒 Secure OAuth 2.0</span>
+          <span>🚫 No password saved</span>
           <span>✅ Revocable anytime</span>
-        </div>
-
-        <div className="mt-16 pt-8 border-t border-[var(--border)] w-full max-w-md">
-          <div className="flex items-start gap-4 rounded-xl bg-[var(--surface)] p-4 text-left">
-            <div className="text-2xl">📋</div>
-            <div>
-              <p className="text-sm font-semibold text-white">Why TikShare?</p>
-              <p className="mt-1 text-xs text-[var(--muted)]">
-                No watermark. Upload directly as draft — you review and publish on TikTok.
-                Fully compliant with official TikTok API guidelines.
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     );
@@ -202,22 +184,21 @@ export default function HomePage() {
     <div className="min-h-screen">
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-[var(--border)] bg-black/80 backdrop-blur-2xl">
-        <div className="mx-auto max-w-5xl flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--cyan)] via-[var(--pink)] to-black flex items-center justify-center">
-              <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white">
+        <div className="mx-auto max-w-4xl flex items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--cyan)] via-[var(--pink)] to-black flex items-center justify-center">
+              <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white">
                 <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.77a8.19 8.19 0 0 0 4.77 1.52V6.79a4.85 4.85 0 0 1-1-.1z"/>
               </svg>
             </div>
-            <span className="text-base font-bold text-white">TikShare</span>
-            <span className="ml-2 rounded-full bg-[var(--cyan)]/10 px-2 py-0.5 text-xs text-[var(--cyan)] font-medium">uploader.courssy.com</span>
+            <span className="text-sm font-bold text-white tracking-tight">TikShare</span>
           </div>
-          <div className="flex items-center gap-4">
-            <a href="/terms" className="text-sm text-[var(--muted)] hover:text-white transition">Terms</a>
-            <a href="/privacy" className="text-sm text-[var(--muted)] hover:text-white transition">Privacy</a>
+          <div className="flex items-center gap-5">
+            <a href="/terms" className="text-xs text-[var(--muted)] hover:text-white transition">Terms</a>
+            <a href="/privacy" className="text-xs text-[var(--muted)] hover:text-white transition">Privacy</a>
             <button
               onClick={handleLogout}
-              className="rounded-full border border-[var(--red)]/30 px-4 py-1.5 text-sm font-medium text-[var(--red)] transition hover:bg-[var(--red)]/10"
+              className="text-xs text-[var(--red)] font-medium transition hover:opacity-85"
             >
               Sign out
             </button>
@@ -227,30 +208,33 @@ export default function HomePage() {
 
       {/* Main */}
       <div className="pt-24 px-6 pb-16">
-        <div className="mx-auto max-w-5xl">
-          {/* User header */}
-          <div className="mb-10 flex items-center gap-5">
-            {user.avatar_url ? (
-              <img src={user.avatar_url} alt={user.display_name} className="w-16 h-16 rounded-2xl border-2 border-[var(--cyan)] object-cover" />
-            ) : (
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--cyan)] to-[var(--pink)] flex items-center justify-center text-xl font-extrabold text-black">
-                {user.display_name[0].toUpperCase()}
-              </div>
-            )}
-            <div>
-              <h1 className="text-2xl font-bold text-white">{user.display_name}</h1>
-              <p className="text-[var(--cyan)]">@{user.username}</p>
-              {user.bio && <p className="mt-1 text-sm text-[var(--muted)] max-w-md">{user.bio}</p>}
-            </div>
-          </div>
-
+        <div className="mx-auto max-w-4xl">
           {/* Two-column grid */}
-          <div className="grid gap-8 lg:grid-cols-2">
-            {/* ── LEFT: Upload ─────────────────────────────── */}
-            <div className="space-y-5">
-              <div>
-                <h2 className="text-xl font-bold text-white">Upload a Video</h2>
-                <p className="mt-1 text-sm text-[var(--muted)]">No watermark · Upload as draft on TikTok</p>
+          <div className="grid gap-12 md:grid-cols-3">
+            
+            {/* ── LEFT/SIDEBAR: Profile info (1 col) ──────── */}
+            <div className="md:col-span-1 space-y-6">
+              <div className="rounded-2xl border border-[var(--border2)] p-6" style={{ background: "var(--surface)" }}>
+                <div className="flex flex-col items-center text-center">
+                  {user.avatar_url ? (
+                    <img src={user.avatar_url} alt={user.display_name} className="w-16 h-16 rounded-full border-2 border-[var(--cyan)] object-cover mb-4" />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--cyan)] to-[var(--pink)] flex items-center justify-center text-xl font-extrabold text-black mb-4">
+                      {user.display_name[0].toUpperCase()}
+                    </div>
+                  )}
+                  <h3 className="font-bold text-white text-lg">{user.display_name}</h3>
+                  <p className="text-xs text-[var(--cyan)] mb-2">@{user.username}</p>
+                  {user.bio && <p className="text-xs text-[var(--muted)] leading-relaxed">{user.bio}</p>}
+                </div>
+              </div>
+            </div>
+
+            {/* ── RIGHT: Video Upload (2 cols) ───────────── */}
+            <div className="md:col-span-2 space-y-6">
+              <div className="space-y-1">
+                <h2 className="text-xl font-bold text-white">Upload Video</h2>
+                <p className="text-xs text-[var(--muted)]">All uploads are sent to TikTok as drafts.</p>
               </div>
 
               {/* Drop zone */}
@@ -259,22 +243,17 @@ export default function HomePage() {
                 onDragLeave={() => setDragging(false)}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
-                className={`relative flex h-44 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed transition-all ${dragging ? "border-[var(--cyan)] bg-[var(--cyan)]/5" : "border-[var(--border2)] hover:border-[var(--muted)]"}`}
+                className={`relative flex h-40 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed transition-all ${dragging ? "border-[var(--cyan)] bg-[var(--cyan)]/5" : "border-[var(--border2)] hover:border-[var(--muted)]"}`}
                 style={{ background: "var(--surface)" }}
               >
                 {videoPreview ? (
                   <video src={videoPreview!} className="h-full w-full rounded-xl object-cover" controls />
                 ) : (
                   <>
-                    <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--surface2)]">
-                      <svg viewBox="0 0 24 24" className="w-6 h-6 fill-[var(--muted)]">
-                        <path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4z"/>
-                      </svg>
-                    </div>
                     <p className="text-sm text-[var(--muted)]">
-                      Drag & drop your video here or <span className="text-[var(--cyan)]">click to select</span>
+                      Drag and drop your video or <span className="text-[var(--cyan)]">browse</span>
                     </p>
-                    <p className="mt-1 text-xs text-[var(--dimmed)]">MP4, MOV · max 100MB · no watermark</p>
+                    <p className="mt-1 text-xs text-[var(--dimmed)]">MP4, MOV (max 100MB)</p>
                   </>
                 )}
                 <input
@@ -287,30 +266,29 @@ export default function HomePage() {
               </div>
 
               {/* Title */}
-              <div>
-                <label className="mb-2 block text-sm font-medium text-[var(--muted)]">Title</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-[var(--muted)]">Title</label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   maxLength={150}
-                  className="w-full rounded-xl border border-[var(--border2)] bg-[var(--surface2)] px-4 py-3 text-white placeholder-[var(--dimmed)] transition focus:border-[var(--cyan)]"
-                  placeholder="Your video title..."
+                  className="w-full rounded-xl border border-[var(--border2)] bg-[var(--surface)] px-4 py-2.5 text-sm text-white transition focus:border-[var(--cyan)]"
+                  placeholder="Video title..."
                 />
-                <p className="mt-1 text-right text-xs text-[var(--dimmed)]">{title.length}/150</p>
               </div>
 
-              {/* Privacy — no default */}
-              <div>
-                <label className="mb-2 block text-sm font-medium text-[var(--muted)]">Privacy</label>
+              {/* Privacy */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-[var(--muted)]">Privacy Level</label>
                 {privacyLevel === "" && (
-                  <p className="mb-2 text-xs text-[var(--yellow)]">⚠️ Select a privacy level before publishing</p>
+                  <p className="text-[10px] text-[var(--yellow)]">⚠️ Please select privacy before publishing</p>
                 )}
-                <div className="space-y-2">
+                <div className="grid grid-cols-3 gap-2">
                   {privacyOptions.map((opt) => (
                     <label
                       key={opt.value}
-                      className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition ${privacyLevel === opt.value ? "border-[var(--cyan)] bg-[var(--cyan)]/5" : "border-[var(--border2)] hover:border-[var(--muted)]"}`}
+                      className={`flex flex-col cursor-pointer justify-center items-center rounded-xl border p-3 transition text-center ${privacyLevel === opt.value ? "border-[var(--cyan)] bg-[var(--cyan)]/5" : "border-[var(--border2)] hover:border-[var(--muted)]"}`}
                     >
                       <input
                         type="radio"
@@ -318,42 +296,18 @@ export default function HomePage() {
                         value={opt.value}
                         checked={privacyLevel === opt.value}
                         onChange={() => setPrivacyLevel(opt.value)}
-                        className="accent-[var(--cyan)]"
+                        className="sr-only"
                       />
-                      <div>
-                        <span className="text-sm font-medium text-white">{opt.label}</span>
-                        <span className="ml-2 text-xs text-[var(--dimmed)]">{opt.desc}</span>
-                      </div>
+                      <span className="text-xs font-bold text-white mb-0.5">{opt.label}</span>
+                      <span className="text-[9px] text-[var(--dimmed)]">{opt.desc.split("—")[0]}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
-              {/* Options */}
-              <div className="space-y-2">
-                {[
-                  { flag: allowComment, setter: setAllowComment, label: "Allow comments" },
-                  { flag: allowDuet, setter: setAllowDuet, label: "Allow Duet" },
-                  { flag: allowShare, setter: setAllowShare, label: "Allow sharing" },
-                ].map(({ flag, setter, label }) => (
-                  <label
-                    key={label}
-                    className="flex cursor-pointer items-center gap-3 rounded-xl border border-[var(--border2)] px-4 py-3 transition hover:border-[var(--muted)]"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={flag}
-                      onChange={(e) => setter(e.target.checked)}
-                      className="accent-[var(--cyan)] h-4 w-4"
-                    />
-                    <span className="text-sm text-[var(--muted)]">{label}</span>
-                  </label>
-                ))}
-              </div>
-
               {/* Status */}
               {uploadStatus !== "idle" && (
-                <div className={`rounded-xl border p-4 text-sm font-medium ${
+                <div className={`rounded-xl border p-4 text-xs font-medium ${
                   uploadStatus === "error" ? "border-[var(--red)]/30 bg-[var(--red)]/10 text-[var(--red)]" :
                   uploadStatus === "done" ? "border-[var(--green)]/30 bg-[var(--green)]/10 text-[var(--green)]" :
                   "border-[var(--cyan)]/30 bg-[var(--cyan)]/10 text-[var(--cyan)]"
@@ -364,14 +318,11 @@ export default function HomePage() {
                     </div>
                   )}
                   <div className="flex items-center gap-2">
-                    {uploadStatus === "uploading" && <div className="w-4 h-4 rounded-full border-2 border-[var(--cyan)] border-t-transparent spin" />}
-                    {uploadStatus === "done" && <span>✓</span>}
-                    {uploadStatus === "error" && <span>✗</span>}
-                    {uploadStatus === "processing" && <div className="w-4 h-4 rounded-full bg-[var(--yellow)] pulse" />}
+                    {uploadStatus === "uploading" && <div className="w-3.5 h-3.5 rounded-full border-2 border-[var(--cyan)] border-t-transparent spin" />}
                     <span>{uploadMessage}</span>
                   </div>
                   {shareUrl && (
-                    <a href={shareUrl} target="_blank" rel="noopener" className="mt-2 inline-block text-xs underline hover:text-white">
+                    <a href={shareUrl} target="_blank" rel="noopener" className="mt-1.5 inline-block text-[10px] underline">
                       Open on TikTok →
                     </a>
                   )}
@@ -382,149 +333,24 @@ export default function HomePage() {
               <button
                 onClick={handleUpload}
                 disabled={!canUpload}
-                className="w-full rounded-xl py-4 text-base font-bold text-black transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full rounded-xl py-3.5 text-sm font-bold text-black transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 style={{ background: "linear-gradient(90deg, var(--cyan), var(--pink))" }}
               >
-                {uploadStatus === "uploading" ? (
-                  <>
-                    <div className="w-4 h-4 rounded-full border-2 border-black border-t-transparent spin" />
-                    Uploading...
-                  </>
-                ) : "Publish to TikTok"}
+                {uploadStatus === "uploading" ? "Uploading..." : "Publish to TikTok"}
               </button>
-
-              <p className="text-center text-xs text-[var(--dimmed)]">
-                Uploads as draft · Verify and publish manually on TikTok
-              </p>
-
-              {/* Compliance */}
-              <div className="rounded-xl border border-[var(--border2)] p-4" style={{ background: "#050505" }}>
-                <p className="text-xs text-[var(--dimmed)] leading-relaxed">
-                  By uploading to TikTok, you agree to respect the{" "}
-                  <a href="https://www.tiktok.com/community-guidelines" target="_blank" rel="noopener" className="text-[var(--cyan)] hover:underline">Community Guidelines</a>{" "}
-                  and{" "}
-                  <a href="https://www.tiktok.com/music-usage-confirmation" target="_blank" rel="noopener" className="text-[var(--cyan)] hover:underline">Music Usage Confirmation</a>.
-                  The upload will happen as a draft — you must manually confirm and publish on TikTok.
-                </p>
-              </div>
             </div>
 
-            {/* ── RIGHT: Info ───────────────────────────────── */}
-            <div className="space-y-5">
-              <div>
-                <h2 className="text-xl font-bold text-white">Your Profile</h2>
-                <p className="mt-1 text-sm text-[var(--muted)]">Data retrieved from TikTok OAuth</p>
-              </div>
-
-              {/* Profile card */}
-              <div className="rounded-2xl border border-[var(--border2)] p-6" style={{ background: "var(--surface)" }}>
-                <div className="flex items-start gap-4">
-                  {user.avatar_url ? (
-                    <img src={user.avatar_url} alt={user.display_name} className="w-16 h-16 rounded-2xl border-2 border-[var(--cyan)] object-cover" />
-                  ) : (
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--cyan)] to-[var(--pink)] flex items-center justify-center text-xl font-extrabold text-black">
-                      {user.display_name[0].toUpperCase()}
-                    </div>
-                  )}
-                  <div>
-                    <p className="font-bold text-white">{user.display_name}</p>
-                    <p className="text-[var(--cyan)]">@{user.username}</p>
-                    {user.bio && <p className="mt-2 text-sm text-[var(--muted)]">{user.bio}</p>}
-                  </div>
-                </div>
-                <div className="mt-5 grid grid-cols-3 gap-3">
-                  {[
-                    { label: "Open ID", value: user.open_id.slice(0, 10) + "..." },
-                    { label: "Avatar", value: user.avatar_url ? "✓" : "—" },
-                    { label: "Bio", value: user.bio ? "✓" : "—" },
-                  ].map(({ label, value }) => (
-                    <div key={label} className="rounded-xl bg-[var(--surface2)] p-3 text-center">
-                      <p className="text-xs text-[var(--dimmed)]">{label}</p>
-                      <p className="mt-1 text-sm font-semibold text-white">{value}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* OAuth scopes */}
-              <div className="rounded-2xl border border-[var(--border2)] p-6" style={{ background: "var(--surface)" }}>
-                <h3 className="mb-4 text-sm font-bold text-white">Requested OAuth Scopes</h3>
-                <div className="space-y-3">
-                  {[
-                    { scope: "user.info.basic", desc: "Username, avatar, display name" },
-                    { scope: "user.info.profile", desc: "Bio and extended profile info" },
-                    { scope: "video.upload", desc: "Upload video drafts to TikTok" },
-                  ].map(({ scope, desc }) => (
-                    <div key={scope} className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--cyan)]/10">
-                        <span className="text-xs font-mono text-[var(--cyan)]">✓</span>
-                      </div>
-                      <div>
-                        <code className="text-sm font-medium text-white">{scope}</code>
-                        <p className="text-xs text-[var(--dimmed)]">{desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* API endpoints */}
-              <div className="rounded-2xl border border-[var(--border2)] p-6" style={{ background: "var(--surface)" }}>
-                <h3 className="mb-4 text-sm font-bold text-white">Active API Endpoints</h3>
-                <div className="space-y-2">
-                  {[
-                    { method: "GET", path: "/api/tiktok/login", desc: "OAuth Authorization" },
-                    { method: "GET", path: "/api/tiktok/callback", desc: "Token Exchange" },
-                    { method: "GET", path: "/api/tiktok/user", desc: "User Info" },
-                    { method: "POST", path: "/api/tiktok/upload", desc: "Video Upload" },
-                    { method: "POST", path: "/api/tiktok/logout", desc: "Token Revocation" },
-                  ].map(({ method, path, desc }) => (
-                    <div key={path} className="flex items-center gap-3 rounded-lg bg-[var(--surface2)] p-3">
-                      <span className={`flex-shrink-0 rounded-md px-2 py-0.5 text-xs font-bold ${method === "GET" ? "bg-[var(--green)]/10 text-[var(--green)]" : "bg-[#3b82f6]/10 text-[#3b82f6]"}`}>
-                        {method}
-                      </span>
-                      <code className="flex-1 text-xs text-[var(--muted)]">{path}</code>
-                      <span className="text-xs text-[var(--dimmed)]">{desc}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Data handling */}
-              <div className="rounded-2xl border border-[var(--border2)] p-6" style={{ background: "var(--surface)" }}>
-                <h3 className="mb-3 text-sm font-bold text-white">How We Handle Your Data</h3>
-                <div className="space-y-3 text-xs text-[var(--muted)]">
-                  <div className="flex items-start gap-3">
-                    <span className="mt-0.5 text-[var(--cyan)]">▪</span>
-                    <p>The TikTok access token is stored in an httpOnly cookie on your browser. It is never saved on any database or external server.</p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span className="mt-0.5 text-[var(--cyan)]">▪</span>
-                    <p>Profile data (name, avatar, bio) is only used to display your profile in the dashboard and during video uploading.</p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span className="mt-0.5 text-[var(--cyan)]">▪</span>
-                    <p>We do not share any TikTok data with third parties. No data is stored on servers outside of Vercel (EU/US).</p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span className="mt-0.5 text-[var(--cyan)]">▪</span>
-                    <p>You can revoke access at any time by signing out or modifying your settings in your TikTok account.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
 
       {/* Footer */}
       <footer className="border-t border-[var(--border)] py-8 px-6">
-        <div className="mx-auto max-w-5xl flex items-center justify-between text-xs text-[var(--dimmed)]">
-          <span>© {new Date().getFullYear()} TikShare — uploader.courssy.com</span>
+        <div className="mx-auto max-w-4xl flex items-center justify-between text-[10px] text-[var(--dimmed)]">
+          <span>© {new Date().getFullYear()} TikShare</span>
           <div className="flex gap-4">
-            <a href="/terms" className="hover:text-white transition">Terms of Service</a>
-            <a href="/privacy" className="hover:text-white transition">Privacy Policy</a>
-            <a href="https://developers.tiktok.com" target="_blank" rel="noopener" className="hover:text-white transition">TikTok Dev</a>
+            <a href="/terms" className="hover:text-white transition">Terms</a>
+            <a href="/privacy" className="hover:text-white transition">Privacy</a>
           </div>
         </div>
       </footer>
