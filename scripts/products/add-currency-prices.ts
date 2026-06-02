@@ -1,9 +1,11 @@
 import { prisma } from "../../src/lib/db/prisma";
 
 async function main() {
-  const product = await prisma.product.findUnique({ where: { slug: "amish-secrets" } });
+  const slug = process.argv[2] || "amish-secrets";
+
+  const product = await prisma.product.findUnique({ where: { slug } });
   if (!product) {
-    console.error("Product not found");
+    console.error(`Product "${slug}" not found`);
     process.exit(1);
   }
 
@@ -30,7 +32,7 @@ async function main() {
   };
 
   await prisma.product.update({
-    where: { slug: "amish-secrets" },
+    where: { slug },
     data: { pricesByCurrency: JSON.stringify(prices) },
   });
 
