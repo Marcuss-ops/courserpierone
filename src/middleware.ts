@@ -37,7 +37,7 @@ function detectFromCountry(country: string | null): string | null {
 
 // ─── Check if a path starts with known routes ──
 const KNOWN_PREFIXES = [
-  "/_next", "/api", "/admin", "/login", "/favicon.ico", "/images/", "/courses/",
+  "/_next", "/api", "/admin", "/login", "/favicon.ico", "/images/", "/courses/", "/debug-locale",
 ];
 
 function isKnownPath(pathname: string): boolean {
@@ -156,6 +156,7 @@ export default withAuth(
           pathname.startsWith("/api/magic-link") ||
           pathname.startsWith("/api/products") ||
           pathname.startsWith("/login") ||
+          pathname.startsWith("/debug-locale") ||
           pathname === "/" ||
           /^\/[a-z]{2,5}\/?$/.test(pathname) || // /it, /en, /fr, etc.
           /^\/[a-z]{2,5}\/[^/]+$/.test(pathname) // /{lang}/{slug}
