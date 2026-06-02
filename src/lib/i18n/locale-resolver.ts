@@ -142,10 +142,12 @@ export function normalizeLocale(code: string): string {
 // ─── Map a 2-letter language code to preferred locale ─
 export function langToLocale(lang: string): string {
   const normalized = lang.toLowerCase();
-  // Direct match in COUNTRY_LOCALE (2-letter codes that ARE locales)
+  // Map via language table first (en → en-us, fr → fr-fr, etc.)
+  const mapped = LANG_TO_DEFAULT_LOCALE[normalized];
+  if (mapped) return mapped;
+  // Fallback: direct match if it's already a known locale
   if (isKnownLocale(normalized)) return normalized;
-  // Map via language table
-  return LANG_TO_DEFAULT_LOCALE[normalized] ?? DEFAULT_LOCALE;
+  return DEFAULT_LOCALE;
 }
 
 // ─── Fallback chain resolver ─────────────────────
@@ -155,8 +157,15 @@ export function resolveFallback(locale: string, visited = new Set<string>()): st
 
   const normalized = normalizeLocale(locale);
 
-  // Check if locale exists in our data
-  if (isKnownLocale(normalized)) return normalized;
+  // Check if it's a known locale
+  if (isKnownLocale(normalized)) {
+    // For language-only codes (de, fr, it), map to regional variant via langToLocale
+    if (!normalized.includes("-")) {
+      const mapped = langToLocale(normalized);
+      if (mapped !== normalized) return resolveFallback(mapped, visited);
+    }
+    return normalized;
+  }
 
   // Try language-only fallback: "fr-ca" → "fr-fr"
   const lang = localeToLanguage(normalized);

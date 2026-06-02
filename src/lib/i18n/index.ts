@@ -13,7 +13,7 @@ export {
   LANG_TO_DEFAULT_LOCALE,
 } from "./locale-resolver";
 
-export { t } from "./player-locale";
+export { t, playerLocale } from "./player-locale";
 
 export {
   getVisitorId,
