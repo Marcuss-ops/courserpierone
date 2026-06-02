@@ -145,32 +145,23 @@ export default withAuth(
       authorized: ({ token, req }) => {
         const { pathname } = req.nextUrl;
 
-        // Public paths: allow without auth
-        if (
-          pathname.startsWith("/_next") ||
-          pathname.startsWith("/api/auth") ||
-          pathname.startsWith("/api/analytics") ||
-          pathname.startsWith("/api/access") ||
-          pathname.startsWith("/api/checkout") ||
-          pathname.startsWith("/api/webhooks") ||
-          pathname.startsWith("/api/magic-link") ||
-          pathname.startsWith("/api/products") ||
-          pathname.startsWith("/login") ||
-          pathname.startsWith("/debug-locale") ||
-          pathname === "/" ||
-          /^\/[a-z]{2,5}\/?$/.test(pathname) || // /it, /en, /fr, etc.
-          /^\/[a-z]{2,5}\/[^/]+$/.test(pathname) // /{lang}/{slug}
-        ) {
+        // Known non-landing paths: skip auth
+        if (isKnownPath(pathname)) return true;
+
+        // Paths ALREADY with language prefix: /en, /fr/amish-secrets, etc.
+        if (/^\/[a-z]{2,5}(\/.*)?$/.test(pathname)) {
+          // Admin routes in any language — must have admin role
+          if (pathname.startsWith("/admin")) {
+            return !!token && token.role === "admin";
+          }
+          // Language-prefixed landing pages are public
           return true;
         }
 
-        // Admin routes — must have admin role
-        if (pathname.startsWith("/admin")) {
-          return !!token && token.role === "admin";
-        }
-
-        // All other routes — require at least a valid session
-        return !!token;
+        // Non-language-prefixed paths (e.g. /amish-secrets):
+        // The middleware will detect language and redirect to /{lang}/{path}
+        // Allow them through so the language detection logic runs
+        return true;
       },
     },
     secret: process.env.NEXTAUTH_SECRET,
