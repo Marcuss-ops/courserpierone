@@ -58,8 +58,16 @@ const FAQ_EN = [
   { q: "How long does it take?", a: "The complete program takes about 3-4 hours. Each module is designed for 20-minute sessions." },
 ];
 
+/**
+ * t() supporta 100+ lingue con fallback universale.
+ * - locale "it" → testo italiano
+ * - TUTTE le altre lingue (en, fr, es, de, ja, zh, pt, ar, hi, ru, etc.) → inglese
+ * 
+ * Il contenuto del prodotto (titolo, storia, etc.) viene già dal database
+ * in qualsiasi lingua — questo gestisce solo le label fisse della UI.
+ */
 function t(locale: string, it: string, en: string): string {
-  return locale === "en" ? en : it;
+  return locale?.toLowerCase() === "it" ? it : en;
 }
 
 // ─── Benefit data ──────────────────────────────
@@ -94,8 +102,9 @@ export default function TemplateBookClaude({
   checkoutUrl,
 }: BookClaudeProps) {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const faqItems = locale === "en" ? FAQ_EN : FAQ_IT;
-  const benefits = locale === "en" ? BENEFITS_EN : BENEFITS_IT;
+  // Supporto 100+ lingue: italiano per locale "it", inglese per tutto il resto
+  const faqItems = locale?.toLowerCase() === "it" ? FAQ_IT : FAQ_EN;
+  const benefits = locale?.toLowerCase() === "it" ? BENEFITS_IT : BENEFITS_EN;
 
   // ─── RENDER ────────────────────────────────────
   return (
