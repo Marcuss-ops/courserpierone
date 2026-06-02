@@ -18,6 +18,9 @@ interface HorizonProps {
     lezioni?: { titolo: string; descrizione: string }[];
   };
   locale?: string;
+  productId?: string;
+  productSlug?: string;
+  checkoutUrl?: string;
 }
 
 export default function TemplateHorizon({ data, locale: _locale = "it" }: HorizonProps) {

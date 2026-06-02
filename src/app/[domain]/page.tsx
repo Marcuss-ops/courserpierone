@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import dynamic from "next/dynamic";
 import { 
   Play, 
@@ -9,6 +9,30 @@ import {
 import { getCourseConfig, type CourseConfig } from "@/lib/white-label-data";
 import { AnalyticsTracker } from "@/components/course/analytics-tracker";
 import { TrackedCtaButton } from "@/components/course/tracked-cta-button";
+
+/**
+ * Detect the user's preferred language from the Accept-Language header.
+ * Falls back to a configurable default.
+ */
+function detectBrowserLocale(acceptLanguage: string | null, supported: string[], fallback: string): string {
+  if (!acceptLanguage) return fallback;
+  // Accept-Language: "it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7"
+  // Parse and find the first supported language
+  const preferred = acceptLanguage
+    .split(",")
+    .map((part) => {
+      const [locale, q = "q=1"] = part.trim().split(";");
+      const lang = locale.split("-")[0].toLowerCase();
+      const quality = parseFloat(q.replace("q=", "")) || 1;
+      return { lang, quality };
+    })
+    .sort((a, b) => b.quality - a.quality);
+  
+  for (const { lang } of preferred) {
+    if (supported.includes(lang)) return lang;
+  }
+  return fallback;
+}
 
 // Dynamic imports for template components
 const TemplateLumio = dynamic(() => import("@/components/funnel/template-lumio"));
@@ -48,7 +72,8 @@ function mapConfigToTemplateData(data: CourseConfig, locale: string) {
     sottotitolo: content.description,
     problema: content.problem,
     storia: content.story,
-    recensioni: "",
+    // TODO: aggiungere campo recensioni dedicato a ProductTranslation
+    recensioni: content.story ?? "",
     cta: content.cta,
     prezzo: getPriceString(data, lang),
     coverUrl: data.cover,
@@ -76,8 +101,12 @@ export default async function LandingPage({
 
   const cookieStore = await cookies();
   const cookieLocale = cookieStore.get("locale")?.value;
+  const headersList = await headers();
+  const acceptLanguage = headersList.get("accept-language");
+  const supportedLocales = Object.keys(data?.languages ?? {});
+  const browserLocale = detectBrowserLocale(acceptLanguage, supportedLocales, data?.defaultLanguage ?? "it");
 
-  const currentLang = (lang as "it" | "en") ?? (cookieLocale as "it" | "en") ?? (data?.defaultLanguage as "it" | "en") ?? "it";
+  const currentLang = (lang as string) ?? (cookieLocale as string) ?? browserLocale ?? (data?.defaultLanguage as string) ?? "it";
   const content = data?.languages?.[currentLang] ?? data?.languages?.[data.defaultLanguage] ?? Object.values(data?.languages ?? {})[0];
   
   if (!data || !content) return notFound();
@@ -103,7 +132,13 @@ export default async function LandingPage({
       return (
         <>
           <AnalyticsTracker productSlug={domain} />
-          <TemplateComponent data={templateData} locale={currentLang} />
+          <TemplateComponent
+            data={templateData}
+            locale={currentLang}
+            productId={data.productId}
+            productSlug={domain}
+            checkoutUrl={checkoutUrl}
+          />
         </>
       );
     }

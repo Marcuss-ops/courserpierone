@@ -16,6 +16,9 @@ interface H612Props {
     lezioni?: { titolo: string; descrizione: string }[];
   };
   locale?: string;
+  productId?: string;
+  productSlug?: string;
+  checkoutUrl?: string;
 }
 
 export default function TemplateH612({ data, locale: _locale = "it" }: H612Props) {

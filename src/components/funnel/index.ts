@@ -1,6 +1,7 @@
 import TemplateLumio from "./template-lumio";
 import TemplateH612 from "./template-h612";
 import TemplateHorizon from "./template-horizon";
+import TemplateBookClaude from "./template-book-claude";
 
 export const TEMPLATES = {
   lumio: {
@@ -27,8 +28,16 @@ export const TEMPLATES = {
     preview: "bg-[#fff9ee]",
     accent: "#FF5E3A",
   },
+  "book-claude": {
+    id: "book-claude",
+    name: "Book Claude",
+    description: "Libro/funnel editoriale con cover 3D, tabs estratti, arancione caldo",
+    component: TemplateBookClaude,
+    preview: "bg-white",
+    accent: "#FF6B00",
+  },
 } as const;
 
 export type TemplateId = keyof typeof TEMPLATES;
 
-export { TemplateLumio, TemplateH612, TemplateHorizon };
+export { TemplateLumio, TemplateH612, TemplateHorizon, TemplateBookClaude };

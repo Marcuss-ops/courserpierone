@@ -13,6 +13,7 @@ const TEMPLATE_EMOJI: Record<TemplateId, string> = {
   lumio: "☀️",
   h612: "🌑",
   horizon: "🌅",
+  "book-claude": "📖",
 };
 
 export default function TemplateSelector({

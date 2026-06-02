@@ -17,6 +17,9 @@ interface LumioProps {
     lezioni?: { titolo: string; descrizione: string }[];
   };
   locale?: string;
+  productId?: string;
+  productSlug?: string;
+  checkoutUrl?: string;
 }
 
 export default function TemplateLumio({ data, locale: _locale = "it" }: LumioProps) {
