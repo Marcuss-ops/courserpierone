@@ -37,7 +37,7 @@ export async function sendMagicLinkEmail(
     return false;
   }
 
-  const from = process.env.EMAIL_FROM || "noreply@courser.app";
+  const from = process.env.EMAIL_FROM ?? "noreply@courser.app";
 
   try {
     await transporter.sendMail({
@@ -133,7 +133,7 @@ export async function sendAbandonedCheckoutEmail(
     return false;
   }
 
-  const from = process.env.EMAIL_FROM || "noreply@courser.app";
+  const from = process.env.EMAIL_FROM ?? "noreply@courser.app";
 
   try {
     await transporter.sendMail({
@@ -225,7 +225,7 @@ export async function sendPurchaseConfirmation(
     return false;
   }
 
-  const from = process.env.EMAIL_FROM || "noreply@courser.app";
+  const from = process.env.EMAIL_FROM ?? "noreply@courser.app";
 
   try {
     await transporter.sendMail({

@@ -20,9 +20,9 @@ export function initLS() {
 }
 
 export function getStoreId(): string {
-  return process.env.LEMONSQUEEZY_STORE_ID || "";
+  return process.env.LEMONSQUEEZY_STORE_ID ?? "";
 }
 
 export function getWebhookSecret(): string {
-  return process.env.LEMONSQUEEZY_WEBHOOK_SECRET || "";
+  return process.env.LEMONSQUEEZY_WEBHOOK_SECRET ?? "";
 }

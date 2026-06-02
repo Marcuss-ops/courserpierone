@@ -22,10 +22,6 @@ export async function GET(request: NextRequest) {
 
     const progress = await prisma.lessonProgress.findMany({ where });
 
-    // Calculate percentage per product
-    const productIds = [...new Set(progress.map((p) => p.lessonId))];
-    // We need productId on progress or fetch lessons. Since we can't easily join without relation,
-    // we'll return raw progress and compute on frontend, or include lessons.
     const lessonIds = progress.map((p) => p.lessonId);
     const lessons = await prisma.lesson.findMany({
       where: { id: { in: lessonIds } },

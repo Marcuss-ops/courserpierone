@@ -4,9 +4,7 @@ import { cookies } from "next/headers";
 import dynamic from "next/dynamic";
 import { 
   Play, 
-  ShieldCheck, 
-  Zap,
-  Globe
+  Zap
 } from "lucide-react";
 import { getCourseConfig, type CourseConfig } from "@/lib/white-label-data";
 import { AnalyticsTracker } from "@/components/course/analytics-tracker";
@@ -20,12 +18,12 @@ const TemplateBookClaude = dynamic(() => import("@/components/funnel/template-bo
 
 function getPriceString(data: CourseConfig, locale: string): string {
   // Prezzo localizzato se disponibile
-  const priceConfig = data.prices?.[locale] || data.prices?.default;
+  const priceConfig = data.prices?.[locale] ?? data.prices?.default;
   if (priceConfig) {
     return `${priceConfig.symbol}${priceConfig.amount}`;
   }
   // Fallback: prezzo singolo
-  return `€${data.price || 0}`;
+  return `€${data.price ?? 0}`;
 }
 
 function getDisplayPriceForCurrency(data: CourseConfig): string {
@@ -33,16 +31,16 @@ function getDisplayPriceForCurrency(data: CourseConfig): string {
   const eur = data.prices?.EUR;
   const usd = data.prices?.USD;
   const prices: string[] = [];
-  if (eur) prices.push(`${eur.symbol || '€'}${eur.amount}`);
-  if (usd) prices.push(`${usd.symbol || '$'}${usd.amount}`);
+  if (eur) prices.push(`${eur.symbol ?? '€'}${eur.amount}`);
+  if (usd) prices.push(`${usd.symbol ?? '$'}${usd.amount}`);
   // Se nessuno configurato, mostra default
-  if (prices.length === 0) prices.push(`€${data.price || 0}`);
+  if (prices.length === 0) prices.push(`€${data.price ?? 0}`);
   return prices.join(' / ');
 }
 
 function mapConfigToTemplateData(data: CourseConfig, locale: string) {
-  const lang = locale || data.defaultLanguage || "it";
-  const content = data.languages[lang] || data.languages[Object.keys(data.languages)[0]];
+  const lang = locale ?? data.defaultLanguage ?? "it";
+  const content = data.languages[lang] ?? data.languages[Object.keys(data.languages)[0]];
   if (!content) return null;
 
   return {
@@ -55,8 +53,8 @@ function mapConfigToTemplateData(data: CourseConfig, locale: string) {
     prezzo: getPriceString(data, lang),
     coverUrl: data.cover,
     lezioni: data.lessons.map((l) => ({
-      titolo: l.titles[lang] || Object.values(l.titles)[0] || "",
-      descrizione: l.descriptions[lang] || Object.values(l.descriptions)[0] || "",
+      titolo: l.titles[lang] ?? Object.values(l.titles)[0] ?? "",
+      descrizione: l.descriptions[lang] ?? Object.values(l.descriptions)[0] ?? "",
     })),
   };
 }
@@ -79,13 +77,13 @@ export default async function LandingPage({
   const cookieStore = await cookies();
   const cookieLocale = cookieStore.get("locale")?.value;
 
-  const currentLang = (lang as "it" | "en") || (cookieLocale as "it" | "en") || (data?.defaultLanguage as "it" | "en") || "it";
-  const content = data?.languages?.[currentLang] || data?.languages?.[data.defaultLanguage] || Object.values(data?.languages || {})[0];
+  const currentLang = (lang as "it" | "en") ?? (cookieLocale as "it" | "en") ?? (data?.defaultLanguage as "it" | "en") ?? "it";
+  const content = data?.languages?.[currentLang] ?? data?.languages?.[data.defaultLanguage] ?? Object.values(data?.languages ?? {})[0];
   
   if (!data || !content) return notFound();
 
-  const firstLessonId = data.lessons?.[0]?.id || "#";
-  const checkoutUrl = data.checkoutUrl || "#";
+  const firstLessonId = data.lessons?.[0]?.id ?? "#";
+  const checkoutUrl = data.checkoutUrl ?? "#";
 
   // ─── Multi-Template: Render the template from config ──────
   // Helper per prezzo localizzato
@@ -221,17 +219,5 @@ export default async function LandingPage({
         </footer>
       </div>
     </>
-  );
-}
-
-function FeatureCard({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) {
-  return (
-    <div className="premium-glass p-10 rounded-[2.5rem] border border-white/5 group hover:border-white/20 transition-all duration-500">
-       <div className="w-12 h-12 premium-glass rounded-2xl flex items-center justify-center mb-6 border-white/10 group-hover:scale-110 transition-transform shadow-lg">
-          {icon}
-       </div>
-       <h3 className="text-xl font-bold text-white mb-3 text-contrast">{title}</h3>
-       <p className="text-zinc-500 text-sm font-medium leading-relaxed">{desc}</p>
-    </div>
   );
 }

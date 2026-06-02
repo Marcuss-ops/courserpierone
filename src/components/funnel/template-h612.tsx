@@ -18,7 +18,7 @@ interface H612Props {
   locale?: string;
 }
 
-export default function TemplateH612({ data, locale = "it" }: H612Props) {
+export default function TemplateH612({ data, locale: _locale = "it" }: H612Props) {
   return (
     <div className="min-h-screen" style={{ background: "#141313", color: "#ffffff" }}>
       {/* ── NAV ───────────────────────────────────────────── */}
@@ -57,10 +57,10 @@ export default function TemplateH612({ data, locale = "it" }: H612Props) {
               letterSpacing: "-0.02em",
             }}
           >
-            {data.titolo || "Titolo del Prodotto"}
+            {data.titolo ?? "Titolo del Prodotto"}
           </h1>
           <p className="mt-6 max-w-2xl text-lg" style={{ color: "#c7c6c6", fontFamily: "'Manrope', sans-serif" }}>
-            {data.sottotitolo || "Sottotitolo che introduce il valore del prodotto in modo elegante e diretto."}
+            {data.sottotitolo ?? "Sottotitolo che introduce il valore del prodotto in modo elegante e diretto."}
           </p>
           <div className="mt-8 flex gap-4">
             <a
@@ -68,7 +68,7 @@ export default function TemplateH612({ data, locale = "it" }: H612Props) {
               className="rounded-lg px-8 py-3 text-sm font-medium text-black transition hover:opacity-90"
               style={{ background: "#ffffff" }}
             >
-              {data.cta || "Inizia Ora"}
+              {data.cta ?? "Inizia Ora"}
             </a>
             <a
               href="#features"
@@ -165,7 +165,7 @@ export default function TemplateH612({ data, locale = "it" }: H612Props) {
                   className="mt-3"
                   style={{ fontFamily: "'Noto Serif', serif", fontSize: "clamp(24px, 3vw, 36px)", lineHeight: 1.2 }}
                 >
-                  {data.storia.split("\n")[0] || "La storia del prodotto"}
+                  {data.storia.split("\n")[0] ?? "La storia del prodotto"}
                 </h2>
                 <p className="mt-4 leading-relaxed" style={{ color: "#c7c6c6", fontFamily: "'Manrope', sans-serif" }}>
                   {data.storia.split("\n").slice(1).join("\n") || data.storia}
@@ -258,7 +258,7 @@ export default function TemplateH612({ data, locale = "it" }: H612Props) {
           <h2
             style={{ fontFamily: "'Noto Serif', serif", fontSize: "clamp(28px, 4vw, 48px)" }}
           >
-            {data.cta || "Inizia Oggi"}
+            {data.cta ?? "Inizia Oggi"}
           </h2>
           <p className="mt-4 text-lg" style={{ color: "#c7c6c6" }}>
             {data.prezzo ? `Prezzo: ${data.prezzo}` : "Offerta speciale di lancio"}

@@ -33,7 +33,7 @@ export async function GET(
       include: {
         lessons: { select: { id: true } },
         translations: {
-          where: { locale: order.locale || "it", section: "titolo" },
+          where: { locale: order.locale ?? "it", section: "titolo" },
           select: { content: true },
         },
       },
@@ -61,7 +61,7 @@ export async function GET(
     }
 
     const courseTitle = product.translations[0]?.content || product.slug;
-    const locale = order.locale || "it";
+    const locale = order.locale ?? "it";
     const lang = locale === "en" ? "en" : "it";
 
     // ─── Genera PDF Certificato ─────────────────────────────
@@ -111,7 +111,7 @@ export async function GET(
     doc.setFontSize(28);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(255, 255, 255);
-    const studentName = user.name || user.email?.split("@")[0] || "Studente";
+    const studentName = user.name ?? user.email?.split("@")[0] ?? "Studente";
     doc.text(studentName, pageWidth / 2, 120, { align: "center" });
 
     // Ha completato

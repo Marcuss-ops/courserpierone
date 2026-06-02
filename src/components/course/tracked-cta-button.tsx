@@ -17,7 +17,7 @@ function detectUserCurrency(): string {
     };
     const parts = locale.split("-");
     const region = parts.length > 1 ? parts[1].toUpperCase() : parts[0].toUpperCase();
-    return regionMap[region] || "EUR";    } catch (e) {
+    return regionMap[region] ?? "EUR";    } catch (e) {
       console.warn("[Currency] Failed to detect currency:", e);
       return "EUR";
     }
@@ -61,7 +61,7 @@ export function TrackedCtaButton({
         if (data.url) {
           window.location.href = data.url;
         } else {
-          setError(data.error || "Checkout non disponibile");
+          setError(data.error ?? "Checkout non disponibile");
           setLoading(false);
         }
       } catch (e) {
@@ -102,7 +102,7 @@ export function TrackedCtaButton({
 
   return (
     <a
-      href={href || "#"}
+      href={href ?? "#"}
       target="_blank"
       rel="noopener noreferrer"
       onClick={handleClick}

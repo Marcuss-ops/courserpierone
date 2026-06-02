@@ -40,6 +40,5 @@ export function parseUtmParams(): Record<string, string> {
 }
 
 export function getReferrer(): string {
-  if (typeof document === "undefined") return "";
-  return document.referrer || "";
+  if (typeof document === "undefined") return "";    return document.referrer ?? "";
 }

@@ -1,9 +1,9 @@
 import NextAuth, { type NextAuthOptions } from "next-auth";
+import type { Adapter } from "next-auth/adapters";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "./prisma";
 import GoogleProvider from "next-auth/providers/google";
 import EmailProvider from "next-auth/providers/email";
-import type { Adapter } from "next-auth/adapters";
 
 // Warn if NEXTAUTH_SECRET is the default dev value (skip during build to keep logs clean)
 if (
@@ -19,22 +19,22 @@ if (
 }
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(prisma) as Adapter,
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
     }),
     EmailProvider({
       server: {
-        host: process.env.EMAIL_SERVER_HOST || "smtp.gmail.com",
+        host: process.env.EMAIL_SERVER_HOST ?? "smtp.gmail.com",
         port: parseInt(process.env.EMAIL_SERVER_PORT || "587"),
         auth: {
-          user: process.env.EMAIL_SERVER_USER || "",
-          pass: process.env.EMAIL_SERVER_PASSWORD || "",
+          user: process.env.EMAIL_SERVER_USER ?? "",
+          pass: process.env.EMAIL_SERVER_PASSWORD ?? "",
         },
       },
-      from: process.env.EMAIL_FROM || "noreply@courser.app",
+      from: process.env.EMAIL_FROM ?? "noreply@courser.app",
     }),
   ],
   pages: {
@@ -45,14 +45,14 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt" as const,
   },
   callbacks: {
-    session({ session, token }: { session: any; token: any }) {
+    session({ session, token }) {
       if (session.user && token) {
-        session.user.id = token.sub as string;
-        session.user.role = token.role as string;
+        session.user.id = token.sub!;
+        session.user.role = token.role!;
       }
       return session;
     },
-    jwt({ token, user }: { token: any; user: any }) {
+    jwt({ token, user }) {
       if (user) {
         token.role = user.role;
       }

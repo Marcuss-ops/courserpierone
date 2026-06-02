@@ -3,7 +3,6 @@
 // ─── TEMPLATE LUMIO: Minimalism + Glassmorphism ──────────
 // Tonalità calda ivory, nav floating pill, gradienti sunset, glassmorphism
 
-import Link from "next/link";
 
 interface LumioProps {
   data: {
@@ -20,7 +19,7 @@ interface LumioProps {
   locale?: string;
 }
 
-export default function TemplateLumio({ data, locale = "it" }: LumioProps) {
+export default function TemplateLumio({ data, locale: _locale = "it" }: LumioProps) {
   return (
     <div className="min-h-screen" style={{ background: "#FAF9F5" }}>
       {/* ── FLOATING NAV ──────────────────────────────────── */}
@@ -60,13 +59,13 @@ export default function TemplateLumio({ data, locale = "it" }: LumioProps) {
             textWrap: "balance",
           }}
         >
-          {data.titolo || "Titolo del tuo prodotto"}
+          {data.titolo ?? "Titolo del tuo prodotto"}
         </h1>
         <p
           className="mt-6 max-w-2xl text-lg"
           style={{ color: "#8C8880", lineHeight: 1.6 }}
         >
-          {data.sottotitolo || "Sottotitolo che descrive il valore del prodotto in modo chiaro e diretto."}
+          {data.sottotitolo ?? "Sottotitolo che descrive il valore del prodotto in modo chiaro e diretto."}
         </p>
         <div className="mt-8 flex gap-4">
           <a
@@ -150,7 +149,7 @@ export default function TemplateLumio({ data, locale = "it" }: LumioProps) {
                   La Nostra Storia
                 </span>
                 <h2 className="mt-3 font-bold" style={{ fontSize: "clamp(24px, 3vw, 36px)", lineHeight: 1.2, color: "#1B1B1B" }}>
-                  {data.storia.split("\n")[0] || "La storia del prodotto"}
+                  {data.storia.split("\n")[0] ?? "La storia del prodotto"}
                 </h2>
                 <p className="mt-4 leading-relaxed" style={{ color: "#8C8880", lineHeight: 1.7 }}>
                   {data.storia.split("\n").slice(1).join("\n") || data.storia}
@@ -228,7 +227,7 @@ export default function TemplateLumio({ data, locale = "it" }: LumioProps) {
             className="rounded-[40px] p-12"
             style={{ background: "#1B1B1B" }}
           >
-            <h2 className="text-3xl font-bold text-white">{data.cta || "Inizia Oggi"}</h2>
+            <h2 className="text-3xl font-bold text-white">{data.cta ?? "Inizia Oggi"}</h2>
             <p className="mt-4 text-lg text-gray-400">
               {data.prezzo ? `Prezzo: ${data.prezzo}` : "Prezzo speciale di lancio"}
             </p>

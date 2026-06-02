@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl;
     const productId = searchParams.get("productId");
-    const days = parseInt(searchParams.get("days") || "30");
+    const days = parseInt(searchParams.get("days") ?? "30");
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
     const where = {
@@ -24,8 +24,8 @@ export async function GET(request: NextRequest) {
 
     const totalRevenue = revenue.reduce((sum, r) => {
       try {
-        const m = JSON.parse(r.metadata || "{}") as { amount?: number };
-        return sum + (m.amount || 0);
+        const m = JSON.parse(r.metadata ?? "{}") as { amount?: number };
+        return sum + (m.amount ?? 0);
       } catch {
         return sum;
       }

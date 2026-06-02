@@ -7,15 +7,12 @@ import {
   BookOpen, 
   Play, 
   TrendingUp, 
-  Clock,
   ChevronRight,
   LogOut,
   User,
-  Mail,
   Calendar,
   Award,
   GraduationCap,
-  BarChart3,
   Package,
   ArrowRight,
   FileText
@@ -120,7 +117,7 @@ export default async function DashboardPage() {
               <div className="inline-flex items-center gap-2 px-4 py-1.5 premium-glass rounded-full border border-white/5">
                 <div className="w-2 h-2 rounded-full bg-accent-tertiary animate-pulse" />
                 <span className="text-[10px] font-black text-accent-tertiary uppercase tracking-widest">
-                  Benvenuto, {user.name?.split(" ")[0] || "Studente"}
+                  Benvenuto, {user.name?.split(" ")[0] ?? "Studente"}
                 </span>
               </div>
               <h1 className="text-4xl lg:text-6xl font-black text-white text-contrast tracking-tighter leading-[0.95]">
@@ -169,7 +166,7 @@ export default async function DashboardPage() {
                 )}
               </div>
               <div className="space-y-1">
-                <h2 className="text-lg font-bold text-white text-contrast">{user.name || "Studente"}</h2>
+                <h2 className="text-lg font-bold text-white text-contrast">{user.name ?? "Studente"}</h2>
                 <p className="text-xs text-zinc-500 font-medium">{user.email}</p>
               </div>
             </div>
@@ -341,7 +338,7 @@ async function ContinueAndCertificatesSection({
 
   const allCompleted = productProgress.filter(p => p.total > 0 && p.completed >= p.total);
   const lastLessonTitle = lastWatch?.lesson?.translations?.[0]?.title;
-  const resumeLocale = lastWatch?.lesson?.translations?.[0]?.locale || lastWatch?.lesson?.product?.defaultLanguage || "it";
+  const resumeLocale = lastWatch?.lesson?.translations?.[0]?.locale ?? lastWatch?.lesson?.product?.defaultLanguage ?? "it";
   const resumeSlug = lastWatch?.lesson?.product?.slug;
   const resumePosition = lastWatch?.lesson?.position;
 

@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Genera nome file univoco
-    const ext = file.name.split(".").pop() || "jpg";
+    const ext = file.name.split(".").pop() ?? "jpg";
     const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const filePath = `products/${fileName}`;
 

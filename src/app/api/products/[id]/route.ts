@@ -68,7 +68,7 @@ export async function PUT(
               where: {
                 productId_locale_section: {
                   productId: id,
-                  locale: sourceLocale || "it",
+                  locale: sourceLocale ?? "it",
                   section,
                 },
               },
@@ -87,7 +87,7 @@ export async function PUT(
       // Salva le traduzioni AI per altre lingue
       if (translationsByLocale && typeof translationsByLocale === "object") {
         for (const [locale, sections] of Object.entries(translationsByLocale)) {
-          if (locale === (sourceLocale || "it")) continue;
+          if (locale === (sourceLocale ?? "it")) continue;
           if (typeof sections === "object" && sections !== null) {
             for (const [section, content] of Object.entries(sections)) {
               if (typeof content === "string" && content.trim() !== "") {

@@ -59,7 +59,7 @@ export async function GET(
     return NextResponse.json({ error: "Course not found" }, { status: 404 });
   }
 
-  const lang = (url.searchParams.get("lang") as "it" | "en") || "it";
+  const lang = (url.searchParams.get("lang") as "it" | "en") ?? "it";
   const content = course.languages[lang] || course.languages[course.defaultLanguage];
   if (!content) {
     return NextResponse.json({ error: "Language not found" }, { status: 404 });

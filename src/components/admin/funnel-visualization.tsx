@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Users, TrendingDown, Eye, ShoppingCart, Play, CheckCircle, ArrowDown } from "lucide-react";
+import { TrendingDown, Eye, ShoppingCart, Play, CheckCircle, ArrowDown } from "lucide-react";
 
 interface FunnelStep {
   step: string;
@@ -143,14 +143,14 @@ export default function FunnelVisualization({ productId }: { productId?: string 
               <div key={step.step}>
                 <div className="flex items-center gap-4">
                   <div className="w-32 shrink-0 flex items-center gap-2 text-xs text-zinc-400">
-                    <span className={`p-1 rounded-lg bg-gradient-to-br ${STEP_COLORS[step.step] || "from-zinc-500 to-zinc-600"} text-white`}>
+                    <span className={`p-1 rounded-lg bg-gradient-to-br ${STEP_COLORS[step.step] ?? "from-zinc-500 to-zinc-600"} text-white`}>
                       {STEP_ICONS[step.step]}
                     </span>
                     {STEP_LABELS[step.step] || step.step}
                   </div>
                   <div className="flex-1 relative">
                     <div
-                      className={`h-10 rounded-xl bg-gradient-to-r ${STEP_COLORS[step.step] || "from-zinc-500 to-zinc-600"} flex items-center px-4 transition-all duration-500`}
+                      className={`h-10 rounded-xl bg-gradient-to-r ${STEP_COLORS[step.step] ?? "from-zinc-500 to-zinc-600"} flex items-center px-4 transition-all duration-500`}
                       style={{ width: `${width}%`, minWidth: "60px" }}
                     >
                       <span className="text-xs font-bold text-white">{step.uniqueVisitors}</span>

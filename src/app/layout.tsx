@@ -37,7 +37,7 @@ export default async function RootLayout({
   let locale = "it";
   try {
     const cookieStore = await cookies();
-    locale = cookieStore.get("locale")?.value || "it";
+    locale = cookieStore.get("locale")?.value ?? "it";
   } catch {
     // cookies() può fallire in build statica
   }

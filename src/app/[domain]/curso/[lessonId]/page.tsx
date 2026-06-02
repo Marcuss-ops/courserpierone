@@ -4,8 +4,6 @@ import {
   ChevronLeft, 
   Menu, 
   Layout,
-  Settings,
-  FileText,
   Lock
 } from "lucide-react";
 import { getServerSession } from "next-auth/next";
@@ -28,7 +26,7 @@ export default async function CoursePage({
   searchParams: Promise<{ lang?: string; token?: string }>;
 }) {
   const { domain, lessonId } = await params;
-  const { lang, token } = await searchParams;
+  const { lang } = await searchParams;
   const course = await getCourseConfig(domain);
 
   if (!course) return notFound();
@@ -36,7 +34,7 @@ export default async function CoursePage({
   const session = await getServerSession(authOptions);
   const isAuthenticated = !!session?.user?.email;
 
-  const currentLang = (lang as "it" | "en") || (course.defaultLanguage as "it" | "en") || "it";
+  const currentLang = (lang as "it" | "en") ?? (course.defaultLanguage as "it" | "en") ?? "it";
   const currentLesson = course.lessons.find((l) => l.id === lessonId) || course.lessons[0];
 
   return (

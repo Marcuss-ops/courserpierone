@@ -16,9 +16,6 @@ export function LessonProgressButton({
 }: LessonProgressButtonProps) {
   const [completed, setCompleted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [progressPercent, setProgressPercent] = useState<number | null>(null);
-  const [totalLessons, setTotalLessons] = useState(0);
-  const [completedLessons, setCompletedLessons] = useState(0);
 
   const fetchProgress = useCallback(async () => {
     try {
@@ -30,11 +27,6 @@ export function LessonProgressButton({
         const completedCount = data.progress.filter((p: { completed: boolean }) => p.completed).length;
 
         setCompleted(lessonIds.includes(lessonId));
-        setTotalLessons(total);
-        setCompletedLessons(completedCount);
-        if (total > 0) {
-          setProgressPercent(Math.round((completedCount / total) * 100));
-        }
       }
     } catch (e) {
       console.warn("[Progress] Failed to fetch progress:", e);

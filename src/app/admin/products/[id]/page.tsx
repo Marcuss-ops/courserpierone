@@ -2,21 +2,18 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import TemplateSelector from "@/components/admin/template-selector";
 import { ImageUpload } from "@/components/admin/image-upload";
 import { CurrencyPricesSection } from "@/components/admin/currency-prices";
 import type { TemplateId } from "@/components/funnel";
 import type { ProductApiDetail, TranslateApiResponse } from "@/lib/api-types";
 import {
   ArrowLeft,
-  ArrowRight,
   Save,
   Image as ImageIcon,
   Plus,
   Trash2,
   Globe,
   FileJson,
-  CheckCircle,
   Loader2,
   CreditCard,
   Languages,
@@ -40,7 +37,7 @@ export default function EditProductPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const [product, setProduct] = useState<ProductApiDetail | null>(null);
+  const [, setProduct] = useState<ProductApiDetail | null>(null);
   const [slug, setSlug] = useState("");
   const [price, setPrice] = useState("4900");
   const [status, setStatus] = useState("draft");
@@ -56,10 +53,6 @@ export default function EditProductPage() {
   const [translationsByLocale, setTranslationsByLocale] = useState<Record<string, Record<string, string>>>({});
   const [pricesByCurrency, setPricesByCurrency] = useState<Record<string, { price: number; lemonVariantId?: string | null; stripePriceId?: string | null }>>({});
 
-  useEffect(() => {
-    void fetchProduct();
-  }, [id]);
-
   async function fetchProduct() {
     setLoading(true);
     try {
@@ -67,11 +60,11 @@ export default function EditProductPage() {
       if (!res.ok) throw new Error("Failed to fetch");
       const data = await res.json() as ProductApiDetail;
       setProduct(data);
-      setSlug(data.slug || "");
-      setPrice(String(data.price || 4900));
-      setStatus(data.status || "draft");
-      setTemplateId((data.templateId || "lumio") as TemplateId);
-      setLemonVariantId(data.lemonVariantId || "");
+      setSlug(data.slug ?? "");
+      setPrice(String(data.price ?? 4900));
+      setStatus(data.status ?? "draft");
+      setTemplateId((data.templateId ?? "lumio") as TemplateId);
+      setLemonVariantId(data.lemonVariantId ?? "");
       setCoverPreview(data.coverUrl || null);
 
       // Parse pricesByCurrency
@@ -95,17 +88,22 @@ export default function EditProductPage() {
       if (data.lessons) {
         const les = data.lessons.map((l) => ({
           id: l.id,
-          title: l.translations?.[0]?.title || "",
-          videoUrl: l.translations?.[0]?.videoUrl || "",
+          title: l.translations?.[0]?.title ?? "",
+          videoUrl: l.translations?.[0]?.videoUrl ?? "",
         }));
         setLessons(les);
       }
-    } catch (e) {
+    } catch {
       alert("Errore nel caricamento del prodotto");
     } finally {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    void fetchProduct();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   async function handleSave() {
     setSaving(true);

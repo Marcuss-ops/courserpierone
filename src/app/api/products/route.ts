@@ -55,11 +55,11 @@ export async function POST(request: NextRequest) {
       const p = await tx.product.create({
         data: {
           slug,
-          price: price || 0,
-          coverUrl: coverUrl || null,
+          price: price ?? 0,
+          coverUrl: coverUrl ?? null,
           status: "draft",
-          templateId: templateId || "lumio",
-          lemonVariantId: lemonVariantId || null,
+          templateId: templateId ?? "lumio",
+          lemonVariantId: lemonVariantId ?? null,
           pricesByCurrency: pricesByCurrency ? JSON.stringify(pricesByCurrency) : null,
         },
       });
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
           await tx.productTranslation.create({
             data: {
               productId: p.id,
-              locale: sourceLocale || "it",
+              locale: sourceLocale ?? "it",
               section,
               content,
             },
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       // Salva le traduzioni AI per altre lingue
       if (translationsByLocale && typeof translationsByLocale === "object") {
         for (const [locale, sections] of Object.entries(translationsByLocale)) {
-          if (locale === (sourceLocale || "it")) continue; // già salvate sopra
+          if (locale === (sourceLocale ?? "it")) continue; // già salvate sopra
           if (typeof sections === "object" && sections !== null) {
             for (const [section, content] of Object.entries(sections)) {
               if (typeof content === "string" && content.trim() !== "") {
@@ -122,9 +122,9 @@ export async function POST(request: NextRequest) {
             await tx.lessonTranslation.create({
               data: {
                 lessonId: l.id,
-                locale: sourceLocale || "it",
+                locale: sourceLocale ?? "it",
                 title: lesson.title,
-                videoUrl: lesson.videoUrl || null,
+                videoUrl: lesson.videoUrl ?? null,
               },
             });
           }

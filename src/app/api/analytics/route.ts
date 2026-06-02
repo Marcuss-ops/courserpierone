@@ -15,8 +15,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing eventType" }, { status: 400 });
     }
 
-    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
-    const userAgent = request.headers.get("user-agent") || "";
+    const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "unknown";
+    const userAgent = request.headers.get("user-agent") ?? "";
 
     let resolvedSessionId: string | null = null;
 
@@ -31,16 +31,16 @@ export async function POST(request: NextRequest) {
         resolvedSessionId = sessionId;
       } else {
         // Parse UTM from metadata if present
-        const meta = metadata ? (typeof metadata === "string" ? JSON.parse(metadata) : metadata) : {};
+        const meta = metadata ? ((typeof metadata === "string" ? JSON.parse(metadata) : metadata) ?? {}) : {};
         const created = await prisma.visitorSession.create({
           data: {
             id: sessionId,
             ip,
             userAgent,
-            referrer: meta.referrer || "",
-            utmSource: meta.utm_source || "",
-            utmCampaign: meta.utm_campaign || "",
-            utmMedium: meta.utm_medium || "",
+            referrer: meta.referrer ?? "",
+            utmSource: meta.utm_source ?? "",
+            utmCampaign: meta.utm_campaign ?? "",
+            utmMedium: meta.utm_medium ?? "",
           },
         });
         resolvedSessionId = created.id;
@@ -51,9 +51,9 @@ export async function POST(request: NextRequest) {
       data: {
         sessionId: resolvedSessionId,
         eventType,
-        productId: productId || null,
+        productId: productId ?? null,
         metadata: metadata ? JSON.stringify(metadata) : null,
-        userId: userId || null,
+        userId: userId ?? null,
         ip,
         userAgent,
       },

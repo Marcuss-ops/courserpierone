@@ -8,7 +8,7 @@ export async function GET(
   try {
     const { lessonId } = await params;
     const { searchParams } = request.nextUrl;
-    const locale = searchParams.get("locale") || "it";
+    const locale = searchParams.get("locale") ?? "it";
 
     const assets = await prisma.lessonAsset.findMany({
       where: {

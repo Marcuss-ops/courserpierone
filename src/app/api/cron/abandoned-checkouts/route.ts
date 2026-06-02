@@ -47,7 +47,7 @@ export async function GET(request: Request) {
     for (const checkout of abandonedCheckouts) {
       try {
         const checkoutUrl = checkout.checkoutUrl
-          || `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/${checkout.product.slug}`;
+          || `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/${checkout.product.slug}`;
 
         const success = await sendAbandonedCheckoutEmail(
           checkout.email,

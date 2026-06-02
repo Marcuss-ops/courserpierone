@@ -41,7 +41,7 @@ export function ImageUpload({ value, onChange, className = "", height = 64, widt
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Upload fallito");
+        throw new Error(data.error ?? "Upload fallito");
       }
 
       onChange(data.url);

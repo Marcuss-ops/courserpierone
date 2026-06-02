@@ -2,8 +2,14 @@
 
 import { useEffect, useState } from "react";
 
+interface AnalyticsStats {
+  pageviews?: number;
+  purchases?: number;
+  [key: string]: unknown;
+}
+
 export function useAnalytics(productId?: string) {
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<AnalyticsStats | null>(null);
 
   async function track(eventType: string, metadata?: object) {
     try {
@@ -13,7 +19,7 @@ export function useAnalytics(productId?: string) {
         body: JSON.stringify({
           eventType,
           productId,
-          metadata: metadata || {},
+          metadata: metadata ?? {},
         }),
       });
     } catch (e) {

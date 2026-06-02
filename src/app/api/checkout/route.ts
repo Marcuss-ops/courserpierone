@@ -29,7 +29,6 @@ export async function POST(request: NextRequest) {
     // ─── Dynamic pricing per currency ───────────────────────────
     let effectiveLemonVariantId = product.lemonVariantId;
     let effectiveStripePriceId = product.stripePriceId;
-    let price = product.price;
 
     if (currency && product.pricesByCurrency) {
       try {
@@ -40,9 +39,8 @@ export async function POST(request: NextRequest) {
         }>;
         const currencyPrices = prices[currency.toUpperCase()];
         if (currencyPrices) {
-          effectiveLemonVariantId = currencyPrices.lemonVariantId || product.lemonVariantId;
-          effectiveStripePriceId = currencyPrices.stripePriceId || product.stripePriceId;
-          price = currencyPrices.price;
+          effectiveLemonVariantId = currencyPrices.lemonVariantId ?? product.lemonVariantId;
+          effectiveStripePriceId = currencyPrices.stripePriceId ?? product.stripePriceId;
         }
       } catch {
         // Parse error, fallback to defaults
@@ -57,7 +55,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const userEmail = session?.user?.email || body.email || "";
+    const userEmail = session?.user?.email ?? body.email ?? "";
 
     // ─── Track abandoned checkout ────────────────────────────
     if (userEmail) {
@@ -85,7 +83,7 @@ export async function POST(request: NextRequest) {
 
     // ─── Priority 1: Lemon Squeezy (if lemonVariantId is set) ──
     if (effectiveLemonVariantId) {
-      const storeId = product.lemonStoreId || getStoreId();
+      const storeId = product.lemonStoreId ?? getStoreId();
       if (!storeId) {
         return NextResponse.json(
           { error: "Lemon Squeezy store not configured. Set LEMONSQUEEZY_STORE_ID in .env or lemonStoreId on the product." },
@@ -109,13 +107,13 @@ export async function POST(request: NextRequest) {
 
       const checkout = await createCheckout(storeId, variantId, {
         checkoutData: {
-          email: userEmail || undefined,
+          email: userEmail ?? undefined,
           custom: customData,
         },
         productOptions: {
-          redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/${product.slug}?success=1`,
+          redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/${product.slug}?success=1`,
           receiptButtonText: "Accedi al Corso",
-          receiptLinkUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/${product.slug}/curso/lesson-1?lang=${locale}`,
+          receiptLinkUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/${product.slug}/curso/lesson-1?lang=${locale}`,
         },
         // Prevent multiple checkouts for the same variant
         expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 min
@@ -139,14 +137,14 @@ export async function POST(request: NextRequest) {
       mode: "payment",
       line_items: [
         {
-          price: effectiveStripePriceId || undefined,
+          price: effectiveStripePriceId ?? undefined,
           quantity: 1,
         },
       ],
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/${product.slug}?success=1`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/${product.slug}?canceled=1`,
       metadata: {
-        userId: user?.id || "guest",
+        userId: user?.id ?? "guest",
         productId: product.id,
         locale,
       },

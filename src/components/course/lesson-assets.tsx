@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FileText, Download, Loader2, File, FileAudio } from "lucide-react";
+import { FileText, Download, FileAudio } from "lucide-react";
 import { t } from "@/lib/player-locale";
 
 interface Asset {

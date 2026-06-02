@@ -6,7 +6,7 @@ import { Package, Plus, Search, Filter, Edit, Eye, ChevronDown, Globe, Calendar,
 import type { ProductApiItem } from "@/lib/api-types";
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<{ id: string; slug: string; title: string; template: string; status: string; locales: string[]; sales: number; revenue: number; conversion: string }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,8 +18,8 @@ export default function ProductsPage() {
             id: p.id,
             slug: p.slug,
             title: p.slug,
-            template: p.templateId || "lumio",
-            status: p.status || "draft",
+            template: p.templateId ?? "lumio",
+            status: p.status ?? "draft",
             locales: p.locales || [],
             sales: 0,
             revenue: 0,

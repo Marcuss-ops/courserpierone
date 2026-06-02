@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { ChevronRight, Check, BookOpen, Clock, Star } from "lucide-react";
 
 interface BookClaudeProps {
@@ -78,7 +78,7 @@ export default function TemplateBookClaude({ data, locale = "it" }: BookClaudePr
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <button className="bg-[#FF6B00] text-white px-8 py-4 rounded-xl font-bold text-lg shadow-[0_8px_24px_rgba(255,107,0,0.2)] hover:bg-[#E05E00] hover:-translate-y-1 transition-all flex items-center justify-center gap-2">
-                  Acquista Ora — {data.prezzo}
+                  Acquista Ora — {data.prezzo ?? ""}
                   <ChevronRight className="w-5 h-5" />
                 </button>
                 <button className="bg-white text-[#1A1A1A] border border-[#EAEAEA] px-8 py-4 rounded-xl font-bold hover:bg-[#FAFAFA] transition-all">

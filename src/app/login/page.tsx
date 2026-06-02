@@ -1,9 +1,9 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Mail, ArrowRight, Loader2, CheckCircle2, LogIn } from "lucide-react";
+import { Mail, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
 
 export default function LoginPage() {
   return (
@@ -18,7 +18,6 @@ export default function LoginPage() {
 }
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const productId = searchParams.get("productId");
   const [email, setEmail] = useState("");
@@ -46,9 +45,9 @@ function LoginForm() {
       const data = await res.json();
       if (res.ok) {
         setSent(true);
-        setMagicUrl(data.magicUrl || "");
+        setMagicUrl(data.magicUrl ?? "");
       } else {
-        setError(data.error || "Errore nell'invio del magic link");
+        setError(data.error ?? "Errore nell'invio del magic link");
       }
     } catch {
       setError("Errore di connessione");

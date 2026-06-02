@@ -67,7 +67,7 @@ export function CurrencyPricesSection({
                 <label className="text-[9px] text-zinc-600 font-bold uppercase tracking-wider mb-1 block">Lemon Variant ID</label>
                 <input
                   type="text"
-                  value={pricesByCurrency[c.code]?.lemonVariantId || ""}
+                  value={pricesByCurrency[c.code]?.lemonVariantId ?? ""}
                   onChange={(e) => setCurrency(c.code, "lemonVariantId", e.target.value || null)}
                   placeholder="opzionale"
                   className="bg-zinc-800/50 border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white w-full"
@@ -77,7 +77,7 @@ export function CurrencyPricesSection({
                 <label className="text-[9px] text-zinc-600 font-bold uppercase tracking-wider mb-1 block">Stripe Price ID</label>
                 <input
                   type="text"
-                  value={pricesByCurrency[c.code]?.stripePriceId || ""}
+                  value={pricesByCurrency[c.code]?.stripePriceId ?? ""}
                   onChange={(e) => setCurrency(c.code, "stripePriceId", e.target.value || null)}
                   placeholder="opzionale"
                   className="bg-zinc-800/50 border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white w-full"

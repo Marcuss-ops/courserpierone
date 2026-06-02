@@ -1,0 +1,179 @@
+import { prisma } from "./prisma";
+import { sendPurchaseConfirmation } from "./email";
+import crypto from "crypto";
+
+export interface ProcessOrderInput {
+  /** Customer email — used for find-or-create user */
+  email: string;
+  /** Optional customer display name */
+  customerName?: string;
+  /** Direct Prisma product ID (from Stripe session metadata) */
+  productId?: string;
+  /** Product slug (from LS custom_data) */
+  productSlug?: string;
+  /** LemonSqueezy variant ID */
+  variantId?: string;
+  /** Stripe price ID */
+  stripePriceId?: string;
+  /** Stripe session ID (unique constraint on Order.stripeSessionId) */
+  stripeSessionId?: string;
+  /** Provider's own order ID (unique per provider via @@unique) */
+  providerOrderId?: string;
+  /** Payment provider identifier */
+  paymentProvider: "stripe" | "lemonsqueezy";
+  /** Amount in cents */
+  amount: number;
+  /** Currency code (eur, usd, etc.) */
+  currency: string;
+  /** Buyer's locale at time of purchase */
+  locale: string;
+}
+
+/**
+ * Process a completed order from any payment provider.
+ *
+ * Flow:
+ * 1. Find or create user by email
+ * 2. Resolve product via productId / slug / variantId / stripePriceId
+ * 3. Idempotency check (skip if order already exists)
+ * 4. Create order
+ * 5. Generate magic link for passwordless access
+ * 6. Send purchase confirmation email
+ * 7. Track analytics purchase event
+ */
+export async function processOrder(input: ProcessOrderInput): Promise<void> {
+  const {
+    email,
+    customerName,
+    productId: directProductId,
+    productSlug,
+    variantId,
+    stripePriceId,
+    stripeSessionId,
+    providerOrderId,
+    paymentProvider,
+    amount,
+    currency,
+    locale,
+  } = input;
+
+  // ── 1. Find or create user ──────────────────────────────────
+  let user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    user = await prisma.user.create({
+      data: {
+        email,
+        name: customerName ?? email.split("@")[0],
+      },
+    });
+  }
+
+  // ── 2. Resolve product ──────────────────────────────────────
+  let product = null;
+
+  if (directProductId) {
+    product = await prisma.product.findUnique({ where: { id: directProductId } });
+  }
+
+  if (!product && productSlug) {
+    product = await prisma.product.findUnique({ where: { slug: productSlug } });
+  }
+
+  if (!product && variantId) {
+    product = await prisma.product.findFirst({
+      where: { lemonVariantId: variantId },
+    });
+  }
+
+  if (!product && stripePriceId) {
+    product = await prisma.product.findFirst({
+      where: { stripePriceId },
+    });
+  }
+
+  if (!product) {
+    console.error(
+      `[OrderService] Product not found — directId: ${directProductId ?? "—"}, slug: ${productSlug ?? "—"}, variantId: ${variantId ?? "—"}, stripePriceId: ${stripePriceId ?? "—"}`
+    );
+    return;
+  }
+
+  // ── 3. Idempotency check ────────────────────────────────────
+  if (stripeSessionId) {
+    const existing = await prisma.order.findUnique({
+      where: { stripeSessionId },
+    });
+    if (existing) {
+      console.log(`[OrderService] Order for Stripe session ${stripeSessionId} already exists, skipping`);
+      return;
+    }
+  }
+
+  if (paymentProvider === "lemonsqueezy" && providerOrderId) {
+    const existing = await prisma.order.findFirst({
+      where: { paymentProvider: "lemonsqueezy", providerOrderId },
+    });
+    if (existing) {
+      console.log(`[OrderService] Order ${providerOrderId} already exists, skipping`);
+      return;
+    }
+  }
+
+  // ── 4. Create order ─────────────────────────────────────────
+  await prisma.order.create({
+    data: {
+      userId: user.id,
+      productId: product.id,
+      paymentProvider,
+      stripeSessionId: stripeSessionId ?? null,
+      providerOrderId: providerOrderId ?? null,
+      amount,
+      currency,
+      locale,
+      status: "completed",
+    },
+  });
+
+  // ── 5. Generate magic link ──────────────────────────────────
+  const token = crypto.randomBytes(32).toString("hex");
+  const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year
+
+  await prisma.magicLink.create({
+    data: {
+      email,
+      token,
+      productId: product.id,
+      expiresAt,
+    },
+  });
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+  // ── 6. Send purchase confirmation email ─────────────────────
+  const courseUrl = `${appUrl}/${product.slug}/curso/lesson-1?lang=${locale}&token=${token}`;
+  try {
+    await sendPurchaseConfirmation(email, product.slug, courseUrl);
+  } catch (emailErr) {
+    console.error(`[${paymentProvider}] Failed to send purchase confirmation email:`, emailErr);
+  }
+
+  // ── 7. Track analytics event ────────────────────────────────
+  await prisma.analyticEvent
+    .create({
+      data: {
+        productId: product.id,
+        eventType: "purchase",
+        metadata: JSON.stringify({
+          provider: paymentProvider,
+          amount,
+          currency,
+          ...(stripeSessionId ? { stripeSessionId } : {}),
+          ...(providerOrderId ? { providerOrderId } : {}),
+        }),
+        userId: user.id,
+      },
+    })
+    .catch((e) => console.warn(`[${paymentProvider}] Failed to track analytics event:`, e));
+
+  console.log(`[OrderService] Order created: user=${user.id}, product=${product.slug}, provider=${paymentProvider}`);
+}

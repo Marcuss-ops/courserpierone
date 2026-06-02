@@ -59,13 +59,13 @@ export async function generateCourseConfig(slug: string) {
   for (const locale of locales) {
     const t = translationsByLocale[locale] || {};
     languages[locale] = {
-      title: t.titolo || product.slug,
-      problem: t.problema || "",
-      story: t.storia || "",
-      cta: t.cta || "Inizia Ora",
-      description: t.sottotitolo || "",
-      ebookTitle: t.titolo || product.slug,
-      ebookContent: t.storia || "",
+      title: t.titolo ?? product.slug,
+      problem: t.problema ?? "",
+      story: t.storia ?? "",
+      cta: t.cta ?? "Inizia Ora",
+      description: t.sottotitolo ?? "",
+      ebookTitle: t.titolo ?? product.slug,
+      ebookContent: t.storia ?? "",
     };
   }
 

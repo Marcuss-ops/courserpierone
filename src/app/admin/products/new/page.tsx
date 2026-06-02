@@ -226,7 +226,7 @@ export default function NewProductPage() {
                   <div key={section.key} className="space-y-2">
                     <label className="block text-sm font-medium text-zinc-400 uppercase tracking-wider text-[10px]">{section.label}</label>
                     <textarea
-                      value={texts[section.key] || ""}
+                      value={texts[section.key] ?? ""}
                       onChange={(e) => setTexts((prev) => ({ ...prev, [section.key]: e.target.value }))}
                       rows={section.key === "storia" || section.key === "recensioni" ? 4 : 2}
                       className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50 transition-all placeholder:text-zinc-700"

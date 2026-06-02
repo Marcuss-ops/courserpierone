@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl;
     const productId = searchParams.get("productId");
-    const days = parseInt(searchParams.get("days") || "30");
+    const days = parseInt(searchParams.get("days") ?? "30");
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
     const baseWhere = {
@@ -70,12 +70,12 @@ export async function GET(request: NextRequest) {
     for (const e of allEvents) {
       if (e.eventType !== "pageview") continue;
       try {
-        const meta = typeof e.metadata === "string" ? JSON.parse(e.metadata) : (e.metadata || {});
-        const ref = meta.referrer || "direct";
+        const meta = typeof e.metadata === "string" ? JSON.parse(e.metadata) : (e.metadata ?? {});
+        const ref = meta.referrer ?? "direct";
         const domain = ref !== "direct" && ref ? new URL(ref).hostname : "direct";
-        referrerCounts[domain] = (referrerCounts[domain] || 0) + 1;
+        referrerCounts[domain] = (referrerCounts[domain] ?? 0) + 1;
       } catch {
-        referrerCounts.direct = (referrerCounts.direct || 0) + 1;
+        referrerCounts.direct = (referrerCounts.direct ?? 0) + 1;
       }
     }
 
@@ -88,8 +88,8 @@ export async function GET(request: NextRequest) {
     const campaignStats: Record<string, { visitors: Set<string | null>; purchases: number }> = {};
     for (const e of allEvents) {
       try {
-        const meta = typeof e.metadata === "string" ? JSON.parse(e.metadata) : (e.metadata || {});
-        const campaign = meta.utm_campaign || "organic";
+        const meta = typeof e.metadata === "string" ? JSON.parse(e.metadata) : (e.metadata ?? {});
+        const campaign = meta.utm_campaign ?? "organic";
         if (!campaignStats[campaign]) campaignStats[campaign] = { visitors: new Set(), purchases: 0 };
         if (e.sessionId) campaignStats[campaign].visitors.add(e.sessionId);
       } catch { /* skip malformed metadata */ }
@@ -99,8 +99,8 @@ export async function GET(request: NextRequest) {
     for (const e of allEvents) {
       if (e.eventType !== "purchase") continue;
       try {
-        const meta = typeof e.metadata === "string" ? JSON.parse(e.metadata) : (e.metadata || {});
-        const campaign = meta.utm_campaign || "organic";
+        const meta = typeof e.metadata === "string" ? JSON.parse(e.metadata) : (e.metadata ?? {});
+        const campaign = meta.utm_campaign ?? "organic";
         if (!campaignStats[campaign]) campaignStats[campaign] = { visitors: new Set(), purchases: 0 };
         campaignStats[campaign].purchases++;
       } catch { /* skip */ }

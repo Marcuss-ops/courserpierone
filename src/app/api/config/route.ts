@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { generateCourseConfig } from "@/lib/generate-course-config";
 
 export async function POST(request: NextRequest) {

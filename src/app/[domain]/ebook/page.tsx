@@ -27,7 +27,7 @@ export default async function EbookPage({
 
   if (!data) return notFound();
 
-  const currentLang = (lang as "it" | "en") || (data.defaultLanguage as "it" | "en") || "it";
+  const currentLang = (lang as "it" | "en") ?? (data.defaultLanguage as "it" | "en") ?? "it";
   const content = data.languages[currentLang] || data.languages[data.defaultLanguage];
 
   return (

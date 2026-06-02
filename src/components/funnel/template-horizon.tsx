@@ -20,7 +20,7 @@ interface HorizonProps {
   locale?: string;
 }
 
-export default function TemplateHorizon({ data, locale = "it" }: HorizonProps) {
+export default function TemplateHorizon({ data, locale: _locale = "it" }: HorizonProps) {
   const ctaRef = useRef<HTMLDivElement>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
@@ -84,13 +84,13 @@ export default function TemplateHorizon({ data, locale = "it" }: HorizonProps) {
             color: "#1d1c15",
           }}
         >
-          {data.titolo || "Titolo del tuo prodotto"}
+          {data.titolo ?? "Titolo del tuo prodotto"}
         </h1>
         <p
           className="mt-6 max-w-2xl text-lg"
           style={{ color: "#555555", lineHeight: 1.6 }}
         >
-          {data.sottotitolo || "Sottotitolo che descrive il valore del prodotto in modo chiaro."}
+          {data.sottotitolo ?? "Sottotitolo che descrive il valore del prodotto in modo chiaro."}
         </p>
         <div className="mt-8 flex gap-4">
           <a
@@ -163,7 +163,7 @@ export default function TemplateHorizon({ data, locale = "it" }: HorizonProps) {
                   La Nostra Storia
                 </span>
                 <h2 className="mt-3 font-bold" style={{ fontSize: "clamp(24px, 3vw, 36px)", lineHeight: 1.2, color: "#1d1c15" }}>
-                  {data.storia.split("\n")[0] || "La storia del prodotto"}
+                  {data.storia.split("\n")[0] ?? "La storia del prodotto"}
                 </h2>
                 <p className="mt-4 leading-relaxed" style={{ color: "#555555" }}>
                   {data.storia.split("\n").slice(1).join("\n") || data.storia}
@@ -286,7 +286,7 @@ export default function TemplateHorizon({ data, locale = "it" }: HorizonProps) {
               </span>
               <h3 className="text-lg font-bold text-white">Pro</h3>
               <p className="mt-2 text-sm text-gray-400">Per crescere</p>
-              <p className="mt-4 text-4xl font-extrabold text-white">{data.prezzo || "$20"}<span className="text-sm font-normal text-gray-400">/mo</span></p>
+              <p className="mt-4 text-4xl font-extrabold text-white">{data.prezzo ?? "$20"}<span className="text-sm font-normal text-gray-400">/mo</span></p>
               <ul className="mt-6 flex flex-col gap-3 text-sm text-gray-300">
                 <li>✓ Prodotti illimitati</li>
                 <li>✓ 20 Lingue</li>

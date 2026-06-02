@@ -48,10 +48,6 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    void fetchUsers();
-  }, []);
-
   async function fetchUsers() {
     try {
       const res = await fetch("/api/admin/users");
@@ -65,6 +61,11 @@ export default function AdminUsersPage() {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    void fetchUsers();
+     
+  }, []);
 
   const filteredUsers = users.filter((u) => {
     if (!search) return true;
@@ -215,7 +216,7 @@ export default function AdminUsersPage() {
                             <User className="w-4 h-4 text-zinc-400" />
                           )}
                         </div>
-                        <span className="text-sm font-bold text-white">{user.name || "—"}</span>
+                        <span className="text-sm font-bold text-white">{user.name ?? "—"}</span>
                       </div>
                     </td>
                     <td className="px-8 py-5">
@@ -225,7 +226,7 @@ export default function AdminUsersPage() {
                       </div>
                     </td>
                     <td className="px-8 py-5">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold ${
+                      <span                      className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold ${
                         user.role === "admin"
                           ? "text-accent-primary bg-accent-primary/10 border border-accent-primary/20"
                           : "text-zinc-400 bg-zinc-500/10 border border-zinc-500/20"

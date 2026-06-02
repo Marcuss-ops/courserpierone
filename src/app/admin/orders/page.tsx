@@ -10,12 +10,10 @@ import {
   RotateCcw,
   Search,
   Loader2,
-  ExternalLink,
   User,
   Package,
   Calendar,
   CreditCard,
-  TrendingUp,
 } from "lucide-react";
 
 interface Order {
@@ -47,10 +45,6 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    void fetchOrders();
-  }, []);
-
   async function fetchOrders() {
     try {
       const res = await fetch("/api/admin/orders");
@@ -64,6 +58,11 @@ export default function AdminOrdersPage() {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    void fetchOrders();
+     
+  }, []);
 
   const filteredOrders = orders.filter((o) => {
     if (!search) return true;
@@ -215,7 +214,7 @@ export default function AdminOrdersPage() {
                 </tr>
               ) : (
                 filteredOrders.map((order) => {
-                  const status = statusConfig[order.status] || { label: order.status, color: "text-zinc-400", bg: "bg-zinc-500/10 border-zinc-500/20" };
+                  const status = statusConfig[order.status] ?? { label: order.status, color: "text-zinc-400", bg: "bg-zinc-500/10 border-zinc-500/20" };
                   return (
                     <tr key={order.id} className="table-row-hover transition-colors group">
                       <td className="px-8 py-5">
@@ -224,7 +223,7 @@ export default function AdminOrdersPage() {
                             <User className="w-4 h-4 text-zinc-400" />
                           </div>
                           <div>
-                            <div className="text-sm font-bold text-white">{order.user.name || "—"}</div>
+                            <div className="text-sm font-bold text-white">{order.user.name ?? "—"}</div>
                             <div className="text-[10px] text-zinc-500">{order.user.email}</div>
                           </div>
                         </div>

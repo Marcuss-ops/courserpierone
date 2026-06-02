@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getOpenAI, SUPPORTED_LOCALES, type Locale } from "@/lib/openai";
+import { getOpenAI, type Locale } from "@/lib/openai";
 
 export async function POST(request: NextRequest) {
   try {
