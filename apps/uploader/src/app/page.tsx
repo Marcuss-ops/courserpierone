@@ -20,7 +20,7 @@ export default function HomePage() {
   // Upload state
   const [videoPreview, setVideoPreview] = useState<string | null>(null);
   const [uploadingFile, setUploadingFile] = useState<File | null>(null);
-  const [title, setTitle] = useState("Il mio video incredibile 📹");
+  const [title, setTitle] = useState("My awesome video 📹");
   const [privacyLevel, setPrivacyLevel] = useState("");
   const [allowComment, setAllowComment] = useState(false);
   const [allowDuet, setAllowDuet] = useState(false);
@@ -62,12 +62,12 @@ export default function HomePage() {
   const handleFile = (file: File) => {
     if (!file.type.startsWith("video/")) {
       setUploadStatus("error");
-      setUploadMessage("Seleziona un file video (MP4, MOV)");
+      setUploadMessage("Please select a video file (MP4, MOV)");
       return;
     }
     if (file.size > 100 * 1024 * 1024) {
       setUploadStatus("error");
-      setUploadMessage("Video troppo grande (max 100MB)");
+      setUploadMessage("Video too large (max 100MB)");
       return;
     }
     if (videoPreview) URL.revokeObjectURL(videoPreview);
@@ -88,7 +88,7 @@ export default function HomePage() {
   const handleUpload = async () => {
     if (!uploadingFile || !privacyLevel) return;
     setUploadStatus("uploading");
-    setUploadMessage("Caricamento in corso...");
+    setUploadMessage("Uploading video...");
 
     const fd = new FormData();
     fd.append("video", uploadingFile);
@@ -104,18 +104,18 @@ export default function HomePage() {
       if (!res.ok) throw new Error(data.error ?? "Upload failed");
 
       setUploadStatus(data.status === "published" ? "done" : "processing");
-      setUploadMessage(data.status === "published" ? "Video pubblicato! 🎉" : "Video in elaborazione...");
+      setUploadMessage(data.status === "published" ? "Video published! 🎉" : "Video processing on TikTok...");
       setShareUrl(data.share_url ?? null);
     } catch (err) {
       setUploadStatus("error");
-      setUploadMessage(err instanceof Error ? err.message : "Errore sconosciuto");
+      setUploadMessage(err instanceof Error ? err.message : "Unknown error");
     }
   };
 
   const privacyOptions = [
-    { value: "SELF_ONLY", label: "Solo io", desc: "Privato — solo tu puoi vedere" },
-    { value: "MUTUAL_FOLLOWERS", label: "Follower reciproci", desc: "Solo chi segui e ti segue" },
-    { value: "PUBLIC", label: "Pubblico", desc: "Tutti possono vedere" },
+    { value: "SELF_ONLY", label: "Only me", desc: "Private — only you can see it" },
+    { value: "MUTUAL_FOLLOWERS", label: "Friends", desc: "Followers you follow back" },
+    { value: "PUBLIC", label: "Public", desc: "Everyone can see it" },
   ];
 
   const canUpload = uploadingFile && privacyLevel && uploadStatus !== "uploading" && uploadStatus !== "processing";
@@ -148,7 +148,7 @@ export default function HomePage() {
           TikShare
         </h1>
         <p className="text-lg text-[var(--muted)] max-w-lg mb-2">
-          Carica video su TikTok in un click.<br/>Gestisci bozze, analytics e profile — tutto da qui.
+          Upload videos to TikTok in one click.<br/>Manage drafts, analytics, and profile — all from here.
         </p>
         <p className="text-sm text-[var(--dimmed)] mb-8">
           Powered by TikTok Login Kit + Content Posting API
@@ -172,23 +172,23 @@ export default function HomePage() {
           <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current">
             <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.77a8.19 8.19 0 0 0 4.77 1.52V6.79a4.85 4.85 0 0 1-1-.1z"/>
           </svg>
-          Accedi con TikTok
+          Sign in with TikTok
         </a>
 
         <div className="mt-6 flex items-center gap-6 text-xs text-[var(--dimmed)]">
           <span>🔒 OAuth 2.0</span>
-          <span>🚫 Nessuna password salvata</span>
-          <span>✅ Revocabile</span>
+          <span>🚫 No password stored</span>
+          <span>✅ Revocable anytime</span>
         </div>
 
         <div className="mt-16 pt-8 border-t border-[var(--border)] w-full max-w-md">
           <div className="flex items-start gap-4 rounded-xl bg-[var(--surface)] p-4 text-left">
             <div className="text-2xl">📋</div>
             <div>
-              <p className="text-sm font-semibold text-white">Perché TikShare?</p>
+              <p className="text-sm font-semibold text-white">Why TikShare?</p>
               <p className="mt-1 text-xs text-[var(--muted)]">
-                Nessun watermark. Upload come bozza — confermi tu su TikTok prima di pubblicare.
-                Conforme alle linee guida TikTok per le API di terze parti.
+                No watermark. Upload directly as draft — you review and publish on TikTok.
+                Fully compliant with official TikTok API guidelines.
               </p>
             </div>
           </div>
@@ -219,7 +219,7 @@ export default function HomePage() {
               onClick={handleLogout}
               className="rounded-full border border-[var(--red)]/30 px-4 py-1.5 text-sm font-medium text-[var(--red)] transition hover:bg-[var(--red)]/10"
             >
-              Disconnetti
+              Sign out
             </button>
           </div>
         </div>
@@ -249,8 +249,8 @@ export default function HomePage() {
             {/* ── LEFT: Upload ─────────────────────────────── */}
             <div className="space-y-5">
               <div>
-                <h2 className="text-xl font-bold text-white">Carica un Video</h2>
-                <p className="mt-1 text-sm text-[var(--muted)]">Nessun watermark · Bozza su TikTok</p>
+                <h2 className="text-xl font-bold text-white">Upload a Video</h2>
+                <p className="mt-1 text-sm text-[var(--muted)]">No watermark · Upload as draft on TikTok</p>
               </div>
 
               {/* Drop zone */}
@@ -272,9 +272,9 @@ export default function HomePage() {
                       </svg>
                     </div>
                     <p className="text-sm text-[var(--muted)]">
-                      Trascina qui il video o <span className="text-[var(--cyan)]">clicca per selezionare</span>
+                      Drag & drop your video here or <span className="text-[var(--cyan)]">click to select</span>
                     </p>
-                    <p className="mt-1 text-xs text-[var(--dimmed)]">MP4, MOV · max 100MB · nessun watermark</p>
+                    <p className="mt-1 text-xs text-[var(--dimmed)]">MP4, MOV · max 100MB · no watermark</p>
                   </>
                 )}
                 <input
@@ -288,14 +288,14 @@ export default function HomePage() {
 
               {/* Title */}
               <div>
-                <label className="mb-2 block text-sm font-medium text-[var(--muted)]">Titolo</label>
+                <label className="mb-2 block text-sm font-medium text-[var(--muted)]">Title</label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   maxLength={150}
                   className="w-full rounded-xl border border-[var(--border2)] bg-[var(--surface2)] px-4 py-3 text-white placeholder-[var(--dimmed)] transition focus:border-[var(--cyan)]"
-                  placeholder="Titolo del tuo video..."
+                  placeholder="Your video title..."
                 />
                 <p className="mt-1 text-right text-xs text-[var(--dimmed)]">{title.length}/150</p>
               </div>
@@ -304,7 +304,7 @@ export default function HomePage() {
               <div>
                 <label className="mb-2 block text-sm font-medium text-[var(--muted)]">Privacy</label>
                 {privacyLevel === "" && (
-                  <p className="mb-2 text-xs text-[var(--yellow)]">⚠️ Seleziona un livello prima di pubblicare</p>
+                  <p className="mb-2 text-xs text-[var(--yellow)]">⚠️ Select a privacy level before publishing</p>
                 )}
                 <div className="space-y-2">
                   {privacyOptions.map((opt) => (
@@ -332,9 +332,9 @@ export default function HomePage() {
               {/* Options */}
               <div className="space-y-2">
                 {[
-                  { flag: allowComment, setter: setAllowComment, label: "Consenti commenti" },
-                  { flag: allowDuet, setter: setAllowDuet, label: "Consenti Duet" },
-                  { flag: allowShare, setter: setAllowShare, label: "Consenti condivisione" },
+                  { flag: allowComment, setter: setAllowComment, label: "Allow comments" },
+                  { flag: allowDuet, setter: setAllowDuet, label: "Allow Duet" },
+                  { flag: allowShare, setter: setAllowShare, label: "Allow sharing" },
                 ].map(({ flag, setter, label }) => (
                   <label
                     key={label}
@@ -372,7 +372,7 @@ export default function HomePage() {
                   </div>
                   {shareUrl && (
                     <a href={shareUrl} target="_blank" rel="noopener" className="mt-2 inline-block text-xs underline hover:text-white">
-                      Apri su TikTok →
+                      Open on TikTok →
                     </a>
                   )}
                 </div>
@@ -388,23 +388,23 @@ export default function HomePage() {
                 {uploadStatus === "uploading" ? (
                   <>
                     <div className="w-4 h-4 rounded-full border-2 border-black border-t-transparent spin" />
-                    Caricamento...
+                    Uploading...
                   </>
-                ) : "Pubblica su TikTok"}
+                ) : "Publish to TikTok"}
               </button>
 
               <p className="text-center text-xs text-[var(--dimmed)]">
-                Upload come bozza · Conferma su TikTok prima di pubblicare
+                Uploads as draft · Verify and publish manually on TikTok
               </p>
 
               {/* Compliance */}
               <div className="rounded-xl border border-[var(--border2)] p-4" style={{ background: "#050505" }}>
                 <p className="text-xs text-[var(--dimmed)] leading-relaxed">
-                  Pubblicando su TikTok confermi di rispettare le{" "}
+                  By uploading to TikTok, you agree to respect the{" "}
                   <a href="https://www.tiktok.com/community-guidelines" target="_blank" rel="noopener" className="text-[var(--cyan)] hover:underline">Community Guidelines</a>{" "}
-                  e la{" "}
+                  and{" "}
                   <a href="https://www.tiktok.com/music-usage-confirmation" target="_blank" rel="noopener" className="text-[var(--cyan)] hover:underline">Music Usage Confirmation</a>.
-                  L&apos;upload avviene come bozza — confermi manualmente su TikTok prima della pubblicazione.
+                  The upload will happen as a draft — you must manually confirm and publish on TikTok.
                 </p>
               </div>
             </div>
@@ -412,8 +412,8 @@ export default function HomePage() {
             {/* ── RIGHT: Info ───────────────────────────────── */}
             <div className="space-y-5">
               <div>
-                <h2 className="text-xl font-bold text-white">Il tuo Profilo</h2>
-                <p className="mt-1 text-sm text-[var(--muted)]">Dati dal Login Kit OAuth</p>
+                <h2 className="text-xl font-bold text-white">Your Profile</h2>
+                <p className="mt-1 text-sm text-[var(--muted)]">Data retrieved from TikTok OAuth</p>
               </div>
 
               {/* Profile card */}
@@ -448,12 +448,12 @@ export default function HomePage() {
 
               {/* OAuth scopes */}
               <div className="rounded-2xl border border-[var(--border2)] p-6" style={{ background: "var(--surface)" }}>
-                <h3 className="mb-4 text-sm font-bold text-white">Scope OAuth richiesti</h3>
+                <h3 className="mb-4 text-sm font-bold text-white">Requested OAuth Scopes</h3>
                 <div className="space-y-3">
                   {[
-                    { scope: "user.info.basic", desc: "Username, avatar, nome visualizzato" },
-                    { scope: "user.info.profile", desc: "Bio e informazioni estese del profilo" },
-                    { scope: "video.upload", desc: "Caricamento video come bozza su TikTok" },
+                    { scope: "user.info.basic", desc: "Username, avatar, display name" },
+                    { scope: "user.info.profile", desc: "Bio and extended profile info" },
+                    { scope: "video.upload", desc: "Upload video drafts to TikTok" },
                   ].map(({ scope, desc }) => (
                     <div key={scope} className="flex items-center gap-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--cyan)]/10">
@@ -470,14 +470,14 @@ export default function HomePage() {
 
               {/* API endpoints */}
               <div className="rounded-2xl border border-[var(--border2)] p-6" style={{ background: "var(--surface)" }}>
-                <h3 className="mb-4 text-sm font-bold text-white">API Endpoints attive</h3>
+                <h3 className="mb-4 text-sm font-bold text-white">Active API Endpoints</h3>
                 <div className="space-y-2">
                   {[
                     { method: "GET", path: "/api/tiktok/login", desc: "OAuth Authorization" },
                     { method: "GET", path: "/api/tiktok/callback", desc: "Token Exchange" },
                     { method: "GET", path: "/api/tiktok/user", desc: "User Info" },
                     { method: "POST", path: "/api/tiktok/upload", desc: "Video Upload" },
-                    { method: "POST", path: "/api/tiktok/logout", desc: "Revoca Token" },
+                    { method: "POST", path: "/api/tiktok/logout", desc: "Token Revocation" },
                   ].map(({ method, path, desc }) => (
                     <div key={path} className="flex items-center gap-3 rounded-lg bg-[var(--surface2)] p-3">
                       <span className={`flex-shrink-0 rounded-md px-2 py-0.5 text-xs font-bold ${method === "GET" ? "bg-[var(--green)]/10 text-[var(--green)]" : "bg-[#3b82f6]/10 text-[#3b82f6]"}`}>
@@ -492,23 +492,23 @@ export default function HomePage() {
 
               {/* Data handling */}
               <div className="rounded-2xl border border-[var(--border2)] p-6" style={{ background: "var(--surface)" }}>
-                <h3 className="mb-3 text-sm font-bold text-white">Come gestiamo i tuoi dati</h3>
+                <h3 className="mb-3 text-sm font-bold text-white">How We Handle Your Data</h3>
                 <div className="space-y-3 text-xs text-[var(--muted)]">
                   <div className="flex items-start gap-3">
                     <span className="mt-0.5 text-[var(--cyan)]">▪</span>
-                    <p>Il token di accesso TikTok è memorizzato in un cookie httpOnly sul tuo browser. Non viene mai salvato su nessun server.</p>
+                    <p>The TikTok access token is stored in an httpOnly cookie on your browser. It is never saved on any database or external server.</p>
                   </div>
                   <div className="flex items-start gap-3">
                     <span className="mt-0.5 text-[var(--cyan)]">▪</span>
-                    <p>I dati del profilo (nome, avatar, bio) sono usati solo per mostrare il tuo profilo nella dashboard e per l&apos;upload video.</p>
+                    <p>Profile data (name, avatar, bio) is only used to display your profile in the dashboard and during video uploading.</p>
                   </div>
                   <div className="flex items-start gap-3">
                     <span className="mt-0.5 text-[var(--cyan)]">▪</span>
-                    <p>Non condividiamo nessun dato TikTok con terze parti. Non archiviazione dati su server esterni a Vercel (EU/US).</p>
+                    <p>We do not share any TikTok data with third parties. No data is stored on servers outside of Vercel (EU/US).</p>
                   </div>
                   <div className="flex items-start gap-3">
                     <span className="mt-0.5 text-[var(--cyan)]">▪</span>
-                    <p>Puoi revocare l&apos;accesso in qualsiasi momento dalla sezione "Disconnetti" o dalle impostazioni TikTok.</p>
+                    <p>You can revoke access at any time by signing out or modifying your settings in your TikTok account.</p>
                   </div>
                 </div>
               </div>

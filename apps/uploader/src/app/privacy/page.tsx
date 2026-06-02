@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Privacy Policy — TikShare",
-  description: "Informativa sulla privacy per TikShare, in conformità al GDPR.",
+  description: "Privacy Policy for TikShare, in compliance with GDPR.",
 };
 
 export default function PrivacyPage() {
@@ -26,39 +26,39 @@ export default function PrivacyPage() {
       <div className="pt-28 px-6 pb-20">
         <div className="mx-auto max-w-3xl">
           <h1 className="text-4xl font-extrabold text-white mb-2">Privacy Policy</h1>
-          <p className="text-sm text-gray-500 mb-10">uploader.courssy.com · Last updated: {new Date().toLocaleDateString("it-IT", { year: "numeric", month: "long", day: "numeric" })}</p>
+          <p className="text-sm text-gray-500 mb-10">uploader.courssy.com · Last updated: {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</p>
 
           <div className="space-y-8 text-gray-400 text-sm leading-relaxed">
 
             <section>
-              <h2 className="text-lg font-bold text-white mb-3">1. Titolare del trattamento</h2>
-              <p>Il titolare del trattamento dei dati personali è:</p>
+              <h2 className="text-lg font-bold text-white mb-3">1. Data Controller</h2>
+              <p>The data controller of your personal data is:</p>
               <div className="mt-3 rounded-xl border border-[#222] p-4" style={{ background: "#0a0a0a" }}>
                 <p className="font-semibold text-white">Courssy</p>
                 <p>Email: <span className="text-[#25F4EE]">info@courssy.com</span></p>
-                <p>Sito: <span className="text-[#25F4EE]">uploader.courssy.com</span></p>
+                <p>Website: <span className="text-[#25F4EE]">uploader.courssy.com</span></p>
               </div>
-              <p className="mt-3">Per ogni domanda sul trattamento dei tuoi dati personali, contattaci a info@courssy.com.</p>
+              <p className="mt-3">For any questions regarding the processing of your personal data, contact us at info@courssy.com.</p>
             </section>
 
             <section>
-              <h2 className="text-lg font-bold text-white mb-3">2. Dati raccolti da TikTok</h2>
-              <p>Quando utilizzi TikShare con il tuo account TikTok, TikShare riceve da TikTok i seguenti dati, secondo i scope OAuth che hai autorizzato:</p>
+              <h2 className="text-lg font-bold text-white mb-3">2. Data Collected from TikTok</h2>
+              <p>When you use TikShare with your TikTok account, TikShare receives the following data from TikTok, according to the OAuth scopes you authorized:</p>
               <table className="mt-3 w-full rounded-xl border border-[#222] overflow-hidden text-xs">
                 <thead>
                   <tr style={{ background: "#111" }}>
-                    <th className="px-4 py-3 text-left text-gray-400 font-medium">Dato</th>
-                    <th className="px-4 py-3 text-left text-gray-400 font-medium">Scope TikTok</th>
-                    <th className="px-4 py-3 text-left text-gray-400 font-medium">Finalità</th>
+                    <th className="px-4 py-3 text-left text-gray-400 font-medium">Data</th>
+                    <th className="px-4 py-3 text-left text-gray-400 font-medium">TikTok Scope</th>
+                    <th className="px-4 py-3 text-left text-gray-400 font-medium">Purpose</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#222]">
                   {[
-                    ["Open ID (identificativo)", "user.info.basic", "Identificazione univoca dell'account"],
-                    ["Nome visualizzato / Username", "user.info.basic", "Mostrare il tuo nome nel profilo"],
-                    ["URL avatar", "user.info.basic", "Mostrare la tua foto profilo"],
-                    ["Bio / Descrizione profilo", "user.info.profile", "Mostrare info aggiuntive del profilo"],
-                    ["Upload video (Bozza)", "video.upload", "Inizializzare e caricare video su TikTok"],
+                    ["Open ID (unique identifier)", "user.info.basic", "Unique account identification"],
+                    ["Display name / Username", "user.info.basic", "Displaying your name in the dashboard"],
+                    ["Avatar URL", "user.info.basic", "Displaying your profile picture"],
+                    ["Bio / Profile description", "user.info.profile", "Displaying additional profile details"],
+                    ["Video Upload (Draft)", "video.upload", "Initializing and uploading videos to TikTok"],
                   ].map(([dato, scope, fine]) => (
                     <tr key={dato}>
                       <td className="px-4 py-3 text-white">{dato}</td>
@@ -68,73 +68,73 @@ export default function PrivacyPage() {
                   ))}
                 </tbody>
               </table>
-              <p className="mt-3">Non raccogliamo, archiviamo o trattiamo dati TikTok al di fuori del token di sessione necessario per l&apos;upload video. I video caricati sono inviati direttamente alle API di TikTok Inc. — non vengono mai archiviati o trattenuti da TikShare. I dati del profilo non sono salvati su database — esistono solo durante la sessione attiva.</p>
+              <p className="mt-3">We do not collect, store, or process TikTok data outside of the session token necessary for video uploads. The uploaded videos are sent directly to the official TikTok Inc. APIs and are never stored or retained by TikShare. Profile data is not stored in any database; it only exists during the active session.</p>
             </section>
 
             <section>
-              <h2 className="text-lg font-bold text-white mb-3">3. Base giuridica del trattamento (GDPR)</h2>
-              <p>Il trattamento dei dati TikTok in TikShare si basa sul:</p>
+              <h2 className="text-lg font-bold text-white mb-3">3. Legal Basis for Processing (GDPR)</h2>
+              <p>The processing of TikTok data in TikShare is based on:</p>
               <div className="mt-3 rounded-xl border border-[#25F4EE]/30 bg-[#25F4EE]/5 p-4">
-                <p className="font-semibold text-[#25F4EE]">Art. 6(1)(b) GDPR — Esecuzione di un contratto</p>
-                <p className="mt-1 text-gray-400 text-xs">L&apos;utente richiede esplicitamente di caricare video sul proprio account TikTok. Il trattamento è necessario per adempiere a questa richiesta.</p>
+                <p className="font-semibold text-[#25F4EE]">Art. 6(1)(b) GDPR — Performance of a contract</p>
+                <p className="mt-1 text-gray-400 text-xs">The user explicitly requests to upload videos to their TikTok account. Processing is necessary to fulfill this request.</p>
               </div>
-              <p className="mt-3">Per i dati del profilo (bio), il trattamento si basa sul consenso esplicito (Art. 6(1)(a) GDPR) fornito durante il flusso OAuth di TikTok.</p>
+              <p className="mt-3">For profile data (bio), processing is based on explicit consent (Art. 6(1)(a) GDPR) provided during the TikTok OAuth flow.</p>
             </section>
 
             <section>
-              <h2 className="text-lg font-bold text-white mb-3">4. Memorizzazione e sicurezza</h2>
+              <h2 className="text-lg font-bold text-white mb-3">4. Storage and Security</h2>
               <ul className="mt-2 space-y-2 list-disc list-inside">
-                <li><strong className="text-white">Token di accesso:</strong> Memorizzato in un cookie httpOnly con flag secure e sameSite=lax. Il cookie è limitato al dominio uploader.courssy.com e ha una scadenza pari al token TikTok (max 24h).</li>
-                <li><strong className="text-white">Nessun database:</strong> TikShare non utilizza database per memorizzare dati TikTok. I dati del profilo non sono salvati in modo persistente.</li>
-                <li><strong className="text-white">Infrastruttura:</strong> L&apos;app è ospitata su Vercel (infrastruttura EU/US) con connessioni HTTPS obbligatorie.</li>
-                <li><strong className="text-white">Crittografia:</strong> Tutte le comunicazioni tra il browser e i server sono crittografate con TLS 1.2+.</li>
+                <li><strong className="text-white">Access token:</strong> Stored in an httpOnly cookie with secure flag and sameSite=lax. The cookie is restricted to the domain uploader.courssy.com and has an expiration duration matching the TikTok token (max 24h).</li>
+                <li><strong className="text-white">No Database:</strong> TikShare does not use any databases to store TikTok data. Profile data is not persistently saved.</li>
+                <li><strong className="text-white">Infrastructure:</strong> The app is hosted on Vercel (EU/US infrastructure) with mandatory HTTPS connections.</li>
+                <li><strong className="text-white">Encryption:</strong> All communications between the browser and servers are encrypted using TLS 1.2+.</li>
               </ul>
             </section>
 
             <section>
-              <h2 className="text-lg font-bold text-white mb-3">5. Condivisione con terze parti</h2>
-              <p>TikShare non condivide, vende, noleggia o trasferisce in altro modo i dati TikTok degli utenti a terze parti.</p>
-              <p className="mt-2">I dati sono condivisi con TikTok Inc. esclusivamente per i seguenti scopi:</p>
+              <h2 className="text-lg font-bold text-white mb-3">5. Third-Party Sharing</h2>
+              <p>TikShare does not share, sell, rent, or otherwise transfer users' TikTok data to third parties.</p>
+              <p className="mt-2">Data is shared with TikTok Inc. exclusively for the following purposes:</p>
               <ul className="mt-2 space-y-1 list-disc list-inside">
-                <li>Autenticazione OAuth (TikTok Login Kit)</li>
-                <li>Caricamento video (TikTok Content Posting API)</li>
+                <li>OAuth Authentication (TikTok Login Kit)</li>
+                <li>Video Uploading (TikTok Content Posting API)</li>
               </ul>
-              <p className="mt-2">Per il trattamento dei dati da parte di TikTok Inc., consulta la <a href="https://www.tiktok.com/legal/privacy-policy" target="_blank" rel="noopener" className="text-[#25F4EE] hover:underline">Privacy Policy di TikTok</a>.</p>
+              <p className="mt-2">For the processing of data by TikTok Inc., please refer to the <a href="https://www.tiktok.com/legal/privacy-policy" target="_blank" rel="noopener" className="text-[#25F4EE] hover:underline">TikTok Privacy Policy</a>.</p>
             </section>
 
             <section>
-              <h2 className="text-lg font-bold text-white mb-3">6. Diritti dell&apos;interessato (GDPR)</h2>
-              <p>L&apos;utente ha i seguenti diritti sui propri dati personali:</p>
+              <h2 className="text-lg font-bold text-white mb-3">6. User Rights (GDPR)</h2>
+              <p>Under GDPR, you have the following rights regarding your personal data:</p>
               <ul className="mt-2 space-y-1 list-disc list-inside">
-                <li><strong>Diritto di accesso (Art. 15):</strong> Richiedere una copia dei dati che TikShare ha ricevuto da TikTok per il tuo account</li>
-                <li><strong>Diritto alla cancellazione (Art. 17):</strong> Revocare il consenso e richiedere la rimozione dei dati — revoke l&apos;accesso TikTok dalle impostazioni del tuo account TikTok</li>
-                <li><strong>Diritto di revoca del consenso:</strong> Revocare l&apos;accesso a TikShare in qualsiasi momento dalle impostazioni del proprio account TikTok su tiktok.com</li>
-                <li><strong>Diritto alla portabilità (Art. 20):</strong> Ricevere i tuoi dati in formato strutturato e leggibile</li>
+                <li><strong>Right of Access (Art. 15):</strong> Request a copy of the data TikShare received from TikTok for your account</li>
+                <li><strong>Right to Erasure (Art. 17):</strong> Withdraw consent and request data removal — revoke TikTok access from your TikTok account settings</li>
+                <li><strong>Right to Withdraw Consent:</strong> Revoke access to TikShare at any time from your TikTok account settings on tiktok.com</li>
+                <li><strong>Right to Portability (Art. 20):</strong> Receive your data in a structured, readable format</li>
               </ul>
-              <p className="mt-3">Per esercitare i tuoi diritti, contattaci a <span className="text-[#25F4EE]">info@courssy.com</span>.</p>
+              <p className="mt-3">To exercise your rights, please contact us at <span className="text-[#25F4EE]">info@courssy.com</span>.</p>
             </section>
 
             <section>
-              <h2 className="text-lg font-bold text-white mb-3">7. Upload video e dati del contenuto</h2>
-              <p>I video caricati tramite TikShare sono inviati direttamente alle API di TikTok Inc. TikShare non archivia, copia o trattiene i video caricati. I video sono trattati da TikTok Inc. secondo la loro <a href="https://www.tiktok.com/legal/privacy-policy" target="_blank" rel="noopener" className="text-[#25F4EE] hover:underline">Privacy Policy</a>.</p>
+              <h2 className="text-lg font-bold text-white mb-3">7. Video Uploads and Content Data</h2>
+              <p>Videos uploaded through TikShare are sent directly to TikTok Inc. APIs. TikShare does not store, copy, or retain uploaded videos. Videos are processed by TikTok Inc. according to their <a href="https://www.tiktok.com/legal/privacy-policy" target="_blank" rel="noopener" className="text-[#25F4EE] hover:underline">Privacy Policy</a>.</p>
             </section>
 
             <section>
-              <h2 className="text-lg font-bold text-white mb-3">8. Cookie policy</h2>
-              <p>TikShare utilizza i seguenti cookie:</p>
+              <h2 className="text-lg font-bold text-white mb-3">8. Cookie Policy</h2>
+              <p>TikShare uses the following cookies:</p>
               <table className="mt-3 w-full rounded-xl border border-[#222] overflow-hidden text-xs">
                 <thead>
                   <tr style={{ background: "#111" }}>
-                    <th className="px-4 py-3 text-left text-gray-400 font-medium">Nome</th>
-                    <th className="px-4 py-3 text-left text-gray-400 font-medium">Tipo</th>
-                    <th className="px-4 py-3 text-left text-gray-400 font-medium">Durata</th>
-                    <th className="px-4 py-3 text-left text-gray-400 font-medium">Scopo</th>
+                    <th className="px-4 py-3 text-left text-gray-400 font-medium">Name</th>
+                    <th className="px-4 py-3 text-left text-gray-400 font-medium">Type</th>
+                    <th className="px-4 py-3 text-left text-gray-400 font-medium">Duration</th>
+                    <th className="px-4 py-3 text-left text-gray-400 font-medium">Purpose</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#222]">
                   {[
-                    ["tiktok_access_token", "httpOnly, secure", "Sessione (max 24h)", "Autenticazione OAuth TikTok"],
-                    ["tiktok_open_id", "httpOnly, secure", "Sessione (max 24h)", "Identificativo univoco TikTok"],
+                    ["tiktok_access_token", "httpOnly, secure", "Session (max 24h)", "TikTok OAuth Authentication"],
+                    ["tiktok_open_id", "httpOnly, secure", "Session (max 24h)", "TikTok Unique Identifier"],
                   ].map(([name, type, duration, purpose]) => (
                     <tr key={name}>
                       <td className="px-4 py-3 text-white font-mono">{name}</td>
@@ -145,26 +145,26 @@ export default function PrivacyPage() {
                   ))}
                 </tbody>
               </table>
-              <p className="mt-3">Non utilizziamo cookie di profilazione, marketing o analisi di terze parti.</p>
+              <p className="mt-3">We do not use any profiling, marketing, or third-party analytics cookies.</p>
             </section>
 
             <section>
-              <h2 className="text-lg font-bold text-white mb-3">9. Conservazione dei dati</h2>
+              <h2 className="text-lg font-bold text-white mb-3">9. Data Retention</h2>
               <ul className="mt-2 space-y-1 list-disc list-inside">
-                <li><strong className="text-white">Token di accesso:</strong> Eliminato automaticamente alla scadenza (max 24h) o alla disconnessione</li>
-                <li><strong className="text-white">Dati del profilo:</strong> Non memorizzati in modo persistente — esistono solo durante la sessione attiva</li>
-                <li><strong className="text-white">Log di sistema:</strong> I log del server sono conservati per max 30 giorni per motivi di sicurezza</li>
+                <li><strong className="text-white">Access token:</strong> Automatically deleted upon expiration (max 24h) or when logging out</li>
+                <li><strong className="text-white">Profile data:</strong> Not stored persistently — only exists during the active session</li>
+                <li><strong className="text-white">System logs:</strong> Server logs are retained for max 30 days for security and debugging purposes</li>
               </ul>
             </section>
 
             <section>
-              <h2 className="text-lg font-bold text-white mb-3">10. Modifiche alla Privacy Policy</h2>
-              <p>Ci riserviamo il diritto di modificare questa Privacy Policy in qualsiasi momento. Le modifiche saranno pubblicate su questa pagina. Ti informeremo di modifiche significative tramite un avviso visibile al primo accesso successivo alla modifica.</p>
+              <h2 className="text-lg font-bold text-white mb-3">10. Changes to the Privacy Policy</h2>
+              <p>We reserve the right to modify this Privacy Policy at any time. Changes will be posted on this page. We will notify you of any significant changes via a visible notification upon your first access after the modification.</p>
             </section>
 
             <section>
-              <h2 className="text-lg font-bold text-white mb-3">11. Reclami</h2>
-              <p>Hai il diritto di presentare un reclamo al Garante per la Protezione dei Dati Personali (www.garanteprivacy.it) se ritieni che il trattamento dei tuoi dati violi il GDPR.</p>
+              <h2 className="text-lg font-bold text-white mb-3">11. Complaints</h2>
+              <p>You have the right to file a complaint with a supervisory authority (such as the Italian Garante per la Protezione dei Dati Personali at www.garanteprivacy.it) if you believe the processing of your data violates the GDPR.</p>
             </section>
 
           </div>

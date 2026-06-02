@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Terms of Service — TikShare",
-  description: "Termini di servizio per TikShare, l'app di upload video per TikTok.",
+  description: "Terms of Service for TikShare, the video upload application for TikTok.",
 };
 
 export default function TermsPage() {
@@ -26,75 +26,75 @@ export default function TermsPage() {
       <div className="pt-28 px-6 pb-20">
         <div className="mx-auto max-w-3xl">
           <h1 className="text-4xl font-extrabold text-white mb-2">Terms of Service</h1>
-          <p className="text-sm text-gray-500 mb-10">uploader.courssy.com · Last updated: {new Date().toLocaleDateString("it-IT", { year: "numeric", month: "long", day: "numeric" })}</p>
+          <p className="text-sm text-gray-500 mb-10">uploader.courssy.com · Last updated: {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</p>
 
           <div className="space-y-8 text-gray-400 text-sm leading-relaxed">
 
             <section>
-              <h2 className="text-lg font-bold text-white mb-3">1. Premessa</h2>
-              <p>Benvenuto in TikShare ("il Servizio"), un&apos;applicazione web che permette agli utenti di caricare video sul proprio account TikTok tramite le API ufficiali di TikTok (TikTok Login Kit e Content Posting API).</p>
-              <p className="mt-2">Utilizzando il Servizio, accetti di essere vincolato dai presenti Termini di Servizio ("Termini"). Se non accetti questi Termini, non utilizzare il Servizio.</p>
+              <h2 className="text-lg font-bold text-white mb-3">1. Introduction</h2>
+              <p>Welcome to TikShare ("the Service"), a web application that allows users to upload videos to their TikTok account using the official TikTok APIs (TikTok Login Kit and Content Posting API).</p>
+              <p className="mt-2">By using the Service, you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, please do not use the Service.</p>
             </section>
 
             <section>
-              <h2 className="text-lg font-bold text-white mb-3">2. Descrizione del Servizio</h2>
-              <p>TikShare agisce come interfaccia tra te e le API di TikTok. Il Servizio ti permette di:</p>
+              <h2 className="text-lg font-bold text-white mb-3">2. Description of the Service</h2>
+              <p>TikShare acts as an interface between you and the TikTok APIs. The Service allows you to:</p>
               <ul className="mt-2 space-y-1 list-disc list-inside">
-                <li>Autenticarti con il tuo account TikTok tramite OAuth 2.0 (TikTok Login Kit)</li>
-                <li>Caricare video sul tuo account TikTok come bozza (TikTok Content Posting API)</li>
-                <li>Gestire le impostazioni di privacy, commenti, Duet e condivisione per ogni video</li>
+                <li>Authenticate with your TikTok account via OAuth 2.0 (TikTok Login Kit)</li>
+                <li>Upload videos to your TikTok account as draft (TikTok Content Posting API)</li>
+                <li>Manage privacy settings, comments, Duet, and share settings for each video</li>
               </ul>
-              <p className="mt-2">TikShare non è affiliato, sponsorizzato o endorsed da TikTok, Inc.</p>
+              <p className="mt-2">TikShare is not affiliated with, sponsored, or endorsed by TikTok, Inc.</p>
             </section>
 
             <section>
-              <h2 className="text-lg font-bold text-white mb-3">3. Account e Autenticazione</h2>
-              <p>L&apos;autenticazione avviene esclusivamente tramite TikTok Login Kit. TikShare non archivia password TikTok. Il token di accesso viene memorizzato in un cookie httpOnly sul dispositivo dell&apos;utente e può essere revocato in qualsiasi momento.</p>
-              <p className="mt-2">L&apos;utente è responsabile di mantenere la sicurezza del proprio account TikTok e di tutte le attività che avvengono tramite il proprio account.</p>
+              <h2 className="text-lg font-bold text-white mb-3">3. Account and Authentication</h2>
+              <p>Authentication is handled exclusively via TikTok Login Kit. TikShare does not store TikTok passwords. The access token is stored in an httpOnly cookie on the user's device and can be revoked at any time.</p>
+              <p className="mt-2">The user is responsible for maintaining the security of their TikTok account and for all activities that occur through their account.</p>
             </section>
 
             <section>
-              <h2 className="text-lg font-bold text-white mb-3">4. Contenuti caricati</h2>
-              <p>L&apos;utente è l&apos;unico responsabile dei contenuti caricati tramite TikShare. Caricando contenuti su TikTok, l&apos;utente conferma di:</p>
+              <h2 className="text-lg font-bold text-white mb-3">4. Uploaded Content</h2>
+              <p>The user is solely responsible for the content uploaded through TikShare. By uploading content to TikTok, the user confirms that they:</p>
               <ul className="mt-2 space-y-1 list-disc list-inside">
-                <li>Essere il proprietario o avere i diritti necessari per caricare detto contenuto</li>
-                <li>Rispettare le <a href="https://www.tiktok.com/community-guidelines" target="_blank" rel="noopener" className="text-[#25F4EE] hover:underline">Community Guidelines di TikTok</a></li>
-                <li>Rispettare la <a href="https://www.tiktok.com/music-usage-confirmation" target="_blank" rel="noopener" className="text-[#25F4EE] hover:underline">Music Usage Confirmation</a> di TikTok per contenuti con musica</li>
-                <li>Non violare diritti di terze parti, incluse copyright, marchi e privacy</li>
-              </ul>
-            </section>
-
-            <section>
-              <h2 className="text-lg font-bold text-white mb-3">5. Limitazioni d&apos;uso</h2>
-              <p>È vietato utilizzare TikShare per:</p>
-              <ul className="mt-2 space-y-1 list-disc list-inside">
-                <li>Caricare contenuti che violano le Community Guidelines di TikTok</li>
-                <li>Caricare contenuti protetti da copyright senza diritti validi</li>
-                <li>Spam, engagement fraudolento o manipolazione di metriche TikTok</li>
-                <li>Attività illegali o che violano diritti di terze parti</li>
+                <li>Own or have the necessary rights to upload such content</li>
+                <li>Comply with the <a href="https://www.tiktok.com/community-guidelines" target="_blank" rel="noopener" className="text-[#25F4EE] hover:underline">TikTok Community Guidelines</a></li>
+                <li>Comply with the TikTok <a href="https://www.tiktok.com/music-usage-confirmation" target="_blank" rel="noopener" className="text-[#25F4EE] hover:underline">Music Usage Confirmation</a> for content with music</li>
+                <li>Do not violate third-party rights, including copyright, trademarks, and privacy</li>
               </ul>
             </section>
 
             <section>
-              <h2 className="text-lg font-bold text-white mb-3">6. Limitazione di Responsabilità</h2>
-              <p>TikShare è fornito "così com&apos;è". Non garantiamo che il Servizio sarà sempre disponibile, privo di errori o che soddisferà le tue esigenze specifiche.</p>
-              <p className="mt-2">TikShare non è responsabile per azioni intraprese da TikTok Inc. relative al tuo account, incluse sospensioni, rimozioni di contenuti o modifiche alle API.</p>
-              <p className="mt-2">In nessun caso TikShare sarà responsabile per danni diretti, indiretti, incidentali, speciali o consequenziali derivanti dall&apos;uso del Servizio.</p>
+              <h2 className="text-lg font-bold text-white mb-3">5. Restrictions on Use</h2>
+              <p>It is forbidden to use TikShare to:</p>
+              <ul className="mt-2 space-y-1 list-disc list-inside">
+                <li>Upload content that violates TikTok's Community Guidelines</li>
+                <li>Upload copyrighted content without valid rights</li>
+                <li>Spam, fraudulent engagement, or manipulation of TikTok metrics</li>
+                <li>Illegal activities or activities that violate third-party rights</li>
+              </ul>
             </section>
 
             <section>
-              <h2 className="text-lg font-bold text-white mb-3">7. Modifiche ai Termini</h2>
-              <p>Ci riserviamo il diritto di modificare questi Termini in qualsiasi momento. Le modifiche saranno pubblicate su questa pagina con un aggiornamento della data "Last updated". L&apos;uso continuato del Servizio dopo le modifiche costituisce accettazione dei nuovi Termini.</p>
+              <h2 className="text-lg font-bold text-white mb-3">6. Limitation of Liability</h2>
+              <p>TikShare is provided "as is". We do not guarantee that the Service will always be available, error-free, or meet your specific requirements.</p>
+              <p className="mt-2">TikShare is not responsible for actions taken by TikTok Inc. regarding your account, including suspensions, content removals, or API changes.</p>
+              <p className="mt-2">In no event shall TikShare be liable for any direct, indirect, incidental, special, or consequential damages arising out of the use of the Service.</p>
             </section>
 
             <section>
-              <h2 className="text-lg font-bold text-white mb-3">8. Legge applicabile</h2>
-              <p>Questi Termini sono regolati dalla legge italiana. Per qualsiasi controversia, il foro competente è quello di Milano, Italia.</p>
+              <h2 className="text-lg font-bold text-white mb-3">7. Modifications to the Terms</h2>
+              <p>We reserve the right to modify these Terms at any time. Changes will be posted on this page with an updated "Last updated" date. Your continued use of the Service after changes constitutes acceptance of the new Terms.</p>
             </section>
 
             <section>
-              <h2 className="text-lg font-bold text-white mb-3">9. Contatti</h2>
-              <p>Per domande su questi Termini, contattaci a:</p>
+              <h2 className="text-lg font-bold text-white mb-3">8. Governing Law</h2>
+              <p>These Terms are governed by Italian law. For any dispute, the competent court is that of Milan, Italy.</p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-bold text-white mb-3">9. Contact Us</h2>
+              <p>For questions regarding these Terms, please contact us at:</p>
               <p className="mt-2 text-[#25F4EE]">info@courssy.com</p>
             </section>
 
