@@ -37,7 +37,7 @@ function detectFromCountry(country: string | null): string | null {
 
 // ─── Check if a path starts with known routes ──
 const KNOWN_PREFIXES = [
-  "/_next", "/api", "/admin", "/login", "/favicon.ico", "/images/", "/courses/", "/debug-locale",
+  "/_next", "/api", "/admin", "/login", "/favicon.ico", "/images/", "/courses/", "/debug-locale", "/sitemap.xml",
 ];
 
 function isKnownPath(pathname: string): boolean {
@@ -170,6 +170,6 @@ export default withAuth(
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|images/|courses/).*)",
+    "/((?!_next/static|_next/image|favicon.ico|images/|courses/|sitemap.xml).*)",
   ],
 };
