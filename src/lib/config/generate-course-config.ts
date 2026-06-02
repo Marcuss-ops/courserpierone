@@ -14,6 +14,7 @@ export interface CourseConfig {
   author: string;
   price: number;
   prices?: Record<string, { amount: number; currency: string; symbol: string }>;
+  countryOverrides?: Record<string, { currency: string; price: number; symbol?: string; lemonVariantId?: string | null; stripePriceId?: string | null }>;
   lemonVariantId?: string;
   languages: Record<string, {
     title: string;
@@ -154,6 +155,9 @@ export async function generateCourseConfig(slug: string) {
           symbol: p.symbol ?? CURRENCY_SYMBOLS[code] ?? code,
         }])
       );
+    })() : undefined,
+    countryOverrides: product.countryOverrides ? (() => {
+      try { return JSON.parse(product.countryOverrides); } catch { return undefined; }
     })() : undefined,
     lemonVariantId: product.lemonVariantId || undefined,
     languages,

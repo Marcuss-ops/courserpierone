@@ -52,6 +52,7 @@ export default function EditProductPage() {
   const [translatedLocales, setTranslatedLocales] = useState<string[]>([]);
   const [translationsByLocale, setTranslationsByLocale] = useState<Record<string, Record<string, string>>>({});
   const [pricesByCurrency, setPricesByCurrency] = useState<Record<string, { price: number; lemonVariantId?: string | null; stripePriceId?: string | null }>>({});
+  const [countryOverrides, setCountryOverrides] = useState<Record<string, { currency: string; price: number; symbol?: string; lemonVariantId?: string | null; stripePriceId?: string | null }>>({});
 
   async function fetchProduct() {
     setLoading(true);
@@ -71,6 +72,13 @@ export default function EditProductPage() {
       if (data.pricesByCurrency) {
         try {
           setPricesByCurrency(JSON.parse(data.pricesByCurrency));
+        } catch {}
+      }
+
+      // Parse countryOverrides
+      if (data.countryOverrides) {
+        try {
+          setCountryOverrides(JSON.parse(data.countryOverrides));
         } catch {}
       }
 
@@ -121,6 +129,7 @@ export default function EditProductPage() {
           translations: texts,
           translationsByLocale,
           pricesByCurrency: Object.keys(pricesByCurrency).length > 0 ? pricesByCurrency : undefined,
+          countryOverrides: Object.keys(countryOverrides).length > 0 ? countryOverrides : undefined,
           lessons,
           sourceLocale: locale,
         }),
@@ -291,6 +300,8 @@ export default function EditProductPage() {
               <CurrencyPricesSection
                 pricesByCurrency={pricesByCurrency}
                 onChange={setPricesByCurrency}
+                countryOverrides={countryOverrides}
+                onCountryOverridesChange={setCountryOverrides}
               />
             </div>
           </div>

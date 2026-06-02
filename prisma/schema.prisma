@@ -20,6 +20,7 @@ model Product {
   currency         String   @default("eur")
   status           String   @default("draft") // draft | published | archived
   pricesByCurrency String? // JSON: { "USD": { "price": 5500, "symbol": "$", "stripePriceId": "...", "lemonVariantId": "..." }, ... }
+  countryOverrides String? // JSON: { "BR": { "currency": "BRL", "price": 9900, "symbol": "R$", "lemonVariantId": "123456" }, ... }
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 

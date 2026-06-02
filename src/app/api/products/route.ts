@@ -41,7 +41,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { slug, price, coverUrl, translations, lessons, sourceLocale, templateId, lemonVariantId, translationsByLocale, pricesByCurrency } = body;
+    const { slug, price, coverUrl, translations, lessons, sourceLocale, templateId, lemonVariantId, translationsByLocale, pricesByCurrency, countryOverrides } = body;
 
     if (!slug || !translations) {
       return NextResponse.json(
@@ -61,6 +61,7 @@ export async function POST(request: NextRequest) {
           templateId: templateId ?? "lumio",
           lemonVariantId: lemonVariantId ?? null,
           pricesByCurrency: pricesByCurrency ? JSON.stringify(pricesByCurrency) : null,
+          countryOverrides: countryOverrides ? JSON.stringify(countryOverrides) : null,
         },
       });
 

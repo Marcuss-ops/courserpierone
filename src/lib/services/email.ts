@@ -122,6 +122,96 @@ const PURCHASE_TEMPLATES: Record<string, EmailContent> = {
     buttonText: "コースを始める",
     footer: "ご質問があれば、このメールに返信してください。サポートいたします。",
   },
+  nl: {
+    subject: `✅ Aankoop bevestigd — {product}`,
+    heading: "Aankoop Voltooid!",
+    body: [
+      'Je hebt <strong style="color:#e5e2e1;">"{product}"</strong> gekocht.',
+      "Je toegang is al actief. Je kunt meteen beginnen.",
+    ],
+    buttonText: "Start de Cursus",
+    footer: "Als je vragen hebt, reageer dan op deze e-mail. We helpen je graag.",
+  },
+  pl: {
+    subject: `✅ Zakup potwierdzony — {product}`,
+    heading: "Zakup Zakończony!",
+    body: [
+      'Zakupiłeś <strong style="color:#e5e2e1;">"{product}"</strong>.',
+      "Twój dostęp jest już aktywny. Możesz rozpocząć od razu.",
+    ],
+    buttonText: "Rozpocznij Kurs",
+    footer: "Jeśli masz pytania, odpowiedz na tego e-maila. Jesteśmy tutaj, aby pomóc.",
+  },
+  sv: {
+    subject: `✅ Köp bekräftat — {product}`,
+    heading: "Köpet Slutfört!",
+    body: [
+      'Du har köpt <strong style="color:#e5e2e1;">"{product}"</strong>.',
+      "Din åtkomst är redan aktiv. Du kan börja direkt.",
+    ],
+    buttonText: "Starta Kursen",
+    footer: "Om du har frågor, svara på detta mejl. Vi finns här för att hjälpa dig.",
+  },
+  no: {
+    subject: `✅ Kjøp bekreftet — {product}`,
+    heading: "Kjøpet Fullført!",
+    body: [
+      'Du har kjøpt <strong style="color:#e5e2e1;">"{product}"</strong>.',
+      "Tilgangen din er allerede aktiv. Du kan starte med en gang.",
+    ],
+    buttonText: "Start Kurset",
+    footer: "Hvis du har spørsmål, svar på denne e-posten. Vi er her for å hjelpe.",
+  },
+  da: {
+    subject: `✅ Køb bekræftet — {product}`,
+    heading: "Købet Gennemført!",
+    body: [
+      'Du har købt <strong style="color:#e5e2e1;">"{product}"</strong>.',
+      "Din adgang er allerede aktiv. Du kan starte med det samme.",
+    ],
+    buttonText: "Start Kurset",
+    footer: "Hvis du har spørgsmål, svar på denne e-mail. Vi er her for at hjælpe.",
+  },
+  ru: {
+    subject: `✅ Покупка подтверждена — {product}`,
+    heading: "Покупка Завершена!",
+    body: [
+      'Вы приобрели <strong style="color:#e5e2e1;">"{product}"</strong>.',
+      "Ваш доступ уже активен. Вы можете начать прямо сейчас.",
+    ],
+    buttonText: "Начать Курс",
+    footer: "Если у вас есть вопросы, ответьте на это письмо. Мы здесь, чтобы помочь.",
+  },
+  zh: {
+    subject: `✅ 购买已确认 — {product}`,
+    heading: "购买完成！",
+    body: [
+      '您已购买 <strong style="color:#e5e2e1;">"{product}"</strong>。',
+      "您的访问权限已经激活。您可以立即开始学习。",
+    ],
+    buttonText: "开始课程",
+    footer: "如有任何问题，请回复此邮件。我们随时为您提供帮助。",
+  },
+  ko: {
+    subject: `✅ 구매 확인 — {product}`,
+    heading: "구매 완료!",
+    body: [
+      '<strong style="color:#e5e2e1;">"{product}"</strong>을(를) 구매하셨습니다.',
+      "액세스가 이미 활성화되었습니다. 지금 바로 시작할 수 있습니다.",
+    ],
+    buttonText: "강의 시작하기",
+    footer: "질문이 있으시면 이 이메일에 답장해 주세요. 도와드리겠습니다.",
+  },
+  ar: {
+    subject: `✅ تم تأكيد الشراء — {product}`,
+    heading: "تم إتمام الشراء!",
+    body: [
+      'لقد اشتريت <strong style="color:#e5e2e1;">"{product}"</strong>.',
+      "وصولك نشط بالفعل. يمكنك البدء فوراً.",
+    ],
+    buttonText: "ابدأ الدورة",
+    footer: "إذا كان لديك أي أسئلة، رد على هذا البريد الإلكتروني. نحن هنا للمساعدة.",
+  },
 };
 
 // ─── Abandoned Checkout ─────────────────────────────────────
@@ -175,6 +265,46 @@ const ABANDONED_TEMPLATES: Record<string, EmailContent> = {
     ],
     buttonText: "Completar Compra",
     footer: "Si ya completaste tu compra, ignora este correo.",
+  },
+  pt: {
+    subject: `⏳ Você deixou "{product}" no carrinho?`,
+    heading: "Você não completou a compra",
+    body: [
+      'Você deixou <strong style="color:#e5e2e1;">"{product}"</strong> no seu carrinho.',
+      "Seu acesso ainda está disponível — complete a compra para desbloqueá-lo.",
+    ],
+    buttonText: "Completar Compra",
+    footer: "Se já completou a compra, ignore este e-mail.",
+  },
+  nl: {
+    subject: `⏳ Heb je "{product}" in je winkelwagen achtergelaten?`,
+    heading: "Je hebt de aankoop niet voltooid",
+    body: [
+      'Je hebt <strong style="color:#e5e2e1;">"{product}"</strong> in je winkelwagen achtergelaten.',
+      "Je toegang is nog steeds beschikbaar — voltooi je aankoop om het te ontgrendelen.",
+    ],
+    buttonText: "Aankoop Voltooien",
+    footer: "Als je de aankoop al hebt voltooid, negeer dan deze e-mail.",
+  },
+  pl: {
+    subject: `⏳ Czy zostawiłeś "{product}" w koszyku?`,
+    heading: "Nie dokończyłeś zakupu",
+    body: [
+      'Zostawiłeś <strong style="color:#e5e2e1;">"{product}"</strong> w koszyku.',
+      "Twój dostęp jest nadal dostępny — dokończ zakup, aby go odblokować.",
+    ],
+    buttonText: "Dokończ Zakup",
+    footer: "Jeśli już dokonałeś zakupu, zignoruj tę wiadomość.",
+  },
+  sv: {
+    subject: `⏳ Lämnade du "{product}" i din varukorg?`,
+    heading: "Du slutförde inte ditt köp",
+    body: [
+      'Du lämnade <strong style="color:#e5e2e1;">"{product}"</strong> i din varukorg.',
+      "Din åtkomst är fortfarande tillgänglig — slutför ditt köp för att låsa upp den.",
+    ],
+    buttonText: "Slutför Köp",
+    footer: "Om du redan har slutfört ditt köp, ignorera detta mejl.",
   },
 };
 

@@ -38,6 +38,7 @@ export default function NewProductPage() {
   const [translationsByLocale, setTranslationsByLocale] = useState<Record<string, Record<string, string>>>({});
   const [translatedLocales, setTranslatedLocales] = useState<string[]>([]);
   const [pricesByCurrency, setPricesByCurrency] = useState<Record<string, { price: number; lemonVariantId?: string | null; stripePriceId?: string | null }>>({});
+  const [countryOverrides, setCountryOverrides] = useState<Record<string, { currency: string; price: number; symbol?: string; lemonVariantId?: string | null; stripePriceId?: string | null }>>({});
 
   // Form state
   const [slug, setSlug] = useState("");
@@ -120,6 +121,7 @@ export default function NewProductPage() {
           translations: texts,
           translationsByLocale,
           pricesByCurrency: Object.keys(pricesByCurrency).length > 0 ? pricesByCurrency : undefined,
+          countryOverrides: Object.keys(countryOverrides).length > 0 ? countryOverrides : undefined,
           lessons,
           sourceLocale: "it",
           templateId: selectedTemplate,
@@ -304,6 +306,8 @@ export default function NewProductPage() {
               <CurrencyPricesSection
                 pricesByCurrency={pricesByCurrency}
                 onChange={setPricesByCurrency}
+                countryOverrides={countryOverrides}
+                onCountryOverridesChange={setCountryOverrides}
                 showOptionalLabel
               />
             </section>

@@ -50,6 +50,27 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // ─── Country-specific price overrides ─────────────────────
+    const country = request.headers.get("x-vercel-ip-country") ?? request.headers.get("cf-ipcountry");
+    if (country && product.countryOverrides) {
+      try {
+        const overrides = JSON.parse(product.countryOverrides) as Record<string, {
+          currency: string;
+          price: number;
+          symbol?: string;
+          lemonVariantId?: string | null;
+          stripePriceId?: string | null;
+        }>;
+        const countryOverride = overrides[country.toUpperCase()];
+        if (countryOverride) {
+          effectiveLemonVariantId = countryOverride.lemonVariantId ?? effectiveLemonVariantId;
+          effectiveStripePriceId = countryOverride.stripePriceId ?? effectiveStripePriceId;
+        }
+      } catch {
+        // Parse error, fallback to defaults
+      }
+    }
+
     // Validate at least one payment provider is configured
     if (!effectiveLemonVariantId && !effectiveStripePriceId) {
       return NextResponse.json(

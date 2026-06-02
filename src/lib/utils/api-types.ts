@@ -65,6 +65,7 @@ export interface ProductApiDetail {
   status: string;
   lemonVariantId: string | null;
   pricesByCurrency: string | null;
+  countryOverrides: string | null;
   createdAt: string;
   translations: ProductApiTranslation[];
   lessons: ProductApiLesson[];
