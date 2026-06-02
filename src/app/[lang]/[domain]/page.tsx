@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
-import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
+import { cookies, headers } from "next/headers";
+import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 import { Play, Zap } from "lucide-react";
 import { getCourseConfig, type CourseConfig } from "@/lib/white-label-data";
@@ -11,6 +12,37 @@ import { TrackedCtaButton } from "@/components/course/tracked-cta-button";
 const SUPPORTED_LANGUAGES = ["it", "en", "fr", "es", "de", "pt", "nl", "pl", "sv", "da", "no", "fi", "ro", "cs", "hu", "el", "ja", "ko", "zh", "ar", "hi", "tr", "th", "vi", "id", "ms", "ru"];
 
 const DEFAULT_LANGUAGE = "en";
+
+// ─── Generate hreflang metadata ────────────────
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string; domain: string }>;
+}): Promise<Metadata> {
+  const { lang, domain } = await params;
+
+  let host = "www.courssy.com";
+  try {
+    const h = await headers();
+    host = h.get("host") ?? host;
+  } catch {}
+
+  const scheme = process.env.NODE_ENV === "development" ? "http" : "https";
+  const baseUrl = `${scheme}://${host}`;
+
+  const languages: Record<string, string> = {};
+  for (const l of SUPPORTED_LANGUAGES) {
+    languages[l] = `${baseUrl}/${l}/${domain}`;
+  }
+  languages["x-default"] = `${baseUrl}/${DEFAULT_LANGUAGE}/${domain}`;
+
+  return {
+    alternates: {
+      canonical: `${baseUrl}/${lang}/${domain}`,
+      languages,
+    },
+  };
+}
 
 // Dynamic imports for template components
 const TemplateLumio = dynamic(() => import("@/components/funnel/template-lumio"));
