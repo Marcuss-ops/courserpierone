@@ -9,6 +9,7 @@ import {
   CalendarCheck, Smartphone, CreditCard, Lock
 } from "lucide-react";
 import { TrackedCtaButton } from "@/components/course/tracked-cta-button";
+import LanguageSelector from "@/components/funnel/language-selector";
 
 interface BookClaudeProps {
   data: {
@@ -130,6 +131,14 @@ export default function TemplateBookClaude({
             {t(locale, "Acquista Ora →", "Buy Now →")}
           </TrackedCtaButton>
         </div>
+      </div>
+
+      {/* ── Language Selector (floating top-right) ── */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageSelector
+          currentLocale={locale ?? "en"}
+          productSlug={productSlug ?? ""}
+        />
       </div>
 
       {/* ================================================================ */}
@@ -700,7 +709,13 @@ export default function TemplateBookClaude({
       <footer className="py-8 border-t border-[#EAEAEA] bg-white">
         <div className="max-w-[1120px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-3 text-xs text-[#6B7280] font-medium">
           <div>&copy; {new Date().getFullYear()} Courssy — {t(locale, "Tutti i diritti riservati.", "All rights reserved.")}</div>
-          <div className="flex gap-6">
+          <div className="flex items-center gap-6">
+            <div className="relative">
+              <LanguageSelector
+                currentLocale={locale ?? "en"}
+                productSlug={productSlug ?? ""}
+              />
+            </div>
             <a href="/privacy" className="hover:text-[#1A1A1A] transition-colors">{t(locale, "Privacy", "Privacy")}</a>
             <a href="/terms" className="hover:text-[#1A1A1A] transition-colors">{t(locale, "Termini", "Terms")}</a>
           </div>
