@@ -1,6 +1,17 @@
-import { PrismaClient } from "@prisma/client";
+/**
+ * Save All Translations — Seed one-shot di traduzioni hardcoded per un prodotto.
+ *
+ * Uso:
+ *   npx tsx scripts/products/save-all-translations.ts <product-slug>
+ *   npx tsx scripts/products/save-all-translations.ts amish-secrets
+ *
+ * Per traduzioni AI (senza dati hardcoded):
+ *   npx tsx scripts/products/batch-translate.ts <slug> <source-locale>
+ */
 
-const prisma = new PrismaClient();
+import { prisma } from "../../src/lib/db/prisma";
+
+const DEFAULT_SLUG = "amish-secrets";
 
 const translations: Record<string, Record<string, string>> = {
   en: {
@@ -627,8 +638,25 @@ const translations: Record<string, Record<string, string>> = {
 };
 
 async function main() {
-  const product = await prisma.product.findUnique({ where: { slug: "amish-secrets" } });
-  if (!product) throw new Error("Product amish-secrets not found");
+  const slug = process.argv[2] || DEFAULT_SLUG;
+
+  console.log(`\n📦 Prodotto: ${slug}\n`);
+
+  if (slug !== DEFAULT_SLUG) {
+    console.warn(`  ⚠️  Le traduzioni sono quelle originali di "${DEFAULT_SLUG}".`);
+    console.warn(`     Potrebbero non essere appropriate per "${slug}".`);
+    console.warn(`     Per traduzioni AI: npx tsx scripts/products/batch-translate.ts ${slug} <source-locale>\n`);
+  }
+
+  const product = await prisma.product.findUnique({ where: { slug } });
+  if (!product) {
+    console.error(`❌ Prodotto "${slug}" non trovato`);
+    const products = await prisma.product.findMany({ select: { slug: true }, orderBy: { slug: "asc" } });
+    for (const p of products) {
+      console.error(`   - ${p.slug}`);
+    }
+    process.exit(1);
+  }
 
   const locales = Object.keys(translations);
   let total = 0;
