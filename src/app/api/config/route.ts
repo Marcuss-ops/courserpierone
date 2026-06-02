@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateCourseConfig } from "@/lib/generate-course-config";
+import { generateCourseConfig } from "@/lib/config/generate-course-config";
 
 export async function POST(request: NextRequest) {
   try {

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db/prisma";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
-import { progressSchema } from "@/lib/validations";
+import { authOptions } from "@/lib/auth/auth";
+import { progressSchema } from "@/lib/utils/validations";
 import type { Prisma } from "@prisma/client";
 
 export async function GET(request: NextRequest) {

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db/prisma";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
-import { initLS, getStoreId } from "@/lib/lemonsqueezy";
+import { authOptions } from "@/lib/auth/auth";
+import { initLS, getStoreId } from "@/lib/payment/lemonsqueezy";
 import { createCheckout } from "@lemonsqueezy/lemonsqueezy.js";
-import { checkoutSchema, validationErrorResponse } from "@/lib/validations";
-import { getCurrencyFromLocale } from "@/lib/locale-resolver";
+import { checkoutSchema, validationErrorResponse } from "@/lib/utils/validations";
+import { getCurrencyFromLocale } from "@/lib/i18n/locale-resolver";
 
 export async function POST(request: NextRequest) {
   try {
@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
     }
 
     // ─── Fallback: Stripe (legacy) ────────────────────────────
-    const { getStripe } = await import("@/lib/stripe");
+    const { getStripe } = await import("@/lib/payment/stripe");
     const user = userEmail
       ? await prisma.user.findUnique({ where: { email: userEmail } })
       : null;

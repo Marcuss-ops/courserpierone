@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { processOrder } from "@/lib/order-service";
+import { processOrder } from "@/lib/services/order-service";
 import crypto from "crypto";
 
 export async function POST(request: NextRequest) {

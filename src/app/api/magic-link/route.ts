@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db/prisma";
 import { randomBytes } from "crypto";
-import { sendMagicLinkEmail } from "@/lib/email";
-import { magicLinkSchema } from "@/lib/validations";
+import { sendMagicLinkEmail } from "@/lib/services/email";
+import { magicLinkSchema } from "@/lib/utils/validations";
 
 export async function POST(request: NextRequest) {
   try {

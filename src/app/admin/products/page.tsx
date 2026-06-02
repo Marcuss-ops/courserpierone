@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Package, Plus, Search, Filter, Edit, Eye, ChevronDown, Globe, Calendar, Loader2 } from "lucide-react";
-import type { ProductApiItem } from "@/lib/api-types";
+import type { ProductApiItem } from "@/lib/utils/api-types";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<{ id: string; slug: string; title: string; template: string; status: string; locales: string[]; sales: number; revenue: number; conversion: string }[]>([]);

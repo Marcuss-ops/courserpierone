@@ -1,4 +1,4 @@
-import { prisma } from "./prisma";
+import { prisma } from "../db/prisma";
 import { sendPurchaseConfirmation } from "./email";
 import crypto from "crypto";
 
@@ -149,10 +149,10 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-  // ── 6. Send purchase confirmation email ─────────────────────
+  // ── 6. Send purchase confirmation email (localizzata) ─────────
   const courseUrl = `${appUrl}/${product.slug}/curso/lesson-1?lang=${locale}&token=${token}`;
   try {
-    await sendPurchaseConfirmation(email, product.slug, courseUrl);
+    await sendPurchaseConfirmation(email, product.slug, courseUrl, locale);
   } catch (emailErr) {
     console.error(`[${paymentProvider}] Failed to send purchase confirmation email:`, emailErr);
   }

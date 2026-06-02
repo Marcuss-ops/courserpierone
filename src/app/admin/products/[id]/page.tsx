@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ImageUpload } from "@/components/admin/image-upload";
 import { CurrencyPricesSection } from "@/components/admin/currency-prices";
 import type { TemplateId } from "@/components/funnel";
-import type { ProductApiDetail, TranslateApiResponse } from "@/lib/api-types";
+import type { ProductApiDetail, TranslateApiResponse } from "@/lib/utils/api-types";
 import {
   ArrowLeft,
   Save,

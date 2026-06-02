@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db/prisma";
 
 // GET — Dettaglio singolo prodotto
 export async function GET(
@@ -145,7 +145,7 @@ export async function PUT(
 
     // Auto-sync: rigenera config su DB + disco
     try {
-      const { generateCourseConfig } = await import("@/lib/generate-course-config");
+      const { generateCourseConfig } = await import("@/lib/config/generate-course-config");
       await generateCourseConfig(product.slug);
     } catch (syncError) {
       console.error("[Auto-sync] Failed to generate config:", syncError);

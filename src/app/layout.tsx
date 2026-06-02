@@ -17,6 +17,7 @@ export const metadata: Metadata = {
     description: "Generatore automatico di Funnel e Aree Corsi multilingua",
     type: "website",
     siteName: "Courser",
+    locale: "it_IT",
   },
   twitter: {
     card: "summary_large_image",

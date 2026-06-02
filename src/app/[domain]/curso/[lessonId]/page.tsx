@@ -7,8 +7,8 @@ import {
   Lock
 } from "lucide-react";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
-import { getCourseConfig } from "@/lib/white-label-data";
+import { authOptions } from "@/lib/auth/auth";
+import { getCourseConfig } from "@/lib/config/white-label-data";
 import { AnalyticsTracker } from "@/components/course/analytics-tracker";
 import { LessonProgressButton, ProgressBar } from "@/components/course/lesson-progress-button";
 import { VideoPaywall } from "@/components/course/video-paywall";

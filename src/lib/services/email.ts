@@ -1,0 +1,465 @@
+/**
+ * Email System — Localizzato per tutte le lingue
+ *
+ * Ogni email ha template definiti per locale con fallback:
+ *   locale specifico → "en" → "it"
+ *
+ * Uso: sendPurchaseConfirmation(email, productName, courseUrl, "pt-br")
+ */
+
+import nodemailer from "nodemailer";
+
+// ─── Mail Transport ─────────────────────────────────────────
+let _transporter: nodemailer.Transporter | null = null;
+
+function getTransporter(): nodemailer.Transporter | null {
+  if (_transporter) return _transporter;
+
+  const host = process.env.EMAIL_SERVER_HOST;
+  const user = process.env.EMAIL_SERVER_USER;
+  const pass = process.env.EMAIL_SERVER_PASSWORD;
+
+  if (!host || !user || !pass) {
+    return null;
+  }
+
+  _transporter = nodemailer.createTransport({
+    host,
+    port: parseInt(process.env.EMAIL_SERVER_PORT || "587"),
+    secure: process.env.EMAIL_SERVER_PORT === "465",
+    auth: { user, pass },
+  });
+
+  return _transporter;
+}
+
+// ─── Locale helpers ─────────────────────────────────────────
+function extractLang(locale: string): string {
+  return locale.split("-")[0]?.toLowerCase() ?? "en";
+}
+
+// ════════════════════════════════════════════════════════════
+// EMAIL TEMPLATES — Localizzati
+// ════════════════════════════════════════════════════════════
+
+interface EmailContent {
+  subject: string;
+  heading: string;
+  body: string[];
+  buttonText: string;
+  footer: string;
+}
+
+// ─── Purchase Confirmation ──────────────────────────────────
+const PURCHASE_TEMPLATES: Record<string, EmailContent> = {
+  it: {
+    subject: `✅ Acquisto completato — {product}`,
+    heading: "Acquisto Completato!",
+    body: [
+      'Hai acquistato <strong style="color:#e5e2e1;">"{product}"</strong>.',
+      "Il tuo accesso è già attivo. Puoi iniziare subito il corso.",
+    ],
+    buttonText: "Inizia il Corso",
+    footer: "Se hai domande, rispondi a questa email. Siamo qui per aiutarti.",
+  },
+  en: {
+    subject: `✅ Purchase confirmed — {product}`,
+    heading: "Purchase Complete!",
+    body: [
+      'You purchased <strong style="color:#e5e2e1;">"{product}"</strong>.',
+      "Your access is already active. You can start right away.",
+    ],
+    buttonText: "Start the Course",
+    footer: "If you have any questions, reply to this email. We're here to help.",
+  },
+  fr: {
+    subject: `✅ Achat confirmé — {product}`,
+    heading: "Achat Réussi !",
+    body: [
+      'Vous avez acheté <strong style="color:#e5e2e1;">"{product}"</strong>.',
+      "Votre accès est déjà actif. Vous pouvez commencer immédiatement.",
+    ],
+    buttonText: "Commencer le Cours",
+    footer: "Si vous avez des questions, répondez à cet email. Nous sommes là pour vous aider.",
+  },
+  de: {
+    subject: `✅ Kauf bestätigt — {product}`,
+    heading: "Kauf Abgeschlossen!",
+    body: [
+      'Sie haben <strong style="color:#e5e2e1;">"{product}"</strong> erworben.',
+      "Ihr Zugriff ist bereits aktiv. Sie können sofort starten.",
+    ],
+    buttonText: "Kurs Starten",
+    footer: "Bei Fragen antworten Sie einfach auf diese E-Mail. Wir sind für Sie da.",
+  },
+  es: {
+    subject: `✅ Compra confirmada — {product}`,
+    heading: "¡Compra Completada!",
+    body: [
+      'Has adquirido <strong style="color:#e5e2e1;">"{product}"</strong>.',
+      "Tu acceso ya está activo. Puedes empezar de inmediato.",
+    ],
+    buttonText: "Empezar el Curso",
+    footer: "Si tienes preguntas, responde a este correo. Estamos aquí para ayudarte.",
+  },
+  pt: {
+    subject: `✅ Compra confirmada — {product}`,
+    heading: "Compra Concluída!",
+    body: [
+      'Você adquiriu <strong style="color:#e5e2e1;">"{product}"</strong>.',
+      "Seu acesso já está ativo. Você pode começar agora mesmo.",
+    ],
+    buttonText: "Iniciar o Curso",
+    footer: "Se tiver dúvidas, responda a este e-mail. Estamos aqui para ajudar.",
+  },
+  ja: {
+    subject: `✅ 購入完了 — {product}`,
+    heading: "購入完了しました！",
+    body: [
+      '<strong style="color:#e5e2e1;">"{product}"</strong> をご購入いただきありがとうございます。',
+      "アクセスはすでに有効です。今すぐ開始できます。",
+    ],
+    buttonText: "コースを始める",
+    footer: "ご質問があれば、このメールに返信してください。サポートいたします。",
+  },
+};
+
+// ─── Abandoned Checkout ─────────────────────────────────────
+const ABANDONED_TEMPLATES: Record<string, EmailContent> = {
+  it: {
+    subject: `⏳ Hai lasciato "{product}" nel carrello?`,
+    heading: "Non hai completato l'acquisto",
+    body: [
+      'Hai lasciato <strong style="color:#e5e2e1;">"{product}"</strong> nel carrello.',
+      "Il tuo accesso è ancora disponibile — completa l'acquisto per sbloccarlo.",
+    ],
+    buttonText: "Completa l'Acquisto",
+    footer: "Se hai già completato l'acquisto, ignora questa email.",
+  },
+  en: {
+    subject: `⏳ Did you leave "{product}" in your cart?`,
+    heading: "You didn't complete your purchase",
+    body: [
+      'You left <strong style="color:#e5e2e1;">"{product}"</strong> in your cart.',
+      "Your access is still available — complete your purchase to unlock it.",
+    ],
+    buttonText: "Complete Purchase",
+    footer: "If you've already completed your purchase, ignore this email.",
+  },
+  fr: {
+    subject: `⏳ Avez-vous laissé "{product}" dans votre panier ?`,
+    heading: "Vous n'avez pas finalisé votre achat",
+    body: [
+      'Vous avez laissé <strong style="color:#e5e2e1;">"{product}"</strong> dans votre panier.',
+      "Votre accès est toujours disponible — finalisez votre achat pour le débloquer.",
+    ],
+    buttonText: "Finaliser l'Achat",
+    footer: "Si vous avez déjà finalisé votre achat, ignorez cet email.",
+  },
+  de: {
+    subject: `⏳ Haben Sie "{product}" im Warenkorb gelassen?`,
+    heading: "Sie haben den Kauf nicht abgeschlossen",
+    body: [
+      'Sie haben <strong style="color:#e5e2e1;">"{product}"</strong> im Warenkorb gelassen.',
+      "Ihr Zugriff ist noch verfügbar — schließen Sie den Kauf ab, um ihn freizuschalten.",
+    ],
+    buttonText: "Kauf Abschließen",
+    footer: "Wenn Sie den Kauf bereits abgeschlossen haben, ignorieren Sie diese E-Mail.",
+  },
+  es: {
+    subject: `⏳ ¿Dejaste "{product}" en tu carrito?`,
+    heading: "No completaste tu compra",
+    body: [
+      'Dejaste <strong style="color:#e5e2e1;">"{product}"</strong> en tu carrito.',
+      "Tu acceso sigue disponible — completa tu compra para desbloquearlo.",
+    ],
+    buttonText: "Completar Compra",
+    footer: "Si ya completaste tu compra, ignora este correo.",
+  },
+};
+
+// ─── Magic Link ────────────────────────────────────────────
+const MAGIC_LINK_TEMPLATES: Record<string, EmailContent> = {
+  it: {
+    subject: "🎯 Accesso a \"{product}\" — Courser",
+    heading: "Il tuo accesso è pronto",
+    body: [
+      'Clicca il pulsante per accedere a <strong style="color:#e5e2e1;">"{product}"</strong>.',
+      'Il link è valido per <strong style="color:#e5e2e1;">24 ore</strong>.',
+    ],
+    buttonText: "Accedi Ora",
+    footer: "Se non hai richiesto questo accesso, ignora questa email.",
+  },
+  en: {
+    subject: "🔗 Your access link — Courser",
+    heading: "Your access is ready",
+    body: [
+      'Click the button to access <strong style="color:#e5e2e1;">"{product}"</strong>.',
+      'The link is valid for <strong style="color:#e5e2e1;">24 hours</strong>.',
+    ],
+    buttonText: "Sign In Now",
+    footer: "If you didn't request this access, ignore this email.",
+  },
+};
+
+// ════════════════════════════════════════════════════════════
+// EMAIL HTML BUILDER
+// ════════════════════════════════════════════════════════════
+
+function buildHtmlEmail(
+  product: string | undefined,
+  heading: string,
+  bodyLines: string[],
+  buttonText: string,
+  buttonUrl: string,
+  footer: string,
+  icon: string,
+  iconBg: string,
+  iconBorder: string,
+  buttonGradient: string,
+  buttonShadow: string,
+  accentColor: string,
+): string {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    </head>
+    <body style="margin:0;padding:0;background:#0a0a0c;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0c;padding:40px 20px;">
+        <tr>
+          <td align="center">
+            <table width="480" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,rgba(23,23,26,0.95),rgba(10,10,12,0.98));border-radius:24px;padding:48px 40px;border:1px solid rgba(255,255,255,0.08);">
+              <tr>
+                <td align="center" style="padding-bottom:24px;">
+                  <div style="width:64px;height:64px;border-radius:50%;background:${iconBg};border:1px solid ${iconBorder};display:flex;align-items:center;justify-content:center;margin:0 auto;">
+                    <span style="font-size:32px;">${icon}</span>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td align="center" style="padding-bottom:8px;">
+                  <h1 style="color:#ffffff;font-size:24px;font-weight:900;margin:0;letter-spacing:-0.5px;">${heading}</h1>
+                </td>
+              </tr>
+              <tr>
+                <td align="center" style="padding-bottom:32px;">
+                  <p style="color:#a0a0a0;font-size:14px;line-height:1.6;margin:0;">
+                    ${bodyLines.join("<br/>")}
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td align="center" style="padding-bottom:24px;">
+                  <a href="${buttonUrl}" style="display:inline-block;padding:16px 40px;border-radius:16px;background:${buttonGradient};color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;box-shadow:0 4px 24px ${buttonShadow};">
+                    ${buttonText}
+                  </a>
+                </td>
+              </tr>
+              <tr>
+                <td align="center" style="padding-bottom:24px;">
+                  <p style="color:#555;font-size:12px;line-height:1.5;margin:0;">
+                    ${footer}
+                    <br/>© ${new Date().getFullYear()} Courser
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td align="center">
+                  <div style="height:1px;width:100%;background:rgba(255,255,255,0.05);margin-bottom:16px;"></div>
+                  <p style="color:#444;font-size:11px;margin:0;">
+                    <span style="color:${accentColor};">Courser</span> — Piattaforma di corsi digitali multilingua
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+}
+
+function buildTextEmail(bodyLines: string[], buttonText: string, buttonUrl: string, footer: string): string {
+  return `${bodyLines.join("\n")}\n\n${buttonText}: ${buttonUrl}\n\n${footer}`;
+}
+
+function resolveTemplate<T extends EmailContent>(locale: string, templates: Record<string, T>): T {
+  const lang = extractLang(locale);
+  return templates[locale] ?? templates[lang] ?? templates["en"] ?? templates["it"] ?? templates[Object.keys(templates)[0]];
+}
+
+function fillTemplate(tpl: EmailContent, product: string): EmailContent {
+  return {
+    subject: tpl.subject.replace(/{product}/g, product),
+    heading: tpl.heading,
+    body: tpl.body.map((l) => l.replace(/{product}/g, product)),
+    buttonText: tpl.buttonText,
+    footer: tpl.footer.replace(/{product}/g, product),
+  };
+}
+
+// ════════════════════════════════════════════════════════════
+// PUBLIC API
+// ════════════════════════════════════════════════════════════
+
+/** Invia email di benvenuto/accesso */
+export async function sendMagicLinkEmail(
+  email: string,
+  magicUrl: string,
+  productName?: string,
+  locale = "en",
+): Promise<boolean> {
+  const transporter = getTransporter();
+
+  if (!transporter) {
+    console.log(`\n🔗 Magic link per ${email}: ${magicUrl} (locale: ${locale})\n`);
+    return false;
+  }
+
+  const from = process.env.EMAIL_FROM ?? "noreply@courser.app";
+  const tpl = resolveTemplate(locale, MAGIC_LINK_TEMPLATES);    const filled = fillTemplate(tpl, productName ?? "Courser");
+
+  try {
+    await transporter.sendMail({
+      from,
+      to: email,
+      subject: filled.subject,
+      html: buildHtmlEmail(
+        productName,
+        filled.heading,
+        filled.body,
+        filled.buttonText,
+        magicUrl,
+        filled.footer,
+        "C",
+        "rgba(77,142,255,0.15)",
+        "rgba(255,255,255,0.1)",
+        "linear-gradient(135deg,#4d8eff,#005ac2)",
+        "rgba(77,142,255,0.3)",
+        "#4d8eff",
+      ),
+      text: buildTextEmail(
+        filled.body,
+        filled.buttonText,
+        magicUrl,
+        filled.footer,
+      ),
+    });
+
+    console.log(`✅ Email inviata a ${email} (locale: ${locale})`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Errore invio email a ${email}:`, error);
+    return false;
+  }
+}
+
+/** Invia email di recupero checkout abbandonato */
+export async function sendAbandonedCheckoutEmail(
+  email: string,
+  productName: string,
+  checkoutUrl: string,
+  locale = "en",
+): Promise<boolean> {
+  const transporter = getTransporter();
+
+  if (!transporter) {
+    console.log(`\n🛒 Checkout abbandonato per ${email}: ${productName} — Recupera: ${checkoutUrl} (locale: ${locale})\n`);
+    return false;
+  }
+
+  const from = process.env.EMAIL_FROM ?? "noreply@courser.app";
+  const tpl = resolveTemplate(locale, ABANDONED_TEMPLATES);
+  const filled = fillTemplate(tpl, productName);
+
+  try {
+    await transporter.sendMail({
+      from,
+      to: email,
+      subject: filled.subject,
+      html: buildHtmlEmail(
+        productName,
+        filled.heading,
+        filled.body,
+        filled.buttonText,
+        checkoutUrl,
+        filled.footer,
+        "⏳",
+        "rgba(255,193,7,0.15)",
+        "rgba(255,193,7,0.3)",
+        "linear-gradient(135deg,#ffc107,#f59e0b)",
+        "rgba(255,193,7,0.3)",
+        "#f59e0b",
+      ),
+      text: buildTextEmail(
+        filled.body,
+        filled.buttonText,
+        checkoutUrl,
+        filled.footer,
+      ),
+    });
+
+    console.log(`✅ Email recupero checkout inviata a ${email} (locale: ${locale})`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Errore invio recupero a ${email}:`, error);
+    return false;
+  }
+}
+
+/** Invia email di conferma acquisto */
+export async function sendPurchaseConfirmation(
+  email: string,
+  productName: string,
+  courseUrl: string,
+  locale = "en",
+): Promise<boolean> {
+  const transporter = getTransporter();
+
+  if (!transporter) {
+    console.log(`\n📦 Acquisto confermato per ${email}: ${productName} — ${courseUrl} (locale: ${locale})\n`);
+    return false;
+  }
+
+  const from = process.env.EMAIL_FROM ?? "noreply@courser.app";
+  const tpl = resolveTemplate(locale, PURCHASE_TEMPLATES);
+  const filled = fillTemplate(tpl, productName);
+
+  try {
+    await transporter.sendMail({
+      from,
+      to: email,
+      subject: filled.subject,
+      html: buildHtmlEmail(
+        productName,
+        filled.heading,
+        filled.body,
+        filled.buttonText,
+        courseUrl,
+        filled.footer,
+        "✅",
+        "rgba(0,219,231,0.15)",
+        "rgba(0,219,231,0.3)",
+        "linear-gradient(135deg,#4d8eff,#005ac2)",
+        "rgba(77,142,255,0.3)",
+        "#4d8eff",
+      ),
+      text: buildTextEmail(
+        filled.body,
+        filled.buttonText,
+        courseUrl,
+        filled.footer,
+      ),
+    });
+
+    console.log(`✅ Email di conferma inviata a ${email} (locale: ${locale})`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Errore invio conferma a ${email}:`, error);
+    return false;
+  }
+}

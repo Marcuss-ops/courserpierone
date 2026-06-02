@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import TemplateSelector from "@/components/admin/template-selector";
 import { ImageUpload } from "@/components/admin/image-upload";
 import type { TemplateId } from "@/components/funnel";
-import type { TranslateApiResponse } from "@/lib/api-types";
+import type { TranslateApiResponse } from "@/lib/utils/api-types";
 import { 
   ArrowLeft, 
   ArrowRight, 

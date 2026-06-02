@@ -1,4 +1,4 @@
-import { prisma } from "../src/lib/prisma";
+import { prisma } from "../src/lib/db/prisma";
 
 async function main() {
   const slug = process.argv[2] || "amish-secrets";

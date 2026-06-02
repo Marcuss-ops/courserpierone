@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { getVisitorId, parseUtmParams, getReferrer } from "@/lib/visitor-session";
+import { getVisitorId, parseUtmParams, getReferrer } from "@/lib/i18n/visitor-session";
 
 interface AnalyticsTrackerProps {
   productSlug: string;

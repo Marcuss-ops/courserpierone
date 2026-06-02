@@ -4,8 +4,8 @@ import { cookies, headers } from "next/headers";
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 import { Play, Zap } from "lucide-react";
-import { getCourseConfig, type CourseConfig } from "@/lib/white-label-data";
-import { getCurrencyFromLocale } from "@/lib/locale-resolver";
+import { getCourseConfig, type CourseConfig } from "@/lib/config/white-label-data";
+import { getCurrencyFromLocale } from "@/lib/i18n/locale-resolver";
 import { AnalyticsTracker } from "@/components/course/analytics-tracker";
 import { TrackedCtaButton } from "@/components/course/tracked-cta-button";
 
@@ -34,7 +34,7 @@ function localeToLang(locale: string): string {
   return locale.split("-")[0]?.toLowerCase() ?? "en";
 }
 
-// ─── Generate hreflang metadata ────────────────
+// ─── Generate full SEO metadata per locale ─────
 export async function generateMetadata({
   params,
 }: {
@@ -50,18 +50,65 @@ export async function generateMetadata({
 
   const scheme = process.env.NODE_ENV === "development" ? "http" : "https";
   const baseUrl = `${scheme}://${host}`;
+  const currentUrl = `${baseUrl}/${locale}/${domain}`;
 
+  // Load product config to get SEO data for this locale
+  const lang = localeToLang(locale);
+  const data = await getCourseConfig(domain);
+
+  // Resolve SEO metadata: try full locale → language code → default
+  const langEntry =
+    data?.languages?.[locale] ??
+    data?.languages?.[lang] ??
+    data?.languages?.[data?.defaultLanguage ?? "en"];
+
+  const seo = langEntry?.seo;
+
+  const title = seo?.title || langEntry?.title || domain;
+  const description = seo?.description || langEntry?.description || "";
+  const ogImage = seo?.ogImage || data?.cover || undefined;
+
+  // Full hreflang for all 71 locales
   const languages: Record<string, string> = {};
   for (const loc of ALL_LOCALES) {
-    // Use full locale code for hreflang
-    const hreflangKey = loc.replace("-", "-"); // already correct format
     languages[loc] = `${baseUrl}/${loc}/${domain}`;
   }
   languages["x-default"] = `${baseUrl}/${DEFAULT_LOCALE}/${domain}`;
 
   return {
+    title,
+    description,
+    // Open Graph
+    openGraph: {
+      title,
+      description,
+      url: currentUrl,
+      type: "website",
+      siteName: "Courser",
+      locale: locale.replace("-", "_"), // og:locale usa underscore: "it_IT"
+      ...(ogImage ? {
+        images: [
+          {
+            url: ogImage.startsWith("http") ? ogImage : `${baseUrl}${ogImage}`,
+            width: 1200,
+            height: 630,
+            alt: title,
+          },
+        ],
+      } : {}),
+    },
+    // Twitter Card
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      ...(ogImage ? {
+        images: [ogImage.startsWith("http") ? ogImage : `${baseUrl}${ogImage}`],
+      } : {}),
+    },
+    // Canonical + hreflang
     alternates: {
-      canonical: `${baseUrl}/${locale}/${domain}`,
+      canonical: currentUrl,
       languages,
     },
   };

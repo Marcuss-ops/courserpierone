@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getStripe } from "@/lib/stripe";
-import { processOrder } from "@/lib/order-service";
+import { getStripe } from "@/lib/payment/stripe";
+import { processOrder } from "@/lib/services/order-service";
 import Stripe from "stripe";
 
 export async function POST(request: NextRequest) {

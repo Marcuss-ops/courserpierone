@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { FileText, Download, FileAudio } from "lucide-react";
-import { t } from "@/lib/player-locale";
+import { t } from "@/lib/i18n/player-locale";
 
 interface Asset {
   id: string;

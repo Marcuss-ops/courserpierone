@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jsPDF } from "jspdf";
-import { getCourseConfig } from "@/lib/white-label-data";
+import { getCourseConfig } from "@/lib/config/white-label-data";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { authOptions } from "@/lib/auth/auth";
+import { prisma } from "@/lib/db/prisma";
 
 export async function GET(
   request: NextRequest,

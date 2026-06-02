@@ -15,7 +15,7 @@ const mockPrisma = {
   },
 };
 
-vi.mock("@/lib/prisma", () => ({
+vi.mock("@/lib/db/prisma", () => ({
   prisma: mockPrisma,
 }));
 

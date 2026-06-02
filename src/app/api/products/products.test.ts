@@ -25,12 +25,12 @@ const mockPrisma = {
   $transaction: vi.fn(<T>(fn: (tx: typeof mockPrisma) => Promise<T>) => fn(mockPrisma)),
 };
 
-vi.mock("@/lib/prisma", () => ({
+vi.mock("@/lib/db/prisma", () => ({
   prisma: mockPrisma,
 }));
 
 // ─── Mock generateCourseConfig ──────────────────────────────
-vi.mock("@/lib/generate-course-config", () => ({
+vi.mock("@/lib/config/generate-course-config", () => ({
   generateCourseConfig: vi.fn().mockResolvedValue(undefined),
 }));
 

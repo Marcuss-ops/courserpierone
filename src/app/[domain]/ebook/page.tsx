@@ -9,10 +9,10 @@ import {
   ChevronRight,
   Menu
 } from "lucide-react";
-import { getCourseConfig } from "@/lib/white-label-data";
+import { getCourseConfig } from "@/lib/config/white-label-data";
 import { MobileSidebar } from "@/components/layout/mobile-sidebar";
 import { SidebarToggleBtn } from "@/components/layout/sidebar-toggle-btn";
-import { sanitizeHtml } from "@/lib/sanitize";
+import { sanitizeHtml } from "@/lib/utils/sanitize";
 
 export default async function EbookPage({
   params,

@@ -1,4 +1,4 @@
-import { generateCourseConfig } from '../src/lib/generate-course-config';
+import { generateCourseConfig } from '../src/lib/config/generate-course-config';
 
 async function main() {
   const slug = process.argv[2];

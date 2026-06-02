@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { prisma } from "./prisma";
+import { prisma } from "../db/prisma";
 
 export interface LessonConfig {
   number: number;
@@ -26,25 +26,33 @@ export interface CourseConfig {
   checkoutUrl: string;
   author: string;
   price?: number;
-  /** Prezzi localizzati per paese (es. { it: { amount: 19, currency: "EUR", symbol: "€" }, en: { amount: 17, currency: "USD", symbol: "$" } }) */
   prices?: Record<string, PriceByLocale>;
-  lemonVariantId?: string; // Lemon Squeezy variant ID (sostituisce Stripe)
-  languages: Record<string, {
-    title: string;
-    problem: string;
-    story: string;
-    cta: string;
-    description: string;
-    ebookTitle: string;
-    ebookContent: string;
-    ui?: {
-      labels: Record<string, string>;
-      benefits: { title: string; desc: string }[];
-      faq: { q: string; a: string }[];
-    };
-  }>;
+  lemonVariantId?: string;
+  languages: Record<string, LanguageEntry>;
   lessons: LessonConfig[];
   ebookChapters: { it: string; en: string; page: number }[];
+}
+
+export interface LanguageEntry {
+  title: string;
+  problem: string;
+  story: string;
+  cta: string;
+  description: string;
+  ebookTitle: string;
+  ebookContent: string;
+  /** SEO metadata per questa lingua */
+  seo?: {
+    title: string;
+    description: string;
+    ogImage?: string;
+  };
+  /** Traduzioni UI (labels, benefits, faq) */
+  ui?: {
+    labels: Record<string, string>;
+    benefits: { title: string; desc: string }[];
+    faq: { q: string; a: string }[];
+  };
 }
 
 export async function getCourseConfig(slug: string): Promise<CourseConfig | null> {

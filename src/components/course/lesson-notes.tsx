@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Settings, CheckCircle2, Loader2 } from "lucide-react";
-import { t } from "@/lib/player-locale";
+import { t } from "@/lib/i18n/player-locale";
 
 interface LessonNotesProps {
   lessonId: string;

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, Play, Loader2, Eye, Clock, ArrowRight } from "lucide-react";
-import { t } from "@/lib/player-locale";
+import { t } from "@/lib/i18n/player-locale";
 
 interface VideoPaywallProps {
   videoUrl: string;

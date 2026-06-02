@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { analyticsEventSchema } from "@/lib/validations";
+import { prisma } from "@/lib/db/prisma";
+import { analyticsEventSchema } from "@/lib/utils/validations";
 
 export async function POST(request: NextRequest) {
   try {

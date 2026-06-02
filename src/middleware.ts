@@ -5,7 +5,7 @@ import {
   isKnownLocale,
   normalizeLocale,
   LANG_TO_DEFAULT_LOCALE,
-} from "@/lib/locale-resolver";
+} from "@/lib/i18n/locale-resolver";
 
 // ─── Known non-landing paths ───────────────────
 const KNOWN_PREFIXES = [

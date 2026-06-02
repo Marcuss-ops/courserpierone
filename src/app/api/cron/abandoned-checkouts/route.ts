@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { sendAbandonedCheckoutEmail } from "@/lib/email";
+import { prisma } from "@/lib/db/prisma";
+import { sendAbandonedCheckoutEmail } from "@/lib/services/email";
 
 /**
  * GET /api/cron/abandoned-checkouts
@@ -52,7 +52,8 @@ export async function GET(request: Request) {
         const success = await sendAbandonedCheckoutEmail(
           checkout.email,
           checkout.product.slug,
-          checkoutUrl
+          checkoutUrl,
+          checkout.locale
         );
 
         if (success) {

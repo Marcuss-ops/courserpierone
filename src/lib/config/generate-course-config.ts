@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { prisma } from "./prisma";
+import { prisma } from "../db/prisma";
 
 const IS_VERCEL = process.env.VERCEL === "1";
 
@@ -23,7 +23,12 @@ export interface CourseConfig {
     description: string;
     ebookTitle: string;
     ebookContent: string;
-    /** Traduzioni UI (labels, benefits, faq) memorizzate come JSON nella sezione ui_all */
+    /** SEO metadata per questa lingua */
+    seo?: {
+      title: string;
+      description: string;
+      ogImage?: string;
+    };
     ui?: {
       labels: Record<string, string>;
       benefits: { title: string; desc: string }[];
@@ -70,6 +75,12 @@ export async function generateCourseConfig(slug: string) {
       const t = translationsByLocale[locale] || {};
       // UI fallback: se la lingua non ha ui_all, usa quella inglese
       const ui = safeParseUi(t.ui_all) ?? safeParseUi(translationsByLocale["en"]?.ui_all) ?? undefined;
+
+      // SEO metadata: usa sezioni dedicate se presenti, altrimenti costruiscile dal contenuto
+      const seoTitle = t.seo_title || `${t.titolo ?? product.slug} — Courser`;
+      const seoDescription = t.seo_description || (t.sottotitolo || t.problema || "").slice(0, 160);
+      const ogImage = t.og_image || product.coverUrl || undefined;
+
       languages[locale] = {
         title: t.titolo ?? product.slug,
         problem: t.problema ?? "",
@@ -78,6 +89,11 @@ export async function generateCourseConfig(slug: string) {
         description: t.sottotitolo ?? "",
         ebookTitle: t.titolo ?? product.slug,
         ebookContent: t.storia ?? "",
+        seo: {
+          title: seoTitle,
+          description: seoDescription,
+          ...(ogImage ? { ogImage } : {}),
+        },
         ui,
       };
     }

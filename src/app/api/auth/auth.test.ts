@@ -17,13 +17,13 @@ const mockPrisma = {
   },
 };
 
-vi.mock("@/lib/prisma", () => ({
+vi.mock("@/lib/db/prisma", () => ({
   prisma: mockPrisma,
 }));
 
 // ─── Mock email ─────────────────────────────────────────────
 const mockSendMagicLinkEmail = vi.fn().mockResolvedValue(true);
-vi.mock("@/lib/email", () => ({
+vi.mock("@/lib/services/email", () => ({
   sendMagicLinkEmail: mockSendMagicLinkEmail,
 }));
 

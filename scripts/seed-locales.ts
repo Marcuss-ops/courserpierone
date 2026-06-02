@@ -2,7 +2,7 @@
  * Seed all locales into the database.
  * Run: npx tsx scripts/seed-locales.ts
  */
-import { prisma } from "../src/lib/prisma";
+import { prisma } from "../src/lib/db/prisma";
 
 interface LocaleSeed {
   code: string;
