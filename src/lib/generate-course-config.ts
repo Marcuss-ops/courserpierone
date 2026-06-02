@@ -123,12 +123,19 @@ export async function generateCourseConfig(slug: string) {
     author: "Brand",
     price: product.price / 100,
     prices: product.pricesByCurrency ? (() => {
-      const raw = JSON.parse(product.pricesByCurrency) as Record<string, { price: number }>;
+      const raw = JSON.parse(product.pricesByCurrency) as Record<string, { price: number; symbol?: string }>;
+      const CURRENCY_SYMBOLS: Record<string, string> = {
+        EUR: "€", USD: "$", GBP: "£", JPY: "¥", BRL: "R$",
+        CAD: "CA$", AUD: "A$", CHF: "CHF", SEK: "kr", NOK: "kr",
+        DKK: "kr", PLN: "zł", MXN: "MX$", INR: "₹", CNY: "¥",
+        KRW: "₩", RUB: "₽", TRY: "₺", ZAR: "R", SGD: "S$",
+        HKD: "HK$", TWD: "NT$", AED: "د.إ", SAR: "﷼",
+      };
       return Object.fromEntries(
         Object.entries(raw).map(([code, p]) => [code, {
           amount: p.price / 100,
           currency: code,
-          symbol: code === "EUR" ? "€" : code === "USD" ? "$" : code === "GBP" ? "£" : code,
+          symbol: p.symbol ?? CURRENCY_SYMBOLS[code] ?? code,
         }])
       );
     })() : undefined,
