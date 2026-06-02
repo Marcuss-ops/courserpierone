@@ -10,18 +10,24 @@
  * 6. Fallback
  *
  * Il locale è un codice completo "lingua-paese" (es. fr-fr, pt-br, en-us).
+ *
+ * ════════════════════════════════════════════════════════
+ * I DATI LOCALIZZATI (COUNTRY_LOCALE, LANG_TO_DEFAULT_LOCALE,
+ * LOCALE_CURRENCY, ALL_KNOWN_LOCALES) SONO GENERATI DAL DB
+ * tramite scripts/generate/generate-locale-resolver.ts
+ * ════════════════════════════════════════════════════════
+ *
+ * Per rigenerare: npm run generate:locales
+ * Il DB (tabelle Locale + CountryLocaleRule) è la SINGOLA FONTE DI VERITÀ.
  */
 
-// ─── Locale database (in-memory per edge middleware) ──
-// I dati qui sotto (COUNTRY_LOCALE, LANG_TO_DEFAULT_LOCALE, LOCALE_CURRENCY)
-// sono hardcodati per performance nel middleware Edge (no accesso DB).
-//
-// NOTA: Il DB Prisma ha tabelle parallele (Locale, CountryLocaleRule)
-// che contengono gli stessi dati per query admin. Se modifichi queste
-// mappe, aggiorna ANCHE il DB. Sono due viste della stessa verità.
-//
-// In futuro: si potrebbe generare questo file automaticamente dal DB
-// durante il build (es. prisma generate → locale-resolver.ts)
+import {
+  COUNTRY_LOCALE,
+  LANG_TO_DEFAULT_LOCALE,
+  LOCALE_CURRENCY,
+  ALL_KNOWN_LOCALES,
+  DEFAULT_LOCALE,
+} from "./_generated/locale-data";
 
 export interface LocaleInfo {
   code: string;            // "fr-fr"
@@ -33,104 +39,16 @@ export interface LocaleInfo {
   currency: string;        // "EUR"
 }
 
-// ─── Country → preferred locale ────────────────────
-const COUNTRY_LOCALE: Record<string, string> = {
-  // Europa
-  IT: "it-it", FR: "fr-fr", DE: "de-de", ES: "es-es", PT: "pt-pt",
-  GB: "en-gb", IE: "en-ie", NL: "nl-nl", BE: "nl-be",
-  PL: "pl-pl", SE: "sv-se", DK: "da-dk", NO: "nb-no",
-  FI: "fi-fi", RO: "ro-ro", CZ: "cs-cz", HU: "hu-hu",
-  GR: "el-gr", AT: "de-at", CH: "de-ch",
-  BG: "bg-bg", HR: "hr-hr", SK: "sk-sk", SI: "sl-si",
-  LT: "lt-lt", LV: "lv-lv", EE: "et-ee",
-  // Americas
-  US: "en-us", CA: "en-ca", MX: "es-mx",
-  BR: "pt-br", AR: "es-ar", CO: "es-co", CL: "es-cl",
-  PE: "es-pe", EC: "es-ec", VE: "es-ve",
-  // Asia
-  JP: "ja-jp", KR: "ko-kr", CN: "zh-cn", TW: "zh-tw", HK: "zh-hk",
-  IN: "hi-in", TR: "tr-tr", TH: "th-th", VN: "vi-vn",
-  ID: "id-id", MY: "ms-my", PH: "en-ph", SG: "en-sg",
-  PK: "ur-pk", BD: "bn-bd",
-  // Middle East
-  AE: "ar-ae", SA: "ar-sa", EG: "ar-eg", IL: "he-il",
-  // Africa
-  ZA: "en-za", NG: "en-ng", KE: "en-ke", MA: "fr-ma",
-  // Oceania
-  AU: "en-au", NZ: "en-nz",
-  // Other
-  RU: "ru-ru", UA: "uk-ua",
-};
-
-// ─── Language-to-default locale mapping ───────────
-// When browser sends just "fr" without country
-const LANG_TO_DEFAULT_LOCALE: Record<string, string> = {
-  it: "it-it", en: "en-us", fr: "fr-fr", de: "de-de",
-  es: "es-es", pt: "pt-pt", nl: "nl-nl", pl: "pl-pl",
-  sv: "sv-se", da: "da-dk", nb: "nb-no", no: "nb-no",
-  fi: "fi-fi", ro: "ro-ro", cs: "cs-cz", hu: "hu-hu",
-  el: "el-gr", ja: "ja-jp", ko: "ko-kr", zh: "zh-cn",
-  ar: "ar-sa", hi: "hi-in", tr: "tr-tr", th: "th-th",
-  vi: "vi-vn", id: "id-id", ms: "ms-my", ru: "ru-ru",
-  bg: "bg-bg", hr: "hr-hr", sk: "sk-sk", sl: "sl-si",
-  uk: "uk-ua", he: "he-il", bn: "bn-bd", ur: "ur-pk",
-};
-
-export const DEFAULT_LOCALE = "en-us";
-
-// ─── Locale → currency mapping ─────────────────────
-const LOCALE_CURRENCY: Record<string, string> = {
-  // Europe: EUR zone
-  "it-it": "EUR", "fr-fr": "EUR", "de-de": "EUR", "es-es": "EUR",
-  "pt-pt": "EUR", "nl-nl": "EUR", "fi-fi": "EUR", "el-gr": "EUR",
-  "fr-be": "EUR", "nl-be": "EUR", "de-at": "EUR", "it-ch": "EUR",
-  "fr-ch": "CHF", "de-ch": "CHF",
-  "en-ie": "EUR", "sk-sk": "EUR", "si-sl": "EUR", "hr-hr": "EUR",
-  "lt-lt": "EUR", "lv-lv": "EUR", "et-ee": "EUR", "bg-bg": "BGN",
-  "ro-ro": "RON", "ro-md": "MDL",
-  // Europe: non-EUR
-  "en-gb": "GBP", "pl-pl": "PLN", "sv-se": "SEK", "da-dk": "DKK",
-  "nb-no": "NOK", "cs-cz": "CZK", "hu-hu": "HUF",
-  // Americas
-  "en-us": "USD", "en-ca": "CAD", "fr-ca": "CAD",
-  "es-mx": "MXN", "pt-br": "BRL",
-  "es-ar": "ARS", "es-co": "COP", "es-cl": "CLP", "es-pe": "PEN",
-  // Asia Pacific
-  "ja-jp": "JPY", "ko-kr": "KRW",
-  "zh-cn": "CNY", "zh-tw": "TWD", "zh-hk": "HKD",
-  "hi-in": "INR", "en-in": "INR", "ta-in": "INR", "te-in": "INR", "mr-in": "INR",
-  "tr-tr": "TRY", "th-th": "THB", "vi-vn": "VND",
-  "id-id": "IDR", "ms-my": "MYR", "en-sg": "SGD", "en-ph": "PHP",
-  "ur-pk": "PKR", "bn-bd": "BDT",
-  // Middle East
-  "ar-ae": "AED", "ar-sa": "SAR", "ar-eg": "EGP", "he-il": "ILS",
-  // Africa
-  "en-za": "ZAR", "en-ng": "NGN", "en-ke": "KES",
-  "fr-ma": "MAD",
-  // Oceania
-  "en-au": "AUD", "en-nz": "NZD",
-  // Other
-  "ru-ru": "RUB", "uk-ua": "UAH",
-};
-
 /** Get the currency code for a given locale. Falls back to EUR. */
 export function getCurrencyFromLocale(locale: string): string {
   const normalized = normalizeLocale(locale);
   return LOCALE_CURRENCY[normalized] ?? LOCALE_CURRENCY[localeToLanguage(normalized)] ?? "EUR";
 }
 
-// ─── Language-to-default locale mapping (exported) ──
-export { LANG_TO_DEFAULT_LOCALE };
-
-// ─── Supportate locale codes list (generata) ───────
-const ALL_LOCALES = new Set(Object.values(COUNTRY_LOCALE));
-// Add language-only variants (fr, de, en...) for backward compat
-for (const lang of Object.keys(LANG_TO_DEFAULT_LOCALE)) {
-  ALL_LOCALES.add(lang);
-}
+export { LANG_TO_DEFAULT_LOCALE, DEFAULT_LOCALE };
 
 export function isKnownLocale(code: string): boolean {
-  return ALL_LOCALES.has(code.toLowerCase());
+  return ALL_KNOWN_LOCALES.has(code.toLowerCase());
 }
 
 export function localeToLanguage(locale: string): string {

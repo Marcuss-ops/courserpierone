@@ -162,8 +162,8 @@ describe("resolveFallback", () => {
     expect(resolveFallback("fr-fr")).toBe("fr-fr");
   });
 
-  it("resolves fr-ca → fr-fr via LANG_TO_DEFAULT_LOCALE", () => {
-    expect(resolveFallback("fr-ca")).toBe("fr-fr");
+  it("resolves fr-ca directly since it's a known locale", () => {
+    expect(resolveFallback("fr-ca")).toBe("fr-ca");
   });
 
   it("resolves pt-br directly when known", () => {
