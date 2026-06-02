@@ -453,6 +453,7 @@ export default function HomePage() {
                   {[
                     { scope: "user.info.basic", desc: "Username, avatar, nome visualizzato" },
                     { scope: "user.info.profile", desc: "Bio e informazioni estese del profilo" },
+                    { scope: "video.upload", desc: "Caricamento video come bozza su TikTok" },
                   ].map(({ scope, desc }) => (
                     <div key={scope} className="flex items-center gap-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--cyan)]/10">

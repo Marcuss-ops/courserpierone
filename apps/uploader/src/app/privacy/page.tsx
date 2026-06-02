@@ -58,6 +58,7 @@ export default function PrivacyPage() {
                     ["Nome visualizzato / Username", "user.info.basic", "Mostrare il tuo nome nel profilo"],
                     ["URL avatar", "user.info.basic", "Mostrare la tua foto profilo"],
                     ["Bio / Descrizione profilo", "user.info.profile", "Mostrare info aggiuntive del profilo"],
+                    ["Upload video (Bozza)", "video.upload", "Inizializzare e caricare video su TikTok"],
                   ].map(([dato, scope, fine]) => (
                     <tr key={dato}>
                       <td className="px-4 py-3 text-white">{dato}</td>
