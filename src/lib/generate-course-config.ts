@@ -23,6 +23,12 @@ export interface CourseConfig {
     description: string;
     ebookTitle: string;
     ebookContent: string;
+    /** Traduzioni UI (labels, benefits, faq) memorizzate come JSON nella sezione ui_all */
+    ui?: {
+      labels: Record<string, string>;
+      benefits: { title: string; desc: string }[];
+      faq: { q: string; a: string }[];
+    };
   }>;
   lessons: {
     number: number;
@@ -55,19 +61,26 @@ export async function generateCourseConfig(slug: string) {
 
   // Build languages object
   const languages: CourseConfig["languages"] = {};
-  const locales = Object.keys(translationsByLocale).length > 0 ? Object.keys(translationsByLocale) : ["it"];
-  for (const locale of locales) {
-    const t = translationsByLocale[locale] || {};
-    languages[locale] = {
-      title: t.titolo ?? product.slug,
-      problem: t.problema ?? "",
-      story: t.storia ?? "",
-      cta: t.cta ?? "Inizia Ora",
-      description: t.sottotitolo ?? "",
-      ebookTitle: t.titolo ?? product.slug,
-      ebookContent: t.storia ?? "",
-    };
-  }
+  const locales = Object.keys(translationsByLocale).length > 0 ? Object.keys(translationsByLocale) : ["it"];    function safeParseUi(raw: string | undefined) {
+      if (!raw) return undefined;
+      try { return JSON.parse(raw); } catch { return undefined; }
+    }
+
+    for (const locale of locales) {
+      const t = translationsByLocale[locale] || {};
+      // UI fallback: se la lingua non ha ui_all, usa quella inglese
+      const ui = safeParseUi(t.ui_all) ?? safeParseUi(translationsByLocale["en"]?.ui_all) ?? undefined;
+      languages[locale] = {
+        title: t.titolo ?? product.slug,
+        problem: t.problema ?? "",
+        story: t.storia ?? "",
+        cta: t.cta ?? "Inizia Ora",
+        description: t.sottotitolo ?? "",
+        ebookTitle: t.titolo ?? product.slug,
+        ebookContent: t.storia ?? "",
+        ui,
+      };
+    }
 
   // Build lessons
   const lessons: CourseConfig["lessons"] = product.lessons.map((lesson, i) => {
