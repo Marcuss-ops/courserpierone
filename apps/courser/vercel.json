@@ -1,0 +1,8 @@
+{
+  "buildCommand": "cd apps/courser && npm run build",
+  "outputDirectory": "apps/courser/.next",
+  "framework": "nextjs",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ]
+}
