@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 import { Play, Zap } from "lucide-react";
 import { getCourseConfig, type CourseConfig } from "@/lib/white-label-data";
+import { getCurrencyFromLocale } from "@/lib/locale-resolver";
 import { AnalyticsTracker } from "@/components/course/analytics-tracker";
 import { TrackedCtaButton } from "@/components/course/tracked-cta-button";
 
@@ -72,10 +73,18 @@ const TemplateH612 = dynamic(() => import("@/components/funnel/template-h612"));
 const TemplateHorizon = dynamic(() => import("@/components/funnel/template-horizon"));
 const TemplateBookClaude = dynamic(() => import("@/components/funnel/template-book-claude"));
 
-function getPriceString(data: CourseConfig, lang: string): string {
-  const priceConfig = data.prices?.[lang] ?? data.prices?.default;
-  if (priceConfig) return `${priceConfig.symbol}${priceConfig.amount}`;
-  return `€${data.price ?? 0}`;
+function getPriceString(data: CourseConfig, locale: string): { price: string; currency: string } {
+  // Derive currency from locale: pt-br → BRL, ja-jp → JPY, fr-fr → EUR
+  const currency = getCurrencyFromLocale(locale);
+
+  // Look up price by currency code (EUR, USD, BRL, JPY, GBP...)
+  const priceConfig = data.prices?.[currency] ?? data.prices?.default;
+  if (priceConfig) {
+    return { price: `${priceConfig.symbol}${priceConfig.amount}`, currency };
+  }
+
+  // Fallback: use product's base price
+  return { price: `€${data.price ?? 0}`, currency: "EUR" };
 }
 
 function getDisplayPriceForCurrency(data: CourseConfig): string {
@@ -88,9 +97,11 @@ function getDisplayPriceForCurrency(data: CourseConfig): string {
   return prices.join(" / ");
 }
 
-function mapConfigToTemplateData(data: CourseConfig, lang: string) {
+function mapConfigToTemplateData(data: CourseConfig, locale: string, lang: string) {
   const content = data.languages[lang] ?? data.languages[Object.keys(data.languages)[0]];
   if (!content) return null;
+
+  const { price, currency } = getPriceString(data, locale);
 
   return {
     titolo: content.title,
@@ -99,7 +110,8 @@ function mapConfigToTemplateData(data: CourseConfig, lang: string) {
     storia: content.story,
     recensioni: content.story ?? "",
     cta: content.cta,
-    prezzo: getPriceString(data, lang),
+    prezzo: price,
+    currency, // pass currency code to template
     coverUrl: data.cover ?? "",
     ui: content.ui ?? undefined,
     lezioni: data.lessons.map((l) => ({
@@ -153,7 +165,7 @@ export default async function LocaleLandingPage({
 
   // ─── Multi-Template ────────────────────────────
   if (data.template === "lumio" || data.template === "h612" || data.template === "horizon" || data.template === "book-claude" || data.template === "default") {
-    const templateData = mapConfigToTemplateData(data, currentLang);
+    const templateData = mapConfigToTemplateData(data, currentLocale, currentLang);
     if (templateData) {
       let TemplateComponent;
       switch (data.template) {
@@ -253,7 +265,7 @@ export default async function LocaleLandingPage({
               </div>
               <div className="pt-6">
                  <div className="text-5xl font-black text-white mb-8 tracking-tighter">
-                    {data.prices?.EUR || data.prices?.USD ? getDisplayPriceForCurrency(data) : getPriceString(data, currentLang)}
+                    {data.prices?.EUR || data.prices?.USD ? getDisplayPriceForCurrency(data) : getPriceString(data, currentLocale).price}
                     <span className="text-sm text-gray-500 font-bold ml-2 uppercase tracking-widest">{currentLang === "en" ? "One-Time Payment" : "Pagamento Unico"}</span>
                  </div>
                  <TrackedCtaButton

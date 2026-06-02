@@ -20,6 +20,7 @@ interface BookClaudeProps {
     recensioni?: string;
     cta?: string;
     prezzo?: string;
+    currency?: string;
     coverUrl?: string;
     lezioni?: { titolo: string; descrizione: string }[];
     /** UI translations from DB (labels + benefits + faq) */

@@ -71,6 +71,47 @@ const LANG_TO_DEFAULT_LOCALE: Record<string, string> = {
 
 export const DEFAULT_LOCALE = "en-us";
 
+// ─── Locale → currency mapping ─────────────────────
+const LOCALE_CURRENCY: Record<string, string> = {
+  // Europe: EUR zone
+  "it-it": "EUR", "fr-fr": "EUR", "de-de": "EUR", "es-es": "EUR",
+  "pt-pt": "EUR", "nl-nl": "EUR", "fi-fi": "EUR", "el-gr": "EUR",
+  "fr-be": "EUR", "nl-be": "EUR", "de-at": "EUR", "it-ch": "EUR",
+  "fr-ch": "CHF", "de-ch": "CHF",
+  "en-ie": "EUR", "sk-sk": "EUR", "si-sl": "EUR", "hr-hr": "EUR",
+  "lt-lt": "EUR", "lv-lv": "EUR", "et-ee": "EUR", "bg-bg": "BGN",
+  "ro-ro": "RON", "ro-md": "MDL",
+  // Europe: non-EUR
+  "en-gb": "GBP", "pl-pl": "PLN", "sv-se": "SEK", "da-dk": "DKK",
+  "nb-no": "NOK", "cs-cz": "CZK", "hu-hu": "HUF",
+  // Americas
+  "en-us": "USD", "en-ca": "CAD", "fr-ca": "CAD",
+  "es-mx": "MXN", "pt-br": "BRL",
+  "es-ar": "ARS", "es-co": "COP", "es-cl": "CLP", "es-pe": "PEN",
+  // Asia Pacific
+  "ja-jp": "JPY", "ko-kr": "KRW",
+  "zh-cn": "CNY", "zh-tw": "TWD", "zh-hk": "HKD",
+  "hi-in": "INR", "en-in": "INR", "ta-in": "INR", "te-in": "INR", "mr-in": "INR",
+  "tr-tr": "TRY", "th-th": "THB", "vi-vn": "VND",
+  "id-id": "IDR", "ms-my": "MYR", "en-sg": "SGD", "en-ph": "PHP",
+  "ur-pk": "PKR", "bn-bd": "BDT",
+  // Middle East
+  "ar-ae": "AED", "ar-sa": "SAR", "ar-eg": "EGP", "he-il": "ILS",
+  // Africa
+  "en-za": "ZAR", "en-ng": "NGN", "en-ke": "KES",
+  "fr-ma": "MAD",
+  // Oceania
+  "en-au": "AUD", "en-nz": "NZD",
+  // Other
+  "ru-ru": "RUB", "uk-ua": "UAH",
+};
+
+/** Get the currency code for a given locale. Falls back to EUR. */
+export function getCurrencyFromLocale(locale: string): string {
+  const normalized = normalizeLocale(locale);
+  return LOCALE_CURRENCY[normalized] ?? LOCALE_CURRENCY[localeToLanguage(normalized)] ?? "EUR";
+}
+
 // ─── Language-to-default locale mapping (exported) ──
 export { LANG_TO_DEFAULT_LOCALE };
 

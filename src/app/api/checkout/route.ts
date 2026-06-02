@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { initLS, getStoreId } from "@/lib/lemonsqueezy";
 import { createCheckout } from "@lemonsqueezy/lemonsqueezy.js";
 import { checkoutSchema, validationErrorResponse } from "@/lib/validations";
+import { getCurrencyFromLocale } from "@/lib/locale-resolver";
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,7 +22,9 @@ export async function POST(request: NextRequest) {
         }))
       );
     }
-    const { productId, locale = "it", currency, channelId } = parsed.data;
+    // Derive currency from locale if not explicitly provided
+    const { productId, locale = "it", channelId } = parsed.data;
+    const currency = parsed.data.currency ?? getCurrencyFromLocale(locale);
 
     const product = await prisma.product.findUnique({ where: { id: productId } });
     if (!product) return NextResponse.json({ error: "Product not found" }, { status: 404 });
