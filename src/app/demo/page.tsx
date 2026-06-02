@@ -3,6 +3,14 @@ import Link from "next/link";
 export default function DemoIndex() {
   const demos = [
     {
+      id: "tiktok",
+      name: "TikTok API",
+      description: "Login Kit OAuth + Content Posting API, dark video-first design, upload flow",
+      color: "#080808",
+      accent: "#25F4EE",
+      emoji: "🎵",
+    },
+    {
       id: "lumio",
       name: "Lumio",
       description: "Minimalismo + Glassmorphism, tonalità calda ivory, gradienti sunset",
@@ -34,7 +42,7 @@ export default function DemoIndex() {
         <div className="text-center">
           <h1 className="text-4xl font-bold">Demo Templates</h1>
           <p className="mt-3 text-gray-500">
-            3 template white-label per il Cervellone — solo testo, zero immagini
+            4 demo — template + TikTok API per il Cervellone — solo testo, zero immagini
           </p>
         </div>
 
