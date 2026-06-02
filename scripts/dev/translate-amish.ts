@@ -1,4 +1,4 @@
-import { prisma } from "../src/lib/db/prisma";
+import { prisma } from "../../src/lib/db/prisma";
 
 const PRODUCT_ID = "amish-id-1";
 

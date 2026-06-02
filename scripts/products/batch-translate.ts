@@ -12,8 +12,8 @@
  * Se target-locales non è specificato, usa il default set (12 lingue globali).
  */
 
-import { prisma } from "../src/lib/db/prisma";
-import { getOpenAI } from "../src/lib/openai";
+import { prisma } from "../../src/lib/db/prisma";
+import { getOpenAI } from "../../src/lib/openai";
 
 // ─── Config ─────────────────────────────────────────────────
 const DEFAULT_LOCALES = [

@@ -5,7 +5,7 @@
  *
  * Run: npx tsx scripts/seed-ui-translations.ts
  */
-import { prisma } from "../src/lib/db/prisma";
+import { prisma } from "../../src/lib/db/prisma";
 
 const SLUG = "amish-secrets";
 
