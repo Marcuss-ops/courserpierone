@@ -250,3 +250,31 @@ model MagicLink {
   expiresAt DateTime
   createdAt DateTime @default(now())
 }
+
+// ─── Traduzioni Landing Pages (DB condiviso per tutti i siti) ─
+// Una tabella unica per memorizzare le traduzioni di TUTTE le landing page
+// in TUTTE le lingue. Ogni sito/slug ha il suo set di traduzioni.
+model LandingTranslation {
+  id        String   @id @default(cuid())
+  slug      String   // chiave della landing (es. "amish-secrets")
+  locale    String   // it, en, fr, es, de, pt, ja, zh...
+  // Testi della landing page
+  heroTitle       String?
+  heroSubtitle    String?
+  heroDescription String?
+  problemText     String?
+  storyText       String?
+  ctaText         String?
+  // Sezioni strutturate (JSON)
+  benefits        String? // JSON array di { title, desc }
+  testimonials    String? // JSON array di { text, author }
+  faq             String? // JSON array di { q, a }
+  // Bonus
+  bonusLabel      String?
+  guaranteeText   String?
+  // Metadati
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([slug, locale])
+}
