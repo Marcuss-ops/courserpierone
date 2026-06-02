@@ -8,7 +8,7 @@
 | `list-products.ts` | Lista tutti i prodotti nel DB |
 | `read-product.ts` | Mostra dettaglio completo di un prodotto |
 | `batch-translate.ts` | Traduzione GPT-4o-mini batch in 27+ lingue |
-| `save-all-translations.ts` | Seed one-shot traduzioni da contenuto hardcoded |
+| `save-all-translations.ts` | Seed one-shot traduzioni da contenuto hardcoded (28 lingue, include UI rich con benefits/FAQ per it+en) |
 | `add-currency-prices.ts` | Aggiunge prezzi in valute multiple a un prodotto (param: <slug>) |
 | `check-prices.ts` | Verifica i prezzi configurati per un prodotto (param: <slug>) |
 
@@ -36,8 +36,11 @@ Legge le traduzioni esistenti (source-locale) dal DB, traduce via GPT-4o-mini in
 
 ## `save-all-translations.ts`
 
-Script di seed one-shot. Contiene tutte le 189 traduzioni hardcoded (27 lingue × 7 sezioni) per Amish Secrets.
+Script di seed one-shot. Contiene tutte le traduzioni hardcoded (28 lingue × 7 sezioni) per Amish Secrets.
+Include `ui_all` ricco (labels + benefits + FAQ) per italiano e inglese.
 Usato per popolare il DB senza API key OpenAI.
+
+Unifica i dati dei precedenti `save-all-translations.ts` + `seed-ui-translations.ts`.
 
 ## `add-currency-prices.ts`
 
