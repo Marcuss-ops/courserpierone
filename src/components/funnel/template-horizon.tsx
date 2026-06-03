@@ -16,6 +16,18 @@ interface HorizonProps {
     prezzo?: string;
     coverUrl?: string;
     lezioni?: { titolo: string; descrizione: string }[];
+    localeContent?: {
+      nav?: { brand?: string; features?: string; pricing?: string; testimonials?: string; faq?: string; get_started?: string; learn_more?: string };
+      hero?: { badge?: string; cta?: string; secondary_cta?: string; price_label?: string };
+      problem?: { badge?: string };
+      story?: { badge?: string };
+      lessons?: { badge?: string; title?: string };
+      testimonials?: { badge?: string; items?: { name?: string; role?: string }[] };
+      offer?: { one_time?: string; cta?: string };
+      footer?: { rights_reserved?: string; privacy?: string; terms?: string; contact?: string };
+      faq?: { title?: string; items?: { q: string; a: string }[] };
+      pricing?: { title?: string };
+    };
   };
   locale?: string;
   productId?: string;
@@ -24,6 +36,7 @@ interface HorizonProps {
 }
 
 export default function TemplateHorizon({ data, locale: _locale = "it" }: HorizonProps) {
+  const lc = data.localeContent;
   const ctaRef = useRef<HTMLDivElement>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
@@ -50,17 +63,17 @@ export default function TemplateHorizon({ data, locale: _locale = "it" }: Horizo
             boxShadow: "0 4px 30px rgba(0,0,0,0.06)",
           }}
         >
-          <span className="text-sm font-bold" style={{ color: "#1d1c15" }}>Brand</span>
+          <span className="text-sm font-bold" style={{ color: "#1d1c15" }}>{lc?.nav?.brand || "Brand"}</span>
           <div className="hidden items-center gap-6 text-sm md:flex" style={{ color: "#555555" }}>
-            <a href="#features" className="hover:text-black transition">Features</a>
-            <a href="#pricing" className="hover:text-black transition">Pricing</a>
-            <a href="#faq" className="hover:text-black transition">FAQ</a>
+            <a href="#features" className="hover:text-black transition">{lc?.nav?.features || "Features"}</a>
+            <a href="#pricing" className="hover:text-black transition">{lc?.nav?.pricing || "Pricing"}</a>
+            <a href="#faq" className="hover:text-black transition">{lc?.nav?.faq || "FAQ"}</a>
           </div>
           <button
             className="rounded-xl px-5 py-2 text-sm font-semibold text-white transition hover:opacity-90"
             style={{ background: "#FF5E3A" }}
           >
-            Get Started
+            {lc?.nav?.get_started || "Get Started"}
           </button>
         </div>
       </nav>
@@ -76,7 +89,7 @@ export default function TemplateHorizon({ data, locale: _locale = "it" }: Horizo
           className="mb-6 inline-block rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider"
           style={{ background: "#ffdbd0", color: "#FF5E3A" }}
         >
-          New
+          {lc?.hero?.badge || "New"}
         </span>
         <h1
           className="max-w-4xl font-extrabold"
@@ -101,14 +114,14 @@ export default function TemplateHorizon({ data, locale: _locale = "it" }: Horizo
             className="rounded-xl px-8 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5"
             style={{ background: "#FF5E3A", boxShadow: "0 4px 20px rgba(255,94,58,0.3)" }}
           >
-            {data.cta || "Acquista Ora"}
+            {data.cta || lc?.hero?.cta || "Acquista Ora"}
           </a>
           <a
             href="#features"
             className="rounded-xl border px-8 py-3 text-sm font-semibold transition hover:bg-black/5"
             style={{ borderColor: "#ddc0b8", color: "#1d1c15" }}
           >
-            Scopri di Più
+            {lc?.nav?.learn_more || "Scopri di Più"}
           </a>
         </div>
       </section>
@@ -121,7 +134,7 @@ export default function TemplateHorizon({ data, locale: _locale = "it" }: Horizo
               className="mb-4 inline-block rounded-full px-4 py-1 text-xs font-bold uppercase tracking-wider"
               style={{ background: "#f3ede2", color: "#89726b" }}
             >
-              Il Problema
+              {lc?.problem?.badge || "Il Problema"}
             </span>
             <h2
               className="mt-4 font-bold"
@@ -163,7 +176,7 @@ export default function TemplateHorizon({ data, locale: _locale = "it" }: Horizo
               {/* Text */}
               <div>
                 <span className="mb-3 inline-block rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider" style={{ background: "#f3ede2", color: "#89726b" }}>
-                  La Nostra Storia
+                  {lc?.story?.badge || "La Nostra Storia"}
                 </span>
                 <h2 className="mt-3 font-bold" style={{ fontSize: "clamp(24px, 3vw, 36px)", lineHeight: 1.2, color: "#1d1c15" }}>
                   {data.storia.split("\n")[0] ?? "La storia del prodotto"}
@@ -183,10 +196,10 @@ export default function TemplateHorizon({ data, locale: _locale = "it" }: Horizo
           <div className="mx-auto max-w-6xl px-6">
             <div className="mb-12 text-center">
               <span className="mb-3 inline-block rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider" style={{ background: "#f3ede2", color: "#89726b" }}>
-                Cosa Imparerai
+                {lc?.lessons?.badge || "Cosa Imparerai"}
               </span>
               <h2 className="mt-3 font-bold" style={{ fontSize: "clamp(24px, 3vw, 36px)", color: "#1d1c15" }}>
-                Lezioni del Corso
+                {lc?.lessons?.title || "Lezioni del Corso"}
               </h2>
             </div>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -223,7 +236,7 @@ export default function TemplateHorizon({ data, locale: _locale = "it" }: Horizo
         <section className="py-20">
           <div className="mx-auto max-w-3xl px-6 text-center">
             <span className="mb-4 inline-block rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider" style={{ background: "#f3ede2", color: "#89726b" }}>
-              Testimonianze
+              {lc?.testimonials?.badge || "Testimonianze"}
             </span>
             <p
               className="mt-6 font-bold"
@@ -238,8 +251,8 @@ export default function TemplateHorizon({ data, locale: _locale = "it" }: Horizo
             <div className="mt-8 flex items-center justify-center gap-3">
               <div className="h-10 w-10 rounded-full" style={{ background: "linear-gradient(135deg, #FF9A9E, #FECFEF)" }} />
               <div className="text-left">
-                <p className="text-sm font-semibold" style={{ color: "#1d1c15" }}>Nome Cliente</p>
-                <p className="text-xs" style={{ color: "#89726b" }}>Ruolo, Azienda</p>
+                <p className="text-sm font-semibold" style={{ color: "#1d1c15" }}>{lc?.testimonials?.items?.[0]?.name || "Nome Cliente"}</p>
+                <p className="text-xs" style={{ color: "#89726b" }}>{lc?.testimonials?.items?.[0]?.role || "Ruolo, Azienda"}</p>
               </div>
             </div>
           </div>
@@ -251,7 +264,7 @@ export default function TemplateHorizon({ data, locale: _locale = "it" }: Horizo
         <div className="mx-auto max-w-4xl px-6">
           <div className="mb-12 text-center">
             <h2 className="font-bold" style={{ fontSize: "clamp(28px, 4vw, 40px)", color: "#1d1c15" }}>
-              Pricing
+              {lc?.nav?.pricing || "Pricing"}
             </h2>
           </div>
           <div className="grid gap-6 md:grid-cols-2">
@@ -350,16 +363,16 @@ export default function TemplateHorizon({ data, locale: _locale = "it" }: Horizo
         />
         <div className="relative z-10 mx-auto max-w-3xl px-6 text-center">
           <h2 className="font-extrabold text-white" style={{ fontSize: "clamp(28px, 4vw, 54px)", letterSpacing: "-0.03em" }}>
-            {data.cta || "Inizia Oggi"}
+            {data.cta || lc?.hero?.cta || "Inizia Oggi"}
           </h2>
           <p className="mt-4 text-lg text-gray-300">
-            {data.prezzo ? `Prezzo: ${data.prezzo}` : "Offerta speciale di lancio"}
+            {data.prezzo ? `Prezzo: ${data.prezzo}` : (lc?.hero?.price_label || "Offerta speciale di lancio")}
           </p>
           <button
             className="mt-8 rounded-xl px-10 py-4 text-base font-semibold text-white transition hover:-translate-y-0.5"
             style={{ background: "#FF5E3A", boxShadow: "0 4px 30px rgba(255,94,58,0.4)" }}
           >
-            {data.cta || "Acquista Ora"}
+            {data.cta || lc?.hero?.cta || "Acquista Ora"}
           </button>
         </div>
       </section>
@@ -367,15 +380,15 @@ export default function TemplateHorizon({ data, locale: _locale = "it" }: Horizo
       {/* ── FOOTER ──────────────────────────────────────── */}
       <footer className="py-8">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6">
-          <span className="font-bold" style={{ color: "#1d1c15" }}>Brand</span>
+          <span className="font-bold" style={{ color: "#1d1c15" }}>{lc?.nav?.brand || "Brand"}</span>
           <div className="flex gap-6 text-sm" style={{ color: "#89726b" }}>
-            <a href="#" className="hover:text-black transition">Privacy</a>
-            <a href="#" className="hover:text-black transition">Terms</a>
-            <a href="#" className="hover:text-black transition">Contact</a>
+            <a href="#" className="hover:text-black transition">{lc?.footer?.privacy || "Privacy"}</a>
+            <a href="#" className="hover:text-black transition">{lc?.footer?.terms || "Terms"}</a>
+            <a href="#" className="hover:text-black transition">{lc?.footer?.contact || "Contact"}</a>
           </div>
         </div>
         <div className="mt-4 text-center text-xs" style={{ color: "#ddc0b8" }}>
-          © {new Date().getFullYear()} Brand. All rights reserved.
+          © {new Date().getFullYear()} {lc?.nav?.brand || "Brand"}. {lc?.footer?.rights_reserved || "All rights reserved."}
         </div>
       </footer>
     </div>

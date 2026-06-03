@@ -30,6 +30,11 @@ interface BookClaudeProps {
       benefits: { title: string; desc: string }[];
       faq: { q: string; a: string }[];
     };
+    localeContent?: {
+      ui?: { labels?: Record<string, string> };
+      modules?: { items?: { title: string; desc: string }[] };
+      faq?: { items?: { q: string; a: string }[] };
+    };
   };
   locale?: string;
   productId?: string;
@@ -114,6 +119,18 @@ const FALLBACK_LABELS = {
   privacy: "Privacy",
   terms: "Termini",
   legal_note: "This is a digital informational product. Results may vary and depend on personal commitment. The Amish prices and techniques described are based on ethnographic research and may not accurately reflect the contemporary practices of all Amish communities.",
+  bestseller: "Best Seller",
+  story_badge: "// La Storia Vera",
+  story_title: "La mia esperienza tra gli Amish",
+  story_subtitle: "Tre mesi in Pennsylvania, dodici famiglie intervistate, un sistema economico che funziona da 300 anni.",
+  amish_life: "Vita Amish",
+  caption_1: "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria tramandata da generazioni.",
+  caption_2: "Il sistema di baratto e scambio che elimina il bisogno di denaro contante e costruisce relazioni di fiducia durature.",
+  caption_3: "L'economia domestica Amish: come una famiglia riesce a vivere con il 60% in meno rispetto alla media nazionale.",
+  tag_1: "Antropologia Economica",
+  tag_2: "Studi Amish",
+  tag_3: "Consulenza Finanziaria",
+  brand_name: "Courssy",
 } as const;
 
 type LabelKey = keyof typeof FALLBACK_LABELS;
@@ -147,14 +164,16 @@ export default function TemplateBookClaude({
 }: BookClaudeProps) {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
+  const lc = data.localeContent;
   const labels = data.ui?.labels ?? {};
-  const benefits = data.ui?.benefits ?? [];
-  const faqItems = data.ui?.faq ?? [];
+  const lcLabels = lc?.ui?.labels ?? {};
+  const benefits = data.ui?.benefits ?? lc?.modules?.items ?? [];
+  const faqItems = data.ui?.faq ?? lc?.faq?.items ?? [];
 
   const hasBenefits = benefits.length > 0;
   const hasFaq = faqItems.length > 0;
 
-  const t = (key: LabelKey): string => labels[key] ?? FALLBACK_LABELS[key] ?? key;
+  const t = (key: LabelKey): string => lcLabels[key] ?? labels[key] ?? FALLBACK_LABELS[key] ?? key;
 
   return (
     <div className="min-h-screen bg-white text-[#1A1A1A] font-sans selection:bg-[#FF6B00]/20 antialiased">
@@ -277,7 +296,7 @@ export default function TemplateBookClaude({
                 {/* Badge flottante */}
                 <div className="absolute -top-3 -right-3 bg-[#FF6B00] text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg animate-pulse flex items-center gap-1.5">
                   <Award className="w-3 h-3" />
-                  Best Seller
+                  {t("bestseller")}
                 </div>
               </div>
             </div>
@@ -337,12 +356,12 @@ export default function TemplateBookClaude({
       <section className="py-20 lg:py-24 px-6">
         <div className="max-w-[1000px] mx-auto">
           <div className="text-center mb-14">
-            <span className="font-mono text-xs text-[#6B7280] uppercase tracking-widest block mb-4">// La Storia Vera</span>
+            <span className="font-mono text-xs text-[#6B7280] uppercase tracking-widest block mb-4">{t("story_badge")}</span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight mb-4">
-              La mia esperienza tra gli Amish
+              {t("story_title")}
             </h2>
             <p className="text-lg text-[#6B7280] max-w-2xl mx-auto">
-              Tre mesi in Pennsylvania, dodici famiglie intervistate, un sistema economico che funziona da 300 anni.
+              {t("story_subtitle")}
             </p>
           </div>
 
@@ -352,18 +371,14 @@ export default function TemplateBookClaude({
                 <div className="aspect-[4/3] overflow-hidden">
                   <img
                     src={src}
-                    alt={`Vita Amish ${i + 1}`}
+                    alt={`${t("amish_life")} ${i + 1}`}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                     onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                   />
                 </div>
                 <div className="p-4 bg-white">
                   <p className="text-sm text-[#6B7280] leading-relaxed">
-                    {[
-                      "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria tramandata da generazioni.",
-                      "Il sistema di baratto e scambio che elimina il bisogno di denaro contante e costruisce relazioni di fiducia durature.",
-                      "L'economia domestica Amish: come una famiglia riesce a vivere con il 60% in meno rispetto alla media nazionale."
-                    ][i]}
+                    {[t("caption_1"), t("caption_2"), t("caption_3")][i]}
                   </p>
                 </div>
               </div>
@@ -397,7 +412,7 @@ export default function TemplateBookClaude({
                 <p className="text-sm text-[#FF6B00] font-bold uppercase tracking-wider mb-4">{t("researcher_author")}</p>
                 <p className="text-sm text-[#6B7280] leading-relaxed">{t("author_bio")}</p>
                 <div className="mt-5 flex flex-wrap gap-3">
-                  {["Antropologia Economica", "Studi Amish", "Consulenza Finanziaria"].map((tag, i) => (
+                  {[t("tag_1"), t("tag_2"), t("tag_3")].map((tag, i) => (
                     <span key={i} className="text-[10px] font-bold text-[#FF6B00] bg-[#FFF3EB] px-3 py-1.5 rounded-full uppercase tracking-wider">
                       {tag}
                     </span>
@@ -621,7 +636,7 @@ export default function TemplateBookClaude({
           </div>
           {/* Footer links */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-3 text-xs text-[#6B7280] font-medium">
-            <div>&copy; {new Date().getFullYear()} Courssy &mdash; {t("rights_reserved")}</div>
+            <div>&copy; {new Date().getFullYear()} {t("brand_name") || "Courssy"} &mdash; {t("rights_reserved")}</div>
             <div className="flex items-center gap-6">
               <div className="relative">
                 <LanguageSelector currentLocale={locale ?? "en"} productSlug={productSlug ?? ""} />

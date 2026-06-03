@@ -14,6 +14,18 @@ interface H612Props {
     prezzo?: string;
     coverUrl?: string;
     lezioni?: { titolo: string; descrizione: string }[];
+    localeContent?: {
+      nav?: { brand?: string; features?: string; pricing?: string; get_started?: string; learn_more?: string };
+      hero?: { badge?: string; cta?: string; secondary_cta?: string; price_label?: string };
+      problem?: { badge?: string };
+      story?: { badge?: string };
+      lessons?: { badge?: string; title?: string };
+      testimonials?: { badge?: string; items?: { name?: string; role?: string }[] };
+      offer?: { one_time?: string };
+      footer?: { rights_reserved?: string; privacy?: string; terms?: string; contact?: string };
+      course?: { now_playing?: string; module_label?: string };
+      trust?: { title?: string; company_names?: string[] };
+    };
   };
   locale?: string;
   productId?: string;
@@ -22,6 +34,7 @@ interface H612Props {
 }
 
 export default function TemplateH612({ data, locale: _locale = "it" }: H612Props) {
+  const lc = data.localeContent;
   return (
     <div className="min-h-screen" style={{ background: "#141313", color: "#ffffff" }}>
       {/* ── NAV ───────────────────────────────────────────── */}
@@ -34,15 +47,15 @@ export default function TemplateH612({ data, locale: _locale = "it" }: H612Props
         }}
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <span className="text-lg font-semibold text-white">Brand</span>
+          <span className="text-lg font-semibold text-white">{lc?.nav?.brand || "Brand"}</span>
           <div className="flex items-center gap-6">
-            <a href="#features" className="text-sm text-gray-400 hover:text-white transition">Features</a>
-            <a href="#pricing" className="text-sm text-gray-400 hover:text-white transition">Pricing</a>
+            <a href="#features" className="text-sm text-gray-400 hover:text-white transition">{lc?.nav?.features || "Features"}</a>
+            <a href="#pricing" className="text-sm text-gray-400 hover:text-white transition">{lc?.nav?.pricing || "Pricing"}</a>
             <button
               className="rounded-full border px-5 py-2 text-sm font-medium text-white transition hover:bg-white/10"
               style={{ borderColor: "#444748" }}
             >
-              Get Started
+              {lc?.nav?.get_started || "Get Started"}
             </button>
           </div>
         </div>
@@ -71,14 +84,14 @@ export default function TemplateH612({ data, locale: _locale = "it" }: H612Props
               className="rounded-lg px-8 py-3 text-sm font-medium text-black transition hover:opacity-90"
               style={{ background: "#ffffff" }}
             >
-              {data.cta ?? "Inizia Ora"}
+              {data.cta || lc?.hero?.cta || "Inizia Ora"}
             </a>
             <a
               href="#features"
               className="rounded-lg border px-8 py-3 text-sm font-medium text-white transition hover:bg-white/5"
               style={{ borderColor: "#444748" }}
             >
-              Scopri di Più
+              {lc?.nav?.learn_more || "Scopri di Più"}
             </a>
           </div>
         </div>
@@ -100,7 +113,7 @@ export default function TemplateH612({ data, locale: _locale = "it" }: H612Props
         <section className="py-24">
           <div className="mx-auto max-w-3xl px-6">
             <span className="mb-4 inline-block text-xs font-semibold uppercase tracking-widest" style={{ color: "#8e9192" }}>
-              The Problem
+              {lc?.problem?.badge || "The Problem"}
             </span>
             <h2
               className="mt-4"
@@ -162,7 +175,7 @@ export default function TemplateH612({ data, locale: _locale = "it" }: H612Props
               {/* Text */}
               <div>
                 <span className="mb-3 inline-block text-xs font-semibold uppercase tracking-widest" style={{ color: "#8e9192" }}>
-                  Our Story
+                  {lc?.story?.badge || "Our Story"}
                 </span>
                 <h2
                   className="mt-3"
@@ -184,13 +197,13 @@ export default function TemplateH612({ data, locale: _locale = "it" }: H612Props
         <section className="py-20">
           <div className="mx-auto max-w-6xl px-6">
             <span className="mb-4 inline-block text-xs font-semibold uppercase tracking-widest" style={{ color: "#8e9192" }}>
-              Curriculum
+              {lc?.lessons?.badge || "Curriculum"}
             </span>
             <h2
               className="mb-12"
               style={{ fontFamily: "'Noto Serif', serif", fontSize: "clamp(24px, 3vw, 36px)" }}
             >
-              Lezioni del Corso
+              {lc?.lessons?.title || "Lezioni del Corso"}
             </h2>
             <div className="flex flex-col gap-4">
               {data.lezioni.map((lez, i) => (
@@ -226,7 +239,7 @@ export default function TemplateH612({ data, locale: _locale = "it" }: H612Props
         <section className="py-24">
           <div className="mx-auto max-w-3xl px-6 text-center">
             <span className="mb-4 inline-block text-xs font-semibold uppercase tracking-widest" style={{ color: "#8e9192" }}>
-              Testimonials
+              {lc?.testimonials?.badge || "Testimonianze"}
             </span>
             <p
               className="mt-6"
@@ -242,8 +255,8 @@ export default function TemplateH612({ data, locale: _locale = "it" }: H612Props
             <div className="mt-8 flex items-center justify-center gap-3">
               <div className="h-10 w-10 rounded-full" style={{ background: "linear-gradient(135deg, #4facfe, #00f2fe)" }} />
               <div className="text-left">
-                <p className="text-sm font-medium text-white">Nome Cliente</p>
-                <p className="text-xs" style={{ color: "#8e9192" }}>Ruolo, Azienda</p>
+                <p className="text-sm font-medium text-white">{data.localeContent?.testimonials?.items?.[0]?.name || "Nome Cliente"}</p>
+                <p className="text-xs" style={{ color: "#8e9192" }}>{data.localeContent?.testimonials?.items?.[0]?.role || "Ruolo, Azienda"}</p>
               </div>
             </div>
           </div>
@@ -261,16 +274,16 @@ export default function TemplateH612({ data, locale: _locale = "it" }: H612Props
           <h2
             style={{ fontFamily: "'Noto Serif', serif", fontSize: "clamp(28px, 4vw, 48px)" }}
           >
-            {data.cta ?? "Inizia Oggi"}
+            {data.cta || lc?.hero?.cta || "Inizia Oggi"}
           </h2>
           <p className="mt-4 text-lg" style={{ color: "#c7c6c6" }}>
-            {data.prezzo ? `Prezzo: ${data.prezzo}` : "Offerta speciale di lancio"}
+            {data.prezzo ? `Prezzo: ${data.prezzo}` : (lc?.hero?.price_label || "Offerta speciale di lancio")}
           </p>
           <button
             className="mt-8 rounded-lg px-10 py-4 text-base font-medium text-black transition hover:opacity-90"
             style={{ background: "#ffffff" }}
           >
-            {data.cta || "Acquista Ora"}
+            {data.cta || lc?.hero?.cta || "Acquista Ora"}
           </button>
         </div>
       </section>
@@ -278,15 +291,15 @@ export default function TemplateH612({ data, locale: _locale = "it" }: H612Props
       {/* ── FOOTER ──────────────────────────────────────── */}
       <footer className="border-t py-8" style={{ borderColor: "#353434" }}>
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6">
-          <span className="font-semibold">Brand</span>
+          <span className="font-semibold">{lc?.nav?.brand || "Brand"}</span>
           <div className="flex gap-6 text-sm" style={{ color: "#8e9192" }}>
-            <a href="#" className="hover:text-white transition">Privacy</a>
-            <a href="#" className="hover:text-white transition">Terms</a>
-            <a href="#" className="hover:text-white transition">Contact</a>
+            <a href="#" className="hover:text-white transition">{lc?.footer?.privacy || "Privacy"}</a>
+            <a href="#" className="hover:text-white transition">{lc?.footer?.terms || "Terms"}</a>
+            <a href="#" className="hover:text-white transition">{lc?.footer?.contact || "Contact"}</a>
           </div>
         </div>
         <div className="mt-4 text-center text-xs" style={{ color: "#444748" }}>
-          © {new Date().getFullYear()} Brand. All rights reserved.
+          © {new Date().getFullYear()} {lc?.nav?.brand || "Brand"}. {lc?.footer?.rights_reserved || "All rights reserved."}
         </div>
       </footer>
 
