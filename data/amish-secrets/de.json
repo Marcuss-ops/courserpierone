@@ -6,38 +6,38 @@
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
-    "brand": "Amish secrets",
-    "features": "Features",
-    "pricing": "Pricing",
-    "testimonials": "Testimonials",
+    "brand": "Amische Geheimnisse",
+    "features": "Eigenschaften",
+    "pricing": "Preis",
+    "testimonials": "Zeugnisse",
     "faq": "FAQ",
-    "contact": "Contact",
-    "get_started": "Get Started",
-    "learn_more": "Learn More",
-    "member_area": "Member Area",
-    "back_to_landing": "Back to Landing"
+    "contact": "Kontakt",
+    "get_started": "Erste Schritte",
+    "learn_more": "Mehr erfahren",
+    "member_area": "Mitgliedstaat",
+    "back_to_landing": "Zurück zur Landing"
   },
   "hero": {
-    "badge": "New",
+    "badge": "Neu",
     "title": "Amish Secrets: Wie man sparsam lebt und Geld verwaltet",
     "subtitle": "Entdecke die Geheimnisse der Amish-Gemeinschaft für ein sparsames Leben. Enthält umfassende Videomodule und herunterladbare PDFs.",
-    "cta": "Get Started",
-    "secondary_cta": "Learn More",
-    "price_label": "Special launch price",
+    "cta": "Erste Schritte",
+    "secondary_cta": "Mehr erfahren",
+    "price_label": "Sonderpreis",
     "one_time_payment": "Einmalzahlung — kein Abo"
   },
   "problem": {
-    "badge": "The Problem",
+    "badge": "Das Problem",
     "title": "Müde davon, am Ende des Monats keine Ersparnisse mehr zu haben? Die moderne Gesellschaft treibt uns zum übermäßigen Konsum.",
     "text": ""
   },
   "story": {
-    "badge": "Our Story",
+    "badge": "Unsere Geschichte",
     "title": "La mia esperienza tra gli Amish",
     "image_captions": [
       "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria.",
       "Il sistema di baratto e scambio che elimina il bisogno di denaro contante.",
-      "L'economia domestica Amish: come una famiglia riesce a vivere con il 60% in meno."
+      "L'economia domestica Amish: come una famigliariesce a vivere con il 60% in meno."
     ],
     "quote": "Die Amish führen ein reiches und erfülltes Leben, indem sie nur einen Bruchteil dessen ausgeben, was wir ausgeben. In diesem Kurs verraten wir dir, wie sie das machen."
   },
@@ -48,9 +48,9 @@
     "role": "Forscher · Autor · Reisender",
     "bio": "Ich habe 3 Monate in Pennsylvania gelebt, 12 Amish-Familien interviewt und ihr Wirtschaftssystem studiert. Keine Theorie — nur praxiserprobte Methoden, die ich angewandt habe, um mein finanzielles Leben zu verändern.",
     "tags": [
-      "Saggezza Finanziaria",
+      "Die Geschichte der Welt",
       "Vita Sostenibile",
-      "Educazione"
+      "In den Warenkorb"
     ]
   },
   "modules": {
@@ -59,36 +59,36 @@
     "description": "8 praktische Module, die die Weisheit der Amish in konkrete Aktionen für deinen Alltag verwandeln.",
     "items": [
       {
-        "title": "Amish Budget",
-        "desc": "Live on 30% less without sacrifice."
+        "title": "Am meisten",
+        "desc": "Leben auf 30% weniger ohne Opfer."
       },
       {
         "title": "Infinite Pantry",
-        "desc": "The food storage method that eliminates waste."
+        "desc": "Die Lebensmittelspeichermethode, die Abfälle eliminiert."
       },
       {
-        "title": "Zero Debt",
-        "desc": "The framework to get out of debt forever."
+        "title": "Keine Schulden",
+        "desc": "Der Rahmen, um für immer aus Schulden zu kommen."
       },
       {
-        "title": "Fix Everything",
-        "desc": "12 essential tools to repair yourself."
+        "title": "Alles in Ordnung",
+        "desc": "12 wesentliche Werkzeuge, um sich zu reparieren."
       },
       {
-        "title": "Money-Free Exchange",
-        "desc": "How to activate a barter network."
+        "title": "Geldfreier Austausch",
+        "desc": "Wie man ein Barter-Netzwerk aktiviert."
       },
       {
-        "title": "Farm to Table",
-        "desc": "Guide to home gardening and zero-waste cooking."
+        "title": "Bauernhof zu Tisch",
+        "desc": "Guide to home gardening and zero-waste Kochen."
       },
       {
-        "title": "Free Energy",
-        "desc": "How to cut utility bills by 50%."
+        "title": "Freie Energie",
+        "desc": "Wie man Gebrauchsrechnungen um 50% zu schneiden."
       },
       {
-        "title": "30-Day Plan",
-        "desc": "Day-by-day checklist to transform your finances."
+        "title": "30-Tage-Plan",
+        "desc": "Tägliche Checkliste, um Ihre Finanzen zu transformieren."
       }
     ]
   },
@@ -105,7 +105,7 @@
   },
   "testimonials": {
     "badge": "// 06 — Erfahrungsberichte",
-    "title": "Testimonials",
+    "title": "Zeugnisse",
     "items": [
       {
         "text": "Ich habe die Amish-Budget-Methode angewandt und in zwei Monaten meine Ausgaben um 35 % reduziert. Die 30-Tage-Checkliste war der Wendepunkt. Endlich ein Kurs, der wirklich funktioniert.",
@@ -141,28 +141,28 @@
     "offer_valid": "Angebot gültig diese Woche",
     "items": [
       {
-        "q": "What exactly is included?",
-        "a": "You get the complete eBook in PDF, ePub, and Kindle formats. Plus lifetime access to all future updates."
+        "q": "Was genau ist enthalten?",
+        "a": "Sie erhalten das komplette eBook in PDF-, ePub- und Kindle-Formaten. Plus lebenslangen Zugriff auf alle zukünftigen Updates."
       },
       {
-        "q": "Is it in English?",
-        "a": "Yes, the course is fully available in English."
+        "q": "Ist es auf Englisch?",
+        "a": "Ja, der Kurs ist komplett in Englisch verfügbar."
       },
       {
-        "q": "What format is the course in?",
-        "a": "eBook in PDF, ePub, and Kindle formats. Videos are in MP4 format."
+        "q": "Welches Format ist der Kurs?",
+        "a": "eBook in PDF, ePub und Kindle Formate. Videos sind im MP4-Format."
       },
       {
-        "q": "When do I get access?",
-        "a": "Immediately after payment."
+        "q": "Wann bekomme ich Zugang?",
+        "a": "Sofort nach Zahlung."
       },
       {
-        "q": "What if I'm not satisfied?",
-        "a": "You're protected by our 30-day money-back guarantee."
+        "q": "Was, wenn ich nicht zufrieden bin?",
+        "a": "Sie sind durch unsere 30-tägige Geld-zurück-Garantie geschützt."
       },
       {
-        "q": "How long does it take?",
-        "a": "The complete program takes about 3-4 hours."
+        "q": "Wie lange dauert es?",
+        "a": "Das komplette Programm dauert ca. 3-4 Stunden."
       }
     ]
   },
@@ -183,7 +183,7 @@
     }
   },
   "trust": {
-    "title": "Trusted by teams worldwide",
+    "title": "Vertraut von Teams weltweit",
     "readers_count": "1.247 Leser",
     "company_names": []
   },
@@ -195,9 +195,9 @@
       "buy_now_dash": "Jetzt kaufen —",
       "view_modules": "Module ansehen",
       "ssl_secure": "Sichere Zahlung mit SSL",
-      "instant_download": "Instant Download",
-      "lifetime_access": "Lifetime Access",
-      "guarantee_days": "30-Day Guarantee",
+      "instant_download": "Sofortiger Download",
+      "lifetime_access": "Zugang zum Leben",
+      "guarantee_days": "Garantie von 30 Tagen",
       "section_who": "// 01 — Für Wen",
       "is_this_for_you": "Ist dieser Kurs für dich?",
       "perfect_for": "Perfekt für dich, wenn:",
@@ -253,33 +253,46 @@
       "privacy": "Datenschutz",
       "terms": "AGB",
       "legal_note": "Dies ist ein digitales Informationsprodukt. Die Ergebnisse können variieren und hängen vom persönlichen Engagement ab. Die beschriebenen Amish-Preise und Techniken basieren auf ethnografischer Forschung und spiegeln möglicherweise nicht genau die zeitgenössischen Praktiken aller Amish-Gemeinschaften wider.",
-      "features": "Features",
-      "pricing": "Pricing",
-      "testimonials": "Testimonials",
-      "contact": "Contact",
-      "get_started": "Get Started",
-      "learn_more": "Learn More",
-      "member_area": "Member Area",
-      "back_to_landing": "Back to Landing",
-      "buy_now": "Buy Now",
+      "features": "Eigenschaften",
+      "pricing": "Preis",
+      "testimonials": "Zeugnisse",
+      "contact": "Kontakt",
+      "get_started": "Erste Schritte",
+      "learn_more": "Mehr erfahren",
+      "member_area": "Mitgliedstaat",
+      "back_to_landing": "Zurück zur Landing",
+      "buy_now": "Jetzt kaufen",
       "currency_symbol": "$",
-      "new_badge": "New",
-      "the_problem": "The Problem",
-      "our_story": "Our Story",
-      "what_learn": "What You'll Learn",
-      "course_lessons": "Course Lessons",
-      "curriculum": "Curriculum",
-      "free_tier": "Free",
+      "new_badge": "Neu",
+      "the_problem": "Das Problem",
+      "our_story": "Unsere Geschichte",
+      "what_learn": "Was du lernen wirst",
+      "course_lessons": "Lehrveranstaltungen",
+      "curriculum": "Lehrplan",
+      "free_tier": "Kostenlos",
       "pro_tier": "Pro",
       "per_month": "/mo",
-      "start_free": "Start Free",
-      "popular": "Popular",
-      "free_title": "To get started",
-      "pro_title": "To grow",
-      "trusted_by": "Trusted by teams worldwide",
-      "offer_badge": "Launch Offer",
-      "price_special": "Special launch price",
-      "buy_and_access": "Buy & Access Instantly",
+      "start_free": "Kostenlos starten",
+      "popular": "Beliebtheit",
+      "free_title": "Um zu beginnen",
+      "pro_title": "Zu wachsen",
+      "trusted_by": "Vertraut von Teams weltweit",
+      "offer_badge": "Startangebot",
+      "price_special": "Sonderpreis",
+      "buy_and_access": "Kaufen &amp; Zugang sofort",
+      "bestseller": "Der beste Verkäufer",
+      "story_badge": "// Die wahre Geschichte",
+      "story_title": "Meine Erfahrung unter den Amish",
+      "story_subtitle": "Drei Monate in Pennsylvania, zwölf Familien interviewt, ein Wirtschaftssystem, das 300 Jahre gearbeitet hat.",
+      "amish_life": "Am Ende des Lebens",
+      "caption_1": "Tägliches Leben in der Amisch-Gemeinschaft: Einfachheit, Selbstversorgung und finanzielle Weisheit durch Generationen weitergegeben.",
+      "caption_2": "Das Barter- und Austauschsystem, das die Notwendigkeit von Bargeld beseitigt und dauerhafte Vertrauensbeziehungen baut.",
+      "caption_3": "Die Amish-Haushaltswirtschaft: wie eine Familie 60% weniger lebt als der nationale Durchschnitt.",
+      "tag_1": "Wirtschaftliche Anthropologie",
+      "tag_2": "Am Ende des Jahres",
+      "tag_3": "Finanzberatung",
+      "brand_name": "Kuriose",
+      "reviewer": "Marco R., Erste Leser",
       "language_switch": "EN",
       "language_switch_en": "EN",
       "30day money back": "30 Tage Geld-zurück-Garantie",
@@ -296,8 +309,7 @@
       "n_habits": "Du deine Ausgabegewohnheiten nicht ändern willst",
       "n_quick_fix": "Du schnelle Lösungen statt einem soliden Weg bevorzugst",
       "n_implement": "Du nicht bereit bist, das Gelernte umzusetzen",
-      "n_advice": "Du persönliche Finanzberatung suchst",
-      "reviewer": "Marco R., Erste Leser"
+      "n_advice": "Du persönliche Finanzberatung suchst"
     }
   },
   "audience": {
@@ -321,13 +333,13 @@
     ]
   },
   "course": {
-    "back_to_course": "Back to Landing",
-    "module_label": "Curriculum",
-    "now_playing": "Now playing",
-    "page_label": "Page",
+    "back_to_course": "Zurück zur Landing",
+    "module_label": "Lehrplan",
+    "now_playing": "Jetzt spielen",
+    "page_label": "Seite",
     "reading_progress": "Reading Progress",
-    "download_pdf": "Download PDF",
-    "chapter": "Chapter"
+    "download_pdf": "PDF herunterladen",
+    "chapter": "Kapitel"
   },
   "lessons": {
     "badge": "// 04 — Kursinhalt",

@@ -110,6 +110,19 @@ const FALLBACK_LABELS: Record<string, Record<string, string>> = {
     offer_badge: "Offerta di Lancio",
     price_special: "Prezzo speciale di lancio",
     buy_and_access: "Acquista e Accedi Istantaneamente",
+    bestseller: "Best Seller",
+    story_badge: "// La Storia Vera",
+    story_title: "La mia esperienza tra gli Amish",
+    story_subtitle: "Tre mesi in Pennsylvania, dodici famiglie intervistate, un sistema economico che funziona da 300 anni.",
+    amish_life: "Vita Amish",
+    caption_1: "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria tramandata da generazioni.",
+    caption_2: "Il sistema di baratto e scambio che elimina il bisogno di denaro contante e costruisce relazioni di fiducia durature.",
+    caption_3: "L'economia domestica Amish: come una famiglia riesce a vivere con il 60% in meno rispetto alla media nazionale.",
+    tag_1: "Antropologia Economica",
+    tag_2: "Studi Amish",
+    tag_3: "Consulenza Finanziaria",
+    brand_name: "Courssy",
+    reviewer: "Marco R., primi lettori",
     language_switch: "IT",
     language_switch_en: "EN",
   },
@@ -205,6 +218,19 @@ const FALLBACK_LABELS: Record<string, Record<string, string>> = {
     offer_badge: "Launch Offer",
     price_special: "Special launch price",
     buy_and_access: "Buy & Access Instantly",
+    bestseller: "Best Seller",
+    story_badge: "// The True Story",
+    story_title: "My Experience Among the Amish",
+    story_subtitle: "Three months in Pennsylvania, twelve families interviewed, an economic system that has worked for 300 years.",
+    amish_life: "Amish Life",
+    caption_1: "Daily life in the Amish community: simplicity, self-sufficiency, and financial wisdom passed down through generations.",
+    caption_2: "The barter and exchange system that eliminates the need for cash and builds lasting trust relationships.",
+    caption_3: "The Amish household economy: how a family lives on 60% less than the national average.",
+    tag_1: "Economic Anthropology",
+    tag_2: "Amish Studies",
+    tag_3: "Financial Consulting",
+    brand_name: "Courssy",
+    reviewer: "Marco R., early readers",
     language_switch: "EN",
     language_switch_en: "EN",
   },
@@ -512,7 +538,8 @@ Esempi:
 
   console.log(`\n✅ Completato! ${total} file JSON creati in data/${slug}/`);
   console.log(`\n👉 Per tradurre con Argos nelle lingue mancanti:`);
-  console.log(`   npx tsx scripts/translate/argos-bridge.ts ${locales[0]} en fr de es pt ja ko zh ar hi`);
+  console.log(`   python scripts/translate/translate-argos.py ${slug} de fr es pt ja ko zh ar hi`);
+  console.log(`   python scripts/translate/translate-argos.py ${slug} all  # tutte le lingue`);
 
   await prisma.$disconnect();
 }

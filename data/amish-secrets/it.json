@@ -280,6 +280,19 @@
       "offer_badge": "Offerta di Lancio",
       "price_special": "Prezzo speciale di lancio",
       "buy_and_access": "Acquista e Accedi Istantaneamente",
+      "bestseller": "Best Seller",
+      "story_badge": "// La Storia Vera",
+      "story_title": "La mia esperienza tra gli Amish",
+      "story_subtitle": "Tre mesi in Pennsylvania, dodici famiglie intervistate, un sistema economico che funziona da 300 anni.",
+      "amish_life": "Vita Amish",
+      "caption_1": "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria tramandata da generazioni.",
+      "caption_2": "Il sistema di baratto e scambio che elimina il bisogno di denaro contante e costruisce relazioni di fiducia durature.",
+      "caption_3": "L'economia domestica Amish: come una famiglia riesce a vivere con il 60% in meno rispetto alla media nazionale.",
+      "tag_1": "Antropologia Economica",
+      "tag_2": "Studi Amish",
+      "tag_3": "Consulenza Finanziaria",
+      "brand_name": "Courssy",
+      "reviewer": "Marco R., primi lettori",
       "language_switch": "IT",
       "language_switch_en": "EN",
       "p_struggle": "Fai fatica ad arrivare a fine mese",
@@ -291,8 +304,7 @@
       "n_habits": "Non vuoi cambiare le tue abitudini di spesa",
       "n_quick_fix": "Preferisci soluzioni rapide invece di un percorso solido",
       "n_implement": "Non sei disposto a mettere in pratica ciò che impari",
-      "n_advice": "Cerchi consulenza finanziaria personalizzata",
-      "reviewer": "Marco R., primi lettori"
+      "n_advice": "Cerchi consulenza finanziaria personalizzata"
     }
   },
   "audience": {
