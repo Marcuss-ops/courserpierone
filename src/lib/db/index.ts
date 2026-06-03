@@ -1,2 +1,2 @@
 export { prisma } from "./prisma";
-export { getSupabase, getSupabaseAdmin } from "./supabase";
+export { getSupabaseAdmin } from "./supabase";

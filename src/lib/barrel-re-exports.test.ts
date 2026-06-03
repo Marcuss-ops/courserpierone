@@ -33,12 +33,6 @@ describe("@/lib/db — barrel re-exports", () => {
     expect(typeof mod.prisma).toBe("object");
   });
 
-  it("exports getSupabase function", async () => {
-    const mod = await import("@/lib/db");
-    expect(mod.getSupabase).toBeDefined();
-    expect(typeof mod.getSupabase).toBe("function");
-  });
-
   it("exports getSupabaseAdmin function", async () => {
     const mod = await import("@/lib/db");
     expect(mod.getSupabaseAdmin).toBeDefined();
