@@ -29,4 +29,4 @@ model Locale {
 }
 ```
 
-> **Nota:** Le traduzioni UI sono state unificate in `scripts/products/save-all-translations.ts` (28 lingue, sezione `ui_all` con labels/benefits/FAQ).
+> **Nota:** Il sistema traduzioni white-label è in `scripts/translate/` — estrai DB → JSON con `extract-locales.ts`, traduci con `argos-bridge.ts` (Argos Translate locale).
