@@ -1,0 +1,326 @@
+{
+  "locale": "el",
+  "seo": {
+    "title": "Μυστικά των Άμις: Πώς να ζείτε με οικονομία και να διαχειρίζεστε τα χρήματά σας",
+    "description": "Ανακαλύψτε τα μυστικά της λιτής διαβίωσης της κοινότητας των Άμις. Περιλαμβάνει πλήρεις ενότητες βίντεο και PDF με δυνατότητα λήψης.",
+    "ogImage": "/courses/amish-secrets/cover.png"
+  },
+  "nav": {
+    "brand": "Amish secrets",
+    "features": "Features",
+    "pricing": "Pricing",
+    "testimonials": "Testimonials",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "get_started": "Get Started",
+    "learn_more": "Learn More",
+    "member_area": "Member Area",
+    "back_to_landing": "Back to Landing"
+  },
+  "hero": {
+    "badge": "New",
+    "title": "Μυστικά των Άμις: Πώς να ζείτε με οικονομία και να διαχειρίζεστε τα χρήματά σας",
+    "subtitle": "Ανακαλύψτε τα μυστικά της λιτής διαβίωσης της κοινότητας των Άμις. Περιλαμβάνει πλήρεις ενότητες βίντεο και PDF με δυνατότητα λήψης.",
+    "cta": "Get Started",
+    "secondary_cta": "Learn More",
+    "price_label": "Special launch price",
+    "one_time_payment": "One-time payment — no subscription"
+  },
+  "problem": {
+    "badge": "The Problem",
+    "title": "Έχετε κουραστεί να φτάνετε στο τέλος του μήνα χωρίς αποταμιεύσεις; Η σύγχρονη κοινωνία μας ωθεί στην υπερκατανάλωση.",
+    "text": ""
+  },
+  "story": {
+    "badge": "Our Story",
+    "title": "La mia esperienza tra gli Amish",
+    "image_captions": [
+      "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria.",
+      "Il sistema di baratto e scambio che elimina il bisogno di denaro contante.",
+      "L'economia domestica Amish: come una famiglia riesce a vivere con il 60% in meno."
+    ],
+    "quote": "Οι Άμις ζουν πλούσιες και γεμάτες ζωές ξοδεύοντας ένα κλάσμα αυτών που ξοδεύουμε εμείς. Σε αυτό το μάθημα σας αποκαλύπτουμε πώς τα καταφέρνουν."
+  },
+  "author": {
+    "badge": "// 03 — The Author",
+    "title": "Behind This Course",
+    "name": "Alessandro Rinaldi",
+    "role": "Researcher · Author · Traveler",
+    "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+    "tags": [
+      "Saggezza Finanziaria",
+      "Vita Sostenibile",
+      "Educazione"
+    ]
+  },
+  "modules": {
+    "badge": "// 02 — What You'll Learn",
+    "title": "The Amish Masters' Secrets",
+    "description": "8 practical modules that turn Amish wisdom into concrete actions.",
+    "items": [
+      {
+        "title": "Amish Budget",
+        "desc": "Live on 30% less without sacrifice."
+      },
+      {
+        "title": "Infinite Pantry",
+        "desc": "The food storage method that eliminates waste."
+      },
+      {
+        "title": "Zero Debt",
+        "desc": "The framework to get out of debt forever."
+      },
+      {
+        "title": "Fix Everything",
+        "desc": "12 essential tools to repair yourself."
+      },
+      {
+        "title": "Money-Free Exchange",
+        "desc": "How to activate a barter network."
+      },
+      {
+        "title": "Farm to Table",
+        "desc": "Guide to home gardening and zero-waste cooking."
+      },
+      {
+        "title": "Free Energy",
+        "desc": "How to cut utility bills by 50%."
+      },
+      {
+        "title": "30-Day Plan",
+        "desc": "Day-by-day checklist to transform your finances."
+      }
+    ]
+  },
+  "includes": {
+    "title": "Also includes:",
+    "items": [
+      "Full eBook (PDF, ePub, Kindle)",
+      "Printable 30-day checklist",
+      "Amish budget Excel sheet",
+      "Weekly shopping list template",
+      "Lifetime member area access",
+      "Free future updates"
+    ]
+  },
+  "testimonials": {
+    "badge": "// 06 — Testimonials",
+    "title": "Testimonials",
+    "items": [
+      {
+        "text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
+        "name": "Marco R.",
+        "role": "Rome — early readers"
+      }
+    ]
+  },
+  "offer": {
+    "badge": "Launch Offer",
+    "title": "Invest in Yourself",
+    "complete_package": "Complete Package",
+    "course_value": "Course: $97",
+    "bonus_value": "Bonus: $27",
+    "price_text": "",
+    "one_time": "One-time payment — no subscription",
+    "launch_price": "Launch price — then $37",
+    "cta": "Unlock Access Now",
+    "guarantee_title": "30-Day Money-Back Guarantee",
+    "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+    "includes": [
+      "Full course (value $97)",
+      "eBook PDF, ePub, Kindle",
+      "Printable 30-day checklist",
+      "Amish budget Excel sheet",
+      "Lifetime access + updates",
+      "BONUS: Weekly shopping list (value $27)"
+    ]
+  },
+  "faq": {
+    "badge": "// 07 — FAQ",
+    "title": "Frequently Asked Questions",
+    "offer_valid": "Offer valid this week",
+    "items": [
+      {
+        "q": "What exactly is included?",
+        "a": "You get the complete eBook in PDF, ePub, and Kindle formats. Plus lifetime access to all future updates."
+      },
+      {
+        "q": "Is it in English?",
+        "a": "Yes, the course is fully available in English."
+      },
+      {
+        "q": "What format is the course in?",
+        "a": "eBook in PDF, ePub, and Kindle formats. Videos are in MP4 format."
+      },
+      {
+        "q": "When do I get access?",
+        "a": "Immediately after payment."
+      },
+      {
+        "q": "What if I'm not satisfied?",
+        "a": "You're protected by our 30-day money-back guarantee."
+      },
+      {
+        "q": "How long does it take?",
+        "a": "The complete program takes about 3-4 hours."
+      }
+    ]
+  },
+  "final_cta": {
+    "title": "Start Your Journey to Financial Freedom Today",
+    "subtitle": "Join hundreds of people who have already transformed their relationship with money.",
+    "badge": "Offer valid this week"
+  },
+  "footer": {
+    "rights_reserved": "All rights reserved.",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+    "badges": {
+      "guarantee": "30-Day Guarantee",
+      "instant_access": "Instant Access",
+      "lifetime_updates": "Lifetime Updates"
+    }
+  },
+  "trust": {
+    "title": "Trusted by teams worldwide",
+    "readers_count": "1.247 αναγνώστες",
+    "company_names": []
+  },
+  "ui": {
+    "labels": {
+      "instant_access": "Άμεση πρόσβαση",
+      "buy_now_arrow": "Αγοράστε Τώρα →",
+      "readers": "1.247 αναγνώστες",
+      "buy_now_dash": "Αγοράστε Τώρα —",
+      "view_modules": "Δείτε τις Ενότητες",
+      "ssl_secure": "Ασφαλής πληρωμή με SSL",
+      "instant_download": "Instant Download",
+      "lifetime_access": "Lifetime Access",
+      "guarantee_days": "30-Day Guarantee",
+      "section_who": "// 01 — Who Is This For",
+      "is_this_for_you": "Is This Course For You?",
+      "perfect_for": "Perfect for you if:",
+      "not_for": "Not for you if:",
+      "section_learn": "// 02 — What You'll Learn",
+      "masters_secrets": "The Amish Masters' Secrets",
+      "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
+      "section_author": "// 03 — The Author",
+      "behind_course": "Behind This Course",
+      "your_name": "Your Name Here",
+      "researcher_author": "Researcher · Author · Traveler",
+      "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+      "section_content": "// 04 — Course Content",
+      "what_inside": "What You'll Find Inside",
+      "also_includes": "Also includes:",
+      "inc_full_ebook": "Full eBook (PDF, ePub, Kindle)",
+      "inc_checklist": "Printable 30-day checklist",
+      "inc_excel": "Amish budget Excel sheet",
+      "inc_shopping": "Weekly shopping list template",
+      "inc_lifetime": "Lifetime member area access",
+      "inc_updates": "Free future updates",
+      "section_offer": "// 05 — The Offer",
+      "invest_yourself": "Invest in Yourself",
+      "launch_offer": "Launch Offer",
+      "complete_package": "Complete Package",
+      "course_value": "Course: $97",
+      "bonus_value": "Bonus: $27",
+      "one_time": "One-time payment — no subscription",
+      "launch_price": "Launch price — then $37",
+      "inc_course_full": "Full course (value $97)",
+      "inc_ebook": "eBook PDF, ePub, Kindle",
+      "inc_checklist2": "Printable 30-day checklist",
+      "inc_excel2": "Amish budget Excel sheet",
+      "inc_access_updates": "Lifetime access + updates",
+      "inc_bonus_shopping": "BONUS: Weekly shopping list (value $27)",
+      "unlock_now": "Unlock Access Now",
+      "guarantee_title": "30-Day Money-Back Guarantee",
+      "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+      "section_testimonials": "// 06 — Testimonials",
+      "testimonial_text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
+      "testimonial_name": "Marco R.",
+      "testimonial_role": "Rome — early readers",
+      "section_faq": "// 07 — FAQ",
+      "faq_title": "Frequently Asked Questions",
+      "offer_valid": "Offer valid this week",
+      "final_cta": "Start Your Journey to Financial Freedom Today",
+      "final_sub": "Join hundreds of people who have already transformed their relationship with money.",
+      "unlock_dash": "Unlock Access —",
+      "guarantee_badge": "30-Day Guarantee",
+      "instant_access_badge": "Instant Access",
+      "lifetime_badge": "Lifetime Updates",
+      "rights_reserved": "All rights reserved.",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+      "features": "Features",
+      "pricing": "Pricing",
+      "testimonials": "Testimonials",
+      "contact": "Contact",
+      "get_started": "Get Started",
+      "learn_more": "Learn More",
+      "member_area": "Member Area",
+      "back_to_landing": "Back to Landing",
+      "buy_now": "Buy Now",
+      "currency_symbol": "$",
+      "new_badge": "New",
+      "the_problem": "The Problem",
+      "our_story": "Our Story",
+      "what_learn": "What You'll Learn",
+      "course_lessons": "Course Lessons",
+      "curriculum": "Curriculum",
+      "free_tier": "Free",
+      "pro_tier": "Pro",
+      "per_month": "/mo",
+      "start_free": "Start Free",
+      "popular": "Popular",
+      "free_title": "To get started",
+      "pro_title": "To grow",
+      "trusted_by": "Trusted by teams worldwide",
+      "offer_badge": "Launch Offer",
+      "price_special": "Special launch price",
+      "buy_and_access": "Buy & Access Instantly",
+      "language_switch": "EN",
+      "language_switch_en": "EN",
+      "30day money back": "Εγγύηση επιστροφής χρημάτων 30 ημερών",
+      "price": "Τιμή",
+      "free": "ΔΩΡΕΑΝ",
+      "addtocart": "Προσθήκη στο καλάθι",
+      "select_currency": "Επιλογή νομίσματος"
+    }
+  },
+  "audience": {
+    "badge": "// 01 — Who Is This For",
+    "title": "Is This Course For You?",
+    "perfect_for": "Perfect for you if:",
+    "perfect_items": [
+      "You struggle to make ends meet",
+      "You want to cut costs",
+      "Tired of consumerism",
+      "Want practical methods",
+      "Want solid future for family"
+    ],
+    "not_for": "Not for you if:",
+    "not_items": [
+      "Looking for get-rich-quick",
+      "Don't want to change habits",
+      "Prefer quick fixes",
+      "Not willing to implement",
+      "Looking for personal advice"
+    ]
+  },
+  "course": {
+    "back_to_course": "Back to Landing",
+    "module_label": "Curriculum",
+    "now_playing": "Now playing",
+    "page_label": "Page",
+    "reading_progress": "Reading Progress",
+    "download_pdf": "Download PDF",
+    "chapter": "Chapter"
+  },
+  "lessons": {
+    "badge": "// 04 — Course Content",
+    "title": "What You'll Find Inside",
+    "items": []
+  }
+}

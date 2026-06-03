@@ -15,6 +15,17 @@ interface LumioProps {
     prezzo?: string;
     coverUrl?: string;
     lezioni?: { titolo: string; descrizione: string }[];
+    localeContent?: {
+      nav?: { brand?: string; features?: string; pricing?: string; testimonials?: string; get_started?: string; learn_more?: string };
+      hero?: { cta?: string; secondary_cta?: string };
+      testimonials?: { badge?: string; title?: string };
+      lessons?: { badge?: string; title?: string };
+      footer?: { rights_reserved?: string; privacy?: string; terms?: string; contact?: string };
+      problem?: { badge?: string };
+      story?: { badge?: string };
+      trust?: { title?: string };
+      ui?: { labels?: Record<string, string> };
+    };
   };
   locale?: string;
   productId?: string;
@@ -23,6 +34,10 @@ interface LumioProps {
 }
 
 export default function TemplateLumio({ data, locale: _locale = "it" }: LumioProps) {
+  const lc = data.localeContent;
+  const t = (key: string, fallback: string): string =>
+    (lc?.ui?.labels?.[key]) || fallback;
+
   return (
     <div className="min-h-screen" style={{ background: "#FAF9F5" }}>
       {/* ── FLOATING NAV ──────────────────────────────────── */}
@@ -35,17 +50,17 @@ export default function TemplateLumio({ data, locale: _locale = "it" }: LumioPro
             boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
           }}
         >
-          <span className="text-sm font-semibold text-white">Brand</span>
+          <span className="text-sm font-semibold text-white">{lc?.nav?.brand || "Brand"}</span>
           <div className="hidden items-center gap-6 text-sm text-gray-400 md:flex">
-            <a href="#features" className="hover:text-white transition">Features</a>
-            <a href="#pricing" className="hover:text-white transition">Pricing</a>
-            <a href="#testimonials" className="hover:text-white transition">Testimonials</a>
+            <a href="#features" className="hover:text-white transition">{lc?.nav?.features || "Features"}</a>
+            <a href="#pricing" className="hover:text-white transition">{lc?.nav?.pricing || "Pricing"}</a>
+            <a href="#testimonials" className="hover:text-white transition">{lc?.nav?.testimonials || "Testimonials"}</a>
           </div>
           <button
             className="rounded-full px-4 py-1.5 text-sm font-medium text-white"
             style={{ background: "linear-gradient(135deg, #FF416C, #FF4B2B)" }}
           >
-            Get Started
+            {lc?.nav?.get_started || "Get Started"}
           </button>
         </div>
       </nav>

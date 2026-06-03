@@ -6,6 +6,8 @@ import dynamic from "next/dynamic";
 import { Play, Zap } from "lucide-react";
 import { getCourseConfig, type CourseConfig } from "@/lib/config/white-label-data";
 import { getCurrencyFromLocale } from "@/lib/i18n/locale-resolver";
+import { loadLocaleContentSafe } from "@/lib/i18n/load-locale-content";
+import type { LocaleContent } from "@/lib/i18n/locale-content";
 import { AnalyticsTracker } from "@/components/course/analytics-tracker";
 import { TrackedCtaButton } from "@/components/course/tracked-cta-button";
 
@@ -144,7 +146,7 @@ function getDisplayPriceForCurrency(data: CourseConfig): string {
   return prices.join(" / ");
 }
 
-function mapConfigToTemplateData(data: CourseConfig, locale: string, lang: string) {
+function mapConfigToTemplateData(data: CourseConfig, locale: string, lang: string, localeContent?: LocaleContent) {
   const content = data.languages[lang] ?? data.languages[Object.keys(data.languages)[0]];
   if (!content) return null;
 
@@ -158,9 +160,10 @@ function mapConfigToTemplateData(data: CourseConfig, locale: string, lang: strin
     recensioni: content.story ?? "",
     cta: content.cta,
     prezzo: price,
-    currency, // pass currency code to template
+    currency,
     coverUrl: data.cover ?? "",
     ui: content.ui ?? undefined,
+    localeContent, // passa il LocaleContent JSON al template
     lezioni: data.lessons.map((l) => ({
       titolo: l.titles[lang] ?? Object.values(l.titles)[0] ?? "",
       descrizione: l.descriptions[lang] ?? Object.values(l.descriptions)[0] ?? "",
@@ -210,9 +213,13 @@ export default async function LocaleLandingPage({
   const firstLessonId = data.lessons?.[0]?.id ?? "#";
   const checkoutUrl = data.checkoutUrl ?? "#";
 
+  // ─── Carica LocaleContent per la lingua corrente ──
+  const localeContent = loadLocaleContentSafe(domain, currentLocale);
+  const lc = localeContent; // shorthand
+
   // ─── Multi-Template ────────────────────────────
   if (data.template === "lumio" || data.template === "h612" || data.template === "horizon" || data.template === "book-claude" || data.template === "default") {
-    const templateData = mapConfigToTemplateData(data, currentLocale, currentLang);
+    const templateData = mapConfigToTemplateData(data, currentLocale, currentLang, localeContent);
     if (templateData) {
       let TemplateComponent;
       switch (data.template) {
@@ -249,9 +256,9 @@ export default async function LocaleLandingPage({
                <span className="text-2xl font-black tracking-tighter text-gray-900 uppercase">{data.slug}.</span>
             </div>
             <div className="hidden md:flex items-center gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
-               <Link href={`/${currentLocale === "it-it" ? "en-us" : "it-it"}/${domain}`} className="hover:text-gray-900 transition-colors">
-                 {currentLocale === "it-it" ? "EN" : "IT"}
-               </Link>
+               <a href={`/${currentLocale === "it-it" ? "en-us" : "it-it"}/${domain}`} className="hover:text-gray-900 transition-colors">
+                 {currentLocale === "it-it" ? lc?.nav?.get_started || "EN" : lc?.nav?.get_started || "IT"}
+               </a>
             </div>
             <Link href={`/${currentLocale}/${domain}/curso/${firstLessonId}${accessToken ? `?token=${accessToken}` : ""}`} className="bg-gray-900 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-white hover:bg-gray-800 transition-all">
                {content.cta}
@@ -263,7 +270,7 @@ export default async function LocaleLandingPage({
            <div className="max-w-5xl mx-auto text-center space-y-8 relative">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-full border border-gray-100 text-gray-600 text-[10px] font-black uppercase tracking-[0.3em]">
                  <Zap className="w-3 h-3 fill-current" />
-                 New: {content.title}
+                 {lc?.hero?.badge || "New"}: {content.title}
               </div>
               <h1 className="text-5xl lg:text-8xl font-black text-gray-900 tracking-tighter leading-[0.9]">
                  {content.title}
@@ -282,7 +289,7 @@ export default async function LocaleLandingPage({
                    {content.cta}
                  </TrackedCtaButton>
                  <Link href={`/${currentLocale}/${domain}/curso/${firstLessonId}${accessToken ? `?token=${accessToken}` : ""}`} className="px-10 py-5 bg-white rounded-3xl text-sm font-black text-gray-900 border border-gray-200 hover:bg-gray-50 transition-all flex items-center gap-3">
-                    <Play className="w-5 h-5 text-gray-400" /> Area Membri
+                    <Play className="w-5 h-5 text-gray-400" /> {lc?.nav?.member_area || "Area Membri"}
                  </Link>
               </div>
            </div>
@@ -307,13 +314,13 @@ export default async function LocaleLandingPage({
               <div className="space-y-4">
                  <h2 className="text-3xl lg:text-4xl font-black text-white tracking-tight">{content.title}</h2>
                  <p className="text-gray-400 font-medium">
-                    {currentLang === "en" ? "Get instant access to all video lessons and download the PDF manual." : "Ottieni l'accesso immediato a tutte le lezioni video e scarica il manuale in formato PDF."}
+                    {lc?.offer?.guarantee_text || "Get instant access to all video lessons."}
                  </p>
               </div>
               <div className="pt-6">
                  <div className="text-5xl font-black text-white mb-8 tracking-tighter">
                     {data.prices?.EUR || data.prices?.USD ? getDisplayPriceForCurrency(data) : getPriceString(data, currentLocale).price}
-                    <span className="text-sm text-gray-500 font-bold ml-2 uppercase tracking-widest">{currentLang === "en" ? "One-Time Payment" : "Pagamento Unico"}</span>
+                    <span className="text-sm text-gray-500 font-bold ml-2 uppercase tracking-widest">{lc?.offer?.one_time || "One-Time Payment"}</span>
                  </div>
                  <TrackedCtaButton
                    href={checkoutUrl}
@@ -322,7 +329,7 @@ export default async function LocaleLandingPage({
                    locale={currentLang}
                    className="block w-full py-5 rounded-3xl text-sm font-black text-gray-900 bg-white uppercase tracking-[0.2em] hover:bg-gray-100 transition-all"
                  >
-                    {currentLang === "en" ? "Buy & Access Instantly" : "Acquista e Accedi Istantaneamente"}
+                    {lc?.offer?.cta || "Buy & Access Instantly"}
                  </TrackedCtaButton>
               </div>
            </div>
@@ -334,7 +341,7 @@ export default async function LocaleLandingPage({
                  <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center font-bold text-sm text-white">C</div>
                  <span className="text-xl font-black tracking-tighter text-gray-900">{data.slug}.</span>
               </div>
-              <p className="text-xs font-medium text-gray-500">&copy; 2026 {data.author}. All rights reserved.</p>
+              <p className="text-xs font-medium text-gray-500">&copy; 2026 {data.author}. {lc?.footer?.rights_reserved || "All rights reserved."}</p>
            </div>
         </footer>
       </div>
