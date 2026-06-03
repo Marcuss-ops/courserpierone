@@ -6,28 +6,28 @@
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
-    "brand": "Amish secrets",
-    "features": "Features",
-    "pricing": "Pricing",
-    "testimonials": "Testimonials",
-    "faq": "FAQ",
-    "contact": "Contact",
-    "get_started": "Get Started",
-    "learn_more": "Learn More",
-    "member_area": "Member Area",
-    "back_to_landing": "Back to Landing"
+    "brand": "Rahasia Amish",
+    "features": "Fitur",
+    "pricing": "Harga",
+    "testimonials": "Testimonial",
+    "faq": "PSD",
+    "contact": "Kontak",
+    "get_started": "Mulai",
+    "learn_more": "Pelajari Lebih",
+    "member_area": "Area Anggota",
+    "back_to_landing": "Kembali ke Landing"
   },
   "hero": {
-    "badge": "New",
+    "badge": "Baru",
     "title": "Rahasia Amish: Cara hidup hemat dan mengelola uang",
     "subtitle": "Temukan rahasia hidup hemat dari komunitas Amish. Termasuk modul video lengkap dan PDF yang dapat diunduh.",
-    "cta": "Get Started",
-    "secondary_cta": "Learn More",
-    "price_label": "Special launch price",
-    "one_time_payment": "One-time payment — no subscription"
+    "cta": "Mulai",
+    "secondary_cta": "Pelajari Lebih",
+    "price_label": "Harga peluncuran khusus",
+    "one_time_payment": "Satu pembayaran waktu - tidak berlangganan"
   },
   "problem": {
-    "badge": "The Problem",
+    "badge": "Masalah",
     "title": "Lelah hidup pas-pasan setiap akhir bulan? Masyarakat modern mendorong kita untuk konsumsi berlebihan.",
     "text": ""
   },
@@ -35,155 +35,155 @@
     "badge": "Our Story",
     "title": "La mia esperienza tra gli Amish",
     "image_captions": [
-      "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria.",
-      "Il sistema di baratto e scambio che elimina il bisogno di denaro contante.",
-      "L'economia domestica Amish: come una famiglia riesce a vivere con il 60% in meno."
+      "La vita quotidiana nella comunità Amish: sempitheà, auttoufficienza e saggezza finanziaria.",
+      "Il sistema di baratto e scamboio che eliminasi il bisogno di denaro contante.",
+      "L 'ekonomi domestica Amish: datang una famililia riesce a vivere con il 60% di meno."
     ],
     "quote": "Orang Amish menjalani kehidupan yang kaya dan penuh makna dengan menghabiskan hanya sebagian kecil dari apa yang kita habiskan. Dalam kursus ini kami expose rahasia mereka."
   },
   "author": {
-    "badge": "// 03 — The Author",
-    "title": "Behind This Course",
+    "badge": "/ / 03 - Penulis",
+    "title": "Di belakang Kursus ini",
     "name": "Alessandro Rinaldi",
     "role": "Researcher · Author · Traveler",
     "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
     "tags": [
-      "Saggezza Finanziaria",
-      "Vita Sostenibile",
+      "Saggezza emporziaria",
+      "Vita Sosteniempedu",
       "Educazione"
     ]
   },
   "modules": {
-    "badge": "// 02 — What You'll Learn",
-    "title": "The Amish Masters' Secrets",
+    "badge": "# # 02 - What You 'll Learn",
+    "title": "Rahasia Amish Masters",
     "description": "8 practical modules that turn Amish wisdom into concrete actions.",
     "items": [
       {
-        "title": "Amish Budget",
-        "desc": "Live on 30% less without sacrifice."
+        "title": "Anggaran Amish",
+        "desc": "Hidup dengan kurang 30% tanpa pengorbanan."
       },
       {
         "title": "Infinite Pantry",
-        "desc": "The food storage method that eliminates waste."
+        "desc": "Metode penyimpanan makanan yang menghilangkan limbah."
       },
       {
-        "title": "Zero Debt",
-        "desc": "The framework to get out of debt forever."
+        "title": "Kosong Kosong",
+        "desc": "Kerangka kerja untuk keluar dari utang selamanya."
       },
       {
-        "title": "Fix Everything",
-        "desc": "12 essential tools to repair yourself."
+        "title": "Perbaiki Semuanya",
+        "desc": "12 alat penting untuk memperbaiki diri."
       },
       {
-        "title": "Money-Free Exchange",
-        "desc": "How to activate a barter network."
+        "title": "Money- Free Exchange",
+        "desc": "Cara mengaktifkan jaringan barter."
       },
       {
-        "title": "Farm to Table",
-        "desc": "Guide to home gardening and zero-waste cooking."
+        "title": "Farm ke Tabel",
+        "desc": "Panduan untuk rumah berkebun dan zero- limbah memasak."
       },
       {
-        "title": "Free Energy",
-        "desc": "How to cut utility bills by 50%."
+        "title": "Energi Bebas",
+        "desc": "Bagaimana memotong tagihan utilitas sebesar 50%."
       },
       {
-        "title": "30-Day Plan",
-        "desc": "Day-by-day checklist to transform your finances."
+        "title": "30-Hari Rencana",
+        "desc": "Daftar cek harian untuk mengubah keuanganmu."
       }
     ]
   },
   "includes": {
-    "title": "Also includes:",
+    "title": "Juga termasuk:",
     "items": [
-      "Full eBook (PDF, ePub, Kindle)",
-      "Printable 30-day checklist",
-      "Amish budget Excel sheet",
-      "Weekly shopping list template",
-      "Lifetime member area access",
-      "Free future updates"
+      "EBook penuh (PDF, ePub, Kindle)",
+      "Dapat dicetak 30-hari checklist",
+      "Lembar Excel anggaran Amish",
+      "Templat daftar belanja mingguan",
+      "Akses anggota seumur hidup",
+      "Pemutakhiran bebas di masa depan"
     ]
   },
   "testimonials": {
-    "badge": "// 06 — Testimonials",
-    "title": "Testimonials",
+    "badge": "/ / 06 - Testomial",
+    "title": "Testimonial",
     "items": [
       {
-        "text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
+        "text": "Saya menerapkan metode anggaran Amish dan dalam dua bulan saya memotong biaya saya sebesar 35%. Daftar cek 30 hari adalah titik balik. Akhirnya kursus yang benar-benar bekerja.",
         "name": "Marco R.",
-        "role": "Rome — early readers"
+        "role": "Roma - pembaca awal"
       }
     ]
   },
   "offer": {
-    "badge": "Launch Offer",
+    "badge": "Penawaran Peluncuran",
     "title": "Invest in Yourself",
-    "complete_package": "Complete Package",
-    "course_value": "Course: $97",
+    "complete_package": "Paket Lengkap",
+    "course_value": "Kursus: $97",
     "bonus_value": "Bonus: $27",
     "price_text": "",
-    "one_time": "One-time payment — no subscription",
-    "launch_price": "Launch price — then $37",
-    "cta": "Unlock Access Now",
-    "guarantee_title": "30-Day Money-Back Guarantee",
+    "one_time": "Satu pembayaran waktu - tidak berlangganan",
+    "launch_price": "Harga peluncuran - kemudian $37",
+    "cta": "Buka Kunci Akses Sekarang",
+    "guarantee_title": "30- Hari Money- Jaminan Kembali",
     "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
     "includes": [
-      "Full course (value $97)",
+      "Kursus penuh (nilai $97)",
       "eBook PDF, ePub, Kindle",
-      "Printable 30-day checklist",
-      "Amish budget Excel sheet",
-      "Lifetime access + updates",
-      "BONUS: Weekly shopping list (value $27)"
+      "Dapat dicetak 30-hari checklist",
+      "Lembar Excel anggaran Amish",
+      "Akses hidup + pemutakhiran",
+      "Daftar belanja mingguan (nilai $27)"
     ]
   },
   "faq": {
-    "badge": "// 07 — FAQ",
-    "title": "Frequently Asked Questions",
-    "offer_valid": "Offer valid this week",
+    "badge": "/ / 07 - FAQ",
+    "title": "Pertanyaan Yang Sering Muncul",
+    "offer_valid": "Tagihan valid minggu ini",
     "items": [
       {
-        "q": "What exactly is included?",
-        "a": "You get the complete eBook in PDF, ePub, and Kindle formats. Plus lifetime access to all future updates."
+        "q": "Apa yang sebenarnya termasuk?",
+        "a": "Anda mendapatkan eBook lengkap di PDF, ePub, dan format Kindle. Ditambah akses seumur hidup ke semua update masa depan."
       },
       {
-        "q": "Is it in English?",
-        "a": "Yes, the course is fully available in English."
+        "q": "Apakah dalam bahasa Inggris?",
+        "a": "Ya, kursus sepenuhnya tersedia dalam bahasa Inggris."
       },
       {
-        "q": "What format is the course in?",
-        "a": "eBook in PDF, ePub, and Kindle formats. Videos are in MP4 format."
+        "q": "Apa format kursus?",
+        "a": "eBook dalam PDF, ePub, dan format Kindle. Video dalam format MP4."
       },
       {
-        "q": "When do I get access?",
-        "a": "Immediately after payment."
+        "q": "Kapan aku mendapatkan akses?",
+        "a": "Segera setelah pembayaran."
       },
       {
-        "q": "What if I'm not satisfied?",
-        "a": "You're protected by our 30-day money-back guarantee."
+        "q": "Bagaimana jika aku tidak puas?",
+        "a": "Anda dilindungi oleh 30 hari kami uang - jaminan kembali."
       },
       {
-        "q": "How long does it take?",
-        "a": "The complete program takes about 3-4 hours."
+        "q": "Berapa lama waktu yang dibutuhkan?",
+        "a": "Program lengkap memakan waktu sekitar 3-4 jam."
       }
     ]
   },
   "final_cta": {
-    "title": "Start Your Journey to Financial Freedom Today",
-    "subtitle": "Join hundreds of people who have already transformed their relationship with money.",
-    "badge": "Offer valid this week"
+    "title": "Mulai Perjalanan Anda ke Kebebasan Keuangan Hari ini",
+    "subtitle": "Bergabung dengan ratusan orang yang telah mengubah hubungan mereka dengan uang.",
+    "badge": "Tagihan valid minggu ini"
   },
   "footer": {
-    "rights_reserved": "All rights reserved.",
-    "privacy": "Privacy",
-    "terms": "Terms",
+    "rights_reserved": "Semua hak disediakan.",
+    "privacy": "Privasi",
+    "terms": "Kalimat",
     "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
     "badges": {
-      "guarantee": "30-Day Guarantee",
-      "instant_access": "Instant Access",
-      "lifetime_updates": "Lifetime Updates"
+      "guarantee": "30- Hari Jaminan",
+      "instant_access": "Akses Instan",
+      "lifetime_updates": "Pemutakhiran Lifetime"
     }
   },
   "trust": {
-    "title": "Trusted by teams worldwide",
+    "title": "Dipercaya oleh tim di seluruh dunia",
     "readers_count": "1.247 pembaca",
     "company_names": []
   },
@@ -195,112 +195,112 @@
       "buy_now_dash": "Beli Sekarang —",
       "view_modules": "Lihat Modul",
       "ssl_secure": "Pembayaran aman dengan SSL",
-      "instant_download": "Instant Download",
-      "lifetime_access": "Lifetime Access",
-      "guarantee_days": "30-Day Guarantee",
-      "section_who": "// 01 — Who Is This For",
-      "is_this_for_you": "Is This Course For You?",
-      "perfect_for": "Perfect for you if:",
-      "p_struggle": "You struggle to make ends meet",
-      "p_cut_costs": "You want to cut costs without sacrificing quality of life",
+      "instant_download": "Unduh Instan",
+      "lifetime_access": "Akses Seumur Hidup",
+      "guarantee_days": "30- Hari Jaminan",
+      "section_who": "# # 01 - Who Is This For",
+      "is_this_for_you": "Apakah ini untukmu?",
+      "perfect_for": "Sempurna untuk Anda jika:",
+      "p_struggle": "Anda berjuang untuk memenuhi kebutuhan",
+      "p_cut_costs": "Anda ingin memotong biaya tanpa mengorbankan kualitas hidup",
       "p_consumerism": "Tired of consumerism and debt culture",
       "p_practical": "Looking for practical, time-tested methods",
       "p_future": "Want a solid financial future for your family",
-      "not_for": "Not for you if:",
+      "not_for": "Bukan untuk Anda jika:",
       "n_quick": "Looking for get-rich-quick schemes",
       "n_habits": "Not willing to change spending habits",
       "n_quick_fix": "Prefer quick fixes over a solid path",
       "n_implement": "Not willing to implement what you learn",
       "n_advice": "Looking for personalized financial advice",
-      "section_learn": "// 02 — What You'll Learn",
-      "masters_secrets": "The Amish Masters' Secrets",
+      "section_learn": "# # 02 - What You 'll Learn",
+      "masters_secrets": "Rahasia Amish Masters",
       "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
-      "section_author": "// 03 — The Author",
-      "behind_course": "Behind This Course",
-      "your_name": "Your Name Here",
+      "section_author": "/ / 03 - Penulis",
+      "behind_course": "Di belakang Kursus ini",
+      "your_name": "Namamu disini",
       "researcher_author": "Researcher · Author · Traveler",
       "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
-      "section_content": "// 04 — Course Content",
-      "what_inside": "What You'll Find Inside",
-      "also_includes": "Also includes:",
-      "inc_full_ebook": "Full eBook (PDF, ePub, Kindle)",
-      "inc_checklist": "Printable 30-day checklist",
-      "inc_excel": "Amish budget Excel sheet",
-      "inc_shopping": "Weekly shopping list template",
-      "inc_lifetime": "Lifetime member area access",
-      "inc_updates": "Free future updates",
-      "section_offer": "// 05 — The Offer",
+      "section_content": "/ / 04 - Konten Kursus",
+      "what_inside": "What You 'll Find Inside",
+      "also_includes": "Juga termasuk:",
+      "inc_full_ebook": "EBook penuh (PDF, ePub, Kindle)",
+      "inc_checklist": "Dapat dicetak 30-hari checklist",
+      "inc_excel": "Lembar Excel anggaran Amish",
+      "inc_shopping": "Templat daftar belanja mingguan",
+      "inc_lifetime": "Akses anggota seumur hidup",
+      "inc_updates": "Pemutakhiran bebas di masa depan",
+      "section_offer": "/ / 05 - Penawaran",
       "invest_yourself": "Invest in Yourself",
-      "launch_offer": "Launch Offer",
-      "complete_package": "Complete Package",
-      "course_value": "Course: $97",
+      "launch_offer": "Penawaran Peluncuran",
+      "complete_package": "Paket Lengkap",
+      "course_value": "Kursus: $97",
       "bonus_value": "Bonus: $27",
-      "one_time": "One-time payment — no subscription",
-      "launch_price": "Launch price — then $37",
-      "inc_course_full": "Full course (value $97)",
+      "one_time": "Satu pembayaran waktu - tidak berlangganan",
+      "launch_price": "Harga peluncuran - kemudian $37",
+      "inc_course_full": "Kursus penuh (nilai $97)",
       "inc_ebook": "eBook PDF, ePub, Kindle",
-      "inc_checklist2": "Printable 30-day checklist",
-      "inc_excel2": "Amish budget Excel sheet",
-      "inc_access_updates": "Lifetime access + updates",
-      "inc_bonus_shopping": "BONUS: Weekly shopping list (value $27)",
-      "unlock_now": "Unlock Access Now",
-      "guarantee_title": "30-Day Money-Back Guarantee",
+      "inc_checklist2": "Dapat dicetak 30-hari checklist",
+      "inc_excel2": "Lembar Excel anggaran Amish",
+      "inc_access_updates": "Akses hidup + pemutakhiran",
+      "inc_bonus_shopping": "Daftar belanja mingguan (nilai $27)",
+      "unlock_now": "Buka Kunci Akses Sekarang",
+      "guarantee_title": "30- Hari Money- Jaminan Kembali",
       "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
-      "section_testimonials": "// 06 — Testimonials",
-      "testimonial_text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
+      "section_testimonials": "/ / 06 - Testomial",
+      "testimonial_text": "Saya menerapkan metode anggaran Amish dan dalam dua bulan saya memotong biaya saya sebesar 35%. Daftar cek 30 hari adalah titik balik. Akhirnya kursus yang benar-benar bekerja.",
       "testimonial_name": "Marco R.",
-      "testimonial_role": "Rome — early readers",
-      "section_faq": "// 07 — FAQ",
-      "faq_title": "Frequently Asked Questions",
-      "offer_valid": "Offer valid this week",
-      "final_cta": "Start Your Journey to Financial Freedom Today",
-      "final_sub": "Join hundreds of people who have already transformed their relationship with money.",
-      "unlock_dash": "Unlock Access —",
-      "guarantee_badge": "30-Day Guarantee",
-      "instant_access_badge": "Instant Access",
-      "lifetime_badge": "Lifetime Updates",
-      "rights_reserved": "All rights reserved.",
-      "privacy": "Privacy",
-      "terms": "Terms",
+      "testimonial_role": "Roma - pembaca awal",
+      "section_faq": "/ / 07 - FAQ",
+      "faq_title": "Pertanyaan Yang Sering Muncul",
+      "offer_valid": "Tagihan valid minggu ini",
+      "final_cta": "Mulai Perjalanan Anda ke Kebebasan Keuangan Hari ini",
+      "final_sub": "Bergabung dengan ratusan orang yang telah mengubah hubungan mereka dengan uang.",
+      "unlock_dash": "Buka Akses -",
+      "guarantee_badge": "30- Hari Jaminan",
+      "instant_access_badge": "Akses Instan",
+      "lifetime_badge": "Pemutakhiran Lifetime",
+      "rights_reserved": "Semua hak disediakan.",
+      "privacy": "Privasi",
+      "terms": "Kalimat",
       "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
-      "features": "Features",
-      "pricing": "Pricing",
-      "testimonials": "Testimonials",
-      "contact": "Contact",
-      "get_started": "Get Started",
-      "learn_more": "Learn More",
-      "member_area": "Member Area",
-      "back_to_landing": "Back to Landing",
-      "buy_now": "Buy Now",
+      "features": "Fitur",
+      "pricing": "Harga",
+      "testimonials": "Testimonial",
+      "contact": "Kontak",
+      "get_started": "Mulai",
+      "learn_more": "Pelajari Lebih",
+      "member_area": "Area Anggota",
+      "back_to_landing": "Kembali ke Landing",
+      "buy_now": "Beli Sekarang",
       "currency_symbol": "$",
-      "new_badge": "New",
-      "the_problem": "The Problem",
+      "new_badge": "Baru",
+      "the_problem": "Masalah",
       "our_story": "Our Story",
-      "what_learn": "What You'll Learn",
-      "course_lessons": "Course Lessons",
-      "curriculum": "Curriculum",
-      "free_tier": "Free",
+      "what_learn": "What You 'll Learn",
+      "course_lessons": "Pelajaran Kursus",
+      "curriculum": "Kurrium",
+      "free_tier": "Bebas",
       "pro_tier": "Pro",
       "per_month": "/mo",
-      "start_free": "Start Free",
-      "popular": "Popular",
-      "free_title": "To get started",
-      "pro_title": "To grow",
-      "trusted_by": "Trusted by teams worldwide",
-      "offer_badge": "Launch Offer",
-      "price_special": "Special launch price",
-      "buy_and_access": "Buy & Access Instantly",
-      "bestseller": "Best Seller",
-      "story_badge": "// The True Story",
-      "story_title": "My Experience Among the Amish",
-      "story_subtitle": "Three months in Pennsylvania, twelve families interviewed, an economic system that has worked for 300 years.",
+      "start_free": "Mulai Bebas",
+      "popular": "Populer",
+      "free_title": "Untuk memulai",
+      "pro_title": "Untuk tumbuh",
+      "trusted_by": "Dipercaya oleh tim di seluruh dunia",
+      "offer_badge": "Penawaran Peluncuran",
+      "price_special": "Harga peluncuran khusus",
+      "buy_and_access": "Beli & Akses Seketika",
+      "bestseller": "Penjual Terbaik",
+      "story_badge": "# The True Story",
+      "story_title": "Pengalaman saya di antara Amish",
+      "story_subtitle": "Tiga bulan di Pennsylvania, dua belas keluarga mewawancarai, sistem ekonomi yang telah bekerja selama 300 tahun.",
       "amish_life": "Amish Life",
-      "caption_1": "Daily life in the Amish community: simplicity, self-sufficiency, and financial wisdom passed down through generations.",
-      "caption_2": "The barter and exchange system that eliminates the need for cash and builds lasting trust relationships.",
-      "caption_3": "The Amish household economy: how a family lives on 60% less than the national average.",
-      "tag_1": "Economic Anthropology",
-      "tag_2": "Amish Studies",
-      "tag_3": "Financial Consulting",
+      "caption_1": "Kehidupan sehari-hari di komunitas Amish: kesederhanaan, kemandirian, dan kebijaksanaan keuangan turun temurun.",
+      "caption_2": "Pertukaran dan pertukaran sistem yang menghilangkan kebutuhan uang tunai dan membangun hubungan kepercayaan abadi.",
+      "caption_3": "Ekonomi rumah tangga Amish: bagaimana keluarga hidup di 60% kurang dari rata-rata nasional.",
+      "tag_1": "Antropologi Ekonomi",
+      "tag_2": "Studi Amish",
+      "tag_3": "Konsultan Keuangan",
       "brand_name": "Courssy",
       "reviewer": "Marco R., early readers",
       "language_switch": "EN",
@@ -313,17 +313,17 @@
     }
   },
   "audience": {
-    "badge": "// 01 — Who Is This For",
-    "title": "Is This Course For You?",
-    "perfect_for": "Perfect for you if:",
+    "badge": "# # 01 - Who Is This For",
+    "title": "Apakah ini untukmu?",
+    "perfect_for": "Sempurna untuk Anda jika:",
     "perfect_items": [
-      "You struggle to make ends meet",
-      "You want to cut costs without sacrificing quality of life",
+      "Anda berjuang untuk memenuhi kebutuhan",
+      "Anda ingin memotong biaya tanpa mengorbankan kualitas hidup",
       "Tired of consumerism and debt culture",
       "Looking for practical, time-tested methods",
       "Want a solid financial future for your family"
     ],
-    "not_for": "Not for you if:",
+    "not_for": "Bukan untuk Anda jika:",
     "not_items": [
       "Looking for get-rich-quick schemes",
       "Not willing to change spending habits",
@@ -333,17 +333,17 @@
     ]
   },
   "course": {
-    "back_to_course": "Back to Landing",
-    "module_label": "Curriculum",
-    "now_playing": "Now playing",
-    "page_label": "Page",
-    "reading_progress": "Reading Progress",
-    "download_pdf": "Download PDF",
-    "chapter": "Chapter"
+    "back_to_course": "Kembali ke Landing",
+    "module_label": "Kurrium",
+    "now_playing": "Sekarang bermain",
+    "page_label": "Halaman",
+    "reading_progress": "Membaca Kemajuan",
+    "download_pdf": "Unduh PDF",
+    "chapter": "Bab"
   },
   "lessons": {
-    "badge": "// 04 — Course Content",
-    "title": "What You'll Find Inside",
+    "badge": "/ / 04 - Konten Kursus",
+    "title": "What You 'll Find Inside",
     "items": []
   }
 }

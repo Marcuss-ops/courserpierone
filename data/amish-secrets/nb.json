@@ -1,0 +1,344 @@
+{
+  "locale": "nb",
+  "seo": {
+    "title": "Amish Secrets: Hvordan leve med besparelser og administrere penger",
+    "description": "Oppdag hemmelighetene til det amishiske samfunnets frugale liv. Inkluderer komplette videomoduler og nedlastbare PDF-filer.",
+    "ogImage": "/courses/amish-secrets/cover.png"
+  },
+  "nav": {
+    "brand": "Amish hemmeligheter",
+    "features": "Funksjoner",
+    "pricing": "Prising",
+    "testimonials": "Vitnemål",
+    "faq": "FAQ",
+    "contact": "Kontakt",
+    "get_started": "Kom i gang",
+    "learn_more": "Les mer",
+    "member_area": "Medlemsområde",
+    "back_to_landing": "Tilbake til Landing"
+  },
+  "hero": {
+    "badge": "Ny",
+    "title": "Amish Secrets: Hvordan leve med besparelser og administrere penger",
+    "subtitle": "Oppdag hemmelighetene til det amishiske samfunnets frugale liv. Inkluderer komplette videomoduler og nedlastbare PDF-filer.",
+    "cta": "Kom i gang",
+    "secondary_cta": "Les mer",
+    "price_label": "Spesial lanseringspris",
+    "one_time_payment": "Engangsbetaling — ingen abonnement"
+  },
+  "problem": {
+    "badge": "Problemet",
+    "title": "Tråkt av å nå slutten av måneden uten besparelser? Det moderne samfunn presser oss mot overdrevent forbruk.",
+    "text": ""
+  },
+  "story": {
+    "badge": "Vår historie",
+    "title": "La mia esperienza tra gli amish",
+    "image_captions": [
+      "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finansziaria.",
+      "Il sitema di Baratto e svindelbio che elimina il bisogno di denaro contante.",
+      "L'economia domestica amish: kom una famiglia riesce en vivere con il 60% i meino."
+    ],
+    "quote": "Amish lever rike og fulle liv mens du bruker en brøkdel av det vi bruker. I dette kurset avslører vi hvordan de gjør det."
+  },
+  "author": {
+    "badge": "// 03 — Forfatteren",
+    "title": "Bak dette kurset",
+    "name": "Alessandro Rinaldi",
+    "role": "Forsker · Forfatter",
+    "bio": "[Legg til din historie her: Jeg bodde 3 måneder i Pennsylvania, intervjuet 12 amish familier, studerte deres økonomiske system. Ingen teori, bare praksis.]",
+    "tags": [
+      "Saggezza Finanziaria",
+      "Vita Sostenibile",
+      "Educazione"
+    ]
+  },
+  "modules": {
+    "badge": "// 02 - Hva du vil lære",
+    "title": "Amish Masters' hemmeligheter",
+    "description": "8 praktiske moduler som gjør amish visdom til konkrete handlinger for ditt daglige liv.",
+    "items": [
+      {
+        "title": "Amish Budsjett",
+        "desc": "Lev på 30% mindre uten å ofre."
+      },
+      {
+        "title": "Infinite Pantry",
+        "desc": "Matlagringsmetoden som eliminerer avfall."
+      },
+      {
+        "title": "Nøytral gjeld",
+        "desc": "Rammeverket for å komme seg ut av gjelden for alltid."
+      },
+      {
+        "title": "Løs alt",
+        "desc": "12 viktige verktøy for å reparere deg selv."
+      },
+      {
+        "title": "Pengefri utveksling",
+        "desc": "Hvordan aktivere en barter nettverk."
+      },
+      {
+        "title": "Gård til bord",
+        "desc": "Guide til hjem hagearbeid og null-avfall matlaging."
+      },
+      {
+        "title": "Gratis energi",
+        "desc": "Hvordan å kutte nytteregninger med 50%."
+      },
+      {
+        "title": "30 dagers plan",
+        "desc": "Daglig sjekkliste for å forvandle økonomien."
+      }
+    ]
+  },
+  "includes": {
+    "title": "Inkluderer også:",
+    "items": [
+      "Full eBook (PDF, ePub, Kindle)",
+      "30-dagers sjekkliste",
+      "Amish budsjett Excel-ark",
+      "Weekly shopping liste mal",
+      "Adgang til livstidsmedlemsområde",
+      "Gratis fremtidige oppdateringer"
+    ]
+  },
+  "testimonials": {
+    "badge": "// 06 — Vitnemål",
+    "title": "Vitnemål",
+    "items": [
+      {
+        "text": "Jeg brukte amish budsjettmetoden og i løpet av to måneder reduserte jeg kostnadene mine med 35%. 30 dagers sjekkliste var vendepunktet. Endelig et kurs som virkelig fungerer.",
+        "name": "Marco R.",
+        "role": "Roma — tidlige lesere"
+      }
+    ]
+  },
+  "offer": {
+    "badge": "Lanseringstilbud",
+    "title": "Invester i deg selv",
+    "complete_package": "Komplett pakke",
+    "course_value": "Kurs: $97",
+    "bonus_value": "Bonus: $27",
+    "price_text": "",
+    "one_time": "Engangsbetaling — ingen abonnement",
+    "launch_price": "Lanseringspris — så $ 37",
+    "cta": "Lås opp nå",
+    "guarantee_title": "30 dagers pengene-tilbake-garanti",
+    "guarantee_text": "Prøv det i 30 dager. Hvis du ikke sparer minst $ 100, refunderer vi hele beløpet. Ingen spørsmål, ingen problemer.",
+    "includes": [
+      "Full kurs (verdi $ 97)",
+      "eBook PDF, ePub, Kindle",
+      "30-dagers sjekkliste",
+      "Amish budsjett Excel-ark",
+      "Tilgang til levetid + oppdateringer",
+      "BONUS: Ukelig handleliste (verdi $27)"
+    ]
+  },
+  "faq": {
+    "badge": "// 07 — FAQ",
+    "title": "Ofte stilte spørsmål",
+    "offer_valid": "Tilbud gyldig denne uken",
+    "items": [
+      {
+        "q": "Hva er det som er inkludert?",
+        "a": "Du får den komplette eBook i PDF, ePub og Kindle-formater. Pluss livslang tilgang til alle fremtidige oppdateringer."
+      },
+      {
+        "q": "Er det på engelsk?",
+        "a": "Kurset er fullt tilgjengelig på engelsk."
+      },
+      {
+        "q": "Hvilket format er kurset i?",
+        "a": "eBook i PDF, ePub og Kindle-formater. Videoer er i MP4-format."
+      },
+      {
+        "q": "Når får jeg tilgang?",
+        "a": "Rett etter betaling."
+      },
+      {
+        "q": "Hva om jeg ikke er fornøyd?",
+        "a": "Du er beskyttet av vår 30-dagers pengene-tilbake garanti."
+      },
+      {
+        "q": "Hvor lang tid tar det?",
+        "a": "Hele programmet tar 3-4 timer."
+      }
+    ]
+  },
+  "final_cta": {
+    "title": "Start din reise til økonomisk frihet i dag",
+    "subtitle": "Bli med hundrevis av mennesker som allerede har forvandlet sitt forhold til penger.",
+    "badge": "Tilbud gyldig denne uken"
+  },
+  "footer": {
+    "rights_reserved": "Alle rettigheter forbeholdt.",
+    "privacy": "Personvern",
+    "terms": "Vilkår",
+    "legal_note": "Dette er et digitalt informasjonsprodukt. Resultatene kan variere og avhenge av personlig engasjement. Amish-prisene og teknikkene som er beskrevet er basert på etnografisk forskning og kan ikke nøyaktig reflektere moderne praksis i alle amish-samfunn.",
+    "badges": {
+      "guarantee": "30 dagers garanti",
+      "instant_access": "Instant Access",
+      "lifetime_updates": "Livstidsoppdateringer"
+    }
+  },
+  "trust": {
+    "title": "Stolt av lag over hele verden",
+    "readers_count": "1 247 lesere",
+    "company_names": []
+  },
+  "ui": {
+    "labels": {
+      "instant_access": "Umiddelbar tilgang",
+      "buy_now_arrow": "Kjøp nå",
+      "readers": "1 247 lesere",
+      "buy_now_dash": "Kjøp nå -",
+      "view_modules": "Vis moduler",
+      "ssl_secure": "Sikker SSL-betaling",
+      "instant_download": "Instant Download",
+      "lifetime_access": "Livstidstilgang",
+      "guarantee_days": "30 dagers garanti",
+      "section_who": "// 01 — Hvem er dette for",
+      "is_this_for_you": "Er dette kurset for deg?",
+      "perfect_for": "Perfekt for deg hvis:",
+      "p_struggle": "Du kjemper for å få endene til å møtes",
+      "p_cut_costs": "Du vil redusere kostnadene uten å ofre livskvaliteten",
+      "p_consumerism": "Du er lei av forbruker- og gjeldskulturen",
+      "p_practical": "Du vil ha praktiske, tidstestede metoder",
+      "p_future": "Du vil bygge en solid økonomisk fremtid for familien din",
+      "not_for": "Ikke for deg hvis:",
+      "n_quick": "Du er på utkikk etter gode ordninger",
+      "n_habits": "Du vil ikke endre dine bruksvaner",
+      "n_quick_fix": "Du foretrekker raske rettelser over et solid fundament",
+      "n_implement": "Du er ikke villig til å implementere det du lærer",
+      "n_advice": "Du leter etter personlig økonomisk rådgivning",
+      "section_learn": "// 02 - Hva du vil lære",
+      "masters_secrets": "Amish Masters' hemmeligheter",
+      "modules_desc": "8 praktiske moduler som gjør amish visdom til konkrete handlinger for ditt daglige liv.",
+      "section_author": "// 03 — Forfatteren",
+      "behind_course": "Bak dette kurset",
+      "your_name": "Ditt navn her",
+      "researcher_author": "Forsker · Forfatter",
+      "author_bio": "[Legg til din historie her: Jeg bodde 3 måneder i Pennsylvania, intervjuet 12 amish familier, studerte deres økonomiske system. Ingen teori, bare praksis.]",
+      "section_content": "// 04 — Kursinnhold",
+      "what_inside": "Hva du finner inne",
+      "also_includes": "Inkluderer også:",
+      "inc_full_ebook": "Full eBook (PDF, ePub, Kindle)",
+      "inc_checklist": "30-dagers sjekkliste",
+      "inc_excel": "Amish budsjett Excel-ark",
+      "inc_shopping": "Weekly shopping liste mal",
+      "inc_lifetime": "Adgang til livstidsmedlemsområde",
+      "inc_updates": "Gratis fremtidige oppdateringer",
+      "section_offer": "// 05 - Tilbudet",
+      "invest_yourself": "Invester i deg selv",
+      "launch_offer": "Lanseringstilbud",
+      "complete_package": "Komplett pakke",
+      "course_value": "Kurs: $97",
+      "bonus_value": "Bonus: $27",
+      "one_time": "Engangsbetaling — ingen abonnement",
+      "launch_price": "Lanseringspris — så $ 37",
+      "inc_course_full": "Full kurs (verdi $ 97)",
+      "inc_ebook": "eBook PDF, ePub, Kindle",
+      "inc_checklist2": "30-dagers sjekkliste",
+      "inc_excel2": "Amish budsjett Excel-ark",
+      "inc_access_updates": "Tilgang til levetid + oppdateringer",
+      "inc_bonus_shopping": "BONUS: Ukelig handleliste (verdi $27)",
+      "unlock_now": "Lås opp nå",
+      "guarantee_title": "30 dagers pengene-tilbake-garanti",
+      "guarantee_text": "Prøv det i 30 dager. Hvis du ikke sparer minst $ 100, refunderer vi hele beløpet. Ingen spørsmål, ingen problemer.",
+      "section_testimonials": "// 06 — Vitnemål",
+      "testimonial_text": "Jeg brukte amish budsjettmetoden og i løpet av to måneder reduserte jeg kostnadene mine med 35%. 30 dagers sjekkliste var vendepunktet. Endelig et kurs som virkelig fungerer.",
+      "testimonial_name": "Marco R.",
+      "testimonial_role": "Roma — tidlige lesere",
+      "section_faq": "// 07 — FAQ",
+      "faq_title": "Ofte stilte spørsmål",
+      "offer_valid": "Tilbud gyldig denne uken",
+      "final_cta": "Start din reise til økonomisk frihet i dag",
+      "final_sub": "Bli med hundrevis av mennesker som allerede har forvandlet sitt forhold til penger.",
+      "unlock_dash": "Lås opp tilgang —",
+      "guarantee_badge": "30 dagers garanti",
+      "instant_access_badge": "Instant Access",
+      "lifetime_badge": "Livstidsoppdateringer",
+      "rights_reserved": "Alle rettigheter forbeholdt.",
+      "privacy": "Personvern",
+      "terms": "Vilkår",
+      "legal_note": "Dette er et digitalt informasjonsprodukt. Resultatene kan variere og avhenge av personlig engasjement. Amish-prisene og teknikkene som er beskrevet er basert på etnografisk forskning og kan ikke nøyaktig reflektere moderne praksis i alle amish-samfunn.",
+      "features": "Funksjoner",
+      "pricing": "Prising",
+      "testimonials": "Vitnemål",
+      "contact": "Kontakt",
+      "get_started": "Kom i gang",
+      "learn_more": "Les mer",
+      "member_area": "Medlemsområde",
+      "back_to_landing": "Tilbake til Landing",
+      "buy_now": "Kjøp nå",
+      "currency_symbol": "$",
+      "new_badge": "Ny",
+      "the_problem": "Problemet",
+      "our_story": "Vår historie",
+      "what_learn": "Hva du vil lære",
+      "course_lessons": "Kursleksjoner",
+      "curriculum": "Curriculum",
+      "free_tier": "Gratis",
+      "pro_tier": "Pro",
+      "per_month": "/mo",
+      "start_free": "Start gratis",
+      "popular": "Populære",
+      "free_title": "For å komme i gang",
+      "pro_title": "å vokse",
+      "trusted_by": "Stolt av lag over hele verden",
+      "offer_badge": "Lanseringstilbud",
+      "price_special": "Spesial lanseringspris",
+      "buy_and_access": "Kjøp og tilgang umiddelbart",
+      "bestseller": "Beste selger",
+      "story_badge": "// Den sanne historien",
+      "story_title": "Min erfaring blant amish",
+      "story_subtitle": "Tre måneder i Pennsylvania, tolv familier intervjuet, et økonomisk system som har jobbet i 300 år.",
+      "amish_life": "Amish Life",
+      "caption_1": "Daglige liv i det amishiske samfunnet: enkelhet, selvforsyning og økonomisk visdom gikk ned gjennom generasjoner.",
+      "caption_2": "Barter og byttesystem som eliminerer behovet for kontanter og bygger varige tillitsforhold.",
+      "caption_3": "Amish husholdning økonomi: hvordan en familie lever på 60% mindre enn det nasjonale gjennomsnittet.",
+      "tag_1": "Økonomisk antropologi",
+      "tag_2": "Amish Studies",
+      "tag_3": "Økonomisk rådgivning",
+      "brand_name": "Courssy",
+      "reviewer": "Marco R., tidlig leser",
+      "language_switch": "EN",
+      "language_switch_en": "EN"
+    }
+  },
+  "audience": {
+    "badge": "// 01 — Hvem er dette for",
+    "title": "Er dette kurset for deg?",
+    "perfect_for": "Perfekt for deg hvis:",
+    "perfect_items": [
+      "Du kjemper for å få endene til å møtes",
+      "Du vil redusere kostnadene uten å ofre livskvaliteten",
+      "Du er lei av forbruker- og gjeldskulturen",
+      "Du vil ha praktiske, tidstestede metoder",
+      "Du vil bygge en solid økonomisk fremtid for familien din"
+    ],
+    "not_for": "Ikke for deg hvis:",
+    "not_items": [
+      "Du er på utkikk etter gode ordninger",
+      "Du vil ikke endre dine bruksvaner",
+      "Du foretrekker raske rettelser over et solid fundament",
+      "Du er ikke villig til å implementere det du lærer",
+      "Du leter etter personlig økonomisk rådgivning"
+    ]
+  },
+  "course": {
+    "back_to_course": "Tilbake til Landing",
+    "module_label": "Curriculum",
+    "now_playing": "Nå spiller",
+    "page_label": "Page",
+    "reading_progress": "Lese fremgang",
+    "download_pdf": "Last ned PDF",
+    "chapter": "Kapittel"
+  },
+  "lessons": {
+    "badge": "// 04 — Kursinnhold",
+    "title": "Hva du finner inne",
+    "items": []
+  }
+}

@@ -1,0 +1,344 @@
+{
+  "locale": "tl",
+  "seo": {
+    "title": "Mga Lihim ng Amish: Kung paano mamumuhay na may ipon at pangasiwaan ang salapi",
+    "description": "Alamin ang mga lihim ng pamumuhay ng pamayanang Amish. Isama ang kumpletong video module at downloadable PDFs.",
+    "ogImage": "/courses/amish-secrets/cover.png"
+  },
+  "nav": {
+    "brand": "Ibunyag ang mga lihim",
+    "features": "Mga Katangian",
+    "pricing": "Pagpipinta",
+    "testimonials": "Mga Patotoo",
+    "faq": "KABAITAN",
+    "contact": "Makipag - ugnayan",
+    "get_started": "Magsimula",
+    "learn_more": "Matuto Nang Higit Pa",
+    "member_area": "Member Area",
+    "back_to_landing": "Pagbabalik sa Paglapag"
+  },
+  "hero": {
+    "badge": "Bago",
+    "title": "Mga Lihim ng Amish: Kung paano mamumuhay na may ipon at pangasiwaan ang salapi",
+    "subtitle": "Alamin ang mga lihim ng pamumuhay ng pamayanang Amish. Isama ang kumpletong video module at downloadable PDFs.",
+    "cta": "Magsimula",
+    "secondary_cta": "Matuto Nang Higit Pa",
+    "price_label": "Pantanging presyo ng paglulunsad",
+    "one_time_payment": "Paminsan - minsang pagbabayad — walang suskrisyon"
+  },
+  "problem": {
+    "badge": "Ang Problema",
+    "title": "Pagod sa pag - abot sa katapusan ng buwan nang walang anumang ipon? Ang modernong lipunan ay nagtutulak sa atin sa labis na pagkonsumo.",
+    "text": ""
+  },
+  "story": {
+    "badge": "Ang Aming Kuwento",
+    "title": "La mi esperienza tra gli Amish",
+    "image_captions": [
+      "La vita qutidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria.",
+      "Il sistema di baratto e scambio che elimina il bisogno di denaro contante.",
+      "L'economia domestica Amish: dumating ang una famiglia riesce a viverire con il 60% sa meno."
+    ],
+    "quote": "Ang mga Amish ay namumuhay nang mayaman at kasiya - siyang buhay samantalang gumugugol ng katiting na bahagi ng ating ginugugol. Sa ganitong paraan, isinisiwalat natin kung paano nila ito ginagawa."
+  },
+  "author": {
+    "badge": "// 03 — Ang Awtor",
+    "title": "Sa Likod ng Landas na Ito",
+    "name": "Si Alessandro Rinaldi",
+    "role": "mananaliksik · Awtor",
+    "bio": "[ Karagdagan pa ang inyong kuwento rito: Ako'y nanirahan ng 3 buwan sa Pennsylvania, kinapanayam ang 12 pamilyang Amish, pinag - aralan ang kanilang sistema ng kabuhayan. Walang teorya, tanging gawain.]",
+    "tags": [
+      "Saggezza Finanziaria",
+      "Vita Sostenibile",
+      "Educazione"
+    ]
+  },
+  "modules": {
+    "badge": "// 02 — Kung Ano ang Matututuhan Mo",
+    "title": "Ang mga Lihim ng mga Amish Master",
+    "description": "8 praktikal na mga module na nagpapangyaring maging espesipikong mga pagkilos ang karunungan ng Amish para sa iyong pang - araw - araw na buhay.",
+    "items": [
+      {
+        "title": "Badyet ng Amoy",
+        "desc": "Mabuhay sa 30% mas mababa nang walang sakripisyo."
+      },
+      {
+        "title": "Di - nagbabagong Tambalan",
+        "desc": "Ang paraan ng pag - iimbak ng pagkain na nag - aalis ng dumi."
+      },
+      {
+        "title": "Walang Pagkakautang",
+        "desc": "Ang balangkas upang makaalis sa utang magpakailanman."
+      },
+      {
+        "title": "Sapatan ang Lahat",
+        "desc": "12 mahahalagang kasangkapan upang kumpunihin ang iyong sarili."
+      },
+      {
+        "title": "Pera-Free Exchange",
+        "desc": "Kung paano babaguhin ang isang barter network."
+      },
+      {
+        "title": "Pagsasaka na Mabubusog",
+        "desc": "Gabay sa paghahalaman sa bahay at lutuing sero-waste."
+      },
+      {
+        "title": "Malayang Enerhiya",
+        "desc": "Kung paano babawasan ang mga bayarin sa kuryente ng 50%."
+      },
+      {
+        "title": "30-Day Plan",
+        "desc": "Day-by-day Listahan upang baguhin ang iyong pananalapi."
+      }
+    ]
+  },
+  "includes": {
+    "title": "Kasama rin ang:",
+    "items": [
+      "Buong eBook (PDF, ePub, Kindle)",
+      "Nakalimbag na 30-araw na talaan",
+      "Lipas na badyet",
+      "Linggu - linggong listahan ng pamimili template",
+      "Pag - access ng miyembro ng isang lifetime area",
+      "Libreng mga update sa hinaharap"
+    ]
+  },
+  "testimonials": {
+    "badge": "// 06 — Mga Patotoo",
+    "title": "Mga Patotoo",
+    "items": [
+      {
+        "text": "Ikinapit ko ang paraan ng badyet sa Amish at sa loob ng dalawang buwan binawasan ko ang aking mga gastusin ng 35%. Ang 30-araw na talaan ay ang malaking pagbabago. Sa wakas isang landasin na talagang gumagana.",
+        "name": "Ganito ang sabi ni Marco R.",
+        "role": "Roma — ang unang mga mambabasa"
+      }
+    ]
+  },
+  "offer": {
+    "badge": "Pag - aalok ng Launch",
+    "title": "Mamuhunan sa Iyong Sarili",
+    "complete_package": "Buong pakete",
+    "course_value": "Landasin: $97",
+    "bonus_value": "Bonus: $27",
+    "price_text": "",
+    "one_time": "Paminsan - minsang pagbabayad — walang suskrisyon",
+    "launch_price": "Launch na presyo — pagkatapos ay $37",
+    "cta": "Walang Paa Ngayon",
+    "guarantee_title": "30-Day Money-Back Garantiya",
+    "guarantee_text": "Subukan ito sa loob ng 30 araw. Kung hindi ka mag - iipon ng di - kukulangin sa $100, pupustahin natin ang buong halaga. Walang mga tanong, walang problema.",
+    "includes": [
+      "Full course (halaga $97)",
+      "eBook PDF, ePub, Kindle",
+      "Nakalimbag na 30-araw na talaan",
+      "Lipas na badyet",
+      "Haba ng buhay access + updates",
+      "BONUS: Linggu - linggong listahan ng pamimili (halaga $27)"
+    ]
+  },
+  "faq": {
+    "badge": "// 07 — FAQ",
+    "title": "Madalas na Tinatanong",
+    "offer_valid": "Mag - alok nang may bisa sa linggong ito",
+    "items": [
+      {
+        "q": "Ano ba talaga ang kasali rito?",
+        "a": "Nakuha mo ang buong eBook sa PDF, ePub, at Kindle formats. At saka gamitin ang lahat ng updates habang - buhay."
+      },
+      {
+        "q": "Nasa wikang Ingles ba ito?",
+        "a": "Oo, ang kurso ay lubusang makukuha sa Ingles."
+      },
+      {
+        "q": "Anong format ang kailangan mong gawin?",
+        "a": "EBook sa PDF, ePub, at Kindle formats. Nasa MP4 format ang mga video."
+      },
+      {
+        "q": "Kailan ako puwedeng makipag - usap?",
+        "a": "Karaka - raka pagkatapos magbayad."
+      },
+      {
+        "q": "Paano kung hindi ako nasisiyahan?",
+        "a": "Iniingatan ka ng aming 30-araw na garantiya sa pera-back."
+      },
+      {
+        "q": "Gaano katagal?",
+        "a": "Ang kumpletong programa ay umaabot ng mga 3-4 oras."
+      }
+    ]
+  },
+  "final_cta": {
+    "title": "Magsimula sa Iyong Paglalakbay sa Kalayaan sa Pananalapi Ngayon",
+    "subtitle": "Makisama sa daan - daang tao na nagbago na ng kanilang kaugnayan sa salapi.",
+    "badge": "Mag - alok nang may bisa sa linggong ito"
+  },
+  "footer": {
+    "rights_reserved": "Ang lahat ng karapatan ay nakalaan.",
+    "privacy": "Pribadong Buhay",
+    "terms": "Mga Termino",
+    "legal_note": "Ito ay isang digital na impormasyonal na produkto. Ang mga resulta ay maaaring iba - iba at depende sa personal na pangako. Ang mga presyo at pamamaraang Amish na inilalarawan ay batay sa pananaliksik na etnographic at maaaring hindi tumpak na sumasalamin sa mga kontemporaryong gawain ng lahat ng mga pamayanang Amish.",
+    "badges": {
+      "guarantee": "30-Day Garantiya",
+      "instant_access": "Kagyat na Access",
+      "lifetime_updates": "Mga Update sa Buhay"
+    }
+  },
+  "trust": {
+    "title": "Pinagkakatiwalaan ng mga koponan sa buong daigdig",
+    "readers_count": "1,247 mambabasa",
+    "company_names": []
+  },
+  "ui": {
+    "labels": {
+      "instant_access": "Agad na daanan",
+      "buy_now_arrow": "Bumili Ngayon →",
+      "readers": "1,247 mambabasa",
+      "buy_now_dash": "Bumili Na Ngayon —",
+      "view_modules": "Tingnan ang mga Module",
+      "ssl_secure": "Matatag na kabayaran sa SSL",
+      "instant_download": "Biglang Bumaba",
+      "lifetime_access": "Habang - Buhay",
+      "guarantee_days": "30-Day Garantiya",
+      "section_who": "// 01 — Sino Ito Para sa",
+      "is_this_for_you": "Ito ba ang Landas Para sa Iyo?",
+      "perfect_for": "Mahusay para sa iyo kung:",
+      "p_struggle": "Nakikipagpunyagi ka upang makaraos",
+      "p_cut_costs": "Nais mong bawasan ang mga gastusin nang hindi isinasakripisyo ang kalidad ng buhay",
+      "p_consumerism": "Pagod ka na sa pamimili at pangungutang",
+      "p_practical": "Nais mo ng praktikal, time-subok na mga paraan",
+      "p_future": "Gusto mong magkaroon ng matatag na pinansiyal na kinabukasan para sa iyong pamilya",
+      "not_for": "Hindi para sa iyo kung:",
+      "n_quick": "Hinahanap mo ang gock-rich-lick scheme",
+      "n_habits": "Ayaw mong baguhin ang iyong paggasta",
+      "n_quick_fix": "Mas gusto mo ang mabilis na pag - aayos sa isang matibay na pundasyon",
+      "n_implement": "Ayaw mong ipatupad ang iyong natututuhan",
+      "n_advice": "Naghahanap ka ng personal na pinansiyal na payo",
+      "section_learn": "// 02 — Kung Ano ang Matututuhan Mo",
+      "masters_secrets": "Ang mga Lihim ng mga Amish Master",
+      "modules_desc": "8 praktikal na mga module na nagpapangyaring maging espesipikong mga pagkilos ang karunungan ng Amish para sa iyong pang - araw - araw na buhay.",
+      "section_author": "// 03 — Ang Awtor",
+      "behind_course": "Sa Likod ng Landas na Ito",
+      "your_name": "Ang Iyong Pangalan Dito",
+      "researcher_author": "mananaliksik · Awtor",
+      "author_bio": "[ Karagdagan pa ang inyong kuwento rito: Ako'y nanirahan ng 3 buwan sa Pennsylvania, kinapanayam ang 12 pamilyang Amish, pinag - aralan ang kanilang sistema ng kabuhayan. Walang teorya, tanging gawain.]",
+      "section_content": "// 04 — Kontento sa Landas",
+      "what_inside": "Kung Ano ang Masusumpungan Mo sa Loob",
+      "also_includes": "Kasama rin ang:",
+      "inc_full_ebook": "Buong eBook (PDF, ePub, Kindle)",
+      "inc_checklist": "Nakalimbag na 30-araw na talaan",
+      "inc_excel": "Lipas na badyet",
+      "inc_shopping": "Linggu - linggong listahan ng pamimili template",
+      "inc_lifetime": "Pag - access ng miyembro ng isang lifetime area",
+      "inc_updates": "Libreng mga update sa hinaharap",
+      "section_offer": "// 05 — Ang Inialok",
+      "invest_yourself": "Mamuhunan sa Iyong Sarili",
+      "launch_offer": "Pag - aalok ng Launch",
+      "complete_package": "Buong pakete",
+      "course_value": "Landasin: $97",
+      "bonus_value": "Bonus: $27",
+      "one_time": "Paminsan - minsang pagbabayad — walang suskrisyon",
+      "launch_price": "Launch na presyo — pagkatapos ay $37",
+      "inc_course_full": "Full course (halaga $97)",
+      "inc_ebook": "eBook PDF, ePub, Kindle",
+      "inc_checklist2": "Nakalimbag na 30-araw na talaan",
+      "inc_excel2": "Lipas na badyet",
+      "inc_access_updates": "Haba ng buhay access + updates",
+      "inc_bonus_shopping": "BONUS: Linggu - linggong listahan ng pamimili (halaga $27)",
+      "unlock_now": "Walang Paa Ngayon",
+      "guarantee_title": "30-Day Money-Back Garantiya",
+      "guarantee_text": "Subukan ito sa loob ng 30 araw. Kung hindi ka mag - iipon ng di - kukulangin sa $100, pupustahin natin ang buong halaga. Walang mga tanong, walang problema.",
+      "section_testimonials": "// 06 — Mga Patotoo",
+      "testimonial_text": "Ikinapit ko ang paraan ng badyet sa Amish at sa loob ng dalawang buwan binawasan ko ang aking mga gastusin ng 35%. Ang 30-araw na talaan ay ang malaking pagbabago. Sa wakas isang landasin na talagang gumagana.",
+      "testimonial_name": "Ganito ang sabi ni Marco R.",
+      "testimonial_role": "Roma — ang unang mga mambabasa",
+      "section_faq": "// 07 — FAQ",
+      "faq_title": "Madalas na Tinatanong",
+      "offer_valid": "Mag - alok nang may bisa sa linggong ito",
+      "final_cta": "Magsimula sa Iyong Paglalakbay sa Kalayaan sa Pananalapi Ngayon",
+      "final_sub": "Makisama sa daan - daang tao na nagbago na ng kanilang kaugnayan sa salapi.",
+      "unlock_dash": "Walang Paa —",
+      "guarantee_badge": "30-Day Garantiya",
+      "instant_access_badge": "Kagyat na Access",
+      "lifetime_badge": "Mga Update sa Buhay",
+      "rights_reserved": "Ang lahat ng karapatan ay nakalaan.",
+      "privacy": "Pribadong Buhay",
+      "terms": "Mga Termino",
+      "legal_note": "Ito ay isang digital na impormasyonal na produkto. Ang mga resulta ay maaaring iba - iba at depende sa personal na pangako. Ang mga presyo at pamamaraang Amish na inilalarawan ay batay sa pananaliksik na etnographic at maaaring hindi tumpak na sumasalamin sa mga kontemporaryong gawain ng lahat ng mga pamayanang Amish.",
+      "features": "Mga Katangian",
+      "pricing": "Pagpipinta",
+      "testimonials": "Mga Patotoo",
+      "contact": "Makipag - ugnayan",
+      "get_started": "Magsimula",
+      "learn_more": "Matuto Nang Higit Pa",
+      "member_area": "Member Area",
+      "back_to_landing": "Pagbabalik sa Paglapag",
+      "buy_now": "Bumili Na Ngayon",
+      "currency_symbol": "$",
+      "new_badge": "Bago",
+      "the_problem": "Ang Problema",
+      "our_story": "Ang Aming Kuwento",
+      "what_learn": "Kung Ano ang Matututuhan Mo",
+      "course_lessons": "Mga Aral sa Landas",
+      "curriculum": "Kurrikulum",
+      "free_tier": "Malaya",
+      "pro_tier": "Pro",
+      "per_month": "/mo",
+      "start_free": "Magsimulang Malaya",
+      "popular": "Popular",
+      "free_title": "Upang magsimula",
+      "pro_title": "Upang lumago",
+      "trusted_by": "Pinagkakatiwalaan ng mga koponan sa buong daigdig",
+      "offer_badge": "Pag - aalok ng Launch",
+      "price_special": "Pantanging presyo ng paglulunsad",
+      "buy_and_access": "Bumili at Mabili Nang Walang Lubay",
+      "bestseller": "Pinakamabili",
+      "story_badge": "// Ang Tunay na Kasaysayan",
+      "story_title": "Ang Aking Karanasan sa Gitna ng mga Amish",
+      "story_subtitle": "Tatlong buwan sa Pennsylvania, labindalawang pamilya ang kinapanayam, isang sistema ng ekonomiya na nagtrabaho sa loob ng 300 taon.",
+      "amish_life": "Maasim na Buhay",
+      "caption_1": "Araw-araw na pamumuhay sa pamayanang Amish: ang pagiging simple, self-sufficiency, at ang karunungang pinansiyal ay dumaan sa mga henerasyon.",
+      "caption_2": "Ang sistema ng pagpapalitan at palitan na nag - aalis sa pangangailangan ng salapi at nagtatayo ng nagtatagal na mga kaugnayan sa pagtitiwala.",
+      "caption_3": "Ang ekonomiyang Amish sambahayan: kung paanong ang isang pamilya ay nabubuhay sa 60% na mas mababa kaysa pambansang katamtaman.",
+      "tag_1": "Antropolohiya sa Ekonomiya",
+      "tag_2": "Mahuhusay na Pag - aaral",
+      "tag_3": "Pagsusuri sa Pananalapi",
+      "brand_name": "Pakikipagsapalaran",
+      "reviewer": "Marco R., unang mambabasa",
+      "language_switch": "EN",
+      "language_switch_en": "EN"
+    }
+  },
+  "audience": {
+    "badge": "// 01 — Sino Ito Para sa",
+    "title": "Ito ba ang Landas Para sa Iyo?",
+    "perfect_for": "Mahusay para sa iyo kung:",
+    "perfect_items": [
+      "Nakikipagpunyagi ka upang makaraos",
+      "Nais mong bawasan ang mga gastusin nang hindi isinasakripisyo ang kalidad ng buhay",
+      "Pagod ka na sa pamimili at pangungutang",
+      "Nais mo ng praktikal, time-subok na mga paraan",
+      "Gusto mong magkaroon ng matatag na pinansiyal na kinabukasan para sa iyong pamilya"
+    ],
+    "not_for": "Hindi para sa iyo kung:",
+    "not_items": [
+      "Hinahanap mo ang gock-rich-lick scheme",
+      "Ayaw mong baguhin ang iyong paggasta",
+      "Mas gusto mo ang mabilis na pag - aayos sa isang matibay na pundasyon",
+      "Ayaw mong ipatupad ang iyong natututuhan",
+      "Naghahanap ka ng personal na pinansiyal na payo"
+    ]
+  },
+  "course": {
+    "back_to_course": "Pagbabalik sa Paglapag",
+    "module_label": "Kurrikulum",
+    "now_playing": "Naglalaro na ngayon",
+    "page_label": "Pahina",
+    "reading_progress": "Pagsulong sa Pagbabasa",
+    "download_pdf": "Ibabang PDF",
+    "chapter": "Kabanata"
+  },
+  "lessons": {
+    "badge": "// 04 — Kontento sa Landas",
+    "title": "Kung Ano ang Masusumpungan Mo sa Loob",
+    "items": []
+  }
+}

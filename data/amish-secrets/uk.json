@@ -6,184 +6,184 @@
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
-    "brand": "Amish secrets",
-    "features": "Features",
-    "pricing": "Pricing",
-    "testimonials": "Testimonials",
-    "faq": "FAQ",
-    "contact": "Contact",
-    "get_started": "Get Started",
-    "learn_more": "Learn More",
-    "member_area": "Member Area",
-    "back_to_landing": "Back to Landing"
+    "brand": "Аміш секрети",
+    "features": "Особливості",
+    "pricing": "Ціна",
+    "testimonials": "Відгуки",
+    "faq": "Контакти",
+    "contact": "Контакти",
+    "get_started": "Почати",
+    "learn_more": "Дізнатися більше",
+    "member_area": "Область членства",
+    "back_to_landing": "Повернутися до посадки"
   },
   "hero": {
-    "badge": "New",
+    "badge": "Нові",
     "title": "Амішські секрети: Як жити економно та керувати грошима",
     "subtitle": "Відкрийте для себе секрети ощадливого способу життя громади амішів. Включає повні відеомодулі та PDF-файли для завантаження.",
-    "cta": "Get Started",
-    "secondary_cta": "Learn More",
-    "price_label": "Special launch price",
-    "one_time_payment": "One-time payment — no subscription"
+    "cta": "Почати",
+    "secondary_cta": "Дізнатися більше",
+    "price_label": "Спеціальна ціна запуску",
+    "one_time_payment": "Одноразовий платіж — без підписки"
   },
   "problem": {
-    "badge": "The Problem",
+    "badge": "Проблема",
     "title": "Втомилися ледь дотягувати до кінця місяця без заощаджень? Сучасне суспільство підштовхує нас до надмірного споживання.",
     "text": ""
   },
   "story": {
-    "badge": "Our Story",
+    "badge": "Історія",
     "title": "La mia esperienza tra gli Amish",
     "image_captions": [
-      "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria.",
+      "La vita quotidiana nella comunità amish: semplicità, autosufficienza e saggezza finanziaria.",
       "Il sistema di baratto e scambio che elimina il bisogno di denaro contante.",
-      "L'economia domestica Amish: come una famiglia riesce a vivere con il 60% in meno."
+      "L'economia domestica Amish: приїжджайте вауна famiglia riesce a vivere con il 60% в meno."
     ],
     "quote": "Аміші живуть багатим і повноцінним життям, витрачаючи лише частину того, що витрачаємо ми. У цьому курсі ми розкриємо, як вони це роблять."
   },
   "author": {
-    "badge": "// 03 — The Author",
-    "title": "Behind This Course",
+    "badge": "// 03 — Автор",
+    "title": "За цим курсом",
     "name": "Alessandro Rinaldi",
     "role": "Researcher · Author · Traveler",
     "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
     "tags": [
-      "Saggezza Finanziaria",
-      "Vita Sostenibile",
-      "Educazione"
+      "Саггіце Фінанзіарія",
+      "Віта Состенібі",
+      "Продакшн"
     ]
   },
   "modules": {
-    "badge": "// 02 — What You'll Learn",
-    "title": "The Amish Masters' Secrets",
+    "badge": "// 02 — Що ви дізнаєтеся",
+    "title": "Секрети Амішних майстрів",
     "description": "8 practical modules that turn Amish wisdom into concrete actions.",
     "items": [
       {
-        "title": "Amish Budget",
-        "desc": "Live on 30% less without sacrifice."
+        "title": "Аміш Бюджет",
+        "desc": "Жити на 30% менше без жертв."
       },
       {
-        "title": "Infinite Pantry",
-        "desc": "The food storage method that eliminates waste."
+        "title": "Пантри",
+        "desc": "Спосіб зберігання продуктів, що виключає відходи."
       },
       {
-        "title": "Zero Debt",
-        "desc": "The framework to get out of debt forever."
+        "title": "Зеро Дебт",
+        "desc": "В рамках отримання боргу назавжди."
       },
       {
-        "title": "Fix Everything",
-        "desc": "12 essential tools to repair yourself."
+        "title": "Виправлення",
+        "desc": "12 необхідних інструментів для ремонту себе."
       },
       {
-        "title": "Money-Free Exchange",
-        "desc": "How to activate a barter network."
+        "title": "Безкоштовний обмін",
+        "desc": "Як активувати мережу бартерів."
       },
       {
-        "title": "Farm to Table",
-        "desc": "Guide to home gardening and zero-waste cooking."
+        "title": "Ферма на стіл",
+        "desc": "Путівник по домашньому садівництві та нульовому влаштуванню."
       },
       {
-        "title": "Free Energy",
-        "desc": "How to cut utility bills by 50%."
+        "title": "Безкоштовна енергія",
+        "desc": "Як розрізати комунальні рахунки на 50%."
       },
       {
-        "title": "30-Day Plan",
-        "desc": "Day-by-day checklist to transform your finances."
+        "title": "30-денний план",
+        "desc": "ДЕНЬ-відділення для перетворення ваших фінансів."
       }
     ]
   },
   "includes": {
-    "title": "Also includes:",
+    "title": "Також включає:",
     "items": [
-      "Full eBook (PDF, ePub, Kindle)",
-      "Printable 30-day checklist",
-      "Amish budget Excel sheet",
-      "Weekly shopping list template",
-      "Lifetime member area access",
-      "Free future updates"
+      "Повний eBook (PDF, ePub, Kindle)",
+      "Друкований 30-денний контроль",
+      "Амішний бюджет листа Excel",
+      "Щотижневий шаблон списку покупок",
+      "Доступ до зони життя",
+      "Безкоштовні оновлення майбутнього"
     ]
   },
   "testimonials": {
-    "badge": "// 06 — Testimonials",
-    "title": "Testimonials",
+    "badge": "// 06 — Відгуки",
+    "title": "Відгуки",
     "items": [
       {
-        "text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
-        "name": "Marco R.",
-        "role": "Rome — early readers"
+        "text": "Я звернувся до методу «Амішський бюджет» і через два місяці я ріжу свої витрати на 35%. 30-денний контрольний пункт. Нарешті курс, який дійсно працює.",
+        "name": "Марко Р.",
+        "role": "Рим — ранні читачі"
       }
     ]
   },
   "offer": {
-    "badge": "Launch Offer",
-    "title": "Invest in Yourself",
-    "complete_package": "Complete Package",
-    "course_value": "Course: $97",
-    "bonus_value": "Bonus: $27",
+    "badge": "Пропозиція",
+    "title": "Інвестуй у себе",
+    "complete_package": "Повний пакет",
+    "course_value": "Курс: $97",
+    "bonus_value": "Бонус: $27",
     "price_text": "",
-    "one_time": "One-time payment — no subscription",
-    "launch_price": "Launch price — then $37",
-    "cta": "Unlock Access Now",
-    "guarantee_title": "30-Day Money-Back Guarantee",
+    "one_time": "Одноразовий платіж — без підписки",
+    "launch_price": "Початкова ціна — потім $37",
+    "cta": "Розблокувати доступ зараз",
+    "guarantee_title": "30-денна гарантія повернення грошей",
     "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
     "includes": [
-      "Full course (value $97)",
+      "Повний курс (значення $97)",
       "eBook PDF, ePub, Kindle",
-      "Printable 30-day checklist",
-      "Amish budget Excel sheet",
-      "Lifetime access + updates",
-      "BONUS: Weekly shopping list (value $27)"
+      "Друкований 30-денний контроль",
+      "Амішний бюджет листа Excel",
+      "Доступ до життя + оновлення",
+      "BONUS: Щотижневий список покупок (значення $27)"
     ]
   },
   "faq": {
-    "badge": "// 07 — FAQ",
-    "title": "Frequently Asked Questions",
-    "offer_valid": "Offer valid this week",
+    "badge": "// 07 — Питання",
+    "title": "Питання та відповіді",
+    "offer_valid": "Пропозиція дійсна на цьому тижні",
     "items": [
       {
-        "q": "What exactly is included?",
-        "a": "You get the complete eBook in PDF, ePub, and Kindle formats. Plus lifetime access to all future updates."
+        "q": "Що саме входить?",
+        "a": "Ви отримуєте повну книгу у форматі PDF, ePub та Kindle. Доступ до всіх оновлень."
       },
       {
-        "q": "Is it in English?",
-        "a": "Yes, the course is fully available in English."
+        "q": "Чи є це англійською мовою?",
+        "a": "Так, курс повністю доступний англійською мовою."
       },
       {
-        "q": "What format is the course in?",
-        "a": "eBook in PDF, ePub, and Kindle formats. Videos are in MP4 format."
+        "q": "Який формат є курсом?",
+        "a": "eBook в PDF, ePub і Kindle формати. Відео в форматі MP4."
       },
       {
-        "q": "When do I get access?",
-        "a": "Immediately after payment."
+        "q": "Як отримати доступ?",
+        "a": "Відразу після оплати."
       },
       {
-        "q": "What if I'm not satisfied?",
-        "a": "You're protected by our 30-day money-back guarantee."
+        "q": "Що, якщо я не задоволений?",
+        "a": "Гарантія повернення грошей за 30 днів."
       },
       {
-        "q": "How long does it take?",
-        "a": "The complete program takes about 3-4 hours."
+        "q": "Скільки коштує?",
+        "a": "Програма триває приблизно 3-4 години."
       }
     ]
   },
   "final_cta": {
-    "title": "Start Your Journey to Financial Freedom Today",
-    "subtitle": "Join hundreds of people who have already transformed their relationship with money.",
-    "badge": "Offer valid this week"
+    "title": "Почати свою подорож до фінансової свободи сьогодні",
+    "subtitle": "Приєднуйтесь до сотні людей, які вже перетворили свої відносини з грошима.",
+    "badge": "Пропозиція дійсна на цьому тижні"
   },
   "footer": {
-    "rights_reserved": "All rights reserved.",
-    "privacy": "Privacy",
-    "terms": "Terms",
+    "rights_reserved": "Всі права захищені.",
+    "privacy": "Контакти",
+    "terms": "Контакти",
     "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
     "badges": {
-      "guarantee": "30-Day Guarantee",
-      "instant_access": "Instant Access",
-      "lifetime_updates": "Lifetime Updates"
+      "guarantee": "30-денна гарантія",
+      "instant_access": "Миттєвий доступ",
+      "lifetime_updates": "Оновлення часу життя"
     }
   },
   "trust": {
-    "title": "Trusted by teams worldwide",
+    "title": "Довіра команди по всьому світу",
     "readers_count": "1 247 читачів",
     "company_names": []
   },
@@ -195,113 +195,113 @@
       "buy_now_dash": "Купити зараз —",
       "view_modules": "Переглянути модулі",
       "ssl_secure": "Безпечна оплата через SSL",
-      "instant_download": "Instant Download",
-      "lifetime_access": "Lifetime Access",
-      "guarantee_days": "30-Day Guarantee",
-      "section_who": "// 01 — Who Is This For",
-      "is_this_for_you": "Is This Course For You?",
-      "perfect_for": "Perfect for you if:",
-      "p_struggle": "You struggle to make ends meet",
-      "p_cut_costs": "You want to cut costs without sacrificing quality of life",
+      "instant_download": "Миттєве завантаження",
+      "lifetime_access": "Доступ до життя",
+      "guarantee_days": "30-денна гарантія",
+      "section_who": "// 01 — Хто це для",
+      "is_this_for_you": "Чи є це курс для вас?",
+      "perfect_for": "Ідеально підходить для вас, якщо:",
+      "p_struggle": "Ви боретеся, щоб кінці познайомилися",
+      "p_cut_costs": "Ви хочете вирізати витрати без шкоди якості життя",
       "p_consumerism": "Tired of consumerism and debt culture",
       "p_practical": "Looking for practical, time-tested methods",
       "p_future": "Want a solid financial future for your family",
-      "not_for": "Not for you if:",
+      "not_for": "Не для вас, якщо:",
       "n_quick": "Looking for get-rich-quick schemes",
       "n_habits": "Not willing to change spending habits",
       "n_quick_fix": "Prefer quick fixes over a solid path",
       "n_implement": "Not willing to implement what you learn",
       "n_advice": "Looking for personalized financial advice",
-      "section_learn": "// 02 — What You'll Learn",
-      "masters_secrets": "The Amish Masters' Secrets",
+      "section_learn": "// 02 — Що ви дізнаєтеся",
+      "masters_secrets": "Секрети Амішних майстрів",
       "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
-      "section_author": "// 03 — The Author",
-      "behind_course": "Behind This Course",
-      "your_name": "Your Name Here",
+      "section_author": "// 03 — Автор",
+      "behind_course": "За цим курсом",
+      "your_name": "Ваше ім'я",
       "researcher_author": "Researcher · Author · Traveler",
       "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
-      "section_content": "// 04 — Course Content",
-      "what_inside": "What You'll Find Inside",
-      "also_includes": "Also includes:",
-      "inc_full_ebook": "Full eBook (PDF, ePub, Kindle)",
-      "inc_checklist": "Printable 30-day checklist",
-      "inc_excel": "Amish budget Excel sheet",
-      "inc_shopping": "Weekly shopping list template",
-      "inc_lifetime": "Lifetime member area access",
-      "inc_updates": "Free future updates",
-      "section_offer": "// 05 — The Offer",
-      "invest_yourself": "Invest in Yourself",
-      "launch_offer": "Launch Offer",
-      "complete_package": "Complete Package",
-      "course_value": "Course: $97",
-      "bonus_value": "Bonus: $27",
-      "one_time": "One-time payment — no subscription",
-      "launch_price": "Launch price — then $37",
-      "inc_course_full": "Full course (value $97)",
+      "section_content": "// 04 — Зміст курсу",
+      "what_inside": "Що ви знайдете",
+      "also_includes": "Також включає:",
+      "inc_full_ebook": "Повний eBook (PDF, ePub, Kindle)",
+      "inc_checklist": "Друкований 30-денний контроль",
+      "inc_excel": "Амішний бюджет листа Excel",
+      "inc_shopping": "Щотижневий шаблон списку покупок",
+      "inc_lifetime": "Доступ до зони життя",
+      "inc_updates": "Безкоштовні оновлення майбутнього",
+      "section_offer": "// 05 — Пропозиція",
+      "invest_yourself": "Інвестуй у себе",
+      "launch_offer": "Пропозиція",
+      "complete_package": "Повний пакет",
+      "course_value": "Курс: $97",
+      "bonus_value": "Бонус: $27",
+      "one_time": "Одноразовий платіж — без підписки",
+      "launch_price": "Початкова ціна — потім $37",
+      "inc_course_full": "Повний курс (значення $97)",
       "inc_ebook": "eBook PDF, ePub, Kindle",
-      "inc_checklist2": "Printable 30-day checklist",
-      "inc_excel2": "Amish budget Excel sheet",
-      "inc_access_updates": "Lifetime access + updates",
-      "inc_bonus_shopping": "BONUS: Weekly shopping list (value $27)",
-      "unlock_now": "Unlock Access Now",
-      "guarantee_title": "30-Day Money-Back Guarantee",
+      "inc_checklist2": "Друкований 30-денний контроль",
+      "inc_excel2": "Амішний бюджет листа Excel",
+      "inc_access_updates": "Доступ до життя + оновлення",
+      "inc_bonus_shopping": "BONUS: Щотижневий список покупок (значення $27)",
+      "unlock_now": "Розблокувати доступ зараз",
+      "guarantee_title": "30-денна гарантія повернення грошей",
       "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
-      "section_testimonials": "// 06 — Testimonials",
-      "testimonial_text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
-      "testimonial_name": "Marco R.",
-      "testimonial_role": "Rome — early readers",
-      "section_faq": "// 07 — FAQ",
-      "faq_title": "Frequently Asked Questions",
-      "offer_valid": "Offer valid this week",
-      "final_cta": "Start Your Journey to Financial Freedom Today",
-      "final_sub": "Join hundreds of people who have already transformed their relationship with money.",
-      "unlock_dash": "Unlock Access —",
-      "guarantee_badge": "30-Day Guarantee",
-      "instant_access_badge": "Instant Access",
-      "lifetime_badge": "Lifetime Updates",
-      "rights_reserved": "All rights reserved.",
-      "privacy": "Privacy",
-      "terms": "Terms",
+      "section_testimonials": "// 06 — Відгуки",
+      "testimonial_text": "Я звернувся до методу «Амішський бюджет» і через два місяці я ріжу свої витрати на 35%. 30-денний контрольний пункт. Нарешті курс, який дійсно працює.",
+      "testimonial_name": "Марко Р.",
+      "testimonial_role": "Рим — ранні читачі",
+      "section_faq": "// 07 — Питання",
+      "faq_title": "Питання та відповіді",
+      "offer_valid": "Пропозиція дійсна на цьому тижні",
+      "final_cta": "Почати свою подорож до фінансової свободи сьогодні",
+      "final_sub": "Приєднуйтесь до сотні людей, які вже перетворили свої відносини з грошима.",
+      "unlock_dash": "Розблокувати доступ —",
+      "guarantee_badge": "30-денна гарантія",
+      "instant_access_badge": "Миттєвий доступ",
+      "lifetime_badge": "Оновлення часу життя",
+      "rights_reserved": "Всі права захищені.",
+      "privacy": "Контакти",
+      "terms": "Контакти",
       "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
-      "features": "Features",
-      "pricing": "Pricing",
-      "testimonials": "Testimonials",
-      "contact": "Contact",
-      "get_started": "Get Started",
-      "learn_more": "Learn More",
-      "member_area": "Member Area",
-      "back_to_landing": "Back to Landing",
-      "buy_now": "Buy Now",
+      "features": "Особливості",
+      "pricing": "Ціна",
+      "testimonials": "Відгуки",
+      "contact": "Контакти",
+      "get_started": "Почати",
+      "learn_more": "Дізнатися більше",
+      "member_area": "Область членства",
+      "back_to_landing": "Повернутися до посадки",
+      "buy_now": "Купити зараз",
       "currency_symbol": "$",
-      "new_badge": "New",
-      "the_problem": "The Problem",
-      "our_story": "Our Story",
-      "what_learn": "What You'll Learn",
-      "course_lessons": "Course Lessons",
-      "curriculum": "Curriculum",
-      "free_tier": "Free",
-      "pro_tier": "Pro",
+      "new_badge": "Нові",
+      "the_problem": "Проблема",
+      "our_story": "Історія",
+      "what_learn": "Що ви дізнаєтеся",
+      "course_lessons": "Уроки курсу",
+      "curriculum": "Навчальна програма",
+      "free_tier": "Безкоштовно",
+      "pro_tier": "Про нас",
       "per_month": "/mo",
-      "start_free": "Start Free",
-      "popular": "Popular",
-      "free_title": "To get started",
-      "pro_title": "To grow",
-      "trusted_by": "Trusted by teams worldwide",
-      "offer_badge": "Launch Offer",
-      "price_special": "Special launch price",
-      "buy_and_access": "Buy & Access Instantly",
-      "bestseller": "Best Seller",
-      "story_badge": "// The True Story",
-      "story_title": "My Experience Among the Amish",
-      "story_subtitle": "Three months in Pennsylvania, twelve families interviewed, an economic system that has worked for 300 years.",
-      "amish_life": "Amish Life",
-      "caption_1": "Daily life in the Amish community: simplicity, self-sufficiency, and financial wisdom passed down through generations.",
-      "caption_2": "The barter and exchange system that eliminates the need for cash and builds lasting trust relationships.",
-      "caption_3": "The Amish household economy: how a family lives on 60% less than the national average.",
-      "tag_1": "Economic Anthropology",
-      "tag_2": "Amish Studies",
-      "tag_3": "Financial Consulting",
-      "brand_name": "Courssy",
+      "start_free": "Безкоштовно",
+      "popular": "Популярні",
+      "free_title": "Почати",
+      "pro_title": "Вирощувати",
+      "trusted_by": "Довіра команди по всьому світу",
+      "offer_badge": "Пропозиція",
+      "price_special": "Спеціальна ціна запуску",
+      "buy_and_access": "Купуйте та користуйтеся миттєво",
+      "bestseller": "Кращий продавець",
+      "story_badge": "// Правда Історія",
+      "story_title": "Мій досвід серед Аміш",
+      "story_subtitle": "Три місяці в Пенсільванії, дванадцять сімей інтерв'ю, економічна система, яка працювала на 300 років.",
+      "amish_life": "Аміш життя",
+      "caption_1": "Щоденне життя в громаді Аміш: простота, самодостатність та фінансова мудрість пройшли через покоління.",
+      "caption_2": "Система бартера і обміну, яка усуває необхідність готівки і будує останні довірчі відносини.",
+      "caption_3": "Чим живе сім'я на 60% менше, ніж на національному рівні.",
+      "tag_1": "Економічна антропологія",
+      "tag_2": "Амішознавство",
+      "tag_3": "Фінансовий консалтинг",
+      "brand_name": "Прованс",
       "reviewer": "Marco R., early readers",
       "language_switch": "EN",
       "language_switch_en": "EN",
@@ -313,17 +313,17 @@
     }
   },
   "audience": {
-    "badge": "// 01 — Who Is This For",
-    "title": "Is This Course For You?",
-    "perfect_for": "Perfect for you if:",
+    "badge": "// 01 — Хто це для",
+    "title": "Чи є це курс для вас?",
+    "perfect_for": "Ідеально підходить для вас, якщо:",
     "perfect_items": [
-      "You struggle to make ends meet",
-      "You want to cut costs without sacrificing quality of life",
+      "Ви боретеся, щоб кінці познайомилися",
+      "Ви хочете вирізати витрати без шкоди якості життя",
       "Tired of consumerism and debt culture",
       "Looking for practical, time-tested methods",
       "Want a solid financial future for your family"
     ],
-    "not_for": "Not for you if:",
+    "not_for": "Не для вас, якщо:",
     "not_items": [
       "Looking for get-rich-quick schemes",
       "Not willing to change spending habits",
@@ -333,17 +333,17 @@
     ]
   },
   "course": {
-    "back_to_course": "Back to Landing",
-    "module_label": "Curriculum",
-    "now_playing": "Now playing",
-    "page_label": "Page",
-    "reading_progress": "Reading Progress",
-    "download_pdf": "Download PDF",
-    "chapter": "Chapter"
+    "back_to_course": "Повернутися до посадки",
+    "module_label": "Навчальна програма",
+    "now_playing": "Тепер грати",
+    "page_label": "Навігація",
+    "reading_progress": "Прогрес читання",
+    "download_pdf": "Завантажити PDF",
+    "chapter": "Головна"
   },
   "lessons": {
-    "badge": "// 04 — Course Content",
-    "title": "What You'll Find Inside",
+    "badge": "// 04 — Зміст курсу",
+    "title": "Що ви знайдете",
     "items": []
   }
 }

@@ -6,184 +6,184 @@
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
-    "brand": "Amish secrets",
-    "features": "Features",
-    "pricing": "Pricing",
-    "testimonials": "Testimonials",
-    "faq": "FAQ",
-    "contact": "Contact",
-    "get_started": "Get Started",
-    "learn_more": "Learn More",
-    "member_area": "Member Area",
-    "back_to_landing": "Back to Landing"
+    "brand": "암시 비밀",
+    "features": "제품 정보",
+    "pricing": "제품정보",
+    "testimonials": "관련 기사",
+    "faq": "제품 정보",
+    "contact": "제품정보",
+    "get_started": "시작하기",
+    "learn_more": "더 알아보기",
+    "member_area": "회원 영역",
+    "back_to_landing": "착륙하기"
   },
   "hero": {
-    "badge": "New",
+    "badge": "- 한국어",
     "title": "아미시의 비밀: 절약하며 사는 법과 돈 관리하기",
     "subtitle": "아미시 공동체의 검소한 삶의 비결을 알아보세요. 전체 영상 모듈과 다운로드 가능한 PDF가 포함되어 있습니다.",
-    "cta": "Get Started",
-    "secondary_cta": "Learn More",
-    "price_label": "Special launch price",
-    "one_time_payment": "One-time payment — no subscription"
+    "cta": "시작하기",
+    "secondary_cta": "더 알아보기",
+    "price_label": "특별 출시 가격",
+    "one_time_payment": "One-time 결제 — 구독 없음"
   },
   "problem": {
-    "badge": "The Problem",
+    "badge": "문제",
     "title": "저축 없이 월말을 맞이하는 것에 지치셨나요? 현대 사회는 우리에게 과도한 소비를 부추깁니다.",
     "text": ""
   },
   "story": {
-    "badge": "Our Story",
-    "title": "La mia esperienza tra gli Amish",
+    "badge": "우리의 이야기",
+    "title": "La mia esperienza tra gli 아미시",
     "image_captions": [
       "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria.",
-      "Il sistema di baratto e scambio che elimina il bisogno di denaro contante.",
-      "L'economia domestica Amish: come una famiglia riesce a vivere con il 60% in meno."
+      "일 sistema di baratto e scambio che elimina il bisogno di denaro contante.",
+      "L'economia 국내 Amish: una famiglia riesce a vivere con il 60% 에 meno."
     ],
     "quote": "아미시는 우리가 쓰는 비용의 아주 적은 부분만으로도 풍요롭고 충만한 삶을 살고 있습니다. 이 코스에서는 그 비밀을 밝혀드립니다."
   },
   "author": {
-    "badge": "// 03 — The Author",
-    "title": "Behind This Course",
-    "name": "Alessandro Rinaldi",
+    "badge": "// 03 - 저자",
+    "title": "이 코스 뒤에",
+    "name": "카테고리",
     "role": "Researcher · Author · Traveler",
     "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
     "tags": [
-      "Saggezza Finanziaria",
-      "Vita Sostenibile",
-      "Educazione"
+      "Saggezza Finanziaria, 인도네시아",
+      "비타 Sostenibile",
+      "교육 기관"
     ]
   },
   "modules": {
-    "badge": "// 02 — What You'll Learn",
-    "title": "The Amish Masters' Secrets",
+    "badge": "// 02 - 당신이 배울 것",
+    "title": "Amish Masters의 비밀",
     "description": "8 practical modules that turn Amish wisdom into concrete actions.",
     "items": [
       {
-        "title": "Amish Budget",
-        "desc": "Live on 30% less without sacrifice."
+        "title": "Amish 예산",
+        "desc": "희생없이 30 % 미만에서 라이브."
       },
       {
-        "title": "Infinite Pantry",
-        "desc": "The food storage method that eliminates waste."
+        "title": "Infinite 바지",
+        "desc": "폐기물을 제거하는 식품 저장 방법."
       },
       {
-        "title": "Zero Debt",
-        "desc": "The framework to get out of debt forever."
+        "title": "영 Debt",
+        "desc": "부채를 영원히 얻을 수있는 프레임 워크."
       },
       {
-        "title": "Fix Everything",
-        "desc": "12 essential tools to repair yourself."
+        "title": "모든 것",
+        "desc": "스스로 수리하는 데 12 가지 필수 도구."
       },
       {
-        "title": "Money-Free Exchange",
-        "desc": "How to activate a barter network."
+        "title": "돈 무료 교환",
+        "desc": "barter 네트워크를 활성화하는 방법."
       },
       {
-        "title": "Farm to Table",
-        "desc": "Guide to home gardening and zero-waste cooking."
+        "title": "본문 바로가기",
+        "desc": "홈 정원 및 제로와스 요리 가이드."
       },
       {
-        "title": "Free Energy",
-        "desc": "How to cut utility bills by 50%."
+        "title": "무료 에너지",
+        "desc": "50%의 유틸리티 청구서를 절단하는 방법."
       },
       {
-        "title": "30-Day Plan",
-        "desc": "Day-by-day checklist to transform your finances."
+        "title": "30일 플랜",
+        "desc": "Day-by-day 체크리스트는 재정을 변화시킵니다."
       }
     ]
   },
   "includes": {
-    "title": "Also includes:",
+    "title": "다음을 포함합니다:",
     "items": [
-      "Full eBook (PDF, ePub, Kindle)",
-      "Printable 30-day checklist",
-      "Amish budget Excel sheet",
-      "Weekly shopping list template",
-      "Lifetime member area access",
-      "Free future updates"
+      "전체 전자 책 (PDF, ePub, 킨들)",
+      "인쇄 가능한 30 일 체크리스트",
+      "Amish 예산 Excel 시트",
+      "주간 쇼핑 목록 템플릿",
+      "평생 회원 영역 액세스",
+      "무료 미래 업데이트"
     ]
   },
   "testimonials": {
-    "badge": "// 06 — Testimonials",
-    "title": "Testimonials",
+    "badge": "// 06 — 증언",
+    "title": "관련 기사",
     "items": [
       {
-        "text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
-        "name": "Marco R.",
-        "role": "Rome — early readers"
+        "text": "나는 Amish 예산 방법을 적용하고 2 개월 만에 나는 35 %로 내 비용을 잘라. 30 일 체크리스트는 터닝 포인트였습니다. 마지막으로 정말 작동 하는 과정.",
+        "name": "마르코 R.",
+        "role": "로마 - 초기 독자"
       }
     ]
   },
   "offer": {
-    "badge": "Launch Offer",
-    "title": "Invest in Yourself",
-    "complete_package": "Complete Package",
-    "course_value": "Course: $97",
-    "bonus_value": "Bonus: $27",
+    "badge": "공지사항",
+    "title": "당신의 자신에 투자",
+    "complete_package": "관련 상품",
+    "course_value": "코스: $97",
+    "bonus_value": "보너스: $27",
     "price_text": "",
-    "one_time": "One-time payment — no subscription",
-    "launch_price": "Launch price — then $37",
-    "cta": "Unlock Access Now",
-    "guarantee_title": "30-Day Money-Back Guarantee",
+    "one_time": "One-time 결제 — 구독 없음",
+    "launch_price": "시작 가격 — 다음 $37",
+    "cta": "지금 접속",
+    "guarantee_title": "30일 환불 보증",
     "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
     "includes": [
-      "Full course (value $97)",
-      "eBook PDF, ePub, Kindle",
-      "Printable 30-day checklist",
-      "Amish budget Excel sheet",
-      "Lifetime access + updates",
-      "BONUS: Weekly shopping list (value $27)"
+      "풀 코스 (값 $97)",
+      "eBook PDF, ePub, 킨들",
+      "인쇄 가능한 30 일 체크리스트",
+      "Amish 예산 Excel 시트",
+      "평생 액세스 + 업데이트",
+      "BONUS: 주간 쇼핑 목록 (값 $27)"
     ]
   },
   "faq": {
-    "badge": "// 07 — FAQ",
-    "title": "Frequently Asked Questions",
-    "offer_valid": "Offer valid this week",
+    "badge": "// 07 - 자주 묻는 질문",
+    "title": "자주 묻는 질문",
+    "offer_valid": "이번 주에 유효한 제안",
     "items": [
       {
-        "q": "What exactly is included?",
-        "a": "You get the complete eBook in PDF, ePub, and Kindle formats. Plus lifetime access to all future updates."
+        "q": "정확히 무엇이 포함되어 있습니까?",
+        "a": "PDF, ePub 및 Kindle 형식의 완벽한 eBook을 얻을 수 있습니다. 모든 미래 업데이트에 대한 평생 액세스 플러스."
       },
       {
-        "q": "Is it in English?",
-        "a": "Yes, the course is fully available in English."
+        "q": "그것은 영어로?",
+        "a": "예, 과정은 영어에서 완전히 사용할 수 있습니다."
       },
       {
-        "q": "What format is the course in?",
-        "a": "eBook in PDF, ePub, and Kindle formats. Videos are in MP4 format."
+        "q": "어떤 형식이 과정에 있습니까?",
+        "a": "PDF, ePub 및 Kindle 형식의 eBook. 동영상은 MP4 형식입니다."
       },
       {
-        "q": "When do I get access?",
-        "a": "Immediately after payment."
+        "q": "액세스 할 때?",
+        "a": "지불 후에 즉시."
       },
       {
-        "q": "What if I'm not satisfied?",
-        "a": "You're protected by our 30-day money-back guarantee."
+        "q": "만족하지 않는 경우?",
+        "a": "30 일 환불 보장에 의해 보호됩니다."
       },
       {
-        "q": "How long does it take?",
-        "a": "The complete program takes about 3-4 hours."
+        "q": "얼마나 걸리나요?",
+        "a": "전체 프로그램은 약 3-4 시간 걸립니다."
       }
     ]
   },
   "final_cta": {
-    "title": "Start Your Journey to Financial Freedom Today",
-    "subtitle": "Join hundreds of people who have already transformed their relationship with money.",
-    "badge": "Offer valid this week"
+    "title": "오늘 금융 Freedom에 대한 여행 시작",
+    "subtitle": "이미 돈과 관계를 변환 한 사람들의 수백에 가입하십시오.",
+    "badge": "이번 주에 유효한 제안"
   },
   "footer": {
-    "rights_reserved": "All rights reserved.",
-    "privacy": "Privacy",
-    "terms": "Terms",
+    "rights_reserved": "모든 권리 보유",
+    "privacy": "제품 정보",
+    "terms": "제품 정보",
     "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
     "badges": {
-      "guarantee": "30-Day Guarantee",
-      "instant_access": "Instant Access",
-      "lifetime_updates": "Lifetime Updates"
+      "guarantee": "30일 보증",
+      "instant_access": "즉시 액세스",
+      "lifetime_updates": "평생 업데이트"
     }
   },
   "trust": {
-    "title": "Trusted by teams worldwide",
+    "title": "전 세계 팀에 의해 신뢰",
     "readers_count": "1,247명의 독자",
     "company_names": []
   },
@@ -195,113 +195,113 @@
       "buy_now_dash": "지금 구매하기 —",
       "view_modules": "모듈 보기",
       "ssl_secure": "보안 결제 (SSL)",
-      "instant_download": "Instant Download",
-      "lifetime_access": "Lifetime Access",
-      "guarantee_days": "30-Day Guarantee",
-      "section_who": "// 01 — Who Is This For",
-      "is_this_for_you": "Is This Course For You?",
-      "perfect_for": "Perfect for you if:",
-      "p_struggle": "You struggle to make ends meet",
-      "p_cut_costs": "You want to cut costs without sacrificing quality of life",
+      "instant_download": "즉시 다운로드",
+      "lifetime_access": "일생 접근",
+      "guarantee_days": "30일 보증",
+      "section_who": "// 01 - 이 경우",
+      "is_this_for_you": "이 코스는?",
+      "perfect_for": "당신을 위해 완전히:",
+      "p_struggle": "당신은 끝을 만들기 위해 투쟁",
+      "p_cut_costs": "삶의 질을 희생하지 않고 비용을 삭감하고 싶습니다.",
       "p_consumerism": "Tired of consumerism and debt culture",
       "p_practical": "Looking for practical, time-tested methods",
       "p_future": "Want a solid financial future for your family",
-      "not_for": "Not for you if:",
+      "not_for": "만약에:",
       "n_quick": "Looking for get-rich-quick schemes",
       "n_habits": "Not willing to change spending habits",
       "n_quick_fix": "Prefer quick fixes over a solid path",
       "n_implement": "Not willing to implement what you learn",
       "n_advice": "Looking for personalized financial advice",
-      "section_learn": "// 02 — What You'll Learn",
-      "masters_secrets": "The Amish Masters' Secrets",
+      "section_learn": "// 02 - 당신이 배울 것",
+      "masters_secrets": "Amish Masters의 비밀",
       "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
-      "section_author": "// 03 — The Author",
-      "behind_course": "Behind This Course",
-      "your_name": "Your Name Here",
+      "section_author": "// 03 - 저자",
+      "behind_course": "이 코스 뒤에",
+      "your_name": "당신의 이름 여기",
       "researcher_author": "Researcher · Author · Traveler",
       "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
-      "section_content": "// 04 — Course Content",
-      "what_inside": "What You'll Find Inside",
-      "also_includes": "Also includes:",
-      "inc_full_ebook": "Full eBook (PDF, ePub, Kindle)",
-      "inc_checklist": "Printable 30-day checklist",
-      "inc_excel": "Amish budget Excel sheet",
-      "inc_shopping": "Weekly shopping list template",
-      "inc_lifetime": "Lifetime member area access",
-      "inc_updates": "Free future updates",
-      "section_offer": "// 05 — The Offer",
-      "invest_yourself": "Invest in Yourself",
-      "launch_offer": "Launch Offer",
-      "complete_package": "Complete Package",
-      "course_value": "Course: $97",
-      "bonus_value": "Bonus: $27",
-      "one_time": "One-time payment — no subscription",
-      "launch_price": "Launch price — then $37",
-      "inc_course_full": "Full course (value $97)",
-      "inc_ebook": "eBook PDF, ePub, Kindle",
-      "inc_checklist2": "Printable 30-day checklist",
-      "inc_excel2": "Amish budget Excel sheet",
-      "inc_access_updates": "Lifetime access + updates",
-      "inc_bonus_shopping": "BONUS: Weekly shopping list (value $27)",
-      "unlock_now": "Unlock Access Now",
-      "guarantee_title": "30-Day Money-Back Guarantee",
+      "section_content": "// 04 - 코스 내용",
+      "what_inside": "자주 묻는 질문",
+      "also_includes": "다음을 포함합니다:",
+      "inc_full_ebook": "전체 전자 책 (PDF, ePub, 킨들)",
+      "inc_checklist": "인쇄 가능한 30 일 체크리스트",
+      "inc_excel": "Amish 예산 Excel 시트",
+      "inc_shopping": "주간 쇼핑 목록 템플릿",
+      "inc_lifetime": "평생 회원 영역 액세스",
+      "inc_updates": "무료 미래 업데이트",
+      "section_offer": "// 05 - 제안",
+      "invest_yourself": "당신의 자신에 투자",
+      "launch_offer": "공지사항",
+      "complete_package": "관련 상품",
+      "course_value": "코스: $97",
+      "bonus_value": "보너스: $27",
+      "one_time": "One-time 결제 — 구독 없음",
+      "launch_price": "시작 가격 — 다음 $37",
+      "inc_course_full": "풀 코스 (값 $97)",
+      "inc_ebook": "eBook PDF, ePub, 킨들",
+      "inc_checklist2": "인쇄 가능한 30 일 체크리스트",
+      "inc_excel2": "Amish 예산 Excel 시트",
+      "inc_access_updates": "평생 액세스 + 업데이트",
+      "inc_bonus_shopping": "BONUS: 주간 쇼핑 목록 (값 $27)",
+      "unlock_now": "지금 접속",
+      "guarantee_title": "30일 환불 보증",
       "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
-      "section_testimonials": "// 06 — Testimonials",
-      "testimonial_text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
-      "testimonial_name": "Marco R.",
-      "testimonial_role": "Rome — early readers",
-      "section_faq": "// 07 — FAQ",
-      "faq_title": "Frequently Asked Questions",
-      "offer_valid": "Offer valid this week",
-      "final_cta": "Start Your Journey to Financial Freedom Today",
-      "final_sub": "Join hundreds of people who have already transformed their relationship with money.",
-      "unlock_dash": "Unlock Access —",
-      "guarantee_badge": "30-Day Guarantee",
-      "instant_access_badge": "Instant Access",
-      "lifetime_badge": "Lifetime Updates",
-      "rights_reserved": "All rights reserved.",
-      "privacy": "Privacy",
-      "terms": "Terms",
+      "section_testimonials": "// 06 — 증언",
+      "testimonial_text": "나는 Amish 예산 방법을 적용하고 2 개월 만에 나는 35 %로 내 비용을 잘라. 30 일 체크리스트는 터닝 포인트였습니다. 마지막으로 정말 작동 하는 과정.",
+      "testimonial_name": "마르코 R.",
+      "testimonial_role": "로마 - 초기 독자",
+      "section_faq": "// 07 - 자주 묻는 질문",
+      "faq_title": "자주 묻는 질문",
+      "offer_valid": "이번 주에 유효한 제안",
+      "final_cta": "오늘 금융 Freedom에 대한 여행 시작",
+      "final_sub": "이미 돈과 관계를 변환 한 사람들의 수백에 가입하십시오.",
+      "unlock_dash": "액세스 잠금 해제 —",
+      "guarantee_badge": "30일 보증",
+      "instant_access_badge": "즉시 액세스",
+      "lifetime_badge": "평생 업데이트",
+      "rights_reserved": "모든 권리 보유",
+      "privacy": "제품 정보",
+      "terms": "제품 정보",
       "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
-      "features": "Features",
-      "pricing": "Pricing",
-      "testimonials": "Testimonials",
-      "contact": "Contact",
-      "get_started": "Get Started",
-      "learn_more": "Learn More",
-      "member_area": "Member Area",
-      "back_to_landing": "Back to Landing",
-      "buy_now": "Buy Now",
+      "features": "제품 정보",
+      "pricing": "제품정보",
+      "testimonials": "관련 기사",
+      "contact": "제품정보",
+      "get_started": "시작하기",
+      "learn_more": "더 알아보기",
+      "member_area": "회원 영역",
+      "back_to_landing": "착륙하기",
+      "buy_now": "구매하기",
       "currency_symbol": "$",
-      "new_badge": "New",
-      "the_problem": "The Problem",
-      "our_story": "Our Story",
-      "what_learn": "What You'll Learn",
-      "course_lessons": "Course Lessons",
-      "curriculum": "Curriculum",
-      "free_tier": "Free",
-      "pro_tier": "Pro",
+      "new_badge": "- 한국어",
+      "the_problem": "문제",
+      "our_story": "우리의 이야기",
+      "what_learn": "당신이 배울 것",
+      "course_lessons": "코스 수업",
+      "curriculum": "교육과정",
+      "free_tier": "무료 다운로드",
+      "pro_tier": "지원하다",
       "per_month": "/mo",
-      "start_free": "Start Free",
-      "popular": "Popular",
-      "free_title": "To get started",
-      "pro_title": "To grow",
-      "trusted_by": "Trusted by teams worldwide",
-      "offer_badge": "Launch Offer",
-      "price_special": "Special launch price",
-      "buy_and_access": "Buy & Access Instantly",
-      "bestseller": "Best Seller",
-      "story_badge": "// The True Story",
-      "story_title": "My Experience Among the Amish",
-      "story_subtitle": "Three months in Pennsylvania, twelve families interviewed, an economic system that has worked for 300 years.",
-      "amish_life": "Amish Life",
-      "caption_1": "Daily life in the Amish community: simplicity, self-sufficiency, and financial wisdom passed down through generations.",
-      "caption_2": "The barter and exchange system that eliminates the need for cash and builds lasting trust relationships.",
-      "caption_3": "The Amish household economy: how a family lives on 60% less than the national average.",
-      "tag_1": "Economic Anthropology",
-      "tag_2": "Amish Studies",
-      "tag_3": "Financial Consulting",
-      "brand_name": "Courssy",
+      "start_free": "시작하기",
+      "popular": "인기 있는",
+      "free_title": "시작하기",
+      "pro_title": "성장하기",
+      "trusted_by": "전 세계 팀에 의해 신뢰",
+      "offer_badge": "공지사항",
+      "price_special": "특별 출시 가격",
+      "buy_and_access": "즉시 구매 및 액세스",
+      "bestseller": "회사 소개",
+      "story_badge": "// 진실한 이야기",
+      "story_title": "Amish의 내 경험",
+      "story_subtitle": "펜실베니아에서 3 개월, 12 가족 인터뷰, 300 년 동안 일한 경제 시스템.",
+      "amish_life": "Amish 생활",
+      "caption_1": "Amish 커뮤니티의 일상 생활 : 단순성, 자손, 금융 지혜는 세대를 통해 내려갑니다.",
+      "caption_2": "현금의 필요성을 제거하고 신뢰 관계를 구축하는 바터 및 교환 시스템.",
+      "caption_3": "가정 경제 : 가족이 평균보다 60 % 덜 생활하는 방법.",
+      "tag_1": "경제학",
+      "tag_2": "학회소개",
+      "tag_3": "금융 컨설팅",
+      "brand_name": "한국어",
       "reviewer": "Marco R., early readers",
       "language_switch": "EN",
       "language_switch_en": "EN",
@@ -313,17 +313,17 @@
     }
   },
   "audience": {
-    "badge": "// 01 — Who Is This For",
-    "title": "Is This Course For You?",
-    "perfect_for": "Perfect for you if:",
+    "badge": "// 01 - 이 경우",
+    "title": "이 코스는?",
+    "perfect_for": "당신을 위해 완전히:",
     "perfect_items": [
-      "You struggle to make ends meet",
-      "You want to cut costs without sacrificing quality of life",
+      "당신은 끝을 만들기 위해 투쟁",
+      "삶의 질을 희생하지 않고 비용을 삭감하고 싶습니다.",
       "Tired of consumerism and debt culture",
       "Looking for practical, time-tested methods",
       "Want a solid financial future for your family"
     ],
-    "not_for": "Not for you if:",
+    "not_for": "만약에:",
     "not_items": [
       "Looking for get-rich-quick schemes",
       "Not willing to change spending habits",
@@ -333,17 +333,17 @@
     ]
   },
   "course": {
-    "back_to_course": "Back to Landing",
-    "module_label": "Curriculum",
-    "now_playing": "Now playing",
-    "page_label": "Page",
-    "reading_progress": "Reading Progress",
-    "download_pdf": "Download PDF",
-    "chapter": "Chapter"
+    "back_to_course": "착륙하기",
+    "module_label": "교육과정",
+    "now_playing": "지금 재생",
+    "page_label": "(주)",
+    "reading_progress": "회사 소개",
+    "download_pdf": "PDF 다운로드",
+    "chapter": "이름 *"
   },
   "lessons": {
-    "badge": "// 04 — Course Content",
-    "title": "What You'll Find Inside",
+    "badge": "// 04 - 코스 내용",
+    "title": "자주 묻는 질문",
     "items": []
   }
 }

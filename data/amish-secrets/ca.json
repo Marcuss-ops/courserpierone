@@ -1,0 +1,344 @@
+{
+  "locale": "ca",
+  "seo": {
+    "title": "Amish Secrets: com viure amb estalvis i gestionar diners",
+    "description": "Descobriu els secrets de la vida d'Amish a la comunitat. Inclou tots els mòduls de vídeo i els PDF descarregables.",
+    "ogImage": "/courses/amish-secrets/cover.png"
+  },
+  "nav": {
+    "brand": "secrets Amishs",
+    "features": "Característiques",
+    "pricing": "Pricing",
+    "testimonials": "Testimonials",
+    "faq": "PMF",
+    "contact": "Contacte",
+    "get_started": "Començar",
+    "learn_more": "Apreneu més",
+    "member_area": "Àrea membre",
+    "back_to_landing": "De tornada a Port Reial"
+  },
+  "hero": {
+    "badge": "Nou",
+    "title": "Amish Secrets: com viure amb estalvis i gestionar diners",
+    "subtitle": "Descobriu els secrets de la vida d'Amish a la comunitat. Inclou tots els mòduls de vídeo i els PDF descarregables.",
+    "cta": "Començar",
+    "secondary_cta": "Apreneu més",
+    "price_label": "preu de llançament especial",
+    "one_time_payment": "Solucionador d' una hora sense subscripció"
+  },
+  "problem": {
+    "badge": "El problema",
+    "title": "Cansat per arribar al final del mes sense cap estalvi? La societat moderna ens empeny cap al consum excessiu.",
+    "text": ""
+  },
+  "story": {
+    "badge": "La nostra història",
+    "title": "La mia esperiza tragli Aish",
+    "image_captions": [
+      "La vita quotidianella comuntà Amish: semplicità, autosufènia e saggez Salainskaskaia.",
+      "Il system di baratto e stabios che limina bisogno di sarantant.",
+      "He arribat a una Famiomilia ríce un polí cent per cent en meno."
+    ],
+    "quote": "Els Amish viuen rics i vides completes mentre gastem una fracció del que passem. En aquest curs revelem com ho fan."
+  },
+  "author": {
+    "badge": "/ 03 AuthorL' autor",
+    "title": "Darrere d' aquest camp",
+    "name": "Alessandro Rinaldi",
+    "role": "Autor del investigador",
+    "bio": "Vaig viure 3 mesos a Pennsilvània, vaig entrevistar 12 famílies Amish, van estudiar el seu sistema econòmic. Sense teoria, només pràctica.]",
+    "tags": [
+      "Saggezza Finnaziriapoland. kgm",
+      "Vita Sostenibile",
+      "EducazoneCity name (optional, probably does not need a translation)"
+    ]
+  },
+  "modules": {
+    "badge": "/ 02 bibliography Què aprendre",
+    "title": "Els secrets d'Amish Masters",
+    "description": "8 mòduls pràctics que converteixen la saviesa amish en accions concretes per la teva vida quotidiana.",
+    "items": [
+      {
+        "title": "Any següent",
+        "desc": "Viu el 30% menys sense sacrifici."
+      },
+      {
+        "title": "Panal infinit",
+        "desc": "El mètode d'emmagatzematge alimentària que elimina els residus."
+      },
+      {
+        "title": "Zero Debt",
+        "desc": "El marc per a sortir del deute per sempre."
+      },
+      {
+        "title": "Arregla- ho tot",
+        "desc": "12 eines essencials per reparar-te."
+      },
+      {
+        "title": "Exchange lliure de moneda",
+        "desc": "Com activar una xarxa barter."
+      },
+      {
+        "title": "Granja a taula",
+        "desc": "Guia al jardí de casa i cuina zero."
+      },
+      {
+        "title": "Energia lliure",
+        "desc": "Com tallar factures de serveis per 50%."
+      },
+      {
+        "title": "Pla de 30 dies",
+        "desc": "Llista dia rere dia per transformar les vostres finances."
+      }
+    ]
+  },
+  "includes": {
+    "title": "També inclou:",
+    "items": [
+      "Full d' eBook (PDF, ePub, amable)",
+      "Llista de 30 dies imprimibles",
+      "Full Amish ExcelLanguage",
+      "Plantilla de llista de compres setmanal",
+      "Accés a l'àrea membre de la vida",
+      "Actualitzacions futures"
+    ]
+  },
+  "testimonials": {
+    "badge": "//06 Testimonials",
+    "title": "Testimonials",
+    "items": [
+      {
+        "text": "Vaig aplicar el mètode pressupostari Amish i en dos mesos vaig tallar les despeses pel 35%. La llista de 30 dies era el punt d'inflexió. Finalment, un curs que realment funciona.",
+        "name": "Marco R.",
+        "role": "Roma dels lectors electrònics"
+      }
+    ]
+  },
+  "offer": {
+    "badge": "Engega un apagat",
+    "title": "Inverteix en tu mateix",
+    "complete_package": "Paquet complet",
+    "course_value": "Camp: $97",
+    "bonus_value": "Bonus: $27",
+    "price_text": "",
+    "one_time": "Solucionador d' una hora sense subscripció",
+    "launch_price": "Engega el preu i després $37",
+    "cta": "Desbloqueja l' accés ara",
+    "guarantee_title": "Segur que 30 dies després de la moneda",
+    "guarantee_text": "Intenta-ho durant 30 dies. Si no estalviem almenys $ 100, resturem tota la quantitat. Sense preguntes, sense problemes.",
+    "includes": [
+      "Camp complet (valor $97)",
+      "Emobe PDF, ePub, arty",
+      "Llista de 30 dies imprimibles",
+      "Full Amish ExcelLanguage",
+      "Accés a temps de vida + actualitzacions",
+      "BONUS: Llista de compres setmanals (valora 2 dòlars7)"
+    ]
+  },
+  "faq": {
+    "badge": "/ 07 PMF",
+    "title": "Preguntes més freqüents",
+    "offer_valid": "Offer vàlid aquesta setmana",
+    "items": [
+      {
+        "q": "Què és exactament inclòs?",
+        "a": "Tens el llibre d'eBook complet a PDF, ePub, i formats amables. Més accés de vida a totes les futures actualitzacions."
+      },
+      {
+        "q": "Està en anglès?",
+        "a": "Sí, el curs està completament disponible en anglès."
+      },
+      {
+        "q": "En quin format consisteix el curs?",
+        "a": "Llibre en PDF, ePub, i formats amables. Els vídeos estan en format MP4."
+      },
+      {
+        "q": "Quan puc accedir?",
+        "a": "Immediatament després del pagament."
+      },
+      {
+        "q": "I si no estic satisfet?",
+        "a": "Estàs protegida per la nostra garantia de diners de 30 dies."
+      },
+      {
+        "q": "Quant tarda?",
+        "a": "El programa complet pren unes 3-4 hores."
+      }
+    ]
+  },
+  "final_cta": {
+    "title": "Inicia la teva Jinney a la Llibertat financera Avui",
+    "subtitle": "Uneix-te a centenars de persones que ja han transformat la seva relació amb diners.",
+    "badge": "Offer vàlid aquesta setmana"
+  },
+  "footer": {
+    "rights_reserved": "Tots els drets reservats.",
+    "privacy": "Privadesa",
+    "terms": "Termes",
+    "legal_note": "Això és un producte informatiu digital. Els resultats poden variar i depenen del compromís personal. El preu d'Amish i les tècniques descrites es basen en recerca ethnogràfica i poden no reflectir amb precisió les pràctiques modernes de totes les comunitats Amish.",
+    "badges": {
+      "guarantee": "30 dies Segur",
+      "instant_access": "Accés instantani",
+      "lifetime_updates": "Actualitzacions temps de vida"
+    }
+  },
+  "trust": {
+    "title": "Confiat per equips arreu del món",
+    "readers_count": "1.247 lectors",
+    "company_names": []
+  },
+  "ui": {
+    "labels": {
+      "instant_access": "Accés instantani",
+      "buy_now_arrow": "Compra ara Manveen",
+      "readers": "1.247 lectors",
+      "buy_now_dash": "Compra ara el kolab",
+      "view_modules": "Visualitza Mòduls",
+      "ssl_secure": "S' ha assegurat el pagament SSL",
+      "instant_download": "Baixada instantània",
+      "lifetime_access": "Accés de vida",
+      "guarantee_days": "30 dies Segur",
+      "section_who": "//01 Manveen Qui és això per",
+      "is_this_for_you": "És aquest camp per a tu?",
+      "perfect_for": "Perfecte per a vostè si:",
+      "p_struggle": "Lluites per arribar a fi.",
+      "p_cut_costs": "Voleu tallar els costos sense sacrificar la qualitat de vida",
+      "p_consumerism": "Estàs cansat del consumisme i de la cultura del deute",
+      "p_practical": "Voleu mètodes pràctics i provades",
+      "p_future": "Voleu construir un futur financer sòlid per la vostra família",
+      "not_for": "No per tu si:",
+      "n_quick": "Esteu buscant esquemes de few-rich",
+      "n_habits": "No vols canviar els teus hàbits de despesa",
+      "n_quick_fix": "Prefereixes solucions ràpides sobre una base sòlida",
+      "n_implement": "No estàs disposat a implementar el que aprens",
+      "n_advice": "Busques consell financer personalitzat",
+      "section_learn": "/ 02 bibliography Què aprendre",
+      "masters_secrets": "Els secrets d'Amish Masters",
+      "modules_desc": "8 mòduls pràctics que converteixen la saviesa amish en accions concretes per la teva vida quotidiana.",
+      "section_author": "/ 03 AuthorL' autor",
+      "behind_course": "Darrere d' aquest camp",
+      "your_name": "El vostre nom aquí",
+      "researcher_author": "Autor del investigador",
+      "author_bio": "Vaig viure 3 mesos a Pennsilvània, vaig entrevistar 12 famílies Amish, van estudiar el seu sistema econòmic. Sense teoria, només pràctica.]",
+      "section_content": "/ 04 Content del camp de cursos",
+      "what_inside": "El que trobaràs dins",
+      "also_includes": "També inclou:",
+      "inc_full_ebook": "Full d' eBook (PDF, ePub, amable)",
+      "inc_checklist": "Llista de 30 dies imprimibles",
+      "inc_excel": "Full Amish ExcelLanguage",
+      "inc_shopping": "Plantilla de llista de compres setmanal",
+      "inc_lifetime": "Accés a l'àrea membre de la vida",
+      "inc_updates": "Actualitzacions futures",
+      "section_offer": "// 0505 The Offer",
+      "invest_yourself": "Inverteix en tu mateix",
+      "launch_offer": "Engega un apagat",
+      "complete_package": "Paquet complet",
+      "course_value": "Camp: $97",
+      "bonus_value": "Bonus: $27",
+      "one_time": "Solucionador d' una hora sense subscripció",
+      "launch_price": "Engega el preu i després $37",
+      "inc_course_full": "Camp complet (valor $97)",
+      "inc_ebook": "Emobe PDF, ePub, arty",
+      "inc_checklist2": "Llista de 30 dies imprimibles",
+      "inc_excel2": "Full Amish ExcelLanguage",
+      "inc_access_updates": "Accés a temps de vida + actualitzacions",
+      "inc_bonus_shopping": "BONUS: Llista de compres setmanals (valora 2 dòlars7)",
+      "unlock_now": "Desbloqueja l' accés ara",
+      "guarantee_title": "Segur que 30 dies després de la moneda",
+      "guarantee_text": "Intenta-ho durant 30 dies. Si no estalviem almenys $ 100, resturem tota la quantitat. Sense preguntes, sense problemes.",
+      "section_testimonials": "//06 Testimonials",
+      "testimonial_text": "Vaig aplicar el mètode pressupostari Amish i en dos mesos vaig tallar les despeses pel 35%. La llista de 30 dies era el punt d'inflexió. Finalment, un curs que realment funciona.",
+      "testimonial_name": "Marco R.",
+      "testimonial_role": "Roma dels lectors electrònics",
+      "section_faq": "/ 07 PMF",
+      "faq_title": "Preguntes més freqüents",
+      "offer_valid": "Offer vàlid aquesta setmana",
+      "final_cta": "Inicia la teva Jinney a la Llibertat financera Avui",
+      "final_sub": "Uneix-te a centenars de persones que ja han transformat la seva relació amb diners.",
+      "unlock_dash": "Desbloqueja l' accés al Mr. edu",
+      "guarantee_badge": "30 dies Segur",
+      "instant_access_badge": "Accés instantani",
+      "lifetime_badge": "Actualitzacions temps de vida",
+      "rights_reserved": "Tots els drets reservats.",
+      "privacy": "Privadesa",
+      "terms": "Termes",
+      "legal_note": "Això és un producte informatiu digital. Els resultats poden variar i depenen del compromís personal. El preu d'Amish i les tècniques descrites es basen en recerca ethnogràfica i poden no reflectir amb precisió les pràctiques modernes de totes les comunitats Amish.",
+      "features": "Característiques",
+      "pricing": "Pricing",
+      "testimonials": "Testimonials",
+      "contact": "Contacte",
+      "get_started": "Començar",
+      "learn_more": "Apreneu més",
+      "member_area": "Àrea membre",
+      "back_to_landing": "De tornada a Port Reial",
+      "buy_now": "Compra ara",
+      "currency_symbol": "$",
+      "new_badge": "Nou",
+      "the_problem": "El problema",
+      "our_story": "La nostra història",
+      "what_learn": "El que aprendreu",
+      "course_lessons": "Lliçós de camp",
+      "curriculum": "Curriculum",
+      "free_tier": "Lliure",
+      "pro_tier": "Pro",
+      "per_month": "/mo",
+      "start_free": "Inicia lliure",
+      "popular": "Popular",
+      "free_title": "Per començar",
+      "pro_title": "Per créixer",
+      "trusted_by": "Confiat per equips arreu del món",
+      "offer_badge": "Engega un apagat",
+      "price_special": "preu de llançament especial",
+      "buy_and_access": "Compra & Accés instantàniament",
+      "bestseller": "Millor Vendor",
+      "story_badge": "// La història True",
+      "story_title": "La meva experiència entre la Amish",
+      "story_subtitle": "Tres mesos a Pennsilvània, dotze famílies entrevistades, un sistema econòmic que ha funcionat durant 300 anys.",
+      "amish_life": "Amish VidaName",
+      "caption_1": "La vida de dia a la comunitat amish: simplicitat, autosuficiència, i la saviesa financera va passar per generacions.",
+      "caption_2": "El sistema d'intercanvi i canvi que elimina la necessitat de diners i construeix les relacions de confiança duradora.",
+      "caption_3": "L'economia familiar Amish: com viu una família el 60% menys que la mitjana nacional.",
+      "tag_1": "Antropologia econòmica",
+      "tag_2": "Estudis Amish",
+      "tag_3": "Consulta financera",
+      "brand_name": "CourssyCity name (optional, probably does not need a translation)",
+      "reviewer": "Marco R., lector d'abans",
+      "language_switch": "EN",
+      "language_switch_en": "EN"
+    }
+  },
+  "audience": {
+    "badge": "//01 Manveen Qui és això per",
+    "title": "És aquest camp per a tu?",
+    "perfect_for": "Perfecte per a vostè si:",
+    "perfect_items": [
+      "Lluites per arribar a fi.",
+      "Voleu tallar els costos sense sacrificar la qualitat de vida",
+      "Estàs cansat del consumisme i de la cultura del deute",
+      "Voleu mètodes pràctics i provades",
+      "Voleu construir un futur financer sòlid per la vostra família"
+    ],
+    "not_for": "No per tu si:",
+    "not_items": [
+      "Esteu buscant esquemes de few-rich",
+      "No vols canviar els teus hàbits de despesa",
+      "Prefereixes solucions ràpides sobre una base sòlida",
+      "No estàs disposat a implementar el que aprens",
+      "Busques consell financer personalitzat"
+    ]
+  },
+  "course": {
+    "back_to_course": "De tornada a Port Reial",
+    "module_label": "Curriculum",
+    "now_playing": "Ara s' està reproduint",
+    "page_label": "Pàgina",
+    "reading_progress": "S' està llegint el progrés",
+    "download_pdf": "Descarrega PDF",
+    "chapter": "Capítol"
+  },
+  "lessons": {
+    "badge": "/ 04 Content del camp de cursos",
+    "title": "El que trobaràs dins",
+    "items": []
+  }
+}

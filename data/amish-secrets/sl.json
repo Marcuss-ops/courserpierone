@@ -1,0 +1,344 @@
+{
+  "locale": "sl",
+  "seo": {
+    "title": "Amiške skrivnosti: Kako živeti s prihranki in upravljati z denarjem",
+    "description": "Odkrijte skrivnosti amiške skupnosti. Vključuje popolne video module in prenosljive PDF.",
+    "ogImage": "/courses/amish-secrets/cover.png"
+  },
+  "nav": {
+    "brand": "Amiške skrivnosti",
+    "features": "Značilnosti",
+    "pricing": "Cene",
+    "testimonials": "Pričevanja",
+    "faq": "FAQ",
+    "contact": "Stik",
+    "get_started": "Začni",
+    "learn_more": "Več o tem",
+    "member_area": "Območje članice",
+    "back_to_landing": "Nazaj na pristanek"
+  },
+  "hero": {
+    "badge": "Novo",
+    "title": "Amiške skrivnosti: Kako živeti s prihranki in upravljati z denarjem",
+    "subtitle": "Odkrijte skrivnosti amiške skupnosti. Vključuje popolne video module in prenosljive PDF.",
+    "cta": "Začni",
+    "secondary_cta": "Več o tem",
+    "price_label": "Cena posebnega zagona",
+    "one_time_payment": "Enkratno plačilo – brez naročnine"
+  },
+  "problem": {
+    "badge": "Problem",
+    "title": "Si se naveličal, da si prišel do konca meseca brez prihrankov? Sodobna družba nas sili k pretirani potrošnji.",
+    "text": ""
+  },
+  "story": {
+    "badge": "Naša zgodba",
+    "title": "La mia esperienza tra gli Amish",
+    "image_captions": [
+      "La vita citidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria.",
+      "Il sistema di baratto e squambio che elimina il bisogno di denaro contante.",
+      "L'economia domestica Amish: come una famiglia riesce a vivere con il 60% in meno."
+    ],
+    "quote": "Amiši živijo bogato in polno življenje, medtem ko trošijo delček tega, kar porabimo. V tej smeri odkrivamo, kako to počnejo."
+  },
+  "author": {
+    "badge": "// 03 — Avtor",
+    "title": "Za to smerjo",
+    "name": "Alessandro Rinaldi",
+    "role": "Raziskovalec · Avtor",
+    "bio": "Živel sem 3 mesece v Pensilvaniji, intervjuval 12 amiških družin in preučeval njihov ekonomski sistem. Ni teorije, samo vaja.]",
+    "tags": [
+      "Saggezza Finanziaria",
+      "Vita Stenibile",
+      "Edukazion"
+    ]
+  },
+  "modules": {
+    "badge": "// 02 – Kaj se boste naučili",
+    "title": "Skrivnosti amiških mojstrov",
+    "description": "8 praktičnih modulov, ki amiško modrost spremenijo v konkretna dejanja za vaše vsakdanje življenje.",
+    "items": [
+      {
+        "title": "Amiški proračun",
+        "desc": "Živi na 30% manj brez žrtvovanja."
+      },
+      {
+        "title": "Neskončna shramba",
+        "desc": "Način shranjevanja hrane, ki odpravlja odpadke."
+      },
+      {
+        "title": "Brez dolga",
+        "desc": "Okvir, da se za vedno rešiš dolgov."
+      },
+      {
+        "title": "Popravi vse",
+        "desc": "12 bistvenih orodij za popravilo sami."
+      },
+      {
+        "title": "Izmenjava brez denarja",
+        "desc": "Kako aktivirati barter omrežje."
+      },
+      {
+        "title": "Ribogojnica k tabeli",
+        "desc": "Vodič do vrtnarjenja in kuhanja brez odpadkov."
+      },
+      {
+        "title": "Prosta energija",
+        "desc": "Kako zmanjšati komunalne račune za 50%."
+      },
+      {
+        "title": "30-dnevni načrt",
+        "desc": "Dnevni kontrolni seznam za preoblikovanje vaših financ."
+      }
+    ]
+  },
+  "includes": {
+    "title": "Vključuje tudi:",
+    "items": [
+      "Full eBook (PDF, ePub, Kindle)",
+      "Natisljiv 30-dnevni kontrolni seznam",
+      "Amish proračun Excel list",
+      "Predloga za tedenski nakupovalni seznam",
+      "Dostop do območja za člane življenjskega obdobja",
+      "Brezplačne prihodnje posodobitve"
+    ]
+  },
+  "testimonials": {
+    "badge": "// 06 – Pričevanja",
+    "title": "Pričevanja",
+    "items": [
+      {
+        "text": "Uporabila sem amiško proračunsko metodo in v dveh mesecih zmanjšala stroške za 35 %. 30-dnevni kontrolni seznam je bil prelomnica. Končno tečaj, ki res deluje.",
+        "name": "Marco R.",
+        "role": "Rim – zgodnji bralci"
+      }
+    ]
+  },
+  "offer": {
+    "badge": "Ponudba za zagon",
+    "title": "Naložbe v sebe",
+    "complete_package": "Popolni paket",
+    "course_value": "Tečaj: 97 $",
+    "bonus_value": "Bonus: 27 $",
+    "price_text": "",
+    "one_time": "Enkratno plačilo – brez naročnine",
+    "launch_price": "Cena izstrelitve – potem $37",
+    "cta": "Odkleni dostop zdaj",
+    "guarantee_title": "30-dnevni denar nazaj garancije",
+    "guarantee_text": "Poskusi za 30 dni. Če ne prihranite vsaj 100 $, bomo vrnili celoten znesek. Brez vprašanj, brez težav.",
+    "includes": [
+      "Celoten tečaj (vrednost 97 $)",
+      "eBook PDF, ePub, Kindle",
+      "Natisljiv 30-dnevni kontrolni seznam",
+      "Amish proračun Excel list",
+      "Dostop do življenjskega časa + posodobitve",
+      "BONUS: Tedenski nakupovalni seznam (vrednost $27)"
+    ]
+  },
+  "faq": {
+    "badge": "// 07 – Pogosta vprašanja",
+    "title": "Pogosta vprašanja",
+    "offer_valid": "Ponudba velja ta teden",
+    "items": [
+      {
+        "q": "Kaj natančno je vključeno?",
+        "a": "Celoten eBook dobite v PDF, ePub in Kindle formatih. Plus dostop do vseh prihodnjih posodobitev."
+      },
+      {
+        "q": "Je v angleščini?",
+        "a": "Da, tečaj je v celoti na voljo v angleščini."
+      },
+      {
+        "q": "V kateri obliki je tečaj?",
+        "a": "eBook v formatu PDF, ePub in Kindle. Video posnetki so v formatu MP4."
+      },
+      {
+        "q": "Kdaj dobim dostop?",
+        "a": "Takoj po plačilu."
+      },
+      {
+        "q": "Kaj, če nisem zadovoljen?",
+        "a": "Zaščiten si z našo 30-dnevno garancijo."
+      },
+      {
+        "q": "Kako dolgo traja?",
+        "a": "Celoten program traja približno 3-4 ure."
+      }
+    ]
+  },
+  "final_cta": {
+    "title": "Danes začnite pot do finančne svobode",
+    "subtitle": "Pridružite se več sto ljudem, ki so že spremenili svoj odnos z denarjem.",
+    "badge": "Ponudba velja ta teden"
+  },
+  "footer": {
+    "rights_reserved": "Vse pravice pridržane.",
+    "privacy": "Zasebnost",
+    "terms": "Pogoji",
+    "legal_note": "To je digitalni informacijski izdelek. Rezultati se lahko razlikujejo in so odvisni od osebne predanosti. Amiške cene in opisane tehnike temeljijo na etnografskih raziskavah in morda ne odražajo točno sodobnih praks vseh amiških skupnosti.",
+    "badges": {
+      "guarantee": "30-dnevno jamstvo",
+      "instant_access": "Takojšen dostop",
+      "lifetime_updates": "Posodobitve življenjskega časa"
+    }
+  },
+  "trust": {
+    "title": "Zaupanje ekip po vsem svetu",
+    "readers_count": "1 247 čitalnikov",
+    "company_names": []
+  },
+  "ui": {
+    "labels": {
+      "instant_access": "Takojšen dostop",
+      "buy_now_arrow": "Kupi zdaj →",
+      "readers": "1 247 čitalnikov",
+      "buy_now_dash": "Kupi zdaj –",
+      "view_modules": "Prikaži module",
+      "ssl_secure": "Varno plačilo SSL",
+      "instant_download": "Instant Prenesi",
+      "lifetime_access": "Dostop do življenjskega časa",
+      "guarantee_days": "30-dnevno jamstvo",
+      "section_who": "// 01 – Za koga je to",
+      "is_this_for_you": "Ali je to zate?",
+      "perfect_for": "Popolno zate, če:",
+      "p_struggle": "Bojuješ se, da bi preživel.",
+      "p_cut_costs": "Hočeš zmanjšati stroške brez žrtvovanja kakovosti življenja.",
+      "p_consumerism": "Sit si potrošništva in kulture dolgov.",
+      "p_practical": "Želite praktične, časovno preizkušene metode",
+      "p_future": "Svoji družini želite ustvariti trdno finančno prihodnost",
+      "not_for": "Ne zate, če:",
+      "n_quick": "Iščete hitro bogate sheme.",
+      "n_habits": "Nočeš spremeniti svojih navad porabe.",
+      "n_quick_fix": "Imate raje hitre popravke kot trdne temelje",
+      "n_implement": "Nisi pripravljen izvajati tega, kar si se naučil.",
+      "n_advice": "Iščete prilagojene finančne nasvete.",
+      "section_learn": "// 02 – Kaj se boste naučili",
+      "masters_secrets": "Skrivnosti amiških mojstrov",
+      "modules_desc": "8 praktičnih modulov, ki amiško modrost spremenijo v konkretna dejanja za vaše vsakdanje življenje.",
+      "section_author": "// 03 — Avtor",
+      "behind_course": "Za to smerjo",
+      "your_name": "Vaše ime tukaj",
+      "researcher_author": "Raziskovalec · Avtor",
+      "author_bio": "Živel sem 3 mesece v Pensilvaniji, intervjuval 12 amiških družin in preučeval njihov ekonomski sistem. Ni teorije, samo vaja.]",
+      "section_content": "// 04 — Vsebina tečaja",
+      "what_inside": "Kaj boš našel notri?",
+      "also_includes": "Vključuje tudi:",
+      "inc_full_ebook": "Full eBook (PDF, ePub, Kindle)",
+      "inc_checklist": "Natisljiv 30-dnevni kontrolni seznam",
+      "inc_excel": "Amish proračun Excel list",
+      "inc_shopping": "Predloga za tedenski nakupovalni seznam",
+      "inc_lifetime": "Dostop do območja za člane življenjskega obdobja",
+      "inc_updates": "Brezplačne prihodnje posodobitve",
+      "section_offer": "// 05 – Ponudba",
+      "invest_yourself": "Naložbe v sebe",
+      "launch_offer": "Ponudba za zagon",
+      "complete_package": "Popolni paket",
+      "course_value": "Tečaj: 97 $",
+      "bonus_value": "Bonus: 27 $",
+      "one_time": "Enkratno plačilo – brez naročnine",
+      "launch_price": "Cena izstrelitve – potem $37",
+      "inc_course_full": "Celoten tečaj (vrednost 97 $)",
+      "inc_ebook": "eBook PDF, ePub, Kindle",
+      "inc_checklist2": "Natisljiv 30-dnevni kontrolni seznam",
+      "inc_excel2": "Amish proračun Excel list",
+      "inc_access_updates": "Dostop do življenjskega časa + posodobitve",
+      "inc_bonus_shopping": "BONUS: Tedenski nakupovalni seznam (vrednost $27)",
+      "unlock_now": "Odkleni dostop zdaj",
+      "guarantee_title": "30-dnevni denar nazaj garancije",
+      "guarantee_text": "Poskusi za 30 dni. Če ne prihranite vsaj 100 $, bomo vrnili celoten znesek. Brez vprašanj, brez težav.",
+      "section_testimonials": "// 06 – Pričevanja",
+      "testimonial_text": "Uporabila sem amiško proračunsko metodo in v dveh mesecih zmanjšala stroške za 35 %. 30-dnevni kontrolni seznam je bil prelomnica. Končno tečaj, ki res deluje.",
+      "testimonial_name": "Marco R.",
+      "testimonial_role": "Rim – zgodnji bralci",
+      "section_faq": "// 07 – Pogosta vprašanja",
+      "faq_title": "Pogosta vprašanja",
+      "offer_valid": "Ponudba velja ta teden",
+      "final_cta": "Danes začnite pot do finančne svobode",
+      "final_sub": "Pridružite se več sto ljudem, ki so že spremenili svoj odnos z denarjem.",
+      "unlock_dash": "Odkleni dostop –",
+      "guarantee_badge": "30-dnevno jamstvo",
+      "instant_access_badge": "Takojšen dostop",
+      "lifetime_badge": "Posodobitve življenjskega časa",
+      "rights_reserved": "Vse pravice pridržane.",
+      "privacy": "Zasebnost",
+      "terms": "Pogoji",
+      "legal_note": "To je digitalni informacijski izdelek. Rezultati se lahko razlikujejo in so odvisni od osebne predanosti. Amiške cene in opisane tehnike temeljijo na etnografskih raziskavah in morda ne odražajo točno sodobnih praks vseh amiških skupnosti.",
+      "features": "Značilnosti",
+      "pricing": "Cene",
+      "testimonials": "Pričevanja",
+      "contact": "Stik",
+      "get_started": "Začni",
+      "learn_more": "Več o tem",
+      "member_area": "Območje članice",
+      "back_to_landing": "Nazaj na pristanek",
+      "buy_now": "Kupi zdaj",
+      "currency_symbol": "$",
+      "new_badge": "Novo",
+      "the_problem": "Problem",
+      "our_story": "Naša zgodba",
+      "what_learn": "Kaj se boš naučil?",
+      "course_lessons": "Lekcije tečaja",
+      "curriculum": "Kurikulum",
+      "free_tier": "Prosto",
+      "pro_tier": "Pro",
+      "per_month": "/mo",
+      "start_free": "Zaženi prosto",
+      "popular": "Priljubljeno",
+      "free_title": "Za začetek",
+      "pro_title": "Za rast",
+      "trusted_by": "Zaupanje ekip po vsem svetu",
+      "offer_badge": "Ponudba za zagon",
+      "price_special": "Cena posebnega zagona",
+      "buy_and_access": "Takoj kupi & dostop",
+      "bestseller": "Najboljši prodajalec",
+      "story_badge": "// Prava zgodba",
+      "story_title": "Moje izkušnje med amiši",
+      "story_subtitle": "Tri mesece v Pensilvaniji, dvanajst družin intervjuvanih, gospodarski sistem, ki deluje že 300 let.",
+      "amish_life": "Amiško življenje",
+      "caption_1": "Dnevno življenje v amiški skupnosti: preprostost, samozadostnost in finančna modrost se je prenašala skozi generacije.",
+      "caption_2": "Barantanje in menjalni sistem, ki odpravlja potrebo po denarju in gradi trajne odnose zaupanja.",
+      "caption_3": "Amiška gospodinjska ekonomija: kako družina živi na 60 % manj od državnega povprečja.",
+      "tag_1": "Ekonomska antropologija",
+      "tag_2": "Amiške študije",
+      "tag_3": "Finančno svetovanje",
+      "brand_name": "Courssy",
+      "reviewer": "Marco R., zgodnji bralec",
+      "language_switch": "EN",
+      "language_switch_en": "EN"
+    }
+  },
+  "audience": {
+    "badge": "// 01 – Za koga je to",
+    "title": "Ali je to zate?",
+    "perfect_for": "Popolno zate, če:",
+    "perfect_items": [
+      "Bojuješ se, da bi preživel.",
+      "Hočeš zmanjšati stroške brez žrtvovanja kakovosti življenja.",
+      "Sit si potrošništva in kulture dolgov.",
+      "Želite praktične, časovno preizkušene metode",
+      "Svoji družini želite ustvariti trdno finančno prihodnost"
+    ],
+    "not_for": "Ne zate, če:",
+    "not_items": [
+      "Iščete hitro bogate sheme.",
+      "Nočeš spremeniti svojih navad porabe.",
+      "Imate raje hitre popravke kot trdne temelje",
+      "Nisi pripravljen izvajati tega, kar si se naučil.",
+      "Iščete prilagojene finančne nasvete."
+    ]
+  },
+  "course": {
+    "back_to_course": "Nazaj na pristanek",
+    "module_label": "Kurikulum",
+    "now_playing": "Zdaj pa igraj.",
+    "page_label": "Stran",
+    "reading_progress": "Napredek branja",
+    "download_pdf": "Prenesi PDF",
+    "chapter": "Poglavje"
+  },
+  "lessons": {
+    "badge": "// 04 — Vsebina tečaja",
+    "title": "Kaj boš našel notri?",
+    "items": []
+  }
+}

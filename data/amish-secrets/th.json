@@ -6,184 +6,184 @@
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
-    "brand": "Amish secrets",
-    "features": "Features",
-    "pricing": "Pricing",
-    "testimonials": "Testimonials",
-    "faq": "FAQ",
-    "contact": "Contact",
-    "get_started": "Get Started",
-    "learn_more": "Learn More",
-    "member_area": "Member Area",
-    "back_to_landing": "Back to Landing"
+    "brand": "ความลับอามิช",
+    "features": "คุณสมบัติต่าง ๆ",
+    "pricing": "ความละเอียด",
+    "testimonials": "แบบทดสอบ",
+    "faq": "ขนาด FAQ",
+    "contact": "ติดต่อ",
+    "get_started": "เริ่มได้",
+    "learn_more": "เรียน รู้ มาก ขึ้น",
+    "member_area": "พื้นที่สมาชิก",
+    "back_to_landing": "กลับ สู่ การ ลง จอด"
   },
   "hero": {
-    "badge": "New",
+    "badge": "สร้างนัดหมายใหม่New",
     "title": "ความลับชาวอามิช: วิธีประหยัดและบริหารจัดการเงิน",
     "subtitle": "ค้นพบเคล็ดลับการใช้ชีวิตอย่างสมถะของชุมชนชาวอามิช พร้อมบทเรียนวิดีโอแบบเต็มและไฟล์ PDF ที่ดาวน์โหลดได้",
-    "cta": "Get Started",
-    "secondary_cta": "Learn More",
-    "price_label": "Special launch price",
-    "one_time_payment": "One-time payment — no subscription"
+    "cta": "เริ่มได้",
+    "secondary_cta": "เรียน รู้ มาก ขึ้น",
+    "price_label": "ราคาเปิดตัวพิเศษ",
+    "one_time_payment": "ชําระ หนี้ ครั้ง เดียว — ไม่ มี การ บอก รับ"
   },
   "problem": {
-    "badge": "The Problem",
+    "badge": "ปัญหา",
     "title": "เหนื่อยไหมกับการที่เงินเดือนชนเดือนโดยไม่มีเงินเก็บ? สังคมสมัยใหม่ผลักดันให้เราบริโภคเกินความจำเป็น",
     "text": ""
   },
   "story": {
-    "badge": "Our Story",
-    "title": "La mia esperienza tra gli Amish",
+    "badge": "เรื่อง ราว ของ เรา",
+    "title": "ลา มี เอ ส เท รี ยา",
     "image_captions": [
-      "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria.",
-      "Il sistema di baratto e scambio che elimina il bisogno di denaro contante.",
-      "L'economia domestica Amish: come una famiglia riesce a vivere con il 60% in meno."
+      "La vita quitidiana nella comcenta Amish: Sepmplicita, Autosfficinea e sagggeza Filasianiria.",
+      "Il Sistema Di Baratto e sigbio che Elemina III Bisogno Di Denaro Contantte.",
+      "L'Economia data Amich: มา Una Femiglia erice a vievere con II 60% ในเมโน"
     ],
     "quote": "ชาวอามิชใช้ชีวิตที่มั่งคั่งและเต็มเปี่ยมโดยใช้จ่ายเพียงส่วนน้อยของสิ่งที่เราใช้ ในหลักสูตรนี้เราจะเปิดเผยว่าพวกเขาทำได้อย่างไร"
   },
   "author": {
-    "badge": "// 03 — The Author",
-    "title": "Behind This Course",
-    "name": "Alessandro Rinaldi",
+    "badge": "/ / 03 — ผู้ ประพันธ์",
+    "title": "ข้างหลังเส้นทางนี้",
+    "name": "อเลสซานโดร รินัลดี",
     "role": "Researcher · Author · Traveler",
     "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
     "tags": [
-      "Saggezza Finanziaria",
-      "Vita Sostenibile",
-      "Educazione"
+      "ซา เก ซา",
+      "ไว ตา โซ ส เต นิ เบิล",
+      "เอ ดู ซิ ออน"
     ]
   },
   "modules": {
-    "badge": "// 02 — What You'll Learn",
-    "title": "The Amish Masters' Secrets",
+    "badge": "//02 — คุณเรียนรู้อะไร",
+    "title": "ความลับของอามิช",
     "description": "8 practical modules that turn Amish wisdom into concrete actions.",
     "items": [
       {
-        "title": "Amish Budget",
-        "desc": "Live on 30% less without sacrifice."
+        "title": "งบประมาณอามิช",
+        "desc": "มีชีวิตอยู่ด้วย 30% โดยไม่เสียสละ"
       },
       {
-        "title": "Infinite Pantry",
-        "desc": "The food storage method that eliminates waste."
+        "title": "มุม:",
+        "desc": "วิธี เก็บ อาหาร ที่ ขจัด ของ เสีย."
       },
       {
-        "title": "Zero Debt",
-        "desc": "The framework to get out of debt forever."
+        "title": "หนี้ ศูนย์",
+        "desc": "โครงร่างที่จะปลดหนี้ได้ตลอดไป"
       },
       {
-        "title": "Fix Everything",
-        "desc": "12 essential tools to repair yourself."
+        "title": "แก้ไขทุกอย่าง",
+        "desc": "12 เครื่องมือที่สําคัญในการซ่อมแซมตัวเอง"
       },
       {
-        "title": "Money-Free Exchange",
-        "desc": "How to activate a barter network."
+        "title": "แลกเปลี่ยนเงินอิสระ",
+        "desc": "วิธีเปิดใช้งานเครือข่ายการแลกเปลี่ยน"
       },
       {
-        "title": "Farm to Table",
-        "desc": "Guide to home gardening and zero-waste cooking."
+        "title": "ฟาร์มไปยังโต๊ะ",
+        "desc": "นําทางไปยังสวนบ้าน และอาหารจานหลัก"
       },
       {
-        "title": "Free Energy",
-        "desc": "How to cut utility bills by 50%."
+        "title": "พลังงาน",
+        "desc": "วิธีตัดบิลค่าไฟก่อน 50%"
       },
       {
-        "title": "30-Day Plan",
-        "desc": "Day-by-day checklist to transform your finances."
+        "title": "30 วัน",
+        "desc": "รายการวันต่อวัน เพื่อเปลี่ยนแปลงการเงินของคุณ"
       }
     ]
   },
   "includes": {
-    "title": "Also includes:",
+    "title": "นอก จาก นี้ ยัง รวม ถึง:",
     "items": [
-      "Full eBook (PDF, ePub, Kindle)",
-      "Printable 30-day checklist",
-      "Amish budget Excel sheet",
-      "Weekly shopping list template",
-      "Lifetime member area access",
-      "Free future updates"
+      "พิมพ์แบบเต็ม (PDF, epub, dindle)",
+      "รายการที่พิมพ์ได้ 30 วัน",
+      "งบประมาณอามิช",
+      "ต้นแบบการช้อปปิ้งรายสัปดาห์",
+      "การ เข้า ไป ใน บริเวณ ที่ มี สมาชิก อาศัย อยู่",
+      "การปรับปรุงในอนาคตอิสระ"
     ]
   },
   "testimonials": {
-    "badge": "// 06 — Testimonials",
-    "title": "Testimonials",
+    "badge": "/ 06 — การ ทดสอบ",
+    "title": "แบบทดสอบ",
     "items": [
       {
-        "text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
-        "name": "Marco R.",
-        "role": "Rome — early readers"
+        "text": "ผม นํา วิธี การ จัด งบ ประมาณ ของ พวก อา มิช มา ใช้ และ ภาย ใน สอง เดือน ผม ลด ค่า ใช้ จ่าย ลง 35%. รายการ 30 วันคือจุดเปลี่ยน ในที่สุด หลักสูตรที่ใช้งานได้จริงๆ",
+        "name": "มาร์ โค อาร์.",
+        "role": "โรม — ผู้ อ่าน ยุค แรก"
       }
     ]
   },
   "offer": {
-    "badge": "Launch Offer",
-    "title": "Invest in Yourself",
-    "complete_package": "Complete Package",
-    "course_value": "Course: $97",
-    "bonus_value": "Bonus: $27",
+    "badge": "นําเสนอการเรียกใช้",
+    "title": "การ ลง ทุน ใน ตัว คุณ",
+    "complete_package": "แพกเกจที่สมบูรณ์",
+    "course_value": "หลักสูตร: $907",
+    "bonus_value": "โบนุส: $27",
     "price_text": "",
-    "one_time": "One-time payment — no subscription",
-    "launch_price": "Launch price — then $37",
-    "cta": "Unlock Access Now",
-    "guarantee_title": "30-Day Money-Back Guarantee",
+    "one_time": "ชําระ หนี้ ครั้ง เดียว — ไม่ มี การ บอก รับ",
+    "launch_price": "เรียก ราคา — แล้ว ก็ $ 39",
+    "cta": "เข้าสู่การปลดล็อคเดี๋ยวนี้",
+    "guarantee_title": "รับประกันเงิน 30 วัน",
     "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
     "includes": [
-      "Full course (value $97)",
-      "eBook PDF, ePub, Kindle",
-      "Printable 30-day checklist",
-      "Amish budget Excel sheet",
-      "Lifetime access + updates",
-      "BONUS: Weekly shopping list (value $27)"
+      "โหมดเต็ม (ค่า $757)",
+      "เอกสาร PDF, EPub, SDL",
+      "รายการที่พิมพ์ได้ 30 วัน",
+      "งบประมาณอามิช",
+      "การเข้าใช้เวลามีชีวิต + การปรับปรุง",
+      "BOONUS: รายการช้อปปิ้งรายสัปดาห์ (ค่า $27)"
     ]
   },
   "faq": {
-    "badge": "// 07 — FAQ",
-    "title": "Frequently Asked Questions",
-    "offer_valid": "Offer valid this week",
+    "badge": "/ / 07 — เอฟ เอคิว",
+    "title": "ถาม บ่อย ๆ",
+    "offer_valid": "นําเสนอที่ถูกต้องในสัปดาห์นี้",
     "items": [
       {
-        "q": "What exactly is included?",
-        "a": "You get the complete eBook in PDF, ePub, and Kindle formats. Plus lifetime access to all future updates."
+        "q": "มี อะไร รวม อยู่ ด้วย?",
+        "a": "คุณได้ eBook ครบชุดใน PDF, EPub, และรูปแบบ Mindle รวมไปถึง การเข้าถึงข้อมูลในอนาคตทั้งหมด"
       },
       {
-        "q": "Is it in English?",
-        "a": "Yes, the course is fully available in English."
+        "q": "ภาษาอังกฤษรึเปล่า?",
+        "a": "ใช่ แล้ว หลัก สูตร มี ใน ภาษา อังกฤษ อย่าง เต็ม ที่."
       },
       {
-        "q": "What format is the course in?",
-        "a": "eBook in PDF, ePub, and Kindle formats. Videos are in MP4 format."
+        "q": "หลัก สูตร มี รูป แบบ เช่น ไร?",
+        "a": "แบบ eBook ใน PDF, ePub, และ MDL วิดีโออยู่ในรูปแบบ MP4"
       },
       {
-        "q": "When do I get access?",
-        "a": "Immediately after payment."
+        "q": "เมื่อไหร่ฉันจะได้เข้าไป",
+        "a": "ทันทีหลังจ่ายเงิน"
       },
       {
-        "q": "What if I'm not satisfied?",
-        "a": "You're protected by our 30-day money-back guarantee."
+        "q": "ถ้าฉันไม่พอใจล่ะ",
+        "a": "คุณได้รับการคุ้มครองจาก การรับประกันทางการเงิน 30 วันของเรา"
       },
       {
-        "q": "How long does it take?",
-        "a": "The complete program takes about 3-4 hours."
+        "q": "ใช้เวลานานแค่ไหน?",
+        "a": "โปรแกรมที่สมบูรณ์ใช้เวลาประมาณ 3-4 ชั่วโมง"
       }
     ]
   },
   "final_cta": {
-    "title": "Start Your Journey to Financial Freedom Today",
-    "subtitle": "Join hundreds of people who have already transformed their relationship with money.",
-    "badge": "Offer valid this week"
+    "title": "จง เริ่ม การ เดิน ทาง สู่ เสรีภาพ ทาง การ เงิน ใน ทุก วัน นี้",
+    "subtitle": "ร่วม กับ คน นับ ร้อย ซึ่ง ได้ เปลี่ยน ความ สัมพันธ์ กับ เงิน ไป แล้ว.",
+    "badge": "นําเสนอที่ถูกต้องในสัปดาห์นี้"
   },
   "footer": {
-    "rights_reserved": "All rights reserved.",
-    "privacy": "Privacy",
-    "terms": "Terms",
+    "rights_reserved": "สงวน ลิขสิทธิ์.",
+    "privacy": "ชื่อแฟ้ม",
+    "terms": "จํานวนงวด",
     "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
     "badges": {
-      "guarantee": "30-Day Guarantee",
-      "instant_access": "Instant Access",
-      "lifetime_updates": "Lifetime Updates"
+      "guarantee": "30 วัน",
+      "instant_access": "การเข้าใช้งานด่วน",
+      "lifetime_updates": "ปรับปรุงเวลาการใช้งาน"
     }
   },
   "trust": {
-    "title": "Trusted by teams worldwide",
+    "title": "เชื่อถือได้โดยทีมทั่วโลก",
     "readers_count": "ผู้อ่าน 1,247 คน",
     "company_names": []
   },
@@ -195,113 +195,113 @@
       "buy_now_dash": "ซื้อเลย —",
       "view_modules": "ดูบทเรียน",
       "ssl_secure": "ชำระเงินปลอดภัยด้วย SSL",
-      "instant_download": "Instant Download",
-      "lifetime_access": "Lifetime Access",
-      "guarantee_days": "30-Day Guarantee",
-      "section_who": "// 01 — Who Is This For",
-      "is_this_for_you": "Is This Course For You?",
-      "perfect_for": "Perfect for you if:",
-      "p_struggle": "You struggle to make ends meet",
-      "p_cut_costs": "You want to cut costs without sacrificing quality of life",
+      "instant_download": "ดาวน์โหลดทันที",
+      "lifetime_access": "การเข้าใช้เวลาในชีวิต",
+      "guarantee_days": "30 วัน",
+      "section_who": "// 01 — ใครทํา",
+      "is_this_for_you": "คอร์สนี้สําหรับคุณเหรอ?",
+      "perfect_for": "สมบูรณ์แบบสําหรับคุณถ้า:",
+      "p_struggle": "คุณดิ้นรนเพื่อให้สิ้นสุดการพบกัน",
+      "p_cut_costs": "คุณต้องการตัดค่าใช้จ่าย โดยไม่ต้องเสียสละคุณภาพของชีวิต",
       "p_consumerism": "Tired of consumerism and debt culture",
       "p_practical": "Looking for practical, time-tested methods",
       "p_future": "Want a solid financial future for your family",
-      "not_for": "Not for you if:",
+      "not_for": "ไม่สําหรับคุณถ้า:",
       "n_quick": "Looking for get-rich-quick schemes",
       "n_habits": "Not willing to change spending habits",
       "n_quick_fix": "Prefer quick fixes over a solid path",
       "n_implement": "Not willing to implement what you learn",
       "n_advice": "Looking for personalized financial advice",
-      "section_learn": "// 02 — What You'll Learn",
-      "masters_secrets": "The Amish Masters' Secrets",
+      "section_learn": "//02 — คุณเรียนรู้อะไร",
+      "masters_secrets": "ความลับของอามิช",
       "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
-      "section_author": "// 03 — The Author",
-      "behind_course": "Behind This Course",
-      "your_name": "Your Name Here",
+      "section_author": "/ / 03 — ผู้ ประพันธ์",
+      "behind_course": "ข้างหลังเส้นทางนี้",
+      "your_name": "ชื่อของคุณที่นี่",
       "researcher_author": "Researcher · Author · Traveler",
       "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
-      "section_content": "// 04 — Course Content",
-      "what_inside": "What You'll Find Inside",
-      "also_includes": "Also includes:",
-      "inc_full_ebook": "Full eBook (PDF, ePub, Kindle)",
-      "inc_checklist": "Printable 30-day checklist",
-      "inc_excel": "Amish budget Excel sheet",
-      "inc_shopping": "Weekly shopping list template",
-      "inc_lifetime": "Lifetime member area access",
-      "inc_updates": "Free future updates",
-      "section_offer": "// 05 — The Offer",
-      "invest_yourself": "Invest in Yourself",
-      "launch_offer": "Launch Offer",
-      "complete_package": "Complete Package",
-      "course_value": "Course: $97",
-      "bonus_value": "Bonus: $27",
-      "one_time": "One-time payment — no subscription",
-      "launch_price": "Launch price — then $37",
-      "inc_course_full": "Full course (value $97)",
-      "inc_ebook": "eBook PDF, ePub, Kindle",
-      "inc_checklist2": "Printable 30-day checklist",
-      "inc_excel2": "Amish budget Excel sheet",
-      "inc_access_updates": "Lifetime access + updates",
-      "inc_bonus_shopping": "BONUS: Weekly shopping list (value $27)",
-      "unlock_now": "Unlock Access Now",
-      "guarantee_title": "30-Day Money-Back Guarantee",
+      "section_content": "//04 — เนื้อหาหลัก",
+      "what_inside": "จะเจออะไรข้างใน",
+      "also_includes": "นอก จาก นี้ ยัง รวม ถึง:",
+      "inc_full_ebook": "พิมพ์แบบเต็ม (PDF, epub, dindle)",
+      "inc_checklist": "รายการที่พิมพ์ได้ 30 วัน",
+      "inc_excel": "งบประมาณอามิช",
+      "inc_shopping": "ต้นแบบการช้อปปิ้งรายสัปดาห์",
+      "inc_lifetime": "การ เข้า ไป ใน บริเวณ ที่ มี สมาชิก อาศัย อยู่",
+      "inc_updates": "การปรับปรุงในอนาคตอิสระ",
+      "section_offer": "/ / 05 — การ เสนอ",
+      "invest_yourself": "การ ลง ทุน ใน ตัว คุณ",
+      "launch_offer": "นําเสนอการเรียกใช้",
+      "complete_package": "แพกเกจที่สมบูรณ์",
+      "course_value": "หลักสูตร: $907",
+      "bonus_value": "โบนุส: $27",
+      "one_time": "ชําระ หนี้ ครั้ง เดียว — ไม่ มี การ บอก รับ",
+      "launch_price": "เรียก ราคา — แล้ว ก็ $ 39",
+      "inc_course_full": "โหมดเต็ม (ค่า $757)",
+      "inc_ebook": "เอกสาร PDF, EPub, SDL",
+      "inc_checklist2": "รายการที่พิมพ์ได้ 30 วัน",
+      "inc_excel2": "งบประมาณอามิช",
+      "inc_access_updates": "การเข้าใช้เวลามีชีวิต + การปรับปรุง",
+      "inc_bonus_shopping": "BOONUS: รายการช้อปปิ้งรายสัปดาห์ (ค่า $27)",
+      "unlock_now": "เข้าสู่การปลดล็อคเดี๋ยวนี้",
+      "guarantee_title": "รับประกันเงิน 30 วัน",
       "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
-      "section_testimonials": "// 06 — Testimonials",
-      "testimonial_text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
-      "testimonial_name": "Marco R.",
-      "testimonial_role": "Rome — early readers",
-      "section_faq": "// 07 — FAQ",
-      "faq_title": "Frequently Asked Questions",
-      "offer_valid": "Offer valid this week",
-      "final_cta": "Start Your Journey to Financial Freedom Today",
-      "final_sub": "Join hundreds of people who have already transformed their relationship with money.",
-      "unlock_dash": "Unlock Access —",
-      "guarantee_badge": "30-Day Guarantee",
-      "instant_access_badge": "Instant Access",
-      "lifetime_badge": "Lifetime Updates",
-      "rights_reserved": "All rights reserved.",
-      "privacy": "Privacy",
-      "terms": "Terms",
+      "section_testimonials": "/ 06 — การ ทดสอบ",
+      "testimonial_text": "ผม นํา วิธี การ จัด งบ ประมาณ ของ พวก อา มิช มา ใช้ และ ภาย ใน สอง เดือน ผม ลด ค่า ใช้ จ่าย ลง 35%. รายการ 30 วันคือจุดเปลี่ยน ในที่สุด หลักสูตรที่ใช้งานได้จริงๆ",
+      "testimonial_name": "มาร์ โค อาร์.",
+      "testimonial_role": "โรม — ผู้ อ่าน ยุค แรก",
+      "section_faq": "/ / 07 — เอฟ เอคิว",
+      "faq_title": "ถาม บ่อย ๆ",
+      "offer_valid": "นําเสนอที่ถูกต้องในสัปดาห์นี้",
+      "final_cta": "จง เริ่ม การ เดิน ทาง สู่ เสรีภาพ ทาง การ เงิน ใน ทุก วัน นี้",
+      "final_sub": "ร่วม กับ คน นับ ร้อย ซึ่ง ได้ เปลี่ยน ความ สัมพันธ์ กับ เงิน ไป แล้ว.",
+      "unlock_dash": "การ เข้า ใส่ กุญแจ —",
+      "guarantee_badge": "30 วัน",
+      "instant_access_badge": "การเข้าใช้งานด่วน",
+      "lifetime_badge": "ปรับปรุงเวลาการใช้งาน",
+      "rights_reserved": "สงวน ลิขสิทธิ์.",
+      "privacy": "ชื่อแฟ้ม",
+      "terms": "จํานวนงวด",
       "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
-      "features": "Features",
-      "pricing": "Pricing",
-      "testimonials": "Testimonials",
-      "contact": "Contact",
-      "get_started": "Get Started",
-      "learn_more": "Learn More",
-      "member_area": "Member Area",
-      "back_to_landing": "Back to Landing",
-      "buy_now": "Buy Now",
+      "features": "คุณสมบัติต่าง ๆ",
+      "pricing": "ความละเอียด",
+      "testimonials": "แบบทดสอบ",
+      "contact": "ติดต่อ",
+      "get_started": "เริ่มได้",
+      "learn_more": "เรียน รู้ มาก ขึ้น",
+      "member_area": "พื้นที่สมาชิก",
+      "back_to_landing": "กลับ สู่ การ ลง จอด",
+      "buy_now": "ซื้อเดี๋ยวนี้",
       "currency_symbol": "$",
-      "new_badge": "New",
-      "the_problem": "The Problem",
-      "our_story": "Our Story",
-      "what_learn": "What You'll Learn",
-      "course_lessons": "Course Lessons",
-      "curriculum": "Curriculum",
-      "free_tier": "Free",
-      "pro_tier": "Pro",
+      "new_badge": "สร้างนัดหมายใหม่New",
+      "the_problem": "ปัญหา",
+      "our_story": "เรื่อง ราว ของ เรา",
+      "what_learn": "สิ่งที่คุณจะเรียนรู้",
+      "course_lessons": "บท เรียน หลัก",
+      "curriculum": "เคอร์ริกูลัส",
+      "free_tier": "ว่าง",
+      "pro_tier": "โปร",
       "per_month": "/mo",
-      "start_free": "Start Free",
-      "popular": "Popular",
-      "free_title": "To get started",
-      "pro_title": "To grow",
-      "trusted_by": "Trusted by teams worldwide",
-      "offer_badge": "Launch Offer",
-      "price_special": "Special launch price",
-      "buy_and_access": "Buy & Access Instantly",
-      "bestseller": "Best Seller",
-      "story_badge": "// The True Story",
-      "story_title": "My Experience Among the Amish",
-      "story_subtitle": "Three months in Pennsylvania, twelve families interviewed, an economic system that has worked for 300 years.",
-      "amish_life": "Amish Life",
-      "caption_1": "Daily life in the Amish community: simplicity, self-sufficiency, and financial wisdom passed down through generations.",
-      "caption_2": "The barter and exchange system that eliminates the need for cash and builds lasting trust relationships.",
-      "caption_3": "The Amish household economy: how a family lives on 60% less than the national average.",
-      "tag_1": "Economic Anthropology",
-      "tag_2": "Amish Studies",
-      "tag_3": "Financial Consulting",
-      "brand_name": "Courssy",
+      "start_free": "เริ่มให้ว่าง",
+      "popular": "ความนิยม",
+      "free_title": "เพื่อเริ่มต้น",
+      "pro_title": "เพื่อเติบโต",
+      "trusted_by": "เชื่อถือได้โดยทีมทั่วโลก",
+      "offer_badge": "นําเสนอการเรียกใช้",
+      "price_special": "ราคาเปิดตัวพิเศษ",
+      "buy_and_access": "ซื้อการเข้าถึงทันที",
+      "bestseller": "ขายดีที่สุด",
+      "story_badge": "/ เรื่องจริง",
+      "story_title": "ประสบการณ์ ของ ผม ท่ามกลาง พวก อา มิช",
+      "story_subtitle": "3 เดือนในเพนซิลเวเนีย 12 ครอบครัวสัมภาษณ์ ระบบเศรษฐกิจที่ทํางานมา 300 ปี",
+      "amish_life": "ชีวิต แบบ อามิช",
+      "caption_1": "ชีวิตประจําวันในชุมชนอามิช: ความเรียบง่าย ความมั่นใจในตัวเอง และความรู้ด้านการเงิน",
+      "caption_2": "การ ซื้อ ขาย และ การ แลก เปลี่ยน ที่ ขจัด ความ จําเป็น ใน เรื่อง เงิน และ สร้าง สาย สัมพันธ์ ที่ ไว้ วางใจ ได้ ถาวร.",
+      "caption_3": "เศรษฐกิจในครัวเรือนอามิช: ครอบครัวที่มีอายุน้อยกว่าค่าเฉลี่ยของประเทศ 60%",
+      "tag_1": "มานุษยวิทยาเศรษฐกิจ",
+      "tag_2": "อา มิช",
+      "tag_3": "ที่ปรึกษาด้านการเงิน",
+      "brand_name": "Coursy",
       "reviewer": "Marco R., early readers",
       "language_switch": "EN",
       "language_switch_en": "EN",
@@ -313,17 +313,17 @@
     }
   },
   "audience": {
-    "badge": "// 01 — Who Is This For",
-    "title": "Is This Course For You?",
-    "perfect_for": "Perfect for you if:",
+    "badge": "// 01 — ใครทํา",
+    "title": "คอร์สนี้สําหรับคุณเหรอ?",
+    "perfect_for": "สมบูรณ์แบบสําหรับคุณถ้า:",
     "perfect_items": [
-      "You struggle to make ends meet",
-      "You want to cut costs without sacrificing quality of life",
+      "คุณดิ้นรนเพื่อให้สิ้นสุดการพบกัน",
+      "คุณต้องการตัดค่าใช้จ่าย โดยไม่ต้องเสียสละคุณภาพของชีวิต",
       "Tired of consumerism and debt culture",
       "Looking for practical, time-tested methods",
       "Want a solid financial future for your family"
     ],
-    "not_for": "Not for you if:",
+    "not_for": "ไม่สําหรับคุณถ้า:",
     "not_items": [
       "Looking for get-rich-quick schemes",
       "Not willing to change spending habits",
@@ -333,17 +333,17 @@
     ]
   },
   "course": {
-    "back_to_course": "Back to Landing",
-    "module_label": "Curriculum",
-    "now_playing": "Now playing",
-    "page_label": "Page",
-    "reading_progress": "Reading Progress",
-    "download_pdf": "Download PDF",
-    "chapter": "Chapter"
+    "back_to_course": "กลับ สู่ การ ลง จอด",
+    "module_label": "เคอร์ริกูลัส",
+    "now_playing": "เล่นอยู่",
+    "page_label": "หน้า",
+    "reading_progress": "ความคืบหน้าในการอ่าน",
+    "download_pdf": "ดาวน์โหลด PDF",
+    "chapter": "บท"
   },
   "lessons": {
-    "badge": "// 04 — Course Content",
-    "title": "What You'll Find Inside",
+    "badge": "//04 — เนื้อหาหลัก",
+    "title": "จะเจออะไรข้างใน",
     "items": []
   }
 }

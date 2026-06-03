@@ -6,184 +6,184 @@
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
-    "brand": "Amish secrets",
-    "features": "Features",
-    "pricing": "Pricing",
-    "testimonials": "Testimonials",
-    "faq": "FAQ",
+    "brand": "Secrete Amish",
+    "features": "Caracteristici",
+    "pricing": "Prețuri",
+    "testimonials": "Mărturii",
+    "faq": "Întrebări frecvente",
     "contact": "Contact",
-    "get_started": "Get Started",
-    "learn_more": "Learn More",
-    "member_area": "Member Area",
-    "back_to_landing": "Back to Landing"
+    "get_started": "Începe",
+    "learn_more": "Află mai multe",
+    "member_area": "Zona membru",
+    "back_to_landing": "Înapoi la aterizare"
   },
   "hero": {
-    "badge": "New",
+    "badge": "Nou",
     "title": "Secretele comunității Amish: Cum să trăiești cu economii și să gestionezi banii",
     "subtitle": "Descoperă secretele traiului frugal al comunității Amish. Include module video complete și PDF-uri descărcabile.",
-    "cta": "Get Started",
-    "secondary_cta": "Learn More",
-    "price_label": "Special launch price",
-    "one_time_payment": "One-time payment — no subscription"
+    "cta": "Începe",
+    "secondary_cta": "Află mai multe",
+    "price_label": "Prețul special de lansare",
+    "one_time_payment": "Plata o singură dată "
   },
   "problem": {
-    "badge": "The Problem",
+    "badge": "Problema",
     "title": "Te-ai săturat să ajungi la sfârșitul lunii fără economii? Societatea modernă ne împinge către un consum excesiv.",
     "text": ""
   },
   "story": {
-    "badge": "Our Story",
-    "title": "La mia esperienza tra gli Amish",
+    "badge": "Povestea noastră",
+    "title": "La mia experienza tra plane Amish",
     "image_captions": [
-      "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria.",
+      "La vita citidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria.",
       "Il sistema di baratto e scambio che elimina il bisogno di denaro contante.",
       "L'economia domestica Amish: come una famiglia riesce a vivere con il 60% in meno."
     ],
     "quote": "Comunitatea Amish trăiește vieți bogate și împlinite cheltuind o fracțiune din cât cheltuim noi. În acest curs îți dezvăluim cum fac acest lucru."
   },
   "author": {
-    "badge": "// 03 — The Author",
-    "title": "Behind This Course",
+    "badge": "Autorul",
+    "title": "În spatele acestui curs",
     "name": "Alessandro Rinaldi",
     "role": "Researcher · Author · Traveler",
     "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
     "tags": [
       "Saggezza Finanziaria",
-      "Vita Sostenibile",
+      "Vita Sostenibil",
       "Educazione"
     ]
   },
   "modules": {
-    "badge": "// 02 — What You'll Learn",
-    "title": "The Amish Masters' Secrets",
+    "badge": "Ce vei învăţa",
+    "title": "Secretele Masters Amish",
     "description": "8 practical modules that turn Amish wisdom into concrete actions.",
     "items": [
       {
-        "title": "Amish Budget",
-        "desc": "Live on 30% less without sacrifice."
+        "title": "Bugetul Amish",
+        "desc": "Trăieşte cu 30% mai puţin fără sacrificiu."
       },
       {
-        "title": "Infinite Pantry",
-        "desc": "The food storage method that eliminates waste."
+        "title": "Cămar infinit",
+        "desc": "Metoda de depozitare a alimentelor care elimină deșeurile."
       },
       {
-        "title": "Zero Debt",
-        "desc": "The framework to get out of debt forever."
+        "title": "Datorie zero",
+        "desc": "Cadrul pentru a scăpa de datorii pentru totdeauna."
       },
       {
-        "title": "Fix Everything",
-        "desc": "12 essential tools to repair yourself."
+        "title": "Repară totul.",
+        "desc": "12 instrumente esențiale pentru a te repara."
       },
       {
-        "title": "Money-Free Exchange",
-        "desc": "How to activate a barter network."
+        "title": "Schimb fără bani",
+        "desc": "Cum să activezi o reţea de schimb."
       },
       {
-        "title": "Farm to Table",
-        "desc": "Guide to home gardening and zero-waste cooking."
+        "title": "Fermă la masă",
+        "desc": "Ghid de grădinărit acasă și de gătit zero deșeuri."
       },
       {
-        "title": "Free Energy",
-        "desc": "How to cut utility bills by 50%."
+        "title": "Energie liberă",
+        "desc": "Cum să tai facturile de utilităţi cu 50%."
       },
       {
-        "title": "30-Day Plan",
-        "desc": "Day-by-day checklist to transform your finances."
+        "title": "Planul de 30 de zile",
+        "desc": "Lista de verificare zi cu zi pentru a transforma finanțele."
       }
     ]
   },
   "includes": {
-    "title": "Also includes:",
+    "title": "De asemenea, include:",
     "items": [
-      "Full eBook (PDF, ePub, Kindle)",
-      "Printable 30-day checklist",
-      "Amish budget Excel sheet",
-      "Weekly shopping list template",
-      "Lifetime member area access",
-      "Free future updates"
+      "Carte electronică completă (PDF, ePub, Kindle)",
+      "Lista de verificare de 30 de zile tipabilă",
+      "Amish buget Excel foaie",
+      "Șablon listă de cumpărături săptămânale",
+      "Accesul pe durata vieții în zona membrilor",
+      "Actualizări viitoare gratuite"
     ]
   },
   "testimonials": {
-    "badge": "// 06 — Testimonials",
-    "title": "Testimonials",
+    "badge": "/ 06 ",
+    "title": "Mărturii",
     "items": [
       {
-        "text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
+        "text": "Am aplicat metoda bugetului Amish şi în două luni mi-am redus cheltuielile cu 35%. Lista de 30 de zile a fost punctul de cotitură. În sfârşit un curs care chiar funcţionează.",
         "name": "Marco R.",
-        "role": "Rome — early readers"
+        "role": "Roma cititori timpurii"
       }
     ]
   },
   "offer": {
-    "badge": "Launch Offer",
-    "title": "Invest in Yourself",
-    "complete_package": "Complete Package",
-    "course_value": "Course: $97",
+    "badge": "Oferta de lansare",
+    "title": "Investiţi în voi înşivă",
+    "complete_package": "Ambalaj complet",
+    "course_value": "Curs: 97 dolari",
     "bonus_value": "Bonus: $27",
     "price_text": "",
-    "one_time": "One-time payment — no subscription",
-    "launch_price": "Launch price — then $37",
-    "cta": "Unlock Access Now",
-    "guarantee_title": "30-Day Money-Back Guarantee",
+    "one_time": "Plata o singură dată ",
+    "launch_price": "Preţ de lansare apoi $37",
+    "cta": "Deblochează accesul acum",
+    "guarantee_title": "Garanţie pentru banii de 30 de zile",
     "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
     "includes": [
-      "Full course (value $97)",
-      "eBook PDF, ePub, Kindle",
-      "Printable 30-day checklist",
-      "Amish budget Excel sheet",
-      "Lifetime access + updates",
-      "BONUS: Weekly shopping list (value $27)"
+      "Curs complet (valoare 97 dolari)",
+      "EBook PDF, ePub, Kindle",
+      "Lista de verificare de 30 de zile tipabilă",
+      "Amish buget Excel foaie",
+      "Acces pe viaţă + actualizări",
+      "BONUS: Lista de cumpărături săptămânale (valoare $27)"
     ]
   },
   "faq": {
-    "badge": "// 07 — FAQ",
-    "title": "Frequently Asked Questions",
-    "offer_valid": "Offer valid this week",
+    "badge": "- Da.",
+    "title": "Întrebări frecvente",
+    "offer_valid": "Oferta valabila saptamana asta",
     "items": [
       {
-        "q": "What exactly is included?",
-        "a": "You get the complete eBook in PDF, ePub, and Kindle formats. Plus lifetime access to all future updates."
+        "q": "Ce anume este inclus?",
+        "a": "Primești cartea electronică completă în formate PDF, ePub și Kindle. Plus accesul pe viaţă la toate actualizările viitoare."
       },
       {
-        "q": "Is it in English?",
-        "a": "Yes, the course is fully available in English."
+        "q": "E în engleză?",
+        "a": "Da, cursul este pe deplin disponibil în limba engleză."
       },
       {
-        "q": "What format is the course in?",
-        "a": "eBook in PDF, ePub, and Kindle formats. Videos are in MP4 format."
+        "q": "În ce format este cursul?",
+        "a": "EBook în formate PDF, ePub, și Kindle. Videoclipurile sunt în format MP4."
       },
       {
-        "q": "When do I get access?",
-        "a": "Immediately after payment."
+        "q": "Când am acces?",
+        "a": "Imediat după plată."
       },
       {
-        "q": "What if I'm not satisfied?",
-        "a": "You're protected by our 30-day money-back guarantee."
+        "q": "Şi dacă nu sunt mulţumit?",
+        "a": "Eşti protejat de garanţia noastră de 30 de zile."
       },
       {
-        "q": "How long does it take?",
-        "a": "The complete program takes about 3-4 hours."
+        "q": "Cât durează?",
+        "a": "Programul complet durează aproximativ 3-4 ore."
       }
     ]
   },
   "final_cta": {
-    "title": "Start Your Journey to Financial Freedom Today",
-    "subtitle": "Join hundreds of people who have already transformed their relationship with money.",
-    "badge": "Offer valid this week"
+    "title": "Începeţi călătoria spre libertatea financiară astăzi",
+    "subtitle": "Alăturaţi-vă sutelor de oameni care şi-au transformat deja relaţia cu banii.",
+    "badge": "Oferta valabila saptamana asta"
   },
   "footer": {
-    "rights_reserved": "All rights reserved.",
-    "privacy": "Privacy",
-    "terms": "Terms",
+    "rights_reserved": "Toate drepturile rezervate.",
+    "privacy": "Confidențialitate",
+    "terms": "Termeni",
     "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
     "badges": {
-      "guarantee": "30-Day Guarantee",
-      "instant_access": "Instant Access",
-      "lifetime_updates": "Lifetime Updates"
+      "guarantee": "Garanție de 30 de zile",
+      "instant_access": "Acces instant",
+      "lifetime_updates": "Actualizări pe viaţă"
     }
   },
   "trust": {
-    "title": "Trusted by teams worldwide",
+    "title": "Încrezător de echipe din întreaga lume",
     "readers_count": "1.247 de cititori",
     "company_names": []
   },
@@ -195,113 +195,113 @@
       "buy_now_dash": "Cumpără Acum —",
       "view_modules": "Descoperă Modulele",
       "ssl_secure": "Plată securizată prin SSL",
-      "instant_download": "Instant Download",
-      "lifetime_access": "Lifetime Access",
-      "guarantee_days": "30-Day Guarantee",
-      "section_who": "// 01 — Who Is This For",
-      "is_this_for_you": "Is This Course For You?",
-      "perfect_for": "Perfect for you if:",
-      "p_struggle": "You struggle to make ends meet",
-      "p_cut_costs": "You want to cut costs without sacrificing quality of life",
+      "instant_download": "Descărcare instantanee",
+      "lifetime_access": "Acces pe viaţă",
+      "guarantee_days": "Garanție de 30 de zile",
+      "section_who": "Cine este pentru",
+      "is_this_for_you": "Este acest curs pentru tine?",
+      "perfect_for": "Perfect pentru dumneavoastră dacă:",
+      "p_struggle": "Te zbaţi să-ţi vezi de treabă.",
+      "p_cut_costs": "Vrei să reduci costurile fără să sacrifici calitatea vieţii.",
       "p_consumerism": "Tired of consumerism and debt culture",
       "p_practical": "Looking for practical, time-tested methods",
       "p_future": "Want a solid financial future for your family",
-      "not_for": "Not for you if:",
+      "not_for": "Nu pentru tine dacă:",
       "n_quick": "Looking for get-rich-quick schemes",
       "n_habits": "Not willing to change spending habits",
       "n_quick_fix": "Prefer quick fixes over a solid path",
       "n_implement": "Not willing to implement what you learn",
       "n_advice": "Looking for personalized financial advice",
-      "section_learn": "// 02 — What You'll Learn",
-      "masters_secrets": "The Amish Masters' Secrets",
+      "section_learn": "Ce vei învăţa",
+      "masters_secrets": "Secretele Masters Amish",
       "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
-      "section_author": "// 03 — The Author",
-      "behind_course": "Behind This Course",
-      "your_name": "Your Name Here",
+      "section_author": "Autorul",
+      "behind_course": "În spatele acestui curs",
+      "your_name": "Numele tău aici",
       "researcher_author": "Researcher · Author · Traveler",
       "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
-      "section_content": "// 04 — Course Content",
-      "what_inside": "What You'll Find Inside",
-      "also_includes": "Also includes:",
-      "inc_full_ebook": "Full eBook (PDF, ePub, Kindle)",
-      "inc_checklist": "Printable 30-day checklist",
-      "inc_excel": "Amish budget Excel sheet",
-      "inc_shopping": "Weekly shopping list template",
-      "inc_lifetime": "Lifetime member area access",
-      "inc_updates": "Free future updates",
-      "section_offer": "// 05 — The Offer",
-      "invest_yourself": "Invest in Yourself",
-      "launch_offer": "Launch Offer",
-      "complete_package": "Complete Package",
-      "course_value": "Course: $97",
+      "section_content": "// 04 ",
+      "what_inside": "Ce vei găsi în interior",
+      "also_includes": "De asemenea, include:",
+      "inc_full_ebook": "Carte electronică completă (PDF, ePub, Kindle)",
+      "inc_checklist": "Lista de verificare de 30 de zile tipabilă",
+      "inc_excel": "Amish buget Excel foaie",
+      "inc_shopping": "Șablon listă de cumpărături săptămânale",
+      "inc_lifetime": "Accesul pe durata vieții în zona membrilor",
+      "inc_updates": "Actualizări viitoare gratuite",
+      "section_offer": "- Oferta.",
+      "invest_yourself": "Investiţi în voi înşivă",
+      "launch_offer": "Oferta de lansare",
+      "complete_package": "Ambalaj complet",
+      "course_value": "Curs: 97 dolari",
       "bonus_value": "Bonus: $27",
-      "one_time": "One-time payment — no subscription",
-      "launch_price": "Launch price — then $37",
-      "inc_course_full": "Full course (value $97)",
-      "inc_ebook": "eBook PDF, ePub, Kindle",
-      "inc_checklist2": "Printable 30-day checklist",
-      "inc_excel2": "Amish budget Excel sheet",
-      "inc_access_updates": "Lifetime access + updates",
-      "inc_bonus_shopping": "BONUS: Weekly shopping list (value $27)",
-      "unlock_now": "Unlock Access Now",
-      "guarantee_title": "30-Day Money-Back Guarantee",
+      "one_time": "Plata o singură dată ",
+      "launch_price": "Preţ de lansare apoi $37",
+      "inc_course_full": "Curs complet (valoare 97 dolari)",
+      "inc_ebook": "EBook PDF, ePub, Kindle",
+      "inc_checklist2": "Lista de verificare de 30 de zile tipabilă",
+      "inc_excel2": "Amish buget Excel foaie",
+      "inc_access_updates": "Acces pe viaţă + actualizări",
+      "inc_bonus_shopping": "BONUS: Lista de cumpărături săptămânale (valoare $27)",
+      "unlock_now": "Deblochează accesul acum",
+      "guarantee_title": "Garanţie pentru banii de 30 de zile",
       "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
-      "section_testimonials": "// 06 — Testimonials",
-      "testimonial_text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
+      "section_testimonials": "/ 06 ",
+      "testimonial_text": "Am aplicat metoda bugetului Amish şi în două luni mi-am redus cheltuielile cu 35%. Lista de 30 de zile a fost punctul de cotitură. În sfârşit un curs care chiar funcţionează.",
       "testimonial_name": "Marco R.",
-      "testimonial_role": "Rome — early readers",
-      "section_faq": "// 07 — FAQ",
-      "faq_title": "Frequently Asked Questions",
-      "offer_valid": "Offer valid this week",
-      "final_cta": "Start Your Journey to Financial Freedom Today",
-      "final_sub": "Join hundreds of people who have already transformed their relationship with money.",
-      "unlock_dash": "Unlock Access —",
-      "guarantee_badge": "30-Day Guarantee",
-      "instant_access_badge": "Instant Access",
-      "lifetime_badge": "Lifetime Updates",
-      "rights_reserved": "All rights reserved.",
-      "privacy": "Privacy",
-      "terms": "Terms",
+      "testimonial_role": "Roma cititori timpurii",
+      "section_faq": "- Da.",
+      "faq_title": "Întrebări frecvente",
+      "offer_valid": "Oferta valabila saptamana asta",
+      "final_cta": "Începeţi călătoria spre libertatea financiară astăzi",
+      "final_sub": "Alăturaţi-vă sutelor de oameni care şi-au transformat deja relaţia cu banii.",
+      "unlock_dash": "Deblochează accesul",
+      "guarantee_badge": "Garanție de 30 de zile",
+      "instant_access_badge": "Acces instant",
+      "lifetime_badge": "Actualizări pe viaţă",
+      "rights_reserved": "Toate drepturile rezervate.",
+      "privacy": "Confidențialitate",
+      "terms": "Termeni",
       "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
-      "features": "Features",
-      "pricing": "Pricing",
-      "testimonials": "Testimonials",
+      "features": "Caracteristici",
+      "pricing": "Prețuri",
+      "testimonials": "Mărturii",
       "contact": "Contact",
-      "get_started": "Get Started",
-      "learn_more": "Learn More",
-      "member_area": "Member Area",
-      "back_to_landing": "Back to Landing",
-      "buy_now": "Buy Now",
+      "get_started": "Începe",
+      "learn_more": "Află mai multe",
+      "member_area": "Zona membru",
+      "back_to_landing": "Înapoi la aterizare",
+      "buy_now": "Cumpără acum",
       "currency_symbol": "$",
-      "new_badge": "New",
-      "the_problem": "The Problem",
-      "our_story": "Our Story",
-      "what_learn": "What You'll Learn",
-      "course_lessons": "Course Lessons",
+      "new_badge": "Nou",
+      "the_problem": "Problema",
+      "our_story": "Povestea noastră",
+      "what_learn": "Ce vei învăţa",
+      "course_lessons": "Lecţii de curs",
       "curriculum": "Curriculum",
-      "free_tier": "Free",
+      "free_tier": "Liber",
       "pro_tier": "Pro",
       "per_month": "/mo",
-      "start_free": "Start Free",
+      "start_free": "Pornește gratuit",
       "popular": "Popular",
-      "free_title": "To get started",
-      "pro_title": "To grow",
-      "trusted_by": "Trusted by teams worldwide",
-      "offer_badge": "Launch Offer",
-      "price_special": "Special launch price",
-      "buy_and_access": "Buy & Access Instantly",
-      "bestseller": "Best Seller",
-      "story_badge": "// The True Story",
-      "story_title": "My Experience Among the Amish",
-      "story_subtitle": "Three months in Pennsylvania, twelve families interviewed, an economic system that has worked for 300 years.",
+      "free_title": "Pentru a începe",
+      "pro_title": "Să crească",
+      "trusted_by": "Încrezător de echipe din întreaga lume",
+      "offer_badge": "Oferta de lansare",
+      "price_special": "Prețul special de lansare",
+      "buy_and_access": "Cumpărați & acces imediat",
+      "bestseller": "Cel mai bun vânzător",
+      "story_badge": "Povestea adevărată",
+      "story_title": "Experienţa mea în rândul amishilor",
+      "story_subtitle": "Trei luni în Pennsylvania, 12 familii intervievate, un sistem economic care a lucrat timp de 300 de ani.",
       "amish_life": "Amish Life",
-      "caption_1": "Daily life in the Amish community: simplicity, self-sufficiency, and financial wisdom passed down through generations.",
-      "caption_2": "The barter and exchange system that eliminates the need for cash and builds lasting trust relationships.",
-      "caption_3": "The Amish household economy: how a family lives on 60% less than the national average.",
-      "tag_1": "Economic Anthropology",
-      "tag_2": "Amish Studies",
-      "tag_3": "Financial Consulting",
-      "brand_name": "Courssy",
+      "caption_1": "Viața de zi cu zi în comunitatea Amish: simplitate, auto-suficiență, și înțelepciunea financiară a trecut în jos prin generații.",
+      "caption_2": "Sistemul de schimb şi schimb care elimină nevoia de bani şi construieşte relaţii de încredere durabile.",
+      "caption_3": "Economia casnică Amish: cum o familie trăieşte cu 60% mai puţin decât media naţională.",
+      "tag_1": "Antropologie economică",
+      "tag_2": "Studii Amish",
+      "tag_3": "Consultanţă financiară",
+      "brand_name": "CourssyCity in Germany",
       "reviewer": "Marco R., early readers",
       "language_switch": "EN",
       "language_switch_en": "EN",
@@ -313,17 +313,17 @@
     }
   },
   "audience": {
-    "badge": "// 01 — Who Is This For",
-    "title": "Is This Course For You?",
-    "perfect_for": "Perfect for you if:",
+    "badge": "Cine este pentru",
+    "title": "Este acest curs pentru tine?",
+    "perfect_for": "Perfect pentru dumneavoastră dacă:",
     "perfect_items": [
-      "You struggle to make ends meet",
-      "You want to cut costs without sacrificing quality of life",
+      "Te zbaţi să-ţi vezi de treabă.",
+      "Vrei să reduci costurile fără să sacrifici calitatea vieţii.",
       "Tired of consumerism and debt culture",
       "Looking for practical, time-tested methods",
       "Want a solid financial future for your family"
     ],
-    "not_for": "Not for you if:",
+    "not_for": "Nu pentru tine dacă:",
     "not_items": [
       "Looking for get-rich-quick schemes",
       "Not willing to change spending habits",
@@ -333,17 +333,17 @@
     ]
   },
   "course": {
-    "back_to_course": "Back to Landing",
+    "back_to_course": "Înapoi la aterizare",
     "module_label": "Curriculum",
-    "now_playing": "Now playing",
-    "page_label": "Page",
-    "reading_progress": "Reading Progress",
-    "download_pdf": "Download PDF",
-    "chapter": "Chapter"
+    "now_playing": "Acum joacă",
+    "page_label": "Pagina",
+    "reading_progress": "Citirea progresului",
+    "download_pdf": "Descărcați PDF",
+    "chapter": "Capitolul"
   },
   "lessons": {
-    "badge": "// 04 — Course Content",
-    "title": "What You'll Find Inside",
+    "badge": "// 04 ",
+    "title": "Ce vei găsi în interior",
     "items": []
   }
 }

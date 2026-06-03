@@ -1,0 +1,344 @@
+{
+  "locale": "ga",
+  "seo": {
+    "title": "Rúin Amish: Conas chun cónaí le coigiltis agus airgead a bhainistiú",
+    "description": "Faigh amach na rúin an phobail Amish ar maireachtála frugal. Lena n-áirítear modúil físe iomlán agus PDFs in-íoslódáilte.",
+    "ogImage": "/courses/amish-secrets/cover.png"
+  },
+  "nav": {
+    "brand": "rúin Amish",
+    "features": "Gnéithe",
+    "pricing": "Praghsáil",
+    "testimonials": "Trialacha",
+    "faq": "Ceisteanna Coitianta",
+    "contact": "Déan teagmháil linn",
+    "get_started": "Faigh Tosaigh",
+    "learn_more": "Tuilleadh eolais",
+    "member_area": "Comhaltas an Chomhalta",
+    "back_to_landing": "Ar ais chuig Landing"
+  },
+  "hero": {
+    "badge": "Nuashonraithe go deireanach",
+    "title": "Rúin Amish: Conas chun cónaí le coigiltis agus airgead a bhainistiú",
+    "subtitle": "Faigh amach na rúin an phobail Amish ar maireachtála frugal. Lena n-áirítear modúil físe iomlán agus PDFs in-íoslódáilte.",
+    "cta": "Faigh Tosaigh",
+    "secondary_cta": "Tuilleadh eolais",
+    "price_label": "Praghas seolta speisialta",
+    "one_time_payment": "Íocaíocht aonuaire — gan aon síntiús"
+  },
+  "problem": {
+    "badge": "An Fadhb",
+    "title": "Tuirseach a bhaint amach deireadh na míosa gan aon choigiltis? Cuireann sochaí nua-aimseartha orainn i dtreo tomhaltas iomarcach.",
+    "text": ""
+  },
+  "story": {
+    "badge": "Ár gCúrsa",
+    "title": "Bhí an t-eolas mícheart nó as dáta",
+    "image_captions": [
+      "Cén fáth a bhfuil tú ag iarraidh a bheith ina n-aonar: mar shampla, is féidir leat a bheith ina n-aonar.",
+      "Tá sé mar aidhm ag an obair seo a dhéanamh ar bhealach níos fearr.",
+      "L'economia domestica Amish: teacht ar ries a vivere con il 60% i bhfearas."
+    ],
+    "quote": "An Amish saol saibhir agus iomlán agus a chaitheamh codán de cad a chaithimid. Sa chúrsa seo, nochtann muid conas a dhéanann siad é."
+  },
+  "author": {
+    "badge": "// 03 – An t-údar",
+    "title": "Déan Teagmháil Linn",
+    "name": "cliceáil grianghraf a mhéadú",
+    "role": "Taighde – Údar",
+    "bio": "[Cuir do scéal anseo: Chónaigh mé 3 mhí i Pennsylvania, agallamh 12 teaghlaigh Amish, staidéar a gcóras eacnamaíoch. Uimh teoiric, ach cleachtas.]",
+    "tags": [
+      "cliceáil grianghraf a mhéadú",
+      "Seirbhís do Chustaiméirí",
+      "Amharc ar gach eolas"
+    ]
+  },
+  "modules": {
+    "badge": "// 02 - Cad a Feicfidh tú",
+    "title": "Rúin na Máistreachta Amish '",
+    "description": "8 modúil praiticiúla a cas eagna Amish i ngníomhartha coincréite do do shaol laethúil.",
+    "items": [
+      {
+        "title": "Buiséad an AE",
+        "desc": "Beo ar 30% níos lú gan íobairt."
+      },
+      {
+        "title": "An tSraith Shinsearach",
+        "desc": "An modh stórála bia a chuireann deireadh le dramhaíl."
+      },
+      {
+        "title": "Fiachas an tSuímh",
+        "desc": "An creat a fháil amach fiach go deo."
+      },
+      {
+        "title": "Gach rud",
+        "desc": "12 uirlisí riachtanacha a dheisiú duit féin."
+      },
+      {
+        "title": "Airgead-saor in aisce Malartú",
+        "desc": "Conas líonra barter a ghníomhachtú."
+      },
+      {
+        "title": "Feirme go Tábla",
+        "desc": "Treoir do garraíodóireacht bhaile agus cócaireachta náid-waste."
+      },
+      {
+        "title": "Fuinneamh Saor in Aisce",
+        "desc": "Conas billí fóntais a ghearradh ag 50%."
+      },
+      {
+        "title": "Plean 30-Lá",
+        "desc": "Seicliosta Lá-ar-lá a athrú do airgeadais."
+      }
+    ]
+  },
+  "includes": {
+    "title": "Chomh maith leis sin áirítear:",
+    "items": [
+      "Ríomhleabhar iomlán (PDF, rPub, Kindle)",
+      "Liosta seiceála 30 lá inphriontáilte",
+      "Bileog Excel buiséad Amish",
+      "Teimpléad liosta siopadóireachta seachtainiúil",
+      "Rochtain ball-achar saoil",
+      "Nuashonruithe todhchaí saor in aisce"
+    ]
+  },
+  "testimonials": {
+    "badge": "// 06 — Trialacha",
+    "title": "Trialacha",
+    "items": [
+      {
+        "text": "Chuir mé an modh buiséid Amish agus in dhá mhí gearrthaim mo chostais faoi 35%. Ba é an seicliosta 30-lá an pointe ag casadh. Ar deireadh cúrsa go n-oibríonn i ndáiríre.",
+        "name": "Marco R.",
+        "role": "Róimh - léitheoirí luatha"
+      }
+    ]
+  },
+  "offer": {
+    "badge": "Seoladh Tairiscint",
+    "title": "Infheistiú i Yourself",
+    "complete_package": "Pacáiste iomlán",
+    "course_value": "Cúrsa: $97",
+    "bonus_value": "Bónas: $27",
+    "price_text": "",
+    "one_time": "Íocaíocht aonuaire — gan aon síntiús",
+    "launch_price": "Praghas Seoladh - ansin $37",
+    "cta": "Rochtain Díghlasáil Anois",
+    "guarantee_title": "30-Day Airgead-Back Ráthaíocht",
+    "guarantee_text": "Bain triail as ar feadh 30 lá. Más rud é nach bhfuil tú a shábháil ar a laghad $ 100, beidh muid ag aisíoc an méid iomlán. Níl aon cheist, aon hassle.",
+    "includes": [
+      "Cúrsa iomlán (luach $97)",
+      "Déan Teagmháil Linn",
+      "Liosta seiceála 30 lá inphriontáilte",
+      "Bileog Excel buiséad Amish",
+      "Rochtain ar an saol + nuashonruithe",
+      "BONUS: Liosta siopadóireachta seachtainiúil (luach $ 27)"
+    ]
+  },
+  "faq": {
+    "badge": "// 07 - Ceisteanna Coitianta",
+    "title": "Ceisteanna Coitianta",
+    "offer_valid": "Tairiscint bailí an tseachtain seo",
+    "items": [
+      {
+        "q": "Cad é go díreach san áireamh?",
+        "a": "A gheobhaidh tú an eBook iomlán i PDF, ePub, agus formáidí Kindle. Rochtain ar feadh an tsaoil Plus ar gach nuashonruithe sa todhchaí."
+      },
+      {
+        "q": "An bhfuil sé i mBéarla?",
+        "a": "Tá, tá an cúrsa ar fáil go hiomlán i mBéarla."
+      },
+      {
+        "q": "Cén fhormáid atá ar an gcúrsa?",
+        "a": "eBook i PDF, ePub, agus formáidí Kindle. Tá Físeáin i bhformáid MP4."
+      },
+      {
+        "q": "Cathain a gheobhaidh mé rochtain?",
+        "a": "Díreach tar éis na híocaíochta."
+      },
+      {
+        "q": "Cad a tharlaíonn mura bhfuil mé sásta?",
+        "a": "Tá tú faoi chosaint ag ár ráthaíocht airgead-ais 30-lá."
+      },
+      {
+        "q": "Cé chomh fada a thógann sé?",
+        "a": "Tógann an clár iomlán thart ar 3-4 uair an chloig."
+      }
+    ]
+  },
+  "final_cta": {
+    "title": "Tosaigh Do Turas go Saoirse Airgeadais Sa lá atá inniu",
+    "subtitle": "Member na céadta daoine a chlaochlú cheana féin a gcaidreamh le hairgead.",
+    "badge": "Tairiscint bailí an tseachtain seo"
+  },
+  "footer": {
+    "rights_reserved": "Gach ceart ar cosaint.",
+    "privacy": "Príobháideacht",
+    "terms": "Téarmaí agus Coinníollacha",
+    "legal_note": "Is táirge faisnéise digiteach é seo. D'fhéadfadh torthaí a bheith éagsúil agus ag brath ar thiomantas pearsanta. Tá na praghsanna agus na teicnící Amish cur síos bunaithe ar thaighde eitneagrafach agus ní féidir a léiriú go cruinn na cleachtais chomhaimseartha de gach pobal Amish.",
+    "badges": {
+      "guarantee": "Ráthaíocht 30-Lá",
+      "instant_access": "Rochtain láithreach",
+      "lifetime_updates": "Nuacht agus Imeachtaí"
+    }
+  },
+  "trust": {
+    "title": "Iontaofa ag foirne ar fud an domhain",
+    "readers_count": "1,247 léitheoirí",
+    "company_names": []
+  },
+  "ui": {
+    "labels": {
+      "instant_access": "Rochtain láithreach",
+      "buy_now_arrow": "Ceannaigh Anois →",
+      "readers": "1,247 léitheoirí",
+      "buy_now_dash": "Ceannaigh Anois —",
+      "view_modules": "Plean Gníomhaíochta don Oideachas",
+      "ssl_secure": "Íocaíocht SSL Secure",
+      "instant_download": "Íoslódálacha Meandaracha",
+      "lifetime_access": "Rochtain ar an Saol",
+      "guarantee_days": "Ráthaíocht 30-Lá",
+      "section_who": "// 01 – Cé hé seo Do",
+      "is_this_for_you": "An bhfuil an cúrsa seo á dhéanamh agat?",
+      "perfect_for": "Foirfe duit más rud é:",
+      "p_struggle": "Tá tú ag streachailt chun deireadh a chur le chéile",
+      "p_cut_costs": "Ba mhaith leat costais a ghearradh gan sacrificing cáilíochta saoil",
+      "p_consumerism": "Tá tú tuirseach de na tomhaltóirí agus an cultúr fiachais",
+      "p_practical": "Ba mhaith leat modhanna praiticiúla, am-thástáil",
+      "p_future": "Ba mhaith leat todhchaí airgeadais láidir a thógáil do do theaghlach",
+      "not_for": "Nach bhfuil tú más rud é:",
+      "n_quick": "Tá tú ag lorg scéimeanna sách saibhir",
+      "n_habits": "Níl tú ag iarraidh a athrú do nósanna caiteachais",
+      "n_quick_fix": "Is fearr leat fixes tapa thar bunús láidir",
+      "n_implement": "Níl tú sásta a chur i bhfeidhm cad a fhoghlaim tú",
+      "n_advice": "Tá tú ag lorg comhairle airgeadais phearsantaithe",
+      "section_learn": "// 02 - Cad a Feicfidh tú",
+      "masters_secrets": "Rúin na Máistreachta Amish '",
+      "modules_desc": "8 modúil praiticiúla a cas eagna Amish i ngníomhartha coincréite do do shaol laethúil.",
+      "section_author": "// 03 – An t-údar",
+      "behind_course": "Déan Teagmháil Linn",
+      "your_name": "Do Ainm Anseo",
+      "researcher_author": "Taighde – Údar",
+      "author_bio": "[Cuir do scéal anseo: Chónaigh mé 3 mhí i Pennsylvania, agallamh 12 teaghlaigh Amish, staidéar a gcóras eacnamaíoch. Uimh teoiric, ach cleachtas.]",
+      "section_content": "// 04 - Ábhar an Chúrsa",
+      "what_inside": "Cad a gheobhaidh tú Inside",
+      "also_includes": "Chomh maith leis sin áirítear:",
+      "inc_full_ebook": "Ríomhleabhar iomlán (PDF, rPub, Kindle)",
+      "inc_checklist": "Liosta seiceála 30 lá inphriontáilte",
+      "inc_excel": "Bileog Excel buiséad Amish",
+      "inc_shopping": "Teimpléad liosta siopadóireachta seachtainiúil",
+      "inc_lifetime": "Rochtain ball-achar saoil",
+      "inc_updates": "Nuashonruithe todhchaí saor in aisce",
+      "section_offer": "// 05 — An Tairiscint",
+      "invest_yourself": "Infheistiú i Yourself",
+      "launch_offer": "Seoladh Tairiscint",
+      "complete_package": "Pacáiste iomlán",
+      "course_value": "Cúrsa: $97",
+      "bonus_value": "Bónas: $27",
+      "one_time": "Íocaíocht aonuaire — gan aon síntiús",
+      "launch_price": "Praghas Seoladh - ansin $37",
+      "inc_course_full": "Cúrsa iomlán (luach $97)",
+      "inc_ebook": "Déan Teagmháil Linn",
+      "inc_checklist2": "Liosta seiceála 30 lá inphriontáilte",
+      "inc_excel2": "Bileog Excel buiséad Amish",
+      "inc_access_updates": "Rochtain ar an saol + nuashonruithe",
+      "inc_bonus_shopping": "BONUS: Liosta siopadóireachta seachtainiúil (luach $ 27)",
+      "unlock_now": "Rochtain Díghlasáil Anois",
+      "guarantee_title": "30-Day Airgead-Back Ráthaíocht",
+      "guarantee_text": "Bain triail as ar feadh 30 lá. Más rud é nach bhfuil tú a shábháil ar a laghad $ 100, beidh muid ag aisíoc an méid iomlán. Níl aon cheist, aon hassle.",
+      "section_testimonials": "// 06 — Trialacha",
+      "testimonial_text": "Chuir mé an modh buiséid Amish agus in dhá mhí gearrthaim mo chostais faoi 35%. Ba é an seicliosta 30-lá an pointe ag casadh. Ar deireadh cúrsa go n-oibríonn i ndáiríre.",
+      "testimonial_name": "Marco R.",
+      "testimonial_role": "Róimh - léitheoirí luatha",
+      "section_faq": "// 07 - Ceisteanna Coitianta",
+      "faq_title": "Ceisteanna Coitianta",
+      "offer_valid": "Tairiscint bailí an tseachtain seo",
+      "final_cta": "Tosaigh Do Turas go Saoirse Airgeadais Sa lá atá inniu",
+      "final_sub": "Member na céadta daoine a chlaochlú cheana féin a gcaidreamh le hairgead.",
+      "unlock_dash": "Rochtain Díghlasáil —",
+      "guarantee_badge": "Ráthaíocht 30-Lá",
+      "instant_access_badge": "Rochtain láithreach",
+      "lifetime_badge": "Nuacht agus Imeachtaí",
+      "rights_reserved": "Gach ceart ar cosaint.",
+      "privacy": "Príobháideacht",
+      "terms": "Téarmaí agus Coinníollacha",
+      "legal_note": "Is táirge faisnéise digiteach é seo. D'fhéadfadh torthaí a bheith éagsúil agus ag brath ar thiomantas pearsanta. Tá na praghsanna agus na teicnící Amish cur síos bunaithe ar thaighde eitneagrafach agus ní féidir a léiriú go cruinn na cleachtais chomhaimseartha de gach pobal Amish.",
+      "features": "Gnéithe",
+      "pricing": "Praghsáil",
+      "testimonials": "Trialacha",
+      "contact": "Déan teagmháil linn",
+      "get_started": "Faigh Tosaigh",
+      "learn_more": "Tuilleadh eolais",
+      "member_area": "Comhaltas an Chomhalta",
+      "back_to_landing": "Ar ais chuig Landing",
+      "buy_now": "Ceannaigh Anois",
+      "currency_symbol": "$",
+      "new_badge": "Nuashonraithe go deireanach",
+      "the_problem": "An Fadhb",
+      "our_story": "Ár gCúrsa",
+      "what_learn": "Cad a Feicfidh tú",
+      "course_lessons": "Amharc ar gach eolas",
+      "curriculum": "Curaclam agus Measúnú",
+      "free_tier": "Saor in aisce",
+      "pro_tier": "Pro Pro",
+      "per_month": "/mo",
+      "start_free": "Tosaigh saor in aisce",
+      "popular": "Bláthanna Gairdín",
+      "free_title": "Chun tús a chur",
+      "pro_title": "Ag fás",
+      "trusted_by": "Iontaofa ag foirne ar fud an domhain",
+      "offer_badge": "Seoladh Tairiscint",
+      "price_special": "Praghas seolta speisialta",
+      "buy_and_access": "Ceannaigh &amp; Rochtain Láithreach",
+      "bestseller": "Díoltóir is Fearr",
+      "story_badge": "// An Scéal Fíor",
+      "story_title": "Mo Taithí I measc na Amish",
+      "story_subtitle": "Trí mhí i Pennsylvania, dhá theaghlach déag agallamh, córas eacnamaíoch a d'oibrigh ar feadh 300 bliain.",
+      "amish_life": "Saol Amish",
+      "caption_1": "Saol laethúil sa phobal Amish: simplíocht, féin-dhóthanacht, agus eagna airgeadais a rith síos trí na glúnta.",
+      "caption_2": "An córas barter agus a mhalartú a eliminates an gá atá le hairgead tirim agus a thógann caidreamh muinín buan.",
+      "caption_3": "An geilleagar teaghlaigh Amish: conas a chónaíonn teaghlach ar 60% níos lú ná an meán náisiúnta.",
+      "tag_1": "Antraipeolaíocht Eacnamaíoch",
+      "tag_2": "Staidéar Amish",
+      "tag_3": "Comhairle Airgeadais",
+      "brand_name": "taiseachas aeir: fliuch",
+      "reviewer": "Marco R., léitheoir luath",
+      "language_switch": "EN",
+      "language_switch_en": "EN"
+    }
+  },
+  "audience": {
+    "badge": "// 01 – Cé hé seo Do",
+    "title": "An bhfuil an cúrsa seo á dhéanamh agat?",
+    "perfect_for": "Foirfe duit más rud é:",
+    "perfect_items": [
+      "Tá tú ag streachailt chun deireadh a chur le chéile",
+      "Ba mhaith leat costais a ghearradh gan sacrificing cáilíochta saoil",
+      "Tá tú tuirseach de na tomhaltóirí agus an cultúr fiachais",
+      "Ba mhaith leat modhanna praiticiúla, am-thástáil",
+      "Ba mhaith leat todhchaí airgeadais láidir a thógáil do do theaghlach"
+    ],
+    "not_for": "Nach bhfuil tú más rud é:",
+    "not_items": [
+      "Tá tú ag lorg scéimeanna sách saibhir",
+      "Níl tú ag iarraidh a athrú do nósanna caiteachais",
+      "Is fearr leat fixes tapa thar bunús láidir",
+      "Níl tú sásta a chur i bhfeidhm cad a fhoghlaim tú",
+      "Tá tú ag lorg comhairle airgeadais phearsantaithe"
+    ]
+  },
+  "course": {
+    "back_to_course": "Ar ais chuig Landing",
+    "module_label": "Curaclam agus Measúnú",
+    "now_playing": "Anois ag imirt",
+    "page_label": "Leathanach Baile",
+    "reading_progress": "Amharc ar gach eolas",
+    "download_pdf": "Íoslódáil an PDF",
+    "chapter": "Caibidil V"
+  },
+  "lessons": {
+    "badge": "// 04 - Ábhar an Chúrsa",
+    "title": "Cad a gheobhaidh tú Inside",
+    "items": []
+  }
+}

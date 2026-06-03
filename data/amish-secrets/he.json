@@ -6,44 +6,44 @@
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
-    "brand": "Amish secrets",
-    "features": "Features",
-    "pricing": "Pricing",
-    "testimonials": "Testimonials",
-    "faq": "FAQ",
-    "contact": "Contact",
-    "get_started": "Get Started",
-    "learn_more": "Learn More",
-    "member_area": "Member Area",
-    "back_to_landing": "Back to Landing"
+    "brand": "סודות",
+    "features": "תכונות",
+    "pricing": "מחירים",
+    "testimonials": "עדויות",
+    "faq": "שאלות נפוצות",
+    "contact": "צור קשר",
+    "get_started": "להתחיל",
+    "learn_more": "למד עוד",
+    "member_area": "אזור חבר",
+    "back_to_landing": "חזרה ל Landing"
   },
   "hero": {
-    "badge": "New",
+    "badge": "חדש חדש חדש",
     "title": "סודות האמיש: איך לחיות בחיסכון ולנהל כסף",
     "subtitle": "גלו את סודות החיים החסכוניים של קהילת האמיש. כולל מודולי וידאו מלאים וקובצי PDF להורדה.",
-    "cta": "Get Started",
-    "secondary_cta": "Learn More",
-    "price_label": "Special launch price",
-    "one_time_payment": "One-time payment — no subscription"
+    "cta": "להתחיל",
+    "secondary_cta": "למד עוד",
+    "price_label": "מחיר שיגור מיוחד",
+    "one_time_payment": "תשלום חד פעמי - אין מנוי"
   },
   "problem": {
-    "badge": "The Problem",
+    "badge": "הבעיה",
     "title": "עייפים מלהגיע לסוף החודש ללא חיסכון? החברה המודרנית דוחפת אותנו לצריכת יתר.",
     "text": ""
   },
   "story": {
-    "badge": "Our Story",
-    "title": "La mia esperienza tra gli Amish",
+    "badge": "הסיפור שלנו",
+    "title": "La mia esperienza tragli Amish",
     "image_captions": [
-      "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria.",
-      "Il sistema di baratto e scambio che elimina il bisogno di denaro contante.",
-      "L'economia domestica Amish: come una famiglia riesce a vivere con il 60% in meno."
+      "La vita quotidiana nella unia Amish: semplicità, autosufficienza e saggezza finanziaria.",
+      "Il sistema di baratto e Frabio che elimina il bisogno di denaro contante.",
+      "L'economia Amish: Come una famiglia riesce a vivere conil 60% in meno."
     ],
     "quote": "אנשי האמיש חיים חיים עשירים ומלאים תוך שהם מוציאים רק חלק קטן ממה שאנחנו מוציאים. בקורס זה נחשוף בפניכם כיצד הם עושים זאת."
   },
   "author": {
-    "badge": "// 03 — The Author",
-    "title": "Behind This Course",
+    "badge": "03 – המחבר",
+    "title": "מאחורי הקורס הזה",
     "name": "Alessandro Rinaldi",
     "role": "Researcher · Author · Traveler",
     "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
@@ -54,136 +54,136 @@
     ]
   },
   "modules": {
-    "badge": "// 02 — What You'll Learn",
-    "title": "The Amish Masters' Secrets",
+    "badge": "02 – מה תלמד",
+    "title": "סודות המאסטרים",
     "description": "8 practical modules that turn Amish wisdom into concrete actions.",
     "items": [
       {
-        "title": "Amish Budget",
-        "desc": "Live on 30% less without sacrifice."
+        "title": "תקציב Amish",
+        "desc": "לחיות 30% פחות ללא הקרבה."
       },
       {
-        "title": "Infinite Pantry",
-        "desc": "The food storage method that eliminates waste."
+        "title": "פאניקה אינסופית",
+        "desc": "שיטת אחסון המזון שמבטלת פסולת."
       },
       {
-        "title": "Zero Debt",
-        "desc": "The framework to get out of debt forever."
+        "title": "אפס חוב",
+        "desc": "המסגרת לצאת מהחוב לנצח."
       },
       {
-        "title": "Fix Everything",
-        "desc": "12 essential tools to repair yourself."
+        "title": "לתקן הכל",
+        "desc": "12 כלים חיוניים לתיקון עצמי"
       },
       {
-        "title": "Money-Free Exchange",
-        "desc": "How to activate a barter network."
+        "title": "כסף חינם Exchange",
+        "desc": "כיצד להפעיל רשת ברטר"
       },
       {
-        "title": "Farm to Table",
-        "desc": "Guide to home gardening and zero-waste cooking."
+        "title": "חוות לשולחן",
+        "desc": "מדריך הביתה גינון ובישול אפס."
       },
       {
-        "title": "Free Energy",
-        "desc": "How to cut utility bills by 50%."
+        "title": "אנרגיה חופשית",
+        "desc": "כיצד לקצץ את חשבונות השירות ב-50%"
       },
       {
-        "title": "30-Day Plan",
-        "desc": "Day-by-day checklist to transform your finances."
+        "title": "תכנית 30 יום",
+        "desc": "יום-יום צ'ק כדי לשנות את הכספים שלך."
       }
     ]
   },
   "includes": {
-    "title": "Also includes:",
+    "title": "כולל גם:",
     "items": [
       "Full eBook (PDF, ePub, Kindle)",
-      "Printable 30-day checklist",
-      "Amish budget Excel sheet",
-      "Weekly shopping list template",
-      "Lifetime member area access",
-      "Free future updates"
+      "רשימת 30 יום",
+      "עדכון תקציב Excel",
+      "רשימת קניות שבועית",
+      "גישה לכל החיים",
+      "עדכונים עתידיים בחינם"
     ]
   },
   "testimonials": {
-    "badge": "// 06 — Testimonials",
-    "title": "Testimonials",
+    "badge": "06 - המלצות",
+    "title": "עדויות",
     "items": [
       {
-        "text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
-        "name": "Marco R.",
-        "role": "Rome — early readers"
+        "text": "הגשתי את שיטת התקציב של אמיש ובחודשיים חתכתי את ההוצאות שלי ב-35%. רשימת 30 הימים הייתה נקודת מפנה. סוף סוף קורס שבאמת עובד.",
+        "name": "מרקו ר.",
+        "role": "רומא - הקוראים הראשונים"
       }
     ]
   },
   "offer": {
-    "badge": "Launch Offer",
-    "title": "Invest in Yourself",
-    "complete_package": "Complete Package",
-    "course_value": "Course: $97",
-    "bonus_value": "Bonus: $27",
+    "badge": "הצעת שיגור",
+    "title": "להשקיע בעצמך",
+    "complete_package": "חבילה שלמה",
+    "course_value": "קורס: 97 $",
+    "bonus_value": "בונוס: $27",
     "price_text": "",
-    "one_time": "One-time payment — no subscription",
-    "launch_price": "Launch price — then $37",
+    "one_time": "תשלום חד פעמי - אין מנוי",
+    "launch_price": "מחיר שיגור - 37 דולר",
     "cta": "Unlock Access Now",
-    "guarantee_title": "30-Day Money-Back Guarantee",
+    "guarantee_title": "30 יום החזר כספי",
     "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
     "includes": [
-      "Full course (value $97)",
+      "מחיר מלא (ערך $97)",
       "eBook PDF, ePub, Kindle",
-      "Printable 30-day checklist",
-      "Amish budget Excel sheet",
-      "Lifetime access + updates",
-      "BONUS: Weekly shopping list (value $27)"
+      "רשימת 30 יום",
+      "עדכון תקציב Excel",
+      "גישה לכל החיים + עדכונים",
+      "BONUS: רשימת קניות שבועית (ערך $27)"
     ]
   },
   "faq": {
-    "badge": "// 07 — FAQ",
-    "title": "Frequently Asked Questions",
-    "offer_valid": "Offer valid this week",
+    "badge": "07 - שאלות",
+    "title": "שאלות נפוצות",
+    "offer_valid": "הצעה בתוקף השבוע",
     "items": [
       {
-        "q": "What exactly is included?",
-        "a": "You get the complete eBook in PDF, ePub, and Kindle formats. Plus lifetime access to all future updates."
+        "q": "מה בדיוק נכלל?",
+        "a": "אתה מקבל את הספר האלקטרוני המלא בפורמט PDF, ePub ו- Kindle. גישה לכל העדכונים העתידיים"
       },
       {
-        "q": "Is it in English?",
-        "a": "Yes, the course is fully available in English."
+        "q": "האם זה באנגלית?",
+        "a": "כן, הקורס זמין לחלוטין באנגלית."
       },
       {
-        "q": "What format is the course in?",
-        "a": "eBook in PDF, ePub, and Kindle formats. Videos are in MP4 format."
+        "q": "איזה פורמט זה הקורס?",
+        "a": "ספר אלקטרוני בפורמט PDF, ePub ו- Kindle. קטעי וידאו הם בפורמט MP4."
       },
       {
-        "q": "When do I get access?",
-        "a": "Immediately after payment."
+        "q": "מתי אני מקבל גישה?",
+        "a": "מיד לאחר התשלום."
       },
       {
-        "q": "What if I'm not satisfied?",
-        "a": "You're protected by our 30-day money-back guarantee."
+        "q": "מה אם אני לא מרוצה?",
+        "a": "אתה מוגן על ידי הבטחת החזר כספי של 30 יום."
       },
       {
-        "q": "How long does it take?",
-        "a": "The complete program takes about 3-4 hours."
+        "q": "כמה זמן זה לוקח?",
+        "a": "התוכנית המלאה לוקחת בערך 3-4 שעות."
       }
     ]
   },
   "final_cta": {
-    "title": "Start Your Journey to Financial Freedom Today",
-    "subtitle": "Join hundreds of people who have already transformed their relationship with money.",
-    "badge": "Offer valid this week"
+    "title": "התחל את המסע שלך לחופש פיננסי היום",
+    "subtitle": "הצטרפו למאות אנשים שכבר שינו את מערכת היחסים שלהם בכסף.",
+    "badge": "הצעה בתוקף השבוע"
   },
   "footer": {
-    "rights_reserved": "All rights reserved.",
-    "privacy": "Privacy",
-    "terms": "Terms",
+    "rights_reserved": "כל הזכויות שמורות.",
+    "privacy": "פרטיות פרטיות",
+    "terms": "תנאים",
     "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
     "badges": {
-      "guarantee": "30-Day Guarantee",
-      "instant_access": "Instant Access",
-      "lifetime_updates": "Lifetime Updates"
+      "guarantee": "הבטחת 30 יום",
+      "instant_access": "גישה מיידית",
+      "lifetime_updates": "עדכון לכל החיים"
     }
   },
   "trust": {
-    "title": "Trusted by teams worldwide",
+    "title": "אמון על ידי קבוצות ברחבי העולם",
     "readers_count": "1,247 קוראים",
     "company_names": []
   },
@@ -195,113 +195,113 @@
       "buy_now_dash": "קנה עכשיו —",
       "view_modules": "צפה במודולים",
       "ssl_secure": "תשלום מאובטח ב-SSL",
-      "instant_download": "Instant Download",
-      "lifetime_access": "Lifetime Access",
-      "guarantee_days": "30-Day Guarantee",
-      "section_who": "// 01 — Who Is This For",
-      "is_this_for_you": "Is This Course For You?",
-      "perfect_for": "Perfect for you if:",
-      "p_struggle": "You struggle to make ends meet",
-      "p_cut_costs": "You want to cut costs without sacrificing quality of life",
+      "instant_download": "הורדה מיידית",
+      "lifetime_access": "גישה לכל החיים",
+      "guarantee_days": "הבטחת 30 יום",
+      "section_who": "01 - מי זה בשביל",
+      "is_this_for_you": "האם הקורס הזה בשבילך?",
+      "perfect_for": "מושלם בשבילך אם:",
+      "p_struggle": "אתה נאבק כדי לגמור את הסוף",
+      "p_cut_costs": "אתה רוצה לקצץ בעלויות מבלי להקריב איכות חיים",
       "p_consumerism": "Tired of consumerism and debt culture",
       "p_practical": "Looking for practical, time-tested methods",
       "p_future": "Want a solid financial future for your family",
-      "not_for": "Not for you if:",
+      "not_for": "לא בשבילך אם:",
       "n_quick": "Looking for get-rich-quick schemes",
       "n_habits": "Not willing to change spending habits",
       "n_quick_fix": "Prefer quick fixes over a solid path",
       "n_implement": "Not willing to implement what you learn",
       "n_advice": "Looking for personalized financial advice",
-      "section_learn": "// 02 — What You'll Learn",
-      "masters_secrets": "The Amish Masters' Secrets",
+      "section_learn": "02 – מה תלמד",
+      "masters_secrets": "סודות המאסטרים",
       "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
-      "section_author": "// 03 — The Author",
-      "behind_course": "Behind This Course",
-      "your_name": "Your Name Here",
+      "section_author": "03 – המחבר",
+      "behind_course": "מאחורי הקורס הזה",
+      "your_name": "שמך כאן",
       "researcher_author": "Researcher · Author · Traveler",
       "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
-      "section_content": "// 04 — Course Content",
-      "what_inside": "What You'll Find Inside",
-      "also_includes": "Also includes:",
+      "section_content": "המונחים: course content",
+      "what_inside": "מה תמצאו בפנים",
+      "also_includes": "כולל גם:",
       "inc_full_ebook": "Full eBook (PDF, ePub, Kindle)",
-      "inc_checklist": "Printable 30-day checklist",
-      "inc_excel": "Amish budget Excel sheet",
-      "inc_shopping": "Weekly shopping list template",
-      "inc_lifetime": "Lifetime member area access",
-      "inc_updates": "Free future updates",
-      "section_offer": "// 05 — The Offer",
-      "invest_yourself": "Invest in Yourself",
-      "launch_offer": "Launch Offer",
-      "complete_package": "Complete Package",
-      "course_value": "Course: $97",
-      "bonus_value": "Bonus: $27",
-      "one_time": "One-time payment — no subscription",
-      "launch_price": "Launch price — then $37",
-      "inc_course_full": "Full course (value $97)",
+      "inc_checklist": "רשימת 30 יום",
+      "inc_excel": "עדכון תקציב Excel",
+      "inc_shopping": "רשימת קניות שבועית",
+      "inc_lifetime": "גישה לכל החיים",
+      "inc_updates": "עדכונים עתידיים בחינם",
+      "section_offer": "05 – ההצעה",
+      "invest_yourself": "להשקיע בעצמך",
+      "launch_offer": "הצעת שיגור",
+      "complete_package": "חבילה שלמה",
+      "course_value": "קורס: 97 $",
+      "bonus_value": "בונוס: $27",
+      "one_time": "תשלום חד פעמי - אין מנוי",
+      "launch_price": "מחיר שיגור - 37 דולר",
+      "inc_course_full": "מחיר מלא (ערך $97)",
       "inc_ebook": "eBook PDF, ePub, Kindle",
-      "inc_checklist2": "Printable 30-day checklist",
-      "inc_excel2": "Amish budget Excel sheet",
-      "inc_access_updates": "Lifetime access + updates",
-      "inc_bonus_shopping": "BONUS: Weekly shopping list (value $27)",
+      "inc_checklist2": "רשימת 30 יום",
+      "inc_excel2": "עדכון תקציב Excel",
+      "inc_access_updates": "גישה לכל החיים + עדכונים",
+      "inc_bonus_shopping": "BONUS: רשימת קניות שבועית (ערך $27)",
       "unlock_now": "Unlock Access Now",
-      "guarantee_title": "30-Day Money-Back Guarantee",
+      "guarantee_title": "30 יום החזר כספי",
       "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
-      "section_testimonials": "// 06 — Testimonials",
-      "testimonial_text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
-      "testimonial_name": "Marco R.",
-      "testimonial_role": "Rome — early readers",
-      "section_faq": "// 07 — FAQ",
-      "faq_title": "Frequently Asked Questions",
-      "offer_valid": "Offer valid this week",
-      "final_cta": "Start Your Journey to Financial Freedom Today",
-      "final_sub": "Join hundreds of people who have already transformed their relationship with money.",
-      "unlock_dash": "Unlock Access —",
-      "guarantee_badge": "30-Day Guarantee",
-      "instant_access_badge": "Instant Access",
-      "lifetime_badge": "Lifetime Updates",
-      "rights_reserved": "All rights reserved.",
-      "privacy": "Privacy",
-      "terms": "Terms",
+      "section_testimonials": "06 - המלצות",
+      "testimonial_text": "הגשתי את שיטת התקציב של אמיש ובחודשיים חתכתי את ההוצאות שלי ב-35%. רשימת 30 הימים הייתה נקודת מפנה. סוף סוף קורס שבאמת עובד.",
+      "testimonial_name": "מרקו ר.",
+      "testimonial_role": "רומא - הקוראים הראשונים",
+      "section_faq": "07 - שאלות",
+      "faq_title": "שאלות נפוצות",
+      "offer_valid": "הצעה בתוקף השבוע",
+      "final_cta": "התחל את המסע שלך לחופש פיננסי היום",
+      "final_sub": "הצטרפו למאות אנשים שכבר שינו את מערכת היחסים שלהם בכסף.",
+      "unlock_dash": "Unlock Access -",
+      "guarantee_badge": "הבטחת 30 יום",
+      "instant_access_badge": "גישה מיידית",
+      "lifetime_badge": "עדכון לכל החיים",
+      "rights_reserved": "כל הזכויות שמורות.",
+      "privacy": "פרטיות פרטיות",
+      "terms": "תנאים",
       "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
-      "features": "Features",
-      "pricing": "Pricing",
-      "testimonials": "Testimonials",
-      "contact": "Contact",
-      "get_started": "Get Started",
-      "learn_more": "Learn More",
-      "member_area": "Member Area",
-      "back_to_landing": "Back to Landing",
-      "buy_now": "Buy Now",
+      "features": "תכונות",
+      "pricing": "מחירים",
+      "testimonials": "עדויות",
+      "contact": "צור קשר",
+      "get_started": "להתחיל",
+      "learn_more": "למד עוד",
+      "member_area": "אזור חבר",
+      "back_to_landing": "חזרה ל Landing",
+      "buy_now": "קנה עכשיו",
       "currency_symbol": "$",
-      "new_badge": "New",
-      "the_problem": "The Problem",
-      "our_story": "Our Story",
-      "what_learn": "What You'll Learn",
-      "course_lessons": "Course Lessons",
+      "new_badge": "חדש חדש חדש",
+      "the_problem": "הבעיה",
+      "our_story": "הסיפור שלנו",
+      "what_learn": "מה תלמד",
+      "course_lessons": "קורסים",
       "curriculum": "Curriculum",
-      "free_tier": "Free",
+      "free_tier": "חינם חינם",
       "pro_tier": "Pro",
       "per_month": "/mo",
-      "start_free": "Start Free",
-      "popular": "Popular",
-      "free_title": "To get started",
-      "pro_title": "To grow",
-      "trusted_by": "Trusted by teams worldwide",
-      "offer_badge": "Launch Offer",
-      "price_special": "Special launch price",
-      "buy_and_access": "Buy & Access Instantly",
-      "bestseller": "Best Seller",
-      "story_badge": "// The True Story",
-      "story_title": "My Experience Among the Amish",
-      "story_subtitle": "Three months in Pennsylvania, twelve families interviewed, an economic system that has worked for 300 years.",
-      "amish_life": "Amish Life",
-      "caption_1": "Daily life in the Amish community: simplicity, self-sufficiency, and financial wisdom passed down through generations.",
-      "caption_2": "The barter and exchange system that eliminates the need for cash and builds lasting trust relationships.",
-      "caption_3": "The Amish household economy: how a family lives on 60% less than the national average.",
-      "tag_1": "Economic Anthropology",
-      "tag_2": "Amish Studies",
-      "tag_3": "Financial Consulting",
-      "brand_name": "Courssy",
+      "start_free": "התחל חינם",
+      "popular": "פופולרי פופולרי",
+      "free_title": "להתחיל",
+      "pro_title": "לגדול",
+      "trusted_by": "אמון על ידי קבוצות ברחבי העולם",
+      "offer_badge": "הצעת שיגור",
+      "price_special": "מחיר שיגור מיוחד",
+      "buy_and_access": "קנה וגישה מיידית",
+      "bestseller": "המוכר הטוב ביותר",
+      "story_badge": "הסיפור האמיתי",
+      "story_title": "החוויה שלי בין האמיש",
+      "story_subtitle": "שלושה חודשים בפנסילבניה, 12 משפחות ראיין, מערכת כלכלית שעבדה במשך 300 שנה.",
+      "amish_life": "חיים Amish Life",
+      "caption_1": "חיי היומיום בקהילה האמישת: פשטות, חוסר יכולת עצמי, וחוכמה פיננסית עברה לאורך הדורות.",
+      "caption_2": "מערכת הברטר והחילופית שמבטלת את הצורך במזומנים ומתבססת על יחסי אמון לאורך זמן.",
+      "caption_3": "הכלכלה הביתית האמישת: איך משפחה חיה ב-60% פחות מהממוצע הלאומי.",
+      "tag_1": "אנתרופולוגיה כלכלית",
+      "tag_2": "מחקרים Amish",
+      "tag_3": "ייעוץ פיננסי",
+      "brand_name": "Corssy",
       "reviewer": "Marco R., early readers",
       "language_switch": "EN",
       "language_switch_en": "EN",
@@ -313,17 +313,17 @@
     }
   },
   "audience": {
-    "badge": "// 01 — Who Is This For",
-    "title": "Is This Course For You?",
-    "perfect_for": "Perfect for you if:",
+    "badge": "01 - מי זה בשביל",
+    "title": "האם הקורס הזה בשבילך?",
+    "perfect_for": "מושלם בשבילך אם:",
     "perfect_items": [
-      "You struggle to make ends meet",
-      "You want to cut costs without sacrificing quality of life",
+      "אתה נאבק כדי לגמור את הסוף",
+      "אתה רוצה לקצץ בעלויות מבלי להקריב איכות חיים",
       "Tired of consumerism and debt culture",
       "Looking for practical, time-tested methods",
       "Want a solid financial future for your family"
     ],
-    "not_for": "Not for you if:",
+    "not_for": "לא בשבילך אם:",
     "not_items": [
       "Looking for get-rich-quick schemes",
       "Not willing to change spending habits",
@@ -333,17 +333,17 @@
     ]
   },
   "course": {
-    "back_to_course": "Back to Landing",
+    "back_to_course": "חזרה ל Landing",
     "module_label": "Curriculum",
-    "now_playing": "Now playing",
-    "page_label": "Page",
-    "reading_progress": "Reading Progress",
-    "download_pdf": "Download PDF",
-    "chapter": "Chapter"
+    "now_playing": "עכשיו לשחק",
+    "page_label": "עמוד Page",
+    "reading_progress": "קריאה התקדמות",
+    "download_pdf": "הורד PDF",
+    "chapter": "פרק פרק פרק"
   },
   "lessons": {
-    "badge": "// 04 — Course Content",
-    "title": "What You'll Find Inside",
+    "badge": "המונחים: course content",
+    "title": "מה תמצאו בפנים",
     "items": []
   }
 }

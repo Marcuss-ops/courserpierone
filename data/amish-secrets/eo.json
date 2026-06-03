@@ -1,0 +1,344 @@
+{
+  "locale": "eo",
+  "seo": {
+    "title": "Amish Secrets: Kiel vivi kun ŝparaĵoj kaj administri monon",
+    "description": "Malkovru la sekretojn de la ŝparema vivo de la Amish-komunumo. Inkludas kompletajn videmodulojn kaj elŝuteblajn PDFojn.",
+    "ogImage": "/courses/amish-secrets/cover.png"
+  },
+  "nav": {
+    "brand": "Viaj sekretoj",
+    "features": "Plendoj",
+    "pricing": "Pricing",
+    "testimonials": "Testimonials",
+    "faq": "FAQ demandoj",
+    "contact": "Kontaktu kontakton",
+    "get_started": "Komencu komenci",
+    "learn_more": "Lernu pli",
+    "member_area": "Membroregiono",
+    "back_to_landing": "Reiri al Tero"
+  },
+  "hero": {
+    "badge": "Nova",
+    "title": "Amish Secrets: Kiel vivi kun ŝparaĵoj kaj administri monon",
+    "subtitle": "Malkovru la sekretojn de la ŝparema vivo de la Amish-komunumo. Inkludas kompletajn videmodulojn kaj elŝuteblajn PDFojn.",
+    "cta": "Komencu komenci",
+    "secondary_cta": "Lernu pli",
+    "price_label": "Speciala lanĉo prezo",
+    "one_time_payment": "Unufoja pago - neniu abono"
+  },
+  "problem": {
+    "badge": "La problemo",
+    "title": "Ĉu la fino de la monato sen iuj ŝparaĵoj? Moderna socio puŝas nin direkte al troa konsumo.",
+    "text": ""
+  },
+  "story": {
+    "badge": "Nia rakonto",
+    "title": "La mia Amenza tra glisa Amish",
+    "image_captions": [
+      "La vita quotidiana nella comunità Amish: semplicità, aŭtosufficienza e saggezza finaziaria.",
+      "Il sistema di bariatto e trompbio che elimina il bisogno di denaro contante.",
+      "L'economia domestica Amish: venu una famigliaj riesce vivere con il 60% in meno."
+    ],
+    "quote": "La amiŝoj vivas riĉajn kaj plenajn vivojn elspezante frakcion de kion ni pasigas. En ĉi tiu kurso ni rivelas kiel ili faras ĝin."
+  },
+  "author": {
+    "badge": "/ 03 - La verkinto",
+    "title": "Malantaŭ tiu kurso",
+    "name": "Alessandro Rinaldi",
+    "role": "Esploristo · aŭtoro",
+    "bio": "Mi vivis tri monatojn en Pensilvanio, intervjuis 12 amiŝojn, studis sian ekonomian sistemon. Neniu teorio, nur praktiko.",
+    "tags": [
+      "Saggezza Finanziaria",
+      "Vita Sostenibile",
+      "Educazione"
+    ]
+  },
+  "modules": {
+    "badge": "/ 02 - Kion vi lernos",
+    "title": "La sekretoj de la Amish Masters",
+    "description": "8 praktikaj moduloj kiuj turnas Amish-saĝecon en konkretajn agojn por via ĉiutaga vivo.",
+    "items": [
+      {
+        "title": "Amita Buĝeto",
+        "desc": "Vivu 30% malpli sen ofero."
+      },
+      {
+        "title": "Infinite Pantry",
+        "desc": "La manĝaĵo stokadmetodo kiu eliminas rubon."
+      },
+      {
+        "title": "Nula ŝuldo",
+        "desc": "La kadro por eliri el ŝuldo eterne."
+      },
+      {
+        "title": "Fix Ĉio",
+        "desc": "12 esencaj iloj por ripari vin."
+      },
+      {
+        "title": "Mono-Libera Interŝanĝo",
+        "desc": "Kiel aktivigi interŝanĝon."
+      },
+      {
+        "title": "Farmo al Table",
+        "desc": "Gvidisto al hejmĝardeno kaj nul-rubo kuirado."
+      },
+      {
+        "title": "Libera Energio",
+        "desc": "Kiel tranĉi servajn fakturojn je 50%."
+      },
+      {
+        "title": "30-taga plano",
+        "desc": "Tag-post-taga kontrollisto por transformi vian ekonomion."
+      }
+    ]
+  },
+  "includes": {
+    "title": "Ankaŭ inkludas:",
+    "items": [
+      "Plena eBook (PDF, ePub, Kindle)",
+      "Presebla 30-taga kontrollisto",
+      "Amish-buĝeto Excel tuko",
+      "Semajna butikumado",
+      "Viva membro-areo",
+      "Libera estonteco ĝisdatigoj"
+    ]
+  },
+  "testimonials": {
+    "badge": "/ 06 - Testimonials",
+    "title": "Testimonials",
+    "items": [
+      {
+        "text": "Mi aplikis la Amish buĝetan metodon kaj en du monatoj mi tranĉis miajn elspezojn je 35%. La 30-taga kontrollisto estis la turnopunkto. Kompreneble tio vere funkcias.",
+        "name": "Marco R.",
+        "role": "Romo - fruaj legantoj"
+      }
+    ]
+  },
+  "offer": {
+    "badge": "Lanĉo",
+    "title": "Investi en vi mem",
+    "complete_package": "Kompleta pakado",
+    "course_value": "Kurso: $97",
+    "bonus_value": "Bonus: $ 27",
+    "price_text": "",
+    "one_time": "Unufoja pago - neniu abono",
+    "launch_price": "Lanĉprezo - tiam 37",
+    "cta": "Malŝlosila Aliro Nun",
+    "guarantee_title": "30 Tago Mono-Back-Garantio",
+    "guarantee_text": "Provu ĝin dum 30 tagoj. Se vi ne ŝparas almenaŭ 100 USD, ni repagos la plenan kvanton. Neniuj demandoj, neniu havas.",
+    "includes": [
+      "Plena kurso (valoro 97)",
+      "eBook PDF, ePub, Kindle",
+      "Presebla 30-taga kontrollisto",
+      "Amish-buĝeto Excel tuko",
+      "Viva aliro + ĝisdatigoj",
+      "BONUS: semajna butikumadlisto (valoro 27"
+    ]
+  },
+  "faq": {
+    "badge": "/ 07 - FAQ",
+    "title": "Ofte demanditaj demandoj",
+    "offer_valid": "Propono valida ĉi-semajne",
+    "items": [
+      {
+        "q": "Kio estas inkluzivita?",
+        "a": "Vi ricevas la kompletan eBook en PDF, ePub, kaj Kindle formatoj. Plus dumviva aliro al ĉiuj estontaj ĝisdatigoj."
+      },
+      {
+        "q": "Ĉu ĝi estas en la angla?",
+        "a": "Jes, la kurso estas plene havebla en la angla."
+      },
+      {
+        "q": "Kio formato estas la kurso en?",
+        "a": "eLibro en PDF, ePub, kaj Kindle formatoj. Videoj estas en MP4-formato."
+      },
+      {
+        "q": "Kiam mi ricevas aliron?",
+        "a": "Tuj post pago."
+      },
+      {
+        "q": "Kio se mi ne estas kontenta?",
+        "a": "Vi estas protektita per nia 30-taga mono-dorsa garantio."
+      },
+      {
+        "q": "Kiom longe ĝi prenas?",
+        "a": "La kompleta programo daŭras 3-4 horojn."
+      }
+    ]
+  },
+  "final_cta": {
+    "title": "Komenci Vian Vojaĝon al Financa Libereco Hodiaŭ",
+    "subtitle": "Aliĝu centoj da homoj kiuj jam ŝanĝis sian rilaton kun mono.",
+    "badge": "Propono valida ĉi-semajne"
+  },
+  "footer": {
+    "rights_reserved": "Ĉiuj rajtoj rezervitaj.",
+    "privacy": "Privateco privateco",
+    "terms": "Kondiĉoj",
+    "legal_note": "Tio estas cifereca informa produkto. Rezultoj povas varii kaj dependi de persona engaĝiĝo. La amiŝoj-prezoj kaj teknikoj priskribitaj estas bazitaj sur etnografia esplorado kaj eble ne precize reflektas la nuntempajn praktikojn de ĉiuj amiŝoj.",
+    "badges": {
+      "guarantee": "30-taga garantio",
+      "instant_access": "Malantaŭa Aliro",
+      "lifetime_updates": "Vivaj ĝisdatigoj"
+    }
+  },
+  "trust": {
+    "title": "Fidata de teamoj tutmonde",
+    "readers_count": "1,247 legantoj",
+    "company_names": []
+  },
+  "ui": {
+    "labels": {
+      "instant_access": "Tuja aliro",
+      "buy_now_arrow": "Aĉetu nun",
+      "readers": "1,247 legantoj",
+      "buy_now_dash": "Aĉetu nun -",
+      "view_modules": "Vidu kiel moduloj",
+      "ssl_secure": "sekura SSL pago",
+      "instant_download": "Elŝutu tuj",
+      "lifetime_access": "Viva aliro",
+      "guarantee_days": "30-taga garantio",
+      "section_who": "1 Kiu estas tio por",
+      "is_this_for_you": "Ĉu tio estas por vi?",
+      "perfect_for": "Perfekta por vi se:",
+      "p_struggle": "Vi luktas por finojn",
+      "p_cut_costs": "Vi volas tranĉi kostojn sen oferi kvaliton de vivo",
+      "p_consumerism": "Vi estas laca de la konsumismo kaj ŝuldokulturo",
+      "p_practical": "Vi deziras praktikajn, temp-testitajn metodojn",
+      "p_future": "Vi volas konstrui solidan financan estontecon por via familio",
+      "not_for": "Ne por vi, se:",
+      "n_quick": "Vi serĉas Get-rich-quick-kabaloj",
+      "n_habits": "Vi ne volas ŝanĝi viajn elspezajn kutimojn",
+      "n_quick_fix": "Vi preferas rapidajn riparojn super solida fundamento",
+      "n_implement": "Vi ne volas efektivigi kion vi lernas",
+      "n_advice": "Vi serĉas personigitajn financajn konsilojn",
+      "section_learn": "/ 02 - Kion vi lernos",
+      "masters_secrets": "La sekretoj de la Amish Masters",
+      "modules_desc": "8 praktikaj moduloj kiuj turnas Amish-saĝecon en konkretajn agojn por via ĉiutaga vivo.",
+      "section_author": "/ 03 - La verkinto",
+      "behind_course": "Malantaŭ tiu kurso",
+      "your_name": "Via nomo ĉi tie",
+      "researcher_author": "Esploristo · aŭtoro",
+      "author_bio": "Mi vivis tri monatojn en Pensilvanio, intervjuis 12 amiŝojn, studis sian ekonomian sistemon. Neniu teorio, nur praktiko.",
+      "section_content": "/ 04 - Kurso Enhavo",
+      "what_inside": "Kion vi trovos interne",
+      "also_includes": "Ankaŭ inkludas:",
+      "inc_full_ebook": "Plena eBook (PDF, ePub, Kindle)",
+      "inc_checklist": "Presebla 30-taga kontrollisto",
+      "inc_excel": "Amish-buĝeto Excel tuko",
+      "inc_shopping": "Semajna butikumado",
+      "inc_lifetime": "Viva membro-areo",
+      "inc_updates": "Libera estonteco ĝisdatigoj",
+      "section_offer": "/ 05 - La propono",
+      "invest_yourself": "Investi en vi mem",
+      "launch_offer": "Lanĉo",
+      "complete_package": "Kompleta pakado",
+      "course_value": "Kurso: $97",
+      "bonus_value": "Bonus: $ 27",
+      "one_time": "Unufoja pago - neniu abono",
+      "launch_price": "Lanĉprezo - tiam 37",
+      "inc_course_full": "Plena kurso (valoro 97)",
+      "inc_ebook": "eBook PDF, ePub, Kindle",
+      "inc_checklist2": "Presebla 30-taga kontrollisto",
+      "inc_excel2": "Amish-buĝeto Excel tuko",
+      "inc_access_updates": "Viva aliro + ĝisdatigoj",
+      "inc_bonus_shopping": "BONUS: semajna butikumadlisto (valoro 27",
+      "unlock_now": "Malŝlosila Aliro Nun",
+      "guarantee_title": "30 Tago Mono-Back-Garantio",
+      "guarantee_text": "Provu ĝin dum 30 tagoj. Se vi ne ŝparas almenaŭ 100 USD, ni repagos la plenan kvanton. Neniuj demandoj, neniu havas.",
+      "section_testimonials": "/ 06 - Testimonials",
+      "testimonial_text": "Mi aplikis la Amish buĝetan metodon kaj en du monatoj mi tranĉis miajn elspezojn je 35%. La 30-taga kontrollisto estis la turnopunkto. Kompreneble tio vere funkcias.",
+      "testimonial_name": "Marco R.",
+      "testimonial_role": "Romo - fruaj legantoj",
+      "section_faq": "/ 07 - FAQ",
+      "faq_title": "Ofte demanditaj demandoj",
+      "offer_valid": "Propono valida ĉi-semajne",
+      "final_cta": "Komenci Vian Vojaĝon al Financa Libereco Hodiaŭ",
+      "final_sub": "Aliĝu centoj da homoj kiuj jam ŝanĝis sian rilaton kun mono.",
+      "unlock_dash": "Malŝlosilo -",
+      "guarantee_badge": "30-taga garantio",
+      "instant_access_badge": "Malantaŭa Aliro",
+      "lifetime_badge": "Vivaj ĝisdatigoj",
+      "rights_reserved": "Ĉiuj rajtoj rezervitaj.",
+      "privacy": "Privateco privateco",
+      "terms": "Kondiĉoj",
+      "legal_note": "Tio estas cifereca informa produkto. Rezultoj povas varii kaj dependi de persona engaĝiĝo. La amiŝoj-prezoj kaj teknikoj priskribitaj estas bazitaj sur etnografia esplorado kaj eble ne precize reflektas la nuntempajn praktikojn de ĉiuj amiŝoj.",
+      "features": "Plendoj",
+      "pricing": "Pricing",
+      "testimonials": "Testimonials",
+      "contact": "Kontaktu kontakton",
+      "get_started": "Komencu komenci",
+      "learn_more": "Lernu pli",
+      "member_area": "Membroregiono",
+      "back_to_landing": "Reiri al Tero",
+      "buy_now": "Aĉetu nun",
+      "currency_symbol": "$",
+      "new_badge": "Nova",
+      "the_problem": "La problemo",
+      "our_story": "Nia rakonto",
+      "what_learn": "Kion vi lernos",
+      "course_lessons": "Kurso Lecionoj",
+      "curriculum": "Kuraĝa",
+      "free_tier": "Libera Libera Libera Libero",
+      "pro_tier": "Proporcio",
+      "per_month": "/mo",
+      "start_free": "Komencu Libera",
+      "popular": "Populara popola",
+      "free_title": "komenci",
+      "pro_title": "Por kreski",
+      "trusted_by": "Fidata de teamoj tutmonde",
+      "offer_badge": "Lanĉo",
+      "price_special": "Speciala lanĉo prezo",
+      "buy_and_access": "Aĉetu & Aliro Tuj",
+      "bestseller": "Plej bona Seller",
+      "story_badge": "/ La Vera Rakonto",
+      "story_title": "Mia sperto inter la amiŝoj",
+      "story_subtitle": "Tri monatojn en Pensilvanio, dek du familioj intervjuis, ekonomian sistemon kiu laboris dum 300 jaroj.",
+      "amish_life": "Amish Life",
+      "caption_1": "Ĉiutaga vivo en la amiŝa komunumo: simpleco, aŭtarkio, kaj financa saĝeco pasis malsupren tra generacioj.",
+      "caption_2": "La interŝanĝo kaj interŝanĝsistemo kiu eliminas la bezonon de kontantmono kaj konstruas daŭrantajn fidorilatojn.",
+      "caption_3": "La amiŝa domanarekonomio: kiel familio vivas sur 60% malpli ol landaveraĝo.",
+      "tag_1": "Ekonomia Antropologio",
+      "tag_2": "Amitaj studoj",
+      "tag_3": "Financa konsulo",
+      "brand_name": "Courssy",
+      "reviewer": "Marco R., frua leganto",
+      "language_switch": "EN",
+      "language_switch_en": "EN"
+    }
+  },
+  "audience": {
+    "badge": "1 Kiu estas tio por",
+    "title": "Ĉu tio estas por vi?",
+    "perfect_for": "Perfekta por vi se:",
+    "perfect_items": [
+      "Vi luktas por finojn",
+      "Vi volas tranĉi kostojn sen oferi kvaliton de vivo",
+      "Vi estas laca de la konsumismo kaj ŝuldokulturo",
+      "Vi deziras praktikajn, temp-testitajn metodojn",
+      "Vi volas konstrui solidan financan estontecon por via familio"
+    ],
+    "not_for": "Ne por vi, se:",
+    "not_items": [
+      "Vi serĉas Get-rich-quick-kabaloj",
+      "Vi ne volas ŝanĝi viajn elspezajn kutimojn",
+      "Vi preferas rapidajn riparojn super solida fundamento",
+      "Vi ne volas efektivigi kion vi lernas",
+      "Vi serĉas personigitajn financajn konsilojn"
+    ]
+  },
+  "course": {
+    "back_to_course": "Reiri al Tero",
+    "module_label": "Kuraĝa",
+    "now_playing": "Nun ludante",
+    "page_label": "Paĝo",
+    "reading_progress": "Leganta Progreson",
+    "download_pdf": "Elŝutu PDF",
+    "chapter": "Ĉapitro Ĉapitro"
+  },
+  "lessons": {
+    "badge": "/ 04 - Kurso Enhavo",
+    "title": "Kion vi trovos interne",
+    "items": []
+  }
+}

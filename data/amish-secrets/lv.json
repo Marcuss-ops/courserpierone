@@ -1,0 +1,344 @@
+{
+  "locale": "lv",
+  "seo": {
+    "title": "Amish Secrets: Kā dzīvot ar uzkrājumiem un pārvaldīt naudu",
+    "description": "Atklāj amišu kopienas taupīgās dzīves noslēpumus. Ietver pilnu video moduļus un lejupielādējamus PDF.",
+    "ogImage": "/courses/amish-secrets/cover.png"
+  },
+  "nav": {
+    "brand": "Amišu noslēpumi",
+    "features": "Īpašības",
+    "pricing": "Cenu noteikšana",
+    "testimonials": "Atsauksmes",
+    "faq": "BUJ",
+    "contact": "Kontaktinformācija",
+    "get_started": "Sākt",
+    "learn_more": "Uzziniet vairāk",
+    "member_area": "Dalībvalsts",
+    "back_to_landing": "Atkal nosēšanās"
+  },
+  "hero": {
+    "badge": "Jauns",
+    "title": "Amish Secrets: Kā dzīvot ar uzkrājumiem un pārvaldīt naudu",
+    "subtitle": "Atklāj amišu kopienas taupīgās dzīves noslēpumus. Ietver pilnu video moduļus un lejupielādējamus PDF.",
+    "cta": "Sākt",
+    "secondary_cta": "Uzziniet vairāk",
+    "price_label": "Īpašā palaišanas cena",
+    "one_time_payment": "Vienreizējs maksājums – bez maksas"
+  },
+  "problem": {
+    "badge": "Problēma",
+    "title": "Noguris sasniegt mēneša beigām bez ietaupījumiem? Mūsdienu sabiedrība mūs mudina uz pārmērīgu patēriņu.",
+    "text": ""
+  },
+  "story": {
+    "badge": "Mūsu stāsts",
+    "title": "La mia esperienza tra gli Amish",
+    "image_captions": [
+      "La vita quotidiana nella comunità Amish: semplicità, autosuffienza e saggezza finanziaria.",
+      "Il sistema di baratto e scambio che elimina il bisogno di denaro contante.",
+      "L'economia domestica Amish: come una famiglia riesce a vivere con il 60% meno."
+    ],
+    "quote": "Amiši dzīvo bagātīgu un pilnvērtīgu dzīvi, tērējot nelielu daļu no tā, ko mēs tērējam. Šajā gaitā mēs atklājam, kā viņi to dara."
+  },
+  "author": {
+    "badge": "03 – Autors",
+    "title": "Aiz šī kursa",
+    "name": "Alesandro Rinaldi",
+    "role": "Pētnieks · Autors",
+    "bio": "[Pievienot savu stāstu šeit: Es dzīvoju 3 mēnešus Pensilvānijā, intervēja 12 amišu ģimenes, pētīja savu ekonomisko sistēmu. Nav teorijas, tikai prakse.]",
+    "tags": [
+      "Saggezza Finanziaria",
+      "Vita Sostenibile kdze",
+      "Educazione"
+    ]
+  },
+  "modules": {
+    "badge": "02 – Ko jūs uzzināsiet",
+    "title": "Amišu meistaru noslēpumi",
+    "description": "8 praktiski moduļi, kas pārvērš amiša gudrību konkrētās darbībās jūsu ikdienas dzīvē.",
+    "items": [
+      {
+        "title": "Milzīgs budžets",
+        "desc": "Dzīvo ar 30% mazāk bez upuriem."
+      },
+      {
+        "title": "Bezgalīgs pantrijs",
+        "desc": "Pārtikas uzglabāšanas metode, kas likvidē atkritumus."
+      },
+      {
+        "title": "Nulles parāds",
+        "desc": "Regulējums, lai izkļūtu no parādiem mūžīgi."
+      },
+      {
+        "title": "Noteikt visu",
+        "desc": "12 būtiski instrumenti, lai labotu sevi."
+      },
+      {
+        "title": "Birža bez naudas samaksas",
+        "desc": "Kā aktivizēt bartera tīklu."
+      },
+      {
+        "title": "Zivaudzētava uz tabulu",
+        "desc": "Rokasgrāmata mājas dārzkopībai un bezatkritumu ēdiena gatavošanai."
+      },
+      {
+        "title": "Brīvā enerģija",
+        "desc": "Kā samazināt komunālo pakalpojumu rēķinus par 50 %."
+      },
+      {
+        "title": "30 dienu plāns",
+        "desc": "Ikdienas kontrolsaraksts, lai pārveidotu savas finanses."
+      }
+    ]
+  },
+  "includes": {
+    "title": "Pie tiem pieder arī:",
+    "items": [
+      "Full eBook (PDF, ePub, Kindle)",
+      "Drukājams 30 dienu kontrolsaraksts",
+      "Amish budget Excel lapa",
+      "Nedēļas pirkumu saraksta sagatave",
+      "Mūža locekļa piekļuve zonai",
+      "Bezmaksas nākotnes atjauninājumi"
+    ]
+  },
+  "testimonials": {
+    "badge": "06 – Atsauksmes",
+    "title": "Atsauksmes",
+    "items": [
+      {
+        "text": "Es piemēroju amiša budžeta metodi un pēc diviem mēnešiem samazināju savus izdevumus par 35 %. 30 dienu kontrolsaraksts bija pagrieziena punkts. Beidzot kurss, kas patiešām darbojas.",
+        "name": "Marko R.",
+        "role": "Roma — agrīnie lasītāji"
+      }
+    ]
+  },
+  "offer": {
+    "badge": "Palaišanas piedāvājums",
+    "title": "Ieguldīsim paši sevi",
+    "complete_package": "Pakotne",
+    "course_value": "kurss: $97",
+    "bonus_value": "Bonuss: $27",
+    "price_text": "",
+    "one_time": "Vienreizējs maksājums – bez maksas",
+    "launch_price": "Starta cena – tad $37",
+    "cta": "Atslēgt piekļuvi tagad",
+    "guarantee_title": "30 dienu naudas atmaksas garantija",
+    "guarantee_text": "Izmēģiniet to 30 dienas. Ja neietaupīsiet vismaz 100 dolārus, mēs atmaksāsim visu summu. Nekādu jautājumu, nekādu problēmu.",
+    "includes": [
+      "Pilns kurss (vērtība $97)",
+      "EBook PDF, ePub, Kindle",
+      "Drukājams 30 dienu kontrolsaraksts",
+      "Amish budget Excel lapa",
+      "Piekļuve mūža garumā + atjauninājumi",
+      "BONUS: iknedēļas pirkumu saraksts (vērtība $27)"
+    ]
+  },
+  "faq": {
+    "badge": "07 – BUJ",
+    "title": "Bieži uzdotie jautājumi",
+    "offer_valid": "Piedāvājums derīgs šonedēļ",
+    "items": [
+      {
+        "q": "Kas tieši ir iekļauts?",
+        "a": "Jūs saņemsiet pilnīgu eBook PDF, ePub, un Kindle formātos. Plus mūža piekļuvi visiem nākotnes atjauninājumiem."
+      },
+      {
+        "q": "Vai tas ir angļu valodā?",
+        "a": "Jā, kurss ir pilnībā pieejams angļu valodā."
+      },
+      {
+        "q": "Kādā formātā notiek mācības?",
+        "a": "EBook PDF, ePub, un Kindle formātos. Video ir MP4 formātā."
+      },
+      {
+        "q": "Kad es varu piekļūt?",
+        "a": "Tūlīt pēc apmaksas."
+      },
+      {
+        "q": "Ja nu neesmu apmierināts?",
+        "a": "Jūs aizsargā mūsu 30 dienu naudas atmaksas garantija."
+      },
+      {
+        "q": "Cik ilgi?",
+        "a": "Pilna programma aizņem apmēram 3-4 stundas."
+      }
+    ]
+  },
+  "final_cta": {
+    "title": "Sāciet savu ceļojumu uz finansiālu brīvību šodien",
+    "subtitle": "Pievienojies simtiem cilvēku, kas jau ir pārveidojuši savas attiecības ar naudu.",
+    "badge": "Piedāvājums derīgs šonedēļ"
+  },
+  "footer": {
+    "rights_reserved": "Visas tiesības aizsargātas.",
+    "privacy": "Privātums",
+    "terms": "Termini",
+    "legal_note": "Tas ir digitāls informatīvs produkts. Rezultāti var atšķirties un ir atkarīgi no personiskās apņemšanās. Aprakstītās amiša cenas un paņēmieni ir balstīti uz etnogrāfiskiem pētījumiem un var precīzi neatspoguļot visu amiša kopienu mūsdienu praksi.",
+    "badges": {
+      "guarantee": "30 dienu garantija",
+      "instant_access": "Tūlītēja piekļuve",
+      "lifetime_updates": "Lifetime atjauninājumi"
+    }
+  },
+  "trust": {
+    "title": "Uzticas komandām visā pasaulē",
+    "readers_count": "1247 lasītāji",
+    "company_names": []
+  },
+  "ui": {
+    "labels": {
+      "instant_access": "Tūlītēja piekļuve",
+      "buy_now_arrow": "Pirkt tagad →",
+      "readers": "1247 lasītāji",
+      "buy_now_dash": "Pirkt tagad.",
+      "view_modules": "Skata moduļi",
+      "ssl_secure": "Drošs SSL maksājums",
+      "instant_download": "Tūlītēja lejupielāde",
+      "lifetime_access": "Piekļuve mūža garumā",
+      "guarantee_days": "30 dienu garantija",
+      "section_who": "01 – Kas to dara",
+      "is_this_for_you": "Vai šis kurss ir domāts jums?",
+      "perfect_for": "Ideāli piemērots, ja:",
+      "p_struggle": "Jums cīņa, lai padarītu galus tikties",
+      "p_cut_costs": "Jūs vēlaties samazināt izmaksas, neupurējot dzīves kvalitāti",
+      "p_consumerism": "Jūs esat noguris no patērnieciskuma un parādu kultūras",
+      "p_practical": "Jūs vēlaties praktiskas, laika pārbaudītas metodes",
+      "p_future": "Jūs vēlaties izveidot stabilu finansiālo nākotni savai ģimenei",
+      "not_for": "Nav jums, ja:",
+      "n_quick": "Jūs meklējat bagātīgas shēmas",
+      "n_habits": "Tu negribi mainīt savus tērēšanas paradumus",
+      "n_quick_fix": "Jūs vēlaties ātrus labojumus virs stabila pamata",
+      "n_implement": "Jūs neesat gatavs īstenot to, ko jūs uzzināt",
+      "n_advice": "Jūs meklējat personalizētas finanšu konsultācijas",
+      "section_learn": "02 – Ko jūs uzzināsiet",
+      "masters_secrets": "Amišu meistaru noslēpumi",
+      "modules_desc": "8 praktiski moduļi, kas pārvērš amiša gudrību konkrētās darbībās jūsu ikdienas dzīvē.",
+      "section_author": "03 – Autors",
+      "behind_course": "Aiz šī kursa",
+      "your_name": "Jūsu vārds šeit",
+      "researcher_author": "Pētnieks · Autors",
+      "author_bio": "[Pievienot savu stāstu šeit: Es dzīvoju 3 mēnešus Pensilvānijā, intervēja 12 amišu ģimenes, pētīja savu ekonomisko sistēmu. Nav teorijas, tikai prakse.]",
+      "section_content": "04 – Kursu saturs",
+      "what_inside": "Ko jūs atradīsiet iekšpusē",
+      "also_includes": "Pie tiem pieder arī:",
+      "inc_full_ebook": "Full eBook (PDF, ePub, Kindle)",
+      "inc_checklist": "Drukājams 30 dienu kontrolsaraksts",
+      "inc_excel": "Amish budget Excel lapa",
+      "inc_shopping": "Nedēļas pirkumu saraksta sagatave",
+      "inc_lifetime": "Mūža locekļa piekļuve zonai",
+      "inc_updates": "Bezmaksas nākotnes atjauninājumi",
+      "section_offer": "05 – Piedāvājums",
+      "invest_yourself": "Ieguldīsim paši sevi",
+      "launch_offer": "Palaišanas piedāvājums",
+      "complete_package": "Pakotne",
+      "course_value": "kurss: $97",
+      "bonus_value": "Bonuss: $27",
+      "one_time": "Vienreizējs maksājums – bez maksas",
+      "launch_price": "Starta cena – tad $37",
+      "inc_course_full": "Pilns kurss (vērtība $97)",
+      "inc_ebook": "EBook PDF, ePub, Kindle",
+      "inc_checklist2": "Drukājams 30 dienu kontrolsaraksts",
+      "inc_excel2": "Amish budget Excel lapa",
+      "inc_access_updates": "Piekļuve mūža garumā + atjauninājumi",
+      "inc_bonus_shopping": "BONUS: iknedēļas pirkumu saraksts (vērtība $27)",
+      "unlock_now": "Atslēgt piekļuvi tagad",
+      "guarantee_title": "30 dienu naudas atmaksas garantija",
+      "guarantee_text": "Izmēģiniet to 30 dienas. Ja neietaupīsiet vismaz 100 dolārus, mēs atmaksāsim visu summu. Nekādu jautājumu, nekādu problēmu.",
+      "section_testimonials": "06 – Atsauksmes",
+      "testimonial_text": "Es piemēroju amiša budžeta metodi un pēc diviem mēnešiem samazināju savus izdevumus par 35 %. 30 dienu kontrolsaraksts bija pagrieziena punkts. Beidzot kurss, kas patiešām darbojas.",
+      "testimonial_name": "Marko R.",
+      "testimonial_role": "Roma — agrīnie lasītāji",
+      "section_faq": "07 – BUJ",
+      "faq_title": "Bieži uzdotie jautājumi",
+      "offer_valid": "Piedāvājums derīgs šonedēļ",
+      "final_cta": "Sāciet savu ceļojumu uz finansiālu brīvību šodien",
+      "final_sub": "Pievienojies simtiem cilvēku, kas jau ir pārveidojuši savas attiecības ar naudu.",
+      "unlock_dash": "Atbloķēt piekļuvi –",
+      "guarantee_badge": "30 dienu garantija",
+      "instant_access_badge": "Tūlītēja piekļuve",
+      "lifetime_badge": "Lifetime atjauninājumi",
+      "rights_reserved": "Visas tiesības aizsargātas.",
+      "privacy": "Privātums",
+      "terms": "Termini",
+      "legal_note": "Tas ir digitāls informatīvs produkts. Rezultāti var atšķirties un ir atkarīgi no personiskās apņemšanās. Aprakstītās amiša cenas un paņēmieni ir balstīti uz etnogrāfiskiem pētījumiem un var precīzi neatspoguļot visu amiša kopienu mūsdienu praksi.",
+      "features": "Īpašības",
+      "pricing": "Cenu noteikšana",
+      "testimonials": "Atsauksmes",
+      "contact": "Kontaktinformācija",
+      "get_started": "Sākt",
+      "learn_more": "Uzziniet vairāk",
+      "member_area": "Dalībvalsts",
+      "back_to_landing": "Atkal nosēšanās",
+      "buy_now": "Pirkt tagad",
+      "currency_symbol": "$",
+      "new_badge": "Jauns",
+      "the_problem": "Problēma",
+      "our_story": "Mūsu stāsts",
+      "what_learn": "Ko tu uzzināsi",
+      "course_lessons": "Kursa stundas",
+      "curriculum": "Mācību programma",
+      "free_tier": "Bez nodokļa",
+      "pro_tier": "Pro",
+      "per_month": "/mo",
+      "start_free": "Palaist brīvs",
+      "popular": "Populārs",
+      "free_title": "Lai sāktu",
+      "pro_title": "Augt",
+      "trusted_by": "Uzticas komandām visā pasaulē",
+      "offer_badge": "Palaišanas piedāvājums",
+      "price_special": "Īpašā palaišanas cena",
+      "buy_and_access": "Tūlīt pat iegādāties un piekļūt",
+      "bestseller": "Labākais pārdevējs",
+      "story_badge": "Patiesais stāsts",
+      "story_title": "Mana pieredze starp amišiem",
+      "story_subtitle": "Trīs mēnešus Pensilvānijas štatā intervēja divpadsmit ģimenes, ekonomisko sistēmu, kas darbojas 300 gadus.",
+      "amish_life": "Amiša dzīve",
+      "caption_1": "Ikdienas dzīve amišu kopienā: vienkāršība, pašpietiekamība, un finanšu gudrība pārgāja cauri paaudzēm.",
+      "caption_2": "Bartera un apmaiņas sistēma, kas novērš nepieciešamību pēc naudas un veido ilgstošu uzticību attiecības.",
+      "caption_3": "Amišu mājsaimniecību ekonomika: kā ģimene dzīvo par 60 % mazāk nekā valsts vidējais rādītājs.",
+      "tag_1": "Ekonomiskā antropoloģija",
+      "tag_2": "Amish pētījumi",
+      "tag_3": "Finanšu konsultācijas",
+      "brand_name": "Kursors",
+      "reviewer": "Marko R., agrīnais lasītājs",
+      "language_switch": "EN",
+      "language_switch_en": "EN"
+    }
+  },
+  "audience": {
+    "badge": "01 – Kas to dara",
+    "title": "Vai šis kurss ir domāts jums?",
+    "perfect_for": "Ideāli piemērots, ja:",
+    "perfect_items": [
+      "Jums cīņa, lai padarītu galus tikties",
+      "Jūs vēlaties samazināt izmaksas, neupurējot dzīves kvalitāti",
+      "Jūs esat noguris no patērnieciskuma un parādu kultūras",
+      "Jūs vēlaties praktiskas, laika pārbaudītas metodes",
+      "Jūs vēlaties izveidot stabilu finansiālo nākotni savai ģimenei"
+    ],
+    "not_for": "Nav jums, ja:",
+    "not_items": [
+      "Jūs meklējat bagātīgas shēmas",
+      "Tu negribi mainīt savus tērēšanas paradumus",
+      "Jūs vēlaties ātrus labojumus virs stabila pamata",
+      "Jūs neesat gatavs īstenot to, ko jūs uzzināt",
+      "Jūs meklējat personalizētas finanšu konsultācijas"
+    ]
+  },
+  "course": {
+    "back_to_course": "Atkal nosēšanās",
+    "module_label": "Mācību programma",
+    "now_playing": "Šobrīd spēlē",
+    "page_label": "Lappuse",
+    "reading_progress": "Lasīšana",
+    "download_pdf": "Lejupielādēt PDF",
+    "chapter": "Nodaļa"
+  },
+  "lessons": {
+    "badge": "04 – Kursu saturs",
+    "title": "Ko jūs atradīsiet iekšpusē",
+    "items": []
+  }
+}

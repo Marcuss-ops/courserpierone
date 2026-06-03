@@ -6,44 +6,44 @@
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
-    "brand": "Amish secrets",
-    "features": "Features",
-    "pricing": "Pricing",
-    "testimonials": "Testimonials",
-    "faq": "FAQ",
-    "contact": "Contact",
-    "get_started": "Get Started",
-    "learn_more": "Learn More",
-    "member_area": "Member Area",
-    "back_to_landing": "Back to Landing"
+    "brand": "Amish geheimen",
+    "features": "Kenmerken",
+    "pricing": "Prijzen",
+    "testimonials": "Getuigenissen",
+    "faq": "Veelgestelde vragen",
+    "contact": "Contactpersoon",
+    "get_started": "Starten",
+    "learn_more": "Meer informatie",
+    "member_area": "Lidstaat",
+    "back_to_landing": "Terug naar Landing"
   },
   "hero": {
-    "badge": "New",
+    "badge": "Nieuw",
     "title": "Amish Secrets: Hoe je zuinig leeft en geld beheert",
     "subtitle": "Ontdek de geheimen van een sober leven van de Amish-gemeenschap. Inclusief complete videomodules en downloadbare PDF's.",
-    "cta": "Get Started",
-    "secondary_cta": "Learn More",
-    "price_label": "Special launch price",
-    "one_time_payment": "One-time payment — no subscription"
+    "cta": "Starten",
+    "secondary_cta": "Meer informatie",
+    "price_label": "Speciale lanceerprijs",
+    "one_time_payment": "Eenmalige betaling geen abonnement"
   },
   "problem": {
-    "badge": "The Problem",
+    "badge": "Het probleem",
     "title": "Ben je het zat om aan het einde van de maand zonder spaargeld te zitten? De moderne samenleving pusht ons tot overmatige consumptie.",
     "text": ""
   },
   "story": {
-    "badge": "Our Story",
-    "title": "La mia esperienza tra gli Amish",
+    "badge": "Ons verhaal",
+    "title": "La mia esérienza tra gli Amish",
     "image_captions": [
       "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria.",
-      "Il sistema di baratto e scambio che elimina il bisogno di denaro contante.",
-      "L'economia domestica Amish: come una famiglia riesce a vivere con il 60% in meno."
+      "Il sistema di Baratto e scambio che elimina il bisogno di denaro contante.",
+      "L'economia domestica Amish: kom een famiglia riesce a vivere con il 60% in meno."
     ],
     "quote": "De Amish leiden rijke en vervullende levens terwijl ze een fractie uitgeven van wat wij uitgeven. In deze cursus onthullen we hoe ze dat doen."
   },
   "author": {
-    "badge": "// 03 — The Author",
-    "title": "Behind This Course",
+    "badge": "// 03 De auteur",
+    "title": "Achter deze cursus",
     "name": "Alessandro Rinaldi",
     "role": "Researcher · Author · Traveler",
     "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
@@ -54,136 +54,136 @@
     ]
   },
   "modules": {
-    "badge": "// 02 — What You'll Learn",
+    "badge": "# # What You'll Learn",
     "title": "The Amish Masters' Secrets",
     "description": "8 practical modules that turn Amish wisdom into concrete actions.",
     "items": [
       {
-        "title": "Amish Budget",
-        "desc": "Live on 30% less without sacrifice."
+        "title": "Amish-begroting",
+        "desc": "Leef van 30% minder zonder opoffering."
       },
       {
-        "title": "Infinite Pantry",
-        "desc": "The food storage method that eliminates waste."
+        "title": "Oneindige voorraad",
+        "desc": "De voedselopslagmethode die afval elimineert."
       },
       {
-        "title": "Zero Debt",
-        "desc": "The framework to get out of debt forever."
+        "title": "Nulschuld",
+        "desc": "Het kader om voor altijd uit de schulden te komen."
       },
       {
-        "title": "Fix Everything",
-        "desc": "12 essential tools to repair yourself."
+        "title": "Alles herstellen",
+        "desc": "12 essentiële gereedschappen om jezelf te repareren."
       },
       {
-        "title": "Money-Free Exchange",
-        "desc": "How to activate a barter network."
+        "title": "Geld-vrije beurs",
+        "desc": "Hoe een ruilhandel netwerk te activeren."
       },
       {
-        "title": "Farm to Table",
-        "desc": "Guide to home gardening and zero-waste cooking."
+        "title": "Tabel",
+        "desc": "Gids voor thuis tuinieren en nul-afval koken."
       },
       {
-        "title": "Free Energy",
-        "desc": "How to cut utility bills by 50%."
+        "title": "Vrije energie",
+        "desc": "Hoe te besparen nut rekeningen met 50%."
       },
       {
-        "title": "30-Day Plan",
-        "desc": "Day-by-day checklist to transform your finances."
+        "title": "30 dagen",
+        "desc": "Dag-voor-dag checklist om uw financiën te transformeren."
       }
     ]
   },
   "includes": {
-    "title": "Also includes:",
+    "title": "Omvat ook:",
     "items": [
-      "Full eBook (PDF, ePub, Kindle)",
-      "Printable 30-day checklist",
+      "Volledig eBook (PDF, ePub, Kindle)",
+      "30-daagse checklist afdrukken",
       "Amish budget Excel sheet",
-      "Weekly shopping list template",
-      "Lifetime member area access",
-      "Free future updates"
+      "Wekelijkse winkellijst template",
+      "Toegang tot het lifetime-lidgebied",
+      "Gratis toekomstige updates"
     ]
   },
   "testimonials": {
-    "badge": "// 06 — Testimonials",
-    "title": "Testimonials",
+    "badge": "// 06 Getuigenissen",
+    "title": "Getuigenissen",
     "items": [
       {
-        "text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
+        "text": "Ik heb de Amish-begrotingsmethode toegepast en binnen twee maanden heb ik mijn uitgaven met 35% verlaagd. De 30 dagen checklist was het keerpunt. Eindelijk een cursus die echt werkt.",
         "name": "Marco R.",
-        "role": "Rome — early readers"
+        "role": "Rome: vroege lezers"
       }
     ]
   },
   "offer": {
-    "badge": "Launch Offer",
-    "title": "Invest in Yourself",
-    "complete_package": "Complete Package",
-    "course_value": "Course: $97",
+    "badge": "Aanbieding starten",
+    "title": "Investeer in jezelf",
+    "complete_package": "Pakket compleet",
+    "course_value": "Cursus: $97",
     "bonus_value": "Bonus: $27",
     "price_text": "",
-    "one_time": "One-time payment — no subscription",
-    "launch_price": "Launch price — then $37",
-    "cta": "Unlock Access Now",
-    "guarantee_title": "30-Day Money-Back Guarantee",
+    "one_time": "Eenmalige betaling geen abonnement",
+    "launch_price": "Lancering prijs dan $37",
+    "cta": "Toegang nu ontgrendelen",
+    "guarantee_title": "30 dagen geld-terug garantie",
     "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
     "includes": [
-      "Full course (value $97)",
+      "Volledige cursus (waarde $97)",
       "eBook PDF, ePub, Kindle",
-      "Printable 30-day checklist",
+      "30-daagse checklist afdrukken",
       "Amish budget Excel sheet",
-      "Lifetime access + updates",
-      "BONUS: Weekly shopping list (value $27)"
+      "Levenslange toegang + updates",
+      "Wekelijkse boodschappenlijst (waarde $27)"
     ]
   },
   "faq": {
-    "badge": "// 07 — FAQ",
-    "title": "Frequently Asked Questions",
-    "offer_valid": "Offer valid this week",
+    "badge": "Veelgestelde vragen",
+    "title": "Veelgestelde vragen",
+    "offer_valid": "Aanbieding geldig deze week",
     "items": [
       {
-        "q": "What exactly is included?",
-        "a": "You get the complete eBook in PDF, ePub, and Kindle formats. Plus lifetime access to all future updates."
+        "q": "Wat is er precies inbegrepen?",
+        "a": "U krijgt het volledige eBook in PDF, ePub en Kindle formaten. Plus toegang tot alle toekomstige updates."
       },
       {
-        "q": "Is it in English?",
-        "a": "Yes, the course is fully available in English."
+        "q": "Is het in het Engels?",
+        "a": "Ja, de cursus is volledig beschikbaar in het Engels."
       },
       {
-        "q": "What format is the course in?",
-        "a": "eBook in PDF, ePub, and Kindle formats. Videos are in MP4 format."
+        "q": "In welk formaat is de cursus?",
+        "a": "eBook in PDF, ePub en Kindle formaten. Video's zijn in MP4-formaat."
       },
       {
-        "q": "When do I get access?",
-        "a": "Immediately after payment."
+        "q": "Wanneer krijg ik toegang?",
+        "a": "Onmiddellijk na betaling."
       },
       {
-        "q": "What if I'm not satisfied?",
-        "a": "You're protected by our 30-day money-back guarantee."
+        "q": "Wat als ik niet tevreden ben?",
+        "a": "Je bent beschermd door onze 30-dagen geld-terug garantie."
       },
       {
-        "q": "How long does it take?",
-        "a": "The complete program takes about 3-4 hours."
+        "q": "Hoe lang duurt het?",
+        "a": "Het volledige programma duurt ongeveer 3-4 uur."
       }
     ]
   },
   "final_cta": {
-    "title": "Start Your Journey to Financial Freedom Today",
-    "subtitle": "Join hundreds of people who have already transformed their relationship with money.",
-    "badge": "Offer valid this week"
+    "title": "Start uw reis naar financiële vrijheid vandaag",
+    "subtitle": "Sluit je aan bij honderden mensen die hun relatie met geld al hebben veranderd.",
+    "badge": "Aanbieding geldig deze week"
   },
   "footer": {
-    "rights_reserved": "All rights reserved.",
+    "rights_reserved": "Alle rechten voorbehouden.",
     "privacy": "Privacy",
-    "terms": "Terms",
+    "terms": "Voorwaarden",
     "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
     "badges": {
-      "guarantee": "30-Day Guarantee",
-      "instant_access": "Instant Access",
-      "lifetime_updates": "Lifetime Updates"
+      "guarantee": "30 dagen garantie",
+      "instant_access": "Onmiddellijke toegang",
+      "lifetime_updates": "Lifetime updates"
     }
   },
   "trust": {
-    "title": "Trusted by teams worldwide",
+    "title": "Vertrouwd door teams wereldwijd",
     "readers_count": "1.247 lezers",
     "company_names": []
   },
@@ -195,112 +195,112 @@
       "buy_now_dash": "Koop Nu —",
       "view_modules": "Bekijk de modules",
       "ssl_secure": "Veilige SSL-betaling",
-      "instant_download": "Instant Download",
-      "lifetime_access": "Lifetime Access",
-      "guarantee_days": "30-Day Guarantee",
-      "section_who": "// 01 — Who Is This For",
-      "is_this_for_you": "Is This Course For You?",
-      "perfect_for": "Perfect for you if:",
-      "p_struggle": "You struggle to make ends meet",
-      "p_cut_costs": "You want to cut costs without sacrificing quality of life",
+      "instant_download": "Direct downloaden",
+      "lifetime_access": "Levenslange toegang",
+      "guarantee_days": "30 dagen garantie",
+      "section_who": "# 01 # Wie is dit voor",
+      "is_this_for_you": "Is deze cursus voor jou?",
+      "perfect_for": "Perfect voor u als:",
+      "p_struggle": "Je worstelt om de eindjes aan elkaar te knopen",
+      "p_cut_costs": "U wilt kosten besparen zonder de kwaliteit van leven op te offeren",
       "p_consumerism": "Tired of consumerism and debt culture",
       "p_practical": "Looking for practical, time-tested methods",
       "p_future": "Want a solid financial future for your family",
-      "not_for": "Not for you if:",
+      "not_for": "Niet voor jou als:",
       "n_quick": "Looking for get-rich-quick schemes",
       "n_habits": "Not willing to change spending habits",
       "n_quick_fix": "Prefer quick fixes over a solid path",
       "n_implement": "Not willing to implement what you learn",
       "n_advice": "Looking for personalized financial advice",
-      "section_learn": "// 02 — What You'll Learn",
+      "section_learn": "# # What You'll Learn",
       "masters_secrets": "The Amish Masters' Secrets",
       "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
-      "section_author": "// 03 — The Author",
-      "behind_course": "Behind This Course",
-      "your_name": "Your Name Here",
+      "section_author": "// 03 De auteur",
+      "behind_course": "Achter deze cursus",
+      "your_name": "Uw naam hier",
       "researcher_author": "Researcher · Author · Traveler",
       "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
-      "section_content": "// 04 — Course Content",
-      "what_inside": "What You'll Find Inside",
-      "also_includes": "Also includes:",
-      "inc_full_ebook": "Full eBook (PDF, ePub, Kindle)",
-      "inc_checklist": "Printable 30-day checklist",
+      "section_content": "// 04 Cursusinhoud",
+      "what_inside": "Wat je binnen vindt",
+      "also_includes": "Omvat ook:",
+      "inc_full_ebook": "Volledig eBook (PDF, ePub, Kindle)",
+      "inc_checklist": "30-daagse checklist afdrukken",
       "inc_excel": "Amish budget Excel sheet",
-      "inc_shopping": "Weekly shopping list template",
-      "inc_lifetime": "Lifetime member area access",
-      "inc_updates": "Free future updates",
-      "section_offer": "// 05 — The Offer",
-      "invest_yourself": "Invest in Yourself",
-      "launch_offer": "Launch Offer",
-      "complete_package": "Complete Package",
-      "course_value": "Course: $97",
+      "inc_shopping": "Wekelijkse winkellijst template",
+      "inc_lifetime": "Toegang tot het lifetime-lidgebied",
+      "inc_updates": "Gratis toekomstige updates",
+      "section_offer": "# 05 # The Offer",
+      "invest_yourself": "Investeer in jezelf",
+      "launch_offer": "Aanbieding starten",
+      "complete_package": "Pakket compleet",
+      "course_value": "Cursus: $97",
       "bonus_value": "Bonus: $27",
-      "one_time": "One-time payment — no subscription",
-      "launch_price": "Launch price — then $37",
-      "inc_course_full": "Full course (value $97)",
+      "one_time": "Eenmalige betaling geen abonnement",
+      "launch_price": "Lancering prijs dan $37",
+      "inc_course_full": "Volledige cursus (waarde $97)",
       "inc_ebook": "eBook PDF, ePub, Kindle",
-      "inc_checklist2": "Printable 30-day checklist",
+      "inc_checklist2": "30-daagse checklist afdrukken",
       "inc_excel2": "Amish budget Excel sheet",
-      "inc_access_updates": "Lifetime access + updates",
-      "inc_bonus_shopping": "BONUS: Weekly shopping list (value $27)",
-      "unlock_now": "Unlock Access Now",
-      "guarantee_title": "30-Day Money-Back Guarantee",
+      "inc_access_updates": "Levenslange toegang + updates",
+      "inc_bonus_shopping": "Wekelijkse boodschappenlijst (waarde $27)",
+      "unlock_now": "Toegang nu ontgrendelen",
+      "guarantee_title": "30 dagen geld-terug garantie",
       "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
-      "section_testimonials": "// 06 — Testimonials",
-      "testimonial_text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
+      "section_testimonials": "// 06 Getuigenissen",
+      "testimonial_text": "Ik heb de Amish-begrotingsmethode toegepast en binnen twee maanden heb ik mijn uitgaven met 35% verlaagd. De 30 dagen checklist was het keerpunt. Eindelijk een cursus die echt werkt.",
       "testimonial_name": "Marco R.",
-      "testimonial_role": "Rome — early readers",
-      "section_faq": "// 07 — FAQ",
-      "faq_title": "Frequently Asked Questions",
-      "offer_valid": "Offer valid this week",
-      "final_cta": "Start Your Journey to Financial Freedom Today",
-      "final_sub": "Join hundreds of people who have already transformed their relationship with money.",
-      "unlock_dash": "Unlock Access —",
-      "guarantee_badge": "30-Day Guarantee",
-      "instant_access_badge": "Instant Access",
-      "lifetime_badge": "Lifetime Updates",
-      "rights_reserved": "All rights reserved.",
+      "testimonial_role": "Rome: vroege lezers",
+      "section_faq": "Veelgestelde vragen",
+      "faq_title": "Veelgestelde vragen",
+      "offer_valid": "Aanbieding geldig deze week",
+      "final_cta": "Start uw reis naar financiële vrijheid vandaag",
+      "final_sub": "Sluit je aan bij honderden mensen die hun relatie met geld al hebben veranderd.",
+      "unlock_dash": "Toegang ontgrendelen",
+      "guarantee_badge": "30 dagen garantie",
+      "instant_access_badge": "Onmiddellijke toegang",
+      "lifetime_badge": "Lifetime updates",
+      "rights_reserved": "Alle rechten voorbehouden.",
       "privacy": "Privacy",
-      "terms": "Terms",
+      "terms": "Voorwaarden",
       "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
-      "features": "Features",
-      "pricing": "Pricing",
-      "testimonials": "Testimonials",
-      "contact": "Contact",
-      "get_started": "Get Started",
-      "learn_more": "Learn More",
-      "member_area": "Member Area",
-      "back_to_landing": "Back to Landing",
-      "buy_now": "Buy Now",
+      "features": "Kenmerken",
+      "pricing": "Prijzen",
+      "testimonials": "Getuigenissen",
+      "contact": "Contactpersoon",
+      "get_started": "Starten",
+      "learn_more": "Meer informatie",
+      "member_area": "Lidstaat",
+      "back_to_landing": "Terug naar Landing",
+      "buy_now": "Nu kopen",
       "currency_symbol": "$",
-      "new_badge": "New",
-      "the_problem": "The Problem",
-      "our_story": "Our Story",
-      "what_learn": "What You'll Learn",
-      "course_lessons": "Course Lessons",
+      "new_badge": "Nieuw",
+      "the_problem": "Het probleem",
+      "our_story": "Ons verhaal",
+      "what_learn": "Wat je zult leren",
+      "course_lessons": "Cursus lessen",
       "curriculum": "Curriculum",
-      "free_tier": "Free",
+      "free_tier": "Vrij",
       "pro_tier": "Pro",
       "per_month": "/mo",
-      "start_free": "Start Free",
-      "popular": "Popular",
-      "free_title": "To get started",
-      "pro_title": "To grow",
-      "trusted_by": "Trusted by teams worldwide",
-      "offer_badge": "Launch Offer",
-      "price_special": "Special launch price",
-      "buy_and_access": "Buy & Access Instantly",
-      "bestseller": "Best Seller",
-      "story_badge": "// The True Story",
-      "story_title": "My Experience Among the Amish",
-      "story_subtitle": "Three months in Pennsylvania, twelve families interviewed, an economic system that has worked for 300 years.",
+      "start_free": "Vrij beginnen",
+      "popular": "Populair",
+      "free_title": "Om te beginnen",
+      "pro_title": "Groeien",
+      "trusted_by": "Vertrouwd door teams wereldwijd",
+      "offer_badge": "Aanbieding starten",
+      "price_special": "Speciale lanceerprijs",
+      "buy_and_access": "Koop & Access direct",
+      "bestseller": "Beste verkoper",
+      "story_badge": "Het ware verhaal",
+      "story_title": "Mijn ervaring onder de Amish",
+      "story_subtitle": "Drie maanden in Pennsylvania, twaalf gezinnen geïnterviewd, een economisch systeem dat al 300 jaar werkt.",
       "amish_life": "Amish Life",
-      "caption_1": "Daily life in the Amish community: simplicity, self-sufficiency, and financial wisdom passed down through generations.",
-      "caption_2": "The barter and exchange system that eliminates the need for cash and builds lasting trust relationships.",
-      "caption_3": "The Amish household economy: how a family lives on 60% less than the national average.",
-      "tag_1": "Economic Anthropology",
+      "caption_1": "Dagelijks leven in de Amish gemeenschap: eenvoud, zelfvoorziening en financiële wijsheid doorgegeven door generaties.",
+      "caption_2": "De ruilhandel en uitwisseling systeem dat elimineert de behoefte aan contant geld en bouwt duurzame vertrouwen relaties.",
+      "caption_3": "De Amish huishoudens economie: hoe een gezin leeft op 60% minder dan het nationale gemiddelde.",
+      "tag_1": "Economische antropologie",
       "tag_2": "Amish Studies",
-      "tag_3": "Financial Consulting",
+      "tag_3": "Financiële raadpleging",
       "brand_name": "Courssy",
       "reviewer": "Marco R., early readers",
       "language_switch": "EN",
@@ -313,17 +313,17 @@
     }
   },
   "audience": {
-    "badge": "// 01 — Who Is This For",
-    "title": "Is This Course For You?",
-    "perfect_for": "Perfect for you if:",
+    "badge": "# 01 # Wie is dit voor",
+    "title": "Is deze cursus voor jou?",
+    "perfect_for": "Perfect voor u als:",
     "perfect_items": [
-      "You struggle to make ends meet",
-      "You want to cut costs without sacrificing quality of life",
+      "Je worstelt om de eindjes aan elkaar te knopen",
+      "U wilt kosten besparen zonder de kwaliteit van leven op te offeren",
       "Tired of consumerism and debt culture",
       "Looking for practical, time-tested methods",
       "Want a solid financial future for your family"
     ],
-    "not_for": "Not for you if:",
+    "not_for": "Niet voor jou als:",
     "not_items": [
       "Looking for get-rich-quick schemes",
       "Not willing to change spending habits",
@@ -333,17 +333,17 @@
     ]
   },
   "course": {
-    "back_to_course": "Back to Landing",
+    "back_to_course": "Terug naar Landing",
     "module_label": "Curriculum",
-    "now_playing": "Now playing",
-    "page_label": "Page",
-    "reading_progress": "Reading Progress",
-    "download_pdf": "Download PDF",
-    "chapter": "Chapter"
+    "now_playing": "Nu spelen",
+    "page_label": "Bladzijde",
+    "reading_progress": "Voortgang lezen",
+    "download_pdf": "PDF downloaden",
+    "chapter": "Hoofdstuk"
   },
   "lessons": {
-    "badge": "// 04 — Course Content",
-    "title": "What You'll Find Inside",
+    "badge": "// 04 Cursusinhoud",
+    "title": "Wat je binnen vindt",
     "items": []
   }
 }

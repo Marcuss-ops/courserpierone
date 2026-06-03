@@ -1,0 +1,344 @@
+{
+  "locale": "sk",
+  "seo": {
+    "title": "Amish tajomstvo: Ako žiť s úsporami a spravovať peniaze",
+    "description": "Objavte tajomstvá skromného života amišskej komunity. Obsahuje kompletné video moduly a sťahovacie PDF.",
+    "ogImage": "/courses/amish-secrets/cover.png"
+  },
+  "nav": {
+    "brand": "Amišské tajomstvo",
+    "features": "Vlastnosti",
+    "pricing": "Ceny",
+    "testimonials": "Skúsenosti",
+    "faq": "FAQ",
+    "contact": "Kontakt",
+    "get_started": "Začnite",
+    "learn_more": "Ďalšie informácie",
+    "member_area": "Členský priestor",
+    "back_to_landing": "Späť na pristátie"
+  },
+  "hero": {
+    "badge": "Nové",
+    "title": "Amish tajomstvo: Ako žiť s úsporami a spravovať peniaze",
+    "subtitle": "Objavte tajomstvá skromného života amišskej komunity. Obsahuje kompletné video moduly a sťahovacie PDF.",
+    "cta": "Začnite",
+    "secondary_cta": "Ďalšie informácie",
+    "price_label": "Špeciálna spúšťacia cena",
+    "one_time_payment": "Jednorázová platba bez predplatného"
+  },
+  "problem": {
+    "badge": "Problém",
+    "title": "Unavený z dosiahnutia konca mesiaca bez úspor? Moderná spoločnosť nás núti k nadmernej spotrebe.",
+    "text": ""
+  },
+  "story": {
+    "badge": "Náš príbeh",
+    "title": "La mia esperienza tra gli Amish",
+    "image_captions": [
+      "La vita quotidiana nela comunità Amish: semplicità, autosufficienza e saggezza finanziaria.",
+      "Il sistema di baratto e scambio che elimina il bisogno di denaro contante.",
+      "L'economia domestica Amish: come una famiglia riesce a vivere con il 60% in meno."
+    ],
+    "quote": "Amiš žije bohatým a plným životom, pričom míňa časť z toho, čo míňame. V tomto smere odhaľujeme, ako to robia."
+  },
+  "author": {
+    "badge": "// 03 ",
+    "title": "Za týmto kurzom",
+    "name": "Alessandro Rinaldi",
+    "role": "Výskumník · Autor",
+    "bio": "[Pridaj svoj príbeh tu: žil som 3 mesiace v Pennsylvánii, rozhovor 12 rodín Amish, študoval ich ekonomický systém. Žiadna teória, len prax.]",
+    "tags": [
+      "Saggezza Finanziaria",
+      "Vita Sostenibile",
+      "Educazione"
+    ]
+  },
+  "modules": {
+    "badge": "/ / 02 ",
+    "title": "Tajomstvá amišských majstrov",
+    "description": "8 praktických modulov, ktoré menia amišskú múdrosť na konkrétne skutky pre váš každodenný život.",
+    "items": [
+      {
+        "title": "Amish Budget",
+        "desc": "Ži o 30% menej bez obetí."
+      },
+      {
+        "title": "Nekonečná špajza",
+        "desc": "Spôsob skladovania potravín, ktorý odstraňuje odpad."
+      },
+      {
+        "title": "Nultý dlh",
+        "desc": "Rámec, aby sa z dlhov navždy."
+      },
+      {
+        "title": "Opraviť všetko",
+        "desc": "12 základné nástroje na opravu sami."
+      },
+      {
+        "title": "Bezhotovostná výmena",
+        "desc": "Ako aktivovať sieť barterov."
+      },
+      {
+        "title": "Farma podľa tabuľky",
+        "desc": "Sprievodca domácim záhradníctvom a nulovým odpadom varenie."
+      },
+      {
+        "title": "Voľná energia",
+        "desc": "Ako znížiť účty za služby o 50%."
+      },
+      {
+        "title": "Plán 30 dní",
+        "desc": "Denný kontrolný zoznam na zmenu vašich financií."
+      }
+    ]
+  },
+  "includes": {
+    "title": "Zahŕňa aj:",
+    "items": [
+      "Full eBook (PDF, ePub, Kindle)",
+      "Tlačiteľný 30-dňový kontrolný zoznam",
+      "Amish budget Excel list",
+      "Šablóna týždenného nákupného zoznamu",
+      "Prístup do zóny pre členov počas celého života",
+      "Bezplatné budúce aktualizácie"
+    ]
+  },
+  "testimonials": {
+    "badge": "/ / 06 ",
+    "title": "Skúsenosti",
+    "items": [
+      {
+        "text": "Uplatnil som Amišovu rozpočtovú metódu a za dva mesiace som znížil svoje výdavky o 35%. 30-dňový kontrolný zoznam bol bod zlomu. Konečne kurz, ktorý naozaj funguje.",
+        "name": "Marco R.",
+        "role": "Rím - raní čitatelia"
+      }
+    ]
+  },
+  "offer": {
+    "badge": "Spustenie ponuky",
+    "title": "Investujte do seba",
+    "complete_package": "Kompletný balík",
+    "course_value": "Kurz: 97 dolárov",
+    "bonus_value": "Bonus: 27 dolárov",
+    "price_text": "",
+    "one_time": "Jednorázová platba bez predplatného",
+    "launch_price": "Cena štartu a potom $37",
+    "cta": "Odomknúť prístup teraz",
+    "guarantee_title": "30-dňová záruka vrátenia peňazí",
+    "guarantee_text": "Skús to 30 dní. Ak nešetríte aspoň 100 dolárov, vrátime vám celú sumu. Žiadne otázky, žiadne problémy.",
+    "includes": [
+      "Celý kurz (hodnota $ 97)",
+      "eBook PDF, ePub, Kindle",
+      "Tlačiteľný 30-dňový kontrolný zoznam",
+      "Amish budget Excel list",
+      "Životný prístup + aktualizácie",
+      "BONUS: Zoznam nákupov za týždeň (hodnota $27)"
+    ]
+  },
+  "faq": {
+    "badge": "/ / 07",
+    "title": "Často kladené otázky",
+    "offer_valid": "Ponuka platí tento týždeň",
+    "items": [
+      {
+        "q": "Čo presne je zahrnuté?",
+        "a": "Dostanete kompletnú eBook vo formátoch PDF, ePub a Kindle. Plus celoživotný prístup ku všetkým budúcim aktualizáciám."
+      },
+      {
+        "q": "Je to po anglicky?",
+        "a": "Áno, kurz je plne dostupný v angličtine."
+      },
+      {
+        "q": "V akom formáte je kurz?",
+        "a": "eBook vo formátoch PDF, ePub a Kindle. Videá sú vo formáte MP4."
+      },
+      {
+        "q": "Kedy mám prístup?",
+        "a": "Okamžite po zaplatení."
+      },
+      {
+        "q": "Čo ak nie som spokojný?",
+        "a": "Ste chránený našou 30-dňovou zárukou vrátenia peňazí."
+      },
+      {
+        "q": "Ako dlho to trvá?",
+        "a": "Celý program trvá asi 3-4 hodiny."
+      }
+    ]
+  },
+  "final_cta": {
+    "title": "Začnite svoju cestu k finančnej slobode dnes",
+    "subtitle": "Pripojte sa k stovkám ľudí, ktorí už zmenili svoj vzťah s peniazmi.",
+    "badge": "Ponuka platí tento týždeň"
+  },
+  "footer": {
+    "rights_reserved": "Všetky práva vyhradené.",
+    "privacy": "Súkromie",
+    "terms": "Podmienky",
+    "legal_note": "Toto je digitálny informačný produkt. Výsledky sa môžu líšiť a závisieť od osobného záväzku. Ceny a opísané techniky Amish sú založené na etnografickom výskume a nemusia presne odrážať súčasné postupy všetkých amišských komunít.",
+    "badges": {
+      "guarantee": "30-dňová záruka",
+      "instant_access": "Okamžitý prístup",
+      "lifetime_updates": "Celoživotné aktualizácie"
+    }
+  },
+  "trust": {
+    "title": "Dôveryhodné tímy po celom svete",
+    "readers_count": "1 247 čitateľov",
+    "company_names": []
+  },
+  "ui": {
+    "labels": {
+      "instant_access": "Okamžitý prístup",
+      "buy_now_arrow": "Kúpte teraz →",
+      "readers": "1 247 čitateľov",
+      "buy_now_dash": "Kúpiť teraz",
+      "view_modules": "Zobraziť moduly",
+      "ssl_secure": "Bezpečná SSL platba",
+      "instant_download": "Okamžité stiahnutie",
+      "lifetime_access": "Životný prístup",
+      "guarantee_days": "30-dňová záruka",
+      "section_who": "/ / 01",
+      "is_this_for_you": "Je tento kurz pre vás?",
+      "perfect_for": "Ideálne pre vás, ak:",
+      "p_struggle": "Bojujete, aby ste dosiahli koniec.",
+      "p_cut_costs": "Chcete znížiť náklady bez obetovania kvality života",
+      "p_consumerism": "Si unavený zo konzumu a dlhovej kultúry.",
+      "p_practical": "Chcete praktické, časovo overené metódy",
+      "p_future": "Chcete vybudovať spoľahlivú finančnú budúcnosť pre svoju rodinu",
+      "not_for": "Nie pre vás, ak:",
+      "n_quick": "Hľadáte rýchlo-bohaté plány",
+      "n_habits": "Nechceš zmeniť svoje výdavkové návyky.",
+      "n_quick_fix": "Preferujete rýchle opravy nad pevným základom",
+      "n_implement": "Nie si ochotný realizovať to, čo sa naučíš",
+      "n_advice": "Hľadáte personalizované finančné poradenstvo",
+      "section_learn": "/ / 02 ",
+      "masters_secrets": "Tajomstvá amišských majstrov",
+      "modules_desc": "8 praktických modulov, ktoré menia amišskú múdrosť na konkrétne skutky pre váš každodenný život.",
+      "section_author": "// 03 ",
+      "behind_course": "Za týmto kurzom",
+      "your_name": "Tu je vaše meno",
+      "researcher_author": "Výskumník · Autor",
+      "author_bio": "[Pridaj svoj príbeh tu: žil som 3 mesiace v Pennsylvánii, rozhovor 12 rodín Amish, študoval ich ekonomický systém. Žiadna teória, len prax.]",
+      "section_content": "/ / 04",
+      "what_inside": "Čo nájdete vnútri",
+      "also_includes": "Zahŕňa aj:",
+      "inc_full_ebook": "Full eBook (PDF, ePub, Kindle)",
+      "inc_checklist": "Tlačiteľný 30-dňový kontrolný zoznam",
+      "inc_excel": "Amish budget Excel list",
+      "inc_shopping": "Šablóna týždenného nákupného zoznamu",
+      "inc_lifetime": "Prístup do zóny pre členov počas celého života",
+      "inc_updates": "Bezplatné budúce aktualizácie",
+      "section_offer": "/ / 05 ",
+      "invest_yourself": "Investujte do seba",
+      "launch_offer": "Spustenie ponuky",
+      "complete_package": "Kompletný balík",
+      "course_value": "Kurz: 97 dolárov",
+      "bonus_value": "Bonus: 27 dolárov",
+      "one_time": "Jednorázová platba bez predplatného",
+      "launch_price": "Cena štartu a potom $37",
+      "inc_course_full": "Celý kurz (hodnota $ 97)",
+      "inc_ebook": "eBook PDF, ePub, Kindle",
+      "inc_checklist2": "Tlačiteľný 30-dňový kontrolný zoznam",
+      "inc_excel2": "Amish budget Excel list",
+      "inc_access_updates": "Životný prístup + aktualizácie",
+      "inc_bonus_shopping": "BONUS: Zoznam nákupov za týždeň (hodnota $27)",
+      "unlock_now": "Odomknúť prístup teraz",
+      "guarantee_title": "30-dňová záruka vrátenia peňazí",
+      "guarantee_text": "Skús to 30 dní. Ak nešetríte aspoň 100 dolárov, vrátime vám celú sumu. Žiadne otázky, žiadne problémy.",
+      "section_testimonials": "/ / 06 ",
+      "testimonial_text": "Uplatnil som Amišovu rozpočtovú metódu a za dva mesiace som znížil svoje výdavky o 35%. 30-dňový kontrolný zoznam bol bod zlomu. Konečne kurz, ktorý naozaj funguje.",
+      "testimonial_name": "Marco R.",
+      "testimonial_role": "Rím - raní čitatelia",
+      "section_faq": "/ / 07",
+      "faq_title": "Často kladené otázky",
+      "offer_valid": "Ponuka platí tento týždeň",
+      "final_cta": "Začnite svoju cestu k finančnej slobode dnes",
+      "final_sub": "Pripojte sa k stovkám ľudí, ktorí už zmenili svoj vzťah s peniazmi.",
+      "unlock_dash": "Odomknúť prístup",
+      "guarantee_badge": "30-dňová záruka",
+      "instant_access_badge": "Okamžitý prístup",
+      "lifetime_badge": "Celoživotné aktualizácie",
+      "rights_reserved": "Všetky práva vyhradené.",
+      "privacy": "Súkromie",
+      "terms": "Podmienky",
+      "legal_note": "Toto je digitálny informačný produkt. Výsledky sa môžu líšiť a závisieť od osobného záväzku. Ceny a opísané techniky Amish sú založené na etnografickom výskume a nemusia presne odrážať súčasné postupy všetkých amišských komunít.",
+      "features": "Vlastnosti",
+      "pricing": "Ceny",
+      "testimonials": "Skúsenosti",
+      "contact": "Kontakt",
+      "get_started": "Začnite",
+      "learn_more": "Ďalšie informácie",
+      "member_area": "Členský priestor",
+      "back_to_landing": "Späť na pristátie",
+      "buy_now": "Kúpiť teraz",
+      "currency_symbol": "$",
+      "new_badge": "Nové",
+      "the_problem": "Problém",
+      "our_story": "Náš príbeh",
+      "what_learn": "Čo sa naučíš",
+      "course_lessons": "Lekcie kurzu",
+      "curriculum": "Životopis",
+      "free_tier": "bez cla",
+      "pro_tier": "Pro",
+      "per_month": "/mo",
+      "start_free": "Spustiť zadarmo",
+      "popular": "Populárna",
+      "free_title": "Ak chcete začať",
+      "pro_title": "Pestovať",
+      "trusted_by": "Dôveryhodné tímy po celom svete",
+      "offer_badge": "Spustenie ponuky",
+      "price_special": "Špeciálna spúšťacia cena",
+      "buy_and_access": "Kúpiť & prístup okamžite",
+      "bestseller": "Najlepší predávajúci",
+      "story_badge": "/ / Pravý príbeh",
+      "story_title": "Moja skúsenosť medzi amišmi",
+      "story_subtitle": "Tri mesiace v Pennsylvánii vypočúvalo dvanásť rodín, ekonomický systém, ktorý pracoval 300 rokov.",
+      "amish_life": "Amišov život",
+      "caption_1": "Každodenný život v amišskej komunite: jednoduchosť, sebestačnosť a finančná múdrosť prešla generáciami.",
+      "caption_2": "Barter a systém výmeny, ktorý eliminuje potrebu hotovosti a buduje trvalé vzťahy dôvery.",
+      "caption_3": "Amišská domácnosť: ako rodina žije o 60% menej ako národný priemer.",
+      "tag_1": "Hospodárska antropológia",
+      "tag_2": "Amišské štúdie",
+      "tag_3": "Finančné poradenstvo",
+      "brand_name": "Kurz",
+      "reviewer": "Marco R., raný čitateľ",
+      "language_switch": "EN",
+      "language_switch_en": "EN"
+    }
+  },
+  "audience": {
+    "badge": "/ / 01",
+    "title": "Je tento kurz pre vás?",
+    "perfect_for": "Ideálne pre vás, ak:",
+    "perfect_items": [
+      "Bojujete, aby ste dosiahli koniec.",
+      "Chcete znížiť náklady bez obetovania kvality života",
+      "Si unavený zo konzumu a dlhovej kultúry.",
+      "Chcete praktické, časovo overené metódy",
+      "Chcete vybudovať spoľahlivú finančnú budúcnosť pre svoju rodinu"
+    ],
+    "not_for": "Nie pre vás, ak:",
+    "not_items": [
+      "Hľadáte rýchlo-bohaté plány",
+      "Nechceš zmeniť svoje výdavkové návyky.",
+      "Preferujete rýchle opravy nad pevným základom",
+      "Nie si ochotný realizovať to, čo sa naučíš",
+      "Hľadáte personalizované finančné poradenstvo"
+    ]
+  },
+  "course": {
+    "back_to_course": "Späť na pristátie",
+    "module_label": "Životopis",
+    "now_playing": "Teraz hrá",
+    "page_label": "Strana",
+    "reading_progress": "Pokrok v čítaní",
+    "download_pdf": "Stiahnuť PDF",
+    "chapter": "Kapitola"
+  },
+  "lessons": {
+    "badge": "/ / 04",
+    "title": "Čo nájdete vnútri",
+    "items": []
+  }
+}

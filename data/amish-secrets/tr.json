@@ -6,44 +6,44 @@
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
-    "brand": "Amish secrets",
-    "features": "Features",
-    "pricing": "Pricing",
-    "testimonials": "Testimonials",
-    "faq": "FAQ",
-    "contact": "Contact",
-    "get_started": "Get Started",
-    "learn_more": "Learn More",
-    "member_area": "Member Area",
-    "back_to_landing": "Back to Landing"
+    "brand": "Amish sırları",
+    "features": "Özellikler Özellikler Özellikler Özellikler",
+    "pricing": "Fiyatlandırma",
+    "testimonials": "Referanslar",
+    "faq": "SSS SSS",
+    "contact": "İletişim",
+    "get_started": "Başlayın",
+    "learn_more": "Daha Fazla Öğrenin",
+    "member_area": "Üye Alan",
+    "back_to_landing": "Landing'e geri dön"
   },
   "hero": {
-    "badge": "New",
+    "badge": "Yeni Yeni Yeni Yeni Yeni Yeni Yeni",
     "title": "Amish Sırları: Nasıl tasarruflu yaşanır ve para yönetilir",
     "subtitle": "Amish topluluğunun tutumlu yaşam sırlarını keşfedin. Kapsamlı video modülleri ve indirilebilir PDF'ler içerir.",
-    "cta": "Get Started",
-    "secondary_cta": "Learn More",
-    "price_label": "Special launch price",
-    "one_time_payment": "One-time payment — no subscription"
+    "cta": "Başlayın",
+    "secondary_cta": "Daha Fazla Öğrenin",
+    "price_label": "Özel başlangıç fiyatı",
+    "one_time_payment": "One-time ödeme - abonelik yok"
   },
   "problem": {
-    "badge": "The Problem",
+    "badge": "Problem Problem",
     "title": "Ay sonunu birikim yapamadan getirmekten yoruldunuz mu? Modern toplum bizi aşırı tüketime zorluyor.",
     "text": ""
   },
   "story": {
-    "badge": "Our Story",
-    "title": "La mia esperienza tra gli Amish",
+    "badge": "Bizim Hikayemiz",
+    "title": "La mia esperienza tra aks Amish",
     "image_captions": [
-      "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria.",
-      "Il sistema di baratto e scambio che elimina il bisogno di denaro contante.",
-      "L'economia domestica Amish: come una famiglia riesce a vivere con il 60% in meno."
+      "La vita quotidiana nella comunità Amish: se Closedà, autosufficienza e saggezza finanziaria.",
+      "Il systema di baratto e dolandırıcılıkbio che149na disogno di denaro kirletici.",
+      "L'economia homea Amish: a famiglia riesce a vivere con il 60% in meno."
     ],
     "quote": "Amishler, bizim harcadığımızın çok küçük bir kısmını harcayarak zengin ve dolu dolu hayatlar yaşıyorlar. Bu kursta size nasıl yaptıklarını açıklıyoruz."
   },
   "author": {
-    "badge": "// 03 — The Author",
-    "title": "Behind This Course",
+    "badge": "// 03 - The Author",
+    "title": "Bu Kurs Arkasında",
     "name": "Alessandro Rinaldi",
     "role": "Researcher · Author · Traveler",
     "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
@@ -54,136 +54,136 @@
     ]
   },
   "modules": {
-    "badge": "// 02 — What You'll Learn",
-    "title": "The Amish Masters' Secrets",
+    "badge": "// 02 - What You'll Learn",
+    "title": "Amish Masters'ın Sırları",
     "description": "8 practical modules that turn Amish wisdom into concrete actions.",
     "items": [
       {
         "title": "Amish Budget",
-        "desc": "Live on 30% less without sacrifice."
+        "desc": "Kurban olmadan% 30 daha az yaşayın."
       },
       {
-        "title": "Infinite Pantry",
-        "desc": "The food storage method that eliminates waste."
+        "title": "Sonsuz Pantry",
+        "desc": "Atıkları ortadan kaldıran gıda depolama yöntemi."
       },
       {
-        "title": "Zero Debt",
-        "desc": "The framework to get out of debt forever."
+        "title": "Sıfır Borç",
+        "desc": "Borçtan sonsuza kadar çıkmak için çerçeve."
       },
       {
-        "title": "Fix Everything",
-        "desc": "12 essential tools to repair yourself."
+        "title": "Her şeyi düzeltin",
+        "desc": "Kendinizi tamir etmek için 12 temel araç."
       },
       {
-        "title": "Money-Free Exchange",
-        "desc": "How to activate a barter network."
+        "title": "Para-Free Exchange",
+        "desc": "Bir barter ağı nasıl etkinleştirilir."
       },
       {
-        "title": "Farm to Table",
-        "desc": "Guide to home gardening and zero-waste cooking."
+        "title": "Masaya Çift",
+        "desc": "Ev bahçesine ve sıfır yemek pişirmeye kılavuz."
       },
       {
-        "title": "Free Energy",
-        "desc": "How to cut utility bills by 50%."
+        "title": "Ücretsiz Enerji",
+        "desc": "İş faturalarını% 50 ile nasıl kesebilirsiniz."
       },
       {
         "title": "30-Day Plan",
-        "desc": "Day-by-day checklist to transform your finances."
+        "desc": "Günlük kontrol listesi finanslarınızı dönüştürmek için."
       }
     ]
   },
   "includes": {
-    "title": "Also includes:",
+    "title": "Ayrıca şunları içerir:",
     "items": [
       "Full eBook (PDF, ePub, Kindle)",
-      "Printable 30-day checklist",
-      "Amish budget Excel sheet",
-      "Weekly shopping list template",
-      "Lifetime member area access",
-      "Free future updates"
+      "Yazdırılabilir 30 günlük kontrol listesi",
+      "Amish bütçe Excel sayfası",
+      "Haftalık alışveriş listesi şablon",
+      "Lifetime üye alanı erişim",
+      "Free future Update"
     ]
   },
   "testimonials": {
-    "badge": "// 06 — Testimonials",
-    "title": "Testimonials",
+    "badge": "// 06 - Referanslar",
+    "title": "Referanslar",
     "items": [
       {
-        "text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
+        "text": "Amish bütçe yöntemi uyguladım ve iki ay içinde masraflarımı% 35 azalttım. 30 günlük kontrol listesi dönüm noktasıydı. Son olarak gerçekten işe yarayan bir kurs.",
         "name": "Marco R.",
-        "role": "Rome — early readers"
+        "role": "Roma – erken okuyucular"
       }
     ]
   },
   "offer": {
-    "badge": "Launch Offer",
-    "title": "Invest in Yourself",
-    "complete_package": "Complete Package",
-    "course_value": "Course: $97",
+    "badge": "Teklif fırlatma",
+    "title": "Kendinize yatırım",
+    "complete_package": "Tamam Paketi",
+    "course_value": "Ders: $97",
     "bonus_value": "Bonus: $27",
     "price_text": "",
-    "one_time": "One-time payment — no subscription",
-    "launch_price": "Launch price — then $37",
+    "one_time": "One-time ödeme - abonelik yok",
+    "launch_price": "Başlangıç fiyatı – sonra 37 $",
     "cta": "Unlock Access Now",
-    "guarantee_title": "30-Day Money-Back Guarantee",
+    "guarantee_title": "30-Day Money-Back Garanti",
     "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
     "includes": [
       "Full course (value $97)",
       "eBook PDF, ePub, Kindle",
-      "Printable 30-day checklist",
-      "Amish budget Excel sheet",
-      "Lifetime access + updates",
-      "BONUS: Weekly shopping list (value $27)"
+      "Yazdırılabilir 30 günlük kontrol listesi",
+      "Amish bütçe Excel sayfası",
+      "Lifetime access + update",
+      "Fitness: Haftalık alışveriş listesi (değer $27)"
     ]
   },
   "faq": {
-    "badge": "// 07 — FAQ",
-    "title": "Frequently Asked Questions",
-    "offer_valid": "Offer valid this week",
+    "badge": "// 07 - SSS",
+    "title": "Sık Sorulan Sorular",
+    "offer_valid": "Teklif bu hafta geçerli",
     "items": [
       {
-        "q": "What exactly is included?",
-        "a": "You get the complete eBook in PDF, ePub, and Kindle formats. Plus lifetime access to all future updates."
+        "q": "Ne tam olarak dahil edilir?",
+        "a": "PDF, ePub ve Kindle formatlarında tam eBook'u alırsınız. Artı yaşam boyu tüm gelecekteki güncellemelere erişim."
       },
       {
-        "q": "Is it in English?",
-        "a": "Yes, the course is fully available in English."
+        "q": "İngilizce mi?",
+        "a": "Evet, kurs tam olarak İngilizce olarak mevcuttur."
       },
       {
-        "q": "What format is the course in?",
-        "a": "eBook in PDF, ePub, and Kindle formats. Videos are in MP4 format."
+        "q": "Hangi format elbette?",
+        "a": "eBook in PDF, ePub, and Kindle format. Videolar MP4 formatındadır."
       },
       {
-        "q": "When do I get access?",
-        "a": "Immediately after payment."
+        "q": "Ne zaman erişim alırım?",
+        "a": "Hemen ödemeden sonra."
       },
       {
-        "q": "What if I'm not satisfied?",
-        "a": "You're protected by our 30-day money-back guarantee."
+        "q": "Ne memnun değilsem?",
+        "a": "30 günlük para iade garantisimiz tarafından korunuyorsunuz."
       },
       {
-        "q": "How long does it take?",
-        "a": "The complete program takes about 3-4 hours."
+        "q": "Ne kadar sürer?",
+        "a": "Tam program yaklaşık 3-4 saat sürmektedir."
       }
     ]
   },
   "final_cta": {
-    "title": "Start Your Journey to Financial Freedom Today",
-    "subtitle": "Join hundreds of people who have already transformed their relationship with money.",
-    "badge": "Offer valid this week"
+    "title": "Bugün Financial Freedom'a Yolculuğunuza Başlayın",
+    "subtitle": "Zaten para ile ilişkilerini değiştiren yüzlerce insana katılın.",
+    "badge": "Teklif bu hafta geçerli"
   },
   "footer": {
-    "rights_reserved": "All rights reserved.",
-    "privacy": "Privacy",
-    "terms": "Terms",
+    "rights_reserved": "Tüm hakları saklıdır.",
+    "privacy": "Gizlilik",
+    "terms": "Şartlar",
     "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
     "badges": {
-      "guarantee": "30-Day Guarantee",
-      "instant_access": "Instant Access",
+      "guarantee": "30-Day Garanti",
+      "instant_access": "Anında Erişim",
       "lifetime_updates": "Lifetime Updates"
     }
   },
   "trust": {
-    "title": "Trusted by teams worldwide",
+    "title": "Dünya çapında takımlar tarafından güvenildi",
     "readers_count": "1.247 okuyucu",
     "company_names": []
   },
@@ -195,112 +195,112 @@
       "buy_now_dash": "Şimdi Satın Al —",
       "view_modules": "Modülleri Görüntüle",
       "ssl_secure": "SSL ile güvenli ödeme",
-      "instant_download": "Instant Download",
+      "instant_download": "Anında Download",
       "lifetime_access": "Lifetime Access",
-      "guarantee_days": "30-Day Guarantee",
-      "section_who": "// 01 — Who Is This For",
-      "is_this_for_you": "Is This Course For You?",
-      "perfect_for": "Perfect for you if:",
-      "p_struggle": "You struggle to make ends meet",
-      "p_cut_costs": "You want to cut costs without sacrificing quality of life",
+      "guarantee_days": "30-Day Garanti",
+      "section_who": "// 01 - Bu Kim için",
+      "is_this_for_you": "Bu ders sizin için mi?",
+      "perfect_for": "Sizin için mükemmel:",
+      "p_struggle": "Son buluşmak için mücadele ediyorsun",
+      "p_cut_costs": "Yaşam kalitesini feda etmeden maliyetleri kesmek istiyorsunuz",
       "p_consumerism": "Tired of consumerism and debt culture",
       "p_practical": "Looking for practical, time-tested methods",
       "p_future": "Want a solid financial future for your family",
-      "not_for": "Not for you if:",
+      "not_for": "Senin için değil:",
       "n_quick": "Looking for get-rich-quick schemes",
       "n_habits": "Not willing to change spending habits",
       "n_quick_fix": "Prefer quick fixes over a solid path",
       "n_implement": "Not willing to implement what you learn",
       "n_advice": "Looking for personalized financial advice",
-      "section_learn": "// 02 — What You'll Learn",
-      "masters_secrets": "The Amish Masters' Secrets",
+      "section_learn": "// 02 - What You'll Learn",
+      "masters_secrets": "Amish Masters'ın Sırları",
       "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
-      "section_author": "// 03 — The Author",
-      "behind_course": "Behind This Course",
-      "your_name": "Your Name Here",
+      "section_author": "// 03 - The Author",
+      "behind_course": "Bu Kurs Arkasında",
+      "your_name": "Adınız Burada",
       "researcher_author": "Researcher · Author · Traveler",
       "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
-      "section_content": "// 04 — Course Content",
-      "what_inside": "What You'll Find Inside",
-      "also_includes": "Also includes:",
+      "section_content": "// 04 - Course Content",
+      "what_inside": "İçte Ne Bulacaksın",
+      "also_includes": "Ayrıca şunları içerir:",
       "inc_full_ebook": "Full eBook (PDF, ePub, Kindle)",
-      "inc_checklist": "Printable 30-day checklist",
-      "inc_excel": "Amish budget Excel sheet",
-      "inc_shopping": "Weekly shopping list template",
-      "inc_lifetime": "Lifetime member area access",
-      "inc_updates": "Free future updates",
-      "section_offer": "// 05 — The Offer",
-      "invest_yourself": "Invest in Yourself",
-      "launch_offer": "Launch Offer",
-      "complete_package": "Complete Package",
-      "course_value": "Course: $97",
+      "inc_checklist": "Yazdırılabilir 30 günlük kontrol listesi",
+      "inc_excel": "Amish bütçe Excel sayfası",
+      "inc_shopping": "Haftalık alışveriş listesi şablon",
+      "inc_lifetime": "Lifetime üye alanı erişim",
+      "inc_updates": "Free future Update",
+      "section_offer": "// 05 - Teklif",
+      "invest_yourself": "Kendinize yatırım",
+      "launch_offer": "Teklif fırlatma",
+      "complete_package": "Tamam Paketi",
+      "course_value": "Ders: $97",
       "bonus_value": "Bonus: $27",
-      "one_time": "One-time payment — no subscription",
-      "launch_price": "Launch price — then $37",
+      "one_time": "One-time ödeme - abonelik yok",
+      "launch_price": "Başlangıç fiyatı – sonra 37 $",
       "inc_course_full": "Full course (value $97)",
       "inc_ebook": "eBook PDF, ePub, Kindle",
-      "inc_checklist2": "Printable 30-day checklist",
-      "inc_excel2": "Amish budget Excel sheet",
-      "inc_access_updates": "Lifetime access + updates",
-      "inc_bonus_shopping": "BONUS: Weekly shopping list (value $27)",
+      "inc_checklist2": "Yazdırılabilir 30 günlük kontrol listesi",
+      "inc_excel2": "Amish bütçe Excel sayfası",
+      "inc_access_updates": "Lifetime access + update",
+      "inc_bonus_shopping": "Fitness: Haftalık alışveriş listesi (değer $27)",
       "unlock_now": "Unlock Access Now",
-      "guarantee_title": "30-Day Money-Back Guarantee",
+      "guarantee_title": "30-Day Money-Back Garanti",
       "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
-      "section_testimonials": "// 06 — Testimonials",
-      "testimonial_text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
+      "section_testimonials": "// 06 - Referanslar",
+      "testimonial_text": "Amish bütçe yöntemi uyguladım ve iki ay içinde masraflarımı% 35 azalttım. 30 günlük kontrol listesi dönüm noktasıydı. Son olarak gerçekten işe yarayan bir kurs.",
       "testimonial_name": "Marco R.",
-      "testimonial_role": "Rome — early readers",
-      "section_faq": "// 07 — FAQ",
-      "faq_title": "Frequently Asked Questions",
-      "offer_valid": "Offer valid this week",
-      "final_cta": "Start Your Journey to Financial Freedom Today",
-      "final_sub": "Join hundreds of people who have already transformed their relationship with money.",
-      "unlock_dash": "Unlock Access —",
-      "guarantee_badge": "30-Day Guarantee",
-      "instant_access_badge": "Instant Access",
+      "testimonial_role": "Roma – erken okuyucular",
+      "section_faq": "// 07 - SSS",
+      "faq_title": "Sık Sorulan Sorular",
+      "offer_valid": "Teklif bu hafta geçerli",
+      "final_cta": "Bugün Financial Freedom'a Yolculuğunuza Başlayın",
+      "final_sub": "Zaten para ile ilişkilerini değiştiren yüzlerce insana katılın.",
+      "unlock_dash": "Unlock Access –",
+      "guarantee_badge": "30-Day Garanti",
+      "instant_access_badge": "Anında Erişim",
       "lifetime_badge": "Lifetime Updates",
-      "rights_reserved": "All rights reserved.",
-      "privacy": "Privacy",
-      "terms": "Terms",
+      "rights_reserved": "Tüm hakları saklıdır.",
+      "privacy": "Gizlilik",
+      "terms": "Şartlar",
       "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
-      "features": "Features",
-      "pricing": "Pricing",
-      "testimonials": "Testimonials",
-      "contact": "Contact",
-      "get_started": "Get Started",
-      "learn_more": "Learn More",
-      "member_area": "Member Area",
-      "back_to_landing": "Back to Landing",
-      "buy_now": "Buy Now",
+      "features": "Özellikler Özellikler Özellikler Özellikler",
+      "pricing": "Fiyatlandırma",
+      "testimonials": "Referanslar",
+      "contact": "İletişim",
+      "get_started": "Başlayın",
+      "learn_more": "Daha Fazla Öğrenin",
+      "member_area": "Üye Alan",
+      "back_to_landing": "Landing'e geri dön",
+      "buy_now": "Şimdi Satın Al",
       "currency_symbol": "$",
-      "new_badge": "New",
-      "the_problem": "The Problem",
-      "our_story": "Our Story",
+      "new_badge": "Yeni Yeni Yeni Yeni Yeni Yeni Yeni",
+      "the_problem": "Problem Problem",
+      "our_story": "Bizim Hikayemiz",
       "what_learn": "What You'll Learn",
-      "course_lessons": "Course Lessons",
-      "curriculum": "Curriculum",
-      "free_tier": "Free",
-      "pro_tier": "Pro",
+      "course_lessons": "Ders Dersleri",
+      "curriculum": "Müfredat",
+      "free_tier": "Ücretsiz Ücretsiz",
+      "pro_tier": "Pro Pro Pro Pro Pro",
       "per_month": "/mo",
-      "start_free": "Start Free",
-      "popular": "Popular",
-      "free_title": "To get started",
-      "pro_title": "To grow",
-      "trusted_by": "Trusted by teams worldwide",
-      "offer_badge": "Launch Offer",
-      "price_special": "Special launch price",
-      "buy_and_access": "Buy & Access Instantly",
-      "bestseller": "Best Seller",
+      "start_free": "Start Free Start Free",
+      "popular": "Popüler Popüler Popüler Popüler Popüler Popüler",
+      "free_title": "Başlamak için başladı",
+      "pro_title": "büyümek için büyümek",
+      "trusted_by": "Dünya çapında takımlar tarafından güvenildi",
+      "offer_badge": "Teklif fırlatma",
+      "price_special": "Özel başlangıç fiyatı",
+      "buy_and_access": "Satın Al & Access Instantly",
+      "bestseller": "En İyi Satıcı",
       "story_badge": "// The True Story",
-      "story_title": "My Experience Among the Amish",
-      "story_subtitle": "Three months in Pennsylvania, twelve families interviewed, an economic system that has worked for 300 years.",
+      "story_title": "My Experience Between the Amish",
+      "story_subtitle": "Pennsylvania'da üç ay, iki aile röportaj yaptı, 300 yıldır çalışan bir ekonomik sistem.",
       "amish_life": "Amish Life",
-      "caption_1": "Daily life in the Amish community: simplicity, self-sufficiency, and financial wisdom passed down through generations.",
-      "caption_2": "The barter and exchange system that eliminates the need for cash and builds lasting trust relationships.",
-      "caption_3": "The Amish household economy: how a family lives on 60% less than the national average.",
-      "tag_1": "Economic Anthropology",
+      "caption_1": "Amish topluluğundaki günlük hayat: basitlik, öz yeterlilik ve finansal bilgelik nesiller boyunca geçti.",
+      "caption_2": "Nakit ihtiyacını ortadan kaldıran ve kalıcı güven ilişkileri inşa eden barter ve değişim sistemi.",
+      "caption_3": "Amish ev ekonomisi: Bir aile ulusal ortalamadan% 60 daha az yaşıyor.",
+      "tag_1": "Ekonomik Economic",
       "tag_2": "Amish Studies",
-      "tag_3": "Financial Consulting",
+      "tag_3": "Finansal Danışmanlık",
       "brand_name": "Courssy",
       "reviewer": "Marco R., early readers",
       "language_switch": "EN",
@@ -313,17 +313,17 @@
     }
   },
   "audience": {
-    "badge": "// 01 — Who Is This For",
-    "title": "Is This Course For You?",
-    "perfect_for": "Perfect for you if:",
+    "badge": "// 01 - Bu Kim için",
+    "title": "Bu ders sizin için mi?",
+    "perfect_for": "Sizin için mükemmel:",
     "perfect_items": [
-      "You struggle to make ends meet",
-      "You want to cut costs without sacrificing quality of life",
+      "Son buluşmak için mücadele ediyorsun",
+      "Yaşam kalitesini feda etmeden maliyetleri kesmek istiyorsunuz",
       "Tired of consumerism and debt culture",
       "Looking for practical, time-tested methods",
       "Want a solid financial future for your family"
     ],
-    "not_for": "Not for you if:",
+    "not_for": "Senin için değil:",
     "not_items": [
       "Looking for get-rich-quick schemes",
       "Not willing to change spending habits",
@@ -333,17 +333,17 @@
     ]
   },
   "course": {
-    "back_to_course": "Back to Landing",
-    "module_label": "Curriculum",
-    "now_playing": "Now playing",
-    "page_label": "Page",
-    "reading_progress": "Reading Progress",
-    "download_pdf": "Download PDF",
-    "chapter": "Chapter"
+    "back_to_course": "Landing'e geri dön",
+    "module_label": "Müfredat",
+    "now_playing": "Şimdi oyna",
+    "page_label": "Page Page Page",
+    "reading_progress": "Okuma",
+    "download_pdf": "PDF Download PDF indir",
+    "chapter": "Bölüm Bölüm Bölüm"
   },
   "lessons": {
-    "badge": "// 04 — Course Content",
-    "title": "What You'll Find Inside",
+    "badge": "// 04 - Course Content",
+    "title": "İçte Ne Bulacaksın",
     "items": []
   }
 }

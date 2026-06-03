@@ -6,44 +6,44 @@
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
-    "brand": "Amish secrets",
-    "features": "Features",
-    "pricing": "Pricing",
-    "testimonials": "Testimonials",
-    "faq": "FAQ",
-    "contact": "Contact",
-    "get_started": "Get Started",
-    "learn_more": "Learn More",
-    "member_area": "Member Area",
-    "back_to_landing": "Back to Landing"
+    "brand": "Amish salaisuuksia",
+    "features": "Ominaisuudet",
+    "pricing": "Hinnoittelu",
+    "testimonials": "Todistukset",
+    "faq": "UKK",
+    "contact": "Yhteystiedot",
+    "get_started": "Aloita",
+    "learn_more": "Lue lisää",
+    "member_area": "Jäsenvaltio",
+    "back_to_landing": "Takaisin maihinnousuun"
   },
   "hero": {
-    "badge": "New",
+    "badge": "Uusi",
     "title": "Amish-salaisuudet: Kuinka elää säästäväisesti ja hallita rahaa",
     "subtitle": "Tutustu Amish-yhteisön säästäväisen elämän salaisuuksiin. Sisältää kattavat videomoduulit ja ladattavat PDF-tiedostot.",
-    "cta": "Get Started",
-    "secondary_cta": "Learn More",
-    "price_label": "Special launch price",
-    "one_time_payment": "One-time payment — no subscription"
+    "cta": "Aloita",
+    "secondary_cta": "Lue lisää",
+    "price_label": "Erityinen käynnistyshinta",
+    "one_time_payment": "Kertamaksu Ei tilausta"
   },
   "problem": {
-    "badge": "The Problem",
+    "badge": "Ongelma",
     "title": "Oletko väsynyt siihen, että säästöjä ei jää kuun loppuun? Nykypäivän yhteiskunta ajaa meitä ylikulutukseen.",
     "text": ""
   },
   "story": {
-    "badge": "Our Story",
+    "badge": "Meidän tarinamme",
     "title": "La mia esperienza tra gli Amish",
     "image_captions": [
-      "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria.",
+      "La vita quidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria.",
       "Il sistema di baratto e scambio che elimina il bisogno di denaro contante.",
-      "L'economia domestica Amish: come una famiglia riesce a vivere con il 60% in meno."
+      "L'economia domestica amish: come una famiglia riesce a vivere con il 60% in meno."
     ],
     "quote": "Amishit elävät rikasta ja täyttä elämää käyttämällä vain murto-osan siitä, mitä me kulutamme. Tällä kurssilla paljastamme, miten he sen tekevät."
   },
   "author": {
-    "badge": "// 03 — The Author",
-    "title": "Behind This Course",
+    "badge": "Kirjoittaja",
+    "title": "Tämän kurssin takana",
     "name": "Alessandro Rinaldi",
     "role": "Researcher · Author · Traveler",
     "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
@@ -54,136 +54,136 @@
     ]
   },
   "modules": {
-    "badge": "// 02 — What You'll Learn",
-    "title": "The Amish Masters' Secrets",
+    "badge": "Mitä sinä opit?",
+    "title": "Amish Mastersin salaisuudet",
     "description": "8 practical modules that turn Amish wisdom into concrete actions.",
     "items": [
       {
-        "title": "Amish Budget",
-        "desc": "Live on 30% less without sacrifice."
+        "title": "Amish budget",
+        "desc": "Elä 30% vähemmän ilman uhrauksia."
       },
       {
-        "title": "Infinite Pantry",
-        "desc": "The food storage method that eliminates waste."
+        "title": "Ääretön ruokakomero",
+        "desc": "Ruoan varastointimenetelmä, joka poistaa jätteet."
       },
       {
-        "title": "Zero Debt",
-        "desc": "The framework to get out of debt forever."
+        "title": "Nollavelka",
+        "desc": "Kehys, jolla pääset veloista ikuisesti."
       },
       {
-        "title": "Fix Everything",
-        "desc": "12 essential tools to repair yourself."
+        "title": "Korjaa kaikki",
+        "desc": "12 tärkeää työkalua korjata itsesi."
       },
       {
-        "title": "Money-Free Exchange",
-        "desc": "How to activate a barter network."
+        "title": "Rahaton pörssi",
+        "desc": "Miten aktivoida vaihtokauppaverkosto."
       },
       {
-        "title": "Farm to Table",
-        "desc": "Guide to home gardening and zero-waste cooking."
+        "title": "Tilalta pöytään",
+        "desc": "Opas kotiin puutarhanhoito ja nolla-jäte ruoanlaitto."
       },
       {
-        "title": "Free Energy",
-        "desc": "How to cut utility bills by 50%."
+        "title": "Vapaa energia",
+        "desc": "Miten leikata sähkölaskuja 50%."
       },
       {
-        "title": "30-Day Plan",
-        "desc": "Day-by-day checklist to transform your finances."
+        "title": "30 päivän suunnitelma",
+        "desc": "Päivittäin tarkistuslista muuttaa taloutta."
       }
     ]
   },
   "includes": {
-    "title": "Also includes:",
+    "title": "Sisältää myös:",
     "items": [
-      "Full eBook (PDF, ePub, Kindle)",
-      "Printable 30-day checklist",
-      "Amish budget Excel sheet",
-      "Weekly shopping list template",
-      "Lifetime member area access",
-      "Free future updates"
+      "Koko eBook (PDF, ePub, Kindle)",
+      "Tulostettava 30 päivän tarkistuslista",
+      "Amish budget Excel arkki",
+      "Viikoittainen ostoslistamalli",
+      "Elinikäinen jäsenalue",
+      "Vapaat tulevaisuuden päivitykset"
     ]
   },
   "testimonials": {
-    "badge": "// 06 — Testimonials",
-    "title": "Testimonials",
+    "badge": "Suosittelut",
+    "title": "Todistukset",
     "items": [
       {
-        "text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
+        "text": "Käytin amishien budjettimenetelmää ja kahden kuukauden kuluttua laskin kulujani 35 prosentilla. 30 päivän tarkistuslista oli käännekohta. Viimeinkin kurssi, joka todella toimii.",
         "name": "Marco R.",
-        "role": "Rome — early readers"
+        "role": "Rooma..."
       }
     ]
   },
   "offer": {
-    "badge": "Launch Offer",
-    "title": "Invest in Yourself",
-    "complete_package": "Complete Package",
-    "course_value": "Course: $97",
-    "bonus_value": "Bonus: $27",
+    "badge": "Tarjous",
+    "title": "Sijoittaudu itseesi",
+    "complete_package": "Täydellinen pakkaus",
+    "course_value": "Kurssi: 97 dollaria",
+    "bonus_value": "Bonus: 27 dollaria",
     "price_text": "",
-    "one_time": "One-time payment — no subscription",
-    "launch_price": "Launch price — then $37",
-    "cta": "Unlock Access Now",
-    "guarantee_title": "30-Day Money-Back Guarantee",
+    "one_time": "Kertamaksu Ei tilausta",
+    "launch_price": "Käynnistä hinta ... sitten $37",
+    "cta": "Avaa pääsy nyt",
+    "guarantee_title": "30 päivän palautustakuu",
     "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
     "includes": [
-      "Full course (value $97)",
+      "Koko kurssi (arvo 97 dollaria)",
       "eBook PDF, ePub, Kindle",
-      "Printable 30-day checklist",
-      "Amish budget Excel sheet",
-      "Lifetime access + updates",
-      "BONUS: Weekly shopping list (value $27)"
+      "Tulostettava 30 päivän tarkistuslista",
+      "Amish budget Excel arkki",
+      "Elinikäinen käyttö + päivitykset",
+      "BONUS: Viikoittainen ostoslista (arvo $27)"
     ]
   },
   "faq": {
-    "badge": "// 07 — FAQ",
-    "title": "Frequently Asked Questions",
-    "offer_valid": "Offer valid this week",
+    "badge": "// 07",
+    "title": "Usein kysytyt kysymykset",
+    "offer_valid": "Tarjous on voimassa tällä viikolla",
     "items": [
       {
-        "q": "What exactly is included?",
-        "a": "You get the complete eBook in PDF, ePub, and Kindle formats. Plus lifetime access to all future updates."
+        "q": "Mitä tarkalleen ottaen sisältyy?",
+        "a": "Saat täydellisen eBook PDF, ePub, ja Kindle formaatteja. Plus elinikäinen pääsy kaikkiin tuleviin päivityksiin."
       },
       {
-        "q": "Is it in English?",
-        "a": "Yes, the course is fully available in English."
+        "q": "Onko se englanniksi?",
+        "a": "Kyllä, kurssi on täysin saatavilla englanniksi."
       },
       {
-        "q": "What format is the course in?",
-        "a": "eBook in PDF, ePub, and Kindle formats. Videos are in MP4 format."
+        "q": "Missä muodossa kurssi on?",
+        "a": "eBook PDF, ePub, ja Kindle formaatteja. Videot ovat MP4-muodossa."
       },
       {
-        "q": "When do I get access?",
-        "a": "Immediately after payment."
+        "q": "Milloin pääsen sinne?",
+        "a": "Heti maksun jälkeen."
       },
       {
-        "q": "What if I'm not satisfied?",
-        "a": "You're protected by our 30-day money-back guarantee."
+        "q": "Entä jos en ole tyytyväinen?",
+        "a": "30 päivän palautustakuu suojelee sinua."
       },
       {
-        "q": "How long does it take?",
-        "a": "The complete program takes about 3-4 hours."
+        "q": "Kauanko se kestää?",
+        "a": "Koko ohjelma kestää noin 3-4 tuntia."
       }
     ]
   },
   "final_cta": {
-    "title": "Start Your Journey to Financial Freedom Today",
-    "subtitle": "Join hundreds of people who have already transformed their relationship with money.",
-    "badge": "Offer valid this week"
+    "title": "Aloita matkasi taloudelliseen vapauteen tänään",
+    "subtitle": "Liity satoihin ihmisiin, jotka ovat jo muuttaneet suhdettaan rahalla.",
+    "badge": "Tarjous on voimassa tällä viikolla"
   },
   "footer": {
-    "rights_reserved": "All rights reserved.",
-    "privacy": "Privacy",
-    "terms": "Terms",
+    "rights_reserved": "Kaikki oikeudet pidätetään.",
+    "privacy": "Yksityisyys",
+    "terms": "Ehdot",
     "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
     "badges": {
-      "guarantee": "30-Day Guarantee",
-      "instant_access": "Instant Access",
-      "lifetime_updates": "Lifetime Updates"
+      "guarantee": "30 päivän takuu",
+      "instant_access": "Välitön pääsy",
+      "lifetime_updates": "Elinkaaripäivitykset"
     }
   },
   "trust": {
-    "title": "Trusted by teams worldwide",
+    "title": "Luotettu joukkueet ympäri maailmaa",
     "readers_count": "1 247 lukijaa",
     "company_names": []
   },
@@ -195,113 +195,113 @@
       "buy_now_dash": "Osta nyt —",
       "view_modules": "Tutustu moduuleihin",
       "ssl_secure": "Turvallinen SSL-maksu",
-      "instant_download": "Instant Download",
-      "lifetime_access": "Lifetime Access",
-      "guarantee_days": "30-Day Guarantee",
-      "section_who": "// 01 — Who Is This For",
-      "is_this_for_you": "Is This Course For You?",
-      "perfect_for": "Perfect for you if:",
-      "p_struggle": "You struggle to make ends meet",
-      "p_cut_costs": "You want to cut costs without sacrificing quality of life",
+      "instant_download": "Välitön lataus",
+      "lifetime_access": "Elinkaarikäyttö",
+      "guarantee_days": "30 päivän takuu",
+      "section_who": "Kenelle tämä on?",
+      "is_this_for_you": "Onko tämä sinulle?",
+      "perfect_for": "Täydellinen sinulle, jos:",
+      "p_struggle": "Kamppailet tienataksesi",
+      "p_cut_costs": "Haluat leikata kustannuksia uhraamatta elämänlaatua",
       "p_consumerism": "Tired of consumerism and debt culture",
       "p_practical": "Looking for practical, time-tested methods",
       "p_future": "Want a solid financial future for your family",
-      "not_for": "Not for you if:",
+      "not_for": "Ei sinulle, jos:",
       "n_quick": "Looking for get-rich-quick schemes",
       "n_habits": "Not willing to change spending habits",
       "n_quick_fix": "Prefer quick fixes over a solid path",
       "n_implement": "Not willing to implement what you learn",
       "n_advice": "Looking for personalized financial advice",
-      "section_learn": "// 02 — What You'll Learn",
-      "masters_secrets": "The Amish Masters' Secrets",
+      "section_learn": "Mitä sinä opit?",
+      "masters_secrets": "Amish Mastersin salaisuudet",
       "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
-      "section_author": "// 03 — The Author",
-      "behind_course": "Behind This Course",
-      "your_name": "Your Name Here",
+      "section_author": "Kirjoittaja",
+      "behind_course": "Tämän kurssin takana",
+      "your_name": "Nimi tässä",
       "researcher_author": "Researcher · Author · Traveler",
       "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
-      "section_content": "// 04 — Course Content",
-      "what_inside": "What You'll Find Inside",
-      "also_includes": "Also includes:",
-      "inc_full_ebook": "Full eBook (PDF, ePub, Kindle)",
-      "inc_checklist": "Printable 30-day checklist",
-      "inc_excel": "Amish budget Excel sheet",
-      "inc_shopping": "Weekly shopping list template",
-      "inc_lifetime": "Lifetime member area access",
-      "inc_updates": "Free future updates",
-      "section_offer": "// 05 — The Offer",
-      "invest_yourself": "Invest in Yourself",
-      "launch_offer": "Launch Offer",
-      "complete_package": "Complete Package",
-      "course_value": "Course: $97",
-      "bonus_value": "Bonus: $27",
-      "one_time": "One-time payment — no subscription",
-      "launch_price": "Launch price — then $37",
-      "inc_course_full": "Full course (value $97)",
+      "section_content": "// 04 ",
+      "what_inside": "Mitä löydät sisältä",
+      "also_includes": "Sisältää myös:",
+      "inc_full_ebook": "Koko eBook (PDF, ePub, Kindle)",
+      "inc_checklist": "Tulostettava 30 päivän tarkistuslista",
+      "inc_excel": "Amish budget Excel arkki",
+      "inc_shopping": "Viikoittainen ostoslistamalli",
+      "inc_lifetime": "Elinikäinen jäsenalue",
+      "inc_updates": "Vapaat tulevaisuuden päivitykset",
+      "section_offer": "Tarjous",
+      "invest_yourself": "Sijoittaudu itseesi",
+      "launch_offer": "Tarjous",
+      "complete_package": "Täydellinen pakkaus",
+      "course_value": "Kurssi: 97 dollaria",
+      "bonus_value": "Bonus: 27 dollaria",
+      "one_time": "Kertamaksu Ei tilausta",
+      "launch_price": "Käynnistä hinta ... sitten $37",
+      "inc_course_full": "Koko kurssi (arvo 97 dollaria)",
       "inc_ebook": "eBook PDF, ePub, Kindle",
-      "inc_checklist2": "Printable 30-day checklist",
-      "inc_excel2": "Amish budget Excel sheet",
-      "inc_access_updates": "Lifetime access + updates",
-      "inc_bonus_shopping": "BONUS: Weekly shopping list (value $27)",
-      "unlock_now": "Unlock Access Now",
-      "guarantee_title": "30-Day Money-Back Guarantee",
+      "inc_checklist2": "Tulostettava 30 päivän tarkistuslista",
+      "inc_excel2": "Amish budget Excel arkki",
+      "inc_access_updates": "Elinikäinen käyttö + päivitykset",
+      "inc_bonus_shopping": "BONUS: Viikoittainen ostoslista (arvo $27)",
+      "unlock_now": "Avaa pääsy nyt",
+      "guarantee_title": "30 päivän palautustakuu",
       "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
-      "section_testimonials": "// 06 — Testimonials",
-      "testimonial_text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
+      "section_testimonials": "Suosittelut",
+      "testimonial_text": "Käytin amishien budjettimenetelmää ja kahden kuukauden kuluttua laskin kulujani 35 prosentilla. 30 päivän tarkistuslista oli käännekohta. Viimeinkin kurssi, joka todella toimii.",
       "testimonial_name": "Marco R.",
-      "testimonial_role": "Rome — early readers",
-      "section_faq": "// 07 — FAQ",
-      "faq_title": "Frequently Asked Questions",
-      "offer_valid": "Offer valid this week",
-      "final_cta": "Start Your Journey to Financial Freedom Today",
-      "final_sub": "Join hundreds of people who have already transformed their relationship with money.",
-      "unlock_dash": "Unlock Access —",
-      "guarantee_badge": "30-Day Guarantee",
-      "instant_access_badge": "Instant Access",
-      "lifetime_badge": "Lifetime Updates",
-      "rights_reserved": "All rights reserved.",
-      "privacy": "Privacy",
-      "terms": "Terms",
+      "testimonial_role": "Rooma...",
+      "section_faq": "// 07",
+      "faq_title": "Usein kysytyt kysymykset",
+      "offer_valid": "Tarjous on voimassa tällä viikolla",
+      "final_cta": "Aloita matkasi taloudelliseen vapauteen tänään",
+      "final_sub": "Liity satoihin ihmisiin, jotka ovat jo muuttaneet suhdettaan rahalla.",
+      "unlock_dash": "Avaa lukitus",
+      "guarantee_badge": "30 päivän takuu",
+      "instant_access_badge": "Välitön pääsy",
+      "lifetime_badge": "Elinkaaripäivitykset",
+      "rights_reserved": "Kaikki oikeudet pidätetään.",
+      "privacy": "Yksityisyys",
+      "terms": "Ehdot",
       "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
-      "features": "Features",
-      "pricing": "Pricing",
-      "testimonials": "Testimonials",
-      "contact": "Contact",
-      "get_started": "Get Started",
-      "learn_more": "Learn More",
-      "member_area": "Member Area",
-      "back_to_landing": "Back to Landing",
-      "buy_now": "Buy Now",
+      "features": "Ominaisuudet",
+      "pricing": "Hinnoittelu",
+      "testimonials": "Todistukset",
+      "contact": "Yhteystiedot",
+      "get_started": "Aloita",
+      "learn_more": "Lue lisää",
+      "member_area": "Jäsenvaltio",
+      "back_to_landing": "Takaisin maihinnousuun",
+      "buy_now": "Osta nyt",
       "currency_symbol": "$",
-      "new_badge": "New",
-      "the_problem": "The Problem",
-      "our_story": "Our Story",
-      "what_learn": "What You'll Learn",
-      "course_lessons": "Course Lessons",
-      "curriculum": "Curriculum",
-      "free_tier": "Free",
+      "new_badge": "Uusi",
+      "the_problem": "Ongelma",
+      "our_story": "Meidän tarinamme",
+      "what_learn": "Mitä opit",
+      "course_lessons": "Opintojaksot",
+      "curriculum": "Opetussuunnitelma",
+      "free_tier": "Vapaa",
       "pro_tier": "Pro",
       "per_month": "/mo",
-      "start_free": "Start Free",
-      "popular": "Popular",
-      "free_title": "To get started",
-      "pro_title": "To grow",
-      "trusted_by": "Trusted by teams worldwide",
-      "offer_badge": "Launch Offer",
-      "price_special": "Special launch price",
-      "buy_and_access": "Buy & Access Instantly",
-      "bestseller": "Best Seller",
-      "story_badge": "// The True Story",
-      "story_title": "My Experience Among the Amish",
-      "story_subtitle": "Three months in Pennsylvania, twelve families interviewed, an economic system that has worked for 300 years.",
+      "start_free": "Käynnistä vapaa",
+      "popular": "Suosittu",
+      "free_title": "Aloittaa",
+      "pro_title": "Kasvaa",
+      "trusted_by": "Luotettu joukkueet ympäri maailmaa",
+      "offer_badge": "Tarjous",
+      "price_special": "Erityinen käynnistyshinta",
+      "buy_and_access": "Osta & käyttö välittömästi",
+      "bestseller": "Paras myyjä",
+      "story_badge": "/ / Todellinen tarina",
+      "story_title": "Kokemukseni amissien keskuudessa",
+      "story_subtitle": "Kolme kuukautta Pennsylvaniassa, 12 perhettä haastateltiin, talousjärjestelmä, joka on toiminut 300 vuotta.",
       "amish_life": "Amish Life",
-      "caption_1": "Daily life in the Amish community: simplicity, self-sufficiency, and financial wisdom passed down through generations.",
-      "caption_2": "The barter and exchange system that eliminates the need for cash and builds lasting trust relationships.",
-      "caption_3": "The Amish household economy: how a family lives on 60% less than the national average.",
-      "tag_1": "Economic Anthropology",
-      "tag_2": "Amish Studies",
-      "tag_3": "Financial Consulting",
-      "brand_name": "Courssy",
+      "caption_1": "Päivittäinen elämä amishien yhteisössä: yksinkertaisuus, omavaraisuus ja taloudellinen viisaus kulkivat sukupolvien läpi.",
+      "caption_2": "Vaihto- ja vaihtojärjestelmä, joka poistaa rahan tarpeen ja rakentaa pysyviä luottamussuhteita.",
+      "caption_3": "Amish-talous: miten perhe elää 60 prosenttia vähemmän kuin kansallinen keskiarvo.",
+      "tag_1": "Talousantropologia",
+      "tag_2": "Amish-tutkimukset",
+      "tag_3": "Rahoitusneuvonta",
+      "brand_name": "CourssyCity name (optional, probably does not need a translation)",
       "reviewer": "Marco R., early readers",
       "language_switch": "EN",
       "language_switch_en": "EN",
@@ -313,17 +313,17 @@
     }
   },
   "audience": {
-    "badge": "// 01 — Who Is This For",
-    "title": "Is This Course For You?",
-    "perfect_for": "Perfect for you if:",
+    "badge": "Kenelle tämä on?",
+    "title": "Onko tämä sinulle?",
+    "perfect_for": "Täydellinen sinulle, jos:",
     "perfect_items": [
-      "You struggle to make ends meet",
-      "You want to cut costs without sacrificing quality of life",
+      "Kamppailet tienataksesi",
+      "Haluat leikata kustannuksia uhraamatta elämänlaatua",
       "Tired of consumerism and debt culture",
       "Looking for practical, time-tested methods",
       "Want a solid financial future for your family"
     ],
-    "not_for": "Not for you if:",
+    "not_for": "Ei sinulle, jos:",
     "not_items": [
       "Looking for get-rich-quick schemes",
       "Not willing to change spending habits",
@@ -333,17 +333,17 @@
     ]
   },
   "course": {
-    "back_to_course": "Back to Landing",
-    "module_label": "Curriculum",
-    "now_playing": "Now playing",
-    "page_label": "Page",
-    "reading_progress": "Reading Progress",
-    "download_pdf": "Download PDF",
-    "chapter": "Chapter"
+    "back_to_course": "Takaisin maihinnousuun",
+    "module_label": "Opetussuunnitelma",
+    "now_playing": "Nyt pelataan.",
+    "page_label": "Sivu",
+    "reading_progress": "Edistyminen",
+    "download_pdf": "Lataa PDF",
+    "chapter": "Luku"
   },
   "lessons": {
-    "badge": "// 04 — Course Content",
-    "title": "What You'll Find Inside",
+    "badge": "// 04 ",
+    "title": "Mitä löydät sisältä",
     "items": []
   }
 }

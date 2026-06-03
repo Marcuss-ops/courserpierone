@@ -6,184 +6,184 @@
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
-    "brand": "Amish secrets",
-    "features": "Features",
-    "pricing": "Pricing",
-    "testimonials": "Testimonials",
-    "faq": "FAQ",
-    "contact": "Contact",
-    "get_started": "Get Started",
-    "learn_more": "Learn More",
-    "member_area": "Member Area",
-    "back_to_landing": "Back to Landing"
+    "brand": "アミッシュの秘密",
+    "features": "特徴:",
+    "pricing": "料金について",
+    "testimonials": "お客様の声",
+    "faq": "よくある質問",
+    "contact": "お問い合わせ",
+    "get_started": "始める",
+    "learn_more": "もっと知る",
+    "member_area": "会員エリア",
+    "back_to_landing": "着陸に戻る"
   },
   "hero": {
-    "badge": "New",
+    "badge": "ニュース",
     "title": "アーミッシュの秘密：節約生活と賢いお金の管理術",
     "subtitle": "アーミッシュコミュニティの倹約的な生き方の秘訣を解き明かします。充実した動画モジュールとダウンロード可能なPDFが含まれています。",
-    "cta": "Get Started",
-    "secondary_cta": "Learn More",
-    "price_label": "Special launch price",
-    "one_time_payment": "One-time payment — no subscription"
+    "cta": "始める",
+    "secondary_cta": "もっと知る",
+    "price_label": "特別発売価格",
+    "one_time_payment": "一度の支払い — サブスクリプションなし"
   },
   "problem": {
-    "badge": "The Problem",
+    "badge": "問題点",
     "title": "月末にお金が残らず、疲れていませんか？現代社会は私たちに過剰な消費を促しています。",
     "text": ""
   },
   "story": {
-    "badge": "Our Story",
-    "title": "La mia esperienza tra gli Amish",
+    "badge": "私たちの物語",
+    "title": "ラ mia esperienza tra gli Amish",
     "image_captions": [
-      "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria.",
-      "Il sistema di baratto e scambio che elimina il bisogno di denaro contante.",
-      "L'economia domestica Amish: come una famiglia riesce a vivere con il 60% in meno."
+      "ラ・ヴィタ・コチディアナ・ネラ・コンビニカ・アミッシュ: semplicità, autosufficienza saggezza finanziaria.",
+      "Il sistema di baratto e scambio che elimina il bisogno di denaro conante.",
+      "L'economia Domestica Amish: una famiglia riesce a vivere con il 60% に meno."
     ],
     "quote": "アーミッシュの人々は、私たちが使うお金のわずかな額でしか生活していません。本コースではその秘密を明らかにします。"
   },
   "author": {
-    "badge": "// 03 — The Author",
-    "title": "Behind This Course",
-    "name": "Alessandro Rinaldi",
+    "badge": "// 03 — 著者",
+    "title": "このコースの裏側",
+    "name": "アレッサンドロ・リナディ",
     "role": "Researcher · Author · Traveler",
     "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
     "tags": [
-      "Saggezza Finanziaria",
-      "Vita Sostenibile",
-      "Educazione"
+      "サッゲッツァ・フィンガリア",
+      "ヴィタ・ソステニビル",
+      "エデュカツィオーネ"
     ]
   },
   "modules": {
-    "badge": "// 02 — What You'll Learn",
-    "title": "The Amish Masters' Secrets",
+    "badge": "// 02 — あなたが学ぶこと",
+    "title": "アミッシュ・マスターズの秘密",
     "description": "8 practical modules that turn Amish wisdom into concrete actions.",
     "items": [
       {
-        "title": "Amish Budget",
-        "desc": "Live on 30% less without sacrifice."
+        "title": "Amish Budget, オーストラリア",
+        "desc": "犠牲なしで30%オフライブ。"
       },
       {
-        "title": "Infinite Pantry",
-        "desc": "The food storage method that eliminates waste."
+        "title": "無限のパントリー",
+        "desc": "廃棄物を除去する食品貯蔵方法。"
       },
       {
-        "title": "Zero Debt",
-        "desc": "The framework to get out of debt forever."
+        "title": "ゼロデビット",
+        "desc": "債務を永遠に受け止める枠組み。"
       },
       {
-        "title": "Fix Everything",
-        "desc": "12 essential tools to repair yourself."
+        "title": "すべてを固定する",
+        "desc": "自分自身を修復するための12の重要なツール。"
       },
       {
-        "title": "Money-Free Exchange",
-        "desc": "How to activate a barter network."
+        "title": "無料の両替",
+        "desc": "バリタネットワークの活性化方法"
       },
       {
-        "title": "Farm to Table",
-        "desc": "Guide to home gardening and zero-waste cooking."
+        "title": "農場からテーブル",
+        "desc": "家庭の園芸とゼロ廃棄物の調理ガイド。"
       },
       {
-        "title": "Free Energy",
-        "desc": "How to cut utility bills by 50%."
+        "title": "自由エネルギー",
+        "desc": "ユーティリティの請求書を50%削減する方法。"
       },
       {
-        "title": "30-Day Plan",
-        "desc": "Day-by-day checklist to transform your finances."
+        "title": "30日間プラン",
+        "desc": "日々のチェックリストで資金を変換できます。"
       }
     ]
   },
   "includes": {
-    "title": "Also includes:",
+    "title": "また下記のものを含んでいます:",
     "items": [
-      "Full eBook (PDF, ePub, Kindle)",
-      "Printable 30-day checklist",
-      "Amish budget Excel sheet",
-      "Weekly shopping list template",
-      "Lifetime member area access",
-      "Free future updates"
+      "完全な電子ブック(PDF、ePub、Kindle)",
+      "印刷可能な30日間のチェックリスト",
+      "アミッシュ予算エクセルシート",
+      "ウィークリーショッピングリストテンプレート",
+      "ライフタイム会員エリアアクセス",
+      "自由未来のアップデート"
     ]
   },
   "testimonials": {
-    "badge": "// 06 — Testimonials",
-    "title": "Testimonials",
+    "badge": "// 06 — お客様の声",
+    "title": "お客様の声",
     "items": [
       {
-        "text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
-        "name": "Marco R.",
-        "role": "Rome — early readers"
+        "text": "アミッシュの予算方法を適用し、2ヶ月で35%の費用を削減しました。 30日間のチェックリストは、ターンポイントでした。 最後に、本当に働くコース。",
+        "name": "マルコR.",
+        "role": "ローマ — 初期読者"
       }
     ]
   },
   "offer": {
-    "badge": "Launch Offer",
-    "title": "Invest in Yourself",
-    "complete_package": "Complete Package",
-    "course_value": "Course: $97",
-    "bonus_value": "Bonus: $27",
+    "badge": "リリースオファー",
+    "title": "自分への投資",
+    "complete_package": "完全なパッケージ",
+    "course_value": "コース: $97",
+    "bonus_value": "ボーナス: $27",
     "price_text": "",
-    "one_time": "One-time payment — no subscription",
-    "launch_price": "Launch price — then $37",
-    "cta": "Unlock Access Now",
-    "guarantee_title": "30-Day Money-Back Guarantee",
+    "one_time": "一度の支払い — サブスクリプションなし",
+    "launch_price": "発売価格 — $37",
+    "cta": "今すぐアクセスを解除",
+    "guarantee_title": "30日返金保証",
     "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
     "includes": [
-      "Full course (value $97)",
-      "eBook PDF, ePub, Kindle",
-      "Printable 30-day checklist",
-      "Amish budget Excel sheet",
-      "Lifetime access + updates",
-      "BONUS: Weekly shopping list (value $27)"
+      "フルコース (値 $97)",
+      "eBook PDF、ePub、Kindle",
+      "印刷可能な30日間のチェックリスト",
+      "アミッシュ予算エクセルシート",
+      "ライフタイムアクセス+更新",
+      "ボーナス: 週刊ショッピングリスト (値 $27)"
     ]
   },
   "faq": {
-    "badge": "// 07 — FAQ",
-    "title": "Frequently Asked Questions",
-    "offer_valid": "Offer valid this week",
+    "badge": "// 07 — よくある質問",
+    "title": "よくある質問",
+    "offer_valid": "今週の有効なオファー",
     "items": [
       {
-        "q": "What exactly is included?",
-        "a": "You get the complete eBook in PDF, ePub, and Kindle formats. Plus lifetime access to all future updates."
+        "q": "正確に含まれているものは?",
+        "a": "PDF、ePub、Kindle 形式の完全な電子ブックを入手できます。 すべての将来のアップデートへの生涯アクセス"
       },
       {
-        "q": "Is it in English?",
-        "a": "Yes, the course is fully available in English."
+        "q": "英語では?",
+        "a": "はい、コースは英語のみでご利用いただけます。"
       },
       {
-        "q": "What format is the course in?",
-        "a": "eBook in PDF, ePub, and Kindle formats. Videos are in MP4 format."
+        "q": "コースの形式は?",
+        "a": "PDF、ePub、Kindle形式の電子ブック ビデオはMP4フォーマットにあります。"
       },
       {
-        "q": "When do I get access?",
-        "a": "Immediately after payment."
+        "q": "アクセスはいつですか?",
+        "a": "お支払い後すぐに。"
       },
       {
-        "q": "What if I'm not satisfied?",
-        "a": "You're protected by our 30-day money-back guarantee."
+        "q": "満足していないのは?",
+        "a": "30日間の返金保証によって保護されています。"
       },
       {
-        "q": "How long does it take?",
-        "a": "The complete program takes about 3-4 hours."
+        "q": "どのくらいの時間がかかりますか?",
+        "a": "完全なプログラムは3〜4時間かかります。"
       }
     ]
   },
   "final_cta": {
-    "title": "Start Your Journey to Financial Freedom Today",
-    "subtitle": "Join hundreds of people who have already transformed their relationship with money.",
-    "badge": "Offer valid this week"
+    "title": "今日の金融自由への旅を始めよう",
+    "subtitle": "すでにお金との関係を変革してきた何百人も参加してください。",
+    "badge": "今週の有効なオファー"
   },
   "footer": {
-    "rights_reserved": "All rights reserved.",
-    "privacy": "Privacy",
-    "terms": "Terms",
+    "rights_reserved": "お問い合わせ",
+    "privacy": "プロフィール",
+    "terms": "コンテンツ",
     "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
     "badges": {
-      "guarantee": "30-Day Guarantee",
-      "instant_access": "Instant Access",
-      "lifetime_updates": "Lifetime Updates"
+      "guarantee": "30日保証",
+      "instant_access": "即時アクセス",
+      "lifetime_updates": "ライフタイムの更新"
     }
   },
   "trust": {
-    "title": "Trusted by teams worldwide",
+    "title": "世界中のチームから信頼される",
     "readers_count": "読者数 1,247名",
     "company_names": []
   },
@@ -195,113 +195,113 @@
       "buy_now_dash": "今すぐ購入 —",
       "view_modules": "モジュールを見る",
       "ssl_secure": "SSLで保護された安全な決済",
-      "instant_download": "Instant Download",
-      "lifetime_access": "Lifetime Access",
-      "guarantee_days": "30-Day Guarantee",
-      "section_who": "// 01 — Who Is This For",
-      "is_this_for_you": "Is This Course For You?",
-      "perfect_for": "Perfect for you if:",
-      "p_struggle": "You struggle to make ends meet",
-      "p_cut_costs": "You want to cut costs without sacrificing quality of life",
+      "instant_download": "インスタントダウンロード",
+      "lifetime_access": "ライフタイムアクセス",
+      "guarantee_days": "30日保証",
+      "section_who": "// 01 — 誰がこれなのか",
+      "is_this_for_you": "このコースはあなたですか?",
+      "perfect_for": "あなたのために完成して下さい:",
+      "p_struggle": "終わりが会うのに苦労します",
+      "p_cut_costs": "人生の質を犠牲にすることなくコストを削減したい",
       "p_consumerism": "Tired of consumerism and debt culture",
       "p_practical": "Looking for practical, time-tested methods",
       "p_future": "Want a solid financial future for your family",
-      "not_for": "Not for you if:",
+      "not_for": "お問い合わせ",
       "n_quick": "Looking for get-rich-quick schemes",
       "n_habits": "Not willing to change spending habits",
       "n_quick_fix": "Prefer quick fixes over a solid path",
       "n_implement": "Not willing to implement what you learn",
       "n_advice": "Looking for personalized financial advice",
-      "section_learn": "// 02 — What You'll Learn",
-      "masters_secrets": "The Amish Masters' Secrets",
+      "section_learn": "// 02 — あなたが学ぶこと",
+      "masters_secrets": "アミッシュ・マスターズの秘密",
       "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
-      "section_author": "// 03 — The Author",
-      "behind_course": "Behind This Course",
-      "your_name": "Your Name Here",
+      "section_author": "// 03 — 著者",
+      "behind_course": "このコースの裏側",
+      "your_name": "あなたの名前はここにあります",
       "researcher_author": "Researcher · Author · Traveler",
       "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
-      "section_content": "// 04 — Course Content",
-      "what_inside": "What You'll Find Inside",
-      "also_includes": "Also includes:",
-      "inc_full_ebook": "Full eBook (PDF, ePub, Kindle)",
-      "inc_checklist": "Printable 30-day checklist",
-      "inc_excel": "Amish budget Excel sheet",
-      "inc_shopping": "Weekly shopping list template",
-      "inc_lifetime": "Lifetime member area access",
-      "inc_updates": "Free future updates",
-      "section_offer": "// 05 — The Offer",
-      "invest_yourself": "Invest in Yourself",
-      "launch_offer": "Launch Offer",
-      "complete_package": "Complete Package",
-      "course_value": "Course: $97",
-      "bonus_value": "Bonus: $27",
-      "one_time": "One-time payment — no subscription",
-      "launch_price": "Launch price — then $37",
-      "inc_course_full": "Full course (value $97)",
-      "inc_ebook": "eBook PDF, ePub, Kindle",
-      "inc_checklist2": "Printable 30-day checklist",
-      "inc_excel2": "Amish budget Excel sheet",
-      "inc_access_updates": "Lifetime access + updates",
-      "inc_bonus_shopping": "BONUS: Weekly shopping list (value $27)",
-      "unlock_now": "Unlock Access Now",
-      "guarantee_title": "30-Day Money-Back Guarantee",
+      "section_content": "// 04 — コース内容",
+      "what_inside": "あなたがインサイドを見つける",
+      "also_includes": "また下記のものを含んでいます:",
+      "inc_full_ebook": "完全な電子ブック(PDF、ePub、Kindle)",
+      "inc_checklist": "印刷可能な30日間のチェックリスト",
+      "inc_excel": "アミッシュ予算エクセルシート",
+      "inc_shopping": "ウィークリーショッピングリストテンプレート",
+      "inc_lifetime": "ライフタイム会員エリアアクセス",
+      "inc_updates": "自由未来のアップデート",
+      "section_offer": "// 05 — オファー",
+      "invest_yourself": "自分への投資",
+      "launch_offer": "リリースオファー",
+      "complete_package": "完全なパッケージ",
+      "course_value": "コース: $97",
+      "bonus_value": "ボーナス: $27",
+      "one_time": "一度の支払い — サブスクリプションなし",
+      "launch_price": "発売価格 — $37",
+      "inc_course_full": "フルコース (値 $97)",
+      "inc_ebook": "eBook PDF、ePub、Kindle",
+      "inc_checklist2": "印刷可能な30日間のチェックリスト",
+      "inc_excel2": "アミッシュ予算エクセルシート",
+      "inc_access_updates": "ライフタイムアクセス+更新",
+      "inc_bonus_shopping": "ボーナス: 週刊ショッピングリスト (値 $27)",
+      "unlock_now": "今すぐアクセスを解除",
+      "guarantee_title": "30日返金保証",
       "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
-      "section_testimonials": "// 06 — Testimonials",
-      "testimonial_text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
-      "testimonial_name": "Marco R.",
-      "testimonial_role": "Rome — early readers",
-      "section_faq": "// 07 — FAQ",
-      "faq_title": "Frequently Asked Questions",
-      "offer_valid": "Offer valid this week",
-      "final_cta": "Start Your Journey to Financial Freedom Today",
-      "final_sub": "Join hundreds of people who have already transformed their relationship with money.",
-      "unlock_dash": "Unlock Access —",
-      "guarantee_badge": "30-Day Guarantee",
-      "instant_access_badge": "Instant Access",
-      "lifetime_badge": "Lifetime Updates",
-      "rights_reserved": "All rights reserved.",
-      "privacy": "Privacy",
-      "terms": "Terms",
+      "section_testimonials": "// 06 — お客様の声",
+      "testimonial_text": "アミッシュの予算方法を適用し、2ヶ月で35%の費用を削減しました。 30日間のチェックリストは、ターンポイントでした。 最後に、本当に働くコース。",
+      "testimonial_name": "マルコR.",
+      "testimonial_role": "ローマ — 初期読者",
+      "section_faq": "// 07 — よくある質問",
+      "faq_title": "よくある質問",
+      "offer_valid": "今週の有効なオファー",
+      "final_cta": "今日の金融自由への旅を始めよう",
+      "final_sub": "すでにお金との関係を変革してきた何百人も参加してください。",
+      "unlock_dash": "アクセスの解除 —",
+      "guarantee_badge": "30日保証",
+      "instant_access_badge": "即時アクセス",
+      "lifetime_badge": "ライフタイムの更新",
+      "rights_reserved": "お問い合わせ",
+      "privacy": "プロフィール",
+      "terms": "コンテンツ",
       "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
-      "features": "Features",
-      "pricing": "Pricing",
-      "testimonials": "Testimonials",
-      "contact": "Contact",
-      "get_started": "Get Started",
-      "learn_more": "Learn More",
-      "member_area": "Member Area",
-      "back_to_landing": "Back to Landing",
-      "buy_now": "Buy Now",
+      "features": "特徴:",
+      "pricing": "料金について",
+      "testimonials": "お客様の声",
+      "contact": "お問い合わせ",
+      "get_started": "始める",
+      "learn_more": "もっと知る",
+      "member_area": "会員エリア",
+      "back_to_landing": "着陸に戻る",
+      "buy_now": "今すぐ購入",
       "currency_symbol": "$",
-      "new_badge": "New",
-      "the_problem": "The Problem",
-      "our_story": "Our Story",
-      "what_learn": "What You'll Learn",
-      "course_lessons": "Course Lessons",
-      "curriculum": "Curriculum",
-      "free_tier": "Free",
-      "pro_tier": "Pro",
+      "new_badge": "ニュース",
+      "the_problem": "問題点",
+      "our_story": "私たちの物語",
+      "what_learn": "あなたが学ぶことができるもの",
+      "course_lessons": "コースレッスン",
+      "curriculum": "カリキュラム",
+      "free_tier": "無料",
+      "pro_tier": "プロフィール",
       "per_month": "/mo",
-      "start_free": "Start Free",
-      "popular": "Popular",
-      "free_title": "To get started",
-      "pro_title": "To grow",
-      "trusted_by": "Trusted by teams worldwide",
-      "offer_badge": "Launch Offer",
-      "price_special": "Special launch price",
-      "buy_and_access": "Buy & Access Instantly",
-      "bestseller": "Best Seller",
-      "story_badge": "// The True Story",
-      "story_title": "My Experience Among the Amish",
-      "story_subtitle": "Three months in Pennsylvania, twelve families interviewed, an economic system that has worked for 300 years.",
-      "amish_life": "Amish Life",
-      "caption_1": "Daily life in the Amish community: simplicity, self-sufficiency, and financial wisdom passed down through generations.",
-      "caption_2": "The barter and exchange system that eliminates the need for cash and builds lasting trust relationships.",
-      "caption_3": "The Amish household economy: how a family lives on 60% less than the national average.",
-      "tag_1": "Economic Anthropology",
-      "tag_2": "Amish Studies",
-      "tag_3": "Financial Consulting",
-      "brand_name": "Courssy",
+      "start_free": "無料スタート",
+      "popular": "人気カテゴリー",
+      "free_title": "はじめに",
+      "pro_title": "成長する",
+      "trusted_by": "世界中のチームから信頼される",
+      "offer_badge": "リリースオファー",
+      "price_special": "特別発売価格",
+      "buy_and_access": "すぐに購入&アクセス",
+      "bestseller": "ベストセラー",
+      "story_badge": "// 真の物語",
+      "story_title": "アマッシュの中で私の経験",
+      "story_subtitle": "ペンシルバニア州に3か月、300年間働いた経済システムにインタビューした12人の家族。",
+      "amish_life": "アミッシュライフ",
+      "caption_1": "アミッシュコミュニティの日常生活:シンプルさ、自給、世代を通した金融知恵。",
+      "caption_2": "現金の必要性を排除し、永続的な信頼関係を構築するためのバーターと交換システム。",
+      "caption_3": "アミッシュの世帯経済:家族が国民の平均より60%に住んでいる方法。",
+      "tag_1": "経済人類学",
+      "tag_2": "アミッシュ・スタディ",
+      "tag_3": "金融コンサルティング",
+      "brand_name": "カルシー",
       "reviewer": "Marco R., early readers",
       "language_switch": "EN",
       "language_switch_en": "EN",
@@ -313,17 +313,17 @@
     }
   },
   "audience": {
-    "badge": "// 01 — Who Is This For",
-    "title": "Is This Course For You?",
-    "perfect_for": "Perfect for you if:",
+    "badge": "// 01 — 誰がこれなのか",
+    "title": "このコースはあなたですか?",
+    "perfect_for": "あなたのために完成して下さい:",
     "perfect_items": [
-      "You struggle to make ends meet",
-      "You want to cut costs without sacrificing quality of life",
+      "終わりが会うのに苦労します",
+      "人生の質を犠牲にすることなくコストを削減したい",
       "Tired of consumerism and debt culture",
       "Looking for practical, time-tested methods",
       "Want a solid financial future for your family"
     ],
-    "not_for": "Not for you if:",
+    "not_for": "お問い合わせ",
     "not_items": [
       "Looking for get-rich-quick schemes",
       "Not willing to change spending habits",
@@ -333,17 +333,17 @@
     ]
   },
   "course": {
-    "back_to_course": "Back to Landing",
-    "module_label": "Curriculum",
-    "now_playing": "Now playing",
-    "page_label": "Page",
-    "reading_progress": "Reading Progress",
-    "download_pdf": "Download PDF",
-    "chapter": "Chapter"
+    "back_to_course": "着陸に戻る",
+    "module_label": "カリキュラム",
+    "now_playing": "今すぐプレイ",
+    "page_label": "サイトマップ",
+    "reading_progress": "読書進捗",
+    "download_pdf": "PDFダウンロード",
+    "chapter": "トピックス"
   },
   "lessons": {
-    "badge": "// 04 — Course Content",
-    "title": "What You'll Find Inside",
+    "badge": "// 04 — コース内容",
+    "title": "あなたがインサイドを見つける",
     "items": []
   }
 }

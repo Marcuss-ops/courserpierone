@@ -1,0 +1,344 @@
+{
+  "locale": "eu",
+  "seo": {
+    "title": "Amish Secrets: nola bizi aurrezkiekin eta dirua kudeatu",
+    "description": "Aurkitu Amish-eko komunitatearen sekretu guztiak. Bideo modulu osoak eta PDF deskargagarriak ditu.",
+    "ogImage": "/courses/amish-secrets/cover.png"
+  },
+  "nav": {
+    "brand": "Amish-en sekretuak",
+    "features": "Ezaugarriak",
+    "pricing": "Prezioak",
+    "testimonials": "Testigantzak",
+    "faq": "FAQ",
+    "contact": "Kontaktua",
+    "get_started": "Hasi",
+    "learn_more": "Ikasi gehiago",
+    "member_area": "Kide-eremua",
+    "back_to_landing": "Lurrera itzuli"
+  },
+  "hero": {
+    "badge": "Berria",
+    "title": "Amish Secrets: nola bizi aurrezkiekin eta dirua kudeatu",
+    "subtitle": "Aurkitu Amish-eko komunitatearen sekretu guztiak. Bideo modulu osoak eta PDF deskargagarriak ditu.",
+    "cta": "Hasi",
+    "secondary_cta": "Ikasi gehiago",
+    "price_label": "Jaurtiketa-prezio berezia",
+    "one_time_payment": "Aldi baterako ordainketa - harpidetzarik ez"
+  },
+  "problem": {
+    "badge": "Arazoa",
+    "title": "Hilabetearen amaierara iristeaz nekatuta, aurrezkirik gabe? Gizarte modernoak gehiegizko kontsumora bultzatzen gaitu.",
+    "text": ""
+  },
+  "story": {
+    "badge": "Gure historia",
+    "title": "La mia esperienza tra gli Amish",
+    "image_captions": [
+      "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria.",
+      "Il sistema di baratto e scambio che elimina il bisogno di denaro contante.",
+      "L'economia domestica Amish: etorri una famiglia riesce a vivere con il 60% in meno."
+    ],
+    "quote": "Amishek bizitza aberats eta betea dute gastatzen dugunaren zati bat gastatzen dugun bitartean. Bide honetan erakusten dugu nola egiten duten."
+  },
+  "author": {
+    "badge": "// 03 - Egilea",
+    "title": "Ikastaro honen atzean",
+    "name": "Alessandro Rinaldi",
+    "role": "Ikertzailea · Egilea",
+    "bio": "[Gehitu zure istorioa hemen: 3 hilabete eman nituen Pennsylvanian, 12 amish familia elkarrizketatu nituen, haien sistema ekonomikoa aztertu nuen. Teoriarik ez, praktika besterik ez.",
+    "tags": [
+      "Saggezza Finanziaria",
+      "Vita Sostenibile",
+      "Educazione"
+    ]
+  },
+  "modules": {
+    "badge": "// 02 - Ikasiko duzuna",
+    "title": "Amish Masterseko sekretuak",
+    "description": "Amishen jakituria eguneroko bizitzako ekintza konkretu bihurtzen duten 8 modulu praktiko.",
+    "items": [
+      {
+        "title": "Amish Aurrekontua",
+        "desc": "Bizi %30 gutxiago sakrifiziorik gabe."
+      },
+      {
+        "title": "Infinite Pantry",
+        "desc": "Hondakinak ezabatzen dituen biltegiratze-metodoa."
+      },
+      {
+        "title": "Zero Debt",
+        "desc": "Zorretik betiko ateratzeko markoa."
+      },
+      {
+        "title": "Konpondu dena",
+        "desc": "Zure burua konpontzeko funtsezko 12 tresna."
+      },
+      {
+        "title": "Dirurik gabeko trukea",
+        "desc": "Nola aktibatu barter sare bat."
+      },
+      {
+        "title": "Baserritik mahaira",
+        "desc": "Etxeko jardinera eta zero hondakineko sukaldera."
+      },
+      {
+        "title": "Energia librea",
+        "desc": "Nola murriztu utilitate-fakturak % 50ean."
+      },
+      {
+        "title": "30 egunetako plana",
+        "desc": "Eguneko kontrol-zerrenda zure finantzak eraldatzeko."
+      }
+    ]
+  },
+  "includes": {
+    "title": "Baita zera ere:",
+    "items": [
+      "Full eBook (PDF, ePub, Kindle)",
+      "30 eguneko kontrol-zerrenda inprimatua",
+      "Amish aurrekontua Excel orria",
+      "Asteroko erosketa-zerrendaren txantiloia",
+      "Bizi-denborako kideentzako sarbidea",
+      "Etorkizuneko eguneraketak"
+    ]
+  },
+  "testimonials": {
+    "badge": "// 06 - Testigantzak",
+    "title": "Testigantzak",
+    "items": [
+      {
+        "text": "Amish-en aurrekontu-metodoa aplikatu nuen, eta bi hilabete barru gastu guztiak %35 murriztu nituen. 30 eguneko kontrol-zerrenda inflexio-puntua zen. Azkenean benetan funtzionatzen duen ikastaroa.",
+        "name": "Marco R.",
+        "role": "Erroma - lehen irakurleak"
+      }
+    ]
+  },
+  "offer": {
+    "badge": "Abiarazi eskaintza",
+    "title": "Inbertitu zeure burua",
+    "complete_package": "Pakete osoa",
+    "course_value": "Ikastaroa: $97",
+    "bonus_value": "Gainordaina: 27 dolar",
+    "price_text": "",
+    "one_time": "Aldi baterako ordainketa - harpidetzarik ez",
+    "launch_price": "Jaurti prezioa - orduan $ 37",
+    "cta": "Desblokeatu sarbidea orain",
+    "guarantee_title": "30 eguneko dirua itzultzeko bermea",
+    "guarantee_text": "Saiatu 30 egunez. Gutxienez 100 dolar gordetzen ez badituzu, kopuru osoa itzuliko dizugu. Galderarik ez, arazorik ez.",
+    "includes": [
+      "Ikastaro osoa (97 € balioa)",
+      "eBook PDF, ePub, Kindle",
+      "30 eguneko kontrol-zerrenda inprimatua",
+      "Amish aurrekontua Excel orria",
+      "Bizitzako sarbidea + eguneraketak",
+      "BONUS: asteko erosketa-zerrenda (balioa $27)"
+    ]
+  },
+  "faq": {
+    "badge": "// 07 - FAQ",
+    "title": "Maiz egiten diren galderak",
+    "offer_valid": "Aste honetan eskaintza baliozkoa",
+    "items": [
+      {
+        "q": "Zer sartzen da zehazki?",
+        "a": "eBook osoa lortzen duzu PDF, ePub eta Kindle formatuetan. Bizitza osorako sarbidea etorkizuneko eguneraketetarako."
+      },
+      {
+        "q": "Ingelesez dago?",
+        "a": "Bai, ikastaro osoa ingelesez dago."
+      },
+      {
+        "q": "Zein formatutan dago ibilbidea?",
+        "a": "eBook PDF, ePub eta Kindle formatuetan. Bideoak MP4 formatuan daude."
+      },
+      {
+        "q": "Noiz lortuko dut sarbidea?",
+        "a": "Ordaindu eta berehala."
+      },
+      {
+        "q": "Eta pozik ez banago?",
+        "a": "Gure 30 eguneko dirua itzultzeko bermeak babesten zaitu."
+      },
+      {
+        "q": "Zenbat denbora behar da?",
+        "a": "Programa osoak 3-4 ordu inguru irauten du."
+      }
+    ]
+  },
+  "final_cta": {
+    "title": "Hasi bidaia gaur askatasun ekonomikora",
+    "subtitle": "Elkartu diruarekin harremana aldatu duten ehunka pertsona.",
+    "badge": "Aste honetan eskaintza baliozkoa"
+  },
+  "footer": {
+    "rights_reserved": "Eskubide guztiak erreserbatuta.",
+    "privacy": "Pribatutasuna",
+    "terms": "Baldintzak",
+    "legal_note": "Informazio digitaleko produktua da. Emaitzak aldatu eta konpromiso pertsonalaren mende egon daitezke. Amishen prezioak eta teknikak ikerketa etnografikoetan oinarritzen dira, eta agian ez dute zehatz-mehatz islatzen Amish komunitate guztien praktika garaikideak.",
+    "badges": {
+      "guarantee": "30 egunetako bermea",
+      "instant_access": "Berehalako sarbidea",
+      "lifetime_updates": "Bizitzako eguneraketak"
+    }
+  },
+  "trust": {
+    "title": "Mundu osoko taldeez fidatuta",
+    "readers_count": "1.247 irakurle",
+    "company_names": []
+  },
+  "ui": {
+    "labels": {
+      "instant_access": "Berehalako sarbidea",
+      "buy_now_arrow": "Erosi orain",
+      "readers": "1.247 irakurle",
+      "buy_now_dash": "Erosi orain...",
+      "view_modules": "Ikusi moduluak",
+      "ssl_secure": "SSL ordainketa segurua",
+      "instant_download": "Berehalako deskarga",
+      "lifetime_access": "Lifetime Access",
+      "guarantee_days": "30 egunetako bermea",
+      "section_who": "// 01 - Norentzat da hau?",
+      "is_this_for_you": "Ikastaro hau zuretzat da?",
+      "perfect_for": "Bikaina zuretzat, baldin eta:",
+      "p_struggle": "Borrokatu helburuak lortzeko",
+      "p_cut_costs": "Kostuak murriztu nahi dituzu bizi-kalitatea sakrifikatu gabe.",
+      "p_consumerism": "Nazkatuta zaude kontsumismoaz eta zorraren kulturaz.",
+      "p_practical": "Metodo praktikoak eta probatuak nahi dituzu.",
+      "p_future": "Finantza-etorkizun sendo bat eraiki nahi duzu zure familiarentzat",
+      "not_for": "Ez zuretzat, baldin eta:",
+      "n_quick": "Aberatsen bila zabiltza.",
+      "n_habits": "Ez duzu gastu-ohiturak aldatu nahi.",
+      "n_quick_fix": "Oinarri sendo baten gainean finka azkarrak nahiago dituzu.",
+      "n_implement": "Ez zaude prest ikasten duzuna ezartzeko.",
+      "n_advice": "Aholkularitza ekonomiko pertsonalizatua bilatzen ari zara.",
+      "section_learn": "// 02 - Ikasiko duzuna",
+      "masters_secrets": "Amish Masterseko sekretuak",
+      "modules_desc": "Amishen jakituria eguneroko bizitzako ekintza konkretu bihurtzen duten 8 modulu praktiko.",
+      "section_author": "// 03 - Egilea",
+      "behind_course": "Ikastaro honen atzean",
+      "your_name": "Zure izena hemen",
+      "researcher_author": "Ikertzailea · Egilea",
+      "author_bio": "[Gehitu zure istorioa hemen: 3 hilabete eman nituen Pennsylvanian, 12 amish familia elkarrizketatu nituen, haien sistema ekonomikoa aztertu nuen. Teoriarik ez, praktika besterik ez.",
+      "section_content": "// 04 - Edukia",
+      "what_inside": "Barruan aurkituko duzuna",
+      "also_includes": "Baita zera ere:",
+      "inc_full_ebook": "Full eBook (PDF, ePub, Kindle)",
+      "inc_checklist": "30 eguneko kontrol-zerrenda inprimatua",
+      "inc_excel": "Amish aurrekontua Excel orria",
+      "inc_shopping": "Asteroko erosketa-zerrendaren txantiloia",
+      "inc_lifetime": "Bizi-denborako kideentzako sarbidea",
+      "inc_updates": "Etorkizuneko eguneraketak",
+      "section_offer": "// 05 - Eskaintza",
+      "invest_yourself": "Inbertitu zeure burua",
+      "launch_offer": "Abiarazi eskaintza",
+      "complete_package": "Pakete osoa",
+      "course_value": "Ikastaroa: $97",
+      "bonus_value": "Gainordaina: 27 dolar",
+      "one_time": "Aldi baterako ordainketa - harpidetzarik ez",
+      "launch_price": "Jaurti prezioa - orduan $ 37",
+      "inc_course_full": "Ikastaro osoa (97 € balioa)",
+      "inc_ebook": "eBook PDF, ePub, Kindle",
+      "inc_checklist2": "30 eguneko kontrol-zerrenda inprimatua",
+      "inc_excel2": "Amish aurrekontua Excel orria",
+      "inc_access_updates": "Bizitzako sarbidea + eguneraketak",
+      "inc_bonus_shopping": "BONUS: asteko erosketa-zerrenda (balioa $27)",
+      "unlock_now": "Desblokeatu sarbidea orain",
+      "guarantee_title": "30 eguneko dirua itzultzeko bermea",
+      "guarantee_text": "Saiatu 30 egunez. Gutxienez 100 dolar gordetzen ez badituzu, kopuru osoa itzuliko dizugu. Galderarik ez, arazorik ez.",
+      "section_testimonials": "// 06 - Testigantzak",
+      "testimonial_text": "Amish-en aurrekontu-metodoa aplikatu nuen, eta bi hilabete barru gastu guztiak %35 murriztu nituen. 30 eguneko kontrol-zerrenda inflexio-puntua zen. Azkenean benetan funtzionatzen duen ikastaroa.",
+      "testimonial_name": "Marco R.",
+      "testimonial_role": "Erroma - lehen irakurleak",
+      "section_faq": "// 07 - FAQ",
+      "faq_title": "Maiz egiten diren galderak",
+      "offer_valid": "Aste honetan eskaintza baliozkoa",
+      "final_cta": "Hasi bidaia gaur askatasun ekonomikora",
+      "final_sub": "Elkartu diruarekin harremana aldatu duten ehunka pertsona.",
+      "unlock_dash": "Desblokeatu sarbidea -",
+      "guarantee_badge": "30 egunetako bermea",
+      "instant_access_badge": "Berehalako sarbidea",
+      "lifetime_badge": "Bizitzako eguneraketak",
+      "rights_reserved": "Eskubide guztiak erreserbatuta.",
+      "privacy": "Pribatutasuna",
+      "terms": "Baldintzak",
+      "legal_note": "Informazio digitaleko produktua da. Emaitzak aldatu eta konpromiso pertsonalaren mende egon daitezke. Amishen prezioak eta teknikak ikerketa etnografikoetan oinarritzen dira, eta agian ez dute zehatz-mehatz islatzen Amish komunitate guztien praktika garaikideak.",
+      "features": "Ezaugarriak",
+      "pricing": "Prezioak",
+      "testimonials": "Testigantzak",
+      "contact": "Kontaktua",
+      "get_started": "Hasi",
+      "learn_more": "Ikasi gehiago",
+      "member_area": "Kide-eremua",
+      "back_to_landing": "Lurrera itzuli",
+      "buy_now": "Erosi orain",
+      "currency_symbol": "$",
+      "new_badge": "Berria",
+      "the_problem": "Arazoa",
+      "our_story": "Gure historia",
+      "what_learn": "Ikasiko duzuna",
+      "course_lessons": "Ikasketak",
+      "curriculum": "Curriculuma",
+      "free_tier": "Libre",
+      "pro_tier": "Pro",
+      "per_month": "/mo",
+      "start_free": "Hasi libre",
+      "popular": "Popularra",
+      "free_title": "Hasteko",
+      "pro_title": "Hazteko",
+      "trusted_by": "Mundu osoko taldeez fidatuta",
+      "offer_badge": "Abiarazi eskaintza",
+      "price_special": "Jaurtiketa-prezio berezia",
+      "buy_and_access": "Erosi eta eskuratu berehala",
+      "bestseller": "Best Seller",
+      "story_badge": "// Benetako istorioa",
+      "story_title": "Nire esperientzia amishen artean",
+      "story_subtitle": "Pennsylvanian hiru hilabete, hamabi familia elkarrizketatu zituzten, 300 urtez lan egin duen sistema ekonomikoa.",
+      "amish_life": "Amish Life",
+      "caption_1": "Eguneroko bizitza Amishen komunitatean: sinpletasuna, nahikoatasuna eta jakituria finantzarioa belaunaldiz belaunaldi igaro ziren.",
+      "caption_2": "Barter eta truke-sistema, diru-premia ezabatzen duena eta konfiantza-harreman iraunkorrak eraikitzen dituena.",
+      "caption_3": "Amish etxeko ekonomia: familia bat batez bestekoa baino %60 gutxiago bizi da.",
+      "tag_1": "Antropologia ekonomikoa",
+      "tag_2": "Amish Studies",
+      "tag_3": "Finantza-aholkularitza",
+      "brand_name": "Courssy",
+      "reviewer": "Marco R., lehen irakurlea",
+      "language_switch": "EN",
+      "language_switch_en": "EN"
+    }
+  },
+  "audience": {
+    "badge": "// 01 - Norentzat da hau?",
+    "title": "Ikastaro hau zuretzat da?",
+    "perfect_for": "Bikaina zuretzat, baldin eta:",
+    "perfect_items": [
+      "Borrokatu helburuak lortzeko",
+      "Kostuak murriztu nahi dituzu bizi-kalitatea sakrifikatu gabe.",
+      "Nazkatuta zaude kontsumismoaz eta zorraren kulturaz.",
+      "Metodo praktikoak eta probatuak nahi dituzu.",
+      "Finantza-etorkizun sendo bat eraiki nahi duzu zure familiarentzat"
+    ],
+    "not_for": "Ez zuretzat, baldin eta:",
+    "not_items": [
+      "Aberatsen bila zabiltza.",
+      "Ez duzu gastu-ohiturak aldatu nahi.",
+      "Oinarri sendo baten gainean finka azkarrak nahiago dituzu.",
+      "Ez zaude prest ikasten duzuna ezartzeko.",
+      "Aholkularitza ekonomiko pertsonalizatua bilatzen ari zara."
+    ]
+  },
+  "course": {
+    "back_to_course": "Lurrera itzuli",
+    "module_label": "Curriculuma",
+    "now_playing": "Orain jokatzen",
+    "page_label": "Orria",
+    "reading_progress": "Irakurketaren progresioa",
+    "download_pdf": "Deskargatu PDFa",
+    "chapter": "Kapitulua"
+  },
+  "lessons": {
+    "badge": "// 04 - Edukia",
+    "title": "Barruan aurkituko duzuna",
+    "items": []
+  }
+}

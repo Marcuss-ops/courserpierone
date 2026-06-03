@@ -6,184 +6,184 @@
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
-    "brand": "Amish secrets",
-    "features": "Features",
-    "pricing": "Pricing",
-    "testimonials": "Testimonials",
-    "faq": "FAQ",
-    "contact": "Contact",
-    "get_started": "Get Started",
-    "learn_more": "Learn More",
-    "member_area": "Member Area",
-    "back_to_landing": "Back to Landing"
+    "brand": "Μυστικά Άμις",
+    "features": "Χαρακτηριστικά",
+    "pricing": "Τιμή",
+    "testimonials": "Μαρτυρίες",
+    "faq": "Συχνές ερωτήσεις",
+    "contact": "Επαφή",
+    "get_started": "Ξεκινήστε",
+    "learn_more": "Μάθετε Περισσότερα",
+    "member_area": "Περιοχή των κρατών μελών",
+    "back_to_landing": "Επιστροφή στην προσγείωση"
   },
   "hero": {
-    "badge": "New",
+    "badge": "Νέο",
     "title": "Μυστικά των Άμις: Πώς να ζείτε με οικονομία και να διαχειρίζεστε τα χρήματά σας",
     "subtitle": "Ανακαλύψτε τα μυστικά της λιτής διαβίωσης της κοινότητας των Άμις. Περιλαμβάνει πλήρεις ενότητες βίντεο και PDF με δυνατότητα λήψης.",
-    "cta": "Get Started",
-    "secondary_cta": "Learn More",
-    "price_label": "Special launch price",
-    "one_time_payment": "One-time payment — no subscription"
+    "cta": "Ξεκινήστε",
+    "secondary_cta": "Μάθετε Περισσότερα",
+    "price_label": "Ειδική τιμή εκκίνησης",
+    "one_time_payment": "Μία πληρωμή — καμία συνδρομή"
   },
   "problem": {
-    "badge": "The Problem",
+    "badge": "Το Πρόβλημα",
     "title": "Έχετε κουραστεί να φτάνετε στο τέλος του μήνα χωρίς αποταμιεύσεις; Η σύγχρονη κοινωνία μας ωθεί στην υπερκατανάλωση.",
     "text": ""
   },
   "story": {
-    "badge": "Our Story",
-    "title": "La mia esperienza tra gli Amish",
+    "badge": "Η Ιστορία Μας",
+    "title": "La mia esperienza tra gli Amish (στα Αγγλικά).",
     "image_captions": [
-      "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria.",
-      "Il sistema di baratto e scambio che elimina il bisogno di denaro contante.",
-      "L'economia domestica Amish: come una famiglia riesce a vivere con il 60% in meno."
+      "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria (στα Αγγλικά).",
+      "Il sistema di baratto e scambio che elimina il bisogno di denaro contante (στα Αγγλικά).",
+      "L'economia domestica Amish: έρχονται μια famiglia riesce ένα vivere con il 60% σε meno."
     ],
     "quote": "Οι Άμις ζουν πλούσιες και γεμάτες ζωές ξοδεύοντας ένα κλάσμα αυτών που ξοδεύουμε εμείς. Σε αυτό το μάθημα σας αποκαλύπτουμε πώς τα καταφέρνουν."
   },
   "author": {
-    "badge": "// 03 — The Author",
-    "title": "Behind This Course",
-    "name": "Alessandro Rinaldi",
+    "badge": "// 03 — Ο Συγγραφέας",
+    "title": "Πίσω από αυτή την πορεία",
+    "name": "Αλεσάντρο Ρινάλντι.",
     "role": "Researcher · Author · Traveler",
     "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
     "tags": [
-      "Saggezza Finanziaria",
-      "Vita Sostenibile",
+      "Saggezza Finanziaria Ημερομηνία γεννήσεως:",
+      "Vita Σωστενίβη",
       "Educazione"
     ]
   },
   "modules": {
-    "badge": "// 02 — What You'll Learn",
-    "title": "The Amish Masters' Secrets",
+    "badge": "// 02 — Τι θα μάθετε",
+    "title": "Τα Μυστικά των Μάστερ των Άμις",
     "description": "8 practical modules that turn Amish wisdom into concrete actions.",
     "items": [
       {
-        "title": "Amish Budget",
-        "desc": "Live on 30% less without sacrifice."
+        "title": "Προϋπολογισμός Άμις",
+        "desc": "Ζήσε με 30% λιγότερο χωρίς θυσίες."
       },
       {
-        "title": "Infinite Pantry",
-        "desc": "The food storage method that eliminates waste."
+        "title": "Άπειρο παντελονάκι",
+        "desc": "Η μέθοδος αποθήκευσης τροφίμων που εξαλείφει τα απόβλητα."
       },
       {
-        "title": "Zero Debt",
-        "desc": "The framework to get out of debt forever."
+        "title": "Μηδενικό χρέος",
+        "desc": "Το πλαίσιο για να βγούμε από το χρέος για πάντα."
       },
       {
-        "title": "Fix Everything",
-        "desc": "12 essential tools to repair yourself."
+        "title": "Διόρθωση των πάντων",
+        "desc": "12 απαραίτητα εργαλεία για την επισκευή του εαυτού σας."
       },
       {
-        "title": "Money-Free Exchange",
-        "desc": "How to activate a barter network."
+        "title": "Ανταλλαγή χωρίς χρήματα",
+        "desc": "Πώς να ενεργοποιήσετε ένα δίκτυο ανταλλαγής."
       },
       {
-        "title": "Farm to Table",
-        "desc": "Guide to home gardening and zero-waste cooking."
+        "title": "Αγρόκτημα προς πίνακα",
+        "desc": "Οδηγός για την κηπουρική στο σπίτι και το μαγείρεμα μηδενικών αποβλήτων."
       },
       {
-        "title": "Free Energy",
-        "desc": "How to cut utility bills by 50%."
+        "title": "Ελεύθερη ενέργεια",
+        "desc": "Πώς να μειώσει τους λογαριασμούς κοινής ωφέλειας κατά 50%."
       },
       {
-        "title": "30-Day Plan",
-        "desc": "Day-by-day checklist to transform your finances."
+        "title": "Σχέδιο 30 ημερών",
+        "desc": "Μέρα με τη μέρα λίστα ελέγχου για να μετατρέψει τα οικονομικά σας."
       }
     ]
   },
   "includes": {
-    "title": "Also includes:",
+    "title": "Περιλαμβάνει επίσης:",
     "items": [
-      "Full eBook (PDF, ePub, Kindle)",
-      "Printable 30-day checklist",
-      "Amish budget Excel sheet",
-      "Weekly shopping list template",
-      "Lifetime member area access",
-      "Free future updates"
+      "Πλήρες eBook (PDF, ePub, Kindle)",
+      "Εκτυπώσιμη λίστα ελέγχου 30 ημερών",
+      "Προϋπολογισμός Amish φύλλο Excel",
+      "Πρότυπο της εβδομαδιαίας λίστας αγορών",
+      "Πρόσβαση στην περιοχή του Lifetime Member",
+      "Δωρεάν μελλοντικές ενημερώσεις"
     ]
   },
   "testimonials": {
-    "badge": "// 06 — Testimonials",
-    "title": "Testimonials",
+    "badge": "// 06 — Μαρτυρίες",
+    "title": "Μαρτυρίες",
     "items": [
       {
-        "text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
-        "name": "Marco R.",
-        "role": "Rome — early readers"
+        "text": "Εφάρμοσα τη μέθοδο του προϋπολογισμού των Άμις και σε δύο μήνες περιόρισα τα έξοδά μου κατά 35%. Η λίστα των 30 ημερών ήταν το σημείο καμπής. Επιτέλους μια πορεία που πραγματικά λειτουργεί.",
+        "name": "Ο Μάρκο Ρ.",
+        "role": "Ρώμη — Οι πρώτοι αναγνώστες"
       }
     ]
   },
   "offer": {
-    "badge": "Launch Offer",
-    "title": "Invest in Yourself",
-    "complete_package": "Complete Package",
-    "course_value": "Course: $97",
-    "bonus_value": "Bonus: $27",
+    "badge": "Προσφορά έναρξης",
+    "title": "Επενδύστε στον Εαυτό Σας",
+    "complete_package": "Πλήρης συσκευασία",
+    "course_value": "Πορεία: $ 97",
+    "bonus_value": "Μπόνους: $27",
     "price_text": "",
-    "one_time": "One-time payment — no subscription",
-    "launch_price": "Launch price — then $37",
-    "cta": "Unlock Access Now",
-    "guarantee_title": "30-Day Money-Back Guarantee",
+    "one_time": "Μία πληρωμή — καμία συνδρομή",
+    "launch_price": "Τιμή έναρξης — τότε $ 37",
+    "cta": "Ξεκλείδωμα πρόσβασης τώρα",
+    "guarantee_title": "Εγγύηση επιστροφής χρημάτων 30 ημερών",
     "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
     "includes": [
-      "Full course (value $97)",
+      "Πλήρης πορεία (αξία $97)",
       "eBook PDF, ePub, Kindle",
-      "Printable 30-day checklist",
-      "Amish budget Excel sheet",
-      "Lifetime access + updates",
-      "BONUS: Weekly shopping list (value $27)"
+      "Εκτυπώσιμη λίστα ελέγχου 30 ημερών",
+      "Προϋπολογισμός Amish φύλλο Excel",
+      "Πρόσβαση στη ζωή + ενημερώσεις",
+      "BONUS: Εβδομαδιαία λίστα αγορών (αξία $27)"
     ]
   },
   "faq": {
-    "badge": "// 07 — FAQ",
-    "title": "Frequently Asked Questions",
-    "offer_valid": "Offer valid this week",
+    "badge": "// 07 — Συχνές ερωτήσεις",
+    "title": "Συχνές ερωτήσεις",
+    "offer_valid": "Η προσφορά ισχύει αυτή την εβδομάδα",
     "items": [
       {
-        "q": "What exactly is included?",
-        "a": "You get the complete eBook in PDF, ePub, and Kindle formats. Plus lifetime access to all future updates."
+        "q": "Τι ακριβώς περιλαμβάνεται;",
+        "a": "Μπορείτε να πάρετε το πλήρες eBook σε μορφή PDF, ePub, και Kindle. Συν πρόσβαση σε όλες τις μελλοντικές ενημερώσεις."
       },
       {
-        "q": "Is it in English?",
-        "a": "Yes, the course is fully available in English."
+        "q": "Είναι στα αγγλικά;",
+        "a": "Ναι, το μάθημα είναι διαθέσιμο στα αγγλικά."
       },
       {
-        "q": "What format is the course in?",
-        "a": "eBook in PDF, ePub, and Kindle formats. Videos are in MP4 format."
+        "q": "Σε ποια μορφή είναι η πορεία;",
+        "a": "eBook σε PDF, ePub, και Kindle μορφές. Τα βίντεο είναι σε μορφή MP4."
       },
       {
-        "q": "When do I get access?",
-        "a": "Immediately after payment."
+        "q": "Πότε θα έχω πρόσβαση;",
+        "a": "Αμέσως μετά την πληρωμή."
       },
       {
-        "q": "What if I'm not satisfied?",
-        "a": "You're protected by our 30-day money-back guarantee."
+        "q": "Κι αν δεν είμαι ικανοποιημένος;",
+        "a": "Προστατεύεσαι από την εγγύηση επιστροφής χρημάτων 30 ημερών."
       },
       {
-        "q": "How long does it take?",
-        "a": "The complete program takes about 3-4 hours."
+        "q": "Πόση ώρα θα πάρει;",
+        "a": "Το πλήρες πρόγραμμα διαρκεί περίπου 3-4 ώρες."
       }
     ]
   },
   "final_cta": {
-    "title": "Start Your Journey to Financial Freedom Today",
-    "subtitle": "Join hundreds of people who have already transformed their relationship with money.",
-    "badge": "Offer valid this week"
+    "title": "Ξεκινήστε το Ταξίδι σας στην Οικονομική Ελευθερία Σήμερα",
+    "subtitle": "Μαζί με εκατοντάδες ανθρώπους που έχουν ήδη μεταμορφώσει τη σχέση τους με χρήματα.",
+    "badge": "Η προσφορά ισχύει αυτή την εβδομάδα"
   },
   "footer": {
-    "rights_reserved": "All rights reserved.",
-    "privacy": "Privacy",
-    "terms": "Terms",
+    "rights_reserved": "Με την επιφύλαξη όλων των δικαιωμάτων.",
+    "privacy": "Ιδιωτικότητα",
+    "terms": "Όροι",
     "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
     "badges": {
-      "guarantee": "30-Day Guarantee",
-      "instant_access": "Instant Access",
-      "lifetime_updates": "Lifetime Updates"
+      "guarantee": "Εγγύηση 30 ημερών",
+      "instant_access": "Άμεση πρόσβαση",
+      "lifetime_updates": "Ενημερώσεις διάρκειας ζωής"
     }
   },
   "trust": {
-    "title": "Trusted by teams worldwide",
+    "title": "Εμπιστευόμενοι από ομάδες παγκοσμίως",
     "readers_count": "1.247 αναγνώστες",
     "company_names": []
   },
@@ -195,113 +195,113 @@
       "buy_now_dash": "Αγοράστε Τώρα —",
       "view_modules": "Δείτε τις Ενότητες",
       "ssl_secure": "Ασφαλής πληρωμή με SSL",
-      "instant_download": "Instant Download",
-      "lifetime_access": "Lifetime Access",
-      "guarantee_days": "30-Day Guarantee",
-      "section_who": "// 01 — Who Is This For",
-      "is_this_for_you": "Is This Course For You?",
-      "perfect_for": "Perfect for you if:",
-      "p_struggle": "You struggle to make ends meet",
-      "p_cut_costs": "You want to cut costs without sacrificing quality of life",
+      "instant_download": "Άμεση λήψη",
+      "lifetime_access": "Πρόσβαση στο χρόνο ζωής",
+      "guarantee_days": "Εγγύηση 30 ημερών",
+      "section_who": "// 01 — Για ποιον είναι αυτό",
+      "is_this_for_you": "Είναι αυτή η πορεία για σένα;",
+      "perfect_for": "Ιδανικό για εσάς εάν:",
+      "p_struggle": "Παλεύεις να τα βγάλεις πέρα.",
+      "p_cut_costs": "Θέλετε να μειώσετε το κόστος χωρίς να θυσιάσετε την ποιότητα της ζωής",
       "p_consumerism": "Tired of consumerism and debt culture",
       "p_practical": "Looking for practical, time-tested methods",
       "p_future": "Want a solid financial future for your family",
-      "not_for": "Not for you if:",
+      "not_for": "Όχι για σένα αν:",
       "n_quick": "Looking for get-rich-quick schemes",
       "n_habits": "Not willing to change spending habits",
       "n_quick_fix": "Prefer quick fixes over a solid path",
       "n_implement": "Not willing to implement what you learn",
       "n_advice": "Looking for personalized financial advice",
-      "section_learn": "// 02 — What You'll Learn",
-      "masters_secrets": "The Amish Masters' Secrets",
+      "section_learn": "// 02 — Τι θα μάθετε",
+      "masters_secrets": "Τα Μυστικά των Μάστερ των Άμις",
       "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
-      "section_author": "// 03 — The Author",
-      "behind_course": "Behind This Course",
-      "your_name": "Your Name Here",
+      "section_author": "// 03 — Ο Συγγραφέας",
+      "behind_course": "Πίσω από αυτή την πορεία",
+      "your_name": "Το όνομά σας εδώ",
       "researcher_author": "Researcher · Author · Traveler",
       "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
-      "section_content": "// 04 — Course Content",
-      "what_inside": "What You'll Find Inside",
-      "also_includes": "Also includes:",
-      "inc_full_ebook": "Full eBook (PDF, ePub, Kindle)",
-      "inc_checklist": "Printable 30-day checklist",
-      "inc_excel": "Amish budget Excel sheet",
-      "inc_shopping": "Weekly shopping list template",
-      "inc_lifetime": "Lifetime member area access",
-      "inc_updates": "Free future updates",
-      "section_offer": "// 05 — The Offer",
-      "invest_yourself": "Invest in Yourself",
-      "launch_offer": "Launch Offer",
-      "complete_package": "Complete Package",
-      "course_value": "Course: $97",
-      "bonus_value": "Bonus: $27",
-      "one_time": "One-time payment — no subscription",
-      "launch_price": "Launch price — then $37",
-      "inc_course_full": "Full course (value $97)",
+      "section_content": "// 04 — Περιεχόμενο του μαθήματος",
+      "what_inside": "Τι θα βρεις Μέσα",
+      "also_includes": "Περιλαμβάνει επίσης:",
+      "inc_full_ebook": "Πλήρες eBook (PDF, ePub, Kindle)",
+      "inc_checklist": "Εκτυπώσιμη λίστα ελέγχου 30 ημερών",
+      "inc_excel": "Προϋπολογισμός Amish φύλλο Excel",
+      "inc_shopping": "Πρότυπο της εβδομαδιαίας λίστας αγορών",
+      "inc_lifetime": "Πρόσβαση στην περιοχή του Lifetime Member",
+      "inc_updates": "Δωρεάν μελλοντικές ενημερώσεις",
+      "section_offer": "// 05 — Η Προσφορά",
+      "invest_yourself": "Επενδύστε στον Εαυτό Σας",
+      "launch_offer": "Προσφορά έναρξης",
+      "complete_package": "Πλήρης συσκευασία",
+      "course_value": "Πορεία: $ 97",
+      "bonus_value": "Μπόνους: $27",
+      "one_time": "Μία πληρωμή — καμία συνδρομή",
+      "launch_price": "Τιμή έναρξης — τότε $ 37",
+      "inc_course_full": "Πλήρης πορεία (αξία $97)",
       "inc_ebook": "eBook PDF, ePub, Kindle",
-      "inc_checklist2": "Printable 30-day checklist",
-      "inc_excel2": "Amish budget Excel sheet",
-      "inc_access_updates": "Lifetime access + updates",
-      "inc_bonus_shopping": "BONUS: Weekly shopping list (value $27)",
-      "unlock_now": "Unlock Access Now",
-      "guarantee_title": "30-Day Money-Back Guarantee",
+      "inc_checklist2": "Εκτυπώσιμη λίστα ελέγχου 30 ημερών",
+      "inc_excel2": "Προϋπολογισμός Amish φύλλο Excel",
+      "inc_access_updates": "Πρόσβαση στη ζωή + ενημερώσεις",
+      "inc_bonus_shopping": "BONUS: Εβδομαδιαία λίστα αγορών (αξία $27)",
+      "unlock_now": "Ξεκλείδωμα πρόσβασης τώρα",
+      "guarantee_title": "Εγγύηση επιστροφής χρημάτων 30 ημερών",
       "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
-      "section_testimonials": "// 06 — Testimonials",
-      "testimonial_text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
-      "testimonial_name": "Marco R.",
-      "testimonial_role": "Rome — early readers",
-      "section_faq": "// 07 — FAQ",
-      "faq_title": "Frequently Asked Questions",
-      "offer_valid": "Offer valid this week",
-      "final_cta": "Start Your Journey to Financial Freedom Today",
-      "final_sub": "Join hundreds of people who have already transformed their relationship with money.",
-      "unlock_dash": "Unlock Access —",
-      "guarantee_badge": "30-Day Guarantee",
-      "instant_access_badge": "Instant Access",
-      "lifetime_badge": "Lifetime Updates",
-      "rights_reserved": "All rights reserved.",
-      "privacy": "Privacy",
-      "terms": "Terms",
+      "section_testimonials": "// 06 — Μαρτυρίες",
+      "testimonial_text": "Εφάρμοσα τη μέθοδο του προϋπολογισμού των Άμις και σε δύο μήνες περιόρισα τα έξοδά μου κατά 35%. Η λίστα των 30 ημερών ήταν το σημείο καμπής. Επιτέλους μια πορεία που πραγματικά λειτουργεί.",
+      "testimonial_name": "Ο Μάρκο Ρ.",
+      "testimonial_role": "Ρώμη — Οι πρώτοι αναγνώστες",
+      "section_faq": "// 07 — Συχνές ερωτήσεις",
+      "faq_title": "Συχνές ερωτήσεις",
+      "offer_valid": "Η προσφορά ισχύει αυτή την εβδομάδα",
+      "final_cta": "Ξεκινήστε το Ταξίδι σας στην Οικονομική Ελευθερία Σήμερα",
+      "final_sub": "Μαζί με εκατοντάδες ανθρώπους που έχουν ήδη μεταμορφώσει τη σχέση τους με χρήματα.",
+      "unlock_dash": "Ξεκλειδώστε την πρόσβαση -",
+      "guarantee_badge": "Εγγύηση 30 ημερών",
+      "instant_access_badge": "Άμεση πρόσβαση",
+      "lifetime_badge": "Ενημερώσεις διάρκειας ζωής",
+      "rights_reserved": "Με την επιφύλαξη όλων των δικαιωμάτων.",
+      "privacy": "Ιδιωτικότητα",
+      "terms": "Όροι",
       "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
-      "features": "Features",
-      "pricing": "Pricing",
-      "testimonials": "Testimonials",
-      "contact": "Contact",
-      "get_started": "Get Started",
-      "learn_more": "Learn More",
-      "member_area": "Member Area",
-      "back_to_landing": "Back to Landing",
-      "buy_now": "Buy Now",
+      "features": "Χαρακτηριστικά",
+      "pricing": "Τιμή",
+      "testimonials": "Μαρτυρίες",
+      "contact": "Επαφή",
+      "get_started": "Ξεκινήστε",
+      "learn_more": "Μάθετε Περισσότερα",
+      "member_area": "Περιοχή των κρατών μελών",
+      "back_to_landing": "Επιστροφή στην προσγείωση",
+      "buy_now": "Αγορά τώρα",
       "currency_symbol": "$",
-      "new_badge": "New",
-      "the_problem": "The Problem",
-      "our_story": "Our Story",
-      "what_learn": "What You'll Learn",
-      "course_lessons": "Course Lessons",
-      "curriculum": "Curriculum",
-      "free_tier": "Free",
-      "pro_tier": "Pro",
+      "new_badge": "Νέο",
+      "the_problem": "Το Πρόβλημα",
+      "our_story": "Η Ιστορία Μας",
+      "what_learn": "Τι θα Μάθετε",
+      "course_lessons": "Μαθήματα",
+      "curriculum": "Γράφημα",
+      "free_tier": "Δωρεάν",
+      "pro_tier": "Προς",
       "per_month": "/mo",
-      "start_free": "Start Free",
-      "popular": "Popular",
-      "free_title": "To get started",
-      "pro_title": "To grow",
-      "trusted_by": "Trusted by teams worldwide",
-      "offer_badge": "Launch Offer",
-      "price_special": "Special launch price",
-      "buy_and_access": "Buy & Access Instantly",
-      "bestseller": "Best Seller",
-      "story_badge": "// The True Story",
-      "story_title": "My Experience Among the Amish",
-      "story_subtitle": "Three months in Pennsylvania, twelve families interviewed, an economic system that has worked for 300 years.",
-      "amish_life": "Amish Life",
-      "caption_1": "Daily life in the Amish community: simplicity, self-sufficiency, and financial wisdom passed down through generations.",
-      "caption_2": "The barter and exchange system that eliminates the need for cash and builds lasting trust relationships.",
-      "caption_3": "The Amish household economy: how a family lives on 60% less than the national average.",
-      "tag_1": "Economic Anthropology",
-      "tag_2": "Amish Studies",
-      "tag_3": "Financial Consulting",
-      "brand_name": "Courssy",
+      "start_free": "Εκκίνηση δωρεάν",
+      "popular": "Δημοφιλή",
+      "free_title": "Για να ξεκινήσετε",
+      "pro_title": "Να μεγαλώσω",
+      "trusted_by": "Εμπιστευόμενοι από ομάδες παγκοσμίως",
+      "offer_badge": "Προσφορά έναρξης",
+      "price_special": "Ειδική τιμή εκκίνησης",
+      "buy_and_access": "Αγορά & πρόσβασης άμεσα",
+      "bestseller": "Καλύτερος πωλητής",
+      "story_badge": "// Η Αληθινή Ιστορία",
+      "story_title": "Η Εμπειρία μου Ανάμεσα στους Άμις",
+      "story_subtitle": "Τρεις μήνες στην Πενσυλβανία, έδωσαν συνέντευξη σε δώδεκα οικογένειες, ένα οικονομικό σύστημα που έχει λειτουργήσει επί 300 χρόνια.",
+      "amish_life": "Άμις Ζωή",
+      "caption_1": "Η καθημερινή ζωή στην κοινότητα των Άμις: η απλότητα, η αυτάρκεια και η οικονομική σοφία πέρασαν μέσα από γενιές.",
+      "caption_2": "Το σύστημα ανταλλαγής και ανταλλαγής που εξαλείφει την ανάγκη για μετρητά και χτίζει διαρκείς σχέσεις εμπιστοσύνης.",
+      "caption_3": "Η οικονομία των νοικοκυριών των Άμις: πώς ζει μια οικογένεια στο 60% λιγότερο από τον εθνικό μέσο όρο.",
+      "tag_1": "Οικονομική Ανθρωπολογία",
+      "tag_2": "Μελέτες Άμις",
+      "tag_3": "Χρηματοοικονομικές συμβουλευτικές υπηρεσίες",
+      "brand_name": "Κουράγιο",
       "reviewer": "Marco R., early readers",
       "language_switch": "EN",
       "language_switch_en": "EN",
@@ -313,17 +313,17 @@
     }
   },
   "audience": {
-    "badge": "// 01 — Who Is This For",
-    "title": "Is This Course For You?",
-    "perfect_for": "Perfect for you if:",
+    "badge": "// 01 — Για ποιον είναι αυτό",
+    "title": "Είναι αυτή η πορεία για σένα;",
+    "perfect_for": "Ιδανικό για εσάς εάν:",
     "perfect_items": [
-      "You struggle to make ends meet",
-      "You want to cut costs without sacrificing quality of life",
+      "Παλεύεις να τα βγάλεις πέρα.",
+      "Θέλετε να μειώσετε το κόστος χωρίς να θυσιάσετε την ποιότητα της ζωής",
       "Tired of consumerism and debt culture",
       "Looking for practical, time-tested methods",
       "Want a solid financial future for your family"
     ],
-    "not_for": "Not for you if:",
+    "not_for": "Όχι για σένα αν:",
     "not_items": [
       "Looking for get-rich-quick schemes",
       "Not willing to change spending habits",
@@ -333,17 +333,17 @@
     ]
   },
   "course": {
-    "back_to_course": "Back to Landing",
-    "module_label": "Curriculum",
-    "now_playing": "Now playing",
-    "page_label": "Page",
-    "reading_progress": "Reading Progress",
-    "download_pdf": "Download PDF",
-    "chapter": "Chapter"
+    "back_to_course": "Επιστροφή στην προσγείωση",
+    "module_label": "Γράφημα",
+    "now_playing": "Τώρα παίξε.",
+    "page_label": "Σελίδα",
+    "reading_progress": "Πρόοδος ανάγνωσης",
+    "download_pdf": "Λήψη PDF",
+    "chapter": "Κεφάλαιο"
   },
   "lessons": {
-    "badge": "// 04 — Course Content",
-    "title": "What You'll Find Inside",
+    "badge": "// 04 — Περιεχόμενο του μαθήματος",
+    "title": "Τι θα βρεις Μέσα",
     "items": []
   }
 }

@@ -1,0 +1,344 @@
+{
+  "locale": "lt",
+  "seo": {
+    "title": "Amish paslaptys: kaip gyventi su santaupų ir valdyti pinigus",
+    "description": "Atraskite amišų bendruomenės vaisių gyvenimo paslaptis. apima visus vaizdo modulius ir parsisiunčiamus PDF.",
+    "ogImage": "/courses/amish-secrets/cover.png"
+  },
+  "nav": {
+    "brand": "Amish paslaptys",
+    "features": "Savybės",
+    "pricing": "Kainodara",
+    "testimonials": "Testimentai",
+    "faq": "DUK",
+    "contact": "Kontaktai",
+    "get_started": "@ info: whatsthis",
+    "learn_more": "Sužinokite daugiau",
+    "member_area": "Nario sritis",
+    "back_to_landing": "Atgal į nusileidimą"
+  },
+  "hero": {
+    "badge": "Naujas",
+    "title": "Amish paslaptys: kaip gyventi su santaupų ir valdyti pinigus",
+    "subtitle": "Atraskite amišų bendruomenės vaisių gyvenimo paslaptis. apima visus vaizdo modulius ir parsisiunčiamus PDF.",
+    "cta": "@ info: whatsthis",
+    "secondary_cta": "Sužinokite daugiau",
+    "price_label": "Speciali paleidimo kaina",
+    "one_time_payment": "Beto laiko mokėjimas - nėra prenumeratos"
+  },
+  "problem": {
+    "badge": "Problema",
+    "title": "Pavargau pasiekti mėnesio pabaigą be santaupų? Moderni visuomenė verčia mus per daug vartoti.",
+    "text": ""
+  },
+  "story": {
+    "badge": "Mūsų istorija",
+    "title": "La miA esperienzA tra gli Amish",
+    "image_captions": [
+      "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria.",
+      "Il sistema di baratto e scambio che immunina il bisogno di denaro contaante.",
+      "L 'economiA domestica Amish: come unA famiglia riesce a viverre con il 60% in meno."
+    ],
+    "quote": "Amišas gyvena turtingą ir pilną gyvenimą, o praleidžia dalį to, ką mes leidžiame. Čia atskleisime, kaip jie tai daro."
+  },
+  "author": {
+    "badge": "03 - Autorius",
+    "title": "už šio kurso",
+    "name": "Alessandro Rinaldi",
+    "role": "Mokslininkas • Autorius",
+    "bio": "[Pridėti savo istoriją: Aš gyvenau 3 mėnesius Pensilvanijoje, interviu 12 Amish šeimos, studijavo savo ekonominę sistemą. Nr teorija, tik praktika.]",
+    "tags": [
+      "Saggezza Finanziaria",
+      "Vita SosteniTum",
+      "Ugdymas"
+    ]
+  },
+  "modules": {
+    "badge": "/ / 02 - Ką išmoksite",
+    "title": "Amish Masters paslaptys",
+    "description": "8 praktiniai moduliai, kurie paverčia Amish išmintį konkrečiais veiksmais jūsų kasdieniame gyvenime.",
+    "items": [
+      {
+        "title": "Amish biudžetas",
+        "desc": "Gyvena 30% mažiau be aukų."
+      },
+      {
+        "title": "Begalinė plokštė",
+        "desc": "Maisto saugojimo būdas, kuris pašalina atliekas."
+      },
+      {
+        "title": "Nulinė skola",
+        "desc": "Konstrukcija, skirta visam laikui išbristi iš skolos."
+      },
+      {
+        "title": "Fiksuoti viską",
+        "desc": "12 esminių įrankių remonto save."
+      },
+      {
+        "title": "Money- Free Exchange",
+        "desc": "Kaipaktyvuoti barterinį tinklą."
+      },
+      {
+        "title": "Ūkis - lentelė",
+        "desc": "Vadovas namų sodininkystÄ ir nulio atliekų gaminimui."
+      },
+      {
+        "title": "Laisva energija",
+        "desc": "Kaipsumažinti komunalinių paslaugų sąskaitas 50%."
+      },
+      {
+        "title": "30 dienų planas",
+        "desc": "Dienos-pagal dieną kontrolinis sąrašas, siekiant transformuoti savo finansus."
+      }
+    ]
+  },
+  "includes": {
+    "title": "Taip pat apima:",
+    "items": [
+      "Full eBook (PDF, ePub, Kindle)",
+      "Spausdinamas 30 dienų kontrolinis sąrašas",
+      "Amish biudžetas Excel lapas",
+      "Savaitės pirkinių sąrašo šablonas",
+      "Prieiga prie visą gyvenimą dirbančio asmens zonos",
+      "Nemokami ateities atnaujinmai"
+    ]
+  },
+  "testimonials": {
+    "badge": "/ / 06 - Testimonijos",
+    "title": "Testimentai",
+    "items": [
+      {
+        "text": "Aš taikiau Amišo biudžeto metodą ir per du mėnesius sumažinau savo išlaidas 35 proc. 30 dienų kontrolinis sąrašas buvo lūžio taškas. Galų gale žinoma, kad tikrai veikia.",
+        "name": "Marco R.",
+        "role": "Roma - skaitytojai"
+      }
+    ]
+  },
+  "offer": {
+    "badge": "Comment",
+    "title": "Investavimas į save",
+    "complete_package": "Užpildytas paketas",
+    "course_value": "kursas: $97",
+    "bonus_value": "Premija: 27 $",
+    "price_text": "",
+    "one_time": "Beto laiko mokėjimas - nėra prenumeratos",
+    "launch_price": "paleidimo kaina - 37 $",
+    "cta": "Atrakinti priėjimą dabar",
+    "guarantee_title": "30 diena Money- grąžinimo garantija",
+    "guarantee_text": "Pamėgink 30 dienų. Norite sutaupyti bent 100 dolerių, mes grąžinsime visą sumą. Jokių klausimų, jokių problemų.",
+    "includes": [
+      "Pilnas kursas (vertė $97)",
+      "eBook PDF, ePub, Kindle",
+      "Spausdinamas 30 dienų kontrolinis sąrašas",
+      "Amish biudžetas Excel lapas",
+      "Prieiga prie laiko + atnaujinimai",
+      "BONUS: Savaitės pirkinių sąrašas (vertė $27)"
+    ]
+  },
+  "faq": {
+    "badge": "/ 07 - DUK",
+    "title": "Dažnai užduodami klausimai",
+    "offer_valid": "Siūlymas galioja šią savaitę",
+    "items": [
+      {
+        "q": "Kas tiksliai yra įtraukta?",
+        "a": "Jūs gaunate pilną eBook PDF, ePub, ir Kindle formatai. Plius visą gyvenimą prieigą prie visų ateities atnaujinimus."
+      },
+      {
+        "q": "Kalba angliškai?",
+        "a": "Žinoma, visi kursai anglų kalba."
+      },
+      {
+        "q": "Koks kursas?",
+        "a": "eBook PDF, ePub, ir Kindle formatai. Vaizdo įrašai MP4 formatu."
+      },
+      {
+        "q": "Kada man patekti?",
+        "a": "Vos sumokėjus."
+      },
+      {
+        "q": "Kas, jei nesu patenkintas?",
+        "a": "Jus saugo mūsų 30 dienų pinigų grąžinimo garantija."
+      },
+      {
+        "q": "Seniai užtrunka?",
+        "a": "Visa programa trunka apie 3-4 valandas."
+      }
+    ]
+  },
+  "final_cta": {
+    "title": "Jūsų kelionė į finansinę laisvę šiandien",
+    "subtitle": "Prisijunkite prie šimtų žmonių, kurie jau pakeitė savo santykius su pinigais.",
+    "badge": "Siūlymas galioja šią savaitę"
+  },
+  "footer": {
+    "rights_reserved": "visos teisės saugomos.",
+    "privacy": "Privatumas",
+    "terms": "Terminai",
+    "legal_note": "Čia skaitmeninis informacinis gaminys. Rezultatai gali skirtis ir priklauso nuo asmeninių įsipareigojimų. Amiso kainos ir metodai aprašyti remiantis etnografiniais tyrimais ir gali ne tiksliai atspindi šiuolaikinę praktiką visų Amiso bendruomenių.",
+    "badges": {
+      "guarantee": "30 diena garantija",
+      "instant_access": "Momentinė prieiga",
+      "lifetime_updates": "NAME OF TRANSLATORS"
+    }
+  },
+  "trust": {
+    "title": "Patikima komandų visame pasaulyje",
+    "readers_count": "1 247 skaitytojai",
+    "company_names": []
+  },
+  "ui": {
+    "labels": {
+      "instant_access": "Momentinė prieiga",
+      "buy_now_arrow": "Pirkti dabar →",
+      "readers": "1 247 skaitytojai",
+      "buy_now_dash": "Pirkti dabar -",
+      "view_modules": "Rodyti modulius",
+      "ssl_secure": "Saugus SSL mokėjimas",
+      "instant_download": "Momentinis atsisiuntimas",
+      "lifetime_access": "Prieiga prie laiko",
+      "guarantee_days": "30 diena garantija",
+      "section_who": "/ 01 - Kas tai yra",
+      "is_this_for_you": "Čia tau?",
+      "perfect_for": "Jums tinka, jei:",
+      "p_struggle": "Jūs kovojate, kad tikslai atitiktų",
+      "p_cut_costs": "Norite sumažinti išlaidas neaukojant gyvenimo kokybės",
+      "p_consumerism": "Tu pavargai nuo vartotojiškumo ir skolos kultūros",
+      "p_practical": "Jūs norite praktinių, išbandytų metodų",
+      "p_future": "Norite sukurti tvirtą finansinę ateitį savo šeimai",
+      "not_for": "Jums ne, jei:",
+      "n_quick": "Tu ieškai greitų programų",
+      "n_habits": "Jūs nenorite keisti savo išlaidų įpročius",
+      "n_quick_fix": "Jūs norite greitai nustato per tvirtą pagrindą",
+      "n_implement": "Jūs nenorite įgyvendinti, ką išmoksite",
+      "n_advice": "Jūs ieškote asmeninių finansinių patarimų",
+      "section_learn": "/ / 02 - Ką išmoksite",
+      "masters_secrets": "Amish Masters paslaptys",
+      "modules_desc": "8 praktiniai moduliai, kurie paverčia Amish išmintį konkrečiais veiksmais jūsų kasdieniame gyvenime.",
+      "section_author": "03 - Autorius",
+      "behind_course": "už šio kurso",
+      "your_name": "Jūsų vardas Čia",
+      "researcher_author": "Mokslininkas • Autorius",
+      "author_bio": "[Pridėti savo istoriją: Aš gyvenau 3 mėnesius Pensilvanijoje, interviu 12 Amish šeimos, studijavo savo ekonominę sistemą. Nr teorija, tik praktika.]",
+      "section_content": "/ 04 - Žinoma turinys",
+      "what_inside": "Ką rasi viduje",
+      "also_includes": "Taip pat apima:",
+      "inc_full_ebook": "Full eBook (PDF, ePub, Kindle)",
+      "inc_checklist": "Spausdinamas 30 dienų kontrolinis sąrašas",
+      "inc_excel": "Amish biudžetas Excel lapas",
+      "inc_shopping": "Savaitės pirkinių sąrašo šablonas",
+      "inc_lifetime": "Prieiga prie visą gyvenimą dirbančio asmens zonos",
+      "inc_updates": "Nemokami ateities atnaujinmai",
+      "section_offer": "05 - Pasiūlymas",
+      "invest_yourself": "Investavimas į save",
+      "launch_offer": "Comment",
+      "complete_package": "Užpildytas paketas",
+      "course_value": "kursas: $97",
+      "bonus_value": "Premija: 27 $",
+      "one_time": "Beto laiko mokėjimas - nėra prenumeratos",
+      "launch_price": "paleidimo kaina - 37 $",
+      "inc_course_full": "Pilnas kursas (vertė $97)",
+      "inc_ebook": "eBook PDF, ePub, Kindle",
+      "inc_checklist2": "Spausdinamas 30 dienų kontrolinis sąrašas",
+      "inc_excel2": "Amish biudžetas Excel lapas",
+      "inc_access_updates": "Prieiga prie laiko + atnaujinimai",
+      "inc_bonus_shopping": "BONUS: Savaitės pirkinių sąrašas (vertė $27)",
+      "unlock_now": "Atrakinti priėjimą dabar",
+      "guarantee_title": "30 diena Money- grąžinimo garantija",
+      "guarantee_text": "Pamėgink 30 dienų. Norite sutaupyti bent 100 dolerių, mes grąžinsime visą sumą. Jokių klausimų, jokių problemų.",
+      "section_testimonials": "/ / 06 - Testimonijos",
+      "testimonial_text": "Aš taikiau Amišo biudžeto metodą ir per du mėnesius sumažinau savo išlaidas 35 proc. 30 dienų kontrolinis sąrašas buvo lūžio taškas. Galų gale žinoma, kad tikrai veikia.",
+      "testimonial_name": "Marco R.",
+      "testimonial_role": "Roma - skaitytojai",
+      "section_faq": "/ 07 - DUK",
+      "faq_title": "Dažnai užduodami klausimai",
+      "offer_valid": "Siūlymas galioja šią savaitę",
+      "final_cta": "Jūsų kelionė į finansinę laisvę šiandien",
+      "final_sub": "Prisijunkite prie šimtų žmonių, kurie jau pakeitė savo santykius su pinigais.",
+      "unlock_dash": "Atrakinti priėjimą:",
+      "guarantee_badge": "30 diena garantija",
+      "instant_access_badge": "Momentinė prieiga",
+      "lifetime_badge": "NAME OF TRANSLATORS",
+      "rights_reserved": "visos teisės saugomos.",
+      "privacy": "Privatumas",
+      "terms": "Terminai",
+      "legal_note": "Čia skaitmeninis informacinis gaminys. Rezultatai gali skirtis ir priklauso nuo asmeninių įsipareigojimų. Amiso kainos ir metodai aprašyti remiantis etnografiniais tyrimais ir gali ne tiksliai atspindi šiuolaikinę praktiką visų Amiso bendruomenių.",
+      "features": "Savybės",
+      "pricing": "Kainodara",
+      "testimonials": "Testimentai",
+      "contact": "Kontaktai",
+      "get_started": "@ info: whatsthis",
+      "learn_more": "Sužinokite daugiau",
+      "member_area": "Nario sritis",
+      "back_to_landing": "Atgal į nusileidimą",
+      "buy_now": "Pirkti dabar",
+      "currency_symbol": "$",
+      "new_badge": "Naujas",
+      "the_problem": "Problema",
+      "our_story": "Mūsų istorija",
+      "what_learn": "Ką išmoksite",
+      "course_lessons": "kursai",
+      "curriculum": "Gyvenimo būdas",
+      "free_tier": "nemokamai",
+      "pro_tier": "Pro",
+      "per_month": "/mo",
+      "start_free": "@ info: whatsthis",
+      "popular": "Populiariausi",
+      "free_title": "@ info: status",
+      "pro_title": "augti",
+      "trusted_by": "Patikima komandų visame pasaulyje",
+      "offer_badge": "Comment",
+      "price_special": "Speciali paleidimo kaina",
+      "buy_and_access": "Pirkti ir gauti nereguliariai",
+      "bestseller": "Geriausias pardavėjas",
+      "story_badge": "/ / Tiesa istorija",
+      "story_title": "Mano patirtis tarp Amish",
+      "story_subtitle": "Tris mėnesius Pensilvanijoje, dvylika šeimų apklausė, ekonominę sistemą, kuri veikia 300 metų.",
+      "amish_life": "Amish Life",
+      "caption_1": "Kasdieninis gyvenimas amišų bendruomenėje: paprastumas, savęs pakankamumas, ir finansinė išmintis perėjo per kartas.",
+      "caption_2": "Barter ir mainų sistema, kuri pašalina pinigų poreikį ir kuria ilgalaikius pasitikėjimo santykius.",
+      "caption_3": "Amiso namų ūkio ekonomika: kaip šeima gyvena 60% mažiau nei nacionalinis vidurkis.",
+      "tag_1": "Ekonominė antropologija",
+      "tag_2": "Amish Studies",
+      "tag_3": "Finansų konsultantai",
+      "brand_name": "Meškos",
+      "reviewer": "Marco R., pirmasis skaitytojas",
+      "language_switch": "EN",
+      "language_switch_en": "EN"
+    }
+  },
+  "audience": {
+    "badge": "/ 01 - Kas tai yra",
+    "title": "Čia tau?",
+    "perfect_for": "Jums tinka, jei:",
+    "perfect_items": [
+      "Jūs kovojate, kad tikslai atitiktų",
+      "Norite sumažinti išlaidas neaukojant gyvenimo kokybės",
+      "Tu pavargai nuo vartotojiškumo ir skolos kultūros",
+      "Jūs norite praktinių, išbandytų metodų",
+      "Norite sukurti tvirtą finansinę ateitį savo šeimai"
+    ],
+    "not_for": "Jums ne, jei:",
+    "not_items": [
+      "Tu ieškai greitų programų",
+      "Jūs nenorite keisti savo išlaidų įpročius",
+      "Jūs norite greitai nustato per tvirtą pagrindą",
+      "Jūs nenorite įgyvendinti, ką išmoksite",
+      "Jūs ieškote asmeninių finansinių patarimų"
+    ]
+  },
+  "course": {
+    "back_to_course": "Atgal į nusileidimą",
+    "module_label": "Gyvenimo būdas",
+    "now_playing": "Dabar grojama",
+    "page_label": "Puslapis",
+    "reading_progress": "Skaitymo pažanga",
+    "download_pdf": "Atsisiųsti PDF",
+    "chapter": "Skyrius"
+  },
+  "lessons": {
+    "badge": "/ 04 - Žinoma turinys",
+    "title": "Ką rasi viduje",
+    "items": []
+  }
+}

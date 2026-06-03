@@ -1,0 +1,344 @@
+{
+  "locale": "az",
+  "seo": {
+    "title": "Amish Sırları: Necə qazanmaq və pul saxlamaq",
+    "description": "Amish ictimainin fərqli yaşayışın şəkillərini keşfedin. tam video modulları və downloadable PDFs daxildir.",
+    "ogImage": "/courses/amish-secrets/cover.png"
+  },
+  "nav": {
+    "brand": "Axtarış",
+    "features": "Features",
+    "pricing": "Qiymət",
+    "testimonials": "Testi",
+    "faq": "Qeydiyyat",
+    "contact": "Bakı",
+    "get_started": "Başlamaq",
+    "learn_more": "Daha çox",
+    "member_area": "Qeydiyyat",
+    "back_to_landing": "Landing"
+  },
+  "hero": {
+    "badge": "Yeniyetmə",
+    "title": "Amish Sırları: Necə qazanmaq və pul saxlamaq",
+    "subtitle": "Amish ictimainin fərqli yaşayışın şəkillərini keşfedin. tam video modulları və downloadable PDFs daxildir.",
+    "cta": "Başlamaq",
+    "secondary_cta": "Daha çox",
+    "price_label": "Xüsusi start qiymət",
+    "one_time_payment": "Bir vaxt ödəniş - heç bir ödəniş"
+  },
+  "problem": {
+    "badge": "Problem",
+    "title": "Ayın sonuna həyata keçirilmişdir? Müasir siyasət bizi aşırı istehlaka doğru itirir.",
+    "text": ""
+  },
+  "story": {
+    "badge": "Bizim Story",
+    "title": "La mia esperienza tra gli Amish",
+    "image_captions": [
+      "La vita quotidiana nella comunità Amish: sequlià, autosufficienza e saggezza finanziaria.",
+      "Il che che che che che che",
+      "L'economia yerlia Amish: kişio-da bir vivere kon il 60% una famiglia riesce get."
+    ],
+    "quote": "Amish yaşayır və biz dəyişdirdiyimiz bir parça dəyişdirdikdə tam yaşayır. Bu kursda biz bunu necə izah."
+  },
+  "author": {
+    "badge": "// 03 — Yazar",
+    "title": "Bu kursa qoşulun",
+    "name": "Alessandro Rinaldi",
+    "role": "Araşdırma",
+    "bio": "[Məkilinizi buraya da əlavə edin: Pennsylvaniada 3 ay yaşayırdım, 12 Amish ailələri ilə görüşüb, onların iqtisadi sistemini öyrəndi. Qeyd, yalnız praktik.]",
+    "tags": [
+      "Saggezza Finanziaria",
+      "Oxunub",
+      "Tucazione"
+    ]
+  },
+  "modules": {
+    "badge": "// 02 —  Learn  Learn",
+    "title": "Amish Masters'ın Sırları",
+    "description": "Amish haqqında gündəlik həyata üçün beton həyata keçirən 8 praktik modullar.",
+    "items": [
+      {
+        "title": "Axtarış",
+        "desc": "Vəzəsiz 30% az yaşayır."
+      },
+      {
+        "title": "Qeydiyyat",
+        "desc": "Qızıqları aradan qaldırma metodu."
+      },
+      {
+        "title": "Qalereya",
+        "desc": "Qeydiyyatdan keçmək çərçivəsi."
+      },
+      {
+        "title": "Hər şey",
+        "desc": "12 əsas alətlər özünüzü kömək."
+      },
+      {
+        "title": "Yadda saxla",
+        "desc": "Bir barter şəhəri aktivləşdirmək üçün necə."
+      },
+      {
+        "title": "Qalereya",
+        "desc": "Ev memarlıq və sıfır otaqlı yemək."
+      },
+      {
+        "title": "Pulsuz Enerji",
+        "desc": "50-ci ildə əlavə qiymətlərini necə azaltmaq olar?"
+      },
+      {
+        "title": "30-Day Planı",
+        "desc": "Sizin maliyyə çevirmək üçün Day-by-day checklist."
+      }
+    ]
+  },
+  "includes": {
+    "title": "Also:",
+    "items": [
+      "Tam eBook (PDF, ePub, Kindle)",
+      "Çapla 30 günlük checklist",
+      "Amish qiymət Excel hesabatı",
+      "İndi alışveriş siyahısı şablon",
+      "Lifetime üzvü daxildir",
+      "Pulsuz gelecek yeniliklər"
+    ]
+  },
+  "testimonials": {
+    "badge": "// 06 - Görüşlər",
+    "title": "Testi",
+    "items": [
+      {
+        "text": "Amish büdcə metodunu və iki ay əməliyyatlarımı dəyişdirdim 35. 30 günlük checklist dönüş növü idi. Ən çox işləyir.",
+        "name": "Marco R.",
+        "role": "Roma — ermən"
+      }
+    ]
+  },
+  "offer": {
+    "badge": "Proqram",
+    "title": "Özünüzü əlaqə edin",
+    "complete_package": "Tam Paket",
+    "course_value": "Kurs: $97",
+    "bonus_value": "Bonus: $ 27",
+    "price_text": "",
+    "one_time": "Bir vaxt ödəniş - heç bir ödəniş",
+    "launch_price": "İndi qiymət - sonra $37",
+    "cta": "Unlock Access İndi",
+    "guarantee_title": "30-Day Money-Back Qiymət",
+    "guarantee_text": "30 gün üçün baxın. Ən azı $ 100 saxlamaq deyilsə, biz tam dəyişəcək. Heç bir sual deyil.",
+    "includes": [
+      "Tam kurs (qiymət $97)",
+      "eBook PDF, ePub, Kindle",
+      "Çapla 30 günlük checklist",
+      "Amish qiymət Excel hesabatı",
+      "Lifetime access + yeniyetmə",
+      "BONUS: haqqında alış-veriş siyahısı (qiymət $27)"
+    ]
+  },
+  "faq": {
+    "badge": "// - FAQ",
+    "title": "Sorğular",
+    "offer_valid": "Bu həftə təhlükəsiz",
+    "items": [
+      {
+        "q": "Tam daxildir?",
+        "a": "PDF, ePub, və Kindle formatlarında tam eBook almaq. Bütün gələcək yeniliklərinə artıq erişim."
+      },
+      {
+        "q": "İngilis dili?",
+        "a": "Böyük Britaniyada kurs tam mövcuddur."
+      },
+      {
+        "q": "Nə format kursudur?",
+        "a": "eBook in PDF, ePub, və Kindle formatları. Video MP4 formatındadır."
+      },
+      {
+        "q": "Giriş almaq zaman?",
+        "a": "Ödənişdən sonra dərhal."
+      },
+      {
+        "q": "Yaxşı deyilsem?",
+        "a": "30 günlük pul geri qəbul ilə qəbul olunur."
+      },
+      {
+        "q": "Necə uzun alır?",
+        "a": "Tam proqram 3-4 saat alır."
+      }
+    ]
+  },
+  "final_cta": {
+    "title": "E-poçt ünvanı",
+    "subtitle": "artıq pul ilə əlaqə çevirmiş yüzlərinə baxın.",
+    "badge": "Bu həftə təhlükəsiz"
+  },
+  "footer": {
+    "rights_reserved": "Bütün hüquqlar qorunur.",
+    "privacy": "Elanlar",
+    "terms": "Qeydiyyat",
+    "legal_note": "Bu digital informasiya məhsuludur. Nəstəklər dəyişikliklənir və şəxsi təhlükəsizlikdən asılı ola bilər. Tarix edilmiş Amish qiymətləri və texnologiyaları etnoqrafik araşdırma əsaslanır və bütün Amish əməkdaşlarının müasir tətbiqlərini doğru ola bilər.",
+    "badges": {
+      "guarantee": "30-Day Qayda",
+      "instant_access": "Axtarış",
+      "lifetime_updates": "Lifetime Updates"
+    }
+  },
+  "trust": {
+    "title": "Dünya komandaları tərəfindən əməkdaşlıq",
+    "readers_count": "1.247 oxu",
+    "company_names": []
+  },
+  "ui": {
+    "labels": {
+      "instant_access": "Axtarış",
+      "buy_now_arrow": "İndi →",
+      "readers": "1.247 oxu",
+      "buy_now_dash": "İndi al -",
+      "view_modules": "Modulları bax",
+      "ssl_secure": "Yadda saxla",
+      "instant_download": "Instant Download",
+      "lifetime_access": "Lifetime Access",
+      "guarantee_days": "30-Day Qayda",
+      "section_who": "// 01 - Kim Bu üçün",
+      "is_this_for_you": "Sizin üçün bu kurs?",
+      "perfect_for": "Siz üçün müəyyən:",
+      "p_struggle": "Gənc etmək üçün mübarizə",
+      "p_cut_costs": "Siz həyata keyfiyyətsiz məsulları kesmek istəyirəm",
+      "p_consumerism": "Siz istehsalçılıq və borc mərkəziyyətlərinin çünkisi",
+      "p_practical": "Siz praktik, vaxt test metodları istəyirəm",
+      "p_future": "Siz ailəniz üçün sağlam maliyyə gətirmək istəyirəm",
+      "not_for": "Siz üçün deyil:",
+      "n_quick": "Axtarırsınız",
+      "n_habits": "Siz istədiyiniz istəyirik",
+      "n_quick_fix": "Siz böyük bir əsas üzərində sürətli düzelməyi tercih edin",
+      "n_implement": "Siz öyrənmək üçün hazır deyil",
+      "n_advice": "Xüsusi maliyyə məlumat axtarırsınız",
+      "section_learn": "// 02 —  Learn  Learn",
+      "masters_secrets": "Amish Masters'ın Sırları",
+      "modules_desc": "Amish haqqında gündəlik həyata üçün beton həyata keçirən 8 praktik modullar.",
+      "section_author": "// 03 — Yazar",
+      "behind_course": "Bu kursa qoşulun",
+      "your_name": "Ad Soyad",
+      "researcher_author": "Araşdırma",
+      "author_bio": "[Məkilinizi buraya da əlavə edin: Pennsylvaniada 3 ay yaşayırdım, 12 Amish ailələri ilə görüşüb, onların iqtisadi sistemini öyrəndi. Qeyd, yalnız praktik.]",
+      "section_content": "// 04 — Kurslar",
+      "what_inside": "Siz Inside tapacaq",
+      "also_includes": "Also:",
+      "inc_full_ebook": "Tam eBook (PDF, ePub, Kindle)",
+      "inc_checklist": "Çapla 30 günlük checklist",
+      "inc_excel": "Amish qiymət Excel hesabatı",
+      "inc_shopping": "İndi alışveriş siyahısı şablon",
+      "inc_lifetime": "Lifetime üzvü daxildir",
+      "inc_updates": "Pulsuz gelecek yeniliklər",
+      "section_offer": "// 05 —  Offer",
+      "invest_yourself": "Özünüzü əlaqə edin",
+      "launch_offer": "Proqram",
+      "complete_package": "Tam Paket",
+      "course_value": "Kurs: $97",
+      "bonus_value": "Bonus: $ 27",
+      "one_time": "Bir vaxt ödəniş - heç bir ödəniş",
+      "launch_price": "İndi qiymət - sonra $37",
+      "inc_course_full": "Tam kurs (qiymət $97)",
+      "inc_ebook": "eBook PDF, ePub, Kindle",
+      "inc_checklist2": "Çapla 30 günlük checklist",
+      "inc_excel2": "Amish qiymət Excel hesabatı",
+      "inc_access_updates": "Lifetime access + yeniyetmə",
+      "inc_bonus_shopping": "BONUS: haqqında alış-veriş siyahısı (qiymət $27)",
+      "unlock_now": "Unlock Access İndi",
+      "guarantee_title": "30-Day Money-Back Qiymət",
+      "guarantee_text": "30 gün üçün baxın. Ən azı $ 100 saxlamaq deyilsə, biz tam dəyişəcək. Heç bir sual deyil.",
+      "section_testimonials": "// 06 - Görüşlər",
+      "testimonial_text": "Amish büdcə metodunu və iki ay əməliyyatlarımı dəyişdirdim 35. 30 günlük checklist dönüş növü idi. Ən çox işləyir.",
+      "testimonial_name": "Marco R.",
+      "testimonial_role": "Roma — ermən",
+      "section_faq": "// - FAQ",
+      "faq_title": "Sorğular",
+      "offer_valid": "Bu həftə təhlükəsiz",
+      "final_cta": "E-poçt ünvanı",
+      "final_sub": "artıq pul ilə əlaqə çevirmiş yüzlərinə baxın.",
+      "unlock_dash": "Unlock Access -",
+      "guarantee_badge": "30-Day Qayda",
+      "instant_access_badge": "Axtarış",
+      "lifetime_badge": "Lifetime Updates",
+      "rights_reserved": "Bütün hüquqlar qorunur.",
+      "privacy": "Elanlar",
+      "terms": "Qeydiyyat",
+      "legal_note": "Bu digital informasiya məhsuludur. Nəstəklər dəyişikliklənir və şəxsi təhlükəsizlikdən asılı ola bilər. Tarix edilmiş Amish qiymətləri və texnologiyaları etnoqrafik araşdırma əsaslanır və bütün Amish əməkdaşlarının müasir tətbiqlərini doğru ola bilər.",
+      "features": "Features",
+      "pricing": "Qiymət",
+      "testimonials": "Testi",
+      "contact": "Bakı",
+      "get_started": "Başlamaq",
+      "learn_more": "Daha çox",
+      "member_area": "Qeydiyyat",
+      "back_to_landing": "Landing",
+      "buy_now": "İndi",
+      "currency_symbol": "$",
+      "new_badge": "Yeniyetmə",
+      "the_problem": "Problem",
+      "our_story": "Bizim Story",
+      "what_learn": "Oxunub",
+      "course_lessons": "Kurslar",
+      "curriculum": "Proqram",
+      "free_tier": "Pulsuz",
+      "pro_tier": "Proqram",
+      "per_month": "/mo",
+      "start_free": "Pulsuz",
+      "popular": "Populyar",
+      "free_title": "Başlamaq üçün",
+      "pro_title": "Axtarış",
+      "trusted_by": "Dünya komandaları tərəfindən əməkdaşlıq",
+      "offer_badge": "Proqram",
+      "price_special": "Xüsusi start qiymət",
+      "buy_and_access": "Almaq və Access Instantly",
+      "bestseller": "Best Satıcı",
+      "story_badge": "// True Story",
+      "story_title": "Amish",
+      "story_subtitle": "Pennsylvaniada üç ay, on iki uşaq, 300 il üçün çalışmış iqtisadi sistem.",
+      "amish_life": "Axtarış",
+      "caption_1": "Amish ictimai Daily həyat: sadəlik, öz yetirmə, və maliyyə həmçilərdən aşağı düşdü.",
+      "caption_2": "Barter və qazanma sistemi pul lazımdır aradan qaldırmaq və daimi əlaqələr yaradır.",
+      "caption_3": "Amish ev iqtisadiyyatı: bir ailə milli ortalamadan 60% daha az yaşayır.",
+      "tag_1": "İqtisadi",
+      "tag_2": "Axtarış",
+      "tag_3": "E-poçt ünvanı",
+      "brand_name": "Courssy",
+      "reviewer": "Marco R., əvvəl oxu",
+      "language_switch": "EN",
+      "language_switch_en": "EN"
+    }
+  },
+  "audience": {
+    "badge": "// 01 - Kim Bu üçün",
+    "title": "Sizin üçün bu kurs?",
+    "perfect_for": "Siz üçün müəyyən:",
+    "perfect_items": [
+      "Gənc etmək üçün mübarizə",
+      "Siz həyata keyfiyyətsiz məsulları kesmek istəyirəm",
+      "Siz istehsalçılıq və borc mərkəziyyətlərinin çünkisi",
+      "Siz praktik, vaxt test metodları istəyirəm",
+      "Siz ailəniz üçün sağlam maliyyə gətirmək istəyirəm"
+    ],
+    "not_for": "Siz üçün deyil:",
+    "not_items": [
+      "Axtarırsınız",
+      "Siz istədiyiniz istəyirik",
+      "Siz böyük bir əsas üzərində sürətli düzelməyi tercih edin",
+      "Siz öyrənmək üçün hazır deyil",
+      "Xüsusi maliyyə məlumat axtarırsınız"
+    ]
+  },
+  "course": {
+    "back_to_course": "Landing",
+    "module_label": "Proqram",
+    "now_playing": "İndi oynayır",
+    "page_label": "Page",
+    "reading_progress": "Oxunub",
+    "download_pdf": "PDF",
+    "chapter": "Tarix"
+  },
+  "lessons": {
+    "badge": "// 04 — Kurslar",
+    "title": "Siz Inside tapacaq",
+    "items": []
+  }
+}

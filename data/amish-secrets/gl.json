@@ -1,0 +1,344 @@
+{
+  "locale": "gl",
+  "seo": {
+    "title": "Segredos Amish: Como vivir con aforros e xestionar o diñeiro",
+    "description": "Descubra os segredos da vida frugal da comunidade amish. Inclúe módulos de vídeo completos e PDFs descargables.",
+    "ogImage": "/courses/amish-secrets/cover.png"
+  },
+  "nav": {
+    "brand": "Segredos Amish",
+    "features": "Características",
+    "pricing": "Prezo",
+    "testimonials": "Testemuños",
+    "faq": "FAQ",
+    "contact": "Contacto",
+    "get_started": "Comezar",
+    "learn_more": "Aprender máis",
+    "member_area": "Área membro",
+    "back_to_landing": "Volver a Desembarco"
+  },
+  "hero": {
+    "badge": "Nova nova",
+    "title": "Segredos Amish: Como vivir con aforros e xestionar o diñeiro",
+    "subtitle": "Descubra os segredos da vida frugal da comunidade amish. Inclúe módulos de vídeo completos e PDFs descargables.",
+    "cta": "Comezar",
+    "secondary_cta": "Aprender máis",
+    "price_label": "Prezo especial de lanzamento",
+    "one_time_payment": "Pagamento único - Sen subscrición"
+  },
+  "problem": {
+    "badge": "O problema",
+    "title": "Canso de chegar a fin de semana sen cartos? A sociedade moderna está a impulsar o consumo excesivo.",
+    "text": ""
+  },
+  "story": {
+    "badge": "A nosa historia",
+    "title": "La mia esperienza tra gli Amish",
+    "image_captions": [
+      "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria.",
+      "Il sistema di baratto e scambio che elimina il bisogno di denaro contante.",
+      "L'economia domestica Amish: come una famiglia riesce a vivere con il 60% en meno."
+    ],
+    "quote": "Os amish viven ricos e plenas vidas mentres pasamos unha fracción do que gastamos. Neste curso imos descubrir como facelo."
+  },
+  "author": {
+    "badge": "03 - O autor",
+    "title": "Detrás deste curso",
+    "name": "Alessandro Rinaldi",
+    "role": "Investigador · Autor",
+    "bio": "\"Vivín tres meses en Pensilvania, entrevistei a 12 familias de Amish, estudando o seu sistema económico. Non hai teoría, só práctica.",
+    "tags": [
+      "Saggezza Finanziaria",
+      "Vita Sostenibile",
+      "Educazione"
+    ]
+  },
+  "modules": {
+    "badge": "02 - O que aprenderás",
+    "title": "Os segredos dos Amish Masters",
+    "description": "8 módulos prácticos que converten a sabedoría en accións concretas para a túa vida cotiá.",
+    "items": [
+      {
+        "title": "Orzamento Amish",
+        "desc": "Un 30% menos sen sacrificio."
+      },
+      {
+        "title": "Pantería infinita",
+        "desc": "O método de almacenamento de alimentos elimina os residuos."
+      },
+      {
+        "title": "Débeda cero",
+        "desc": "O marco para saír da débeda para sempre."
+      },
+      {
+        "title": "Fixar todo",
+        "desc": "12 ferramentas para reparar."
+      },
+      {
+        "title": "intercambio libre de diñeiro",
+        "desc": "Como activar unha rede de barras?"
+      },
+      {
+        "title": "Granxa para mesa",
+        "desc": "Guía para a xardinería e cociña de refugallos cero."
+      },
+      {
+        "title": "Enerxía libre",
+        "desc": "Como reducir as facturas nun 50%?"
+      },
+      {
+        "title": "Plan de 30 días",
+        "desc": "Lista de verificación día a día para transformar as súas finanzas."
+      }
+    ]
+  },
+  "includes": {
+    "title": "Tamén inclúe:",
+    "items": [
+      "Ebook completo (PDF, ePub, Kindle)",
+      "Lista de verificación 30 días",
+      "Amish orzamento Excel sheet",
+      "Lista semanal de compras",
+      "Área de acceso permanente",
+      "Actualizacións de futuro libres"
+    ]
+  },
+  "testimonials": {
+    "badge": "06 - Testemuños",
+    "title": "Testemuños",
+    "items": [
+      {
+        "text": "Eu apliquei o método de orzamento de Amish e en dous meses cortei os meus gastos nun 35%. A lista de 30 días foi o punto de inflexión. Un curso que realmente funciona.",
+        "name": "Marco R.",
+        "role": "Roma - primeiros lectores"
+      }
+    ]
+  },
+  "offer": {
+    "badge": "Lanzamento Oferta",
+    "title": "Investir en si mesmo",
+    "complete_package": "Paquete completo",
+    "course_value": "Categoría: $97",
+    "bonus_value": "Bonos: $ 27",
+    "price_text": "",
+    "one_time": "Pagamento único - Sen subscrición",
+    "launch_price": "Prezo de lanzamento: $ 37",
+    "cta": "Unlock Access Now",
+    "guarantee_title": "30-Day Money Back Guarantee",
+    "guarantee_text": "Proba durante 30 días. Se non aforras polo menos 100 euros, reembolsaremos o importe íntegro. Sen preguntas, sen dúbidas.",
+    "includes": [
+      "Curso completo (valor $ 97)",
+      "ebook PDF, ePub, Kindle",
+      "Lista de verificación 30 días",
+      "Amish orzamento Excel sheet",
+      "Acceso directo + actualizacións",
+      "Lista de compras semanais (valor $ 27)"
+    ]
+  },
+  "faq": {
+    "badge": "07 - FAQ",
+    "title": "Preguntas frecuentes",
+    "offer_valid": "Oferta válida esta semana",
+    "items": [
+      {
+        "q": "Que se inclúe exactamente?",
+        "a": "Consegue o ebook completo en formatos PDF, ePub e Kindle. Acceso a todas as actualizacións futuras."
+      },
+      {
+        "q": "Está en inglés?",
+        "a": "O curso está totalmente dispoñible en inglés."
+      },
+      {
+        "q": "En que formato está o curso?",
+        "a": "ebook en formato PDF, ePub e Kindle. Os vídeos están en formato MP4."
+      },
+      {
+        "q": "Cando teño acceso?",
+        "a": "Inmediatamente despois do pagamento."
+      },
+      {
+        "q": "E se non estou satisfeito?",
+        "a": "Está protexido pola nosa garantía de devolución do diñeiro de 30 días."
+      },
+      {
+        "q": "Canto tempo leva?",
+        "a": "O programa completo dura aproximadamente 3-4 horas."
+      }
+    ]
+  },
+  "final_cta": {
+    "title": "Comezar o seu camiño cara á liberdade financeira",
+    "subtitle": "Únete a centos de persoas que xa cambiaron a súa relación co diñeiro.",
+    "badge": "Oferta válida esta semana"
+  },
+  "footer": {
+    "rights_reserved": "Todos os dereitos reservados.",
+    "privacy": "Privacidade",
+    "terms": "termos",
+    "legal_note": "É un produto dixital. Os resultados poden variar e depender do compromiso persoal. Os prezos e técnicas descritas baséanse na investigación etnográfica e poden non reflectir con precisión as prácticas contemporáneas de todas as comunidades amish.",
+    "badges": {
+      "guarantee": "Garantía 30 días",
+      "instant_access": "Acceso inmediato",
+      "lifetime_updates": "Actualizacións de vida"
+    }
+  },
+  "trust": {
+    "title": "Confiado por equipos en todo o mundo",
+    "readers_count": "1.247 lectores",
+    "company_names": []
+  },
+  "ui": {
+    "labels": {
+      "instant_access": "Acceso directo",
+      "buy_now_arrow": "Compra agora",
+      "readers": "1.247 lectores",
+      "buy_now_dash": "Compra agora -",
+      "view_modules": "Ver módulos",
+      "ssl_secure": "Pago SSL seguro",
+      "instant_download": "Baixar Instantánea",
+      "lifetime_access": "Acceso vital",
+      "guarantee_days": "Garantía 30 días",
+      "section_who": "1 - Quen é este",
+      "is_this_for_you": "Este curso é para ti?",
+      "perfect_for": "Perfecto para ti se:",
+      "p_struggle": "Loitas para facer o encontro final",
+      "p_cut_costs": "Reducir custos sen sacrificar a calidade de vida.",
+      "p_consumerism": "Estás canso do consumismo e da cultura da débeda.",
+      "p_practical": "Quere métodos prácticos e probados a tempo",
+      "p_future": "Queres construír un futuro económico para a túa familia?",
+      "not_for": "Non para ti se:",
+      "n_quick": "Estás buscando esquemas ricos en solucións",
+      "n_habits": "Non queres cambiar os teus hábitos",
+      "n_quick_fix": "Prefire correccións rápidas sobre unha base sólida",
+      "n_implement": "Non estás disposto a aplicar o que aprendes.",
+      "n_advice": "Busca asesoramento personalizado",
+      "section_learn": "02 - O que aprenderás",
+      "masters_secrets": "Os segredos dos Amish Masters",
+      "modules_desc": "8 módulos prácticos que converten a sabedoría en accións concretas para a túa vida cotiá.",
+      "section_author": "03 - O autor",
+      "behind_course": "Detrás deste curso",
+      "your_name": "O teu nome aquí",
+      "researcher_author": "Investigador · Autor",
+      "author_bio": "\"Vivín tres meses en Pensilvania, entrevistei a 12 familias de Amish, estudando o seu sistema económico. Non hai teoría, só práctica.",
+      "section_content": "04 - Contido do curso",
+      "what_inside": "O que atoparás dentro",
+      "also_includes": "Tamén inclúe:",
+      "inc_full_ebook": "Ebook completo (PDF, ePub, Kindle)",
+      "inc_checklist": "Lista de verificación 30 días",
+      "inc_excel": "Amish orzamento Excel sheet",
+      "inc_shopping": "Lista semanal de compras",
+      "inc_lifetime": "Área de acceso permanente",
+      "inc_updates": "Actualizacións de futuro libres",
+      "section_offer": "05 - Oferta",
+      "invest_yourself": "Investir en si mesmo",
+      "launch_offer": "Lanzamento Oferta",
+      "complete_package": "Paquete completo",
+      "course_value": "Categoría: $97",
+      "bonus_value": "Bonos: $ 27",
+      "one_time": "Pagamento único - Sen subscrición",
+      "launch_price": "Prezo de lanzamento: $ 37",
+      "inc_course_full": "Curso completo (valor $ 97)",
+      "inc_ebook": "ebook PDF, ePub, Kindle",
+      "inc_checklist2": "Lista de verificación 30 días",
+      "inc_excel2": "Amish orzamento Excel sheet",
+      "inc_access_updates": "Acceso directo + actualizacións",
+      "inc_bonus_shopping": "Lista de compras semanais (valor $ 27)",
+      "unlock_now": "Unlock Access Now",
+      "guarantee_title": "30-Day Money Back Guarantee",
+      "guarantee_text": "Proba durante 30 días. Se non aforras polo menos 100 euros, reembolsaremos o importe íntegro. Sen preguntas, sen dúbidas.",
+      "section_testimonials": "06 - Testemuños",
+      "testimonial_text": "Eu apliquei o método de orzamento de Amish e en dous meses cortei os meus gastos nun 35%. A lista de 30 días foi o punto de inflexión. Un curso que realmente funciona.",
+      "testimonial_name": "Marco R.",
+      "testimonial_role": "Roma - primeiros lectores",
+      "section_faq": "07 - FAQ",
+      "faq_title": "Preguntas frecuentes",
+      "offer_valid": "Oferta válida esta semana",
+      "final_cta": "Comezar o seu camiño cara á liberdade financeira",
+      "final_sub": "Únete a centos de persoas que xa cambiaron a súa relación co diñeiro.",
+      "unlock_dash": "Acceso ilimitado -",
+      "guarantee_badge": "Garantía 30 días",
+      "instant_access_badge": "Acceso inmediato",
+      "lifetime_badge": "Actualizacións de vida",
+      "rights_reserved": "Todos os dereitos reservados.",
+      "privacy": "Privacidade",
+      "terms": "termos",
+      "legal_note": "É un produto dixital. Os resultados poden variar e depender do compromiso persoal. Os prezos e técnicas descritas baséanse na investigación etnográfica e poden non reflectir con precisión as prácticas contemporáneas de todas as comunidades amish.",
+      "features": "Características",
+      "pricing": "Prezo",
+      "testimonials": "Testemuños",
+      "contact": "Contacto",
+      "get_started": "Comezar",
+      "learn_more": "Aprender máis",
+      "member_area": "Área membro",
+      "back_to_landing": "Volver a Desembarco",
+      "buy_now": "Compra agora",
+      "currency_symbol": "$",
+      "new_badge": "Nova nova",
+      "the_problem": "O problema",
+      "our_story": "A nosa historia",
+      "what_learn": "O que aprenderás",
+      "course_lessons": "Curso Leccións",
+      "curriculum": "Curriculum",
+      "free_tier": "Libre",
+      "pro_tier": "Pro",
+      "per_month": "/mo",
+      "start_free": "Inicio Libre",
+      "popular": "Popular",
+      "free_title": "Para comezar",
+      "pro_title": "para crecer",
+      "trusted_by": "Confiado por equipos en todo o mundo",
+      "offer_badge": "Lanzamento Oferta",
+      "price_special": "Prezo especial de lanzamento",
+      "buy_and_access": "Compra e acceso inmediato",
+      "bestseller": "Best Seller",
+      "story_badge": "A verdadeira historia",
+      "story_title": "A miña experiencia entre Amish",
+      "story_subtitle": "Tres meses en Pennsylvania, doce familias entrevistadas, un sistema económico que funcionou durante 300 anos.",
+      "amish_life": "Vida Amish",
+      "caption_1": "A vida diaria na comunidade amish: a simplicidade, a autosuficiencia e a sabedoría financeira pasaron por xeracións.",
+      "caption_2": "O barter e sistema de cambio que elimina a necesidade de diñeiro e constrúe relacións de confianza duradeiras.",
+      "caption_3": "A economía do fogar de Amish: como unha familia vive un 60% menos que a media nacional.",
+      "tag_1": "Antropoloxía económica",
+      "tag_2": "Estudos Amish",
+      "tag_3": "consultoría financeira",
+      "brand_name": "Courssy",
+      "reviewer": "Marco R. Primeiro lector",
+      "language_switch": "EN",
+      "language_switch_en": "EN"
+    }
+  },
+  "audience": {
+    "badge": "1 - Quen é este",
+    "title": "Este curso é para ti?",
+    "perfect_for": "Perfecto para ti se:",
+    "perfect_items": [
+      "Loitas para facer o encontro final",
+      "Reducir custos sen sacrificar a calidade de vida.",
+      "Estás canso do consumismo e da cultura da débeda.",
+      "Quere métodos prácticos e probados a tempo",
+      "Queres construír un futuro económico para a túa familia?"
+    ],
+    "not_for": "Non para ti se:",
+    "not_items": [
+      "Estás buscando esquemas ricos en solucións",
+      "Non queres cambiar os teus hábitos",
+      "Prefire correccións rápidas sobre unha base sólida",
+      "Non estás disposto a aplicar o que aprendes.",
+      "Busca asesoramento personalizado"
+    ]
+  },
+  "course": {
+    "back_to_course": "Volver a Desembarco",
+    "module_label": "Curriculum",
+    "now_playing": "Agora toca",
+    "page_label": "Página",
+    "reading_progress": "Lectura Progreso",
+    "download_pdf": "Descargar PDF",
+    "chapter": "Capítulo"
+  },
+  "lessons": {
+    "badge": "04 - Contido do curso",
+    "title": "O que atoparás dentro",
+    "items": []
+  }
+}

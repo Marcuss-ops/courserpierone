@@ -7,183 +7,183 @@
   },
   "nav": {
     "brand": "Amish secrets",
-    "features": "Features",
-    "pricing": "Pricing",
-    "testimonials": "Testimonials",
-    "faq": "FAQ",
-    "contact": "Contact",
-    "get_started": "Get Started",
-    "learn_more": "Learn More",
-    "member_area": "Member Area",
-    "back_to_landing": "Back to Landing"
+    "features": "सुविधाएँ",
+    "pricing": "मूल्य निर्धारण",
+    "testimonials": "प्रशंसापत्र",
+    "faq": "सामान्य",
+    "contact": "संपर्क",
+    "get_started": "प्रारंभ करना",
+    "learn_more": "अधिक जानें",
+    "member_area": "सदस्य क्षेत्र",
+    "back_to_landing": "वापस लैंडिंग"
   },
   "hero": {
-    "badge": "New",
+    "badge": "नया",
     "title": "अमीश सीक्रेट्स: बचत के साथ कैसे जिएं और पैसों का प्रबंधन कैसे करें",
     "subtitle": "अमीश समुदाय के मितव्ययी जीवन के रहस्यों को जानें। इसमें पूर्ण वीडियो मॉड्यूल और डाउनलोड करने योग्य पीडीएफ शामिल हैं।",
-    "cta": "Get Started",
-    "secondary_cta": "Learn More",
-    "price_label": "Special launch price",
-    "one_time_payment": "One-time payment — no subscription"
+    "cta": "प्रारंभ करना",
+    "secondary_cta": "अधिक जानें",
+    "price_label": "विशेष प्रक्षेपण मूल्य",
+    "one_time_payment": "एक बार भुगतान - कोई सदस्यता नहीं"
   },
   "problem": {
-    "badge": "The Problem",
+    "badge": "समस्या",
     "title": "क्या आप बिना बचत के महीने के अंत तक पहुँचने से थक चुके हैं? आधुनिक समाज हमें अत्यधिक उपभोग के लिए प्रेरित करता है।",
     "text": ""
   },
   "story": {
-    "badge": "Our Story",
+    "badge": "हमारी कहानी",
     "title": "La mia esperienza tra gli Amish",
     "image_captions": [
-      "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria.",
+      "La vita coidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria।",
       "Il sistema di baratto e scambio che elimina il bisogno di denaro contante.",
-      "L'economia domestica Amish: come una famiglia riesce a vivere con il 60% in meno."
+      "L'economia domestica Amish: आना una famiglia riesce a vivere con il 60% in Meno."
     ],
     "quote": "अमीश लोग हमारे द्वारा खर्च किए जाने वाले धन के एक अंश को खर्च करके समृद्ध और परिपूर्ण जीवन जीते हैं। इस पाठ्यक्रम में हम आपको बताएंगे कि वे ऐसा कैसे करते हैं।"
   },
   "author": {
-    "badge": "// 03 — The Author",
-    "title": "Behind This Course",
+    "badge": "/ 03 - लेखक",
+    "title": "इस कोर्स के पीछे",
     "name": "Alessandro Rinaldi",
     "role": "Researcher · Author · Traveler",
     "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
     "tags": [
       "Saggezza Finanziaria",
       "Vita Sostenibile",
-      "Educazione"
+      "एडुकाज़ियोन"
     ]
   },
   "modules": {
-    "badge": "// 02 — What You'll Learn",
-    "title": "The Amish Masters' Secrets",
+    "badge": "क्या आप सीखेंगे?",
+    "title": "Amish Masters' Secrets",
     "description": "8 practical modules that turn Amish wisdom into concrete actions.",
     "items": [
       {
-        "title": "Amish Budget",
-        "desc": "Live on 30% less without sacrifice."
+        "title": "अमिश बजट",
+        "desc": "बिना बलिदान के 30% कम पर रहते हैं।"
       },
       {
-        "title": "Infinite Pantry",
-        "desc": "The food storage method that eliminates waste."
+        "title": "अनंत Pantry",
+        "desc": "खाद्य भंडारण विधि जो अपशिष्ट को समाप्त करती है।"
       },
       {
-        "title": "Zero Debt",
-        "desc": "The framework to get out of debt forever."
+        "title": "शून्य ऋण",
+        "desc": "हमेशा के लिए ऋण से बाहर निकलने का ढांचा।"
       },
       {
-        "title": "Fix Everything",
-        "desc": "12 essential tools to repair yourself."
+        "title": "सब कुछ ठीक करें",
+        "desc": "अपने आप की मरम्मत के लिए 12 आवश्यक उपकरण।"
       },
       {
-        "title": "Money-Free Exchange",
-        "desc": "How to activate a barter network."
+        "title": "मनी-फ्री एक्सचेंज",
+        "desc": "कैसे एक बार्टर नेटवर्क सक्रिय करने के लिए।"
       },
       {
-        "title": "Farm to Table",
-        "desc": "Guide to home gardening and zero-waste cooking."
+        "title": "फार्म टेबल",
+        "desc": "घर बागवानी और शून्य-अपशिष्ट खाना पकाने के लिए गाइड।"
       },
       {
-        "title": "Free Energy",
-        "desc": "How to cut utility bills by 50%."
+        "title": "मुक्त ऊर्जा",
+        "desc": "उपयोगिता बिलों को 50% तक कैसे काटें।"
       },
       {
-        "title": "30-Day Plan",
-        "desc": "Day-by-day checklist to transform your finances."
+        "title": "30 दिवसीय योजना",
+        "desc": "अपने वित्त को बदलने के लिए डे-बाय-डे चेकलिस्ट।"
       }
     ]
   },
   "includes": {
-    "title": "Also includes:",
+    "title": "इसमें भी शामिल है:",
     "items": [
-      "Full eBook (PDF, ePub, Kindle)",
-      "Printable 30-day checklist",
-      "Amish budget Excel sheet",
-      "Weekly shopping list template",
-      "Lifetime member area access",
-      "Free future updates"
+      "पूर्ण ईबुक (PDF, ePub, Kindle)",
+      "प्रिंट करने योग्य 30-day चेकलिस्ट",
+      "Amish बजट एक्सेल शीट",
+      "साप्ताहिक खरीदारी सूची टेम्पलेट",
+      "लाइफटाइम सदस्य क्षेत्र",
+      "भविष्य अद्यतन"
     ]
   },
   "testimonials": {
-    "badge": "// 06 — Testimonials",
-    "title": "Testimonials",
+    "badge": "/ 06 - प्रशंसापत्र",
+    "title": "प्रशंसापत्र",
     "items": [
       {
-        "text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
-        "name": "Marco R.",
-        "role": "Rome — early readers"
+        "text": "मैंने Amish बजट विधि को लागू किया और दो महीने में मैंने अपने खर्च को 35% तक घटा दिया। 30 दिवसीय चेकलिस्ट मोड़ बिंदु था। अंत में एक कोर्स जो वास्तव में काम करता है।",
+        "name": "मार्को आर",
+        "role": "रोम — प्रारंभिक पाठक"
       }
     ]
   },
   "offer": {
-    "badge": "Launch Offer",
-    "title": "Invest in Yourself",
-    "complete_package": "Complete Package",
-    "course_value": "Course: $97",
-    "bonus_value": "Bonus: $27",
+    "badge": "प्रस्ताव",
+    "title": "अपने आप में",
+    "complete_package": "पूरा पैकेज",
+    "course_value": "कोर्स: $97",
+    "bonus_value": "बोनस: $27",
     "price_text": "",
-    "one_time": "One-time payment — no subscription",
-    "launch_price": "Launch price — then $37",
-    "cta": "Unlock Access Now",
-    "guarantee_title": "30-Day Money-Back Guarantee",
+    "one_time": "एक बार भुगतान - कोई सदस्यता नहीं",
+    "launch_price": "$37",
+    "cta": "अभी प्रवेश करें",
+    "guarantee_title": "30-day मनी बैक गारंटी",
     "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
     "includes": [
-      "Full course (value $97)",
+      "पूर्ण पाठ्यक्रम (मूल्य $97)",
       "eBook PDF, ePub, Kindle",
-      "Printable 30-day checklist",
-      "Amish budget Excel sheet",
-      "Lifetime access + updates",
-      "BONUS: Weekly shopping list (value $27)"
+      "प्रिंट करने योग्य 30-day चेकलिस्ट",
+      "Amish बजट एक्सेल शीट",
+      "लाइफटाइम एक्सेस + अपडेट",
+      "BONUS: साप्ताहिक शॉपिंग सूची (मूल्य $27)"
     ]
   },
   "faq": {
-    "badge": "// 07 — FAQ",
-    "title": "Frequently Asked Questions",
-    "offer_valid": "Offer valid this week",
+    "badge": "// 07 - सामान्य प्रश्न",
+    "title": "अक्सर पूछे जाने वाले प्रश्न",
+    "offer_valid": "इस सप्ताह मान्य प्रस्ताव",
     "items": [
       {
-        "q": "What exactly is included?",
-        "a": "You get the complete eBook in PDF, ePub, and Kindle formats. Plus lifetime access to all future updates."
+        "q": "वास्तव में क्या शामिल है?",
+        "a": "आपको PDF, ePub और Kindle प्रारूपों में पूरा ईबुक मिलता है। भविष्य के सभी अद्यतनों के लिए लाइफटाइम एक्सेस।"
       },
       {
-        "q": "Is it in English?",
-        "a": "Yes, the course is fully available in English."
+        "q": "क्या यह अंग्रेजी में है?",
+        "a": "हाँ, पाठ्यक्रम अंग्रेजी में पूरी तरह से उपलब्ध है।"
       },
       {
-        "q": "What format is the course in?",
-        "a": "eBook in PDF, ePub, and Kindle formats. Videos are in MP4 format."
+        "q": "किस प्रारूप में पाठ्यक्रम है?",
+        "a": "PDF, ePub और Kindle प्रारूपों में eBook। वीडियो MP4 प्रारूप में हैं।"
       },
       {
-        "q": "When do I get access?",
-        "a": "Immediately after payment."
+        "q": "मैं कब पहुँच सकता हूँ?",
+        "a": "भुगतान के तुरंत बाद।"
       },
       {
-        "q": "What if I'm not satisfied?",
-        "a": "You're protected by our 30-day money-back guarantee."
+        "q": "क्या मैं संतुष्ट नहीं हूँ?",
+        "a": "आप हमारे 30-day पैसे वापस गारंटी द्वारा सुरक्षित हैं।"
       },
       {
-        "q": "How long does it take?",
-        "a": "The complete program takes about 3-4 hours."
+        "q": "कितना समय लगता है?",
+        "a": "पूरा कार्यक्रम लगभग 3-4 घंटे लेता है।"
       }
     ]
   },
   "final_cta": {
-    "title": "Start Your Journey to Financial Freedom Today",
-    "subtitle": "Join hundreds of people who have already transformed their relationship with money.",
-    "badge": "Offer valid this week"
+    "title": "अपनी यात्रा शुरू करने के लिए वित्तीय स्वतंत्रता आज",
+    "subtitle": "सैकड़ों लोगों में शामिल हों जिन्होंने पहले ही पैसे के साथ अपने रिश्ते को बदल दिया है।",
+    "badge": "इस सप्ताह मान्य प्रस्ताव"
   },
   "footer": {
-    "rights_reserved": "All rights reserved.",
-    "privacy": "Privacy",
-    "terms": "Terms",
+    "rights_reserved": "सर्वाधिकार सुरक्षित",
+    "privacy": "गोपनीयता",
+    "terms": "नियम",
     "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
     "badges": {
-      "guarantee": "30-Day Guarantee",
-      "instant_access": "Instant Access",
-      "lifetime_updates": "Lifetime Updates"
+      "guarantee": "30 दिन की गारंटी",
+      "instant_access": "त्वरित पहुँच",
+      "lifetime_updates": "लाइफटाइम अपडेट"
     }
   },
   "trust": {
-    "title": "Trusted by teams worldwide",
+    "title": "दुनिया भर में टीमों द्वारा भरोसा",
     "readers_count": "1,247 पाठक",
     "company_names": []
   },
@@ -195,112 +195,112 @@
       "buy_now_dash": "अभी खरीदें —",
       "view_modules": "मॉड्यूल देखें",
       "ssl_secure": "SSL के साथ सुरक्षित भुगतान",
-      "instant_download": "Instant Download",
-      "lifetime_access": "Lifetime Access",
-      "guarantee_days": "30-Day Guarantee",
-      "section_who": "// 01 — Who Is This For",
-      "is_this_for_you": "Is This Course For You?",
-      "perfect_for": "Perfect for you if:",
-      "p_struggle": "You struggle to make ends meet",
-      "p_cut_costs": "You want to cut costs without sacrificing quality of life",
+      "instant_download": "त्वरित डाउनलोड",
+      "lifetime_access": "लाइफटाइम एक्सेस",
+      "guarantee_days": "30 दिन की गारंटी",
+      "section_who": "// 01 - यह कौन है?",
+      "is_this_for_you": "क्या यह कोर्स आपके लिए है?",
+      "perfect_for": "अगर आपके लिए बिल्कुल सही:",
+      "p_struggle": "आप संघर्ष करते हैं",
+      "p_cut_costs": "आप जीवन की गुणवत्ता का त्याग किए बिना लागत में कटौती करना चाहते हैं",
       "p_consumerism": "Tired of consumerism and debt culture",
       "p_practical": "Looking for practical, time-tested methods",
       "p_future": "Want a solid financial future for your family",
-      "not_for": "Not for you if:",
+      "not_for": "आपके लिए नहीं:",
       "n_quick": "Looking for get-rich-quick schemes",
       "n_habits": "Not willing to change spending habits",
       "n_quick_fix": "Prefer quick fixes over a solid path",
       "n_implement": "Not willing to implement what you learn",
       "n_advice": "Looking for personalized financial advice",
-      "section_learn": "// 02 — What You'll Learn",
-      "masters_secrets": "The Amish Masters' Secrets",
+      "section_learn": "क्या आप सीखेंगे?",
+      "masters_secrets": "Amish Masters' Secrets",
       "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
-      "section_author": "// 03 — The Author",
-      "behind_course": "Behind This Course",
-      "your_name": "Your Name Here",
+      "section_author": "/ 03 - लेखक",
+      "behind_course": "इस कोर्स के पीछे",
+      "your_name": "यहाँ आपका नाम",
       "researcher_author": "Researcher · Author · Traveler",
       "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
-      "section_content": "// 04 — Course Content",
-      "what_inside": "What You'll Find Inside",
-      "also_includes": "Also includes:",
-      "inc_full_ebook": "Full eBook (PDF, ePub, Kindle)",
-      "inc_checklist": "Printable 30-day checklist",
-      "inc_excel": "Amish budget Excel sheet",
-      "inc_shopping": "Weekly shopping list template",
-      "inc_lifetime": "Lifetime member area access",
-      "inc_updates": "Free future updates",
-      "section_offer": "// 05 — The Offer",
-      "invest_yourself": "Invest in Yourself",
-      "launch_offer": "Launch Offer",
-      "complete_package": "Complete Package",
-      "course_value": "Course: $97",
-      "bonus_value": "Bonus: $27",
-      "one_time": "One-time payment — no subscription",
-      "launch_price": "Launch price — then $37",
-      "inc_course_full": "Full course (value $97)",
+      "section_content": "// 04 - पाठ्यक्रम सामग्री",
+      "what_inside": "क्या आप अंदर पाएंगे?",
+      "also_includes": "इसमें भी शामिल है:",
+      "inc_full_ebook": "पूर्ण ईबुक (PDF, ePub, Kindle)",
+      "inc_checklist": "प्रिंट करने योग्य 30-day चेकलिस्ट",
+      "inc_excel": "Amish बजट एक्सेल शीट",
+      "inc_shopping": "साप्ताहिक खरीदारी सूची टेम्पलेट",
+      "inc_lifetime": "लाइफटाइम सदस्य क्षेत्र",
+      "inc_updates": "भविष्य अद्यतन",
+      "section_offer": "// 05 - प्रस्ताव",
+      "invest_yourself": "अपने आप में",
+      "launch_offer": "प्रस्ताव",
+      "complete_package": "पूरा पैकेज",
+      "course_value": "कोर्स: $97",
+      "bonus_value": "बोनस: $27",
+      "one_time": "एक बार भुगतान - कोई सदस्यता नहीं",
+      "launch_price": "$37",
+      "inc_course_full": "पूर्ण पाठ्यक्रम (मूल्य $97)",
       "inc_ebook": "eBook PDF, ePub, Kindle",
-      "inc_checklist2": "Printable 30-day checklist",
-      "inc_excel2": "Amish budget Excel sheet",
-      "inc_access_updates": "Lifetime access + updates",
-      "inc_bonus_shopping": "BONUS: Weekly shopping list (value $27)",
-      "unlock_now": "Unlock Access Now",
-      "guarantee_title": "30-Day Money-Back Guarantee",
+      "inc_checklist2": "प्रिंट करने योग्य 30-day चेकलिस्ट",
+      "inc_excel2": "Amish बजट एक्सेल शीट",
+      "inc_access_updates": "लाइफटाइम एक्सेस + अपडेट",
+      "inc_bonus_shopping": "BONUS: साप्ताहिक शॉपिंग सूची (मूल्य $27)",
+      "unlock_now": "अभी प्रवेश करें",
+      "guarantee_title": "30-day मनी बैक गारंटी",
       "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
-      "section_testimonials": "// 06 — Testimonials",
-      "testimonial_text": "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
-      "testimonial_name": "Marco R.",
-      "testimonial_role": "Rome — early readers",
-      "section_faq": "// 07 — FAQ",
-      "faq_title": "Frequently Asked Questions",
-      "offer_valid": "Offer valid this week",
-      "final_cta": "Start Your Journey to Financial Freedom Today",
-      "final_sub": "Join hundreds of people who have already transformed their relationship with money.",
-      "unlock_dash": "Unlock Access —",
-      "guarantee_badge": "30-Day Guarantee",
-      "instant_access_badge": "Instant Access",
-      "lifetime_badge": "Lifetime Updates",
-      "rights_reserved": "All rights reserved.",
-      "privacy": "Privacy",
-      "terms": "Terms",
+      "section_testimonials": "/ 06 - प्रशंसापत्र",
+      "testimonial_text": "मैंने Amish बजट विधि को लागू किया और दो महीने में मैंने अपने खर्च को 35% तक घटा दिया। 30 दिवसीय चेकलिस्ट मोड़ बिंदु था। अंत में एक कोर्स जो वास्तव में काम करता है।",
+      "testimonial_name": "मार्को आर",
+      "testimonial_role": "रोम — प्रारंभिक पाठक",
+      "section_faq": "// 07 - सामान्य प्रश्न",
+      "faq_title": "अक्सर पूछे जाने वाले प्रश्न",
+      "offer_valid": "इस सप्ताह मान्य प्रस्ताव",
+      "final_cta": "अपनी यात्रा शुरू करने के लिए वित्तीय स्वतंत्रता आज",
+      "final_sub": "सैकड़ों लोगों में शामिल हों जिन्होंने पहले ही पैसे के साथ अपने रिश्ते को बदल दिया है।",
+      "unlock_dash": "अनलॉक एक्सेस —",
+      "guarantee_badge": "30 दिन की गारंटी",
+      "instant_access_badge": "त्वरित पहुँच",
+      "lifetime_badge": "लाइफटाइम अपडेट",
+      "rights_reserved": "सर्वाधिकार सुरक्षित",
+      "privacy": "गोपनीयता",
+      "terms": "नियम",
       "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
-      "features": "Features",
-      "pricing": "Pricing",
-      "testimonials": "Testimonials",
-      "contact": "Contact",
-      "get_started": "Get Started",
-      "learn_more": "Learn More",
-      "member_area": "Member Area",
-      "back_to_landing": "Back to Landing",
-      "buy_now": "Buy Now",
+      "features": "सुविधाएँ",
+      "pricing": "मूल्य निर्धारण",
+      "testimonials": "प्रशंसापत्र",
+      "contact": "संपर्क",
+      "get_started": "प्रारंभ करना",
+      "learn_more": "अधिक जानें",
+      "member_area": "सदस्य क्षेत्र",
+      "back_to_landing": "वापस लैंडिंग",
+      "buy_now": "अभी खरीदें",
       "currency_symbol": "$",
-      "new_badge": "New",
-      "the_problem": "The Problem",
-      "our_story": "Our Story",
-      "what_learn": "What You'll Learn",
-      "course_lessons": "Course Lessons",
-      "curriculum": "Curriculum",
-      "free_tier": "Free",
-      "pro_tier": "Pro",
+      "new_badge": "नया",
+      "the_problem": "समस्या",
+      "our_story": "हमारी कहानी",
+      "what_learn": "आप क्या सीखेंगे",
+      "course_lessons": "पाठ्यक्रम पाठ",
+      "curriculum": "पाठ्यक्रम",
+      "free_tier": "फ्री",
+      "pro_tier": "प्रो",
       "per_month": "/mo",
-      "start_free": "Start Free",
-      "popular": "Popular",
-      "free_title": "To get started",
-      "pro_title": "To grow",
-      "trusted_by": "Trusted by teams worldwide",
-      "offer_badge": "Launch Offer",
-      "price_special": "Special launch price",
-      "buy_and_access": "Buy & Access Instantly",
-      "bestseller": "Best Seller",
+      "start_free": "फ्री",
+      "popular": "लोकप्रिय",
+      "free_title": "शुरू करने के लिए",
+      "pro_title": "बढ़ने",
+      "trusted_by": "दुनिया भर में टीमों द्वारा भरोसा",
+      "offer_badge": "प्रस्ताव",
+      "price_special": "विशेष प्रक्षेपण मूल्य",
+      "buy_and_access": "तुरंत खरीदें",
+      "bestseller": "सर्वश्रेष्ठ विक्रेता",
       "story_badge": "// The True Story",
-      "story_title": "My Experience Among the Amish",
-      "story_subtitle": "Three months in Pennsylvania, twelve families interviewed, an economic system that has worked for 300 years.",
+      "story_title": "मेरे अनुभव के बीच Amish",
+      "story_subtitle": "पेंसिल्वेनिया में तीन महीने, बारह परिवारों का साक्षात्कार, एक आर्थिक प्रणाली जिसने 300 वर्षों तक काम किया है।",
       "amish_life": "Amish Life",
-      "caption_1": "Daily life in the Amish community: simplicity, self-sufficiency, and financial wisdom passed down through generations.",
-      "caption_2": "The barter and exchange system that eliminates the need for cash and builds lasting trust relationships.",
-      "caption_3": "The Amish household economy: how a family lives on 60% less than the national average.",
-      "tag_1": "Economic Anthropology",
-      "tag_2": "Amish Studies",
-      "tag_3": "Financial Consulting",
+      "caption_1": "अमिश समुदाय में दैनिक जीवन: सादगी, आत्मनिर्भरता और वित्तीय ज्ञान पीढ़ियों के माध्यम से पारित हो गया।",
+      "caption_2": "बैर्टर और विनिमय प्रणाली जो नकदी की आवश्यकता को समाप्त करती है और स्थायी विश्वास संबंधों का निर्माण करती है।",
+      "caption_3": "अमिश घरेलू अर्थव्यवस्था: कैसे एक परिवार राष्ट्रीय औसत से 60% कम पर रहता है।",
+      "tag_1": "अर्थशास्त्र",
+      "tag_2": "अमिश अध्ययन",
+      "tag_3": "वित्तीय परामर्श",
       "brand_name": "Courssy",
       "reviewer": "Marco R., early readers",
       "language_switch": "EN",
@@ -313,17 +313,17 @@
     }
   },
   "audience": {
-    "badge": "// 01 — Who Is This For",
-    "title": "Is This Course For You?",
-    "perfect_for": "Perfect for you if:",
+    "badge": "// 01 - यह कौन है?",
+    "title": "क्या यह कोर्स आपके लिए है?",
+    "perfect_for": "अगर आपके लिए बिल्कुल सही:",
     "perfect_items": [
-      "You struggle to make ends meet",
-      "You want to cut costs without sacrificing quality of life",
+      "आप संघर्ष करते हैं",
+      "आप जीवन की गुणवत्ता का त्याग किए बिना लागत में कटौती करना चाहते हैं",
       "Tired of consumerism and debt culture",
       "Looking for practical, time-tested methods",
       "Want a solid financial future for your family"
     ],
-    "not_for": "Not for you if:",
+    "not_for": "आपके लिए नहीं:",
     "not_items": [
       "Looking for get-rich-quick schemes",
       "Not willing to change spending habits",
@@ -333,17 +333,17 @@
     ]
   },
   "course": {
-    "back_to_course": "Back to Landing",
-    "module_label": "Curriculum",
-    "now_playing": "Now playing",
-    "page_label": "Page",
-    "reading_progress": "Reading Progress",
-    "download_pdf": "Download PDF",
-    "chapter": "Chapter"
+    "back_to_course": "वापस लैंडिंग",
+    "module_label": "पाठ्यक्रम",
+    "now_playing": "अब खेलना",
+    "page_label": "पृष्ठ",
+    "reading_progress": "पढ़ना प्रगति",
+    "download_pdf": "PDF डाउनलोड करें",
+    "chapter": "अध्याय"
   },
   "lessons": {
-    "badge": "// 04 — Course Content",
-    "title": "What You'll Find Inside",
+    "badge": "// 04 - पाठ्यक्रम सामग्री",
+    "title": "क्या आप अंदर पाएंगे?",
     "items": []
   }
 }

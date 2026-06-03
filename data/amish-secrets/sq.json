@@ -1,0 +1,344 @@
+{
+  "locale": "sq",
+  "seo": {
+    "title": "Sekretet amishe: Si të jetosh me kursimet dhe të administrosh paratë",
+    "description": "Zbulo sekretet e jetës së popullit amish. Përfshin module të plota video dhe PDF të shkarkuara.",
+    "ogImage": "/courses/amish-secrets/cover.png"
+  },
+  "nav": {
+    "brand": "Sekrete amishe",
+    "features": "Veçoritë",
+    "pricing": "Zgjedhja",
+    "testimonials": "Prova",
+    "faq": "FAQ",
+    "contact": "Kontakti",
+    "get_started": "Fillo",
+    "learn_more": "Mëso më shumë",
+    "member_area": "Zona anëtare",
+    "back_to_landing": "Përsëri në tokë"
+  },
+  "hero": {
+    "badge": "E re",
+    "title": "Sekretet amishe: Si të jetosh me kursimet dhe të administrosh paratë",
+    "subtitle": "Zbulo sekretet e jetës së popullit amish. Përfshin module të plota video dhe PDF të shkarkuara.",
+    "cta": "Fillo",
+    "secondary_cta": "Mëso më shumë",
+    "price_label": "Çmimi special i nisjes",
+    "one_time_payment": "Pagesa me një herë nuk ka abonim"
+  },
+  "problem": {
+    "badge": "Problemi",
+    "title": "I lodhur nga arritja në fund të muajit pa asnjë kursim? Shoqëria moderne na shtyn drejt konsumit të tepërt.",
+    "text": ""
+  },
+  "story": {
+    "badge": "Historia jonë",
+    "title": "La mia esperienza Tra gli Amish",
+    "image_captions": [
+      "La vita quotidiana Nilla comunità Amish: semplicità, autosuflicienza e saggezza Baranziaria.",
+      "Il sitema di baratto e scobo che elimina il bisogno di denaro contante.",
+      "L'economia homea Amish: come una famiglia crea a vivere conl 60% in meno."
+    ],
+    "quote": "Amishët jetojnë të pasur dhe të plotë ndërsa shpenzojnë një pjesëz të asaj që shpenzojmë. Në këtë drejtim, tregojmë se si e bëjnë."
+  },
+  "author": {
+    "badge": "/ 03/ The Autori",
+    "title": "Pas kësaj rruge",
+    "name": "Alesandro Rinaldi",
+    "role": "Kërkuesi",
+    "bio": "[Shto historinë tuaj këtu: kam jetuar 3 muaj në Pensilvani, intervistuar 12 familje Amish, studiuar sistemin e tyre ekonomik. Jo teori, vetëm praktikë.]",
+    "tags": [
+      "Sagesza Finanziaria",
+      "Vita Sostenible",
+      "Edukazione"
+    ]
+  },
+  "modules": {
+    "badge": "/02/ Çfarë do të mësosh?",
+    "title": "Sekretet e mjeshtrave amishë",
+    "description": "8 Modulime praktike që e kthejnë mençurinë amishe në veprime konkrete për jetën e përditshme.",
+    "items": [
+      {
+        "title": "Buxheti amish",
+        "desc": "Jeto me 30% më pak pa sakrificë."
+      },
+      {
+        "title": "Panteri i pafund",
+        "desc": "Metoda e ruajtjes së ushqimit që eliminon mbeturinat."
+      },
+      {
+        "title": "Zero Borxh",
+        "desc": "Kuadri për të dalë nga borxhi përgjithmonë."
+      },
+      {
+        "title": "Rregullo gjithçka",
+        "desc": "12 Mjete thelbësore për të riparuar veten."
+      },
+      {
+        "title": "Exchange pa para",
+        "desc": "Si të aktivizoj një rrjet shkëmbimi."
+      },
+      {
+        "title": "Ferma në tryezë",
+        "desc": "Drejtim tek kopshtari i shtëpisë dhe gatimi zero-vaste."
+      },
+      {
+        "title": "Energjia",
+        "desc": "Si të shkurtohen faturat e shërbimeve me 50%."
+      },
+      {
+        "title": "Plani 30 ditor",
+        "desc": "Lista e përditshme për të transformuar financat tuaja."
+      }
+    ]
+  },
+  "includes": {
+    "title": "Gjithashtu përfshin:",
+    "items": [
+      "EBook plot (PDF, ePob, Kindle)",
+      "Listë e shkruajtshme 30 ditore",
+      "Eksel i buxhetit amish",
+      "Modeli i listës së blerjeve javore",
+      "Në zonën e anëtarëve të jetës",
+      "Përditëson të ardhmen e lirë"
+    ]
+  },
+  "testimonials": {
+    "badge": "/ 06",
+    "title": "Prova",
+    "items": [
+      {
+        "text": "Bëra metodën e buxhetit Amish dhe për dy muaj i shkurtova shpenzimet me 35%. Lista 30 ditore ishte pika e kthesës. Më në fund një rrugë që funksionon vërtet.",
+        "name": "Marko R.",
+        "role": "Romë"
+      }
+    ]
+  },
+  "offer": {
+    "badge": "Nis ofertën",
+    "title": "Shqyrto në veten tënde",
+    "complete_package": "Paketa e plotësuar",
+    "course_value": "Kursi: 97 dollarë",
+    "bonus_value": "Bonus: 27 $",
+    "price_text": "",
+    "one_time": "Pagesa me një herë nuk ka abonim",
+    "launch_price": "Lëshimi i çmimit ⇩ Pastaj 37 $",
+    "cta": "Hape",
+    "guarantee_title": "30 ditë garanci për paratë e prapambetura",
+    "guarantee_text": "Provoje për 30 ditë. Nëse nuk kursen të paktën 100 dollarë, do ta rimbursojmë shumën e plotë. Pa pyetje, pa telashe.",
+    "includes": [
+      "Kursi i plotë (vlerë 97 dollarë)",
+      "eBook PDF, ePob, Kindle",
+      "Listë e shkruajtshme 30 ditore",
+      "Eksel i buxhetit amish",
+      "Hyrje në kohë jete + përditësimet",
+      "BONUS: Lista javore e dyqaneve (vlerës 27 dollarë)"
+    ]
+  },
+  "faq": {
+    "badge": "/ 07 ⇩ FAQ",
+    "title": "Pyetje të shpeshta",
+    "offer_valid": "Ofro të vlefshme këtë javë",
+    "items": [
+      {
+        "q": "Çfarë përfshin saktësisht?",
+        "a": "Ju merrni eBook komplet në PDF, ePob, dhe format Kindle. Plus qasje për gjithë të ardhmen."
+      },
+      {
+        "q": "Është në anglisht?",
+        "a": "Po, kursi është plotësisht i disponueshëm në anglisht."
+      },
+      {
+        "q": "Në çfarë formati është kursi?",
+        "a": "EBook në PDF, ePob, dhe Kindle formats. Videot janë në formatin MP4."
+      },
+      {
+        "q": "Kur do kem qasje?",
+        "a": "Menjëherë pas pagesës."
+      },
+      {
+        "q": "Po sikur të mos jem i kënaqur?",
+        "a": "Je i mbrojtur nga garancia jonë 30 ditore për paratë."
+      },
+      {
+        "q": "Sa kohë duhet?",
+        "a": "Programi i plotë zgjat rreth 3-4 orë."
+      }
+    ]
+  },
+  "final_cta": {
+    "title": "Fillo udhëtimin për liri financiare sot",
+    "subtitle": "Bashkohu me qindra njerëz që tashmë e kanë transformuar marrëdhënien e tyre me paratë.",
+    "badge": "Ofro të vlefshme këtë javë"
+  },
+  "footer": {
+    "rights_reserved": "Të gjitha të drejtat të rezervuara.",
+    "privacy": "Privacy",
+    "terms": "Kushtet",
+    "legal_note": "Ky është një produkt dixhital i informacionit. Rezultatet mund të ndryshojnë dhe të varen nga angazhimi personal. Çmimet dhe teknikat e përshkruara nga Amish janë bazuar në kërkimin etnografik dhe mund të mos pasqyrojnë saktë praktikat bashkëkohore të të gjitha komuniteteve amishe.",
+    "badges": {
+      "guarantee": "Garantim 30-ditor",
+      "instant_access": "Hyrje e menjëhershme",
+      "lifetime_updates": "Rifreskimi i jetës"
+    }
+  },
+  "trust": {
+    "title": "Të besuar nga skuadrat anembanë botës",
+    "readers_count": "247 lexues",
+    "company_names": []
+  },
+  "ui": {
+    "labels": {
+      "instant_access": "Hyrje e menjëhershme",
+      "buy_now_arrow": "Bli tani →",
+      "readers": "247 lexues",
+      "buy_now_dash": "Bli tani",
+      "view_modules": "Shfaq modulin",
+      "ssl_secure": "Pagesa SSL e sigurtë",
+      "instant_download": "Shkarkimi i menjëhershëm",
+      "lifetime_access": "Hyrje në kohë jete",
+      "guarantee_days": "Garantim 30-ditor",
+      "section_who": "/ 01/ Kush është kjo?",
+      "is_this_for_you": "A është kjo rrugë për ty?",
+      "perfect_for": "Perfekt për ty nëse:",
+      "p_struggle": "Ti lufton për t'ia dalë mbanë",
+      "p_cut_costs": "Ti dëshiron të shkurtosh kostot pa sakrifikuar cilësinë e jetës",
+      "p_consumerism": "Je lodhur nga konsumi dhe kultura e borxhit.",
+      "p_practical": "Ju doni metoda praktike, të provuara me kohë",
+      "p_future": "Ju dëshironi të ndërtoni një të ardhme të fortë financiare për familjen tuaj",
+      "not_for": "Jo për ty nëse:",
+      "n_quick": "Po kërkon skema të pasuruara.",
+      "n_habits": "Nuk do të ndryshosh zakonet e shpenzimeve",
+      "n_quick_fix": "Ti preferon të fiksosh shpejt një themel të fortë",
+      "n_implement": "Nuk je i gatshëm të zbatosh atë që mëson.",
+      "n_advice": "Po kërkon këshilla financiare të personalizuara.",
+      "section_learn": "/02/ Çfarë do të mësosh?",
+      "masters_secrets": "Sekretet e mjeshtrave amishë",
+      "modules_desc": "8 Modulime praktike që e kthejnë mençurinë amishe në veprime konkrete për jetën e përditshme.",
+      "section_author": "/ 03/ The Autori",
+      "behind_course": "Pas kësaj rruge",
+      "your_name": "Emri yt këtu",
+      "researcher_author": "Kërkuesi",
+      "author_bio": "[Shto historinë tuaj këtu: kam jetuar 3 muaj në Pensilvani, intervistuar 12 familje Amish, studiuar sistemin e tyre ekonomik. Jo teori, vetëm praktikë.]",
+      "section_content": "/ 04",
+      "what_inside": "Çfarë do të gjeni brenda",
+      "also_includes": "Gjithashtu përfshin:",
+      "inc_full_ebook": "EBook plot (PDF, ePob, Kindle)",
+      "inc_checklist": "Listë e shkruajtshme 30 ditore",
+      "inc_excel": "Eksel i buxhetit amish",
+      "inc_shopping": "Modeli i listës së blerjeve javore",
+      "inc_lifetime": "Në zonën e anëtarëve të jetës",
+      "inc_updates": "Përditëson të ardhmen e lirë",
+      "section_offer": "// 05/ ♫ Oferta",
+      "invest_yourself": "Shqyrto në veten tënde",
+      "launch_offer": "Nis ofertën",
+      "complete_package": "Paketa e plotësuar",
+      "course_value": "Kursi: 97 dollarë",
+      "bonus_value": "Bonus: 27 $",
+      "one_time": "Pagesa me një herë nuk ka abonim",
+      "launch_price": "Lëshimi i çmimit ⇩ Pastaj 37 $",
+      "inc_course_full": "Kursi i plotë (vlerë 97 dollarë)",
+      "inc_ebook": "eBook PDF, ePob, Kindle",
+      "inc_checklist2": "Listë e shkruajtshme 30 ditore",
+      "inc_excel2": "Eksel i buxhetit amish",
+      "inc_access_updates": "Hyrje në kohë jete + përditësimet",
+      "inc_bonus_shopping": "BONUS: Lista javore e dyqaneve (vlerës 27 dollarë)",
+      "unlock_now": "Hape",
+      "guarantee_title": "30 ditë garanci për paratë e prapambetura",
+      "guarantee_text": "Provoje për 30 ditë. Nëse nuk kursen të paktën 100 dollarë, do ta rimbursojmë shumën e plotë. Pa pyetje, pa telashe.",
+      "section_testimonials": "/ 06",
+      "testimonial_text": "Bëra metodën e buxhetit Amish dhe për dy muaj i shkurtova shpenzimet me 35%. Lista 30 ditore ishte pika e kthesës. Më në fund një rrugë që funksionon vërtet.",
+      "testimonial_name": "Marko R.",
+      "testimonial_role": "Romë",
+      "section_faq": "/ 07 ⇩ FAQ",
+      "faq_title": "Pyetje të shpeshta",
+      "offer_valid": "Ofro të vlefshme këtë javë",
+      "final_cta": "Fillo udhëtimin për liri financiare sot",
+      "final_sub": "Bashkohu me qindra njerëz që tashmë e kanë transformuar marrëdhënien e tyre me paratë.",
+      "unlock_dash": "Zhblloko hyrjen",
+      "guarantee_badge": "Garantim 30-ditor",
+      "instant_access_badge": "Hyrje e menjëhershme",
+      "lifetime_badge": "Rifreskimi i jetës",
+      "rights_reserved": "Të gjitha të drejtat të rezervuara.",
+      "privacy": "Privacy",
+      "terms": "Kushtet",
+      "legal_note": "Ky është një produkt dixhital i informacionit. Rezultatet mund të ndryshojnë dhe të varen nga angazhimi personal. Çmimet dhe teknikat e përshkruara nga Amish janë bazuar në kërkimin etnografik dhe mund të mos pasqyrojnë saktë praktikat bashkëkohore të të gjitha komuniteteve amishe.",
+      "features": "Veçoritë",
+      "pricing": "Zgjedhja",
+      "testimonials": "Prova",
+      "contact": "Kontakti",
+      "get_started": "Fillo",
+      "learn_more": "Mëso më shumë",
+      "member_area": "Zona anëtare",
+      "back_to_landing": "Përsëri në tokë",
+      "buy_now": "Bli tani",
+      "currency_symbol": "$",
+      "new_badge": "E re",
+      "the_problem": "Problemi",
+      "our_story": "Historia jonë",
+      "what_learn": "Çfarë do të mësosh?",
+      "course_lessons": "Mësime",
+      "curriculum": "Kurrikulumi",
+      "free_tier": "I lirë",
+      "pro_tier": "Pro",
+      "per_month": "/mo",
+      "start_free": "Fillo i lirë",
+      "popular": "Popullar",
+      "free_title": "Në fillim",
+      "pro_title": "Për tu rritur",
+      "trusted_by": "Të besuar nga skuadrat anembanë botës",
+      "offer_badge": "Nis ofertën",
+      "price_special": "Çmimi special i nisjes",
+      "buy_and_access": "Bli & Hyrje në çast",
+      "bestseller": "Shitësi më i mirë",
+      "story_badge": "/The True Story",
+      "story_title": "Përvoja ime mes amishëve",
+      "story_subtitle": "Tre muaj në Pensilvani, dymbëdhjetë familje të intervistuara, një sistem ekonomik që ka punuar për 300 vjet.",
+      "amish_life": "Jeta amishe",
+      "caption_1": "Jeta e përditshme në komunitetin amish: thjeshtësia, vetë-afektshmëria dhe mençuria financiare kaluan brez pas brezi.",
+      "caption_2": "Sistemi i shkëmbimit dhe shkëmbimit që eliminon nevojën për para dhe ndërton marrëdhënie të qëndrueshme besimi.",
+      "caption_3": "Ekonomia e familjes Amish: sesi një familje jeton në 60% më pak se mesatarja kombëtare.",
+      "tag_1": "Antropologjia ekonomike",
+      "tag_2": "Studimet amishe",
+      "tag_3": "Këshillimi Financiar",
+      "brand_name": "Kursi",
+      "reviewer": "Marko R., lexues i hershëm",
+      "language_switch": "EN",
+      "language_switch_en": "EN"
+    }
+  },
+  "audience": {
+    "badge": "/ 01/ Kush është kjo?",
+    "title": "A është kjo rrugë për ty?",
+    "perfect_for": "Perfekt për ty nëse:",
+    "perfect_items": [
+      "Ti lufton për t'ia dalë mbanë",
+      "Ti dëshiron të shkurtosh kostot pa sakrifikuar cilësinë e jetës",
+      "Je lodhur nga konsumi dhe kultura e borxhit.",
+      "Ju doni metoda praktike, të provuara me kohë",
+      "Ju dëshironi të ndërtoni një të ardhme të fortë financiare për familjen tuaj"
+    ],
+    "not_for": "Jo për ty nëse:",
+    "not_items": [
+      "Po kërkon skema të pasuruara.",
+      "Nuk do të ndryshosh zakonet e shpenzimeve",
+      "Ti preferon të fiksosh shpejt një themel të fortë",
+      "Nuk je i gatshëm të zbatosh atë që mëson.",
+      "Po kërkon këshilla financiare të personalizuara."
+    ]
+  },
+  "course": {
+    "back_to_course": "Përsëri në tokë",
+    "module_label": "Kurrikulumi",
+    "now_playing": "Tani duke luajtur",
+    "page_label": "Faqja",
+    "reading_progress": "Leximi i përparimit",
+    "download_pdf": "Shkarkimi i PDF",
+    "chapter": "Kapitulli"
+  },
+  "lessons": {
+    "badge": "/ 04",
+    "title": "Çfarë do të gjeni brenda",
+    "items": []
+  }
+}
