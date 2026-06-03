@@ -25,6 +25,7 @@ interface H612Props {
       footer?: { rights_reserved?: string; privacy?: string; terms?: string; contact?: string };
       course?: { now_playing?: string; module_label?: string };
       trust?: { title?: string; company_names?: string[] };
+      ui?: { labels?: Record<string, string> };
     };
   };
   locale?: string;
@@ -83,8 +84,7 @@ export default function TemplateH612({ data, locale: _locale = "it" }: H612Props
               href="#pricing"
               className="rounded-lg px-8 py-3 text-sm font-medium text-black transition hover:opacity-90"
               style={{ background: "#ffffff" }}
-            >
-              {data.cta || lc?.hero?.cta || "Inizia Ora"}
+            >                {data.cta || lc?.hero?.cta || lc?.ui?.labels?.start_today || "Inizia Ora"}
             </a>
             <a
               href="#features"
@@ -100,7 +100,7 @@ export default function TemplateH612({ data, locale: _locale = "it" }: H612Props
       {/* ── LOGO ROLL ────────────────────────────────────── */}
       <section className="overflow-hidden border-y py-10" style={{ borderColor: "#353434" }}>
         <div className="flex gap-20 animate-[marquee_25s_linear_infinite] whitespace-nowrap">
-          {["Brand Alpha", "TechCorp", "Studio Pro", "Creative Inc", "Digital Labs", "Brand Alpha", "TechCorp", "Studio Pro"].map((name, i) => (
+          {(lc?.trust?.company_names?.length ? lc.trust.company_names : ["Brand Alpha", "TechCorp", "Studio Pro", "Creative Inc", "Digital Labs", "Brand Alpha", "TechCorp", "Studio Pro"]).map((name, i) => (
             <span key={i} className="text-xl font-bold opacity-20" style={{ fontFamily: "'Noto Serif', serif" }}>
               {name}
             </span>
@@ -113,7 +113,7 @@ export default function TemplateH612({ data, locale: _locale = "it" }: H612Props
         <section className="py-24">
           <div className="mx-auto max-w-3xl px-6">
             <span className="mb-4 inline-block text-xs font-semibold uppercase tracking-widest" style={{ color: "#8e9192" }}>
-              {lc?.problem?.badge || "The Problem"}
+              {lc?.problem?.badge || lc?.ui?.labels?.the_problem || "The Problem"}
             </span>
             <h2
               className="mt-4"
@@ -167,7 +167,7 @@ export default function TemplateH612({ data, locale: _locale = "it" }: H612Props
                       <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl" style={{ background: "#2a2a2a" }}>
                         <span className="text-2xl">📖</span>
                       </div>
-                      <p className="text-sm" style={{ color: "#8e9192" }}>Cover del Prodotto</p>
+                      <p className="text-sm" style={{ color: "#8e9192" }}>{lc?.ui?.labels?.cover_placeholder || "Cover del Prodotto"}</p>
                     </div>
                   </>
                 )}
@@ -175,7 +175,7 @@ export default function TemplateH612({ data, locale: _locale = "it" }: H612Props
               {/* Text */}
               <div>
                 <span className="mb-3 inline-block text-xs font-semibold uppercase tracking-widest" style={{ color: "#8e9192" }}>
-                  {lc?.story?.badge || "Our Story"}
+                  {lc?.story?.badge || lc?.ui?.labels?.our_story || "Our Story"}
                 </span>
                 <h2
                   className="mt-3"
@@ -197,7 +197,7 @@ export default function TemplateH612({ data, locale: _locale = "it" }: H612Props
         <section className="py-20">
           <div className="mx-auto max-w-6xl px-6">
             <span className="mb-4 inline-block text-xs font-semibold uppercase tracking-widest" style={{ color: "#8e9192" }}>
-              {lc?.lessons?.badge || "Curriculum"}
+              {lc?.lessons?.badge || lc?.ui?.labels?.curriculum || "Curriculum"}
             </span>
             <h2
               className="mb-12"
@@ -277,13 +277,13 @@ export default function TemplateH612({ data, locale: _locale = "it" }: H612Props
             {data.cta || lc?.hero?.cta || "Inizia Oggi"}
           </h2>
           <p className="mt-4 text-lg" style={{ color: "#c7c6c6" }}>
-            {data.prezzo ? `Prezzo: ${data.prezzo}` : (lc?.hero?.price_label || "Offerta speciale di lancio")}
+            {data.prezzo ? `${lc?.ui?.labels?.price || "Prezzo"}: ${data.prezzo}` : (lc?.hero?.price_label || lc?.ui?.labels?.price_special || "Offerta speciale di lancio")}
           </p>
           <button
             className="mt-8 rounded-lg px-10 py-4 text-base font-medium text-black transition hover:opacity-90"
             style={{ background: "#ffffff" }}
           >
-            {data.cta || lc?.hero?.cta || "Acquista Ora"}
+            {data.cta || lc?.hero?.cta || lc?.ui?.labels?.buy_now || "Acquista Ora"}
           </button>
         </div>
       </section>
@@ -293,13 +293,13 @@ export default function TemplateH612({ data, locale: _locale = "it" }: H612Props
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6">
           <span className="font-semibold">{lc?.nav?.brand || "Brand"}</span>
           <div className="flex gap-6 text-sm" style={{ color: "#8e9192" }}>
-            <a href="#" className="hover:text-white transition">{lc?.footer?.privacy || "Privacy"}</a>
-            <a href="#" className="hover:text-white transition">{lc?.footer?.terms || "Terms"}</a>
-            <a href="#" className="hover:text-white transition">{lc?.footer?.contact || "Contact"}</a>
+            <a href="#" className="hover:text-white transition">{lc?.footer?.privacy || lc?.ui?.labels?.privacy || "Privacy"}</a>
+            <a href="#" className="hover:text-white transition">{lc?.footer?.terms || lc?.ui?.labels?.terms || "Terms"}</a>
+            <a href="#" className="hover:text-white transition">{lc?.footer?.contact || lc?.ui?.labels?.contact || "Contact"}</a>
           </div>
         </div>
         <div className="mt-4 text-center text-xs" style={{ color: "#444748" }}>
-          © {new Date().getFullYear()} {lc?.nav?.brand || "Brand"}. {lc?.footer?.rights_reserved || "All rights reserved."}
+          © {new Date().getFullYear()} {lc?.nav?.brand || "Brand"}. {lc?.footer?.rights_reserved || lc?.ui?.labels?.rights_reserved || "All rights reserved."}
         </div>
       </footer>
 

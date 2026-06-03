@@ -27,6 +27,7 @@ interface HorizonProps {
       footer?: { rights_reserved?: string; privacy?: string; terms?: string; contact?: string };
       faq?: { title?: string; items?: { q: string; a: string }[] };
       pricing?: { title?: string };
+      ui?: { labels?: Record<string, string> };
     };
   };
   locale?: string;
@@ -169,7 +170,7 @@ export default function TemplateHorizon({ data, locale: _locale = "it" }: Horizo
                     <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl" style={{ background: "#ff8a65" }}>
                       <span className="text-3xl text-white">📖</span>
                     </div>
-                    <p className="text-sm font-medium" style={{ color: "#89726b" }}>Cover del Prodotto</p>
+                    <p className="text-sm font-medium" style={{ color: "#89726b" }}>{lc?.ui?.labels?.cover_placeholder || "Cover del Prodotto"}</p>
                   </div>
                 )}
               </div>
@@ -264,7 +265,7 @@ export default function TemplateHorizon({ data, locale: _locale = "it" }: Horizo
         <div className="mx-auto max-w-4xl px-6">
           <div className="mb-12 text-center">
             <h2 className="font-bold" style={{ fontSize: "clamp(28px, 4vw, 40px)", color: "#1d1c15" }}>
-              {lc?.nav?.pricing || "Pricing"}
+              {lc?.nav?.pricing || lc?.ui?.labels?.pricing || "Pricing"}
             </h2>
           </div>
           <div className="grid gap-6 md:grid-cols-2">
@@ -277,16 +278,16 @@ export default function TemplateHorizon({ data, locale: _locale = "it" }: Horizo
                 border: "1px solid rgba(255,255,255,0.8)",
               }}
             >
-              <h3 className="text-lg font-bold" style={{ color: "#1d1c15" }}>Free</h3>
-              <p className="mt-2 text-sm" style={{ color: "#555555" }}>Per iniziare</p>
-              <p className="mt-4 text-4xl font-extrabold" style={{ color: "#1d1c15" }}>$0<span className="text-sm font-normal" style={{ color: "#89726b" }}>/mo</span></p>
+              <h3 className="text-lg font-bold" style={{ color: "#1d1c15" }}>{lc?.ui?.labels?.free_tier || "Free"}</h3>
+              <p className="mt-2 text-sm" style={{ color: "#555555" }}>{lc?.ui?.labels?.free_title || "Per iniziare"}</p>
+              <p className="mt-4 text-4xl font-extrabold" style={{ color: "#1d1c15" }}>$0<span className="text-sm font-normal" style={{ color: "#89726b" }}>{lc?.ui?.labels?.per_month || "/mo"}</span></p>
               <ul className="mt-6 flex flex-col gap-3 text-sm" style={{ color: "#555555" }}>
                 <li>✓ 1 Prodotto</li>
                 <li>✓ 3 Lingue</li>
                 <li>✓ Analytics base</li>
               </ul>
               <button className="mt-8 w-full rounded-xl border py-3 text-sm font-semibold transition hover:bg-black/5" style={{ borderColor: "#ddc0b8", color: "#1d1c15" }}>
-                Inizia Gratis
+                {lc?.ui?.labels?.start_free || "Inizia Gratis"}
               </button>
             </div>
             {/* Pro tier */}
@@ -298,11 +299,11 @@ export default function TemplateHorizon({ data, locale: _locale = "it" }: Horizo
               }}
             >
               <span className="absolute right-4 top-4 rounded-full px-3 py-1 text-xs font-bold" style={{ background: "#FF5E3A", color: "white" }}>
-                Popular
+                {lc?.ui?.labels?.popular || "Popular"}
               </span>
-              <h3 className="text-lg font-bold text-white">Pro</h3>
-              <p className="mt-2 text-sm text-gray-400">Per crescere</p>
-              <p className="mt-4 text-4xl font-extrabold text-white">{data.prezzo ?? "$20"}<span className="text-sm font-normal text-gray-400">/mo</span></p>
+              <h3 className="text-lg font-bold text-white">{lc?.ui?.labels?.pro_tier || "Pro"}</h3>
+              <p className="mt-2 text-sm text-gray-400">{lc?.ui?.labels?.pro_title || "Per crescere"}</p>
+              <p className="mt-4 text-4xl font-extrabold text-white">{data.prezzo ?? "$20"}<span className="text-sm font-normal text-gray-400">{lc?.ui?.labels?.per_month || "/mo"}</span></p>
               <ul className="mt-6 flex flex-col gap-3 text-sm text-gray-300">
                 <li>✓ Prodotti illimitati</li>
                 <li>✓ 20 Lingue</li>
@@ -314,7 +315,7 @@ export default function TemplateHorizon({ data, locale: _locale = "it" }: Horizo
                 className="mt-8 w-full rounded-xl py-3 text-sm font-semibold text-white transition hover:opacity-90"
                 style={{ background: "#FF5E3A" }}
               >
-                {data.cta || "Acquista Ora"}
+                {data.cta || lc?.hero?.cta || lc?.ui?.labels?.buy_now || "Acquista Ora"}
               </button>
             </div>
           </div>
@@ -324,17 +325,16 @@ export default function TemplateHorizon({ data, locale: _locale = "it" }: Horizo
       {/* ── FAQ ──────────────────────────────────────────── */}
       <section id="faq" className="py-20" style={{ background: "#fff9ee" }}>
         <div className="mx-auto max-w-4xl px-6">
-          <div className="grid gap-12 md:grid-cols-[200px_1fr]">
-            <h2 className="font-bold" style={{ fontSize: "clamp(24px, 3vw, 36px)", color: "#1d1c15", position: "sticky", top: "100px" }}>
-              FAQ
+          <div className="grid gap-12 md:grid-cols-[200px_1fr]">              <h2 className="font-bold" style={{ fontSize: "clamp(24px, 3vw, 36px)", color: "#1d1c15", position: "sticky", top: "100px" }}>
+              {lc?.faq?.title || "FAQ"}
             </h2>
             <div className="flex flex-col">
-              {[
+              {(lc?.faq?.items?.length ? lc.faq.items : [
                 { q: "Come funziona?", a: "Scegli un template, personalizza con AI, pubblica." },
                 { q: "Posso cambiare template dopo?", a: "Sì, puoi switchare in qualsiasi momento." },
                 { q: "Accetta pagamenti internazionali?", a: "Sì, Stripe gestisce 135+ valute automaticamente." },
                 { q: "Serve conoscere il codice?", a: "No, il Cervellone fa tutto per te." },
-              ].map((faq, i) => (
+              ]).map((faq, i) => (
                 <div key={i} className="border-b py-4" style={{ borderColor: "#ddc0b8" }}>
                   <h3 className="font-semibold" style={{ color: "#1d1c15" }}>{faq.q}</h3>
                   <p className="mt-2 text-sm" style={{ color: "#555555" }}>{faq.a}</p>
@@ -382,13 +382,13 @@ export default function TemplateHorizon({ data, locale: _locale = "it" }: Horizo
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6">
           <span className="font-bold" style={{ color: "#1d1c15" }}>{lc?.nav?.brand || "Brand"}</span>
           <div className="flex gap-6 text-sm" style={{ color: "#89726b" }}>
-            <a href="#" className="hover:text-black transition">{lc?.footer?.privacy || "Privacy"}</a>
-            <a href="#" className="hover:text-black transition">{lc?.footer?.terms || "Terms"}</a>
-            <a href="#" className="hover:text-black transition">{lc?.footer?.contact || "Contact"}</a>
+            <a href="#" className="hover:text-black transition">{lc?.footer?.privacy || lc?.ui?.labels?.privacy || "Privacy"}</a>
+            <a href="#" className="hover:text-black transition">{lc?.footer?.terms || lc?.ui?.labels?.terms || "Terms"}</a>
+            <a href="#" className="hover:text-black transition">{lc?.footer?.contact || lc?.ui?.labels?.contact || "Contact"}</a>
           </div>
         </div>
         <div className="mt-4 text-center text-xs" style={{ color: "#ddc0b8" }}>
-          © {new Date().getFullYear()} {lc?.nav?.brand || "Brand"}. {lc?.footer?.rights_reserved || "All rights reserved."}
+          © {new Date().getFullYear()} {lc?.nav?.brand || "Brand"}. {lc?.footer?.rights_reserved || lc?.ui?.labels?.rights_reserved || "All rights reserved."}
         </div>
       </footer>
     </div>

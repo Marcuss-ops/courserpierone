@@ -17,13 +17,13 @@ interface LumioProps {
     lezioni?: { titolo: string; descrizione: string }[];
     localeContent?: {
       nav?: { brand?: string; features?: string; pricing?: string; testimonials?: string; get_started?: string; learn_more?: string };
-      hero?: { cta?: string; secondary_cta?: string };
-      testimonials?: { badge?: string; title?: string };
+      hero?: { cta?: string; secondary_cta?: string; price_label?: string };
+      testimonials?: { badge?: string; title?: string; items?: { name?: string; role?: string }[] };
       lessons?: { badge?: string; title?: string };
       footer?: { rights_reserved?: string; privacy?: string; terms?: string; contact?: string };
       problem?: { badge?: string };
       story?: { badge?: string };
-      trust?: { title?: string };
+      trust?: { title?: string; company_names?: string[] };
       ui?: { labels?: Record<string, string> };
     };
   };
@@ -85,8 +85,7 @@ export default function TemplateLumio({ data, locale: _locale = "it" }: LumioPro
         >
           {data.sottotitolo ?? "Sottotitolo che descrive il valore del prodotto in modo chiaro e diretto."}
         </p>
-        <div className="mt-8 flex gap-4">
-          <a
+        <div className="mt-8 flex gap-4">            <a
             href="#pricing"
             className="rounded-full px-8 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5"
             style={{
@@ -94,14 +93,14 @@ export default function TemplateLumio({ data, locale: _locale = "it" }: LumioPro
               boxShadow: "0 4px 20px rgba(255,65,108,0.3)",
             }}
           >
-            {data.cta || "Acquista Ora"}
+            {data.cta || lc?.hero?.cta || t("buy_now", "Acquista Ora")}
           </a>
           <a
             href="#features"
             className="rounded-full border px-8 py-3 text-sm font-semibold transition hover:bg-black/5"
             style={{ borderColor: "#D9D7D0", color: "#1B1B1B" }}
           >
-            Scopri di Più
+            {lc?.hero?.secondary_cta || t("learn_more", "Scopri di Più")}
           </a>
         </div>
       </section>
@@ -109,10 +108,10 @@ export default function TemplateLumio({ data, locale: _locale = "it" }: LumioPro
       {/* ── TRUST STRIP (Loghi placeholder) ──────────────── */}
       <section className="py-12 overflow-hidden">
         <p className="mb-6 text-center text-xs font-semibold uppercase tracking-widest" style={{ color: "#8C8880" }}>
-          Trusted by teams worldwide
+          {lc?.trust?.title || t("trusted_by", "Trusted by teams worldwide")}
         </p>
         <div className="flex gap-16 animate-[marquee_20s_linear_infinite] whitespace-nowrap">
-          {["Brand Alpha", "TechCorp", "Studio Pro", "Creative Inc", "Digital Labs", "Brand Alpha", "TechCorp", "Studio Pro"].map((name, i) => (
+          {(lc?.trust?.company_names?.length ? lc.trust.company_names : ["Brand Alpha", "TechCorp", "Studio Pro", "Creative Inc", "Digital Labs", "Brand Alpha", "TechCorp", "Studio Pro"]).map((name, i) => (
             <span key={i} className="text-lg font-bold opacity-30" style={{ color: "#1B1B1B" }}>
               {name}
             </span>
@@ -128,7 +127,7 @@ export default function TemplateLumio({ data, locale: _locale = "it" }: LumioPro
               className="mb-4 inline-block rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-wider"
               style={{ background: "#F0EFEB", color: "#8C8880" }}
             >
-              Il Problema
+              {lc?.problem?.badge || t("the_problem", "Il Problema")}
             </span>
             <h2
               className="mt-4 font-bold"
@@ -157,14 +156,14 @@ export default function TemplateLumio({ data, locale: _locale = "it" }: LumioPro
                     <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl" style={{ background: "linear-gradient(135deg, #FF416C, #FF4B2B)" }}>
                       <span className="text-3xl text-white">📖</span>
                     </div>
-                    <p className="text-sm font-medium" style={{ color: "#8C8880" }}>Cover del Prodotto</p>
+                    <p className="text-sm font-medium" style={{ color: "#8C8880" }}>{lc?.ui?.labels?.cover_placeholder || t("cover_placeholder", "Cover del Prodotto")}</p>
                   </div>
                 )}
               </div>
               {/* Testo */}
               <div>
                 <span className="mb-3 inline-block rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider" style={{ background: "#F0EFEB", color: "#8C8880" }}>
-                  La Nostra Storia
+                  {lc?.story?.badge || t("our_story", "La Nostra Storia")}
                 </span>
                 <h2 className="mt-3 font-bold" style={{ fontSize: "clamp(24px, 3vw, 36px)", lineHeight: 1.2, color: "#1B1B1B" }}>
                   {data.storia.split("\n")[0] ?? "La storia del prodotto"}
@@ -184,10 +183,10 @@ export default function TemplateLumio({ data, locale: _locale = "it" }: LumioPro
           <div className="mx-auto max-w-6xl px-6">
             <div className="mb-12 text-center">
               <span className="mb-3 inline-block rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider" style={{ background: "#F0EFEB", color: "#8C8880" }}>
-                Cosa Imparerai
+                {lc?.lessons?.badge || t("what_learn", "Cosa Imparerai")}
               </span>
               <h2 className="mt-3 font-bold" style={{ fontSize: "clamp(24px, 3vw, 36px)", color: "#1B1B1B" }}>
-                Lezioni del Corso
+                {lc?.lessons?.title || t("course_lessons", "Lezioni del Corso")}
               </h2>
             </div>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -219,7 +218,7 @@ export default function TemplateLumio({ data, locale: _locale = "it" }: LumioPro
         <section id="testimonials" className="py-20">
           <div className="mx-auto max-w-3xl px-6 text-center">
             <span className="mb-4 inline-block rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider" style={{ background: "#F0EFEB", color: "#8C8880" }}>
-              Testimonianze
+              {lc?.testimonials?.badge || t("testimonials", "Testimonianze")}
             </span>
             <div className="mt-6 text-xl leading-relaxed" style={{ color: "#1B1B1B" }}>
               <span style={{ background: "linear-gradient(135deg, #FF416C, #FF4B2B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontSize: "48px" }}>&ldquo;</span>
@@ -230,8 +229,8 @@ export default function TemplateLumio({ data, locale: _locale = "it" }: LumioPro
             <div className="mt-6 flex items-center justify-center gap-3">
               <div className="h-10 w-10 rounded-full" style={{ background: "linear-gradient(135deg, #FF416C, #FF4B2B)" }} />
               <div className="text-left">
-                <p className="text-sm font-semibold" style={{ color: "#1B1B1B" }}>Nome Cliente</p>
-                <p className="text-xs" style={{ color: "#8C8880" }}>Ruolo, Azienda</p>
+                <p className="text-sm font-semibold" style={{ color: "#1B1B1B" }}>{lc?.testimonials?.items?.[0]?.name || t("testimonial_name", "Nome Cliente")}</p>
+                <p className="text-xs" style={{ color: "#8C8880" }}>{lc?.testimonials?.items?.[0]?.role || t("testimonial_role", "Ruolo, Azienda")}</p>
               </div>
             </div>
           </div>
@@ -245,9 +244,9 @@ export default function TemplateLumio({ data, locale: _locale = "it" }: LumioPro
             className="rounded-[40px] p-12"
             style={{ background: "#1B1B1B" }}
           >
-            <h2 className="text-3xl font-bold text-white">{data.cta ?? "Inizia Oggi"}</h2>
+            <h2 className="text-3xl font-bold text-white">{data.cta || lc?.hero?.cta || t("start_today", "Inizia Oggi")}</h2>
             <p className="mt-4 text-lg text-gray-400">
-              {data.prezzo ? `Prezzo: ${data.prezzo}` : "Prezzo speciale di lancio"}
+              {data.prezzo ? `Prezzo: ${data.prezzo}` : (lc?.hero?.price_label || t("price_special", "Prezzo speciale di lancio"))}
             </p>
             <button
               className="mt-8 rounded-full px-10 py-4 text-base font-semibold text-white transition hover:-translate-y-0.5"
@@ -256,7 +255,7 @@ export default function TemplateLumio({ data, locale: _locale = "it" }: LumioPro
                 boxShadow: "0 4px 20px rgba(255,65,108,0.4)",
               }}
             >
-              {data.cta || "Acquista Ora"}
+              {data.cta || lc?.hero?.cta || t("buy_now", "Acquista Ora")}
             </button>
           </div>
         </div>
@@ -266,15 +265,15 @@ export default function TemplateLumio({ data, locale: _locale = "it" }: LumioPro
       <footer style={{ background: "linear-gradient(180deg, #181818, #0a0a0a)" }} className="py-12">
         <div className="mx-auto max-w-6xl px-6">
           <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-            <span className="text-lg font-bold text-white">Brand</span>
+            <span className="text-lg font-bold text-white">{lc?.nav?.brand || "Brand"}</span>
             <div className="flex gap-6 text-sm text-gray-500">
-              <a href="#" className="hover:text-white transition">Privacy</a>
-              <a href="#" className="hover:text-white transition">Terms</a>
-              <a href="#" className="hover:text-white transition">Contact</a>
+              <a href="#" className="hover:text-white transition">{lc?.footer?.privacy || t("privacy", "Privacy")}</a>
+              <a href="#" className="hover:text-white transition">{lc?.footer?.terms || t("terms", "Terms")}</a>
+              <a href="#" className="hover:text-white transition">{lc?.footer?.contact || t("contact", "Contact")}</a>
             </div>
           </div>
           <div className="mt-8 text-center text-xs text-gray-600">
-            © {new Date().getFullYear()} Brand. All rights reserved.
+            © {new Date().getFullYear()} {lc?.nav?.brand || "Brand"}. {lc?.footer?.rights_reserved || t("rights_reserved", "All rights reserved.")}
           </div>
         </div>
       </footer>
