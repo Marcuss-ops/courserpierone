@@ -13,9 +13,15 @@ Uso:
     python scripts/translate/translate-argos.py <slug> <target-locales...>
     python scripts/translate/translate-argos.py amish-secrets de fr es pt
     python scripts/translate/translate-argos.py amish-secrets all   # tutte le lingue disponibili
+    python scripts/translate/translate-argos.py --force <slug> all  # sovrascrive TUTTI i campi
 
 Prerequisiti:
     pip install argostranslate
+
+Flag:
+    --force   Ignora il merge intelligente e sovrascrive tutti i campi
+              con le nuove traduzioni Argos. Utile quando en.json
+              viene corretto e si vuole ripropagare tutto da zero.
 """
 
 import sys, os, json, time, re
@@ -155,11 +161,21 @@ def merge_translations(existing: dict, translated: dict, en_source: dict) -> dic
 def main():
     available_targets = get_available_targets()
 
+    # Parsing flag --force
+    FORCE_MODE = "--force" in sys.argv
+    if FORCE_MODE:
+        sys.argv.remove("--force")
+        print("\n⚠️  FORCE mode: sovrascrivo TUTTI i campi con le nuove traduzioni.")
+        print("   I valori esistenti verranno persi!\n")
+
     if len(sys.argv) < 3:
         print(f"""
 Uso: python scripts/translate/translate-argos.py <slug> <target-locales...>
      python scripts/translate/translate-argos.py amish-secrets de fr es pt
      python scripts/translate/translate-argos.py amish-secrets all
+     python scripts/translate/translate-argos.py --force <slug> all
+
+Flag: --force   Ignora il merge e sovrascrive TUTTI i campi
 
 Lingue disponibili da EN ({len(available_targets)}): {', '.join(available_targets)}
 """)
@@ -220,7 +236,11 @@ Lingue disponibili da EN ({len(available_targets)}): {', '.join(available_target
 
         # Merge con esistente (preserva traduzioni DB esistenti)
         if existing:
-            merged = merge_translations(existing, translated, en_data)
+            if FORCE_MODE:
+                print(f"   !! {target}: force mode — ignoring existing values")
+                merged = translated
+            else:
+                merged = merge_translations(existing, translated, en_data)
         else:
             merged = translated
 
