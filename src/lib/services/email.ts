@@ -541,12 +541,13 @@ export async function sendAbandonedCheckoutEmail(
   }
 }
 
-/** Invia email di conferma acquisto */
+/** Invia email di conferma acquisto (con link download ebook opzionale) */
 export async function sendPurchaseConfirmation(
   email: string,
   productName: string,
   courseUrl: string,
   locale = "en",
+  ebookDownloadUrl?: string,
 ): Promise<boolean> {
   const transporter = getTransporter();
 
@@ -559,6 +560,32 @@ export async function sendPurchaseConfirmation(
   const tpl = resolveTemplate(locale, PURCHASE_TEMPLATES);
   const filled = fillTemplate(tpl, productName);
 
+  // Localized ebook download lines
+  const EBOOK_LINES: Record<string, { html: string; text: string }> = {
+    it: { html: `Il tuo ebook è pronto per il download — è disponibile nella tua lingua preferita.<br/><a href="${ebookDownloadUrl}" style="color:#ddb7ff;text-decoration:underline;">📖 Scarica il tuo eBook (PDF)</a>`, text: `📖 Scarica il tuo eBook (PDF): ${ebookDownloadUrl}` },
+    en: { html: `Your ebook is ready to download — available in your preferred language.<br/><a href="${ebookDownloadUrl}" style="color:#ddb7ff;text-decoration:underline;">📖 Download your eBook (PDF)</a>`, text: `📖 Download your eBook (PDF): ${ebookDownloadUrl}` },
+    fr: { html: `Votre ebook est prêt à être téléchargé — disponible dans votre langue préférée.<br/><a href="${ebookDownloadUrl}" style="color:#ddb7ff;text-decoration:underline;">📖 Télécharger votre eBook (PDF)</a>`, text: `📖 Télécharger votre eBook (PDF): ${ebookDownloadUrl}` },
+    de: { html: `Ihr Ebook ist zum Download bereit — verfügbar in Ihrer bevorzugten Sprache.<br/><a href="${ebookDownloadUrl}" style="color:#ddb7ff;text-decoration:underline;">📖 Ihr eBook herunterladen (PDF)</a>`, text: `📖 Ihr eBook herunterladen (PDF): ${ebookDownloadUrl}` },
+    es: { html: `Tu ebook está listo para descargar — disponible en tu idioma preferido.<br/><a href="${ebookDownloadUrl}" style="color:#ddb7ff;text-decoration:underline;">📖 Descarga tu eBook (PDF)</a>`, text: `📖 Descarga tu eBook (PDF): ${ebookDownloadUrl}` },
+    pt: { html: `Seu ebook está pronto para download — disponível no seu idioma preferido.<br/><a href="${ebookDownloadUrl}" style="color:#ddb7ff;text-decoration:underline;">📖 Baixe seu eBook (PDF)</a>`, text: `📖 Baixe seu eBook (PDF): ${ebookDownloadUrl}` },
+    ja: { html: `eBookのダウンロード准备が整いました — お好みの言語でご利用いただけます。<br/><a href="${ebookDownloadUrl}" style="color:#ddb7ff;text-decoration:underline;">📖 eBookをダウンロード (PDF)</a>`, text: `📖 eBookをダウンロード (PDF): ${ebookDownloadUrl}` },
+    nl: { html: `Uw ebook is klaar om te downloaden — beschikbaar in uw voorkeurstaal.<br/><a href="${ebookDownloadUrl}" style="color:#ddb7ff;text-decoration:underline;">📖 Download uw eBook (PDF)</a>`, text: `📖 Download uw eBook (PDF): ${ebookDownloadUrl}` },
+    pl: { html: `Twoja ebook jest gotowy do pobrania — dostępny w Twoim preferowanym języku.<br/><a href="${ebookDownloadUrl}" style="color:#ddb7ff;text-decoration:underline;">📖 Pobierz swój eBook (PDF)</a>`, text: `📖 Pobierz swój eBook (PDF): ${ebookDownloadUrl}` },
+  };
+
+  const ebookLang = extractLang(locale);
+  const ebookLines = EBOOK_LINES[ebookLang] ?? EBOOK_LINES["en"];
+
+  // Add ebook download link to body if available
+  const bodyWithEbook = ebookDownloadUrl
+    ? [...filled.body, `<br/><br/>` + ebookLines.html]
+    : filled.body;
+
+  // Build localized ebook text
+  const bodyTextWithEbook = ebookDownloadUrl
+    ? [...filled.body, ebookLines.text]
+    : filled.body;
+
   try {
     await transporter.sendMail({
       from,
@@ -567,7 +594,7 @@ export async function sendPurchaseConfirmation(
       html: buildHtmlEmail(
         productName,
         filled.heading,
-        filled.body,
+        bodyWithEbook,
         filled.buttonText,
         courseUrl,
         filled.footer,
@@ -579,14 +606,14 @@ export async function sendPurchaseConfirmation(
         "#4d8eff",
       ),
       text: buildTextEmail(
-        filled.body,
+        bodyTextWithEbook,
         filled.buttonText,
         courseUrl,
         filled.footer,
       ),
     });
 
-    console.log(`✅ Email di conferma inviata a ${email} (locale: ${locale})`);
+    console.log(`✅ Email di conferma inviata a ${email} (locale: ${locale})` + (ebookDownloadUrl ? ` con ebook download link` : ""));
     return true;
   } catch (error) {
     console.error(`❌ Errore invio conferma a ${email}:`, error);

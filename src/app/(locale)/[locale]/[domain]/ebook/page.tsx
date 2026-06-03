@@ -27,7 +27,7 @@ export default async function EbookPage({
 
   if (!data) return notFound();
 
-  const currentLang = (lang as "it" | "en") ?? (data.defaultLanguage as "it" | "en") ?? "it";
+  const currentLang = lang || (data.defaultLanguage as string) || "en";
   const content = data.languages[currentLang] || data.languages[data.defaultLanguage];
 
   return (
@@ -64,7 +64,7 @@ export default async function EbookPage({
 
         <nav className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-1">
           {data.ebookChapters.map((chapter, idx) => (
-            <ChapterLink key={idx} title={chapter[currentLang] || chapter.it} page={chapter.page} active={idx === 0} />
+            <ChapterLink key={idx} title={(chapter as any)[currentLang] || (chapter as any)["en"] || ""} page={chapter.page} active={idx === 0} />
           ))}
         </nav>
 

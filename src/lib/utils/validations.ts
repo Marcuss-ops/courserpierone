@@ -39,7 +39,7 @@ export const createProductSchema = z.object({
   slug: z.string().min(1, "Slug richiesto").max(100).regex(/^[a-z0-9-]+$/, "Slug non valido (solo lettere minuscole, numeri e trattini)"),
   price: z.number().int().min(0).optional(),
   coverUrl: z.string().url().optional().nullable(),
-  templateId: z.enum(["lumio", "h612", "horizon"]).optional(),
+  templateId: z.enum(["lumio", "h612", "horizon", "book-claude", "amish"]).optional(),
   lemonVariantId: z.string().optional().nullable(),
   sourceLocale: z.string().optional(),
   translations: z.record(z.string(), z.string()).optional(),

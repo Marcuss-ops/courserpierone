@@ -1,5 +1,6 @@
 import { prisma } from "../db/prisma";
 import { sendPurchaseConfirmation } from "./email";
+import { COUNTRY_LOCALE } from "@/lib/i18n/_generated/locale-data";
 import crypto from "crypto";
 
 export interface ProcessOrderInput {
@@ -27,6 +28,8 @@ export interface ProcessOrderInput {
   currency: string;
   /** Buyer's locale at time of purchase */
   locale: string;
+  /** Customer's country code (ISO 3166-1 alpha-2, e.g. "IT", "US") — used to localize ebook download */
+  customerCountry?: string | null;
 }
 
 /**
@@ -55,6 +58,7 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
     amount,
     currency,
     locale,
+    customerCountry,
   } = input;
 
   // ── 1. Find or create user ──────────────────────────────────
@@ -149,15 +153,22 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-  // ── 6. Send purchase confirmation email (localizzata) ─────────
+  // ── 6. Resolve ebook locale from country ───────────────────────
+  // Use customer_country → COUNTRY_LOCALE mapping, fallback to locale param, then "en"
+  const ebookLang = (customerCountry && COUNTRY_LOCALE[customerCountry])
+    ? COUNTRY_LOCALE[customerCountry].split("-")[0]
+    : (locale.split("-")[0] ?? "en");
+
+  // ── 7. Send purchase confirmation email (localizzata) ─────────
   const courseUrl = `${appUrl}/${product.slug}/curso/lesson-1?lang=${locale}&token=${token}`;
+  const ebookDownloadUrl = `${appUrl}/api/ebook/${product.slug}/download?lang=${ebookLang}&token=${token}`;
   try {
-    await sendPurchaseConfirmation(email, product.slug, courseUrl, locale);
+    await sendPurchaseConfirmation(email, product.slug, courseUrl, locale, ebookDownloadUrl);
   } catch (emailErr) {
     console.error(`[${paymentProvider}] Failed to send purchase confirmation email:`, emailErr);
   }
 
-  // ── 7. Track analytics event ────────────────────────────────
+  // ── 8. Track analytics event ────────────────────────────────
   await prisma.analyticEvent
     .create({
       data: {

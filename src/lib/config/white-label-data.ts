@@ -20,7 +20,7 @@ export interface PriceByLocale {
 export interface CourseConfig {
   slug: string;
   productId?: string;
-  template?: "lumio" | "h612" | "horizon" | "book-claude" | "default";
+  template?: "lumio" | "h612" | "horizon" | "book-claude" | "amish" | "default";
   defaultLanguage: string;
   cover: string;
   checkoutUrl: string;

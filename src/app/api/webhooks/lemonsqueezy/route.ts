@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
       amount,
       currency,
       locale: customData.locale ?? "it",
+      customerCountry: attributes?.customer_country ?? attributes?.country ?? null,
     });
   }
 
@@ -109,6 +110,7 @@ export async function POST(request: NextRequest) {
           amount: attributes?.total ?? 0,
           currency: attributes?.currency ?? "usd",
           locale: customData.locale ?? "it",
+          customerCountry: attributes?.customer_country ?? attributes?.country ?? null,
         });
       } catch (error) {
         console.error("Failed to process subscription from LS webhook:", error);

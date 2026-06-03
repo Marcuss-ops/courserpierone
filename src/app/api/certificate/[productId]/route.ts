@@ -62,7 +62,7 @@ export async function GET(
 
     const courseTitle = product.translations[0]?.content || product.slug;
     const locale = order.locale ?? "it";
-    const lang = locale === "en" ? "en" : "it";
+    const lang = locale || "en";
 
     // ─── Genera PDF Certificato ─────────────────────────────
     const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "landscape" });

@@ -121,6 +121,7 @@ const TemplateLumio = dynamic(() => import("@/components/funnel/template-lumio")
 const TemplateH612 = dynamic(() => import("@/components/funnel/template-h612"));
 const TemplateHorizon = dynamic(() => import("@/components/funnel/template-horizon"));
 const TemplateBookClaude = dynamic(() => import("@/components/funnel/template-book-claude"));
+const TemplateAmish = dynamic(() => import("@/components/funnel/template-amish"));
 
 function getPriceString(data: CourseConfig, locale: string): { price: string; currency: string } {
   // Derive currency from locale: pt-br → BRL, ja-jp → JPY, fr-fr → EUR
@@ -162,8 +163,10 @@ function mapConfigToTemplateData(data: CourseConfig, locale: string, lang: strin
     prezzo: price,
     currency,
     coverUrl: data.cover ?? "",
+    author: data.author,
+    languages: data.languages,
     ui: content.ui ?? undefined,
-    localeContent, // passa il LocaleContent JSON al template
+    localeContent,
     lezioni: data.lessons.map((l) => ({
       titolo: l.titles[lang] ?? Object.values(l.titles)[0] ?? "",
       descrizione: l.descriptions[lang] ?? Object.values(l.descriptions)[0] ?? "",
@@ -218,7 +221,7 @@ export default async function LocaleLandingPage({
   const lc = localeContent; // shorthand
 
   // ─── Multi-Template ────────────────────────────
-  if (data.template === "lumio" || data.template === "h612" || data.template === "horizon" || data.template === "book-claude" || data.template === "default") {
+  if (data.template === "lumio" || data.template === "h612" || data.template === "horizon" || data.template === "book-claude" || data.template === "amish" || data.template === "default") {
     const templateData = mapConfigToTemplateData(data, currentLocale, currentLang, localeContent);
     if (templateData) {
       let TemplateComponent;
@@ -227,6 +230,7 @@ export default async function LocaleLandingPage({
         case "h612": TemplateComponent = TemplateH612; break;
         case "horizon": TemplateComponent = TemplateHorizon; break;
         case "book-claude": TemplateComponent = TemplateBookClaude; break;
+        case "amish": TemplateComponent = TemplateAmish; break;
         default: TemplateComponent = TemplateLumio;
       }
       return (

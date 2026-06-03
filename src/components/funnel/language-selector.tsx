@@ -317,12 +317,15 @@ interface LanguageSelectorProps {
   currentLocale: string;
   productSlug: string;
   className?: string;
+  /** If provided, only show languages present in this set (e.g. from config keys like ["it","en","fr"]) */
+  availableLangs?: string[];
 }
 
 export default function LanguageSelector({
   currentLocale,
   productSlug,
   className = "",
+  availableLangs,
 }: LanguageSelectorProps) {
   const [open, setOpen] = useState(false);
   const [showAll, setShowAll] = useState(false);
@@ -390,10 +393,20 @@ export default function LanguageSelector({
     );
   }, [search]);
 
-  // Top locales for quick access
-  const topLocales = TOP_LOCALES.map(
-    (code) => ALL_LOCALES_FLAT.find((l) => l.code === code)!
-  ).filter(Boolean);
+  // Filter locale groups by available languages from config
+  const filteredGroups = useMemo(() => {
+    if (!availableLangs || availableLangs.length === 0) return LOCALE_GROUPS;
+    const langSet = new Set(availableLangs);
+    return LOCALE_GROUPS.filter((g) => langSet.has(g.lang));
+  }, [availableLangs]);
+
+  // Top locales for quick access (filtered by available)
+  const topLocales = useMemo(() => {
+    const base = availableLangs && availableLangs.length > 0
+      ? TOP_LOCALES.filter((code) => availableLangs.includes(code.split("-")[0]))
+      : TOP_LOCALES;
+    return base.map((code) => ALL_LOCALES_FLAT.find((l) => l.code === code)!).filter(Boolean);
+  }, [availableLangs]);
 
   return (
     <div ref={dropdownRef} className={`relative ${className}`}>
@@ -486,7 +499,7 @@ export default function LanguageSelector({
               )
             ) : showAll ? (
               // ── All locales grouped ──
-              LOCALE_GROUPS.map((group) => {
+              filteredGroups.map((group) => {
                 const hasActive = group.locales.some((l) => l.code === normalize(currentLocale));
                 return (
                   <div key={group.lang} className="mb-1">
@@ -522,7 +535,7 @@ export default function LanguageSelector({
               })
             ) : (
               // ── Top one-per-language ──
-              LOCALE_GROUPS.map((group) => {
+              filteredGroups.map((group) => {
                 const primary = group.locales[0];
                 const isActive = group.locales.some((l) => l.code === normalize(currentLocale));
                 const showVariants = group.locales.length > 1;
@@ -563,7 +576,7 @@ export default function LanguageSelector({
               {showAll ? (
                 <>↑ Mostra compatto</>
               ) : (
-                <>↓ Tutte le {ALL_LOCALES_FLAT.length} lingue</>
+                <>↓ {filteredGroups.length > 0 ? `Tutte le ${filteredGroups.reduce((acc, g) => acc + g.total, 0)} varianti` : 'Tutte le lingue'}</>
               )}
             </button>
           </div>

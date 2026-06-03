@@ -62,7 +62,7 @@ export default function AdminDashboard() {
               id: p.id,
               slug: p.slug,
               title: p.slug,
-              template: p.templateId as "lumio" | "h612" | "horizon",
+              template: p.templateId as "lumio" | "h612" | "horizon" | "book-claude" | "amish",
               status: (p.status ?? "draft") as "published" | "draft" | "archived",
               locales: p.locales ?? [],
               sales: p.lessonsCount ?? 0,

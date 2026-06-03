@@ -1,6 +1,19 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
+import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -25,7 +38,8 @@ export const metadata: Metadata = {
     description: "Generatore automatico di Funnel e Aree Corsi multilingua",
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
   },
 };
 
@@ -44,7 +58,7 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang={locale}>
+    <html lang={locale} className={`${playfair.variable} ${inter.variable}`}>
       <body className="bg-white text-gray-900 antialiased">
         {children}
       </body>

@@ -2,6 +2,7 @@ import TemplateLumio from "./template-lumio";
 import TemplateH612 from "./template-h612";
 import TemplateHorizon from "./template-horizon";
 import TemplateBookClaude from "./template-book-claude";
+import TemplateAmish from "./template-amish";
 
 export const TEMPLATES = {
   lumio: {
@@ -36,8 +37,16 @@ export const TEMPLATES = {
     preview: "bg-white",
     accent: "#FF6B00",
   },
+  amish: {
+    id: "amish",
+    name: "Amish Editorial",
+    description: "Design editoriale caldo, tonalità avorio/salvia/marrone, serif Playfair Display",
+    component: TemplateAmish,
+    preview: "bg-[#FFFBF5]",
+    accent: "#C9840D",
+  },
 } as const;
 
 export type TemplateId = keyof typeof TEMPLATES;
 
-export { TemplateLumio, TemplateH612, TemplateHorizon, TemplateBookClaude };
+export { TemplateLumio, TemplateH612, TemplateHorizon, TemplateBookClaude, TemplateAmish };

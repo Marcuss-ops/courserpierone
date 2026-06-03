@@ -34,7 +34,7 @@ export default async function CoursePage({
   const session = await getServerSession(authOptions);
   const isAuthenticated = !!session?.user?.email;
 
-  const currentLang = (lang as "it" | "en") ?? (course.defaultLanguage as "it" | "en") ?? "it";
+  const currentLang = lang || (course.defaultLanguage as string) || "en";
   const currentLesson = course.lessons.find((l) => l.id === lessonId) || course.lessons[0];
 
   return (
