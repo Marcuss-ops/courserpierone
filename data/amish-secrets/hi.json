@@ -1,8 +1,8 @@
 {
   "locale": "hi",
   "seo": {
-    "title": "अमीश सीक्रेट्स: बचत के साथ कैसे जिएं और पैसों का प्रबंधन कैसे करें",
-    "description": "अमीश समुदाय के मितव्ययी जीवन के रहस्यों को जानें। इसमें पूर्ण वीडियो मॉड्यूल और डाउनलोड करने योग्य पीडीएफ शामिल हैं।",
+    "title": "Amish Secrets: बचत और पैसे का प्रबंधन कैसे करें",
+    "description": "अमिश समुदाय के वैवाहिक जीवन के रहस्यों की खोज करें। पूर्ण वीडियो मॉड्यूल और डाउनलोड करने योग्य PDF शामिल हैं।",
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
@@ -19,8 +19,8 @@
   },
   "hero": {
     "badge": "नया",
-    "title": "अमीश सीक्रेट्स: बचत के साथ कैसे जिएं और पैसों का प्रबंधन कैसे करें",
-    "subtitle": "अमीश समुदाय के मितव्ययी जीवन के रहस्यों को जानें। इसमें पूर्ण वीडियो मॉड्यूल और डाउनलोड करने योग्य पीडीएफ शामिल हैं।",
+    "title": "Amish Secrets: बचत और पैसे का प्रबंधन कैसे करें",
+    "subtitle": "अमिश समुदाय के वैवाहिक जीवन के रहस्यों की खोज करें। पूर्ण वीडियो मॉड्यूल और डाउनलोड करने योग्य PDF शामिल हैं।",
     "cta": "प्रारंभ करना",
     "secondary_cta": "अधिक जानें",
     "price_label": "विशेष प्रक्षेपण मूल्य",
@@ -28,7 +28,7 @@
   },
   "problem": {
     "badge": "समस्या",
-    "title": "क्या आप बिना बचत के महीने के अंत तक पहुँचने से थक चुके हैं? आधुनिक समाज हमें अत्यधिक उपभोग के लिए प्रेरित करता है।",
+    "title": "किसी भी बचत के बिना महीने के अंत तक पहुंचने के लिए? आधुनिक समाज हमें अत्यधिक खपत की ओर धकेलता है।",
     "text": ""
   },
   "story": {
@@ -39,14 +39,14 @@
       "बैर्टर और विनिमय प्रणाली जो नकदी की आवश्यकता को समाप्त करती है और स्थायी विश्वास संबंधों का निर्माण करती है।",
       "अमिश घरेलू अर्थव्यवस्था: कैसे एक परिवार राष्ट्रीय औसत से 60% कम पर रहता है।"
     ],
-    "quote": "अमीश लोग हमारे द्वारा खर्च किए जाने वाले धन के एक अंश को खर्च करके समृद्ध और परिपूर्ण जीवन जीते हैं। इस पाठ्यक्रम में हम आपको बताएंगे कि वे ऐसा कैसे करते हैं।"
+    "quote": "हम जो खर्च करते हैं उसका एक अंश खर्च करते समय अमिश अमीर और पूर्ण जीवन जीते हैं। इस कोर्स में, हम बताते हैं कि वे कैसे करते हैं।"
   },
   "author": {
     "badge": "/ 03 - लेखक",
     "title": "इस कोर्स के पीछे",
     "name": "Alessandro Rinaldi",
-    "role": "Researcher · Author · Traveler",
-    "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+    "role": "शोधकर्ता",
+    "bio": "[अपनी कहानी यहाँ जोड़ें: मैं पेंसिल्वेनिया में 3 महीने तक जीवित रहा, 12 Amish परिवारों का साक्षात्कार, अपनी आर्थिक प्रणाली का अध्ययन किया। कोई सिद्धांत नहीं, केवल अभ्यास।",
     "tags": [
       "वित्तीय ज्ञान",
       "सतत जीवन",
@@ -56,7 +56,7 @@
   "modules": {
     "badge": "क्या आप सीखेंगे?",
     "title": "Amish Masters' Secrets",
-    "description": "8 practical modules that turn Amish wisdom into concrete actions.",
+    "description": "8 व्यावहारिक मॉड्यूल जो अमिश ज्ञान को अपने दैनिक जीवन के लिए ठोस कार्यों में बदल देते हैं।",
     "items": [
       {
         "title": "अमिश बजट",
@@ -125,7 +125,7 @@
     "launch_price": "$37",
     "cta": "अभी प्रवेश करें",
     "guarantee_title": "30-day मनी बैक गारंटी",
-    "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+    "guarantee_text": "इसे 30 दिनों के लिए आज़माएं। यदि आप कम से कम $100 नहीं बचाते हैं, तो हम पूरी राशि वापस कर देंगे। कोई सवाल नहीं, कोई परेशानी नहीं।",
     "includes": [
       "पूर्ण पाठ्यक्रम (मूल्य $97)",
       "eBook PDF, ePub, Kindle",
@@ -175,7 +175,7 @@
     "rights_reserved": "सर्वाधिकार सुरक्षित",
     "privacy": "गोपनीयता",
     "terms": "नियम",
-    "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+    "legal_note": "यह एक डिजिटल सूचनात्मक उत्पाद है। परिणाम अलग-अलग हो सकते हैं और व्यक्तिगत प्रतिबद्धता पर निर्भर हो सकते हैं। वर्णित Amish कीमतों और तकनीकों को ethnographic अनुसंधान पर आधारित हैं और सही ढंग से सभी Amish समुदायों के समकालीन प्रथाओं को प्रतिबिंबित नहीं कर सकते हैं।",
     "badges": {
       "guarantee": "30 दिन की गारंटी",
       "instant_access": "त्वरित पहुँच",
@@ -189,12 +189,12 @@
   },
   "ui": {
     "labels": {
-      "instant_access": "तत्काल पहुंच",
+      "instant_access": "त्वरित पहुँच",
       "buy_now_arrow": "अभी खरीदें →",
       "readers": "1,247 पाठक",
-      "buy_now_dash": "अभी खरीदें —",
+      "buy_now_dash": "अभी खरीदें",
       "view_modules": "मॉड्यूल देखें",
-      "ssl_secure": "SSL के साथ सुरक्षित भुगतान",
+      "ssl_secure": "सुरक्षित एसएसएल भुगतान",
       "instant_download": "त्वरित डाउनलोड",
       "lifetime_access": "लाइफटाइम एक्सेस",
       "guarantee_days": "30 दिन की गारंटी",
@@ -203,23 +203,23 @@
       "perfect_for": "अगर आपके लिए बिल्कुल सही:",
       "p_struggle": "आप संघर्ष करते हैं",
       "p_cut_costs": "आप जीवन की गुणवत्ता का त्याग किए बिना लागत में कटौती करना चाहते हैं",
-      "p_consumerism": "Tired of consumerism and debt culture",
-      "p_practical": "Looking for practical, time-tested methods",
-      "p_future": "Want a solid financial future for your family",
+      "p_consumerism": "आप उपभोक्तावाद और ऋण संस्कृति से थक गए हैं",
+      "p_practical": "आप व्यावहारिक, समय-परीक्षण विधि चाहते हैं",
+      "p_future": "आप अपने परिवार के लिए एक ठोस वित्तीय भविष्य बनाना चाहते हैं",
       "not_for": "आपके लिए नहीं:",
-      "n_quick": "Looking for get-rich-quick schemes",
-      "n_habits": "Not willing to change spending habits",
-      "n_quick_fix": "Prefer quick fixes over a solid path",
-      "n_implement": "Not willing to implement what you learn",
-      "n_advice": "Looking for personalized financial advice",
+      "n_quick": "आप Get-rich-quick योजनाओं की तलाश कर रहे हैं",
+      "n_habits": "आप अपने खर्च की आदतों को बदलना नहीं चाहते हैं",
+      "n_quick_fix": "आप एक ठोस आधार पर त्वरित फिक्स पसंद करते हैं",
+      "n_implement": "आप जो सीखते हैं उसे लागू करने के लिए तैयार नहीं हैं",
+      "n_advice": "आप व्यक्तिगत वित्तीय सलाह की तलाश कर रहे हैं",
       "section_learn": "क्या आप सीखेंगे?",
       "masters_secrets": "Amish Masters' Secrets",
-      "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
+      "modules_desc": "8 व्यावहारिक मॉड्यूल जो अमिश ज्ञान को अपने दैनिक जीवन के लिए ठोस कार्यों में बदल देते हैं।",
       "section_author": "/ 03 - लेखक",
       "behind_course": "इस कोर्स के पीछे",
       "your_name": "यहाँ आपका नाम",
-      "researcher_author": "Researcher · Author · Traveler",
-      "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+      "researcher_author": "शोधकर्ता",
+      "author_bio": "[अपनी कहानी यहाँ जोड़ें: मैं पेंसिल्वेनिया में 3 महीने तक जीवित रहा, 12 Amish परिवारों का साक्षात्कार, अपनी आर्थिक प्रणाली का अध्ययन किया। कोई सिद्धांत नहीं, केवल अभ्यास।",
       "section_content": "// 04 - पाठ्यक्रम सामग्री",
       "what_inside": "क्या आप अंदर पाएंगे?",
       "also_includes": "इसमें भी शामिल है:",
@@ -245,7 +245,7 @@
       "inc_bonus_shopping": "BONUS: साप्ताहिक शॉपिंग सूची (मूल्य $27)",
       "unlock_now": "अभी प्रवेश करें",
       "guarantee_title": "30-day मनी बैक गारंटी",
-      "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+      "guarantee_text": "इसे 30 दिनों के लिए आज़माएं। यदि आप कम से कम $100 नहीं बचाते हैं, तो हम पूरी राशि वापस कर देंगे। कोई सवाल नहीं, कोई परेशानी नहीं।",
       "section_testimonials": "/ 06 - प्रशंसापत्र",
       "testimonial_text": "मैंने Amish बजट विधि को लागू किया और दो महीने में मैंने अपने खर्च को 35% तक घटा दिया। 30 दिवसीय चेकलिस्ट मोड़ बिंदु था। अंत में एक कोर्स जो वास्तव में काम करता है।",
       "testimonial_name": "मार्को आर",
@@ -262,7 +262,7 @@
       "rights_reserved": "सर्वाधिकार सुरक्षित",
       "privacy": "गोपनीयता",
       "terms": "नियम",
-      "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+      "legal_note": "यह एक डिजिटल सूचनात्मक उत्पाद है। परिणाम अलग-अलग हो सकते हैं और व्यक्तिगत प्रतिबद्धता पर निर्भर हो सकते हैं। वर्णित Amish कीमतों और तकनीकों को ethnographic अनुसंधान पर आधारित हैं और सही ढंग से सभी Amish समुदायों के समकालीन प्रथाओं को प्रतिबिंबित नहीं कर सकते हैं।",
       "features": "सुविधाएँ",
       "pricing": "मूल्य निर्धारण",
       "testimonials": "प्रशंसापत्र",
@@ -302,14 +302,10 @@
       "tag_2": "अमिश अध्ययन",
       "tag_3": "वित्तीय परामर्श",
       "brand_name": "Courssy",
-      "reviewer": "Marco R., early readers",
+      "reviewer": "मार्को आर, प्रारंभिक रीडर",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "30day money back": "30 दिन की मनी बैक गारंटी",
-      "price": "मूल्य",
-      "free": "मुफ़्त",
-      "addtocart": "कार्ट में जोड़ें",
-      "select_currency": "मुद्रा चुनें"
+      "story_quote": "हम जो खर्च करते हैं उसका एक अंश खर्च करते समय अमिश अमीर और पूर्ण जीवन जीते हैं। इस कोर्स में, हम बताते हैं कि वे कैसे करते हैं।"
     }
   },
   "audience": {
@@ -319,17 +315,17 @@
     "perfect_items": [
       "आप संघर्ष करते हैं",
       "आप जीवन की गुणवत्ता का त्याग किए बिना लागत में कटौती करना चाहते हैं",
-      "Tired of consumerism and debt culture",
-      "Looking for practical, time-tested methods",
-      "Want a solid financial future for your family"
+      "आप उपभोक्तावाद और ऋण संस्कृति से थक गए हैं",
+      "आप व्यावहारिक, समय-परीक्षण विधि चाहते हैं",
+      "आप अपने परिवार के लिए एक ठोस वित्तीय भविष्य बनाना चाहते हैं"
     ],
     "not_for": "आपके लिए नहीं:",
     "not_items": [
-      "Looking for get-rich-quick schemes",
-      "Not willing to change spending habits",
-      "Prefer quick fixes over a solid path",
-      "Not willing to implement what you learn",
-      "Looking for personalized financial advice"
+      "आप Get-rich-quick योजनाओं की तलाश कर रहे हैं",
+      "आप अपने खर्च की आदतों को बदलना नहीं चाहते हैं",
+      "आप एक ठोस आधार पर त्वरित फिक्स पसंद करते हैं",
+      "आप जो सीखते हैं उसे लागू करने के लिए तैयार नहीं हैं",
+      "आप व्यक्तिगत वित्तीय सलाह की तलाश कर रहे हैं"
     ]
   },
   "course": {

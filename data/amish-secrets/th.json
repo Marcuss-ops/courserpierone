@@ -1,8 +1,8 @@
 {
   "locale": "th",
   "seo": {
-    "title": "ความลับชาวอามิช: วิธีประหยัดและบริหารจัดการเงิน",
-    "description": "ค้นพบเคล็ดลับการใช้ชีวิตอย่างสมถะของชุมชนชาวอามิช พร้อมบทเรียนวิดีโอแบบเต็มและไฟล์ PDF ที่ดาวน์โหลดได้",
+    "title": "เคล็ด ลับ ของ ชาว อา มิช: จะ อยู่ กับ เงิน ออม และ จัด การ เรื่อง เงิน ได้ อย่าง ไร",
+    "description": "ค้นพบความลับของชุมชนอามิช รวมโมดูลวิดีโอที่สมบูรณ์ และ PDF ที่ดาวน์โหลดได้",
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
@@ -19,8 +19,8 @@
   },
   "hero": {
     "badge": "สร้างนัดหมายใหม่New",
-    "title": "ความลับชาวอามิช: วิธีประหยัดและบริหารจัดการเงิน",
-    "subtitle": "ค้นพบเคล็ดลับการใช้ชีวิตอย่างสมถะของชุมชนชาวอามิช พร้อมบทเรียนวิดีโอแบบเต็มและไฟล์ PDF ที่ดาวน์โหลดได้",
+    "title": "เคล็ด ลับ ของ ชาว อา มิช: จะ อยู่ กับ เงิน ออม และ จัด การ เรื่อง เงิน ได้ อย่าง ไร",
+    "subtitle": "ค้นพบความลับของชุมชนอามิช รวมโมดูลวิดีโอที่สมบูรณ์ และ PDF ที่ดาวน์โหลดได้",
     "cta": "เริ่มได้",
     "secondary_cta": "เรียน รู้ มาก ขึ้น",
     "price_label": "ราคาเปิดตัวพิเศษ",
@@ -28,35 +28,35 @@
   },
   "problem": {
     "badge": "ปัญหา",
-    "title": "เหนื่อยไหมกับการที่เงินเดือนชนเดือนโดยไม่มีเงินเก็บ? สังคมสมัยใหม่ผลักดันให้เราบริโภคเกินความจำเป็น",
+    "title": "เหนื่อยที่จะมาถึงสิ้นเดือน โดยไม่เก็บเงินเลย สังคม สมัย ใหม่ ผลัก ดัน เรา ให้ บริโภค มาก เกิน ไป.",
     "text": ""
   },
   "story": {
     "badge": "เรื่อง ราว ของ เรา",
-    "title": "ลา มี เอ ส เท รี ยา",
+    "title": "ประสบการณ์ ของ ผม ท่ามกลาง พวก อา มิช",
     "image_captions": [
-      "La vita quitidiana nella comcenta Amish: Sepmplicita, Autosfficinea e sagggeza Filasianiria.",
-      "Il Sistema Di Baratto e sigbio che Elemina III Bisogno Di Denaro Contantte.",
-      "L'Economia data Amich: มา Una Femiglia erice a vievere con II 60% ในเมโน"
+      "ชีวิตประจําวันในชุมชนอามิช: ความเรียบง่าย ความมั่นใจในตัวเอง และความรู้ด้านการเงิน",
+      "การ ซื้อ ขาย และ การ แลก เปลี่ยน ที่ ขจัด ความ จําเป็น ใน เรื่อง เงิน และ สร้าง สาย สัมพันธ์ ที่ ไว้ วางใจ ได้ ถาวร.",
+      "เศรษฐกิจในครัวเรือนอามิช: ครอบครัวที่มีอายุน้อยกว่าค่าเฉลี่ยของประเทศ 60%"
     ],
-    "quote": "ชาวอามิชใช้ชีวิตที่มั่งคั่งและเต็มเปี่ยมโดยใช้จ่ายเพียงส่วนน้อยของสิ่งที่เราใช้ ในหลักสูตรนี้เราจะเปิดเผยว่าพวกเขาทำได้อย่างไร"
+    "quote": "พวก อา มิช มี ชีวิต อยู่ อย่าง มี ความ สุข และ มี ชีวิต อยู่ อย่าง เต็ม ที่ ขณะ ที่ ใช้ เงิน ที่ เรา จ่าย ไป บ้าง. ในหลักสูตรนี้ เราเปิดเผยวิธีการทําของพวกเขา"
   },
   "author": {
     "badge": "/ / 03 — ผู้ ประพันธ์",
     "title": "ข้างหลังเส้นทางนี้",
     "name": "อเลสซานโดร รินัลดี",
-    "role": "Researcher · Author · Traveler",
-    "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+    "role": "ผู้เขียนวิจัย",
+    "bio": "[รวมเรื่องของคุณที่นี่: ผมอยู่ที่เพนซิลเวเนีย 3 เดือน สัมภาษณ์ 12 ครอบครัวอามิช ศึกษาระบบเศรษฐกิจของพวกเขา ไม่มีทฤษฎีเพียงการปฏิบัติ.]",
     "tags": [
-      "ซา เก ซา",
-      "ไว ตา โซ ส เต นิ เบิล",
-      "เอ ดู ซิ ออน"
+      "สติ ปัญญา ทาง การ เงิน",
+      "การ มี ชีวิต อยู่ ได้",
+      "การศึกษา"
     ]
   },
   "modules": {
     "badge": "//02 — คุณเรียนรู้อะไร",
     "title": "ความลับของอามิช",
-    "description": "8 practical modules that turn Amish wisdom into concrete actions.",
+    "description": "8 วิธี ที่ ใช้ ได้ ผล จริง ซึ่ง เปลี่ยน สติ ปัญญา ของ อา มิช ให้ เป็น การ กระทํา ที่ หนัก แน่น สําหรับ ชีวิต ประจํา วัน ของ คุณ.",
     "items": [
       {
         "title": "งบประมาณอามิช",
@@ -125,7 +125,7 @@
     "launch_price": "เรียก ราคา — แล้ว ก็ $ 39",
     "cta": "เข้าสู่การปลดล็อคเดี๋ยวนี้",
     "guarantee_title": "รับประกันเงิน 30 วัน",
-    "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+    "guarantee_text": "ลองสัก 30 วัน ถ้าคุณไม่ประหยัดอย่างน้อย $100 เราจะคืนเงินทั้งหมด ไม่มีคําถาม ไม่มีเรื่อง",
     "includes": [
       "โหมดเต็ม (ค่า $757)",
       "เอกสาร PDF, EPub, SDL",
@@ -175,7 +175,7 @@
     "rights_reserved": "สงวน ลิขสิทธิ์.",
     "privacy": "ชื่อแฟ้ม",
     "terms": "จํานวนงวด",
-    "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+    "legal_note": "นี่เป็นผลิตภัณฑ์ดิจิตอล ผล อาจ แตก ต่าง กัน และ ขึ้น อยู่ กับ ความ ผูก พัน ส่วน ตัว. ราคา และ เทคนิค ของ ชาว อา มิช ที่ มี การ พรรณนา ไว้ อาศัย การ วิจัย ด้าน ภูมิศาสตร์ และ อาจ ไม่ ได้ สะท้อน ให้ เห็น กิจ ปฏิบัติ ร่วม สมัย ของ ชุมชน ชาว อา มิช ทุก แห่ง.",
     "badges": {
       "guarantee": "30 วัน",
       "instant_access": "การเข้าใช้งานด่วน",
@@ -189,12 +189,12 @@
   },
   "ui": {
     "labels": {
-      "instant_access": "เข้าใช้งานได้ทันที",
-      "buy_now_arrow": "ซื้อเลย →",
+      "instant_access": "เข้าใช้ทันที",
+      "buy_now_arrow": "ซื้อ เดี๋ยว นี้ ○",
       "readers": "ผู้อ่าน 1,247 คน",
-      "buy_now_dash": "ซื้อเลย —",
-      "view_modules": "ดูบทเรียน",
-      "ssl_secure": "ชำระเงินปลอดภัยด้วย SSL",
+      "buy_now_dash": "ซื้อ เดี๋ยวนี้ —",
+      "view_modules": "มอดูลมุมมอง",
+      "ssl_secure": "เก็บการชําระเงิน SSL",
       "instant_download": "ดาวน์โหลดทันที",
       "lifetime_access": "การเข้าใช้เวลาในชีวิต",
       "guarantee_days": "30 วัน",
@@ -203,23 +203,23 @@
       "perfect_for": "สมบูรณ์แบบสําหรับคุณถ้า:",
       "p_struggle": "คุณดิ้นรนเพื่อให้สิ้นสุดการพบกัน",
       "p_cut_costs": "คุณต้องการตัดค่าใช้จ่าย โดยไม่ต้องเสียสละคุณภาพของชีวิต",
-      "p_consumerism": "Tired of consumerism and debt culture",
-      "p_practical": "Looking for practical, time-tested methods",
-      "p_future": "Want a solid financial future for your family",
+      "p_consumerism": "คุณเบื่อการบริโภคและวัฒนธรรมหนี้",
+      "p_practical": "คุณต้องการวิธีปฏิบัติแบบทดสอบเวลา",
+      "p_future": "คุณ ต้องการ สร้าง อนาคต ทาง การ เงิน ที่ มั่นคง สําหรับ ครอบครัว",
       "not_for": "ไม่สําหรับคุณถ้า:",
-      "n_quick": "Looking for get-rich-quick schemes",
-      "n_habits": "Not willing to change spending habits",
-      "n_quick_fix": "Prefer quick fixes over a solid path",
-      "n_implement": "Not willing to implement what you learn",
-      "n_advice": "Looking for personalized financial advice",
+      "n_quick": "คุณกําลังมองหาแผนที่รวยๆ",
+      "n_habits": "คุณไม่ต้องการที่จะเปลี่ยนนิสัยการใช้จ่ายของคุณ",
+      "n_quick_fix": "คุณต้องการแก้ไขอย่างรวดเร็วมากกว่ารากฐานแข็ง",
+      "n_implement": "คุณไม่เต็มใจที่จะปฏิบัติสิ่งที่คุณได้เรียนรู้",
+      "n_advice": "คุณกําลังมองหาคําแนะนําทางการเงินส่วนบุคคล",
       "section_learn": "//02 — คุณเรียนรู้อะไร",
       "masters_secrets": "ความลับของอามิช",
-      "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
+      "modules_desc": "8 วิธี ที่ ใช้ ได้ ผล จริง ซึ่ง เปลี่ยน สติ ปัญญา ของ อา มิช ให้ เป็น การ กระทํา ที่ หนัก แน่น สําหรับ ชีวิต ประจํา วัน ของ คุณ.",
       "section_author": "/ / 03 — ผู้ ประพันธ์",
       "behind_course": "ข้างหลังเส้นทางนี้",
       "your_name": "ชื่อของคุณที่นี่",
-      "researcher_author": "Researcher · Author · Traveler",
-      "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+      "researcher_author": "ผู้เขียนวิจัย",
+      "author_bio": "[รวมเรื่องของคุณที่นี่: ผมอยู่ที่เพนซิลเวเนีย 3 เดือน สัมภาษณ์ 12 ครอบครัวอามิช ศึกษาระบบเศรษฐกิจของพวกเขา ไม่มีทฤษฎีเพียงการปฏิบัติ.]",
       "section_content": "//04 — เนื้อหาหลัก",
       "what_inside": "จะเจออะไรข้างใน",
       "also_includes": "นอก จาก นี้ ยัง รวม ถึง:",
@@ -245,7 +245,7 @@
       "inc_bonus_shopping": "BOONUS: รายการช้อปปิ้งรายสัปดาห์ (ค่า $27)",
       "unlock_now": "เข้าสู่การปลดล็อคเดี๋ยวนี้",
       "guarantee_title": "รับประกันเงิน 30 วัน",
-      "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+      "guarantee_text": "ลองสัก 30 วัน ถ้าคุณไม่ประหยัดอย่างน้อย $100 เราจะคืนเงินทั้งหมด ไม่มีคําถาม ไม่มีเรื่อง",
       "section_testimonials": "/ 06 — การ ทดสอบ",
       "testimonial_text": "ผม นํา วิธี การ จัด งบ ประมาณ ของ พวก อา มิช มา ใช้ และ ภาย ใน สอง เดือน ผม ลด ค่า ใช้ จ่าย ลง 35%. รายการ 30 วันคือจุดเปลี่ยน ในที่สุด หลักสูตรที่ใช้งานได้จริงๆ",
       "testimonial_name": "มาร์ โค อาร์.",
@@ -262,7 +262,7 @@
       "rights_reserved": "สงวน ลิขสิทธิ์.",
       "privacy": "ชื่อแฟ้ม",
       "terms": "จํานวนงวด",
-      "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+      "legal_note": "นี่เป็นผลิตภัณฑ์ดิจิตอล ผล อาจ แตก ต่าง กัน และ ขึ้น อยู่ กับ ความ ผูก พัน ส่วน ตัว. ราคา และ เทคนิค ของ ชาว อา มิช ที่ มี การ พรรณนา ไว้ อาศัย การ วิจัย ด้าน ภูมิศาสตร์ และ อาจ ไม่ ได้ สะท้อน ให้ เห็น กิจ ปฏิบัติ ร่วม สมัย ของ ชุมชน ชาว อา มิช ทุก แห่ง.",
       "features": "คุณสมบัติต่าง ๆ",
       "pricing": "ความละเอียด",
       "testimonials": "แบบทดสอบ",
@@ -302,14 +302,10 @@
       "tag_2": "อา มิช",
       "tag_3": "ที่ปรึกษาด้านการเงิน",
       "brand_name": "Coursy",
-      "reviewer": "Marco R., early readers",
+      "reviewer": "มาร์ โค อาร์.",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "30day money back": "รับประกันคืนเงินภายใน 30 วัน",
-      "price": "ราคา",
-      "free": "ฟรี",
-      "addtocart": "เพิ่มลงตะกร้า",
-      "select_currency": "เลือกสกุลเงิน"
+      "story_quote": "พวก อา มิช มี ชีวิต อยู่ อย่าง มี ความ สุข และ มี ชีวิต อยู่ อย่าง เต็ม ที่ ขณะ ที่ ใช้ เงิน ที่ เรา จ่าย ไป บ้าง. ในหลักสูตรนี้ เราเปิดเผยวิธีการทําของพวกเขา"
     }
   },
   "audience": {
@@ -319,17 +315,17 @@
     "perfect_items": [
       "คุณดิ้นรนเพื่อให้สิ้นสุดการพบกัน",
       "คุณต้องการตัดค่าใช้จ่าย โดยไม่ต้องเสียสละคุณภาพของชีวิต",
-      "Tired of consumerism and debt culture",
-      "Looking for practical, time-tested methods",
-      "Want a solid financial future for your family"
+      "คุณเบื่อการบริโภคและวัฒนธรรมหนี้",
+      "คุณต้องการวิธีปฏิบัติแบบทดสอบเวลา",
+      "คุณ ต้องการ สร้าง อนาคต ทาง การ เงิน ที่ มั่นคง สําหรับ ครอบครัว"
     ],
     "not_for": "ไม่สําหรับคุณถ้า:",
     "not_items": [
-      "Looking for get-rich-quick schemes",
-      "Not willing to change spending habits",
-      "Prefer quick fixes over a solid path",
-      "Not willing to implement what you learn",
-      "Looking for personalized financial advice"
+      "คุณกําลังมองหาแผนที่รวยๆ",
+      "คุณไม่ต้องการที่จะเปลี่ยนนิสัยการใช้จ่ายของคุณ",
+      "คุณต้องการแก้ไขอย่างรวดเร็วมากกว่ารากฐานแข็ง",
+      "คุณไม่เต็มใจที่จะปฏิบัติสิ่งที่คุณได้เรียนรู้",
+      "คุณกําลังมองหาคําแนะนําทางการเงินส่วนบุคคล"
     ]
   },
   "course": {

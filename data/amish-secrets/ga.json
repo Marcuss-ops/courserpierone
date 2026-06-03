@@ -33,10 +33,10 @@
   },
   "story": {
     "badge": "Ár gCúrsa",
-    "title": "Bhí an t-eolas mícheart nó as dáta",
+    "title": "Mo Taithí I measc na Amish",
     "image_captions": [
-      "Cén fáth a bhfuil tú ag iarraidh a bheith ina n-aonar: mar shampla, is féidir leat a bheith ina n-aonar.",
-      "Tá sé mar aidhm ag an obair seo a dhéanamh ar bhealach níos fearr.",
+      "Saol laethúil sa phobal Amish: simplíocht, féin-dhóthanacht, agus eagna airgeadais a rith síos trí na glúnta.",
+      "An córas barter agus a mhalartú a eliminates an gá atá le hairgead tirim agus a thógann caidreamh muinín buan.",
       "An geilleagar teaghlaigh Amish: conas a chónaíonn teaghlach ar 60% níos lú ná an meán náisiúnta."
     ],
     "quote": "An Amish saol saibhir agus iomlán agus a chaitheamh codán de cad a chaithimid. Sa chúrsa seo, nochtann muid conas a dhéanann siad é."
@@ -48,9 +48,9 @@
     "role": "Taighde – Údar",
     "bio": "[Cuir do scéal anseo: Chónaigh mé 3 mhí i Pennsylvania, agallamh 12 teaghlaigh Amish, staidéar a gcóras eacnamaíoch. Uimh teoiric, ach cleachtas.]",
     "tags": [
-      "cliceáil grianghraf a mhéadú",
-      "Seirbhís do Chustaiméirí",
-      "Amharc ar gach eolas"
+      "An tSeachtain Airgeadais",
+      "Sustainable Living",
+      "Oideachas sna Luathbhlianta"
     ]
   },
   "modules": {
@@ -304,7 +304,8 @@
       "brand_name": "taiseachas aeir: fliuch",
       "reviewer": "Marco R., léitheoir luath",
       "language_switch": "EN",
-      "language_switch_en": "EN"
+      "language_switch_en": "EN",
+      "story_quote": "An Amish saol saibhir agus iomlán agus a chaitheamh codán de cad a chaithimid. Sa chúrsa seo, nochtann muid conas a dhéanann siad é."
     }
   },
   "audience": {

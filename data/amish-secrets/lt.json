@@ -37,7 +37,7 @@
     "image_captions": [
       "Kasdieninis gyvenimas amišų bendruomenėje: paprastumas, savęs pakankamumas, ir finansinė išmintis perėjo per kartas.",
       "Barter ir mainų sistema, kuri pašalina pinigų poreikį ir kuria ilgalaikius pasitikėjimo santykius.",
-      "L 'economiA domestica Amish: come unA famiglia riesce a viverre con il 60% in meno."
+      "Amiso namų ūkio ekonomika: kaip šeima gyvena 60% mažiau nei nacionalinis vidurkis."
     ],
     "quote": "Amišas gyvena turtingą ir pilną gyvenimą, o praleidžia dalį to, ką mes leidžiame. Čia atskleisime, kaip jie tai daro."
   },
@@ -304,7 +304,8 @@
       "brand_name": "Meškos",
       "reviewer": "Marco R., pirmasis skaitytojas",
       "language_switch": "EN",
-      "language_switch_en": "EN"
+      "language_switch_en": "EN",
+      "story_quote": "Amišas gyvena turtingą ir pilną gyvenimą, o praleidžia dalį to, ką mes leidžiame. Čia atskleisime, kaip jie tai daro."
     }
   },
   "audience": {

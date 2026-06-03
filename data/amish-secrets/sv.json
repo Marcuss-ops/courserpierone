@@ -1,8 +1,8 @@
 {
   "locale": "sv",
   "seo": {
-    "title": "Amish-hemligheter: Hur man lever sparsamt och hanterar pengar",
-    "description": "Upptäck hemligheterna bakom ett enkelt leverne från Amish-gemenskapen. Innehåller omfattande videomoduler och nedladdningsbara PDF-filer.",
+    "title": "Amish Secrets: Hur man lever med sparande och hanterar pengar",
+    "description": "Upptäck hemligheterna i Amish-samhällets sparsamma liv. Inkluderar kompletta videomoduler och nedladdningsbara PDF-filer.",
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
@@ -19,8 +19,8 @@
   },
   "hero": {
     "badge": "Nytt nytt",
-    "title": "Amish-hemligheter: Hur man lever sparsamt och hanterar pengar",
-    "subtitle": "Upptäck hemligheterna bakom ett enkelt leverne från Amish-gemenskapen. Innehåller omfattande videomoduler och nedladdningsbara PDF-filer.",
+    "title": "Amish Secrets: Hur man lever med sparande och hanterar pengar",
+    "subtitle": "Upptäck hemligheterna i Amish-samhällets sparsamma liv. Inkluderar kompletta videomoduler och nedladdningsbara PDF-filer.",
     "cta": "Kom igång",
     "secondary_cta": "Lär dig mer",
     "price_label": "Speciellt lanseringspris",
@@ -28,7 +28,7 @@
   },
   "problem": {
     "badge": "Problemet",
-    "title": "Trött på att månaden tar slut innan pengarna gör det? Det moderna samhället driver oss till överkonsumtion.",
+    "title": "Trött på att nå slutet av månaden utan besparingar? Det moderna samhället driver oss mot överdriven konsumtion.",
     "text": ""
   },
   "story": {
@@ -39,14 +39,14 @@
       "Bytessystemet som eliminerar behovet av kontanter och bygger bestående förtroenderelationer.",
       "Amish hushållsekonomi: hur en familj lever på 60% mindre än det nationella genomsnittet."
     ],
-    "quote": "Amishfolket lever rika och fullvärdiga liv genom att spendera en bråkdel av vad vi gör. I denna kurs avslöjar vi hur de gör."
+    "quote": "Amish lever rika och fulla liv medan vi spenderar en bråkdel av vad vi spenderar. I denna kurs avslöjar vi hur de gör det."
   },
   "author": {
     "badge": "// 03 - Författaren",
     "title": "Bakom denna kurs",
     "name": "Alessandro Rinaldi",
-    "role": "Researcher · Author · Traveler",
-    "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+    "role": "Forskare · Författare",
+    "bio": "[Lägg till din historia här: Jag levde 3 månader i Pennsylvania, intervjuade 12 Amish-familjer, studerade deras ekonomiska system. Ingen teori, bara praktik.]",
     "tags": [
       "Finansiell visdom",
       "Hållbart liv",
@@ -56,7 +56,7 @@
   "modules": {
     "badge": "// 02 - Vad du lär dig",
     "title": "Amish Masters hemligheter",
-    "description": "8 practical modules that turn Amish wisdom into concrete actions.",
+    "description": "8 praktiska moduler som förvandlar Amish visdom till konkreta handlingar för ditt dagliga liv.",
     "items": [
       {
         "title": "Amish Budget",
@@ -125,7 +125,7 @@
     "launch_price": "Startpris - sedan $37",
     "cta": "Lås upp Access nu",
     "guarantee_title": "30-dagars pengar-tillbaka garanti",
-    "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+    "guarantee_text": "Prova det i 30 dagar. Om du inte sparar minst $ 100, återbetalar vi hela beloppet. Inga frågor, inget krångel.",
     "includes": [
       "Full kurs (värde $ 97)",
       "eBook PDF, ePub, Kindle",
@@ -175,7 +175,7 @@
     "rights_reserved": "Alla rättigheter förbehållna.",
     "privacy": "Sekretess",
     "terms": "Villkor",
-    "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+    "legal_note": "Detta är en digital informationsprodukt. Resultaten kan variera och bero på personligt engagemang. Amish-priserna och teknikerna som beskrivs är baserade på etnografisk forskning och kan inte exakt återspegla de samtida metoderna för alla Amish-samhällen.",
     "badges": {
       "guarantee": "30-dagars garanti",
       "instant_access": "Instant Access",
@@ -189,12 +189,12 @@
   },
   "ui": {
     "labels": {
-      "instant_access": "Omedelbar tillgång",
-      "buy_now_arrow": "Köp nu →",
+      "instant_access": "Instant Access",
+      "buy_now_arrow": "Köp nu",
       "readers": "1 247 läsare",
-      "buy_now_dash": "Köp nu —",
-      "view_modules": "Se moduler",
-      "ssl_secure": "Säker betalning med SSL",
+      "buy_now_dash": "Köp nu -",
+      "view_modules": "Visa moduler",
+      "ssl_secure": "Säker SSL-betalning",
       "instant_download": "Instant Download",
       "lifetime_access": "Lifetime Access",
       "guarantee_days": "30-dagars garanti",
@@ -203,23 +203,23 @@
       "perfect_for": "Perfekt för dig om:",
       "p_struggle": "Du kämpar för att få slut möte",
       "p_cut_costs": "Du vill sänka kostnaderna utan att offra livskvaliteten",
-      "p_consumerism": "Tired of consumerism and debt culture",
-      "p_practical": "Looking for practical, time-tested methods",
-      "p_future": "Want a solid financial future for your family",
+      "p_consumerism": "Du är trött på konsumentism och skuldkultur",
+      "p_practical": "Du vill ha praktiska, tidstestade metoder",
+      "p_future": "Du vill bygga en solid ekonomisk framtid för din familj",
       "not_for": "Inte för dig om:",
-      "n_quick": "Looking for get-rich-quick schemes",
-      "n_habits": "Not willing to change spending habits",
-      "n_quick_fix": "Prefer quick fixes over a solid path",
-      "n_implement": "Not willing to implement what you learn",
-      "n_advice": "Looking for personalized financial advice",
+      "n_quick": "Du letar efter få-rika-snabba system",
+      "n_habits": "Du vill inte ändra dina utgifter vanor",
+      "n_quick_fix": "Du föredrar snabba korrigeringar över en solid grund",
+      "n_implement": "Du är inte villig att genomföra det du lär dig",
+      "n_advice": "Du letar efter personlig ekonomisk rådgivning",
       "section_learn": "// 02 - Vad du lär dig",
       "masters_secrets": "Amish Masters hemligheter",
-      "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
+      "modules_desc": "8 praktiska moduler som förvandlar Amish visdom till konkreta handlingar för ditt dagliga liv.",
       "section_author": "// 03 - Författaren",
       "behind_course": "Bakom denna kurs",
       "your_name": "Ditt namn här",
-      "researcher_author": "Researcher · Author · Traveler",
-      "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+      "researcher_author": "Forskare · Författare",
+      "author_bio": "[Lägg till din historia här: Jag levde 3 månader i Pennsylvania, intervjuade 12 Amish-familjer, studerade deras ekonomiska system. Ingen teori, bara praktik.]",
       "section_content": "// 04 - Kursinnehåll",
       "what_inside": "Vad du hittar inuti",
       "also_includes": "Inkluderar också:",
@@ -245,7 +245,7 @@
       "inc_bonus_shopping": "BONUS: Veckovis shoppinglista (värde $ 27)",
       "unlock_now": "Lås upp Access nu",
       "guarantee_title": "30-dagars pengar-tillbaka garanti",
-      "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+      "guarantee_text": "Prova det i 30 dagar. Om du inte sparar minst $ 100, återbetalar vi hela beloppet. Inga frågor, inget krångel.",
       "section_testimonials": "// 06 - Vittnesmål",
       "testimonial_text": "Jag tillämpade Amish-budgetmetoden och på två månader minskade jag mina kostnader med 35%. 30-dagars checklista var vändpunkten. Slutligen en kurs som verkligen fungerar.",
       "testimonial_name": "Marco R.",
@@ -262,7 +262,7 @@
       "rights_reserved": "Alla rättigheter förbehållna.",
       "privacy": "Sekretess",
       "terms": "Villkor",
-      "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+      "legal_note": "Detta är en digital informationsprodukt. Resultaten kan variera och bero på personligt engagemang. Amish-priserna och teknikerna som beskrivs är baserade på etnografisk forskning och kan inte exakt återspegla de samtida metoderna för alla Amish-samhällen.",
       "features": "funktioner",
       "pricing": "Prissättning",
       "testimonials": "vittnesmål",
@@ -302,14 +302,10 @@
       "tag_2": "Amish Studies",
       "tag_3": "Finansiell rådgivning",
       "brand_name": "Courssy",
-      "reviewer": "Marco R., early readers",
+      "reviewer": "Marco R., tidig läsare",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "30day money back": "30 dagars pengarna tillbaka-garanti",
-      "price": "Pris",
-      "free": "GRATIS",
-      "addtocart": "Lägg i varukorg",
-      "select_currency": "Välj valuta"
+      "story_quote": "Amish lever rika och fulla liv medan vi spenderar en bråkdel av vad vi spenderar. I denna kurs avslöjar vi hur de gör det."
     }
   },
   "audience": {
@@ -319,17 +315,17 @@
     "perfect_items": [
       "Du kämpar för att få slut möte",
       "Du vill sänka kostnaderna utan att offra livskvaliteten",
-      "Tired of consumerism and debt culture",
-      "Looking for practical, time-tested methods",
-      "Want a solid financial future for your family"
+      "Du är trött på konsumentism och skuldkultur",
+      "Du vill ha praktiska, tidstestade metoder",
+      "Du vill bygga en solid ekonomisk framtid för din familj"
     ],
     "not_for": "Inte för dig om:",
     "not_items": [
-      "Looking for get-rich-quick schemes",
-      "Not willing to change spending habits",
-      "Prefer quick fixes over a solid path",
-      "Not willing to implement what you learn",
-      "Looking for personalized financial advice"
+      "Du letar efter få-rika-snabba system",
+      "Du vill inte ändra dina utgifter vanor",
+      "Du föredrar snabba korrigeringar över en solid grund",
+      "Du är inte villig att genomföra det du lär dig",
+      "Du letar efter personlig ekonomisk rådgivning"
     ]
   },
   "course": {

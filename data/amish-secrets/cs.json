@@ -1,8 +1,8 @@
 {
   "locale": "cs",
   "seo": {
-    "title": "Amish Secrets: Jak žít úsporně a spravovat peníze",
-    "description": "Objevte tajemství skromného života komunity Amišů. Zahrnuje kompletní video moduly a PDF ke stažení.",
+    "title": "Amish Secrets: Jak žít s úsporami a spravovat peníze",
+    "description": "Objevte tajemství skromného života Amišské komunity. Zahrnuje kompletní video moduly a stažitelné PDF.",
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
@@ -19,8 +19,8 @@
   },
   "hero": {
     "badge": "Nový",
-    "title": "Amish Secrets: Jak žít úsporně a spravovat peníze",
-    "subtitle": "Objevte tajemství skromného života komunity Amišů. Zahrnuje kompletní video moduly a PDF ke stažení.",
+    "title": "Amish Secrets: Jak žít s úsporami a spravovat peníze",
+    "subtitle": "Objevte tajemství skromného života Amišské komunity. Zahrnuje kompletní video moduly a stažitelné PDF.",
     "cta": "Začít",
     "secondary_cta": "Přečtěte si více",
     "price_label": "Zvláštní spouštěcí cena",
@@ -28,7 +28,7 @@
   },
   "problem": {
     "badge": "Problém",
-    "title": "Už vás nebaví vycházet s penězi bez úspor? Moderní společnost nás nutí k nadměrnému konzumu.",
+    "title": "Unavený z dosažení konce měsíce bez úspor? Moderní společnost nás tlačí k nadměrné spotřebě.",
     "text": ""
   },
   "story": {
@@ -39,14 +39,14 @@
       "Výměnný a výměnný systém, který eliminuje potřebu hotovosti a buduje trvalé vztahy důvěry.",
       "Amišská ekonomika domácností: jak rodina žije o 60% méně než národní průměr."
     ],
-    "quote": "Amišové žijí bohaté a naplněné životy, přičemž utrácejí zlomek toho co my. V tomto kurzu vám odhalíme, jak to dělají."
+    "quote": "Amišové žijí bohaté a plné životy, zatímco utrácejí zlomek toho, co my. V tomto směru odhalujeme, jak to dělají."
   },
   "author": {
     "badge": "/ / 03 - Autor",
     "title": "Za tímto kurzem",
     "name": "Alessandro Rinaldi",
-    "role": "Researcher · Author · Traveler",
-    "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+    "role": "Výzkumník · Autor",
+    "bio": "[Přidat váš příběh zde: Žila jsem 3 měsíce v Pennsylvanii, rozhovor 12 Amišských rodin, studoval jejich ekonomický systém. Žádná teorie, jen praxe.]",
     "tags": [
       "Finanční moudrost",
       "Udržitelný život",
@@ -56,7 +56,7 @@
   "modules": {
     "badge": "/ / 02 - Co se naučíte",
     "title": "Tajemství Amishe Masterse",
-    "description": "8 practical modules that turn Amish wisdom into concrete actions.",
+    "description": "8 praktických modulů, které mění Amišskou moudrost v konkrétní činy pro váš každodenní život.",
     "items": [
       {
         "title": "Amishův rozpočet",
@@ -125,7 +125,7 @@
     "launch_price": "Cena startu - pak 37 dolarů",
     "cta": "Odemknout přístup",
     "guarantee_title": "30denní záruka na vrácení",
-    "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+    "guarantee_text": "Zkus to 30 dní. Pokud neušetříte alespoň 100 dolarů, vrátíme vám plnou částku. Žádné otázky, žádné problémy.",
     "includes": [
       "Celý kurz (hodnota $97)",
       "eBook PDF, ePub, Kindle",
@@ -175,7 +175,7 @@
     "rights_reserved": "Všechna práva vyhrazena.",
     "privacy": "Ochrana soukromí",
     "terms": "Podmínky",
-    "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+    "legal_note": "Jedná se o digitální informační produkt. Výsledky se mohou lišit a závisí na osobním závazku. Popsané Amišské ceny a techniky vycházejí z etnografického výzkumu a nemusí přesně odrážet současné postupy všech amišských komunit.",
     "badges": {
       "guarantee": "30-denní záruka",
       "instant_access": "Okamžitý přístup",
@@ -192,9 +192,9 @@
       "instant_access": "Okamžitý přístup",
       "buy_now_arrow": "Koupit nyní →",
       "readers": "1 247 čtenářů",
-      "buy_now_dash": "Koupit nyní —",
+      "buy_now_dash": "Buy Now -",
       "view_modules": "Zobrazit moduly",
-      "ssl_secure": "Bezpečná platba přes SSL",
+      "ssl_secure": "Bezpečná platba za SSL",
       "instant_download": "Okamžité stahování",
       "lifetime_access": "Celoživotní přístup",
       "guarantee_days": "30-denní záruka",
@@ -203,23 +203,23 @@
       "perfect_for": "Ideální pro vás, pokud:",
       "p_struggle": "Bojuješ s tím, aby se něco stalo.",
       "p_cut_costs": "Chcete snížit náklady bez obětování kvality života",
-      "p_consumerism": "Tired of consumerism and debt culture",
-      "p_practical": "Looking for practical, time-tested methods",
-      "p_future": "Want a solid financial future for your family",
+      "p_consumerism": "Už tě unavuje konzumní a dluhová kultura.",
+      "p_practical": "Chcete praktické, časově testované metody",
+      "p_future": "Chcete vybudovat solidní finanční budoucnost pro vaši rodinu.",
       "not_for": "Ne pro vás, pokud:",
-      "n_quick": "Looking for get-rich-quick schemes",
-      "n_habits": "Not willing to change spending habits",
-      "n_quick_fix": "Prefer quick fixes over a solid path",
-      "n_implement": "Not willing to implement what you learn",
-      "n_advice": "Looking for personalized financial advice",
+      "n_quick": "Hledáš rychlé plány.",
+      "n_habits": "Nechceš změnit své stravovací návyky.",
+      "n_quick_fix": "Dáváte přednost rychlým opravám nad pevným základem",
+      "n_implement": "Nejsi ochotný realizovat to, co se naučíš.",
+      "n_advice": "Hledáte osobní finanční radu.",
       "section_learn": "/ / 02 - Co se naučíte",
       "masters_secrets": "Tajemství Amishe Masterse",
-      "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
+      "modules_desc": "8 praktických modulů, které mění Amišskou moudrost v konkrétní činy pro váš každodenní život.",
       "section_author": "/ / 03 - Autor",
       "behind_course": "Za tímto kurzem",
       "your_name": "Vaše jméno zde",
-      "researcher_author": "Researcher · Author · Traveler",
-      "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+      "researcher_author": "Výzkumník · Autor",
+      "author_bio": "[Přidat váš příběh zde: Žila jsem 3 měsíce v Pennsylvanii, rozhovor 12 Amišských rodin, studoval jejich ekonomický systém. Žádná teorie, jen praxe.]",
       "section_content": "/ / 04 - Obsah kurzu",
       "what_inside": "Co najdete uvnitř",
       "also_includes": "Zahrnuje také:",
@@ -245,7 +245,7 @@
       "inc_bonus_shopping": "BONUS: Týdenní nákupní seznam (hodnota $27)",
       "unlock_now": "Odemknout přístup",
       "guarantee_title": "30denní záruka na vrácení",
-      "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+      "guarantee_text": "Zkus to 30 dní. Pokud neušetříte alespoň 100 dolarů, vrátíme vám plnou částku. Žádné otázky, žádné problémy.",
       "section_testimonials": "/ / 06 - Svědectví",
       "testimonial_text": "Použil jsem metodu Amišského rozpočtu a za dva měsíce jsem snížil výdaje o 35%. 30denní kontrolní seznam byl zlomový bod. Konečně kurz, který opravdu funguje.",
       "testimonial_name": "Marco R.",
@@ -262,7 +262,7 @@
       "rights_reserved": "Všechna práva vyhrazena.",
       "privacy": "Ochrana soukromí",
       "terms": "Podmínky",
-      "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+      "legal_note": "Jedná se o digitální informační produkt. Výsledky se mohou lišit a závisí na osobním závazku. Popsané Amišské ceny a techniky vycházejí z etnografického výzkumu a nemusí přesně odrážet současné postupy všech amišských komunit.",
       "features": "Vlastnosti",
       "pricing": "Ceny",
       "testimonials": "Svědectví",
@@ -302,14 +302,10 @@
       "tag_2": "Amišské studie",
       "tag_3": "Finanční poradenství",
       "brand_name": "Courssy",
-      "reviewer": "Marco R., early readers",
+      "reviewer": "Marco R., časný čtenář",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "30day money back": "30denní záruka vrácení peněz",
-      "price": "Cena",
-      "free": "ZDARMA",
-      "addtocart": "Přidat do košíku",
-      "select_currency": "Vybrat měnu"
+      "story_quote": "Amišové žijí bohaté a plné životy, zatímco utrácejí zlomek toho, co my. V tomto směru odhalujeme, jak to dělají."
     }
   },
   "audience": {
@@ -319,17 +315,17 @@
     "perfect_items": [
       "Bojuješ s tím, aby se něco stalo.",
       "Chcete snížit náklady bez obětování kvality života",
-      "Tired of consumerism and debt culture",
-      "Looking for practical, time-tested methods",
-      "Want a solid financial future for your family"
+      "Už tě unavuje konzumní a dluhová kultura.",
+      "Chcete praktické, časově testované metody",
+      "Chcete vybudovat solidní finanční budoucnost pro vaši rodinu."
     ],
     "not_for": "Ne pro vás, pokud:",
     "not_items": [
-      "Looking for get-rich-quick schemes",
-      "Not willing to change spending habits",
-      "Prefer quick fixes over a solid path",
-      "Not willing to implement what you learn",
-      "Looking for personalized financial advice"
+      "Hledáš rychlé plány.",
+      "Nechceš změnit své stravovací návyky.",
+      "Dáváte přednost rychlým opravám nad pevným základem",
+      "Nejsi ochotný realizovat to, co se naučíš.",
+      "Hledáte osobní finanční radu."
     ]
   },
   "course": {

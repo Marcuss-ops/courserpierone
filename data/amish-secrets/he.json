@@ -1,8 +1,8 @@
 {
   "locale": "he",
   "seo": {
-    "title": "סודות האמיש: איך לחיות בחיסכון ולנהל כסף",
-    "description": "גלו את סודות החיים החסכוניים של קהילת האמיש. כולל מודולי וידאו מלאים וקובצי PDF להורדה.",
+    "title": "סודות אמישים: איך לחיות עם חיסכון ולנהל כסף",
+    "description": "גלה את הסודות של חיי הקהילה האמיש. כולל מודולי וידאו מלאים ו- PDF להורדה.",
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
@@ -19,8 +19,8 @@
   },
   "hero": {
     "badge": "חדש חדש חדש",
-    "title": "סודות האמיש: איך לחיות בחיסכון ולנהל כסף",
-    "subtitle": "גלו את סודות החיים החסכוניים של קהילת האמיש. כולל מודולי וידאו מלאים וקובצי PDF להורדה.",
+    "title": "סודות אמישים: איך לחיות עם חיסכון ולנהל כסף",
+    "subtitle": "גלה את הסודות של חיי הקהילה האמיש. כולל מודולי וידאו מלאים ו- PDF להורדה.",
     "cta": "להתחיל",
     "secondary_cta": "למד עוד",
     "price_label": "מחיר שיגור מיוחד",
@@ -28,7 +28,7 @@
   },
   "problem": {
     "badge": "הבעיה",
-    "title": "עייפים מלהגיע לסוף החודש ללא חיסכון? החברה המודרנית דוחפת אותנו לצריכת יתר.",
+    "title": "נמאס לכם להגיע לסוף החודש ללא חיסכון? החברה המודרנית דוחפת אותנו לצריכה מוגזמת.",
     "text": ""
   },
   "story": {
@@ -39,14 +39,14 @@
       "מערכת הברטר והחילופית שמבטלת את הצורך במזומנים ומתבססת על יחסי אמון לאורך זמן.",
       "הכלכלה הביתית האמישת: איך משפחה חיה ב-60% פחות מהממוצע הלאומי."
     ],
-    "quote": "אנשי האמיש חיים חיים עשירים ומלאים תוך שהם מוציאים רק חלק קטן ממה שאנחנו מוציאים. בקורס זה נחשוף בפניכם כיצד הם עושים זאת."
+    "quote": "האמיש חי חיים עשירים ומלאים תוך שהוא מוציא חלק ממה שאנחנו מבלים. בקורס הזה אנחנו מגלים איך הם עושים את זה."
   },
   "author": {
     "badge": "03 – המחבר",
     "title": "מאחורי הקורס הזה",
     "name": "Alessandro Rinaldi",
-    "role": "Researcher · Author · Traveler",
-    "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+    "role": "תגית: Author",
+    "bio": "[הוספת הסיפור שלך כאן: גרתי 3 חודשים בפנסילבניה, ראיין 12 משפחות אמיש, חקרתי את המערכת הכלכלית שלהם. אין תיאוריה, רק תרגול.)",
     "tags": [
       "חוכמה פיננסית",
       "לחיות בר קיימא",
@@ -56,7 +56,7 @@
   "modules": {
     "badge": "02 – מה תלמד",
     "title": "סודות המאסטרים",
-    "description": "8 practical modules that turn Amish wisdom into concrete actions.",
+    "description": "8 מודולים מעשיים שהופכים את אמיש חוכמה לפעולות קונקרטיות לחיי היומיום שלכם.",
     "items": [
       {
         "title": "תקציב Amish",
@@ -125,7 +125,7 @@
     "launch_price": "מחיר שיגור - 37 דולר",
     "cta": "Unlock Access Now",
     "guarantee_title": "30 יום החזר כספי",
-    "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+    "guarantee_text": "נסו את זה במשך 30 ימים. אם לא תציל לפחות 100 דולר, נחזיר את הסכום המלא. אין שאלות, אין שום חרטה.",
     "includes": [
       "מחיר מלא (ערך $97)",
       "eBook PDF, ePub, Kindle",
@@ -175,7 +175,7 @@
     "rights_reserved": "כל הזכויות שמורות.",
     "privacy": "פרטיות פרטיות",
     "terms": "תנאים",
-    "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+    "legal_note": "זהו מוצר מידע דיגיטלי. התוצאות עשויות להשתנות ותלויות במחויבות אישית. המחירים והטכניקות האמישים המתוארים מבוססים על מחקר אתנוגרפיים ואינם משקפים במדויק את המנהגים העכשוויים של כל הקהילות האמישות.",
     "badges": {
       "guarantee": "הבטחת 30 יום",
       "instant_access": "גישה מיידית",
@@ -184,17 +184,17 @@
   },
   "trust": {
     "title": "אמון על ידי קבוצות ברחבי העולם",
-    "readers_count": "1,247 קוראים",
+    "readers_count": "1,247 הקוראים",
     "company_names": []
   },
   "ui": {
     "labels": {
       "instant_access": "גישה מיידית",
-      "buy_now_arrow": "קנה עכשיו →",
-      "readers": "1,247 קוראים",
-      "buy_now_dash": "קנה עכשיו —",
-      "view_modules": "צפה במודולים",
-      "ssl_secure": "תשלום מאובטח ב-SSL",
+      "buy_now_arrow": "קנה עכשיו",
+      "readers": "1,247 הקוראים",
+      "buy_now_dash": "קנה עכשיו –",
+      "view_modules": "הצג מודולים",
+      "ssl_secure": "תשלום SSL מאובטח",
       "instant_download": "הורדה מיידית",
       "lifetime_access": "גישה לכל החיים",
       "guarantee_days": "הבטחת 30 יום",
@@ -203,23 +203,23 @@
       "perfect_for": "מושלם בשבילך אם:",
       "p_struggle": "אתה נאבק כדי לגמור את הסוף",
       "p_cut_costs": "אתה רוצה לקצץ בעלויות מבלי להקריב איכות חיים",
-      "p_consumerism": "Tired of consumerism and debt culture",
-      "p_practical": "Looking for practical, time-tested methods",
-      "p_future": "Want a solid financial future for your family",
+      "p_consumerism": "נמאס לכם מהצרכנים ומהתרבות החוב",
+      "p_practical": "אתה רוצה שיטות מעשיות, מבחן זמן",
+      "p_future": "אתה רוצה לבנות עתיד פיננסי מוצק למשפחה שלך",
       "not_for": "לא בשבילך אם:",
-      "n_quick": "Looking for get-rich-quick schemes",
-      "n_habits": "Not willing to change spending habits",
-      "n_quick_fix": "Prefer quick fixes over a solid path",
-      "n_implement": "Not willing to implement what you learn",
-      "n_advice": "Looking for personalized financial advice",
+      "n_quick": "אתה מחפש תוכניות עשירות",
+      "n_habits": "אתה לא רוצה לשנות את הרגלי ההוצאות שלך",
+      "n_quick_fix": "אתה מעדיף תיקונים מהירים על בסיס מוצק",
+      "n_implement": "אתה לא מוכן ליישם את מה שאתה לומד",
+      "n_advice": "אתה מחפש ייעוץ פיננסי מותאם אישית",
       "section_learn": "02 – מה תלמד",
       "masters_secrets": "סודות המאסטרים",
-      "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
+      "modules_desc": "8 מודולים מעשיים שהופכים את אמיש חוכמה לפעולות קונקרטיות לחיי היומיום שלכם.",
       "section_author": "03 – המחבר",
       "behind_course": "מאחורי הקורס הזה",
       "your_name": "שמך כאן",
-      "researcher_author": "Researcher · Author · Traveler",
-      "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+      "researcher_author": "תגית: Author",
+      "author_bio": "[הוספת הסיפור שלך כאן: גרתי 3 חודשים בפנסילבניה, ראיין 12 משפחות אמיש, חקרתי את המערכת הכלכלית שלהם. אין תיאוריה, רק תרגול.)",
       "section_content": "המונחים: course content",
       "what_inside": "מה תמצאו בפנים",
       "also_includes": "כולל גם:",
@@ -245,7 +245,7 @@
       "inc_bonus_shopping": "BONUS: רשימת קניות שבועית (ערך $27)",
       "unlock_now": "Unlock Access Now",
       "guarantee_title": "30 יום החזר כספי",
-      "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+      "guarantee_text": "נסו את זה במשך 30 ימים. אם לא תציל לפחות 100 דולר, נחזיר את הסכום המלא. אין שאלות, אין שום חרטה.",
       "section_testimonials": "06 - המלצות",
       "testimonial_text": "הגשתי את שיטת התקציב של אמיש ובחודשיים חתכתי את ההוצאות שלי ב-35%. רשימת 30 הימים הייתה נקודת מפנה. סוף סוף קורס שבאמת עובד.",
       "testimonial_name": "מרקו ר.",
@@ -262,7 +262,7 @@
       "rights_reserved": "כל הזכויות שמורות.",
       "privacy": "פרטיות פרטיות",
       "terms": "תנאים",
-      "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+      "legal_note": "זהו מוצר מידע דיגיטלי. התוצאות עשויות להשתנות ותלויות במחויבות אישית. המחירים והטכניקות האמישים המתוארים מבוססים על מחקר אתנוגרפיים ואינם משקפים במדויק את המנהגים העכשוויים של כל הקהילות האמישות.",
       "features": "תכונות",
       "pricing": "מחירים",
       "testimonials": "עדויות",
@@ -302,14 +302,10 @@
       "tag_2": "מחקרים Amish",
       "tag_3": "ייעוץ פיננסי",
       "brand_name": "Corssy",
-      "reviewer": "Marco R., early readers",
+      "reviewer": "מרקו ר', קורא מוקדם",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "30day money back": "החזר כספי תוך 30 יום",
-      "price": "מחיר",
-      "free": "חינם",
-      "addtocart": "הוסף לעגלה",
-      "select_currency": "בחר מטבע"
+      "story_quote": "האמיש חי חיים עשירים ומלאים תוך שהוא מוציא חלק ממה שאנחנו מבלים. בקורס הזה אנחנו מגלים איך הם עושים את זה."
     }
   },
   "audience": {
@@ -319,17 +315,17 @@
     "perfect_items": [
       "אתה נאבק כדי לגמור את הסוף",
       "אתה רוצה לקצץ בעלויות מבלי להקריב איכות חיים",
-      "Tired of consumerism and debt culture",
-      "Looking for practical, time-tested methods",
-      "Want a solid financial future for your family"
+      "נמאס לכם מהצרכנים ומהתרבות החוב",
+      "אתה רוצה שיטות מעשיות, מבחן זמן",
+      "אתה רוצה לבנות עתיד פיננסי מוצק למשפחה שלך"
     ],
     "not_for": "לא בשבילך אם:",
     "not_items": [
-      "Looking for get-rich-quick schemes",
-      "Not willing to change spending habits",
-      "Prefer quick fixes over a solid path",
-      "Not willing to implement what you learn",
-      "Looking for personalized financial advice"
+      "אתה מחפש תוכניות עשירות",
+      "אתה לא רוצה לשנות את הרגלי ההוצאות שלך",
+      "אתה מעדיף תיקונים מהירים על בסיס מוצק",
+      "אתה לא מוכן ליישם את מה שאתה לומד",
+      "אתה מחפש ייעוץ פיננסי מותאם אישית"
     ]
   },
   "course": {

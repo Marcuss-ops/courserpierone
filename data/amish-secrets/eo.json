@@ -33,10 +33,10 @@
   },
   "story": {
     "badge": "Nia rakonto",
-    "title": "La mia Amenza tra glisa Amish",
+    "title": "Mia sperto inter la amiŝoj",
     "image_captions": [
       "Ĉiutaga vivo en la amiŝa komunumo: simpleco, aŭtarkio, kaj financa saĝeco pasis malsupren tra generacioj.",
-      "Il sistema di bariatto e trompbio che elimina il bisogno di denaro contante.",
+      "La interŝanĝo kaj interŝanĝsistemo kiu eliminas la bezonon de kontantmono kaj konstruas daŭrantajn fidorilatojn.",
       "La amiŝa domanarekonomio: kiel familio vivas sur 60% malpli ol landaveraĝo."
     ],
     "quote": "La amiŝoj vivas riĉajn kaj plenajn vivojn elspezante frakcion de kion ni pasigas. En ĉi tiu kurso ni rivelas kiel ili faras ĝin."
@@ -304,7 +304,8 @@
       "brand_name": "Courssy",
       "reviewer": "Marco R., frua leganto",
       "language_switch": "EN",
-      "language_switch_en": "EN"
+      "language_switch_en": "EN",
+      "story_quote": "La amiŝoj vivas riĉajn kaj plenajn vivojn elspezante frakcion de kion ni pasigas. En ĉi tiu kurso ni rivelas kiel ili faras ĝin."
     }
   },
   "audience": {

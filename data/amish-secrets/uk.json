@@ -1,8 +1,8 @@
 {
   "locale": "uk",
   "seo": {
-    "title": "Амішські секрети: Як жити економно та керувати грошима",
-    "description": "Відкрийте для себе секрети ощадливого способу життя громади амішів. Включає повні відеомодулі та PDF-файли для завантаження.",
+    "title": "Amish Secrets: Як жити з заощадженнями і керувати грошима",
+    "description": "Відкрийте секрети фрагального життя громади Аміш. Включає повне відеомодулювання та завантаження PDF.",
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
@@ -19,8 +19,8 @@
   },
   "hero": {
     "badge": "Нові",
-    "title": "Амішські секрети: Як жити економно та керувати грошима",
-    "subtitle": "Відкрийте для себе секрети ощадливого способу життя громади амішів. Включає повні відеомодулі та PDF-файли для завантаження.",
+    "title": "Amish Secrets: Як жити з заощадженнями і керувати грошима",
+    "subtitle": "Відкрийте секрети фрагального життя громади Аміш. Включає повне відеомодулювання та завантаження PDF.",
     "cta": "Почати",
     "secondary_cta": "Дізнатися більше",
     "price_label": "Спеціальна ціна запуску",
@@ -28,7 +28,7 @@
   },
   "problem": {
     "badge": "Проблема",
-    "title": "Втомилися ледь дотягувати до кінця місяця без заощаджень? Сучасне суспільство підштовхує нас до надмірного споживання.",
+    "title": "Набрид до кінця місяця без будь-яких заощаджень? Сучасне суспільство підштовхує нас до надмірного споживання.",
     "text": ""
   },
   "story": {
@@ -39,24 +39,24 @@
       "Система бартера і обміну, яка усуває необхідність готівки і будує останні довірчі відносини.",
       "Чим живе сім'я на 60% менше, ніж на національному рівні."
     ],
-    "quote": "Аміші живуть багатим і повноцінним життям, витрачаючи лише частину того, що витрачаємо ми. У цьому курсі ми розкриємо, як вони це роблять."
+    "quote": "Аміш живе багате і повне життя, витрачаючи частку того, що ми витрачаємо. У цьому курсі ми розкриємо, як це зробити."
   },
   "author": {
     "badge": "// 03 — Автор",
     "title": "За цим курсом",
     "name": "Alessandro Rinaldi",
-    "role": "Researcher · Author · Traveler",
-    "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+    "role": "Дослідник · Автор",
+    "bio": "[Додати свою історію тут: Я жив 3 місяці в Пенсільванію, інтерв'ю 12 сім'ї Аміш, вивчав їх економічну систему. Немає теорії, тільки практики.]",
     "tags": [
-      "Саггіце Фінанзіарія",
-      "Віта Состенібі",
-      "Продакшн"
+      "Фінансова мудрість",
+      "Стійке життя",
+      "Освіта"
     ]
   },
   "modules": {
     "badge": "// 02 — Що ви дізнаєтеся",
     "title": "Секрети Амішних майстрів",
-    "description": "8 practical modules that turn Amish wisdom into concrete actions.",
+    "description": "8 практичних модулів, які перетворюють амішну мудрість в конкретні дії для повсякденного життя.",
     "items": [
       {
         "title": "Аміш Бюджет",
@@ -125,7 +125,7 @@
     "launch_price": "Початкова ціна — потім $37",
     "cta": "Розблокувати доступ зараз",
     "guarantee_title": "30-денна гарантія повернення грошей",
-    "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+    "guarantee_text": "Спробуйте 30 днів. Якщо ви не економите принаймні $100, ми повернемо повну суму. Немає питань, немає клопотання.",
     "includes": [
       "Повний курс (значення $97)",
       "eBook PDF, ePub, Kindle",
@@ -175,7 +175,7 @@
     "rights_reserved": "Всі права захищені.",
     "privacy": "Контакти",
     "terms": "Контакти",
-    "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+    "legal_note": "Це цифровий інформаційний продукт. Результати можуть відрізнятися і залежать від особистих зобов'язань. На основі етнографічних досліджень, які не можуть точно відображати сучасні практики всіх громад Аміш.",
     "badges": {
       "guarantee": "30-денна гарантія",
       "instant_access": "Миттєвий доступ",
@@ -184,17 +184,17 @@
   },
   "trust": {
     "title": "Довіра команди по всьому світу",
-    "readers_count": "1 247 читачів",
+    "readers_count": "зчитувачі 1,247",
     "company_names": []
   },
   "ui": {
     "labels": {
       "instant_access": "Миттєвий доступ",
       "buy_now_arrow": "Купити зараз →",
-      "readers": "1 247 читачів",
+      "readers": "зчитувачі 1,247",
       "buy_now_dash": "Купити зараз —",
-      "view_modules": "Переглянути модулі",
-      "ssl_secure": "Безпечна оплата через SSL",
+      "view_modules": "Перегляд модулів",
+      "ssl_secure": "Безпечний розрахунок SSL",
       "instant_download": "Миттєве завантаження",
       "lifetime_access": "Доступ до життя",
       "guarantee_days": "30-денна гарантія",
@@ -203,23 +203,23 @@
       "perfect_for": "Ідеально підходить для вас, якщо:",
       "p_struggle": "Ви боретеся, щоб кінці познайомилися",
       "p_cut_costs": "Ви хочете вирізати витрати без шкоди якості життя",
-      "p_consumerism": "Tired of consumerism and debt culture",
-      "p_practical": "Looking for practical, time-tested methods",
-      "p_future": "Want a solid financial future for your family",
+      "p_consumerism": "Ви втомилися від споживача та боргової культури",
+      "p_practical": "Ви хочете практичні, перевірені часом методи",
+      "p_future": "Ви хочете побудувати твердий фінансовий ф'ючерс для вашої родини",
       "not_for": "Не для вас, якщо:",
-      "n_quick": "Looking for get-rich-quick schemes",
-      "n_habits": "Not willing to change spending habits",
-      "n_quick_fix": "Prefer quick fixes over a solid path",
-      "n_implement": "Not willing to implement what you learn",
-      "n_advice": "Looking for personalized financial advice",
+      "n_quick": "Ви шукаєте багатофункціональні схеми",
+      "n_habits": "Ви не хочете змінити звички витрат",
+      "n_quick_fix": "Ви віддаєте перевагу швидко зафіксувати над твердим фундаментом",
+      "n_implement": "Ви не готові реалізувати те, що ви навчитесь",
+      "n_advice": "Ви шукаєте персоналізовані фінансові поради",
       "section_learn": "// 02 — Що ви дізнаєтеся",
       "masters_secrets": "Секрети Амішних майстрів",
-      "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
+      "modules_desc": "8 практичних модулів, які перетворюють амішну мудрість в конкретні дії для повсякденного життя.",
       "section_author": "// 03 — Автор",
       "behind_course": "За цим курсом",
       "your_name": "Ваше ім'я",
-      "researcher_author": "Researcher · Author · Traveler",
-      "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+      "researcher_author": "Дослідник · Автор",
+      "author_bio": "[Додати свою історію тут: Я жив 3 місяці в Пенсільванію, інтерв'ю 12 сім'ї Аміш, вивчав їх економічну систему. Немає теорії, тільки практики.]",
       "section_content": "// 04 — Зміст курсу",
       "what_inside": "Що ви знайдете",
       "also_includes": "Також включає:",
@@ -245,7 +245,7 @@
       "inc_bonus_shopping": "BONUS: Щотижневий список покупок (значення $27)",
       "unlock_now": "Розблокувати доступ зараз",
       "guarantee_title": "30-денна гарантія повернення грошей",
-      "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+      "guarantee_text": "Спробуйте 30 днів. Якщо ви не економите принаймні $100, ми повернемо повну суму. Немає питань, немає клопотання.",
       "section_testimonials": "// 06 — Відгуки",
       "testimonial_text": "Я звернувся до методу «Амішський бюджет» і через два місяці я ріжу свої витрати на 35%. 30-денний контрольний пункт. Нарешті курс, який дійсно працює.",
       "testimonial_name": "Марко Р.",
@@ -262,7 +262,7 @@
       "rights_reserved": "Всі права захищені.",
       "privacy": "Контакти",
       "terms": "Контакти",
-      "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+      "legal_note": "Це цифровий інформаційний продукт. Результати можуть відрізнятися і залежать від особистих зобов'язань. На основі етнографічних досліджень, які не можуть точно відображати сучасні практики всіх громад Аміш.",
       "features": "Особливості",
       "pricing": "Ціна",
       "testimonials": "Відгуки",
@@ -302,14 +302,10 @@
       "tag_2": "Амішознавство",
       "tag_3": "Фінансовий консалтинг",
       "brand_name": "Прованс",
-      "reviewer": "Marco R., early readers",
+      "reviewer": "Марко Р., ранній зчитувач",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "30day money back": "Гарантія повернення коштів 30 днів",
-      "price": "Ціна",
-      "free": "БЕЗКОШТОВНО",
-      "addtocart": "Додати в кошик",
-      "select_currency": "Вибрати валюту"
+      "story_quote": "Аміш живе багате і повне життя, витрачаючи частку того, що ми витрачаємо. У цьому курсі ми розкриємо, як це зробити."
     }
   },
   "audience": {
@@ -319,17 +315,17 @@
     "perfect_items": [
       "Ви боретеся, щоб кінці познайомилися",
       "Ви хочете вирізати витрати без шкоди якості життя",
-      "Tired of consumerism and debt culture",
-      "Looking for practical, time-tested methods",
-      "Want a solid financial future for your family"
+      "Ви втомилися від споживача та боргової культури",
+      "Ви хочете практичні, перевірені часом методи",
+      "Ви хочете побудувати твердий фінансовий ф'ючерс для вашої родини"
     ],
     "not_for": "Не для вас, якщо:",
     "not_items": [
-      "Looking for get-rich-quick schemes",
-      "Not willing to change spending habits",
-      "Prefer quick fixes over a solid path",
-      "Not willing to implement what you learn",
-      "Looking for personalized financial advice"
+      "Ви шукаєте багатофункціональні схеми",
+      "Ви не хочете змінити звички витрат",
+      "Ви віддаєте перевагу швидко зафіксувати над твердим фундаментом",
+      "Ви не готові реалізувати те, що ви навчитесь",
+      "Ви шукаєте персоналізовані фінансові поради"
     ]
   },
   "course": {

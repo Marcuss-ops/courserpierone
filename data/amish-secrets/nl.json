@@ -1,8 +1,8 @@
 {
   "locale": "nl",
   "seo": {
-    "title": "Amish Secrets: Hoe je zuinig leeft en geld beheert",
-    "description": "Ontdek de geheimen van een sober leven van de Amish-gemeenschap. Inclusief complete videomodules en downloadbare PDF's.",
+    "title": "Amish Secrets: Hoe met spaargeld te leven en geld te beheren",
+    "description": "Ontdek de geheimen van het zuinige leven van de Amish gemeenschap. Inclusief complete videomodules en downloadbare PDF's.",
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
@@ -19,8 +19,8 @@
   },
   "hero": {
     "badge": "Nieuw",
-    "title": "Amish Secrets: Hoe je zuinig leeft en geld beheert",
-    "subtitle": "Ontdek de geheimen van een sober leven van de Amish-gemeenschap. Inclusief complete videomodules en downloadbare PDF's.",
+    "title": "Amish Secrets: Hoe met spaargeld te leven en geld te beheren",
+    "subtitle": "Ontdek de geheimen van het zuinige leven van de Amish gemeenschap. Inclusief complete videomodules en downloadbare PDF's.",
     "cta": "Starten",
     "secondary_cta": "Meer informatie",
     "price_label": "Speciale lanceerprijs",
@@ -28,7 +28,7 @@
   },
   "problem": {
     "badge": "Het probleem",
-    "title": "Ben je het zat om aan het einde van de maand zonder spaargeld te zitten? De moderne samenleving pusht ons tot overmatige consumptie.",
+    "title": "Moe van het einde van de maand zonder besparingen? De moderne samenleving drijft ons naar buitensporige consumptie.",
     "text": ""
   },
   "story": {
@@ -36,17 +36,17 @@
     "title": "Mijn ervaring onder de Amish",
     "image_captions": [
       "Dagelijks leven in de Amish gemeenschap: eenvoud, zelfvoorziening en financiële wijsheid doorgegeven door generaties.",
-      "Il sistema di Baratto e scambio che elimina il bisogno di denaro contante.",
+      "De ruilhandel en uitwisseling systeem dat elimineert de behoefte aan contant geld en bouwt duurzame vertrouwen relaties.",
       "De Amish huishoudens economie: hoe een gezin leeft op 60% minder dan het nationale gemiddelde."
     ],
-    "quote": "De Amish leiden rijke en vervullende levens terwijl ze een fractie uitgeven van wat wij uitgeven. In deze cursus onthullen we hoe ze dat doen."
+    "quote": "De Amish leven rijk en vol leven terwijl ze een fractie uitgeven van wat we uitgeven. In deze cursus laten we zien hoe ze het doen."
   },
   "author": {
     "badge": "// 03 De auteur",
     "title": "Achter deze cursus",
     "name": "Alessandro Rinaldi",
-    "role": "Researcher · Author · Traveler",
-    "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+    "role": "Onderzoeker · Auteur",
+    "bio": "[Voeg hier uw verhaal toe: Ik woonde 3 maanden in Pennsylvania, interviewde 12 Amish families, bestudeerde hun economische systeem. Geen theorie, alleen praktijk.]",
     "tags": [
       "Financiële wijsheid",
       "Duurzaam leven",
@@ -56,7 +56,7 @@
   "modules": {
     "badge": "# # What You'll Learn",
     "title": "The Amish Masters' Secrets",
-    "description": "8 practical modules that turn Amish wisdom into concrete actions.",
+    "description": "8 praktische modules die van Amish wijsheid concrete acties maken voor uw dagelijks leven.",
     "items": [
       {
         "title": "Amish-begroting",
@@ -125,7 +125,7 @@
     "launch_price": "Lancering prijs dan $37",
     "cta": "Toegang nu ontgrendelen",
     "guarantee_title": "30 dagen geld-terug garantie",
-    "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+    "guarantee_text": "Probeer het 30 dagen. Als je niet minstens $100 bespaart, betalen we het volledige bedrag terug. Geen vragen, geen gedoe.",
     "includes": [
       "Volledige cursus (waarde $97)",
       "eBook PDF, ePub, Kindle",
@@ -175,7 +175,7 @@
     "rights_reserved": "Alle rechten voorbehouden.",
     "privacy": "Privacy",
     "terms": "Voorwaarden",
-    "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+    "legal_note": "Dit is een digitaal informatief product. De resultaten kunnen variëren en afhankelijk zijn van persoonlijke inzet. De beschreven Amish prijzen en technieken zijn gebaseerd op etnografisch onderzoek en weerspiegelen mogelijk niet de hedendaagse praktijken van alle Amish gemeenschappen.",
     "badges": {
       "guarantee": "30 dagen garantie",
       "instant_access": "Onmiddellijke toegang",
@@ -190,10 +190,10 @@
   "ui": {
     "labels": {
       "instant_access": "Directe toegang",
-      "buy_now_arrow": "Koop Nu →",
+      "buy_now_arrow": "Koop nu →",
       "readers": "1.247 lezers",
-      "buy_now_dash": "Koop Nu —",
-      "view_modules": "Bekijk de modules",
+      "buy_now_dash": "Koop nu",
+      "view_modules": "Modules weergeven",
       "ssl_secure": "Veilige SSL-betaling",
       "instant_download": "Direct downloaden",
       "lifetime_access": "Levenslange toegang",
@@ -203,23 +203,23 @@
       "perfect_for": "Perfect voor u als:",
       "p_struggle": "Je worstelt om de eindjes aan elkaar te knopen",
       "p_cut_costs": "U wilt kosten besparen zonder de kwaliteit van leven op te offeren",
-      "p_consumerism": "Tired of consumerism and debt culture",
-      "p_practical": "Looking for practical, time-tested methods",
-      "p_future": "Want a solid financial future for your family",
+      "p_consumerism": "Je bent de consument en de schuldencultuur zat.",
+      "p_practical": "U wilt praktische, op tijd geteste methoden",
+      "p_future": "U wilt een solide financiële toekomst opbouwen voor uw familie",
       "not_for": "Niet voor jou als:",
-      "n_quick": "Looking for get-rich-quick schemes",
-      "n_habits": "Not willing to change spending habits",
-      "n_quick_fix": "Prefer quick fixes over a solid path",
-      "n_implement": "Not willing to implement what you learn",
-      "n_advice": "Looking for personalized financial advice",
+      "n_quick": "Je bent op zoek naar get-rich-quick schemes",
+      "n_habits": "Je wilt je bestedingsgewoonten niet veranderen.",
+      "n_quick_fix": "U verkiest snelle oplossingen boven een solide fundering",
+      "n_implement": "Je bent niet bereid om te implementeren wat je leert",
+      "n_advice": "U zoekt persoonlijk financieel advies",
       "section_learn": "# # What You'll Learn",
       "masters_secrets": "The Amish Masters' Secrets",
-      "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
+      "modules_desc": "8 praktische modules die van Amish wijsheid concrete acties maken voor uw dagelijks leven.",
       "section_author": "// 03 De auteur",
       "behind_course": "Achter deze cursus",
       "your_name": "Uw naam hier",
-      "researcher_author": "Researcher · Author · Traveler",
-      "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+      "researcher_author": "Onderzoeker · Auteur",
+      "author_bio": "[Voeg hier uw verhaal toe: Ik woonde 3 maanden in Pennsylvania, interviewde 12 Amish families, bestudeerde hun economische systeem. Geen theorie, alleen praktijk.]",
       "section_content": "// 04 Cursusinhoud",
       "what_inside": "Wat je binnen vindt",
       "also_includes": "Omvat ook:",
@@ -245,7 +245,7 @@
       "inc_bonus_shopping": "Wekelijkse boodschappenlijst (waarde $27)",
       "unlock_now": "Toegang nu ontgrendelen",
       "guarantee_title": "30 dagen geld-terug garantie",
-      "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+      "guarantee_text": "Probeer het 30 dagen. Als je niet minstens $100 bespaart, betalen we het volledige bedrag terug. Geen vragen, geen gedoe.",
       "section_testimonials": "// 06 Getuigenissen",
       "testimonial_text": "Ik heb de Amish-begrotingsmethode toegepast en binnen twee maanden heb ik mijn uitgaven met 35% verlaagd. De 30 dagen checklist was het keerpunt. Eindelijk een cursus die echt werkt.",
       "testimonial_name": "Marco R.",
@@ -262,7 +262,7 @@
       "rights_reserved": "Alle rechten voorbehouden.",
       "privacy": "Privacy",
       "terms": "Voorwaarden",
-      "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+      "legal_note": "Dit is een digitaal informatief product. De resultaten kunnen variëren en afhankelijk zijn van persoonlijke inzet. De beschreven Amish prijzen en technieken zijn gebaseerd op etnografisch onderzoek en weerspiegelen mogelijk niet de hedendaagse praktijken van alle Amish gemeenschappen.",
       "features": "Kenmerken",
       "pricing": "Prijzen",
       "testimonials": "Getuigenissen",
@@ -302,14 +302,10 @@
       "tag_2": "Amish Studies",
       "tag_3": "Financiële raadpleging",
       "brand_name": "Courssy",
-      "reviewer": "Marco R., early readers",
+      "reviewer": "Marco R., vroege lezer",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "30day money back": "30 dagen niet goed, geld terug",
-      "price": "Prijs",
-      "free": "GRATIS",
-      "addtocart": "Toevoegen aan winkelwagen",
-      "select_currency": "Selecteer valuta"
+      "story_quote": "De Amish leven rijk en vol leven terwijl ze een fractie uitgeven van wat we uitgeven. In deze cursus laten we zien hoe ze het doen."
     }
   },
   "audience": {
@@ -319,17 +315,17 @@
     "perfect_items": [
       "Je worstelt om de eindjes aan elkaar te knopen",
       "U wilt kosten besparen zonder de kwaliteit van leven op te offeren",
-      "Tired of consumerism and debt culture",
-      "Looking for practical, time-tested methods",
-      "Want a solid financial future for your family"
+      "Je bent de consument en de schuldencultuur zat.",
+      "U wilt praktische, op tijd geteste methoden",
+      "U wilt een solide financiële toekomst opbouwen voor uw familie"
     ],
     "not_for": "Niet voor jou als:",
     "not_items": [
-      "Looking for get-rich-quick schemes",
-      "Not willing to change spending habits",
-      "Prefer quick fixes over a solid path",
-      "Not willing to implement what you learn",
-      "Looking for personalized financial advice"
+      "Je bent op zoek naar get-rich-quick schemes",
+      "Je wilt je bestedingsgewoonten niet veranderen.",
+      "U verkiest snelle oplossingen boven een solide fundering",
+      "Je bent niet bereid om te implementeren wat je leert",
+      "U zoekt persoonlijk financieel advies"
     ]
   },
   "course": {

@@ -1,8 +1,8 @@
 {
   "locale": "id",
   "seo": {
-    "title": "Rahasia Amish: Cara hidup hemat dan mengelola uang",
-    "description": "Temukan rahasia hidup hemat dari komunitas Amish. Termasuk modul video lengkap dan PDF yang dapat diunduh.",
+    "title": "Bagaimana hidup dengan tabungan dan mengelola uang",
+    "description": "Temukan rahasia kehidupan komunitas Amish. Termasuk modul video lengkap dan PDF yang dapat diunduh.",
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
@@ -19,8 +19,8 @@
   },
   "hero": {
     "badge": "Baru",
-    "title": "Rahasia Amish: Cara hidup hemat dan mengelola uang",
-    "subtitle": "Temukan rahasia hidup hemat dari komunitas Amish. Termasuk modul video lengkap dan PDF yang dapat diunduh.",
+    "title": "Bagaimana hidup dengan tabungan dan mengelola uang",
+    "subtitle": "Temukan rahasia kehidupan komunitas Amish. Termasuk modul video lengkap dan PDF yang dapat diunduh.",
     "cta": "Mulai",
     "secondary_cta": "Pelajari Lebih",
     "price_label": "Harga peluncuran khusus",
@@ -28,7 +28,7 @@
   },
   "problem": {
     "badge": "Masalah",
-    "title": "Lelah hidup pas-pasan setiap akhir bulan? Masyarakat modern mendorong kita untuk konsumsi berlebihan.",
+    "title": "Lelah mencapai akhir bulan tanpa ada tabungan? Masyarakat modern mendorong kita untuk konsumsi yang berlebihan.",
     "text": ""
   },
   "story": {
@@ -39,14 +39,14 @@
       "Pertukaran dan pertukaran sistem yang menghilangkan kebutuhan uang tunai dan membangun hubungan kepercayaan abadi.",
       "Ekonomi rumah tangga Amish: bagaimana keluarga hidup di 60% kurang dari rata-rata nasional."
     ],
-    "quote": "Orang Amish menjalani kehidupan yang kaya dan penuh makna dengan menghabiskan hanya sebagian kecil dari apa yang kita habiskan. Dalam kursus ini kami expose rahasia mereka."
+    "quote": "The Amish hidup kaya dan penuh kehidupan sementara menghabiskan sebagian dari apa yang kita habiskan. Pada perkuliahan ini, kita mengungkapkan bagaimana mereka melakukannya."
   },
   "author": {
     "badge": "/ / 03 - Penulis",
     "title": "Di belakang Kursus ini",
     "name": "Alessandro Rinaldi",
-    "role": "Researcher · Author · Traveler",
-    "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+    "role": "Peneliti",
+    "bio": "[Tambahkan cerita Anda di sini: saya tinggal 3 bulan di Pennsylvania, mewawancarai 12 keluarga Amish, mempelajari sistem ekonomi mereka. Tidak ada teori, hanya praktek.]",
     "tags": [
       "Kebijaksanaan Keuangan",
       "Hidup yang layak",
@@ -56,7 +56,7 @@
   "modules": {
     "badge": "# # 02 - What You 'll Learn",
     "title": "Rahasia Amish Masters",
-    "description": "8 practical modules that turn Amish wisdom into concrete actions.",
+    "description": "8 modul praktis yang mengubah Amish menjadi tindakan konkret untuk kehidupan sehari-hari Anda.",
     "items": [
       {
         "title": "Anggaran Amish",
@@ -125,7 +125,7 @@
     "launch_price": "Harga peluncuran - kemudian $37",
     "cta": "Buka Kunci Akses Sekarang",
     "guarantee_title": "30- Hari Money- Jaminan Kembali",
-    "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+    "guarantee_text": "Cobalah selama 30 hari. Jika Anda tidak menyimpan setidaknya $100, kami akan mengembalikan jumlah penuh. Tidak ada pertanyaan, tidak ada kerumitan.",
     "includes": [
       "Kursus penuh (nilai $97)",
       "eBook PDF, ePub, Kindle",
@@ -175,7 +175,7 @@
     "rights_reserved": "Semua hak disediakan.",
     "privacy": "Privasi",
     "terms": "Kalimat",
-    "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+    "legal_note": "Ini adalah produk informasi digital. Hasil mungkin bervariasi dan tergantung pada komitmen pribadi. Harga Amish dan teknik yang dijelaskan didasarkan pada penelitian etnografi dan mungkin tidak akurat mencerminkan praktek kontemporer dari semua komunitas Amish.",
     "badges": {
       "guarantee": "30- Hari Jaminan",
       "instant_access": "Akses Instan",
@@ -190,11 +190,11 @@
   "ui": {
     "labels": {
       "instant_access": "Akses instan",
-      "buy_now_arrow": "Beli Sekarang →",
+      "buy_now_arrow": "Beli sekarang.",
       "readers": "1.247 pembaca",
-      "buy_now_dash": "Beli Sekarang —",
-      "view_modules": "Lihat Modul",
-      "ssl_secure": "Pembayaran aman dengan SSL",
+      "buy_now_dash": "Beli Sekarang -",
+      "view_modules": "Tilik Modul",
+      "ssl_secure": "Pembayaran SSL aman",
       "instant_download": "Unduh Instan",
       "lifetime_access": "Akses Seumur Hidup",
       "guarantee_days": "30- Hari Jaminan",
@@ -203,23 +203,23 @@
       "perfect_for": "Sempurna untuk Anda jika:",
       "p_struggle": "Anda berjuang untuk memenuhi kebutuhan",
       "p_cut_costs": "Anda ingin memotong biaya tanpa mengorbankan kualitas hidup",
-      "p_consumerism": "Tired of consumerism and debt culture",
-      "p_practical": "Looking for practical, time-tested methods",
-      "p_future": "Want a solid financial future for your family",
+      "p_consumerism": "Kau bosan dengan konsumerisme dan budaya hutang.",
+      "p_practical": "Anda ingin praktis, waktu-teruji metode",
+      "p_future": "Anda ingin membangun masa depan keuangan yang solid untuk keluarga Anda",
       "not_for": "Bukan untuk Anda jika:",
-      "n_quick": "Looking for get-rich-quick schemes",
-      "n_habits": "Not willing to change spending habits",
-      "n_quick_fix": "Prefer quick fixes over a solid path",
-      "n_implement": "Not willing to implement what you learn",
-      "n_advice": "Looking for personalized financial advice",
+      "n_quick": "Anda sedang mencari get- kaya-cepat skema",
+      "n_habits": "Anda tidak ingin mengubah kebiasaan pengeluaran Anda",
+      "n_quick_fix": "Anda lebih suka perbaikan cepat atas fondasi yang solid",
+      "n_implement": "Anda tidak bersedia untuk menerapkan apa yang Anda pelajari",
+      "n_advice": "Anda sedang mencari saran pribadi keuangan",
       "section_learn": "# # 02 - What You 'll Learn",
       "masters_secrets": "Rahasia Amish Masters",
-      "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
+      "modules_desc": "8 modul praktis yang mengubah Amish menjadi tindakan konkret untuk kehidupan sehari-hari Anda.",
       "section_author": "/ / 03 - Penulis",
       "behind_course": "Di belakang Kursus ini",
       "your_name": "Namamu disini",
-      "researcher_author": "Researcher · Author · Traveler",
-      "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+      "researcher_author": "Peneliti",
+      "author_bio": "[Tambahkan cerita Anda di sini: saya tinggal 3 bulan di Pennsylvania, mewawancarai 12 keluarga Amish, mempelajari sistem ekonomi mereka. Tidak ada teori, hanya praktek.]",
       "section_content": "/ / 04 - Konten Kursus",
       "what_inside": "What You 'll Find Inside",
       "also_includes": "Juga termasuk:",
@@ -245,7 +245,7 @@
       "inc_bonus_shopping": "Daftar belanja mingguan (nilai $27)",
       "unlock_now": "Buka Kunci Akses Sekarang",
       "guarantee_title": "30- Hari Money- Jaminan Kembali",
-      "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+      "guarantee_text": "Cobalah selama 30 hari. Jika Anda tidak menyimpan setidaknya $100, kami akan mengembalikan jumlah penuh. Tidak ada pertanyaan, tidak ada kerumitan.",
       "section_testimonials": "/ / 06 - Testomial",
       "testimonial_text": "Saya menerapkan metode anggaran Amish dan dalam dua bulan saya memotong biaya saya sebesar 35%. Daftar cek 30 hari adalah titik balik. Akhirnya kursus yang benar-benar bekerja.",
       "testimonial_name": "Marco R.",
@@ -262,7 +262,7 @@
       "rights_reserved": "Semua hak disediakan.",
       "privacy": "Privasi",
       "terms": "Kalimat",
-      "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+      "legal_note": "Ini adalah produk informasi digital. Hasil mungkin bervariasi dan tergantung pada komitmen pribadi. Harga Amish dan teknik yang dijelaskan didasarkan pada penelitian etnografi dan mungkin tidak akurat mencerminkan praktek kontemporer dari semua komunitas Amish.",
       "features": "Fitur",
       "pricing": "Harga",
       "testimonials": "Testimonial",
@@ -302,14 +302,10 @@
       "tag_2": "Studi Amish",
       "tag_3": "Konsultan Keuangan",
       "brand_name": "Courssy",
-      "reviewer": "Marco R., early readers",
+      "reviewer": "Marco R., pembaca awal",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "30day money back": "Jaminan uang kembali 30 hari",
-      "price": "Harga",
-      "free": "GRATIS",
-      "addtocart": "Tambahkan ke keranjang",
-      "select_currency": "Pilih mata uang"
+      "story_quote": "The Amish hidup kaya dan penuh kehidupan sementara menghabiskan sebagian dari apa yang kita habiskan. Pada perkuliahan ini, kita mengungkapkan bagaimana mereka melakukannya."
     }
   },
   "audience": {
@@ -319,17 +315,17 @@
     "perfect_items": [
       "Anda berjuang untuk memenuhi kebutuhan",
       "Anda ingin memotong biaya tanpa mengorbankan kualitas hidup",
-      "Tired of consumerism and debt culture",
-      "Looking for practical, time-tested methods",
-      "Want a solid financial future for your family"
+      "Kau bosan dengan konsumerisme dan budaya hutang.",
+      "Anda ingin praktis, waktu-teruji metode",
+      "Anda ingin membangun masa depan keuangan yang solid untuk keluarga Anda"
     ],
     "not_for": "Bukan untuk Anda jika:",
     "not_items": [
-      "Looking for get-rich-quick schemes",
-      "Not willing to change spending habits",
-      "Prefer quick fixes over a solid path",
-      "Not willing to implement what you learn",
-      "Looking for personalized financial advice"
+      "Anda sedang mencari get- kaya-cepat skema",
+      "Anda tidak ingin mengubah kebiasaan pengeluaran Anda",
+      "Anda lebih suka perbaikan cepat atas fondasi yang solid",
+      "Anda tidak bersedia untuk menerapkan apa yang Anda pelajari",
+      "Anda sedang mencari saran pribadi keuangan"
     ]
   },
   "course": {

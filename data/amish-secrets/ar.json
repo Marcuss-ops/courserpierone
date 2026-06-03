@@ -1,8 +1,8 @@
 {
   "locale": "ar",
   "seo": {
-    "title": "أسرار الأميش: كيف تعيش باقتصاد وتدير أموالك",
-    "description": "اكتشف أسرار العيش المقتصد لمجتمع الأميش. يتضمن نماذج فيديو كاملة وملفات PDF قابلة للتنزيل.",
+    "title": "الأسرار الأميشية: كيفية العيش مع المدخرات وإدارة الأموال",
+    "description": "الكشف عن الأسرار التي يعيشها المجتمع الأميش تشمل وحدات فيديو كاملة وأجهزة PDF قابلة للتنزيل.",
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
@@ -19,8 +19,8 @@
   },
   "hero": {
     "badge": "جديدة",
-    "title": "أسرار الأميش: كيف تعيش باقتصاد وتدير أموالك",
-    "subtitle": "اكتشف أسرار العيش المقتصد لمجتمع الأميش. يتضمن نماذج فيديو كاملة وملفات PDF قابلة للتنزيل.",
+    "title": "الأسرار الأميشية: كيفية العيش مع المدخرات وإدارة الأموال",
+    "subtitle": "الكشف عن الأسرار التي يعيشها المجتمع الأميش تشمل وحدات فيديو كاملة وأجهزة PDF قابلة للتنزيل.",
     "cta": "ابدأ",
     "secondary_cta": "تعلم المزيد",
     "price_label": "سعر الإطلاق الخاص",
@@ -28,7 +28,7 @@
   },
   "problem": {
     "badge": "المشكلة",
-    "title": "هل سئمت من الوصول إلى نهاية الشهر دون أي مدخرات؟ المجتمع الحديث يدفعنا نحو الاستهلاك المفرط.",
+    "title": "سئمت من الوصول إلى نهاية الشهر بدون أي مدخرات؟ المجتمع الحديث يدفعنا نحو الاستهلاك المفرط",
     "text": ""
   },
   "story": {
@@ -39,14 +39,14 @@
       "نظام المقايضة والتبادل الذي يزيل الحاجة إلى النقد ويقيم علاقات ثقة دائمة.",
       "اقتصاد الأسرة الأميشية: كيف تعيش العائلة بإنفاق أقل بنسبة 60% من المعدل الوطني."
     ],
-    "quote": "يعيش الأميش حياة غنية ومليئة بالمعاني بإنفاق جزء بسيط مما ننفقه نحن. في هذه الدورة، نكشف لك كيف يفعلون ذلك."
+    "quote": "يعيش الأميش حياة غنية وكاملة بينما ينفق جزء من ما ننفقه. في هذه الدورة، نكشف كيف يفعلون ذلك."
   },
   "author": {
     "badge": "/ 03 - صاحب البلاغ",
     "title": "خلف هذه الدورة",
     "name": "Alessandro Rinaldi",
-    "role": "Researcher · Author · Traveler",
-    "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+    "role": "كاتب",
+    "bio": "لقد عشت 3 أشهر في بنسلفانيا وقابلت 12 أسرة أميشية ودرست نظامها الاقتصادي لا نظرية، فقط ممارسة.]",
     "tags": [
       "الحكمة المالية",
       "العيش المستدام",
@@ -56,7 +56,7 @@
   "modules": {
     "badge": "/ 02 - ماذا ستتعلم",
     "title": "أسرار الماجستير الأميش",
-    "description": "8 practical modules that turn Amish wisdom into concrete actions.",
+    "description": "8 وحدات عملية تحول الحكمة الأميشية إلى إجراءات ملموسة لحياتك اليومية",
     "items": [
       {
         "title": "الميزانية المتوسطة",
@@ -125,7 +125,7 @@
     "launch_price": "سعر الاطلاق - ثم ٣٧ دولارا",
     "cta": "افتح الباب الآن",
     "guarantee_title": "30-Day Money-Back Guarantee",
-    "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+    "guarantee_text": "جربها لمدة 30 يوماً إذا لم تنقذي 100 دولار على الأقل سنسترد المبلغ بالكامل لا أسئلة، لا مضايقة.",
     "includes": [
       "دورة كاملة (قيمة 97 دولارا)",
       "eBook PDF, ePub, Kindle",
@@ -175,7 +175,7 @@
     "rights_reserved": "جميع الحقوق محجوزة",
     "privacy": "الخصوصية",
     "terms": "المصطلحات",
-    "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+    "legal_note": "هذا منتج رقمي للمعلومات وقد تتباين النتائج وتتوقف على الالتزام الشخصي. وتستند الأسعار والتقنيات الأميشية الموصوفة إلى البحوث الإثنية وقد لا تعكس بدقة الممارسات المعاصرة لجميع المجتمعات الأميشية.",
     "badges": {
       "guarantee": "30-Day Guarantee",
       "instant_access": "Instant Access",
@@ -184,17 +184,17 @@
   },
   "trust": {
     "title": "مؤمنة من قبل أفرقة في جميع أنحاء العالم",
-    "readers_count": "1,247 قارئ",
+    "readers_count": "247 1 قارئ",
     "company_names": []
   },
   "ui": {
     "labels": {
-      "instant_access": "وصول فوري",
-      "buy_now_arrow": "اشتر الآن →",
-      "readers": "1,247 قارئ",
-      "buy_now_dash": "اشتر الآن —",
-      "view_modules": "استعرض الوحدات",
-      "ssl_secure": "دفع آمن عبر SSL",
+      "instant_access": "الوصول الفوري",
+      "buy_now_arrow": "اشتري الآن",
+      "readers": "247 1 قارئ",
+      "buy_now_dash": "اشتري الآن",
+      "view_modules": "View Modules",
+      "ssl_secure": "مدفوعات تأمينية",
       "instant_download": "تحميل ثابت",
       "lifetime_access": "الوصول إلى الحياة",
       "guarantee_days": "30-Day Guarantee",
@@ -203,23 +203,23 @@
       "perfect_for": "مثالي لك إذا:",
       "p_struggle": "أنت تكافح لجعل النهاية تلتقي",
       "p_cut_costs": "تريد تخفيض التكاليف بدون التضحية بنوعية الحياة",
-      "p_consumerism": "Tired of consumerism and debt culture",
-      "p_practical": "Looking for practical, time-tested methods",
-      "p_future": "Want a solid financial future for your family",
+      "p_consumerism": "لقد تعبت من ثقافة الاستهلاك والديون",
+      "p_practical": "تُريدُ أساليبَ عمليةَ، إختبار الوقتِ",
+      "p_future": "تريد بناء مستقبل مالي قوي لعائلتك",
       "not_for": "ليس بالنسبة لك إذا:",
-      "n_quick": "Looking for get-rich-quick schemes",
-      "n_habits": "Not willing to change spending habits",
-      "n_quick_fix": "Prefer quick fixes over a solid path",
-      "n_implement": "Not willing to implement what you learn",
-      "n_advice": "Looking for personalized financial advice",
+      "n_quick": "أنت تبحث عن مخططات تثري",
+      "n_habits": "أنت لا تريد تغيير عادات إنفاقك",
+      "n_quick_fix": "تُفضّلُ التثبيتُ السريعِ على a قاعدة صلبة",
+      "n_implement": "أنت لست على استعداد لتنفيذ ما تتعلمه",
+      "n_advice": "أنت تبحث عن نصيحة مالية شخصية",
       "section_learn": "/ 02 - ماذا ستتعلم",
       "masters_secrets": "أسرار الماجستير الأميش",
-      "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
+      "modules_desc": "8 وحدات عملية تحول الحكمة الأميشية إلى إجراءات ملموسة لحياتك اليومية",
       "section_author": "/ 03 - صاحب البلاغ",
       "behind_course": "خلف هذه الدورة",
       "your_name": "اسمك هنا",
-      "researcher_author": "Researcher · Author · Traveler",
-      "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+      "researcher_author": "كاتب",
+      "author_bio": "لقد عشت 3 أشهر في بنسلفانيا وقابلت 12 أسرة أميشية ودرست نظامها الاقتصادي لا نظرية، فقط ممارسة.]",
       "section_content": "/ 04 - مضمون الدورة",
       "what_inside": "ما ستجده في الداخل",
       "also_includes": "ويشمل أيضا ما يلي:",
@@ -245,7 +245,7 @@
       "inc_bonus_shopping": "قائمة التسوق الأسبوعية (قيمة 27 دولارا)",
       "unlock_now": "افتح الباب الآن",
       "guarantee_title": "30-Day Money-Back Guarantee",
-      "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+      "guarantee_text": "جربها لمدة 30 يوماً إذا لم تنقذي 100 دولار على الأقل سنسترد المبلغ بالكامل لا أسئلة، لا مضايقة.",
       "section_testimonials": "// 06 - الشهادات",
       "testimonial_text": "لقد طبقت طريقة ميزانية (آميش) وخلال شهرين قمت بخفض نفقاتي بنسبة 35 بالمئة وكانت قائمة الـ 30 يوما نقطة التحول. أخيراً مسار يعمل حقاً",
       "testimonial_name": "(ماركو ر)",
@@ -262,7 +262,7 @@
       "rights_reserved": "جميع الحقوق محجوزة",
       "privacy": "الخصوصية",
       "terms": "المصطلحات",
-      "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+      "legal_note": "هذا منتج رقمي للمعلومات وقد تتباين النتائج وتتوقف على الالتزام الشخصي. وتستند الأسعار والتقنيات الأميشية الموصوفة إلى البحوث الإثنية وقد لا تعكس بدقة الممارسات المعاصرة لجميع المجتمعات الأميشية.",
       "features": "المعالم",
       "pricing": "الخصخصة",
       "testimonials": "شهادات",
@@ -302,14 +302,10 @@
       "tag_2": "دراسات أمومة",
       "tag_3": "المشورة المالية",
       "brand_name": "Courssy",
-      "reviewer": "Marco R., early readers",
+      "reviewer": "ماركو ر.، قارئ مبكر",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "30day money back": "ضمان استرداد الأموال لمدة 30 يوماً",
-      "price": "السعر",
-      "free": "مجاناً",
-      "addtocart": "أضف إلى السلة",
-      "select_currency": "اختر العملة"
+      "story_quote": "يعيش الأميش حياة غنية وكاملة بينما ينفق جزء من ما ننفقه. في هذه الدورة، نكشف كيف يفعلون ذلك."
     }
   },
   "audience": {
@@ -319,17 +315,17 @@
     "perfect_items": [
       "أنت تكافح لجعل النهاية تلتقي",
       "تريد تخفيض التكاليف بدون التضحية بنوعية الحياة",
-      "Tired of consumerism and debt culture",
-      "Looking for practical, time-tested methods",
-      "Want a solid financial future for your family"
+      "لقد تعبت من ثقافة الاستهلاك والديون",
+      "تُريدُ أساليبَ عمليةَ، إختبار الوقتِ",
+      "تريد بناء مستقبل مالي قوي لعائلتك"
     ],
     "not_for": "ليس بالنسبة لك إذا:",
     "not_items": [
-      "Looking for get-rich-quick schemes",
-      "Not willing to change spending habits",
-      "Prefer quick fixes over a solid path",
-      "Not willing to implement what you learn",
-      "Looking for personalized financial advice"
+      "أنت تبحث عن مخططات تثري",
+      "أنت لا تريد تغيير عادات إنفاقك",
+      "تُفضّلُ التثبيتُ السريعِ على a قاعدة صلبة",
+      "أنت لست على استعداد لتنفيذ ما تتعلمه",
+      "أنت تبحث عن نصيحة مالية شخصية"
     ]
   },
   "course": {

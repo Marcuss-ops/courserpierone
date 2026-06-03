@@ -1,8 +1,8 @@
 {
   "locale": "ru",
   "seo": {
-    "title": "Амишские секреты: Как жить экономно и управлять деньгами",
-    "description": "Узнайте секреты бережливой жизни общины амишей. Включает полные видеомодули и скачиваемые PDF-файлы.",
+    "title": "Секреты амишей: как жить со сбережениями и управлять деньгами",
+    "description": "Откройте для себя тайны скромной жизни общины амишей. Включает полные видео модули и загружаемые PDF-файлы.",
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
@@ -19,8 +19,8 @@
   },
   "hero": {
     "badge": "Новый",
-    "title": "Амишские секреты: Как жить экономно и управлять деньгами",
-    "subtitle": "Узнайте секреты бережливой жизни общины амишей. Включает полные видеомодули и скачиваемые PDF-файлы.",
+    "title": "Секреты амишей: как жить со сбережениями и управлять деньгами",
+    "subtitle": "Откройте для себя тайны скромной жизни общины амишей. Включает полные видео модули и загружаемые PDF-файлы.",
     "cta": "Начинай.",
     "secondary_cta": "Узнать больше",
     "price_label": "Специальная цена запуска",
@@ -28,7 +28,7 @@
   },
   "problem": {
     "badge": "Проблема",
-    "title": "Устали доживать до зарплаты без сбережений? Современное общество подталкивает нас к чрезмерному потреблению.",
+    "title": "Устали дожить до конца месяца без сбережений? Современное общество подталкивает нас к чрезмерному потреблению.",
     "text": ""
   },
   "story": {
@@ -39,14 +39,14 @@
       "Система бартера и обмена, которая устраняет необходимость в наличных деньгах и создает прочные доверительные отношения.",
       "Экономика амишей: как семья живет на 60% меньше, чем в среднем по стране."
     ],
-    "quote": "Амиши живут богатой и полноценной жизнью, тратя лишь малую часть того, что тратим мы. В этом курсе мы расскажем вам, как они это делают."
+    "quote": "Амиши живут богатой и полной жизнью, тратя часть того, что мы тратим. В этой статье мы расскажем, как они это делают."
   },
   "author": {
     "badge": "03 - Автор",
     "title": "За этим курсом",
     "name": "Алессандро Ринальди",
-    "role": "Researcher · Author · Traveler",
-    "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+    "role": "Исследователь · Автор",
+    "bio": "Я прожил 3 месяца в Пенсильвании, взял интервью у 12 семей амишей, изучил их экономическую систему. Никакой теории, только практика.",
     "tags": [
       "Финансовая мудрость",
       "Устойчивая жизнь",
@@ -56,7 +56,7 @@
   "modules": {
     "badge": "02 Что вы узнаете",
     "title": "Секреты мастеров амишей",
-    "description": "8 practical modules that turn Amish wisdom into concrete actions.",
+    "description": "8 практических модулей, которые превращают мудрость амишей в конкретные действия для вашей повседневной жизни",
     "items": [
       {
         "title": "Бюджет амишей",
@@ -125,7 +125,7 @@
     "launch_price": "Цена запуска — $37",
     "cta": "Скачать Access Now",
     "guarantee_title": "30-дневная гарантия возврата денег",
-    "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+    "guarantee_text": "Попробуйте в течение 30 дней. Если вы не сэкономите хотя бы 100 долларов, мы вернем всю сумму. Никаких вопросов, никаких хлопот.",
     "includes": [
       "Полный курс (стоимость $97)",
       "eBook PDF, ePub, Kindle",
@@ -175,7 +175,7 @@
     "rights_reserved": "Все права защищены.",
     "privacy": "конфиденциальность",
     "terms": "Условия",
-    "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+    "legal_note": "Это цифровой информационный продукт. Результаты могут варьироваться и зависеть от личной приверженности. Описываемые цены и методы амишей основаны на этнографических исследованиях и могут не точно отражать современную практику всех общин амишей.",
     "badges": {
       "guarantee": "30-дневная гарантия",
       "instant_access": "Мгновенный доступ",
@@ -184,17 +184,17 @@
   },
   "trust": {
     "title": "Доверенные команды по всему миру",
-    "readers_count": "1 247 читателей",
+    "readers_count": "1247 читателей",
     "company_names": []
   },
   "ui": {
     "labels": {
       "instant_access": "Мгновенный доступ",
-      "buy_now_arrow": "Купить сейчас →",
-      "readers": "1 247 читателей",
-      "buy_now_dash": "Купить сейчас —",
+      "buy_now_arrow": "Купить сейчас",
+      "readers": "1247 читателей",
+      "buy_now_dash": "Купить сейчас -",
       "view_modules": "Посмотреть модули",
-      "ssl_secure": "Безопасная оплата через SSL",
+      "ssl_secure": "Безопасный SSL платеж",
       "instant_download": "Мгновенная загрузка",
       "lifetime_access": "пожизненный доступ",
       "guarantee_days": "30-дневная гарантия",
@@ -203,23 +203,23 @@
       "perfect_for": "Идеально для вас, если:",
       "p_struggle": "Вы боретесь, чтобы свести концы с концами",
       "p_cut_costs": "Вы хотите сократить расходы, не жертвуя качеством жизни.",
-      "p_consumerism": "Tired of consumerism and debt culture",
-      "p_practical": "Looking for practical, time-tested methods",
-      "p_future": "Want a solid financial future for your family",
+      "p_consumerism": "Вы устали от потребительской и долговой культуры.",
+      "p_practical": "Вы хотите практичные, проверенные временем методы",
+      "p_future": "Вы хотите построить финансовое будущее для своей семьи.",
       "not_for": "Не для вас, если:",
-      "n_quick": "Looking for get-rich-quick schemes",
-      "n_habits": "Not willing to change spending habits",
-      "n_quick_fix": "Prefer quick fixes over a solid path",
-      "n_implement": "Not willing to implement what you learn",
-      "n_advice": "Looking for personalized financial advice",
+      "n_quick": "Вы ищете схемы быстрого обогащения",
+      "n_habits": "Вы не хотите менять свои привычки",
+      "n_quick_fix": "Вы предпочитаете быстрые исправления над прочным фундаментом",
+      "n_implement": "Вы не готовы реализовать то, что вы узнаете",
+      "n_advice": "Вы ищете персонализированные финансовые советы",
       "section_learn": "02 Что вы узнаете",
       "masters_secrets": "Секреты мастеров амишей",
-      "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
+      "modules_desc": "8 практических модулей, которые превращают мудрость амишей в конкретные действия для вашей повседневной жизни",
       "section_author": "03 - Автор",
       "behind_course": "За этим курсом",
       "your_name": "Ваше имя здесь",
-      "researcher_author": "Researcher · Author · Traveler",
-      "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+      "researcher_author": "Исследователь · Автор",
+      "author_bio": "Я прожил 3 месяца в Пенсильвании, взял интервью у 12 семей амишей, изучил их экономическую систему. Никакой теории, только практика.",
       "section_content": "// 04 — Содержание курса",
       "what_inside": "Что вы найдете внутри",
       "also_includes": "Также включает в себя:",
@@ -245,7 +245,7 @@
       "inc_bonus_shopping": "Бонус: Еженедельный список покупок (стоимость $27)",
       "unlock_now": "Скачать Access Now",
       "guarantee_title": "30-дневная гарантия возврата денег",
-      "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+      "guarantee_text": "Попробуйте в течение 30 дней. Если вы не сэкономите хотя бы 100 долларов, мы вернем всю сумму. Никаких вопросов, никаких хлопот.",
       "section_testimonials": "// 06 — Отзывы",
       "testimonial_text": "Я применил бюджетный метод амишей и за два месяца сократил свои расходы на 35%. 30-дневный контрольный список стал поворотным моментом. Наконец, курс, который действительно работает.",
       "testimonial_name": "Марко Р.",
@@ -262,7 +262,7 @@
       "rights_reserved": "Все права защищены.",
       "privacy": "конфиденциальность",
       "terms": "Условия",
-      "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+      "legal_note": "Это цифровой информационный продукт. Результаты могут варьироваться и зависеть от личной приверженности. Описываемые цены и методы амишей основаны на этнографических исследованиях и могут не точно отражать современную практику всех общин амишей.",
       "features": "Особенности",
       "pricing": "цены",
       "testimonials": "Отзывы",
@@ -302,14 +302,10 @@
       "tag_2": "Исследования амишей",
       "tag_3": "Финансовый консалтинг",
       "brand_name": "Курсси",
-      "reviewer": "Marco R., early readers",
+      "reviewer": "Марко Р. Ранний читатель",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "30day money back": "Гарантия возврата денег 30 дней",
-      "price": "Цена",
-      "free": "БЕСПЛАТНО",
-      "addtocart": "Добавить в корзину",
-      "select_currency": "Выберите валюту"
+      "story_quote": "Амиши живут богатой и полной жизнью, тратя часть того, что мы тратим. В этой статье мы расскажем, как они это делают."
     }
   },
   "audience": {
@@ -319,17 +315,17 @@
     "perfect_items": [
       "Вы боретесь, чтобы свести концы с концами",
       "Вы хотите сократить расходы, не жертвуя качеством жизни.",
-      "Tired of consumerism and debt culture",
-      "Looking for practical, time-tested methods",
-      "Want a solid financial future for your family"
+      "Вы устали от потребительской и долговой культуры.",
+      "Вы хотите практичные, проверенные временем методы",
+      "Вы хотите построить финансовое будущее для своей семьи."
     ],
     "not_for": "Не для вас, если:",
     "not_items": [
-      "Looking for get-rich-quick schemes",
-      "Not willing to change spending habits",
-      "Prefer quick fixes over a solid path",
-      "Not willing to implement what you learn",
-      "Looking for personalized financial advice"
+      "Вы ищете схемы быстрого обогащения",
+      "Вы не хотите менять свои привычки",
+      "Вы предпочитаете быстрые исправления над прочным фундаментом",
+      "Вы не готовы реализовать то, что вы узнаете",
+      "Вы ищете персонализированные финансовые советы"
     ]
   },
   "course": {

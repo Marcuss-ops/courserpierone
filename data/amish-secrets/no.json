@@ -36,7 +36,7 @@
     "title": "Min erfaring blant amish",
     "image_captions": [
       "Daglige liv i det amishiske samfunnet: enkelhet, selvforsyning og økonomisk visdom gikk ned gjennom generasjoner.",
-      "Il sitema di Baratto e svindelbio che elimina il bisogno di denaro contante.",
+      "Barter og byttesystem som eliminerer behovet for kontanter og bygger varige tillitsforhold.",
       "Amish husholdning økonomi: hvordan en familie lever på 60% mindre enn det nasjonale gjennomsnittet."
     ],
     "quote": "Amish-folket lever rike og fulle liv ved å bruke en brøkdel av det vi bruker. I dette kurset avslører vi hvordan de gjør det."
@@ -59,35 +59,35 @@
     "description": "8 practical modules that turn Amish wisdom into concrete actions.",
     "items": [
       {
-        "title": "Amish Budget",
+        "title": "Amish-budsjett",
         "desc": "Live on 30% less without sacrifice."
       },
       {
-        "title": "Infinite Pantry",
+        "title": "Uendelig pantry",
         "desc": "The food storage method that eliminates waste."
       },
       {
-        "title": "Zero Debt",
+        "title": "Null gjeld",
         "desc": "The framework to get out of debt forever."
       },
       {
-        "title": "Fix Everything",
+        "title": "Fiks alt selv",
         "desc": "12 essential tools to repair yourself."
       },
       {
-        "title": "Money-Free Exchange",
+        "title": "Pengefri byttehandel",
         "desc": "How to activate a barter network."
       },
       {
-        "title": "Farm to Table",
+        "title": "Fra gård til bord",
         "desc": "Guide to home gardening and zero-waste cooking."
       },
       {
-        "title": "Free Energy",
+        "title": "Gratis energi",
         "desc": "How to cut utility bills by 50%."
       },
       {
-        "title": "30-Day Plan",
+        "title": "30-dagers plan",
         "desc": "Day-by-day checklist to transform your finances."
       }
     ]
@@ -309,7 +309,8 @@
       "price": "Pris",
       "free": "GRATIS",
       "addtocart": "Legg i handlekurv",
-      "select_currency": "Velg valuta"
+      "select_currency": "Velg valuta",
+      "story_quote": "Amish-folket lever rike og fulle liv ved å bruke en brøkdel av det vi bruker. I dette kurset avslører vi hvordan de gjør det."
     }
   },
   "audience": {

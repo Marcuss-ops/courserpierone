@@ -1,8 +1,8 @@
 {
   "locale": "vi",
   "seo": {
-    "title": "Bí quyết của người Amish: Cách sống tiết kiệm và quản lý tiền bạc",
-    "description": "Khám phá những bí quyết sống thanh đạm của cộng đồng người Amish. Bao gồm các mô-đun video đầy đủ và tệp PDF có thể tải xuống.",
+    "title": "Những bí mật của người Amish: làm thế nào để sống với tiết kiệm và quản lý tiền bạc",
+    "description": "Khám phá những bí mật của cộng đồng Amish. Bao gồm các mô- đun video đầy đủ và PDF có thể tải về được.",
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
@@ -19,8 +19,8 @@
   },
   "hero": {
     "badge": "Mới",
-    "title": "Bí quyết của người Amish: Cách sống tiết kiệm và quản lý tiền bạc",
-    "subtitle": "Khám phá những bí quyết sống thanh đạm của cộng đồng người Amish. Bao gồm các mô-đun video đầy đủ và tệp PDF có thể tải xuống.",
+    "title": "Những bí mật của người Amish: làm thế nào để sống với tiết kiệm và quản lý tiền bạc",
+    "subtitle": "Khám phá những bí mật của cộng đồng Amish. Bao gồm các mô- đun video đầy đủ và PDF có thể tải về được.",
     "cta": "Bắt đầu",
     "secondary_cta": "Học thêm",
     "price_label": "Giá khởi động đặc biệt",
@@ -28,25 +28,25 @@
   },
   "problem": {
     "badge": "Vấn đề",
-    "title": "Bạn mệt mỏi vì cuối tháng không còn tiền tiết kiệm? Xã hội hiện đại đang thúc đẩy chúng ta tiêu xài quá mức.",
+    "title": "Mệt mỏi vì đến cuối tháng mà không có tiền tiết kiệm? Xã hội hiện đại thúc đẩy chúng ta tiêu thụ quá nhiều.",
     "text": ""
   },
   "story": {
     "badge": "Câu chuyện của chúng ta",
-    "title": "♪ La mia eperienza trag li Amish",
+    "title": "Kinh nghiệm của tôi trong số người Amish",
     "image_captions": [
-      "La vita quoutidina nella comunità Amish: semplicità, Autosuffisenza e saggezza coranziaria.",
+      "Cuộc sống hàng ngày trong cộng đồng người Amish: sự đơn giản, sự thỏa mãn và sự khôn ngoan tài chính được truyền lại qua nhiều thế hệ.",
       "Hệ thống trao đổi và trao đổi loại bỏ nhu cầu về tiền bạc và xây dựng mối quan hệ tin tưởng lâu dài.",
       "Nền kinh tế gia đình người Amish: một gia đình sống ở mức ít hơn 60% so với trung bình quốc gia."
     ],
-    "quote": "Người Amish có cuộc sống giàu có và trọn vẹn trong khi chỉ chi tiêu một phần nhỏ so với chúng ta. Trong khóa học này, chúng tôi sẽ tiết lộ cho bạn cách họ làm điều đó."
+    "quote": "Người Amish sống giàu có và thỏa nguyện trong khi chi một phần nhỏ những gì chúng ta chi tiêu. Trong khóa học này, chúng ta tiết lộ cách họ làm."
   },
   "author": {
     "badge": "/ 3 — Tác giả",
     "title": "Đằng sau khóa học này",
     "name": "Âm thanh của bộ lạc",
-    "role": "Researcher · Author · Traveler",
-    "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+    "role": "Nhà nghiên cứu · Tác giả",
+    "bio": "Tôi đã sống 3 tháng ở Pennsylvania, phỏng vấn 12 gia đình Amish, nghiên cứu về hệ thống kinh tế của họ. Không lý thuyết, chỉ thực hành.]",
     "tags": [
       "Sự khôn ngoan về tài chính",
       "Sống bền vững",
@@ -56,7 +56,7 @@
   "modules": {
     "badge": "/ 02 — Bạn sẽ học được gì",
     "title": "Bí mật của phái Quên mình",
-    "description": "8 practical modules that turn Amish wisdom into concrete actions.",
+    "description": "8 Các mô-đun thực tiễn biến sự khôn ngoan của người Amish thành những hành động cụ thể cho cuộc sống hàng ngày của bạn.",
     "items": [
       {
         "title": "Name",
@@ -125,7 +125,7 @@
     "launch_price": "Giá phóng — sau đó là 37",
     "cta": "Name",
     "guarantee_title": "Bảo đảm 30 ngày về tiền tệ",
-    "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+    "guarantee_text": "Thử trong 30 ngày đi. Nếu anh không tiết kiệm ít nhất là 100 đô, chúng tôi sẽ hoàn lại toàn bộ số tiền. Không thắc mắc, không rắc rối.",
     "includes": [
       "Hoàn tất khóa học (giá trị 97 đô la)",
       "Name",
@@ -175,7 +175,7 @@
     "rights_reserved": "Nhà xuất bản giữ bản quyền.",
     "privacy": "Riêng tư",
     "terms": "Kì",
-    "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+    "legal_note": "Đây là một sản phẩm thông tin kỹ thuật số. Kết quả có thể khác nhau và tùy thuộc vào sự cam kết cá nhân. Giá cả và kỹ thuật của người Amish được miêu tả dựa trên nghiên cứu đại diện và có thể không phản ánh chính xác những thực hành hiện đại của tất cả cộng đồng người Amish.",
     "badges": {
       "guarantee": "Bảo đảm 30 ngày",
       "instant_access": "Truy cập ngay",
@@ -184,17 +184,17 @@
   },
   "trust": {
     "title": "Được tin cậy bởi các đội trên toàn thế giới",
-    "readers_count": "1.247 độc giả",
+    "readers_count": "1, 247 độc giả",
     "company_names": []
   },
   "ui": {
     "labels": {
-      "instant_access": "Truy cập tức thì",
-      "buy_now_arrow": "Mua ngay →",
-      "readers": "1.247 độc giả",
-      "buy_now_dash": "Mua ngay —",
-      "view_modules": "Xem các mô-đun",
-      "ssl_secure": "Thanh toán bảo mật SSL",
+      "instant_access": "Truy cập ngay",
+      "buy_now_arrow": "Mua ngay bây giờ",
+      "readers": "1, 247 độc giả",
+      "buy_now_dash": "Mua bây giờ —",
+      "view_modules": "Mô- đun xem",
+      "ssl_secure": "thanh toán SSL bảo mật",
       "instant_download": "Tải về",
       "lifetime_access": "Truy cập thời gian sống",
       "guarantee_days": "Bảo đảm 30 ngày",
@@ -203,23 +203,23 @@
       "perfect_for": "Hoàn hảo cho bạn nếu:",
       "p_struggle": "♪ Bạn đấu tranh để kiếm sống",
       "p_cut_costs": "Bạn muốn cắt giảm chi phí mà không phải hy sinh chất lượng cuộc sống",
-      "p_consumerism": "Tired of consumerism and debt culture",
-      "p_practical": "Looking for practical, time-tested methods",
-      "p_future": "Want a solid financial future for your family",
+      "p_consumerism": "Anh chán văn hóa tiêu dùng và nợ nần rồi.",
+      "p_practical": "Bạn muốn phương pháp thực tế, kiểm tra thời gian",
+      "p_future": "Bạn muốn xây dựng một tương lai tài chính vững chắc cho gia đình",
       "not_for": "Không phải cho bạn nếu:",
-      "n_quick": "Looking for get-rich-quick schemes",
-      "n_habits": "Not willing to change spending habits",
-      "n_quick_fix": "Prefer quick fixes over a solid path",
-      "n_implement": "Not willing to implement what you learn",
-      "n_advice": "Looking for personalized financial advice",
+      "n_quick": "Anh đang tìm kiếm những kế hoạch làm giàu.",
+      "n_habits": "Bạn không muốn thay đổi thói quen chi tiêu",
+      "n_quick_fix": "Bạn thích nhanh chóng sửa chữa trên một nền tảng vững chắc",
+      "n_implement": "Bạn không sẵn sàng thực hiện những gì bạn học",
+      "n_advice": "Bạn đang tìm kiếm tư vấn tài chính cá nhân",
       "section_learn": "/ 02 — Bạn sẽ học được gì",
       "masters_secrets": "Bí mật của phái Quên mình",
-      "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
+      "modules_desc": "8 Các mô-đun thực tiễn biến sự khôn ngoan của người Amish thành những hành động cụ thể cho cuộc sống hàng ngày của bạn.",
       "section_author": "/ 3 — Tác giả",
       "behind_course": "Đằng sau khóa học này",
       "your_name": "Tên bạn ở đây",
-      "researcher_author": "Researcher · Author · Traveler",
-      "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+      "researcher_author": "Nhà nghiên cứu · Tác giả",
+      "author_bio": "Tôi đã sống 3 tháng ở Pennsylvania, phỏng vấn 12 gia đình Amish, nghiên cứu về hệ thống kinh tế của họ. Không lý thuyết, chỉ thực hành.]",
       "section_content": "/ 4 — Tất nhiên là thỏa lòng",
       "what_inside": "Những gì bạn sẽ tìm thấy bên trong",
       "also_includes": "Cũng bao gồm:",
@@ -245,7 +245,7 @@
       "inc_bonus_shopping": "BONUS: Danh sách mua sắm hàng tuần (giá 27 Mỹ kim)",
       "unlock_now": "Name",
       "guarantee_title": "Bảo đảm 30 ngày về tiền tệ",
-      "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+      "guarantee_text": "Thử trong 30 ngày đi. Nếu anh không tiết kiệm ít nhất là 100 đô, chúng tôi sẽ hoàn lại toàn bộ số tiền. Không thắc mắc, không rắc rối.",
       "section_testimonials": "/ 6 — Kiểm tra",
       "testimonial_text": "Tôi áp dụng phương pháp ngân sách của người Amish và trong vòng hai tháng, tôi giảm được 25% chi phí. Danh sách 30 ngày là bước ngoặt. Cuối cùng cũng thành công.",
       "testimonial_name": "Marco R.",
@@ -262,7 +262,7 @@
       "rights_reserved": "Nhà xuất bản giữ bản quyền.",
       "privacy": "Riêng tư",
       "terms": "Kì",
-      "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+      "legal_note": "Đây là một sản phẩm thông tin kỹ thuật số. Kết quả có thể khác nhau và tùy thuộc vào sự cam kết cá nhân. Giá cả và kỹ thuật của người Amish được miêu tả dựa trên nghiên cứu đại diện và có thể không phản ánh chính xác những thực hành hiện đại của tất cả cộng đồng người Amish.",
       "features": "Tính năng",
       "pricing": "Chạy",
       "testimonials": "Thí nghiệm",
@@ -302,14 +302,10 @@
       "tag_2": "Học tiếng Amish",
       "tag_3": "Tư vấn tài chính",
       "brand_name": "Coursy",
-      "reviewer": "Marco R., early readers",
+      "reviewer": "Marco R., độc giả sớm",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "30day money back": "Hoàn tiền 30 ngày nếu không hài lòng",
-      "price": "Giá",
-      "free": "MIỄN PHÍ",
-      "addtocart": "Thêm vào giỏ hàng",
-      "select_currency": "Chọn loại tiền tệ"
+      "story_quote": "Người Amish sống giàu có và thỏa nguyện trong khi chi một phần nhỏ những gì chúng ta chi tiêu. Trong khóa học này, chúng ta tiết lộ cách họ làm."
     }
   },
   "audience": {
@@ -319,17 +315,17 @@
     "perfect_items": [
       "♪ Bạn đấu tranh để kiếm sống",
       "Bạn muốn cắt giảm chi phí mà không phải hy sinh chất lượng cuộc sống",
-      "Tired of consumerism and debt culture",
-      "Looking for practical, time-tested methods",
-      "Want a solid financial future for your family"
+      "Anh chán văn hóa tiêu dùng và nợ nần rồi.",
+      "Bạn muốn phương pháp thực tế, kiểm tra thời gian",
+      "Bạn muốn xây dựng một tương lai tài chính vững chắc cho gia đình"
     ],
     "not_for": "Không phải cho bạn nếu:",
     "not_items": [
-      "Looking for get-rich-quick schemes",
-      "Not willing to change spending habits",
-      "Prefer quick fixes over a solid path",
-      "Not willing to implement what you learn",
-      "Looking for personalized financial advice"
+      "Anh đang tìm kiếm những kế hoạch làm giàu.",
+      "Bạn không muốn thay đổi thói quen chi tiêu",
+      "Bạn thích nhanh chóng sửa chữa trên một nền tảng vững chắc",
+      "Bạn không sẵn sàng thực hiện những gì bạn học",
+      "Bạn đang tìm kiếm tư vấn tài chính cá nhân"
     ]
   },
   "course": {

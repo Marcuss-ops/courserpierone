@@ -1,8 +1,8 @@
 {
   "locale": "tr",
   "seo": {
-    "title": "Amish Sırları: Nasıl tasarruflu yaşanır ve para yönetilir",
-    "description": "Amish topluluğunun tutumlu yaşam sırlarını keşfedin. Kapsamlı video modülleri ve indirilebilir PDF'ler içerir.",
+    "title": "Amish Sırları: Tasarrufla nasıl yaşamak ve para kazanmak",
+    "description": "Amish topluluğunun iğrenç yaşam sırlarını keşfedin. Tüm video modüllerini ekleyin ve PDF'leri indirin.",
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
@@ -19,8 +19,8 @@
   },
   "hero": {
     "badge": "Yeni Yeni Yeni Yeni Yeni Yeni Yeni",
-    "title": "Amish Sırları: Nasıl tasarruflu yaşanır ve para yönetilir",
-    "subtitle": "Amish topluluğunun tutumlu yaşam sırlarını keşfedin. Kapsamlı video modülleri ve indirilebilir PDF'ler içerir.",
+    "title": "Amish Sırları: Tasarrufla nasıl yaşamak ve para kazanmak",
+    "subtitle": "Amish topluluğunun iğrenç yaşam sırlarını keşfedin. Tüm video modüllerini ekleyin ve PDF'leri indirin.",
     "cta": "Başlayın",
     "secondary_cta": "Daha Fazla Öğrenin",
     "price_label": "Özel başlangıç fiyatı",
@@ -28,7 +28,7 @@
   },
   "problem": {
     "badge": "Problem Problem",
-    "title": "Ay sonunu birikim yapamadan getirmekten yoruldunuz mu? Modern toplum bizi aşırı tüketime zorluyor.",
+    "title": "Herhangi bir tasarruf olmadan ayın sonuna ulaşmaktan bıktınız mı? Modern toplum bizi aşırı tüketime doğru itiyor.",
     "text": ""
   },
   "story": {
@@ -39,14 +39,14 @@
       "Nakit ihtiyacını ortadan kaldıran ve kalıcı güven ilişkileri inşa eden barter ve değişim sistemi.",
       "Amish ev ekonomisi: Bir aile ulusal ortalamadan% 60 daha az yaşıyor."
     ],
-    "quote": "Amishler, bizim harcadığımızın çok küçük bir kısmını harcayarak zengin ve dolu dolu hayatlar yaşıyorlar. Bu kursta size nasıl yaptıklarını açıklıyoruz."
+    "quote": "Amish, harcadığımız şeyin bir kısmını geçirirken zengin ve tam hayatlar yaşar. Bu durumda, bunu nasıl yaptıklarını ortaya koyuyoruz."
   },
   "author": {
     "badge": "// 03 - The Author",
     "title": "Bu Kurs Arkasında",
     "name": "Alessandro Rinaldi",
-    "role": "Researcher · Author · Traveler",
-    "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+    "role": "Araştırmacı · Yazar",
+    "bio": "[Burada hikayenizi ekleyin: Pennsylvania'da 3 ay yaşadım, 12 Amish ailesiyle röportaj yaptım, ekonomik sistemini inceledim. Hiçbir teori, sadece pratik.]",
     "tags": [
       "Finansal Bilgelik",
       "Sürdürülebilir Yaşam",
@@ -56,7 +56,7 @@
   "modules": {
     "badge": "// 02 - What You'll Learn",
     "title": "Amish Masters'ın Sırları",
-    "description": "8 practical modules that turn Amish wisdom into concrete actions.",
+    "description": "Amish bilgeliğini günlük hayatınız için somut eylemlere çeviren 8 pratik modül.",
     "items": [
       {
         "title": "Amish Budget",
@@ -125,7 +125,7 @@
     "launch_price": "Başlangıç fiyatı – sonra 37 $",
     "cta": "Unlock Access Now",
     "guarantee_title": "30-Day Money-Back Garanti",
-    "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+    "guarantee_text": "30 gün boyunca deneyin. En az 100 tasarruf etmezseniz, tam miktarı iade edeceğiz. Hiçbir soru yok, hayır.",
     "includes": [
       "Full course (value $97)",
       "eBook PDF, ePub, Kindle",
@@ -175,7 +175,7 @@
     "rights_reserved": "Tüm hakları saklıdır.",
     "privacy": "Gizlilik",
     "terms": "Şartlar",
-    "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+    "legal_note": "Bu, dijital bir bilgi ürünü. Sonuçlar değişebilir ve kişisel taahhütlere bağlı olabilir. açıklanan Amish fiyatları ve teknikler etnografik araştırmalara dayanıyor ve tüm Amish topluluklarının çağdaş uygulamalarını doğru şekilde yansıtmıyor olabilir.",
     "badges": {
       "guarantee": "30-Day Garanti",
       "instant_access": "Anında Erişim",
@@ -190,11 +190,11 @@
   "ui": {
     "labels": {
       "instant_access": "Anında erişim",
-      "buy_now_arrow": "Şimdi Satın Al →",
+      "buy_now_arrow": "Şimdi satın alın",
       "readers": "1.247 okuyucu",
-      "buy_now_dash": "Şimdi Satın Al —",
-      "view_modules": "Modülleri Görüntüle",
-      "ssl_secure": "SSL ile güvenli ödeme",
+      "buy_now_dash": "Şimdi Satın Al -",
+      "view_modules": "View Modules",
+      "ssl_secure": "Güvenli SSL ödeme ödeme",
       "instant_download": "Anında Download",
       "lifetime_access": "Lifetime Access",
       "guarantee_days": "30-Day Garanti",
@@ -203,23 +203,23 @@
       "perfect_for": "Sizin için mükemmel:",
       "p_struggle": "Son buluşmak için mücadele ediyorsun",
       "p_cut_costs": "Yaşam kalitesini feda etmeden maliyetleri kesmek istiyorsunuz",
-      "p_consumerism": "Tired of consumerism and debt culture",
-      "p_practical": "Looking for practical, time-tested methods",
-      "p_future": "Want a solid financial future for your family",
+      "p_consumerism": "Tüketicicilik ve borç kültüründen bıktınız",
+      "p_practical": "Pratik, zaman test edilmiş yöntemler istiyorsunuz",
+      "p_future": "Aileniz için sağlam bir finansal gelecek inşa etmek istiyorsunuz",
       "not_for": "Senin için değil:",
-      "n_quick": "Looking for get-rich-quick schemes",
-      "n_habits": "Not willing to change spending habits",
-      "n_quick_fix": "Prefer quick fixes over a solid path",
-      "n_implement": "Not willing to implement what you learn",
-      "n_advice": "Looking for personalized financial advice",
+      "n_quick": "Zengin-quick programları arıyorsun",
+      "n_habits": "Harcama alışkanlıklarınızı değiştirmek istemezsiniz",
+      "n_quick_fix": "Katı bir temel üzerinde hızlı düzeltmeleri tercih edersiniz",
+      "n_implement": "Öğrendiğiniz şeyleri uygulamak için istekli değilsiniz",
+      "n_advice": "Kişiselleştirilmiş finansal tavsiye arıyorsunuz",
       "section_learn": "// 02 - What You'll Learn",
       "masters_secrets": "Amish Masters'ın Sırları",
-      "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
+      "modules_desc": "Amish bilgeliğini günlük hayatınız için somut eylemlere çeviren 8 pratik modül.",
       "section_author": "// 03 - The Author",
       "behind_course": "Bu Kurs Arkasında",
       "your_name": "Adınız Burada",
-      "researcher_author": "Researcher · Author · Traveler",
-      "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+      "researcher_author": "Araştırmacı · Yazar",
+      "author_bio": "[Burada hikayenizi ekleyin: Pennsylvania'da 3 ay yaşadım, 12 Amish ailesiyle röportaj yaptım, ekonomik sistemini inceledim. Hiçbir teori, sadece pratik.]",
       "section_content": "// 04 - Course Content",
       "what_inside": "İçte Ne Bulacaksın",
       "also_includes": "Ayrıca şunları içerir:",
@@ -245,7 +245,7 @@
       "inc_bonus_shopping": "Fitness: Haftalık alışveriş listesi (değer $27)",
       "unlock_now": "Unlock Access Now",
       "guarantee_title": "30-Day Money-Back Garanti",
-      "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+      "guarantee_text": "30 gün boyunca deneyin. En az 100 tasarruf etmezseniz, tam miktarı iade edeceğiz. Hiçbir soru yok, hayır.",
       "section_testimonials": "// 06 - Referanslar",
       "testimonial_text": "Amish bütçe yöntemi uyguladım ve iki ay içinde masraflarımı% 35 azalttım. 30 günlük kontrol listesi dönüm noktasıydı. Son olarak gerçekten işe yarayan bir kurs.",
       "testimonial_name": "Marco R.",
@@ -262,7 +262,7 @@
       "rights_reserved": "Tüm hakları saklıdır.",
       "privacy": "Gizlilik",
       "terms": "Şartlar",
-      "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+      "legal_note": "Bu, dijital bir bilgi ürünü. Sonuçlar değişebilir ve kişisel taahhütlere bağlı olabilir. açıklanan Amish fiyatları ve teknikler etnografik araştırmalara dayanıyor ve tüm Amish topluluklarının çağdaş uygulamalarını doğru şekilde yansıtmıyor olabilir.",
       "features": "Özellikler Özellikler Özellikler Özellikler",
       "pricing": "Fiyatlandırma",
       "testimonials": "Referanslar",
@@ -302,14 +302,10 @@
       "tag_2": "Amish Studies",
       "tag_3": "Finansal Danışmanlık",
       "brand_name": "Courssy",
-      "reviewer": "Marco R., early readers",
+      "reviewer": "Marco R., erken okuyucu",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "30day money back": "30 gün para iade garantisi",
-      "price": "Fiyat",
-      "free": "ÜCRETSİZ",
-      "addtocart": "Sepete ekle",
-      "select_currency": "Para birimi seç"
+      "story_quote": "Amish, harcadığımız şeyin bir kısmını geçirirken zengin ve tam hayatlar yaşar. Bu durumda, bunu nasıl yaptıklarını ortaya koyuyoruz."
     }
   },
   "audience": {
@@ -319,17 +315,17 @@
     "perfect_items": [
       "Son buluşmak için mücadele ediyorsun",
       "Yaşam kalitesini feda etmeden maliyetleri kesmek istiyorsunuz",
-      "Tired of consumerism and debt culture",
-      "Looking for practical, time-tested methods",
-      "Want a solid financial future for your family"
+      "Tüketicicilik ve borç kültüründen bıktınız",
+      "Pratik, zaman test edilmiş yöntemler istiyorsunuz",
+      "Aileniz için sağlam bir finansal gelecek inşa etmek istiyorsunuz"
     ],
     "not_for": "Senin için değil:",
     "not_items": [
-      "Looking for get-rich-quick schemes",
-      "Not willing to change spending habits",
-      "Prefer quick fixes over a solid path",
-      "Not willing to implement what you learn",
-      "Looking for personalized financial advice"
+      "Zengin-quick programları arıyorsun",
+      "Harcama alışkanlıklarınızı değiştirmek istemezsiniz",
+      "Katı bir temel üzerinde hızlı düzeltmeleri tercih edersiniz",
+      "Öğrendiğiniz şeyleri uygulamak için istekli değilsiniz",
+      "Kişiselleştirilmiş finansal tavsiye arıyorsunuz"
     ]
   },
   "course": {

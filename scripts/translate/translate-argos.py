@@ -165,7 +165,7 @@ def main():
     FORCE_MODE = "--force" in sys.argv
     if FORCE_MODE:
         sys.argv.remove("--force")
-        print("\n⚠️  FORCE mode: sovrascrivo TUTTI i campi con le nuove traduzioni.")
+        print("\n[FORCE] mode: sovrascrivo TUTTI i campi con le nuove traduzioni.")
         print("   I valori esistenti verranno persi!\n")
 
     if len(sys.argv) < 3:

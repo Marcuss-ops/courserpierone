@@ -1,8 +1,8 @@
 {
   "locale": "ro",
   "seo": {
-    "title": "Secretele comunității Amish: Cum să trăiești cu economii și să gestionezi banii",
-    "description": "Descoperă secretele traiului frugal al comunității Amish. Include module video complete și PDF-uri descărcabile.",
+    "title": "Secrete Amish: Cum sa traiesti cu economii si sa administrezi bani",
+    "description": "Descoperă secretele vieţii frugale a comunităţii Amish. Include module video complete și PDF-uri descărcabile.",
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
@@ -19,8 +19,8 @@
   },
   "hero": {
     "badge": "Nou",
-    "title": "Secretele comunității Amish: Cum să trăiești cu economii și să gestionezi banii",
-    "subtitle": "Descoperă secretele traiului frugal al comunității Amish. Include module video complete și PDF-uri descărcabile.",
+    "title": "Secrete Amish: Cum sa traiesti cu economii si sa administrezi bani",
+    "subtitle": "Descoperă secretele vieţii frugale a comunităţii Amish. Include module video complete și PDF-uri descărcabile.",
     "cta": "Începe",
     "secondary_cta": "Află mai multe",
     "price_label": "Prețul special de lansare",
@@ -28,25 +28,25 @@
   },
   "problem": {
     "badge": "Problema",
-    "title": "Te-ai săturat să ajungi la sfârșitul lunii fără economii? Societatea modernă ne împinge către un consum excesiv.",
+    "title": "Obosit de a ajunge la sfârșitul lunii fără nici o economie? Societatea modernă ne împinge către consum excesiv.",
     "text": ""
   },
   "story": {
     "badge": "Povestea noastră",
-    "title": "La mia experienza tra plane Amish",
+    "title": "Experienţa mea în rândul amishilor",
     "image_captions": [
       "Viața de zi cu zi în comunitatea Amish: simplitate, auto-suficiență, și înțelepciunea financiară a trecut în jos prin generații.",
       "Sistemul de schimb şi schimb care elimină nevoia de bani şi construieşte relaţii de încredere durabile.",
       "Economia casnică Amish: cum o familie trăieşte cu 60% mai puţin decât media naţională."
     ],
-    "quote": "Comunitatea Amish trăiește vieți bogate și împlinite cheltuind o fracțiune din cât cheltuim noi. În acest curs îți dezvăluim cum fac acest lucru."
+    "quote": "Amish trăiesc vieţi bogate şi pline în timp ce cheltuim o fracţiune din ceea ce cheltuim. În acest curs, vom dezvălui cum o fac."
   },
   "author": {
     "badge": "Autorul",
     "title": "În spatele acestui curs",
     "name": "Alessandro Rinaldi",
-    "role": "Researcher · Author · Traveler",
-    "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+    "role": "Cercetător · Autor",
+    "bio": "Am locuit 3 luni în Pennsylvania, am intervievat 12 familii Amish, le-am studiat sistemul economic. Nici o teorie, doar practica.]",
     "tags": [
       "Înţelepciunea financiară",
       "Viaţa durabilă",
@@ -56,7 +56,7 @@
   "modules": {
     "badge": "Ce vei învăţa",
     "title": "Secretele Masters Amish",
-    "description": "8 practical modules that turn Amish wisdom into concrete actions.",
+    "description": "8 module practice care transformă înţelepciunea Amish în acţiuni concrete pentru viaţa ta de zi cu zi.",
     "items": [
       {
         "title": "Bugetul Amish",
@@ -125,7 +125,7 @@
     "launch_price": "Preţ de lansare apoi $37",
     "cta": "Deblochează accesul acum",
     "guarantee_title": "Garanţie pentru banii de 30 de zile",
-    "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+    "guarantee_text": "Încearcă 30 de zile. Dacă nu economisiţi cel puţin 100 de dolari, vom returna întreaga sumă. Fără întrebări, fără bătăi de cap.",
     "includes": [
       "Curs complet (valoare 97 dolari)",
       "EBook PDF, ePub, Kindle",
@@ -175,7 +175,7 @@
     "rights_reserved": "Toate drepturile rezervate.",
     "privacy": "Confidențialitate",
     "terms": "Termeni",
-    "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+    "legal_note": "Acesta este un produs informatic digital. Rezultatele pot varia și depind de angajamentul personal. Preţurile şi tehnicile Amish descrise se bazează pe cercetarea etnografică şi nu pot reflecta cu exactitate practicile contemporane ale tuturor comunităţilor Amish.",
     "badges": {
       "guarantee": "Garanție de 30 de zile",
       "instant_access": "Acces instant",
@@ -184,17 +184,17 @@
   },
   "trust": {
     "title": "Încrezător de echipe din întreaga lume",
-    "readers_count": "1.247 de cititori",
+    "readers_count": "1,247 de cititori",
     "company_names": []
   },
   "ui": {
     "labels": {
-      "instant_access": "Acces imediat",
-      "buy_now_arrow": "Cumpără Acum →",
-      "readers": "1.247 de cititori",
-      "buy_now_dash": "Cumpără Acum —",
-      "view_modules": "Descoperă Modulele",
-      "ssl_secure": "Plată securizată prin SSL",
+      "instant_access": "Acces instant",
+      "buy_now_arrow": "Cumpără acum →",
+      "readers": "1,247 de cititori",
+      "buy_now_dash": "Cumpăraţi acum",
+      "view_modules": "Module de vizualizare",
+      "ssl_secure": "Plata SSL sigură",
       "instant_download": "Descărcare instantanee",
       "lifetime_access": "Acces pe viaţă",
       "guarantee_days": "Garanție de 30 de zile",
@@ -203,23 +203,23 @@
       "perfect_for": "Perfect pentru dumneavoastră dacă:",
       "p_struggle": "Te zbaţi să-ţi vezi de treabă.",
       "p_cut_costs": "Vrei să reduci costurile fără să sacrifici calitatea vieţii.",
-      "p_consumerism": "Tired of consumerism and debt culture",
-      "p_practical": "Looking for practical, time-tested methods",
-      "p_future": "Want a solid financial future for your family",
+      "p_consumerism": "Te-ai săturat de cultura consumerismului şi a datoriei.",
+      "p_practical": "Vrei metode practice, testate în timp",
+      "p_future": "Vrei să construieşti un viitor financiar solid pentru familia ta",
       "not_for": "Nu pentru tine dacă:",
-      "n_quick": "Looking for get-rich-quick schemes",
-      "n_habits": "Not willing to change spending habits",
-      "n_quick_fix": "Prefer quick fixes over a solid path",
-      "n_implement": "Not willing to implement what you learn",
-      "n_advice": "Looking for personalized financial advice",
+      "n_quick": "Cauţi scheme de îmbogăţire rapidă",
+      "n_habits": "Nu vrei să-ţi schimbi obiceiurile de cheltuieli.",
+      "n_quick_fix": "Preferi reparaţii rapide peste o fundaţie solidă.",
+      "n_implement": "Nu eşti dispus să implementezi ceea ce înveţi.",
+      "n_advice": "Cautati sfaturi financiare personalizate",
       "section_learn": "Ce vei învăţa",
       "masters_secrets": "Secretele Masters Amish",
-      "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
+      "modules_desc": "8 module practice care transformă înţelepciunea Amish în acţiuni concrete pentru viaţa ta de zi cu zi.",
       "section_author": "Autorul",
       "behind_course": "În spatele acestui curs",
       "your_name": "Numele tău aici",
-      "researcher_author": "Researcher · Author · Traveler",
-      "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+      "researcher_author": "Cercetător · Autor",
+      "author_bio": "Am locuit 3 luni în Pennsylvania, am intervievat 12 familii Amish, le-am studiat sistemul economic. Nici o teorie, doar practica.]",
       "section_content": "// 04 ",
       "what_inside": "Ce vei găsi în interior",
       "also_includes": "De asemenea, include:",
@@ -245,7 +245,7 @@
       "inc_bonus_shopping": "BONUS: Lista de cumpărături săptămânale (valoare $27)",
       "unlock_now": "Deblochează accesul acum",
       "guarantee_title": "Garanţie pentru banii de 30 de zile",
-      "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+      "guarantee_text": "Încearcă 30 de zile. Dacă nu economisiţi cel puţin 100 de dolari, vom returna întreaga sumă. Fără întrebări, fără bătăi de cap.",
       "section_testimonials": "/ 06 ",
       "testimonial_text": "Am aplicat metoda bugetului Amish şi în două luni mi-am redus cheltuielile cu 35%. Lista de 30 de zile a fost punctul de cotitură. În sfârşit un curs care chiar funcţionează.",
       "testimonial_name": "Marco R.",
@@ -262,7 +262,7 @@
       "rights_reserved": "Toate drepturile rezervate.",
       "privacy": "Confidențialitate",
       "terms": "Termeni",
-      "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+      "legal_note": "Acesta este un produs informatic digital. Rezultatele pot varia și depind de angajamentul personal. Preţurile şi tehnicile Amish descrise se bazează pe cercetarea etnografică şi nu pot reflecta cu exactitate practicile contemporane ale tuturor comunităţilor Amish.",
       "features": "Caracteristici",
       "pricing": "Prețuri",
       "testimonials": "Mărturii",
@@ -302,14 +302,10 @@
       "tag_2": "Studii Amish",
       "tag_3": "Consultanţă financiară",
       "brand_name": "CourssyCity in Germany",
-      "reviewer": "Marco R., early readers",
+      "reviewer": "Marco R., cititor timpuriu",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "30day money back": "Garanție de returnare a banilor 30 de zile",
-      "price": "Preț",
-      "free": "GRATIS",
-      "addtocart": "Adaugă în coș",
-      "select_currency": "Selectează moneda"
+      "story_quote": "Amish trăiesc vieţi bogate şi pline în timp ce cheltuim o fracţiune din ceea ce cheltuim. În acest curs, vom dezvălui cum o fac."
     }
   },
   "audience": {
@@ -319,17 +315,17 @@
     "perfect_items": [
       "Te zbaţi să-ţi vezi de treabă.",
       "Vrei să reduci costurile fără să sacrifici calitatea vieţii.",
-      "Tired of consumerism and debt culture",
-      "Looking for practical, time-tested methods",
-      "Want a solid financial future for your family"
+      "Te-ai săturat de cultura consumerismului şi a datoriei.",
+      "Vrei metode practice, testate în timp",
+      "Vrei să construieşti un viitor financiar solid pentru familia ta"
     ],
     "not_for": "Nu pentru tine dacă:",
     "not_items": [
-      "Looking for get-rich-quick schemes",
-      "Not willing to change spending habits",
-      "Prefer quick fixes over a solid path",
-      "Not willing to implement what you learn",
-      "Looking for personalized financial advice"
+      "Cauţi scheme de îmbogăţire rapidă",
+      "Nu vrei să-ţi schimbi obiceiurile de cheltuieli.",
+      "Preferi reparaţii rapide peste o fundaţie solidă.",
+      "Nu eşti dispus să implementezi ceea ce înveţi.",
+      "Cautati sfaturi financiare personalizate"
     ]
   },
   "course": {

@@ -42,98 +42,99 @@ interface BookClaudeProps {
   checkoutUrl?: string;
 }
 
-// ─── Last-resort English fallback labels ────────────
+// ─── Last-resort English fallback labels (solo se tutto il resto fallisce) ───
 const FALLBACK_LABELS = {
   instant_access: "Instant access",
   buy_now_arrow: "Buy Now →",
-  readers: "1,247+ lettori",
+  readers: "1,247+ readers",
   buy_now_dash: "Buy Now —",
   view_modules: "View Modules",
-  ssl_secure: "Pagamento sicuro SSL",
-  instant_download: "Download Immediato",
-  lifetime_access: "Accesso a Vita",
-  guarantee_days: "30 Giorni Garanzia",
-  section_who: "// 01 — Per Chi È",
-  is_this_for_you: "Questo corso fa per te?",
-  perfect_for: "Perfetto per te se:",
-  p_struggle: "Fai fatica ad arrivare a fine mese",
-  p_cut_costs: "Vuoi tagliare le spese senza sacrificare la qualità della vita",
-  p_consumerism: "Sei stanco di vivere con la cultura del consumo e del debito",
-  p_practical: "Cerchi metodi pratici, testati da secoli",
-  p_future: "Vuoi costruire un futuro finanziario solido per la tua famiglia",
-  not_for: "Non fa per te se:",
-  n_quick: "Cerchi schemi per diventare milionario in una settimana",
-  n_habits: "Non vuoi cambiare le tue abitudini di spesa",
-  n_quick_fix: "Preferisci soluzioni rapide invece di un percorso solido",
-  n_implement: "Non sei disposto a mettere in pratica ciò che impari",
-  n_advice: "Cerchi consulenza finanziaria personalizzata",
-  section_learn: "// 02 — Cosa Imparerai",
-  masters_secrets: "I Segreti dei Maestri Amish",
-  modules_desc: "8 moduli pratici che trasformano la saggezza Amish in azioni concrete per la tua vita quotidiana.",
-  section_author: "// 03 — L'Autore",
-  behind_course: "Chi c'è dietro questo corso",
+  ssl_secure: "Secure SSL payment",
+  instant_download: "Instant Download",
+  lifetime_access: "Lifetime Access",
+  guarantee_days: "30-Day Guarantee",
+  section_who: "// 01 — Who Is This For",
+  is_this_for_you: "Is This Course For You?",
+  perfect_for: "Perfect for you if:",
+  p_struggle: "You struggle to make ends meet",
+  p_cut_costs: "You want to cut costs without sacrificing quality of life",
+  p_consumerism: "You're tired of consumerism and debt culture",
+  p_practical: "You want practical, time-tested methods",
+  p_future: "You want to build a solid financial future for your family",
+  not_for: "Not for you if:",
+  n_quick: "You're looking for get-rich-quick schemes",
+  n_habits: "You don't want to change your spending habits",
+  n_quick_fix: "You prefer quick fixes over a solid foundation",
+  n_implement: "You're not willing to implement what you learn",
+  n_advice: "You're looking for personalized financial advice",
+  section_learn: "// 02 — What You'll Learn",
+  masters_secrets: "The Amish Masters' Secrets",
+  modules_desc: "8 practical modules that turn Amish wisdom into concrete actions for your daily life.",
+  section_author: "// 03 — The Author",
+  behind_course: "Behind This Course",
   your_name: "Alessandro Rinaldi",
-  researcher_author: "Ricercatore · Autore · Viaggiatore",
-  author_bio: "Ho vissuto 3 mesi in Pennsylvania, intervistato 12 famiglie Amish e studiato il loro sistema economico. Nessuna teoria — solo pratiche testate sul campo che ho applicato per trasformare la mia vita finanziaria.",
-  section_content: "// 04 — Contenuto del Corso",
-  what_inside: "Cosa Troverai Dentro",
-  also_includes: "Include anche:",
-  inc_full_ebook: "eBook completo (PDF, ePub, Kindle)",
-  inc_checklist: "Checklist stampabile 30 giorni",
-  inc_excel: "Foglio Excel budget Amish",
-  inc_shopping: "Lista della spesa settimanale",
-  inc_lifetime: "Accesso a vita all'area riservata",
-  inc_updates: "Aggiornamenti gratuiti futuri",
-  section_offer: "// 05 — Offerta",
-  invest_yourself: "Investi in Te Stesso",
-  launch_offer: "Offerta di Lancio",
-  complete_package: "Pacchetto Completo",
-  course_value: "Corso: €97",
-  bonus_value: "Bonus: €27",
-  one_time: "Pagamento unico — nessun abbonamento",
-  launch_price: "Prezzo lancio — poi €37",
-  inc_course_full: "Corso completo (valore €97)",
+  researcher_author: "Researcher · Author · Traveler",
+  author_bio: "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system. No theory — only field-tested practices that I applied to transform my financial life.",
+  section_content: "// 04 — Course Content",
+  what_inside: "What You'll Find Inside",
+  also_includes: "Also includes:",
+  inc_full_ebook: "Full eBook (PDF, ePub, Kindle)",
+  inc_checklist: "Printable 30-day checklist",
+  inc_excel: "Amish budget Excel sheet",
+  inc_shopping: "Weekly shopping list template",
+  inc_lifetime: "Lifetime member area access",
+  inc_updates: "Free future updates",
+  section_offer: "// 05 — The Offer",
+  invest_yourself: "Invest in Yourself",
+  launch_offer: "Launch Offer",
+  complete_package: "Complete Package",
+  course_value: "Course: $97",
+  bonus_value: "Bonus: $27",
+  one_time: "One-time payment — no subscription",
+  launch_price: "Launch price — then $37",
+  inc_course_full: "Full course (value $97)",
   inc_ebook: "eBook PDF, ePub, Kindle",
-  inc_checklist2: "Checklist 30 giorni stampabile",
-  inc_excel2: "Foglio Excel budget Amish",
-  inc_access_updates: "Accesso a vita + aggiornamenti",
-  inc_bonus_shopping: "BONUS: Lista spesa settimanale (valore €27)",
-  unlock_now: "Sblocca Accesso Ora",
-  guarantee_title: "Garanzia Soddisfatti o Rimborsati",
-  guarantee_text: "Provalo per 30 giorni. Se non risparmi almeno €100, ti rimborsiamo l'intero importo. Nessuna domanda, nessuna scadenza.",
-  section_testimonials: "// 06 — Testimonianze",
-  reviewer: "Marco R., primi lettori",
+  inc_checklist2: "Printable 30-day checklist",
+  inc_excel2: "Amish budget Excel sheet",
+  inc_access_updates: "Lifetime access + updates",
+  inc_bonus_shopping: "BONUS: Weekly shopping list (value $27)",
+  unlock_now: "Unlock Access Now",
+  guarantee_title: "30-Day Money-Back Guarantee",
+  guarantee_text: "Try it for 30 days. If you don't save at least $100, we'll refund the full amount. No questions, no hassle.",
+  section_testimonials: "// 06 — Testimonials",
+  reviewer: "Marco R., early readers",
   testimonial_text: "I applied the Amish budget method and in two months I cut my expenses by 35%. The 30-day checklist was the turning point. Finally a course that really works.",
   testimonial_name: "Marco R.",
   testimonial_role: "Rome — early readers",
   section_faq: "// 07 — FAQ",
-  faq_title: "Domande Frequenti",
-  offer_valid: "Offerta valida questa settimana",
-  final_cta: "Inizia oggi il tuo percorso verso la libertà finanziaria",
-  final_sub: "Unisciti a centinaia di persone che hanno già trasformato il loro rapporto con il denaro.",
-  unlock_dash: "Sblocca Accesso —",
-  guarantee_badge: "30 Giorni Soddisfatti",
-  instant_access_badge: "Accesso Istantaneo",
-  lifetime_badge: "Aggiornamenti a Vita",
-  rights_reserved: "Tutti i diritti riservati.",
+  faq_title: "Frequently Asked Questions",
+  offer_valid: "Offer valid this week",
+  final_cta: "Start Your Journey to Financial Freedom Today",
+  final_sub: "Join hundreds of people who have already transformed their relationship with money.",
+  unlock_dash: "Unlock Access —",
+  guarantee_badge: "30-Day Guarantee",
+  instant_access_badge: "Instant Access",
+  lifetime_badge: "Lifetime Updates",
+  rights_reserved: "All rights reserved.",
   privacy: "Privacy",
-  terms: "Termini",
+  terms: "Terms",
   legal_note: "This is a digital informational product. Results may vary and depend on personal commitment. The Amish prices and techniques described are based on ethnographic research and may not accurately reflect the contemporary practices of all Amish communities.",
   bestseller: "Best Seller",
-  story_badge: "// La Storia Vera",
-  story_title: "La mia esperienza tra gli Amish",
-  story_subtitle: "Tre mesi in Pennsylvania, dodici famiglie intervistate, un sistema economico che funziona da 300 anni.",
-  amish_life: "Vita Amish",
-  caption_1: "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria tramandata da generazioni.",
-  caption_2: "Il sistema di baratto e scambio che elimina il bisogno di denaro contante e costruisce relazioni di fiducia durature.",
-  caption_3: "L'economia domestica Amish: come una famiglia riesce a vivere con il 60% in meno rispetto alla media nazionale.",
-  tag_1: "Antropologia Economica",
-  tag_2: "Studi Amish",
-  tag_3: "Consulenza Finanziaria",
+  story_badge: "// The True Story",
+  story_title: "My Experience Among the Amish",
+  story_subtitle: "Three months in Pennsylvania, twelve families interviewed, an economic system that has worked for 300 years.",
+  amish_life: "Amish Life",
+  caption_1: "Daily life in the Amish community: simplicity, self-sufficiency, and financial wisdom passed down through generations.",
+  caption_2: "The barter and exchange system that eliminates the need for cash and builds lasting trust relationships.",
+  caption_3: "The Amish household economy: how a family lives on 60% less than the national average.",
+  tag_1: "Economic Anthropology",
+  tag_2: "Amish Studies",
+  tag_3: "Financial Consulting",
   brand_name: "Courssy",
+  story_quote: "The Amish live rich and full lives while spending a fraction of what we spend. In this course, we reveal how they do it.",
 } as const;
 
-type LabelKey = keyof typeof FALLBACK_LABELS;
+export type LabelKey = keyof typeof FALLBACK_LABELS;
 
 // ─── Benefits icons ──
 const FEATURE_ICONS = [
@@ -365,10 +366,10 @@ export default function TemplateBookClaude({
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
             {STORY_IMAGES.map((src, i) => (
-              <div key={i} className="group relative overflow-hidden rounded-3xl border border-[#EAEAEA] shadow-sm hover:shadow-lg transition-all duration-500">
-                <div className="aspect-[4/3] overflow-hidden">
+              <div key={i} className="group relative overflow-hidden rounded-3xl border border-[#EAEAEA] shadow-md hover:shadow-xl transition-all duration-500">
+                <div className="aspect-[3/2] overflow-hidden">
                   <img
                     src={src}
                     alt={`${t("amish_life")} ${i + 1}`}
@@ -385,9 +386,8 @@ export default function TemplateBookClaude({
             ))}
           </div>
 
-          <div className="bg-[#FAFAFA] rounded-3xl p-8 lg:p-10 border border-[#EAEAEA]">
-            <blockquote className="text-base sm:text-lg text-[#4A4A4A] leading-relaxed italic border-l-4 border-[#FF6B00] pl-6">
-              &ldquo;{data.storia || t("author_bio")}&rdquo;
+          <div className="bg-[#FAFAFA] rounded-3xl p-8 lg:p-10 border border-[#EAEAEA]">            <blockquote className="text-base sm:text-lg text-[#4A4A4A] leading-relaxed italic border-l-4 border-[#FF6B00] pl-6">
+              &ldquo;{t("story_quote")}&rdquo;
             </blockquote>
           </div>
         </div>

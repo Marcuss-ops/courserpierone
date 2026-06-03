@@ -1,8 +1,8 @@
 {
   "locale": "ja",
   "seo": {
-    "title": "アーミッシュの秘密：節約生活と賢いお金の管理術",
-    "description": "アーミッシュコミュニティの倹約的な生き方の秘訣を解き明かします。充実した動画モジュールとダウンロード可能なPDFが含まれています。",
+    "title": "アミッシュ・シークレット:節約とお金を管理する方法",
+    "description": "アミッシュコミュニティの農業生活の秘密を発見してください。 完全なビデオモジュールとダウンロード可能なPDFが含まれています。",
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
@@ -19,8 +19,8 @@
   },
   "hero": {
     "badge": "ニュース",
-    "title": "アーミッシュの秘密：節約生活と賢いお金の管理術",
-    "subtitle": "アーミッシュコミュニティの倹約的な生き方の秘訣を解き明かします。充実した動画モジュールとダウンロード可能なPDFが含まれています。",
+    "title": "アミッシュ・シークレット:節約とお金を管理する方法",
+    "subtitle": "アミッシュコミュニティの農業生活の秘密を発見してください。 完全なビデオモジュールとダウンロード可能なPDFが含まれています。",
     "cta": "始める",
     "secondary_cta": "もっと知る",
     "price_label": "特別発売価格",
@@ -28,7 +28,7 @@
   },
   "problem": {
     "badge": "問題点",
-    "title": "月末にお金が残らず、疲れていませんか？現代社会は私たちに過剰な消費を促しています。",
+    "title": "貯蓄なしで月末に達するのにうんざりですか? 現代の社会は、過剰な消費に私たちをプッシュ.",
     "text": ""
   },
   "story": {
@@ -39,24 +39,24 @@
       "現金の必要性を排除し、永続的な信頼関係を構築するためのバーターと交換システム。",
       "アミッシュの世帯経済:家族が国民の平均より60%に住んでいる方法。"
     ],
-    "quote": "アーミッシュの人々は、私たちが使うお金のわずかな額でしか生活していません。本コースではその秘密を明らかにします。"
+    "quote": "アミッシュは、私たちが費やすもののほんの一部を費やしながら豊かでフルな生活を送る。 このコースでは、その方法を説明します。"
   },
   "author": {
     "badge": "// 03 — 著者",
     "title": "このコースの裏側",
     "name": "アレッサンドロ・リナディ",
-    "role": "Researcher · Author · Traveler",
-    "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+    "role": "研究者・著者",
+    "bio": "[あなたの話を追加: 私はペンシルバニア州に3ヶ月住んでいました, インタビュー 12 アミッシュ家族, 彼らの経済システムを勉強. 理論なし、練習のみ。)",
     "tags": [
-      "サッゲッツァ・フィンガリア",
-      "ヴィタ・ソステニビル",
-      "エデュカツィオーネ"
+      "金融知恵",
+      "持続可能な生活",
+      "教育機関"
     ]
   },
   "modules": {
     "badge": "// 02 — あなたが学ぶこと",
     "title": "アミッシュ・マスターズの秘密",
-    "description": "8 practical modules that turn Amish wisdom into concrete actions.",
+    "description": "日々の暮らしのために、知恵を具体的な行動に変える8つの実用的なモジュール。",
     "items": [
       {
         "title": "Amish Budget, オーストラリア",
@@ -125,7 +125,7 @@
     "launch_price": "発売価格 — $37",
     "cta": "今すぐアクセスを解除",
     "guarantee_title": "30日返金保証",
-    "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+    "guarantee_text": "30日間お試し下さい。 少なくとも$100を節約しない場合は、全額を返金します。 質問なし、面倒はありません。",
     "includes": [
       "フルコース (値 $97)",
       "eBook PDF、ePub、Kindle",
@@ -175,7 +175,7 @@
     "rights_reserved": "お問い合わせ",
     "privacy": "プロフィール",
     "terms": "コンテンツ",
-    "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+    "legal_note": "デジタル情報製品です。 結果は、個人的な約束によって異なる場合があります。 アミッシュ価格と記述された技術は、エスノグラフィック研究に基づいており、すべてのアミッシュコミュニティの現代的な慣行を正確に反映することはできません。",
     "badges": {
       "guarantee": "30日保証",
       "instant_access": "即時アクセス",
@@ -184,17 +184,17 @@
   },
   "trust": {
     "title": "世界中のチームから信頼される",
-    "readers_count": "読者数 1,247名",
+    "readers_count": "1,247 読者",
     "company_names": []
   },
   "ui": {
     "labels": {
-      "instant_access": "すぐにご利用いただけます",
+      "instant_access": "即時アクセス",
       "buy_now_arrow": "今すぐ購入 →",
-      "readers": "読者数 1,247名",
+      "readers": "1,247 読者",
       "buy_now_dash": "今すぐ購入 —",
       "view_modules": "モジュールを見る",
-      "ssl_secure": "SSLで保護された安全な決済",
+      "ssl_secure": "セキュアなSSL決済",
       "instant_download": "インスタントダウンロード",
       "lifetime_access": "ライフタイムアクセス",
       "guarantee_days": "30日保証",
@@ -203,23 +203,23 @@
       "perfect_for": "あなたのために完成して下さい:",
       "p_struggle": "終わりが会うのに苦労します",
       "p_cut_costs": "人生の質を犠牲にすることなくコストを削減したい",
-      "p_consumerism": "Tired of consumerism and debt culture",
-      "p_practical": "Looking for practical, time-tested methods",
-      "p_future": "Want a solid financial future for your family",
+      "p_consumerism": "消費者主義や債務文化に疲れている",
+      "p_practical": "実用的でタイムテストされた方法が欲しい",
+      "p_future": "あなたの家族のための確かな財務未来を構築したい",
       "not_for": "お問い合わせ",
-      "n_quick": "Looking for get-rich-quick schemes",
-      "n_habits": "Not willing to change spending habits",
-      "n_quick_fix": "Prefer quick fixes over a solid path",
-      "n_implement": "Not willing to implement what you learn",
-      "n_advice": "Looking for personalized financial advice",
+      "n_quick": "豊富なクイックスキームをお探しですか?",
+      "n_habits": "支出習慣を変えたくない",
+      "n_quick_fix": "あなたは、固体基盤上の迅速な修正を好む",
+      "n_implement": "あなたが学ぶことを実装するつもりはない",
+      "n_advice": "パーソナライズされた財務アドバイスをお探しですか?",
       "section_learn": "// 02 — あなたが学ぶこと",
       "masters_secrets": "アミッシュ・マスターズの秘密",
-      "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
+      "modules_desc": "日々の暮らしのために、知恵を具体的な行動に変える8つの実用的なモジュール。",
       "section_author": "// 03 — 著者",
       "behind_course": "このコースの裏側",
       "your_name": "あなたの名前はここにあります",
-      "researcher_author": "Researcher · Author · Traveler",
-      "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+      "researcher_author": "研究者・著者",
+      "author_bio": "[あなたの話を追加: 私はペンシルバニア州に3ヶ月住んでいました, インタビュー 12 アミッシュ家族, 彼らの経済システムを勉強. 理論なし、練習のみ。)",
       "section_content": "// 04 — コース内容",
       "what_inside": "あなたがインサイドを見つける",
       "also_includes": "また下記のものを含んでいます:",
@@ -245,7 +245,7 @@
       "inc_bonus_shopping": "ボーナス: 週刊ショッピングリスト (値 $27)",
       "unlock_now": "今すぐアクセスを解除",
       "guarantee_title": "30日返金保証",
-      "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+      "guarantee_text": "30日間お試し下さい。 少なくとも$100を節約しない場合は、全額を返金します。 質問なし、面倒はありません。",
       "section_testimonials": "// 06 — お客様の声",
       "testimonial_text": "アミッシュの予算方法を適用し、2ヶ月で35%の費用を削減しました。 30日間のチェックリストは、ターンポイントでした。 最後に、本当に働くコース。",
       "testimonial_name": "マルコR.",
@@ -262,7 +262,7 @@
       "rights_reserved": "お問い合わせ",
       "privacy": "プロフィール",
       "terms": "コンテンツ",
-      "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+      "legal_note": "デジタル情報製品です。 結果は、個人的な約束によって異なる場合があります。 アミッシュ価格と記述された技術は、エスノグラフィック研究に基づいており、すべてのアミッシュコミュニティの現代的な慣行を正確に反映することはできません。",
       "features": "特徴:",
       "pricing": "料金について",
       "testimonials": "お客様の声",
@@ -302,14 +302,10 @@
       "tag_2": "アミッシュ・スタディ",
       "tag_3": "金融コンサルティング",
       "brand_name": "カルシー",
-      "reviewer": "Marco R., early readers",
+      "reviewer": "マルコR.、早期読者",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "30day money back": "30日間返金保証",
-      "price": "価格",
-      "free": "無料",
-      "addtocart": "カートに追加",
-      "select_currency": "通貨を選択"
+      "story_quote": "アミッシュは、私たちが費やすもののほんの一部を費やしながら豊かでフルな生活を送る。 このコースでは、その方法を説明します。"
     }
   },
   "audience": {
@@ -319,17 +315,17 @@
     "perfect_items": [
       "終わりが会うのに苦労します",
       "人生の質を犠牲にすることなくコストを削減したい",
-      "Tired of consumerism and debt culture",
-      "Looking for practical, time-tested methods",
-      "Want a solid financial future for your family"
+      "消費者主義や債務文化に疲れている",
+      "実用的でタイムテストされた方法が欲しい",
+      "あなたの家族のための確かな財務未来を構築したい"
     ],
     "not_for": "お問い合わせ",
     "not_items": [
-      "Looking for get-rich-quick schemes",
-      "Not willing to change spending habits",
-      "Prefer quick fixes over a solid path",
-      "Not willing to implement what you learn",
-      "Looking for personalized financial advice"
+      "豊富なクイックスキームをお探しですか?",
+      "支出習慣を変えたくない",
+      "あなたは、固体基盤上の迅速な修正を好む",
+      "あなたが学ぶことを実装するつもりはない",
+      "パーソナライズされた財務アドバイスをお探しですか?"
     ]
   },
   "course": {

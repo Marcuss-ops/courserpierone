@@ -1,8 +1,8 @@
 {
   "locale": "pl",
   "seo": {
-    "title": "Sekrety amiszów: Jak żyć oszczędnie i zarządzać pieniędzmi",
-    "description": "Odkryj sekrety oszczędnego życia społeczności amiszów. Zawiera kompletne moduły wideo i pliki PDF do pobrania.",
+    "title": "Tajemnice amiszów: Jak żyć z oszczędnościami i zarządzać pieniędzmi",
+    "description": "Odkryj sekrety oszczędnego życia amiszów. Zawiera kompletne moduły wideo i PDF do pobrania.",
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
@@ -19,8 +19,8 @@
   },
   "hero": {
     "badge": "Nowy",
-    "title": "Sekrety amiszów: Jak żyć oszczędnie i zarządzać pieniędzmi",
-    "subtitle": "Odkryj sekrety oszczędnego życia społeczności amiszów. Zawiera kompletne moduły wideo i pliki PDF do pobrania.",
+    "title": "Tajemnice amiszów: Jak żyć z oszczędnościami i zarządzać pieniędzmi",
+    "subtitle": "Odkryj sekrety oszczędnego życia amiszów. Zawiera kompletne moduły wideo i PDF do pobrania.",
     "cta": "Zacznij",
     "secondary_cta": "Dowiedz się więcej",
     "price_label": "Specjalna cena uruchomienia",
@@ -28,7 +28,7 @@
   },
   "problem": {
     "badge": "Problem",
-    "title": "Masz dość życia od pierwszego do pierwszego bez oszczędności? Nowoczesne społeczeństwo popycha nas do nadmiernej konsumpcji.",
+    "title": "Zmęczony osiągnięciem końca miesiąca bez żadnych oszczędności? Współczesne społeczeństwo popycha nas do nadmiernej konsumpcji.",
     "text": ""
   },
   "story": {
@@ -39,14 +39,14 @@
       "System wymiany i wymiany, który eliminuje potrzebę gotówki i buduje trwałe relacje zaufania.",
       "Gospodarka gospodarstw domowych Amiszów: jak rodzina żyje o 60% mniej niż średnia krajowa."
     ],
-    "quote": "Amisze wiodą bogate i pełne życie, wydając ułamek tego, co my. W tym kursie zdradzamy, jak to robią."
+    "quote": "Amisze żyją pełnią życia, wydając część tego, co my. W tym kursie ujawniamy jak to robią."
   },
   "author": {
     "badge": "/ / 03 - Autor",
     "title": "Za tym kursem",
     "name": "Alessandro Rinaldi",
-    "role": "Researcher · Author · Traveler",
-    "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+    "role": "Badacz · Autor",
+    "bio": "Mieszkałem 3 miesiące w Pensylwanii, przesłuchiwałem 12 Amiszów, studiowałem ich system gospodarczy. Brak teorii, tylko praktyka.]",
     "tags": [
       "Mądrość finansowa",
       "Zrównoważone życie",
@@ -56,7 +56,7 @@
   "modules": {
     "badge": "/ / 02 - Czego się nauczysz",
     "title": "Tajemnice Amiszów",
-    "description": "8 practical modules that turn Amish wisdom into concrete actions.",
+    "description": "8 praktycznych modułów, które zamieniają Amiszów mądrości w konkretne działania dla codziennego życia.",
     "items": [
       {
         "title": "Budżet amiszów",
@@ -125,7 +125,7 @@
     "launch_price": "Cena uruchomienia - następnie $37",
     "cta": "Odblokuj dostęp teraz",
     "guarantee_title": "30-dniowa gwarancja zwrotu pieniędzy",
-    "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+    "guarantee_text": "Spróbuj przez 30 dni. Jeśli nie zaoszczędzisz co najmniej 100 dolarów, zwrócimy całą kwotę. Żadnych pytań, żadnych kłopotów.",
     "includes": [
       "Pełny kurs (wartość $97)",
       "eBook PDF, ePub, Kindle",
@@ -175,7 +175,7 @@
     "rights_reserved": "Wszelkie prawa zastrzeżone.",
     "privacy": "Prywatność",
     "terms": "Warunki",
-    "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+    "legal_note": "To jest cyfrowy produkt informacyjny. Wyniki mogą się różnić i zależeć od osobistego zaangażowania. Opisane przez Amisza ceny i techniki opierają się na badaniach etnograficznych i mogą nie odzwierciedlać dokładnie współczesnych praktyk wszystkich Amiszów.",
     "badges": {
       "guarantee": "30-dniowa gwarancja",
       "instant_access": "Dostęp natychmiastowy",
@@ -184,16 +184,16 @@
   },
   "trust": {
     "title": "Zaufane przez zespoły na całym świecie",
-    "readers_count": "1247 czytelników",
+    "readers_count": "1 247 czytników",
     "company_names": []
   },
   "ui": {
     "labels": {
-      "instant_access": "Natychmiastowy dostęp",
+      "instant_access": "Dostęp natychmiastowy",
       "buy_now_arrow": "Kup teraz →",
-      "readers": "1247 czytelników",
-      "buy_now_dash": "Kup teraz —",
-      "view_modules": "Zobacz moduły",
+      "readers": "1 247 czytników",
+      "buy_now_dash": "Kup teraz -",
+      "view_modules": "Moduły widoku",
       "ssl_secure": "Bezpieczna płatność SSL",
       "instant_download": "Pobierz błyskawicznie",
       "lifetime_access": "Dostęp przez całe życie",
@@ -203,23 +203,23 @@
       "perfect_for": "Idealne dla ciebie, jeśli:",
       "p_struggle": "Walczysz, by związać koniec z końcem.",
       "p_cut_costs": "Chcesz obniżyć koszty bez poświęcania jakości życia",
-      "p_consumerism": "Tired of consumerism and debt culture",
-      "p_practical": "Looking for practical, time-tested methods",
-      "p_future": "Want a solid financial future for your family",
+      "p_consumerism": "Zmęczył cię konsumpcjonizm i kultura zadłużenia.",
+      "p_practical": "Chcesz praktyczne, testowane w czasie metody",
+      "p_future": "Chcesz zbudować solidną przyszłość finansową dla swojej rodziny",
       "not_for": "Nie dla ciebie, jeśli:",
-      "n_quick": "Looking for get-rich-quick schemes",
-      "n_habits": "Not willing to change spending habits",
-      "n_quick_fix": "Prefer quick fixes over a solid path",
-      "n_implement": "Not willing to implement what you learn",
-      "n_advice": "Looking for personalized financial advice",
+      "n_quick": "Szukasz szybkich planów.",
+      "n_habits": "Nie chcesz zmieniać swoich nawyków wydatkowania.",
+      "n_quick_fix": "Wolisz szybkie poprawki niż solidne podstawy.",
+      "n_implement": "Nie jesteś skłonny wdrażać tego, czego się nauczyłeś.",
+      "n_advice": "Szukasz spersonalizowanych porad finansowych",
       "section_learn": "/ / 02 - Czego się nauczysz",
       "masters_secrets": "Tajemnice Amiszów",
-      "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
+      "modules_desc": "8 praktycznych modułów, które zamieniają Amiszów mądrości w konkretne działania dla codziennego życia.",
       "section_author": "/ / 03 - Autor",
       "behind_course": "Za tym kursem",
       "your_name": "Twoje imię tutaj",
-      "researcher_author": "Researcher · Author · Traveler",
-      "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+      "researcher_author": "Badacz · Autor",
+      "author_bio": "Mieszkałem 3 miesiące w Pensylwanii, przesłuchiwałem 12 Amiszów, studiowałem ich system gospodarczy. Brak teorii, tylko praktyka.]",
       "section_content": "/ / 04 - Zawartość kursu",
       "what_inside": "Co znajdziesz wewnątrz",
       "also_includes": "Obejmuje również:",
@@ -245,7 +245,7 @@
       "inc_bonus_shopping": "BONUS: Cotygodniowa lista zakupów (wartość $27)",
       "unlock_now": "Odblokuj dostęp teraz",
       "guarantee_title": "30-dniowa gwarancja zwrotu pieniędzy",
-      "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+      "guarantee_text": "Spróbuj przez 30 dni. Jeśli nie zaoszczędzisz co najmniej 100 dolarów, zwrócimy całą kwotę. Żadnych pytań, żadnych kłopotów.",
       "section_testimonials": "/ / 06 - Świadectwa",
       "testimonial_text": "Stosowałem metodę budżetu Amiszów, a za dwa miesiące zmniejszyłem wydatki o 35%. 30-dniowa lista kontrolna była punktem zwrotnym. Wreszcie kurs, który naprawdę działa.",
       "testimonial_name": "Marco R. Przewodniczący",
@@ -262,7 +262,7 @@
       "rights_reserved": "Wszelkie prawa zastrzeżone.",
       "privacy": "Prywatność",
       "terms": "Warunki",
-      "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+      "legal_note": "To jest cyfrowy produkt informacyjny. Wyniki mogą się różnić i zależeć od osobistego zaangażowania. Opisane przez Amisza ceny i techniki opierają się na badaniach etnograficznych i mogą nie odzwierciedlać dokładnie współczesnych praktyk wszystkich Amiszów.",
       "features": "Cechy",
       "pricing": "Wycena",
       "testimonials": "Świadectwa",
@@ -302,14 +302,10 @@
       "tag_2": "Badania amiszowe",
       "tag_3": "Konsultacje finansowe",
       "brand_name": "Courssy",
-      "reviewer": "Marco R., early readers",
+      "reviewer": "Marco R., wczesny czytelnik",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "30day money back": "30 dni gwarancji zwrotu pieniędzy",
-      "price": "Cena",
-      "free": "ZA DARMO",
-      "addtocart": "Dodaj do koszyka",
-      "select_currency": "Wybierz walutę"
+      "story_quote": "Amisze żyją pełnią życia, wydając część tego, co my. W tym kursie ujawniamy jak to robią."
     }
   },
   "audience": {
@@ -319,17 +315,17 @@
     "perfect_items": [
       "Walczysz, by związać koniec z końcem.",
       "Chcesz obniżyć koszty bez poświęcania jakości życia",
-      "Tired of consumerism and debt culture",
-      "Looking for practical, time-tested methods",
-      "Want a solid financial future for your family"
+      "Zmęczył cię konsumpcjonizm i kultura zadłużenia.",
+      "Chcesz praktyczne, testowane w czasie metody",
+      "Chcesz zbudować solidną przyszłość finansową dla swojej rodziny"
     ],
     "not_for": "Nie dla ciebie, jeśli:",
     "not_items": [
-      "Looking for get-rich-quick schemes",
-      "Not willing to change spending habits",
-      "Prefer quick fixes over a solid path",
-      "Not willing to implement what you learn",
-      "Looking for personalized financial advice"
+      "Szukasz szybkich planów.",
+      "Nie chcesz zmieniać swoich nawyków wydatkowania.",
+      "Wolisz szybkie poprawki niż solidne podstawy.",
+      "Nie jesteś skłonny wdrażać tego, czego się nauczyłeś.",
+      "Szukasz spersonalizowanych porad finansowych"
     ]
   },
   "course": {

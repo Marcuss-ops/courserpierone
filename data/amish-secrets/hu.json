@@ -1,8 +1,8 @@
 {
   "locale": "hu",
   "seo": {
-    "title": "Amish titkok: Hogyan élj takarékosan és kezeld a pénzed",
-    "description": "Fedezd fel az amish közösség takarékos életmódjának titkait. Tartalmaz teljes videómodulokat és letölthető PDF-eket.",
+    "title": "Amish Titkok: Hogyan kell élni a megtakarítások és a pénzgazdálkodás",
+    "description": "Fedezze fel az amish közösség takarékos életének titkait. Magában foglalja a teljes videomodulokat és a letölthető PDF-eket.",
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
@@ -19,8 +19,8 @@
   },
   "hero": {
     "badge": "Új",
-    "title": "Amish titkok: Hogyan élj takarékosan és kezeld a pénzed",
-    "subtitle": "Fedezd fel az amish közösség takarékos életmódjának titkait. Tartalmaz teljes videómodulokat és letölthető PDF-eket.",
+    "title": "Amish Titkok: Hogyan kell élni a megtakarítások és a pénzgazdálkodás",
+    "subtitle": "Fedezze fel az amish közösség takarékos életének titkait. Magában foglalja a teljes videomodulokat és a letölthető PDF-eket.",
     "cta": "Kezdés",
     "secondary_cta": "Tudjon meg többet",
     "price_label": "Különleges indulási ár",
@@ -28,7 +28,7 @@
   },
   "problem": {
     "badge": "A probléma",
-    "title": "Eleged van abból, hogy a hónap végére elfogy a pénzed? A modern társadalom túlzott fogyasztásra kényszerít minket.",
+    "title": "Belefáradt, hogy a hónap végére se legyen megtakarítás? A modern társadalom a túlzott fogyasztás felé hajlik.",
     "text": ""
   },
   "story": {
@@ -39,14 +39,14 @@
       "A csere- és csererendszer, amely megszünteti a készpénzt és tartós bizalmi kapcsolatokat épít.",
       "Az amish háztartásgazdaság: hogyan él egy család 60% -kal kevesebb, mint a nemzeti átlag."
     ],
-    "quote": "Az amishok gazdag és teljes életet élnek, miközben csak töredékét költik annak, amit mi. Ebben a kurzusban felfedjük, hogyan csinálják."
+    "quote": "Az amisok gazdag és teljes életet élnek, miközben elköltik a részünket. Ezen a kurzuson felfedjük, hogyan csinálják."
   },
   "author": {
     "badge": "/ / 03 - Az író",
     "title": "A tanfolyam mögött",
     "name": "Alessandro Rinaldi",
-    "role": "Researcher · Author · Traveler",
-    "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+    "role": "Kutató",
+    "bio": "[Add ide a történetet: 3 hónapot éltem Pennsylvaniában, kikérdeztem 12 amish családot, tanulmányoztam a gazdasági rendszerüket. Nincs elmélet, csak gyakorlat.]",
     "tags": [
       "Pénzügyi bölcsesség",
       "Fenntartható élet",
@@ -56,7 +56,7 @@
   "modules": {
     "badge": "/ / 02 - Mit fogsz tanulni",
     "title": "Az amish mesterek titkai",
-    "description": "8 practical modules that turn Amish wisdom into concrete actions.",
+    "description": "8 gyakorlati modul, melyek az amis bölcsességet konkrét cselekedetekké változtatják a mindennapi életben.",
     "items": [
       {
         "title": "Amish Budget",
@@ -125,7 +125,7 @@
     "launch_price": "Indítási ár - majd $37",
     "cta": "Hozzáférés megnyitása most",
     "guarantee_title": "30 napos pénz- visszafizetési garancia",
-    "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+    "guarantee_text": "Próbáld ki 30 napig. Ha nem takarít meg legalább 100 dollárt, visszafizetjük a teljes összeget. Nincs kérdés, nincs vita.",
     "includes": [
       "Teljes tanfolyam (érték $97)",
       "eBook PDF, ePub, Kindle",
@@ -175,7 +175,7 @@
     "rights_reserved": "Minden jog fenntartva.",
     "privacy": "Adatvédelem",
     "terms": "Feltételek",
-    "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+    "legal_note": "Ez egy digitális információs termék. Az eredmények változhatnak, és a személyes elkötelezettségtől függhetnek. A leírt amish árak és technikák néprajzi kutatáson alapulnak, és nem feltétlenül tükrözik pontosan az összes amish közösség jelenlegi gyakorlatait.",
     "badges": {
       "guarantee": "30- napos garancia",
       "instant_access": "Azonnali hozzáférés",
@@ -184,17 +184,17 @@
   },
   "trust": {
     "title": "Csapatok által világszerte megbízva",
-    "readers_count": "1247 olvasó",
+    "readers_count": "1.247 olvasó",
     "company_names": []
   },
   "ui": {
     "labels": {
       "instant_access": "Azonnali hozzáférés",
       "buy_now_arrow": "Vásárlás most →",
-      "readers": "1247 olvasó",
-      "buy_now_dash": "Vásárlás most —",
+      "readers": "1.247 olvasó",
+      "buy_now_dash": "Buy Now -",
       "view_modules": "Modulok megtekintése",
-      "ssl_secure": "Biztonságos fizetés SSL-lel",
+      "ssl_secure": "Az SSL biztonságos kifizetése",
       "instant_download": "Azonnali letöltés",
       "lifetime_access": "Élettartam-hozzáférés",
       "guarantee_days": "30- napos garancia",
@@ -203,23 +203,23 @@
       "perfect_for": "Tökéletes, ha:",
       "p_struggle": "Küzdesz, hogy megélj.",
       "p_cut_costs": "Csökkenteni akarod a költségeket anélkül, hogy feláldoznád az életminőséget.",
-      "p_consumerism": "Tired of consumerism and debt culture",
-      "p_practical": "Looking for practical, time-tested methods",
-      "p_future": "Want a solid financial future for your family",
+      "p_consumerism": "Belefáradtál a fogyasztásba és az adósságkultúrába.",
+      "p_practical": "Gyakorlati, időalapú módszereket akar",
+      "p_future": "Szilárd pénzügyi jövőt akarsz építeni a családodnak.",
       "not_for": "Nem, ha:",
-      "n_quick": "Looking for get-rich-quick schemes",
-      "n_habits": "Not willing to change spending habits",
-      "n_quick_fix": "Prefer quick fixes over a solid path",
-      "n_implement": "Not willing to implement what you learn",
-      "n_advice": "Looking for personalized financial advice",
+      "n_quick": "Egy gyors tervet keresel.",
+      "n_habits": "Nem akarod megváltoztatni a költekezési szokásaidat.",
+      "n_quick_fix": "Jobban szereted a gyors javításokat egy szilárd alapnál.",
+      "n_implement": "Nem vagy hajlandó végrehajtani, amit tanulsz.",
+      "n_advice": "Személyre szabott pénzügyi tanácsokat keresel.",
       "section_learn": "/ / 02 - Mit fogsz tanulni",
       "masters_secrets": "Az amish mesterek titkai",
-      "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
+      "modules_desc": "8 gyakorlati modul, melyek az amis bölcsességet konkrét cselekedetekké változtatják a mindennapi életben.",
       "section_author": "/ / 03 - Az író",
       "behind_course": "A tanfolyam mögött",
       "your_name": "Itt a neved.",
-      "researcher_author": "Researcher · Author · Traveler",
-      "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+      "researcher_author": "Kutató",
+      "author_bio": "[Add ide a történetet: 3 hónapot éltem Pennsylvaniában, kikérdeztem 12 amish családot, tanulmányoztam a gazdasági rendszerüket. Nincs elmélet, csak gyakorlat.]",
       "section_content": "/ / 04 - A tanfolyam tartalma",
       "what_inside": "What you 'll find inside",
       "also_includes": "A következők tartoznak ide:",
@@ -245,7 +245,7 @@
       "inc_bonus_shopping": "BONUS: Heti bevásárlólista ($27)",
       "unlock_now": "Hozzáférés megnyitása most",
       "guarantee_title": "30 napos pénz- visszafizetési garancia",
-      "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+      "guarantee_text": "Próbáld ki 30 napig. Ha nem takarít meg legalább 100 dollárt, visszafizetjük a teljes összeget. Nincs kérdés, nincs vita.",
       "section_testimonials": "/ / 06 - Tanúvallomások",
       "testimonial_text": "Alkalmaztam az amish költségvetési módszert, és két hónap alatt 35% -kal csökkentettem a kiadásaimat. A 30 napos ellenőrzőlista volt a fordulópont. Végre egy kurzus, ami tényleg működik.",
       "testimonial_name": "Marco R.",
@@ -262,7 +262,7 @@
       "rights_reserved": "Minden jog fenntartva.",
       "privacy": "Adatvédelem",
       "terms": "Feltételek",
-      "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+      "legal_note": "Ez egy digitális információs termék. Az eredmények változhatnak, és a személyes elkötelezettségtől függhetnek. A leírt amish árak és technikák néprajzi kutatáson alapulnak, és nem feltétlenül tükrözik pontosan az összes amish közösség jelenlegi gyakorlatait.",
       "features": "Jellemzők",
       "pricing": "Árképzés",
       "testimonials": "Tanúvallomások",
@@ -302,14 +302,10 @@
       "tag_2": "Amish Studies",
       "tag_3": "Pénzügyi tanácsadás",
       "brand_name": "Courssy",
-      "reviewer": "Marco R., early readers",
+      "reviewer": "Marco R., korai olvasó",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "30day money back": "30 napos pénzvisszafizetési garancia",
-      "price": "Ár",
-      "free": "INGYENES",
-      "addtocart": "Kosárba",
-      "select_currency": "Pénznem kiválasztása"
+      "story_quote": "Az amisok gazdag és teljes életet élnek, miközben elköltik a részünket. Ezen a kurzuson felfedjük, hogyan csinálják."
     }
   },
   "audience": {
@@ -319,17 +315,17 @@
     "perfect_items": [
       "Küzdesz, hogy megélj.",
       "Csökkenteni akarod a költségeket anélkül, hogy feláldoznád az életminőséget.",
-      "Tired of consumerism and debt culture",
-      "Looking for practical, time-tested methods",
-      "Want a solid financial future for your family"
+      "Belefáradtál a fogyasztásba és az adósságkultúrába.",
+      "Gyakorlati, időalapú módszereket akar",
+      "Szilárd pénzügyi jövőt akarsz építeni a családodnak."
     ],
     "not_for": "Nem, ha:",
     "not_items": [
-      "Looking for get-rich-quick schemes",
-      "Not willing to change spending habits",
-      "Prefer quick fixes over a solid path",
-      "Not willing to implement what you learn",
-      "Looking for personalized financial advice"
+      "Egy gyors tervet keresel.",
+      "Nem akarod megváltoztatni a költekezési szokásaidat.",
+      "Jobban szereted a gyors javításokat egy szilárd alapnál.",
+      "Nem vagy hajlandó végrehajtani, amit tanulsz.",
+      "Személyre szabott pénzügyi tanácsokat keresel."
     ]
   },
   "course": {

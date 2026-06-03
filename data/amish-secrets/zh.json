@@ -1,8 +1,8 @@
 {
   "locale": "zh",
   "seo": {
-    "title": "阿米什人的秘密：如何节省开支并管理金钱",
-    "description": "探索阿米什社区节俭生活的秘密。包含完整的视频模块和可下载的PDF文件。",
+    "title": "Amish Secrets:如何用储蓄和管理资金生活",
+    "description": "揭秘阿米什社区节俭生活的秘密. 包括完整的视频模块和可下载的PDF.",
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
@@ -19,8 +19,8 @@
   },
   "hero": {
     "badge": "新设",
-    "title": "阿米什人的秘密：如何节省开支并管理金钱",
-    "subtitle": "探索阿米什社区节俭生活的秘密。包含完整的视频模块和可下载的PDF文件。",
+    "title": "Amish Secrets:如何用储蓄和管理资金生活",
+    "subtitle": "揭秘阿米什社区节俭生活的秘密. 包括完整的视频模块和可下载的PDF.",
     "cta": "开始",
     "secondary_cta": "学习更多",
     "price_label": "特别发射价格",
@@ -28,35 +28,35 @@
   },
   "problem": {
     "badge": "问题",
-    "title": "厌倦了月底一分不剩？现代社会促使我们过度消费。",
+    "title": "厌倦了到月底 没有任何储蓄? 现代社会将我们推向过度消费。",
     "text": ""
   },
   "story": {
     "badge": "我们的故事",
-    "title": "阿米什岛",
+    "title": "我阿米什人的经验",
     "image_captions": [
-      "(原始内容存档于2018-10-21) (英语). La vitaquintidiana nella comunità Amish: semplicità, autosuffienza e saggezza finanzia.",
+      "阿米什社区的日常生活:简单,自给,金融智慧传承了几代人.",
       "交换和交换制度消除了对现金的需求并建立了持久的信任关系。",
       "阿米什家庭经济:一个家庭的生活水平比全国平均水平低60%。"
     ],
-    "quote": "阿米什人以我们花费的一小部分代价，过着富足而充实的生活。在本课程中，我们将揭示他们是如何做到的。"
+    "quote": "阿米什人过着丰富而充实的生活,却花费了我们花费的一小部分. 在这个过程中,我们揭示他们是如何做到的。"
   },
   "author": {
     "badge": "///03 — 作者 (英语).",
     "title": "在这条路后面",
     "name": "亚历山德罗·里纳尔迪",
-    "role": "Researcher · Author · Traveler",
-    "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+    "role": "研究员 作者",
+    "bio": "[加上你的故事:我住在宾夕法尼亚州三个月,采访了12个阿米什家庭,研究了他们的经济体系. 没有理论,只有实践。 ]",
     "tags": [
-      "萨格扎·菲纳齐亚里亚",
-      "维塔·索斯泰尼比勒",
-      "教育"
+      "金融智慧",
+      "可持续生活",
+      "学历"
     ]
   },
   "modules": {
     "badge": "///02——你会学到什么",
     "title": "阿米什大师的秘密",
-    "description": "8 practical modules that turn Amish wisdom into concrete actions.",
+    "description": "8个实用模块,将阿米什智慧转化为你日常生活的具体行动.",
     "items": [
       {
         "title": "阿米什预算",
@@ -125,7 +125,7 @@
     "launch_price": "发射价格——然后为37美元",
     "cta": "立即解锁访问",
     "guarantee_title": "30天钱包担保",
-    "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+    "guarantee_text": "试行三十日. 如果你不省下至少100美元,我们会退还全部金额. 没有问题,没有麻烦。",
     "includes": [
       "全程(价值97美元)",
       "电子书 PDF, ePub, Kindle",
@@ -175,7 +175,7 @@
     "rights_reserved": "版权所有。",
     "privacy": "隐私",
     "terms": "术语",
-    "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+    "legal_note": "这是一个数字信息产品。 结果可能各不相同,取决于个人的承诺。 所描述的阿米什价格和技术是基于人种学研究,可能无法准确反映所有阿米什社区的当代做法.",
     "badges": {
       "guarantee": "30天保证",
       "instant_access": "即时访问",
@@ -184,17 +184,17 @@
   },
   "trust": {
     "title": "由世界各地的团队信任",
-    "readers_count": "1,247 位读者",
+    "readers_count": "1,247名读者",
     "company_names": []
   },
   "ui": {
     "labels": {
-      "instant_access": "立即访问",
-      "buy_now_arrow": "立即购买 →",
-      "readers": "1,247 位读者",
-      "buy_now_dash": "立即购买 —",
+      "instant_access": "即时访问",
+      "buy_now_arrow": "现在买吧",
+      "readers": "1,247名读者",
+      "buy_now_dash": "现在买...",
       "view_modules": "查看模块",
-      "ssl_secure": "SSL 安全支付",
+      "ssl_secure": "安全 SSL 支付",
       "instant_download": "即时下载",
       "lifetime_access": "终身访问",
       "guarantee_days": "30天保证",
@@ -203,23 +203,23 @@
       "perfect_for": "对你很好,如果:",
       "p_struggle": "你为维持生计而挣扎",
       "p_cut_costs": "你想降低成本而不牺牲生活质量",
-      "p_consumerism": "Tired of consumerism and debt culture",
-      "p_practical": "Looking for practical, time-tested methods",
-      "p_future": "Want a solid financial future for your family",
+      "p_consumerism": "你厌倦了消费主义和债务文化",
+      "p_practical": "你想要实用的 时间测试的方法",
+      "p_future": "你想为家人创造稳固的金融未来",
       "not_for": "对你来说不是,如果:",
-      "n_quick": "Looking for get-rich-quick schemes",
-      "n_habits": "Not willing to change spending habits",
-      "n_quick_fix": "Prefer quick fixes over a solid path",
-      "n_implement": "Not willing to implement what you learn",
-      "n_advice": "Looking for personalized financial advice",
+      "n_quick": "你在找富豪的计谋",
+      "n_habits": "你不想改变你的消费习惯",
+      "n_quick_fix": "你更喜欢快速解决 而不是坚实的基础",
+      "n_implement": "你不愿意执行你学到的",
+      "n_advice": "你在找个性化的财务建议",
       "section_learn": "///02——你会学到什么",
       "masters_secrets": "阿米什大师的秘密",
-      "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
+      "modules_desc": "8个实用模块,将阿米什智慧转化为你日常生活的具体行动.",
       "section_author": "///03 — 作者 (英语).",
       "behind_course": "在这条路后面",
       "your_name": "你的名字在这里",
-      "researcher_author": "Researcher · Author · Traveler",
-      "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+      "researcher_author": "研究员 作者",
+      "author_bio": "[加上你的故事:我住在宾夕法尼亚州三个月,采访了12个阿米什家庭,研究了他们的经济体系. 没有理论,只有实践。 ]",
       "section_content": "///04 — 课程内容",
       "what_inside": "你会找到里面的东西",
       "also_includes": "还包括:",
@@ -245,7 +245,7 @@
       "inc_bonus_shopping": "BONUS:每周购物名单(价值27美元)",
       "unlock_now": "立即解锁访问",
       "guarantee_title": "30天钱包担保",
-      "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+      "guarantee_text": "试行三十日. 如果你不省下至少100美元,我们会退还全部金额. 没有问题,没有麻烦。",
       "section_testimonials": "//06 — 证词",
       "testimonial_text": "我应用了阿米什预算法 两个月后我把开支削减了35% 30天的核对表是转折点。 最后,一个真正有效的课程。",
       "testimonial_name": "马可·R.",
@@ -262,7 +262,7 @@
       "rights_reserved": "版权所有。",
       "privacy": "隐私",
       "terms": "术语",
-      "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+      "legal_note": "这是一个数字信息产品。 结果可能各不相同,取决于个人的承诺。 所描述的阿米什价格和技术是基于人种学研究,可能无法准确反映所有阿米什社区的当代做法.",
       "features": "特征",
       "pricing": "定价",
       "testimonials": "证词",
@@ -302,14 +302,10 @@
       "tag_2": "阿米什语研究",
       "tag_3": "财务咨询",
       "brand_name": "库尔西",
-      "reviewer": "Marco R., early readers",
+      "reviewer": "Marco R.,早期读者",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "30day money back": "30 天退款保证",
-      "price": "价格",
-      "free": "免费",
-      "addtocart": "加入购物车",
-      "select_currency": "选择货币"
+      "story_quote": "阿米什人过着丰富而充实的生活,却花费了我们花费的一小部分. 在这个过程中,我们揭示他们是如何做到的。"
     }
   },
   "audience": {
@@ -319,17 +315,17 @@
     "perfect_items": [
       "你为维持生计而挣扎",
       "你想降低成本而不牺牲生活质量",
-      "Tired of consumerism and debt culture",
-      "Looking for practical, time-tested methods",
-      "Want a solid financial future for your family"
+      "你厌倦了消费主义和债务文化",
+      "你想要实用的 时间测试的方法",
+      "你想为家人创造稳固的金融未来"
     ],
     "not_for": "对你来说不是,如果:",
     "not_items": [
-      "Looking for get-rich-quick schemes",
-      "Not willing to change spending habits",
-      "Prefer quick fixes over a solid path",
-      "Not willing to implement what you learn",
-      "Looking for personalized financial advice"
+      "你在找富豪的计谋",
+      "你不想改变你的消费习惯",
+      "你更喜欢快速解决 而不是坚实的基础",
+      "你不愿意执行你学到的",
+      "你在找个性化的财务建议"
     ]
   },
   "course": {

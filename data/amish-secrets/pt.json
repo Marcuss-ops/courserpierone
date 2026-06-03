@@ -1,7 +1,7 @@
 {
   "locale": "pt",
   "seo": {
-    "title": "Segredos Amish: Como viver com economia e gerenciar dinheiro",
+    "title": "Amish Secrets: Como viver com poupanças e gerir dinheiro",
     "description": "Descubra os segredos da vida frugal da comunidade Amish. Inclui módulos de vídeo completos e PDFs para download.",
     "ogImage": "/courses/amish-secrets/cover.png"
   },
@@ -19,7 +19,7 @@
   },
   "hero": {
     "badge": "Novo",
-    "title": "Segredos Amish: Como viver com economia e gerenciar dinheiro",
+    "title": "Amish Secrets: Como viver com poupanças e gerir dinheiro",
     "subtitle": "Descubra os segredos da vida frugal da comunidade Amish. Inclui módulos de vídeo completos e PDFs para download.",
     "cta": "Começar",
     "secondary_cta": "Saiba mais",
@@ -28,7 +28,7 @@
   },
   "problem": {
     "badge": "O Problema",
-    "title": "Cansado de chegar ao fim do mês sem economias? A sociedade moderna nos empurra para o consumo excessivo.",
+    "title": "Cansado de chegar ao fim do mês sem nenhuma poupança? A sociedade moderna nos empurra para o consumo excessivo.",
     "text": ""
   },
   "story": {
@@ -39,14 +39,14 @@
       "O sistema de troca e troca que elimina a necessidade de dinheiro e constrói relações de confiança duradouras.",
       "A economia doméstica Amish: como uma família vive com 60% menos do que a média nacional."
     ],
-    "quote": "Os Amish vivem vidas ricas e plenas gastando uma fração do que gastamos. Neste curso, revelamos como eles fazem isso."
+    "quote": "Os Amish vivem uma vida rica e cheia enquanto gastam uma fração do que gastamos. Neste curso, revelamos como eles o fazem."
   },
   "author": {
     "badge": "// 03 — O Autor",
     "title": "Por trás deste curso",
     "name": "Alessandro Rinaldi",
-    "role": "Researcher · Author · Traveler",
-    "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+    "role": "Pesquisador · Autor",
+    "bio": "[Adicione sua história aqui: Eu vivi 3 meses na Pensilvânia, entrevistei 12 famílias Amish, estudei seu sistema econômico. Sem teoria, apenas prática.]",
     "tags": [
       "Sabedoria Financeira",
       "Vida Sustentável",
@@ -56,7 +56,7 @@
   "modules": {
     "badge": "// 02 — O que aprenderá",
     "title": "Os Segredos dos Mestres Amish",
-    "description": "8 practical modules that turn Amish wisdom into concrete actions.",
+    "description": "8 módulos práticos que transformam a sabedoria Amish em ações concretas para sua vida diária.",
     "items": [
       {
         "title": "Orçamento Amish",
@@ -125,7 +125,7 @@
     "launch_price": "Preço de lançamento — então $37",
     "cta": "Desbloquear o Acesso Agora",
     "guarantee_title": "Garantia de reembolso de 30 dias",
-    "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+    "guarantee_text": "Experimenta durante 30 dias. Se você não economizar pelo menos $100, nós reembolsaremos o valor total. Sem perguntas, sem problemas.",
     "includes": [
       "Curso completo (valor $97)",
       "eBook PDF, ePub, Kindle",
@@ -175,7 +175,7 @@
     "rights_reserved": "Todos os direitos reservados.",
     "privacy": "Privacidade",
     "terms": "Termos",
-    "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+    "legal_note": "Este é um produto informativo digital. Os resultados podem variar e depender do compromisso pessoal. Os preços e técnicas Amish descritos são baseados em pesquisa etnográfica e podem não refletir com precisão as práticas contemporâneas de todas as comunidades Amish.",
     "badges": {
       "guarantee": "Garantia de 30 dias",
       "instant_access": "Acesso instantâneo",
@@ -189,12 +189,12 @@
   },
   "ui": {
     "labels": {
-      "instant_access": "Acesso imediato",
-      "buy_now_arrow": "Comprar Agora →",
+      "instant_access": "Acesso instantâneo",
+      "buy_now_arrow": "Comprar agora →",
       "readers": "1.247 leitores",
-      "buy_now_dash": "Comprar Agora —",
+      "buy_now_dash": "Compre Agora —",
       "view_modules": "Ver Módulos",
-      "ssl_secure": "Pagamento seguro com SSL",
+      "ssl_secure": "Pagamento seguro SSL",
       "instant_download": "Transferência Instantânea",
       "lifetime_access": "Acesso vitalício",
       "guarantee_days": "Garantia de 30 dias",
@@ -203,23 +203,23 @@
       "perfect_for": "Perfeito para você se:",
       "p_struggle": "Você luta para fazer face às despesas",
       "p_cut_costs": "Você quer cortar custos sem sacrificar a qualidade de vida",
-      "p_consumerism": "Tired of consumerism and debt culture",
-      "p_practical": "Looking for practical, time-tested methods",
-      "p_future": "Want a solid financial future for your family",
+      "p_consumerism": "Estás cansado da cultura do consumismo e da dívida.",
+      "p_practical": "Você quer métodos práticos, testados no tempo",
+      "p_future": "Você quer construir um futuro financeiro sólido para sua família",
       "not_for": "Não para si se:",
-      "n_quick": "Looking for get-rich-quick schemes",
-      "n_habits": "Not willing to change spending habits",
-      "n_quick_fix": "Prefer quick fixes over a solid path",
-      "n_implement": "Not willing to implement what you learn",
-      "n_advice": "Looking for personalized financial advice",
+      "n_quick": "Estás à procura de esquemas rápidos para enriquecer.",
+      "n_habits": "Não queres mudar os teus hábitos de consumo.",
+      "n_quick_fix": "Você prefere correções rápidas sobre uma base sólida",
+      "n_implement": "Não estás disposto a implementar o que aprendes.",
+      "n_advice": "Você está à procura de aconselhamento financeiro personalizado",
       "section_learn": "// 02 — O que aprenderá",
       "masters_secrets": "Os Segredos dos Mestres Amish",
-      "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
+      "modules_desc": "8 módulos práticos que transformam a sabedoria Amish em ações concretas para sua vida diária.",
       "section_author": "// 03 — O Autor",
       "behind_course": "Por trás deste curso",
       "your_name": "Seu nome aqui",
-      "researcher_author": "Researcher · Author · Traveler",
-      "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+      "researcher_author": "Pesquisador · Autor",
+      "author_bio": "[Adicione sua história aqui: Eu vivi 3 meses na Pensilvânia, entrevistei 12 famílias Amish, estudei seu sistema econômico. Sem teoria, apenas prática.]",
       "section_content": "// 04 — Conteúdo do curso",
       "what_inside": "O que você vai encontrar dentro",
       "also_includes": "Inclui também:",
@@ -245,7 +245,7 @@
       "inc_bonus_shopping": "BONUS: Lista de compras semanal (valor 27)",
       "unlock_now": "Desbloquear o Acesso Agora",
       "guarantee_title": "Garantia de reembolso de 30 dias",
-      "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+      "guarantee_text": "Experimenta durante 30 dias. Se você não economizar pelo menos $100, nós reembolsaremos o valor total. Sem perguntas, sem problemas.",
       "section_testimonials": "// 06 — Testemunhos",
       "testimonial_text": "Apliquei o método do orçamento Amish e, em dois meses, reduzi as minhas despesas em 35%. A lista de 30 dias foi o ponto de viragem. Finalmente um curso que realmente funciona.",
       "testimonial_name": "Marco R.",
@@ -262,7 +262,7 @@
       "rights_reserved": "Todos os direitos reservados.",
       "privacy": "Privacidade",
       "terms": "Termos",
-      "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+      "legal_note": "Este é um produto informativo digital. Os resultados podem variar e depender do compromisso pessoal. Os preços e técnicas Amish descritos são baseados em pesquisa etnográfica e podem não refletir com precisão as práticas contemporâneas de todas as comunidades Amish.",
       "features": "Características",
       "pricing": "Preços",
       "testimonials": "Testemunhos",
@@ -302,14 +302,10 @@
       "tag_2": "Estudos Amish",
       "tag_3": "Consultoria Financeira",
       "brand_name": "Courssy",
-      "reviewer": "Marco R., early readers",
+      "reviewer": "Marco R., primeiro leitor",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "30day money back": "Garantia de reembolso de 30 dias",
-      "price": "Preço",
-      "free": "GRÁTIS",
-      "addtocart": "Adicionar ao carrinho",
-      "select_currency": "Selecionar moeda"
+      "story_quote": "Os Amish vivem uma vida rica e cheia enquanto gastam uma fração do que gastamos. Neste curso, revelamos como eles o fazem."
     }
   },
   "audience": {
@@ -319,17 +315,17 @@
     "perfect_items": [
       "Você luta para fazer face às despesas",
       "Você quer cortar custos sem sacrificar a qualidade de vida",
-      "Tired of consumerism and debt culture",
-      "Looking for practical, time-tested methods",
-      "Want a solid financial future for your family"
+      "Estás cansado da cultura do consumismo e da dívida.",
+      "Você quer métodos práticos, testados no tempo",
+      "Você quer construir um futuro financeiro sólido para sua família"
     ],
     "not_for": "Não para si se:",
     "not_items": [
-      "Looking for get-rich-quick schemes",
-      "Not willing to change spending habits",
-      "Prefer quick fixes over a solid path",
-      "Not willing to implement what you learn",
-      "Looking for personalized financial advice"
+      "Estás à procura de esquemas rápidos para enriquecer.",
+      "Não queres mudar os teus hábitos de consumo.",
+      "Você prefere correções rápidas sobre uma base sólida",
+      "Não estás disposto a implementar o que aprendes.",
+      "Você está à procura de aconselhamento financeiro personalizado"
     ]
   },
   "course": {

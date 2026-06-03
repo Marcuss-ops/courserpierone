@@ -1,8 +1,8 @@
 {
   "locale": "ko",
   "seo": {
-    "title": "아미시의 비밀: 절약하며 사는 법과 돈 관리하기",
-    "description": "아미시 공동체의 검소한 삶의 비결을 알아보세요. 전체 영상 모듈과 다운로드 가능한 PDF가 포함되어 있습니다.",
+    "title": "Amish Secrets: 저축과 돈 관리에 사는 방법",
+    "description": "Amish 커뮤니티의 frugal 생활의 비밀을 발견하십시오. 완전한 비디오 모듈 및 다운로드 가능한 PDF를 포함합니다.",
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
@@ -19,8 +19,8 @@
   },
   "hero": {
     "badge": "- 한국어",
-    "title": "아미시의 비밀: 절약하며 사는 법과 돈 관리하기",
-    "subtitle": "아미시 공동체의 검소한 삶의 비결을 알아보세요. 전체 영상 모듈과 다운로드 가능한 PDF가 포함되어 있습니다.",
+    "title": "Amish Secrets: 저축과 돈 관리에 사는 방법",
+    "subtitle": "Amish 커뮤니티의 frugal 생활의 비밀을 발견하십시오. 완전한 비디오 모듈 및 다운로드 가능한 PDF를 포함합니다.",
     "cta": "시작하기",
     "secondary_cta": "더 알아보기",
     "price_label": "특별 출시 가격",
@@ -28,7 +28,7 @@
   },
   "problem": {
     "badge": "문제",
-    "title": "저축 없이 월말을 맞이하는 것에 지치셨나요? 현대 사회는 우리에게 과도한 소비를 부추깁니다.",
+    "title": "어떤 저축 없이 달의 끝에 도달의 피곤? 현대 사회는 과도한 소비로 우리를 밀어.",
     "text": ""
   },
   "story": {
@@ -39,14 +39,14 @@
       "현금의 필요성을 제거하고 신뢰 관계를 구축하는 바터 및 교환 시스템.",
       "가정 경제 : 가족이 평균보다 60 % 덜 생활하는 방법."
     ],
-    "quote": "아미시는 우리가 쓰는 비용의 아주 적은 부분만으로도 풍요롭고 충만한 삶을 살고 있습니다. 이 코스에서는 그 비밀을 밝혀드립니다."
+    "quote": "암시는 풍요롭고 풍요로운 삶을 살고, 우리가 보내는 것에 대한 반응을 보내는 동안. 이 과정에서 우리는 그들이하는 방법을 밝혀."
   },
   "author": {
     "badge": "// 03 - 저자",
     "title": "이 코스 뒤에",
     "name": "카테고리",
-    "role": "Researcher · Author · Traveler",
-    "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+    "role": "연구자 · 저자",
+    "bio": "[당신의 이야기를 추가: 나는 펜실베니아에서 3 개월 살았다, 인터뷰 12 Amish 가족, 자신의 경제 시스템을 공부. 이론 없음, 단지 연습.]",
     "tags": [
       "금융 지혜",
       "지속 가능한 생활",
@@ -56,7 +56,7 @@
   "modules": {
     "badge": "// 02 - 당신이 배울 것",
     "title": "Amish Masters의 비밀",
-    "description": "8 practical modules that turn Amish wisdom into concrete actions.",
+    "description": "일상 생활에 대한 구체적인 행동으로 고통받는 8 가지 실용적인 모듈.",
     "items": [
       {
         "title": "Amish 예산",
@@ -125,7 +125,7 @@
     "launch_price": "시작 가격 — 다음 $37",
     "cta": "지금 접속",
     "guarantee_title": "30일 환불 보증",
-    "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+    "guarantee_text": "30 일 동안 시도하십시오. 최소 $ 100을 저장하지 않으면 전체 금액을 환불해드립니다. 질문이 없습니다.",
     "includes": [
       "풀 코스 (값 $97)",
       "eBook PDF, ePub, 킨들",
@@ -175,7 +175,7 @@
     "rights_reserved": "모든 권리 보유",
     "privacy": "제품 정보",
     "terms": "제품 정보",
-    "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+    "legal_note": "디지털 정보 제품입니다. 결과는 다를 수 있고 개인적인 투입에 달려 있습니다. 연구에 기반을 둔 암시 가격과 기술이 정확하고 모든 암시 공동체의 현대 관행을 반영 할 수 없습니다.",
     "badges": {
       "guarantee": "30일 보증",
       "instant_access": "즉시 액세스",
@@ -184,17 +184,17 @@
   },
   "trust": {
     "title": "전 세계 팀에 의해 신뢰",
-    "readers_count": "1,247명의 독자",
+    "readers_count": "1,247 리더",
     "company_names": []
   },
   "ui": {
     "labels": {
-      "instant_access": "즉시 액세스",
-      "buy_now_arrow": "지금 구매하기 →",
-      "readers": "1,247명의 독자",
+      "instant_access": "즉시 접근",
+      "buy_now_arrow": "지금 구매 →",
+      "readers": "1,247 리더",
       "buy_now_dash": "지금 구매하기 —",
       "view_modules": "모듈 보기",
-      "ssl_secure": "보안 결제 (SSL)",
+      "ssl_secure": "SSL 결제",
       "instant_download": "즉시 다운로드",
       "lifetime_access": "일생 접근",
       "guarantee_days": "30일 보증",
@@ -203,23 +203,23 @@
       "perfect_for": "당신을 위해 완전히:",
       "p_struggle": "당신은 끝을 만들기 위해 투쟁",
       "p_cut_costs": "삶의 질을 희생하지 않고 비용을 삭감하고 싶습니다.",
-      "p_consumerism": "Tired of consumerism and debt culture",
-      "p_practical": "Looking for practical, time-tested methods",
-      "p_future": "Want a solid financial future for your family",
+      "p_consumerism": "소비자와 채무 문화의 피로",
+      "p_practical": "실제, 시간 테스트 방법을 원합니다",
+      "p_future": "당신은 당신의 가족을 위한 단단한 재정적인 미래를 건설하고 싶습니다",
       "not_for": "만약에:",
-      "n_quick": "Looking for get-rich-quick schemes",
-      "n_habits": "Not willing to change spending habits",
-      "n_quick_fix": "Prefer quick fixes over a solid path",
-      "n_implement": "Not willing to implement what you learn",
-      "n_advice": "Looking for personalized financial advice",
+      "n_quick": "get-rich-quick 계획을 찾고 있습니다.",
+      "n_habits": "당신은 당신의 지출 습관을 변경하고 싶지 않아",
+      "n_quick_fix": "당신은 단단한 기초에 빠른 고침을 선호합니다",
+      "n_implement": "당신은 당신이 배우는 것을 구현하지 않습니다",
+      "n_advice": "개인 금융 자문을 찾고 있습니다.",
       "section_learn": "// 02 - 당신이 배울 것",
       "masters_secrets": "Amish Masters의 비밀",
-      "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
+      "modules_desc": "일상 생활에 대한 구체적인 행동으로 고통받는 8 가지 실용적인 모듈.",
       "section_author": "// 03 - 저자",
       "behind_course": "이 코스 뒤에",
       "your_name": "당신의 이름 여기",
-      "researcher_author": "Researcher · Author · Traveler",
-      "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+      "researcher_author": "연구자 · 저자",
+      "author_bio": "[당신의 이야기를 추가: 나는 펜실베니아에서 3 개월 살았다, 인터뷰 12 Amish 가족, 자신의 경제 시스템을 공부. 이론 없음, 단지 연습.]",
       "section_content": "// 04 - 코스 내용",
       "what_inside": "자주 묻는 질문",
       "also_includes": "다음을 포함합니다:",
@@ -245,7 +245,7 @@
       "inc_bonus_shopping": "BONUS: 주간 쇼핑 목록 (값 $27)",
       "unlock_now": "지금 접속",
       "guarantee_title": "30일 환불 보증",
-      "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+      "guarantee_text": "30 일 동안 시도하십시오. 최소 $ 100을 저장하지 않으면 전체 금액을 환불해드립니다. 질문이 없습니다.",
       "section_testimonials": "// 06 — 증언",
       "testimonial_text": "나는 Amish 예산 방법을 적용하고 2 개월 만에 나는 35 %로 내 비용을 잘라. 30 일 체크리스트는 터닝 포인트였습니다. 마지막으로 정말 작동 하는 과정.",
       "testimonial_name": "마르코 R.",
@@ -262,7 +262,7 @@
       "rights_reserved": "모든 권리 보유",
       "privacy": "제품 정보",
       "terms": "제품 정보",
-      "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+      "legal_note": "디지털 정보 제품입니다. 결과는 다를 수 있고 개인적인 투입에 달려 있습니다. 연구에 기반을 둔 암시 가격과 기술이 정확하고 모든 암시 공동체의 현대 관행을 반영 할 수 없습니다.",
       "features": "제품 정보",
       "pricing": "제품정보",
       "testimonials": "관련 기사",
@@ -302,14 +302,10 @@
       "tag_2": "학회소개",
       "tag_3": "금융 컨설팅",
       "brand_name": "한국어",
-      "reviewer": "Marco R., early readers",
+      "reviewer": "Marco R., 초기 리더",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "30day money back": "30일 환불 보장",
-      "price": "가격",
-      "free": "무료",
-      "addtocart": "장바구니에 담기",
-      "select_currency": "통화 선택"
+      "story_quote": "암시는 풍요롭고 풍요로운 삶을 살고, 우리가 보내는 것에 대한 반응을 보내는 동안. 이 과정에서 우리는 그들이하는 방법을 밝혀."
     }
   },
   "audience": {
@@ -319,17 +315,17 @@
     "perfect_items": [
       "당신은 끝을 만들기 위해 투쟁",
       "삶의 질을 희생하지 않고 비용을 삭감하고 싶습니다.",
-      "Tired of consumerism and debt culture",
-      "Looking for practical, time-tested methods",
-      "Want a solid financial future for your family"
+      "소비자와 채무 문화의 피로",
+      "실제, 시간 테스트 방법을 원합니다",
+      "당신은 당신의 가족을 위한 단단한 재정적인 미래를 건설하고 싶습니다"
     ],
     "not_for": "만약에:",
     "not_items": [
-      "Looking for get-rich-quick schemes",
-      "Not willing to change spending habits",
-      "Prefer quick fixes over a solid path",
-      "Not willing to implement what you learn",
-      "Looking for personalized financial advice"
+      "get-rich-quick 계획을 찾고 있습니다.",
+      "당신은 당신의 지출 습관을 변경하고 싶지 않아",
+      "당신은 단단한 기초에 빠른 고침을 선호합니다",
+      "당신은 당신이 배우는 것을 구현하지 않습니다",
+      "개인 금융 자문을 찾고 있습니다."
     ]
   },
   "course": {

@@ -1,8 +1,8 @@
 {
   "locale": "fi",
   "seo": {
-    "title": "Amish-salaisuudet: Kuinka elää säästäväisesti ja hallita rahaa",
-    "description": "Tutustu Amish-yhteisön säästäväisen elämän salaisuuksiin. Sisältää kattavat videomoduulit ja ladattavat PDF-tiedostot.",
+    "title": "Amish Secrets: Miten elää säästöt ja hallita rahaa",
+    "description": "Tutustu amishien salaisuuksiin. Sisältää täydelliset videomoduulit ja ladattavat PDF.",
     "ogImage": "/courses/amish-secrets/cover.png"
   },
   "nav": {
@@ -19,8 +19,8 @@
   },
   "hero": {
     "badge": "Uusi",
-    "title": "Amish-salaisuudet: Kuinka elää säästäväisesti ja hallita rahaa",
-    "subtitle": "Tutustu Amish-yhteisön säästäväisen elämän salaisuuksiin. Sisältää kattavat videomoduulit ja ladattavat PDF-tiedostot.",
+    "title": "Amish Secrets: Miten elää säästöt ja hallita rahaa",
+    "subtitle": "Tutustu amishien salaisuuksiin. Sisältää täydelliset videomoduulit ja ladattavat PDF.",
     "cta": "Aloita",
     "secondary_cta": "Lue lisää",
     "price_label": "Erityinen käynnistyshinta",
@@ -28,7 +28,7 @@
   },
   "problem": {
     "badge": "Ongelma",
-    "title": "Oletko väsynyt siihen, että säästöjä ei jää kuun loppuun? Nykypäivän yhteiskunta ajaa meitä ylikulutukseen.",
+    "title": "Oletko kyllästynyt kuun loppuun ilman säästöjä? Nyky-yhteiskunta ajaa meitä kohti liiallista kulutusta.",
     "text": ""
   },
   "story": {
@@ -39,14 +39,14 @@
       "Vaihto- ja vaihtojärjestelmä, joka poistaa rahan tarpeen ja rakentaa pysyviä luottamussuhteita.",
       "Amish-talous: miten perhe elää 60 prosenttia vähemmän kuin kansallinen keskiarvo."
     ],
-    "quote": "Amishit elävät rikasta ja täyttä elämää käyttämällä vain murto-osan siitä, mitä me kulutamme. Tällä kurssilla paljastamme, miten he sen tekevät."
+    "quote": "Amishit elävät rikasta ja täyttä elämää samalla kun kulutamme murto-osan siitä mitä käytämme. Tällä kurssilla paljastamme, miten he tekevät sen."
   },
   "author": {
     "badge": "Kirjoittaja",
     "title": "Tämän kurssin takana",
     "name": "Alessandro Rinaldi",
-    "role": "Researcher · Author · Traveler",
-    "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+    "role": "Tutkija · Tekijä",
+    "bio": "[Lisää tarinasi tähän: Asuin 3 kuukautta Pennsylvaniassa, haastattelin 12 amish-perhettä, opiskelin niiden talousjärjestelmää. Ei teoriaa, vain harjoittelua.]",
     "tags": [
       "Taloudellinen viisaus",
       "Kestävä elämä",
@@ -56,7 +56,7 @@
   "modules": {
     "badge": "Mitä sinä opit?",
     "title": "Amish Mastersin salaisuudet",
-    "description": "8 practical modules that turn Amish wisdom into concrete actions.",
+    "description": "8 käytännön moduulia, jotka muuttavat amishien viisauden konkreettisiksi toimiksi arkielämääsi.",
     "items": [
       {
         "title": "Amish budget",
@@ -125,7 +125,7 @@
     "launch_price": "Käynnistä hinta ... sitten $37",
     "cta": "Avaa pääsy nyt",
     "guarantee_title": "30 päivän palautustakuu",
-    "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+    "guarantee_text": "Kokeile 30 päivää. Jos et säästä vähintään 100 dollaria, palautamme koko summan. Ei kysymyksiä, ei ongelmia.",
     "includes": [
       "Koko kurssi (arvo 97 dollaria)",
       "eBook PDF, ePub, Kindle",
@@ -175,7 +175,7 @@
     "rights_reserved": "Kaikki oikeudet pidätetään.",
     "privacy": "Yksityisyys",
     "terms": "Ehdot",
-    "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+    "legal_note": "Tämä on digitaalinen tietotuote. Tulokset voivat vaihdella ja riippua henkilökohtaisesta sitoutumisesta. Amish-hinnat ja -tekniikat perustuvat etnografiseen tutkimukseen eivätkä välttämättä vastaa tarkasti kaikkien amishiyhteisöjen nykykäytäntöjä.",
     "badges": {
       "guarantee": "30 päivän takuu",
       "instant_access": "Välitön pääsy",
@@ -184,16 +184,16 @@
   },
   "trust": {
     "title": "Luotettu joukkueet ympäri maailmaa",
-    "readers_count": "1 247 lukijaa",
+    "readers_count": "1,247 lukijaa",
     "company_names": []
   },
   "ui": {
     "labels": {
       "instant_access": "Välitön pääsy",
       "buy_now_arrow": "Osta nyt →",
-      "readers": "1 247 lukijaa",
-      "buy_now_dash": "Osta nyt —",
-      "view_modules": "Tutustu moduuleihin",
+      "readers": "1,247 lukijaa",
+      "buy_now_dash": "Osta nyt",
+      "view_modules": "Näytä moduulit",
       "ssl_secure": "Turvallinen SSL-maksu",
       "instant_download": "Välitön lataus",
       "lifetime_access": "Elinkaarikäyttö",
@@ -203,23 +203,23 @@
       "perfect_for": "Täydellinen sinulle, jos:",
       "p_struggle": "Kamppailet tienataksesi",
       "p_cut_costs": "Haluat leikata kustannuksia uhraamatta elämänlaatua",
-      "p_consumerism": "Tired of consumerism and debt culture",
-      "p_practical": "Looking for practical, time-tested methods",
-      "p_future": "Want a solid financial future for your family",
+      "p_consumerism": "Olet kyllästynyt kulutus- ja velkakulttuuriin.",
+      "p_practical": "Haluat käytännöllisiä, aikatestattuja menetelmiä.",
+      "p_future": "Haluat rakentaa vakaan taloudellisen tulevaisuuden perheellesi",
       "not_for": "Ei sinulle, jos:",
-      "n_quick": "Looking for get-rich-quick schemes",
-      "n_habits": "Not willing to change spending habits",
-      "n_quick_fix": "Prefer quick fixes over a solid path",
-      "n_implement": "Not willing to implement what you learn",
-      "n_advice": "Looking for personalized financial advice",
+      "n_quick": "-Etsit rikkaruohohuijauksia.",
+      "n_habits": "Et halua muuttaa kulutustottumuksia",
+      "n_quick_fix": "Käytät mieluummin nopeita korjauksia kuin vankka perusta",
+      "n_implement": "Et ole valmis toteuttamaan oppimaasi.",
+      "n_advice": "Etsit henkilökohtaista taloudellista neuvontaa",
       "section_learn": "Mitä sinä opit?",
       "masters_secrets": "Amish Mastersin salaisuudet",
-      "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
+      "modules_desc": "8 käytännön moduulia, jotka muuttavat amishien viisauden konkreettisiksi toimiksi arkielämääsi.",
       "section_author": "Kirjoittaja",
       "behind_course": "Tämän kurssin takana",
       "your_name": "Nimi tässä",
-      "researcher_author": "Researcher · Author · Traveler",
-      "author_bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
+      "researcher_author": "Tutkija · Tekijä",
+      "author_bio": "[Lisää tarinasi tähän: Asuin 3 kuukautta Pennsylvaniassa, haastattelin 12 amish-perhettä, opiskelin niiden talousjärjestelmää. Ei teoriaa, vain harjoittelua.]",
       "section_content": "// 04 ",
       "what_inside": "Mitä löydät sisältä",
       "also_includes": "Sisältää myös:",
@@ -245,7 +245,7 @@
       "inc_bonus_shopping": "BONUS: Viikoittainen ostoslista (arvo $27)",
       "unlock_now": "Avaa pääsy nyt",
       "guarantee_title": "30 päivän palautustakuu",
-      "guarantee_text": "Try it for 30 days. If you don't save at least $100, we'll refund the full amount.",
+      "guarantee_text": "Kokeile 30 päivää. Jos et säästä vähintään 100 dollaria, palautamme koko summan. Ei kysymyksiä, ei ongelmia.",
       "section_testimonials": "Suosittelut",
       "testimonial_text": "Käytin amishien budjettimenetelmää ja kahden kuukauden kuluttua laskin kulujani 35 prosentilla. 30 päivän tarkistuslista oli käännekohta. Viimeinkin kurssi, joka todella toimii.",
       "testimonial_name": "Marco R.",
@@ -262,7 +262,7 @@
       "rights_reserved": "Kaikki oikeudet pidätetään.",
       "privacy": "Yksityisyys",
       "terms": "Ehdot",
-      "legal_note": "This is a digital informational product. Results may vary and depend on personal commitment.",
+      "legal_note": "Tämä on digitaalinen tietotuote. Tulokset voivat vaihdella ja riippua henkilökohtaisesta sitoutumisesta. Amish-hinnat ja -tekniikat perustuvat etnografiseen tutkimukseen eivätkä välttämättä vastaa tarkasti kaikkien amishiyhteisöjen nykykäytäntöjä.",
       "features": "Ominaisuudet",
       "pricing": "Hinnoittelu",
       "testimonials": "Todistukset",
@@ -302,14 +302,10 @@
       "tag_2": "Amish-tutkimukset",
       "tag_3": "Rahoitusneuvonta",
       "brand_name": "CourssyCity name (optional, probably does not need a translation)",
-      "reviewer": "Marco R., early readers",
+      "reviewer": "Marco R., varhainen lukija",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "30day money back": "30 päivän tyytyväisyystakuu",
-      "price": "Hinta",
-      "free": "ILMAINEN",
-      "addtocart": "Lisää ostoskoriin",
-      "select_currency": "Valitse valuutta"
+      "story_quote": "Amishit elävät rikasta ja täyttä elämää samalla kun kulutamme murto-osan siitä mitä käytämme. Tällä kurssilla paljastamme, miten he tekevät sen."
     }
   },
   "audience": {
@@ -319,17 +315,17 @@
     "perfect_items": [
       "Kamppailet tienataksesi",
       "Haluat leikata kustannuksia uhraamatta elämänlaatua",
-      "Tired of consumerism and debt culture",
-      "Looking for practical, time-tested methods",
-      "Want a solid financial future for your family"
+      "Olet kyllästynyt kulutus- ja velkakulttuuriin.",
+      "Haluat käytännöllisiä, aikatestattuja menetelmiä.",
+      "Haluat rakentaa vakaan taloudellisen tulevaisuuden perheellesi"
     ],
     "not_for": "Ei sinulle, jos:",
     "not_items": [
-      "Looking for get-rich-quick schemes",
-      "Not willing to change spending habits",
-      "Prefer quick fixes over a solid path",
-      "Not willing to implement what you learn",
-      "Looking for personalized financial advice"
+      "-Etsit rikkaruohohuijauksia.",
+      "Et halua muuttaa kulutustottumuksia",
+      "Käytät mieluummin nopeita korjauksia kuin vankka perusta",
+      "Et ole valmis toteuttamaan oppimaasi.",
+      "Etsit henkilökohtaista taloudellista neuvontaa"
     ]
   },
   "course": {
