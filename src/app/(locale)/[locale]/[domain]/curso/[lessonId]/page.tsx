@@ -22,7 +22,7 @@ export default async function CoursePage({
   params,
   searchParams,
 }: {
-  params: Promise<{ domain: string; lessonId: string }>;
+  params: Promise<{ locale: string; domain: string; lessonId: string }>;
   searchParams: Promise<{ lang?: string; token?: string }>;
 }) {
   const { domain, lessonId } = await params;

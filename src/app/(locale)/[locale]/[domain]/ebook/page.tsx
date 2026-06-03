@@ -18,7 +18,7 @@ export default async function EbookPage({
   params,
   searchParams,
 }: {
-  params: Promise<{ domain: string }>;
+  params: Promise<{ locale: string; domain: string }>;
   searchParams: Promise<{ lang?: string }>;
 }) {
   const { domain } = await params;

@@ -167,8 +167,8 @@ export default function TemplateBookClaude({
   const lc = data.localeContent;
   const labels = data.ui?.labels ?? {};
   const lcLabels = lc?.ui?.labels ?? {};
-  const benefits = data.ui?.benefits ?? lc?.modules?.items ?? [];
-  const faqItems = data.ui?.faq ?? lc?.faq?.items ?? [];
+  const benefits = lc?.modules?.items ?? data.ui?.benefits ?? [];
+  const faqItems = lc?.faq?.items ?? data.ui?.faq ?? [];
 
   const hasBenefits = benefits.length > 0;
   const hasFaq = faqItems.length > 0;
