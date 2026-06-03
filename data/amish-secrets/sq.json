@@ -33,11 +33,11 @@
   },
   "story": {
     "badge": "Historia jonë",
-    "title": "La mia esperienza Tra gli Amish",
+    "title": "Përvoja ime mes amishëve",
     "image_captions": [
-      "La vita quotidiana Nilla comunità Amish: semplicità, autosuflicienza e saggezza Baranziaria.",
-      "Il sitema di baratto e scobo che elimina il bisogno di denaro contante.",
-      "L'economia homea Amish: come una famiglia crea a vivere conl 60% in meno."
+      "Jeta e përditshme në komunitetin amish: thjeshtësia, vetë-afektshmëria dhe mençuria financiare kaluan brez pas brezi.",
+      "Sistemi i shkëmbimit dhe shkëmbimit që eliminon nevojën për para dhe ndërton marrëdhënie të qëndrueshme besimi.",
+      "Ekonomia e familjes Amish: sesi një familje jeton në 60% më pak se mesatarja kombëtare."
     ],
     "quote": "Amishët jetojnë të pasur dhe të plotë ndërsa shpenzojnë një pjesëz të asaj që shpenzojmë. Në këtë drejtim, tregojmë se si e bëjnë."
   },
@@ -48,9 +48,9 @@
     "role": "Kërkuesi",
     "bio": "[Shto historinë tuaj këtu: kam jetuar 3 muaj në Pensilvani, intervistuar 12 familje Amish, studiuar sistemin e tyre ekonomik. Jo teori, vetëm praktikë.]",
     "tags": [
-      "Sagesza Finanziaria",
-      "Vita Sostenible",
-      "Edukazione"
+      "Mençuria financiare",
+      "Jetë e qëndrueshme",
+      "Arsimi"
     ]
   },
   "modules": {

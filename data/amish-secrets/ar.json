@@ -33,11 +33,11 @@
   },
   "story": {
     "badge": "قصتنا",
-    "title": "La mia esperienza tra gli Amish",
+    "title": "خبرتي بين الأميش",
     "image_captions": [
-      "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria.",
-      "Il sistema di baratto e scambio che elimina il bisogno di denaro contante.",
-      "\"تعالي إلى \"فيمجيلا تريس \"فيفري كون\" \"60% في \"مينو"
+      "الحياة اليومية في مجتمع الأميش: البساطة، والاكتفاء الذاتي، والحكمة المالية المتوارثة عبر الأجيال.",
+      "نظام المقايضة والتبادل الذي يزيل الحاجة إلى النقد ويقيم علاقات ثقة دائمة.",
+      "اقتصاد الأسرة الأميشية: كيف تعيش العائلة بإنفاق أقل بنسبة 60% من المعدل الوطني."
     ],
     "quote": "يعيش الأميش حياة غنية ومليئة بالمعاني بإنفاق جزء بسيط مما ننفقه نحن. في هذه الدورة، نكشف لك كيف يفعلون ذلك."
   },
@@ -48,7 +48,7 @@
     "role": "Researcher · Author · Traveler",
     "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
     "tags": [
-      "Financial Wisdom",
+      "الحكمة المالية",
       "العيش المستدام",
       "التعليم"
     ]

@@ -33,11 +33,11 @@
   },
   "story": {
     "badge": "Our Story",
-    "title": "La mia esperienza tra gli Amish",
+    "title": "Min erfaring blant amish",
     "image_captions": [
-      "La vita quotidiana nella comunità Amish: semplicità, autosufficienza e saggezza finanziaria.",
-      "Il sistema di baratto e scambio che elimina il bisogno di denaro contante.",
-      "L'economia domestica Amish: come una famiglia riesce a vivere con il 60% in meno."
+      "Daglige liv i det amishiske samfunnet: enkelhet, selvforsyning og økonomisk visdom gikk ned gjennom generasjoner.",
+      "Il sitema di Baratto e svindelbio che elimina il bisogno di denaro contante.",
+      "Amish husholdning økonomi: hvordan en familie lever på 60% mindre enn det nasjonale gjennomsnittet."
     ],
     "quote": "Amish-folket lever rike og fulle liv ved å bruke en brøkdel av det vi bruker. I dette kurset avslører vi hvordan de gjør det."
   },
@@ -48,9 +48,9 @@
     "role": "Researcher · Author · Traveler",
     "bio": "I lived 3 months in Pennsylvania, interviewed 12 Amish families, studied their economic system.",
     "tags": [
-      "Financial Wisdom",
-      "Sustainable Living",
-      "Education"
+      "Finansiell visdom",
+      "Bærekraftig Living",
+      "Utdanning"
     ]
   },
   "modules": {
