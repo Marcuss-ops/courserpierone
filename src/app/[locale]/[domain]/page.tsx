@@ -289,7 +289,7 @@ export default async function LocaleLandingPage({
                    {content.cta}
                  </TrackedCtaButton>
                  <Link href={`/${currentLocale}/${domain}/curso/${firstLessonId}${accessToken ? `?token=${accessToken}` : ""}`} className="px-10 py-5 bg-white rounded-3xl text-sm font-black text-gray-900 border border-gray-200 hover:bg-gray-50 transition-all flex items-center gap-3">
-                    <Play className="w-5 h-5 text-gray-400" /> {lc?.nav?.member_area || "Area Membri"}
+                    <Play className="w-5 h-5 text-gray-400" /> {lc?.nav?.member_area || "Member Area"}
                  </Link>
               </div>
            </div>

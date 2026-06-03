@@ -201,7 +201,17 @@
       "section_who": "// 01 — Who Is This For",
       "is_this_for_you": "Is This Course For You?",
       "perfect_for": "Perfect for you if:",
+      "p_struggle": "You struggle to make ends meet",
+      "p_cut_costs": "You want to cut costs without sacrificing quality of life",
+      "p_consumerism": "Tired of consumerism and debt culture",
+      "p_practical": "Looking for practical, time-tested methods",
+      "p_future": "Want a solid financial future for your family",
       "not_for": "Not for you if:",
+      "n_quick": "Looking for get-rich-quick schemes",
+      "n_habits": "Not willing to change spending habits",
+      "n_quick_fix": "Prefer quick fixes over a solid path",
+      "n_implement": "Not willing to implement what you learn",
+      "n_advice": "Looking for personalized financial advice",
       "section_learn": "// 02 — What You'll Learn",
       "masters_secrets": "The Amish Masters' Secrets",
       "modules_desc": "8 practical modules that turn Amish wisdom into concrete actions.",
@@ -308,18 +318,18 @@
     "perfect_for": "Perfect for you if:",
     "perfect_items": [
       "You struggle to make ends meet",
-      "You want to cut costs",
-      "Tired of consumerism",
-      "Want practical methods",
-      "Want solid future for family"
+      "You want to cut costs without sacrificing quality of life",
+      "Tired of consumerism and debt culture",
+      "Looking for practical, time-tested methods",
+      "Want a solid financial future for your family"
     ],
     "not_for": "Not for you if:",
     "not_items": [
-      "Looking for get-rich-quick",
-      "Don't want to change habits",
-      "Prefer quick fixes",
-      "Not willing to implement",
-      "Looking for personal advice"
+      "Looking for get-rich-quick schemes",
+      "Not willing to change spending habits",
+      "Prefer quick fixes over a solid path",
+      "Not willing to implement what you learn",
+      "Looking for personalized financial advice"
     ]
   },
   "course": {
