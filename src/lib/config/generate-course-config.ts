@@ -48,6 +48,14 @@ export interface CourseConfig {
 }
 
 export async function generateCourseConfig(slug: string) {
+  let existingConfig: any = {};
+  try {
+    const configPath = path.join(process.cwd(), "public", "courses", slug, "config.json");
+    if (fs.existsSync(configPath)) {
+      existingConfig = JSON.parse(fs.readFileSync(configPath, "utf8"));
+    }
+  } catch {}
+
   const product = await prisma.product.findUnique({
     where: { slug },
     include: {
@@ -67,7 +75,8 @@ export async function generateCourseConfig(slug: string) {
 
   // Build languages object
   const languages: CourseConfig["languages"] = {};
-  const locales = Object.keys(translationsByLocale).length > 0 ? Object.keys(translationsByLocale) : ["it"];    function safeParseUi(raw: string | undefined) {
+  const locales = Object.keys(translationsByLocale).length > 0 ? Object.keys(translationsByLocale) : ["it"];
+    function safeParseUi(raw: string | undefined) {
       if (!raw) return undefined;
       try { return JSON.parse(raw); } catch { return undefined; }
     }
@@ -134,10 +143,13 @@ export async function generateCourseConfig(slug: string) {
     slug: product.slug,
     productId: product.id,
     template: (product.templateId as "lumio" | "h612" | "horizon" | "book-claude" | "amish") || "lumio",
-    defaultLanguage: "it",
-    cover: product.coverUrl || "/placeholder-cover.jpg",
-    checkoutUrl: "#",
-    author: "Brand",
+    defaultLanguage: existingConfig.defaultLanguage || "it",
+    cover: product.coverUrl || existingConfig.cover || "/placeholder-cover.jpg",
+    authorImageUrl: existingConfig.authorImageUrl || undefined,
+    storyImages: existingConfig.storyImages || undefined,
+    accentColor: product.accentColor || existingConfig.accentColor || undefined,
+    checkoutUrl: existingConfig.checkoutUrl || "#",
+    author: existingConfig.author || "Brand",
     price: product.price / 100,
     prices: product.pricesByCurrency ? (() => {
       const raw = JSON.parse(product.pricesByCurrency) as Record<string, { price: number; symbol?: string }>;
@@ -162,7 +174,7 @@ export async function generateCourseConfig(slug: string) {
     lemonVariantId: product.lemonVariantId || undefined,
     languages,
     lessons,
-    ebookChapters: [],
+    ebookChapters: existingConfig.ebookChapters || [],
   };
 
   // Salva su disco (solo se non siamo su Vercel)
