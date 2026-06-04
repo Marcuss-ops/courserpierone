@@ -278,9 +278,7 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
           <div className="bg-white rounded-[32px] shadow-md shadow-[#C9840D]/5 p-8 md:p-12 grid md:grid-cols-[220px_1fr] gap-8 items-start border border-[#F0E6D7]">
             <div className="text-center md:text-left">
               <div className="w-40 h-40 mx-auto md:mx-0 rounded-2xl overflow-hidden bg-[#FFFBF5] border-2 border-[#C9840D]/20">
-                {lc?.author?.image ? (
-                  <img src={lc.author.image} alt={data.author || ""} className="w-full h-full object-cover" />
-                ) : data.coverUrl ? (
+                {data.coverUrl ? (
                   <img src={data.coverUrl} alt={data.author || ""} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center"><User className="w-16 h-16 text-[#C9840D]/30" /></div>
@@ -297,15 +295,19 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
               <div className="space-y-4 text-[#4A4035] leading-relaxed">
                 <p>{authorBio || t("author_bio_1")}</p>
               </div>
-              {lc?.story?.image_captions?.length ? (
-                <div className="grid grid-cols-3 gap-3 mt-6">
-                  {lc.story.image_captions.slice(0, 3).map((_: string, i: number) => (
-                    <div key={i} className="rounded-xl overflow-hidden aspect-[4/3] border border-[#F0E6D7]">
-                      <div className="w-full h-full bg-[#C9840D]/5 flex items-center justify-center text-xs text-[#8A7B6B] p-2 text-center">{_}</div>
-                    </div>
-                  ))}
-                </div>
-              ) : null}
+              {(() => {
+                const storyImages: string[] = lc?.story?.images ?? [];
+                if (storyImages.length === 0) return null;
+                return (
+                  <div className="grid grid-cols-3 gap-3 mt-6">
+                    {storyImages.slice(0, 3).map((src: string, i: number) => (
+                      <div key={i} className="rounded-xl overflow-hidden aspect-[4/3] border border-[#F0E6D7]">
+                        <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>
@@ -314,6 +316,7 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
       {/* ================================================================ */}
       {/* TRANSFORMATION */}
       {/* ================================================================ */}
+      {t("transform_title") && (
       <section className="py-12 relative z-10 overflow-hidden">
         <GradientBlob className="w-[500px] h-[500px] bg-[#C9840D]/5 top-0 right-0 animate-[pulse_10s_ease-in-out_infinite_3s]" />
         <div className="max-w-4xl mx-auto px-6 relative">
@@ -343,6 +346,7 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
           </div>
         </div>
       </section>
+      )}
 
       {/* ================================================================ */}
       {/* MODULES */}
