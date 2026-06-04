@@ -10,6 +10,9 @@ export interface CourseConfig {
   template: "lumio" | "h612" | "horizon" | "book-claude" | "amish";
   defaultLanguage: string;
   cover: string;
+  authorImageUrl?: string;
+  storyImages?: string[];
+  accentColor?: string;
   checkoutUrl: string;
   author: string;
   price: number;
@@ -147,7 +150,7 @@ export async function generateCourseConfig(slug: string) {
     cover: product.coverUrl || existingConfig.cover || "/placeholder-cover.jpg",
     authorImageUrl: existingConfig.authorImageUrl || undefined,
     storyImages: existingConfig.storyImages || undefined,
-    accentColor: product.accentColor || existingConfig.accentColor || undefined,
+    accentColor: existingConfig.accentColor || undefined,
     checkoutUrl: existingConfig.checkoutUrl || "#",
     author: existingConfig.author || "Brand",
     price: product.price / 100,
