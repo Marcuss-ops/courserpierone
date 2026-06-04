@@ -63,54 +63,8 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
   const lc = data.localeContent;
   const uiLabels = { ...lc?.ui?.labels, ...data.ui?.labels };
 
-  // ── Smart t() that reads from localeContent sections first ──
-  const t = (key: string): string => {
-    switch (key) {
-      case "hero_badge": return lc?.hero?.badge ?? uiLabels[key] ?? "";
-      case "hero_subtitle": return lc?.hero?.subtitle ?? uiLabels[key] ?? "";
-      case "hero_cta_prefix": return lc?.hero?.cta ?? uiLabels[key] ?? "";
-      case "hero_no_sub": return lc?.hero?.one_time_payment ?? uiLabels[key] ?? "";
-      case "hero_readers": return lc?.trust?.readers_count ?? uiLabels[key] ?? "";
-      case "problem_title": return lc?.problem?.title ?? uiLabels[key] ?? "";
-      case "author_role": return lc?.author?.role ?? uiLabels[key] ?? "";
-      case "author_title": return lc?.author?.title ?? uiLabels[key] ?? "";
-      case "modules_title": return lc?.modules?.title ?? uiLabels[key] ?? "";
-      case "modules_desc": return lc?.modules?.description ?? uiLabels[key] ?? "";
-      case "testimonials_title": return lc?.testimonials?.title ?? uiLabels[key] ?? "";
-      case "whats_included_title": return lc?.includes?.title ?? uiLabels[key] ?? "";
-      case "faq_title": return lc?.faq?.title ?? uiLabels[key] ?? "";
-      case "offer_badge": return lc?.offer?.badge ?? uiLabels[key] ?? "";
-      case "offer_title": return lc?.offer?.title ?? uiLabels[key] ?? "";
-      case "offer_original_price": return lc?.offer?.course_value ?? uiLabels[key] ?? "";
-      case "offer_one_time": return lc?.offer?.one_time ?? uiLabels[key] ?? "";
-      case "offer_launch_note": return lc?.offer?.launch_price ?? uiLabels[key] ?? "";
-      case "offer_cta": return lc?.offer?.cta ?? uiLabels[key] ?? "";
-      case "guarantee_title": return lc?.offer?.guarantee_title ?? uiLabels[key] ?? "";
-      case "guarantee_text": return lc?.offer?.guarantee_text ?? uiLabels[key] ?? "";
-      case "final_cta_text": return lc?.final_cta?.badge ?? lc?.offer?.cta ?? uiLabels[key] ?? "";
-      case "footer_rights": return lc?.footer?.rights_reserved ?? uiLabels[key] ?? "";
-      case "footer_privacy": return lc?.footer?.privacy ?? uiLabels[key] ?? "";
-      case "footer_terms": return lc?.footer?.terms ?? uiLabels[key] ?? "";
-      case "footer_legal_note": return lc?.footer?.legal_note ?? uiLabels[key] ?? "";
-      case "problem_1_title": return uiLabels[key] ?? "";
-      case "problem_1_text": return uiLabels[key] ?? "";
-      case "problem_2_title": return uiLabels[key] ?? "";
-      case "problem_2_text": return uiLabels[key] ?? "";
-      case "problem_3_title": return uiLabels[key] ?? "";
-      case "problem_3_text": return uiLabels[key] ?? "";
-      case "transform_title": return uiLabels[key] ?? "";
-      case "transform_before_label": return uiLabels[key] ?? "";
-      case "transform_before_1": return uiLabels[key] ?? "";
-      case "transform_before_2": return uiLabels[key] ?? "";
-      case "transform_before_3": return uiLabels[key] ?? "";
-      case "transform_after_label": return uiLabels[key] ?? "";
-      case "transform_after_1": return uiLabels[key] ?? "";
-      case "transform_after_2": return uiLabels[key] ?? "";
-      case "transform_after_3": return uiLabels[key] ?? "";
-      case "transform_disclaimer": return uiLabels[key] ?? "";
-      default: return uiLabels[key] ?? "";
-    }
-  };
+  // ── Helper: read from localeContent sections, fallback to ui.labels ──
+  const t = (key: string): string => uiLabels[key] ?? "";
 
   // Use translated product title from config
   const LOCALE_TITLE_MAP: Record<string, string> = {};
@@ -144,7 +98,7 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
         <div className="flex items-center justify-between gap-3">
           <div>
             <div className="text-lg font-black tracking-tight text-[#3C2F2F]">{data.prezzo}</div>
-            <div className="text-[10px] text-[#8A7B6B] font-medium">{t("hero_no_sub")}</div>
+            <div className="text-[10px] text-[#8A7B6B] font-medium">{lc?.hero?.one_time_payment || t("hero_no_sub")}</div>
           </div>
           <TrackedCtaButton href={checkoutUrl} productSlug={productSlug ?? ""} productId={productId} locale={locale}
             className="bg-[#C9840D] text-white px-6 py-3.5 rounded-xl font-bold text-sm shadow-[0_4px_16px_rgba(201,132,13,0.3)] hover:bg-[#B6750B] transition-all shrink-0">
@@ -171,18 +125,18 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
             <div>
               <div className="inline-flex items-center gap-2 bg-[#C9840D]/10 px-3 py-1.5 rounded-full text-xs font-medium mb-6 border border-[#C9840D]/20">
                 <span className="w-2 h-2 bg-[#C9840D] rounded-full animate-pulse" />
-                {t("hero_badge")}
+                {lc?.hero?.badge || t("hero_badge")}
               </div>
               <h1 className="text-[38px] leading-[1.1] md:text-5xl lg:text-[56px] font-semibold text-[#3C2F2F]"
                 style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
                 {PRODUCT_TITLE}
               </h1>
-              <p className="mt-6 text-lg leading-relaxed text-[#5A4E42] max-w-xl">{t("hero_subtitle")}</p>
+              <p className="mt-6 text-lg leading-relaxed text-[#5A4E42] max-w-xl">{lc?.hero?.subtitle || t("hero_subtitle")}</p>
 
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
                 <TrackedCtaButton href={checkoutUrl} productSlug={productSlug ?? ""} productId={productId} locale={locale}
                   className="inline-flex justify-center items-center px-7 py-4 bg-[#C9840D] hover:bg-[#B6750B] text-white font-semibold rounded-xl shadow-lg shadow-[#C9840D]/20 transition transform hover:-translate-y-0.5">
-                  {t("hero_cta_prefix")} {data.prezzo ?? "$19"}
+                  {lc?.hero?.cta || t("hero_cta_prefix")} {data.prezzo ?? "$19"}
                 </TrackedCtaButton>
                 <div className="flex items-center justify-center sm:justify-start gap-2 text-sm text-[#8A7B6B]">
                   <Shield className="w-4 h-4 text-[#C9840D]" /> {t("hero_secure")}
@@ -191,7 +145,7 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
 
               <div className="mt-6 flex items-center gap-3">
                 <div className="flex text-[#C9840D]">{[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-current" />)}</div>
-                <p className="text-sm text-[#5A4E42]"><strong>{t("hero_readers")}</strong> <span className="text-xs text-[#8A7B6B]">{t("hero_verified")}</span></p>
+                <p className="text-sm text-[#5A4E42]"><strong>{lc?.trust?.readers_count || t("hero_readers")}</strong> <span className="text-xs text-[#8A7B6B]">{t("hero_verified")}</span></p>
               </div>
             </div>
 
@@ -205,7 +159,7 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
                 <div className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-md rounded-2xl p-4 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-[#C9840D]/15 flex items-center justify-center"><Shield className="w-5 h-5 text-[#C9840D]" /></div>
                   <div className="text-sm">
-                    <p className="font-semibold text-[#3C2F2F] leading-tight">{t("hero_no_sub")}</p>
+                    <p className="font-semibold text-[#3C2F2F] leading-tight">{lc?.hero?.one_time_payment || t("hero_no_sub")}</p>
                     <p className="text-[#8A7B6B] text-xs">{t("hero_no_sub_desc")}</p>
                   </div>
                 </div>
@@ -230,7 +184,7 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
         <GradientBlob className="w-[600px] h-[600px] bg-[#C9840D]/5 -top-60 right-0 animate-[pulse_12s_ease-in-out_infinite]" />
         <div className="max-w-5xl mx-auto px-6 relative">
           <h2 className="text-3xl md:text-4xl text-center mb-12 text-[#3C2F2F]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-            {t("problem_title")}
+            {lc?.problem?.title || t("problem_title")}
           </h2>
           <div className="grid md:grid-cols-3 gap-6">
             {[
@@ -261,15 +215,14 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
               </div>
               <p className="mt-4 text-xl font-semibold text-[#3C2F2F]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
                 {data.author || "The Author"}
-              </p>
-              <p className="text-sm text-[#C9840D] font-medium">{t("author_role")}</p>
+              </p>                <p className="text-sm text-[#8A7B6B]">{lc?.author?.role || t("author_role")}</p>
             </div>
             <div>
               <h2 className="text-3xl mb-4 text-[#3C2F2F]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-                {t("author_title")}
+                {lc?.author?.title || t("author_title")}
               </h2>
               <div className="space-y-4 text-[#4A4035] leading-relaxed">
-                <p>{authorBio}</p>
+                <p>{authorBio || t("author_bio_1")}</p>
               </div>
               <div className="grid grid-cols-3 gap-3 mt-6">
                 {["/images/amish-storia-1.png", "/images/amish-storia-2.png", "/images/amish-storia-3.png"].map((src, i) => (
@@ -325,9 +278,9 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
           <div className="max-w-6xl mx-auto px-6 relative">
             <div className="text-center max-w-2xl mx-auto">
               <h2 className="text-3xl md:text-4xl text-[#3C2F2F]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-                {t("modules_title")}
+                {lc?.modules?.title || t("modules_title")}
               </h2>
-              <p className="mt-4 text-[#5A4E42]">{t("modules_desc")}</p>
+              <p className="mt-4 text-[#5A4E42]">{lc?.modules?.description || t("modules_desc")}</p>
             </div>
             <div className="grid md:grid-cols-2 gap-5 mt-12">
               {modules.map((m, i) => {
@@ -364,7 +317,7 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
         <GradientBlob className="w-[500px] h-[500px] bg-[#C9840D]/5 top-0 -left-40 animate-[pulse_11s_ease-in-out_infinite_1s]" />
         <div className="max-w-6xl mx-auto px-6 relative">
           <h2 className="text-3xl text-center mb-2 text-[#3C2F2F]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-            {t("testimonials_title")}
+            {lc?.testimonials?.title || t("testimonials_title")}
           </h2>
           <p className="text-center text-[#8A7B6B] mb-10 text-sm">{t("testimonials_subtitle")}</p>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -392,7 +345,7 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
         <div className="max-w-5xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center relative">
           <div>
             <h2 className="text-3xl md:text-4xl mb-6 text-[#3C2F2F]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-              {t("whats_included_title")}
+              {lc?.includes?.title || t("whats_included_title")}
             </h2>
             <ul className="space-y-4">
               {includesItems.map((item, i) => (
@@ -427,20 +380,20 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")` }} />
         <div className="max-w-3xl mx-auto px-6 relative">
           <div className="bg-[#4A3D32]/80 backdrop-blur-sm border border-[#C9840D]/20 rounded-[32px] p-8 md:p-12 shadow-2xl text-center">
-            <p className="inline-block bg-[#C9840D]/20 text-[#C9840D] px-3 py-1 rounded-full text-xs font-semibold tracking-wide mb-4">{t("offer_badge")}</p>
+            <p className="inline-block bg-[#C9840D]/20 text-[#C9840D] px-3 py-1 rounded-full text-xs font-semibold tracking-wide mb-4">{lc?.offer?.badge || t("offer_badge")}</p>
             <h2 className="text-3xl md:text-4xl text-white" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-              {PRODUCT_TITLE.split(":")[0] || "Course"} &mdash; {t("offer_title")}
+              {PRODUCT_TITLE.split(":")[0] || "Course"} &mdash; {lc?.offer?.title || t("offer_title")}
             </h2>
             <div className="mt-6 flex items-center justify-center gap-4">
-              <span className="text-2xl line-through opacity-40">{t("offer_original_price")}</span>
+              <span className="text-2xl line-through opacity-40">{lc?.offer?.course_value || t("offer_original_price")}</span>
               <span className="text-5xl font-semibold text-white" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>{data.prezzo ?? "$19"}</span>
             </div>
-            <p className="mt-2 text-white/60">{t("offer_one_time")}</p>
-            <p className="mt-1 text-sm text-[#C9840D] font-medium">{t("offer_launch_note")}</p>
+            <p className="mt-2 text-white/60">{lc?.offer?.one_time || t("offer_one_time")}</p>
+            <p className="mt-1 text-sm text-[#C9840D] font-medium">{lc?.offer?.launch_price || t("offer_launch_note")}</p>
 
             <TrackedCtaButton href={checkoutUrl} productSlug={productSlug ?? ""} productId={productId} locale={locale}
               className="mt-8 inline-flex w-full justify-center px-8 py-5 bg-[#C9840D] hover:bg-[#B6750B] text-white font-semibold rounded-xl text-lg shadow-lg shadow-[#C9840D]/30 transition transform hover:-translate-y-0.5">
-              {t("offer_cta")} {data.prezzo ?? "$19"}
+              {lc?.offer?.cta || t("offer_cta")} {data.prezzo ?? "$19"}
             </TrackedCtaButton>
 
             <div className="mt-4 flex items-center justify-center gap-4 text-xs text-white/40">
@@ -453,8 +406,8 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
               <div className="flex gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#C9840D]/15 flex items-center justify-center shrink-0"><Shield className="w-5 h-5 text-[#C9840D]" /></div>
                 <div>
-                  <p className="font-semibold text-white">{t("guarantee_title")}</p>
-                  <p className="text-sm text-white/60 mt-1 leading-relaxed">{t("guarantee_text")}</p>
+                  <p className="font-semibold text-white">{lc?.offer?.guarantee_title || t("guarantee_title")}</p>
+                  <p className="text-sm text-white/60 mt-1 leading-relaxed">{lc?.offer?.guarantee_text || t("guarantee_text")}</p>
                 </div>
               </div>
             </div>
@@ -470,7 +423,7 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
           <GradientBlob className="w-[500px] h-[500px] bg-[#C9840D]/5 -bottom-40 right-0 animate-[pulse_12s_ease-in-out_infinite_2s]" />
           <div className="max-w-3xl mx-auto px-6 relative">
             <h2 className="text-3xl text-center mb-10 text-[#3C2F2F]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-              {t("faq_title")}
+              {lc?.faq?.title || t("faq_title")}
             </h2>
             <div className="space-y-4">
               {faqItems.map((faq, i) => (
@@ -490,7 +443,7 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
             <div className="text-center mt-10">
               <TrackedCtaButton href={checkoutUrl} productSlug={productSlug ?? ""} productId={productId} locale={locale}
                 className="inline-flex px-7 py-3.5 bg-[#C9840D] text-white rounded-xl font-medium hover:bg-[#B6750B] shadow-lg shadow-[#C9840D]/20 transition-all">
-                {t("final_cta_text")}
+                {lc?.final_cta?.badge || lc?.offer?.cta || t("final_cta_text")}
               </TrackedCtaButton>
             </div>
           </div>
@@ -505,20 +458,20 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
           <div className="flex flex-col md:flex-row justify-between gap-6">
             <div>
               <p className="font-semibold text-[#3C2F2F]">{PRODUCT_TITLE}</p>
-              <p className="mt-1">{t("footer_project")}</p>
+              <p className="mt-1">{lc?.footer?.rights_reserved || t("footer_rights")}</p>
             </div>
             <div className="text-xs leading-relaxed">
-              <p>Courssy &mdash; {t("footer_rights")}</p>
+              <p>Courssy &mdash; {lc?.footer?.rights_reserved || t("footer_rights")}</p>
               <p>Email: <a href={`mailto:${t("footer_email")}`} className="underline text-[#C9840D]">{t("footer_email")}</a></p>
               <p className="mt-2">
-                <a href="/privacy" className="hover:text-[#C9840D] transition-colors">{t("footer_privacy")}</a> &middot;{" "}
-                <a href="/terms" className="hover:text-[#C9840D] transition-colors">{t("footer_terms")}</a> &middot;{" "}
+                <a href="/privacy" className="hover:text-[#C9840D] transition-colors">{lc?.footer?.privacy || t("footer_privacy")}</a> &middot;{" "}
+                <a href="/terms" className="hover:text-[#C9840D] transition-colors">{lc?.footer?.terms || t("footer_terms")}</a> &middot;{" "}
                 <a href="#" className="hover:text-[#C9840D] transition-colors">{t("footer_cookies")}</a> &middot;{" "}
                 <a href="#" className="hover:text-[#C9840D] transition-colors">{t("footer_withdrawal")}</a>
               </p>
             </div>
           </div>
-          <p className="mt-8 text-[11px] text-[#B0A89A] max-w-3xl">{t("footer_legal_note")}</p>
+          <p className="mt-8 text-[11px] text-[#B0A89A] max-w-3xl">{lc?.footer?.legal_note || t("footer_legal_note")}</p>
         </div>
       </footer>
 
