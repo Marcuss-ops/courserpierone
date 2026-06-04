@@ -1,12 +1,12 @@
 {
   "locale": "eo",
   "seo": {
-    "title": "Amish Secrets: Kiel vivi kun ŝparaĵoj kaj administri monon",
+    "title": "La sekretoj: Kiel vivi kun ŝparaĵoj kaj administri monon",
     "description": "Mi pasigis 3 monatojn en Pensilvanio kun 12 amiŝoj. Neniu teorio: ĵus ilia buĝetsistemo, paniro, nul ŝuldo, kaj riparoj. Adaptita al vivo en 2026.",
     "ogImage": "/images/amish-secrets-cover.png"
   },
   "nav": {
-    "brand": "Viaj sekretoj",
+    "brand": "La sekretoj",
     "features": "Plendoj",
     "pricing": "Pricing",
     "testimonials": "Testimonials",
@@ -19,7 +19,7 @@
   },
   "hero": {
     "badge": "Nova",
-    "title": "Amish Secrets: Kiel vivi kun ŝparaĵoj kaj administri monon",
+    "title": "La sekretoj: Kiel vivi kun ŝparaĵoj kaj administri monon",
     "subtitle": "Mi pasigis 3 monatojn en Pensilvanio kun 12 amiŝoj. Neniu teorio: ĵus ilia buĝetsistemo, paniro, nul ŝuldo, kaj riparoj. Adaptita al vivo en 2026.",
     "cta": "Komencu komenci",
     "secondary_cta": "Lernu pli",

@@ -1,12 +1,12 @@
 {
   "locale": "nb",
   "seo": {
-    "title": "Amish Secrets: Hvordan leve med besparelser og administrere penger",
+    "title": "Amish Hemmeligheter: Hvordan leve med besparelser og administrere penger",
     "description": "Jeg tilbrakte tre måneder i Pennsylvania med 12 amish familier. Ingen teori: bare deres budsjettsystem, pantry, null gjeld og reparasjoner. Tilpasset til livet i 2026.",
     "ogImage": "/images/amish-secrets-cover.png"
   },
   "nav": {
-    "brand": "Amish hemmeligheter",
+    "brand": "Amish Hemmeligheter",
     "features": "Funksjoner",
     "pricing": "Prising",
     "testimonials": "Vitnemål",
@@ -19,7 +19,7 @@
   },
   "hero": {
     "badge": "Ny",
-    "title": "Amish Secrets: Hvordan leve med besparelser og administrere penger",
+    "title": "Amish Hemmeligheter: Hvordan leve med besparelser og administrere penger",
     "subtitle": "Jeg tilbrakte tre måneder i Pennsylvania med 12 amish familier. Ingen teori: bare deres budsjettsystem, pantry, null gjeld og reparasjoner. Tilpasset til livet i 2026.",
     "cta": "Kom i gang",
     "secondary_cta": "Les mer",

@@ -1,12 +1,12 @@
 {
   "locale": "zh",
   "seo": {
-    "title": "Amish Secrets:如何用储蓄和管理资金生活",
+    "title": "阿米什人的秘密: 如何用储蓄和管理资金生活",
     "description": "我和12个阿米什家庭在宾夕法尼亚待了三个月 没有理论,只是他们的预算系统, 储藏室,零债务和修理。 2026年适应生活.",
     "ogImage": "/images/amish-secrets-cover.png"
   },
   "nav": {
-    "brand": "亚米什秘密",
+    "brand": "阿米什人的秘密",
     "features": "特征",
     "pricing": "定价",
     "testimonials": "证词",
@@ -19,7 +19,7 @@
   },
   "hero": {
     "badge": "新设",
-    "title": "Amish Secrets:如何用储蓄和管理资金生活",
+    "title": "阿米什人的秘密: 如何用储蓄和管理资金生活",
     "subtitle": "我和12个阿米什家庭在宾夕法尼亚待了三个月 没有理论,只是他们的预算系统, 储藏室,零债务和修理。 2026年适应生活.",
     "cta": "开始",
     "secondary_cta": "学习更多",

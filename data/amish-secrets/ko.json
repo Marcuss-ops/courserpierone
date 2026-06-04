@@ -1,12 +1,12 @@
 {
   "locale": "ko",
   "seo": {
-    "title": "Amish Secrets: 저축과 돈 관리에 사는 방법",
+    "title": "아미쉬의 비밀: 저축과 돈 관리에 사는 방법",
     "description": "나는 펜실베니아에서 3 개월을 보냈습니다 12 Amish 가족. 이론 없음 : 예산 시스템, 팬트리, 제 부채 및 수리. 2026년 생활에 적응.",
     "ogImage": "/images/amish-secrets-cover.png"
   },
   "nav": {
-    "brand": "암시 비밀",
+    "brand": "아미쉬의 비밀",
     "features": "제품 정보",
     "pricing": "제품정보",
     "testimonials": "관련 기사",
@@ -19,7 +19,7 @@
   },
   "hero": {
     "badge": "- 한국어",
-    "title": "Amish Secrets: 저축과 돈 관리에 사는 방법",
+    "title": "아미쉬의 비밀: 저축과 돈 관리에 사는 방법",
     "subtitle": "나는 펜실베니아에서 3 개월을 보냈습니다 12 Amish 가족. 이론 없음 : 예산 시스템, 팬트리, 제 부채 및 수리. 2026년 생활에 적응.",
     "cta": "시작하기",
     "secondary_cta": "더 알아보기",

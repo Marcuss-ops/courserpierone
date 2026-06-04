@@ -1,12 +1,12 @@
 {
   "locale": "de",
   "seo": {
-    "title": "Amish Secrets: Wie man mit Sparen lebt und Geld verwaltet",
+    "title": "Amish-Geheimnisse: Wie man mit Sparen lebt und Geld verwaltet",
     "description": "Ich verbrachte 3 Monate in Pennsylvania mit 12 Amish Familien. Keine Theorie: nur ihr Budget-System, Speisekammer, null Schulden und Reparaturen. 2026 an das Leben angepasst.",
     "ogImage": "/images/amish-secrets-cover.png"
   },
   "nav": {
-    "brand": "Amische Geheimnisse",
+    "brand": "Amish-Geheimnisse",
     "features": "Eigenschaften",
     "pricing": "Preis",
     "testimonials": "Zeugnisse",
@@ -19,7 +19,7 @@
   },
   "hero": {
     "badge": "Neu",
-    "title": "Amish Secrets: Wie man mit Sparen lebt und Geld verwaltet",
+    "title": "Amish-Geheimnisse: Wie man mit Sparen lebt und Geld verwaltet",
     "subtitle": "Ich verbrachte 3 Monate in Pennsylvania mit 12 Amish Familien. Keine Theorie: nur ihr Budget-System, Speisekammer, null Schulden und Reparaturen. 2026 an das Leben angepasst.",
     "cta": "Erste Schritte",
     "secondary_cta": "Mehr erfahren",
