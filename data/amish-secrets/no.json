@@ -1,8 +1,8 @@
 {
   "locale": "no",
   "seo": {
-    "title": "Amish-hemmeligheter: Hvordan leve sparsomt og håndtere penger",
-    "description": "Oppdag hemmelighetene bak Amish-samfunnets sparsommelige livsstil. Inkluderer komplette videomoduler og nedlastbare PDF-filer.",
+    "title": "Amish Secrets: Hvordan leve med besparelser og administrere penger",
+    "description": "Jeg tilbrakte tre måneder i Pennsylvania med 12 amish familier. Ingen teori: bare deres budsjettsystem, pantry, null gjeld og reparasjoner. Tilpasset til livet i 2026.",
     "ogImage": "/images/amish-secrets-cover.png"
   },
   "nav": {
@@ -18,13 +18,13 @@
     "back_to_landing": "Back to Landing"
   },
   "hero": {
-    "badge": "New",
-    "title": "Amish-hemmeligheter: Hvordan leve sparsomt og håndtere penger",
-    "subtitle": "Oppdag hemmelighetene bak Amish-samfunnets sparsommelige livsstil. Inkluderer komplette videomoduler og nedlastbare PDF-filer.",
-    "cta": "Get Started",
-    "secondary_cta": "Learn More",
-    "price_label": "Special launch price",
-    "one_time_payment": "One-time payment — no subscription"
+    "badge": "Ny",
+    "title": "Amish Secrets: Hvordan leve med besparelser og administrere penger",
+    "subtitle": "Jeg tilbrakte tre måneder i Pennsylvania med 12 amish familier. Ingen teori: bare deres budsjettsystem, pantry, null gjeld og reparasjoner. Tilpasset til livet i 2026.",
+    "cta": "Kom i gang",
+    "secondary_cta": "Les mer",
+    "price_label": "Spesial lanseringspris",
+    "one_time_payment": "Engangsbetaling — ingen abonnement"
   },
   "problem": {
     "badge": "The Problem",
