@@ -224,7 +224,7 @@ export default async function LocaleLandingPage({
 }) {
   const { locale, domain } = await params;
   const searchParamsResolved = await searchParams;
-  const { verified_token, token } = searchParamsResolved;
+  const { verified_token, token, country: countryOverride } = searchParamsResolved;
   const accessToken = verified_token || token;
 
   // Extract language from locale (fr-fr → fr) for translation lookup
@@ -283,7 +283,7 @@ export default async function LocaleLandingPage({
 
   // Dynamically resolve country name and override hero_badge
   const headersList = await headers();
-  const countryCode = headersList.get("x-vercel-ip-country") || headersList.get("cf-ipcountry") || "IT";
+  const countryCode = countryOverride || headersList.get("x-vercel-ip-country") || headersList.get("cf-ipcountry") || "IT";
   
   const getLocalizedCountryName = (code: string, langCode: string): string => {
     try {
