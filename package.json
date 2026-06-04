@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "db:push": "npx prisma db push",
     "db:studio": "npx prisma studio",
-    "validate:locales": "npx tsx scripts/validate/validate-locales.ts amish-secrets",
+    "validate:locales": "npx tsx scripts/validate/validate-locales.ts",
     "generate:locales": "npx tsx scripts/generate/generate-locale-resolver.ts",
     "db:generate": "npx prisma generate",
     "test": "vitest run",

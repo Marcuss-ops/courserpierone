@@ -74,100 +74,179 @@ function flattenKeys(obj: unknown, prefix = ""): Set<string> {
 }
 
 function main() {
-  const slug = process.argv[2];
-  if (!slug) {
-    console.error(`
-Uso: npx tsx scripts/validate/validate-locales.ts <slug>
+  const argSlug = process.argv[2];
+  let slugs: string[] = [];
 
-Esempi:
-  npx tsx scripts/validate/validate-locales.ts amish-secrets
-
-Aggiungi a package.json:
-  "validate:locales": "npx tsx scripts/validate/validate-locales.ts"
-`);
-    process.exit(1);
-  }
-
-  const slugDir = resolve(DATA_DIR, slug);
-  const enPath = resolve(slugDir, "en.json");
-
-  // Check directory exists
-  try {
-    if (!readdirSync(slugDir)) {}
-  } catch {
-    console.error(`❌ Directory not found: ${slugDir}`);
-    console.error(`   Esegui prima: npx tsx scripts/translate/extract-locales.ts ${slug}`);
-    process.exit(1);
-  }
-
-  // Load reference (en.json)
-  let enData: Record<string, unknown>;
-  try {
-    enData = JSON.parse(readFileSync(enPath, "utf-8"));
-  } catch {
-    console.error(`❌ en.json not found in ${slugDir}`);
-    console.error(`   Esegui prima: npx tsx scripts/translate/extract-locales.ts ${slug}`);
-    process.exit(1);
-  }
-
-  // Flatten reference keys
-  const referenceKeys = flattenKeys(enData);
-  console.log(`\n🔍 Validating locales for: ${slug}`);
-  console.log(`   Reference (en.json): ${referenceKeys.size} keys\n`);
-
-  // List all JSON files in the directory (excluding en.json)
-  const files = readdirSync(slugDir)
-    .filter((f) => f.endsWith(".json") && f !== "en.json")
-    .sort();
-
-  let totalErrors = 0;
-  let totalFiles = 0;
-
-  for (const file of files) {
-    const filePath = resolve(slugDir, file);
-    let localeData: Record<string, unknown>;
-
+  if (argSlug) {
+    slugs = [argSlug];
+  } else {
     try {
-      localeData = JSON.parse(readFileSync(filePath, "utf-8"));
-    } catch (e) {
-      console.error(`   ❌ ${file}: invalid JSON (parse error)`);
-      totalErrors++;
+      slugs = readdirSync(DATA_DIR, { withFileTypes: true })
+        .filter((dirent) => dirent.isDirectory())
+        .map((dirent) => dirent.name);
+    } catch {
+      console.error(`❌ Impossibile leggere la cartella data: ${DATA_DIR}`);
+      process.exit(1);
+    }
+  }
+
+  if (slugs.length === 0) {
+    console.log("⚠️ Nessuna cartella trovata in data/ per la validazione.");
+    process.exit(0);
+  }
+
+  let totalFatalErrors = 0;
+  let totalWarnings = 0;
+  let totalFilesChecked = 0;
+
+  for (const slug of slugs) {
+    const slugDir = resolve(DATA_DIR, slug);
+    const enPath = resolve(slugDir, "en.json");
+
+    // Check directory exists
+    try {
+      if (!readdirSync(slugDir)) {}
+    } catch {
+      console.error(`❌ Directory not found: ${slugDir}`);
       continue;
     }
 
-    const localeKeys = flattenKeys(localeData);
-    const missing: string[] = [];
-
-    for (const key of referenceKeys) {
-      if (!localeKeys.has(key)) {
-        missing.push(key);
-      }
+    // Load reference (en.json)
+    let enData: Record<string, unknown>;
+    try {
+      enData = JSON.parse(readFileSync(enPath, "utf-8"));
+    } catch {
+      console.error(`⚠️ Skip ${slug}: en.json not found or invalid JSON in ${slugDir}`);
+      continue;
     }
 
-    if (missing.length > 0) {
-      totalErrors += missing.length;
-      console.log(`   ❌ ${file}: ${missing.length} chiavi mancanti`);
-      // Show first 5 missing keys
-      missing.slice(0, 5).forEach((k) => console.log(`      - ${k}`));
-      if (missing.length > 5) {
-        console.log(`      ... e ${missing.length - 5} altre`);
+    // Flatten reference keys
+    const referenceKeys = flattenKeys(enData);
+    console.log(`\n🔍 Validating locales for: ${slug}`);
+    console.log(`   Reference (en.json): ${referenceKeys.size} keys\n`);
+
+    // List all JSON files in the directory (excluding en.json)
+    const files = readdirSync(slugDir)
+      .filter((f) => f.endsWith(".json") && f !== "en.json")
+      .sort();
+
+    // Helper to resolve nested path values
+    function getValueByPath(obj: any, path: string): any {
+      const parts = path.replace(/\[\d+\]/g, "").split(".");
+      let curr = obj;
+      for (const part of parts) {
+        if (curr === null || curr === undefined) return undefined;
+        curr = curr[part];
       }
-    } else {
-      console.log(`   ✅ ${file}: OK (${localeKeys.size} keys)`);
+      return curr;
     }
-    totalFiles++;
+
+    // Check for translations containing placeholders or untranslated fallback texts
+    function checkInconsistencies(fileName: string, localeData: any, enData: any): string[] {
+      const issues: string[] = [];
+      const lang = fileName.split(".")[0];
+      if (lang === "en" || lang === "it") return issues;
+
+      const traverse = (obj: any, path = "") => {
+        if (obj === null || obj === undefined) return;
+        if (typeof obj === "object" && !Array.isArray(obj)) {
+          for (const [k, v] of Object.entries(obj)) {
+            traverse(v, path ? `${path}.${k}` : k);
+          }
+        } else if (Array.isArray(obj)) {
+          obj.forEach((item, idx) => {
+            traverse(item, `${path}[${idx}]`);
+          });
+        } else if (typeof obj === "string") {
+          const val = obj.trim();
+
+          // 1. Placeholder brackets [Add your story]
+          if (/\[[^\]]*\]/.test(val)) {
+            issues.push(`      ⚠️ ${path}: contains placeholder brackets: "${val}"`);
+          }
+
+          // 2. Italian text leakages in foreign JSON
+          const italianWords = ["pagamento sicuro", "recensioni verificate", "fattura inclusa", "ritiro"];
+          const lowerVal = val.toLowerCase();
+          for (const word of italianWords) {
+            if (lowerVal === word || (val.length > 10 && lowerVal.includes(word))) {
+              issues.push(`      ⚠️ ${path}: contains Italian fallback text: "${val}"`);
+            }
+          }
+
+          // 3. Long texts left untranslated from English
+          const enVal = getValueByPath(enData, path);
+          if (enVal && typeof enVal === "string" && val.length > 30 && val === enVal.trim()) {
+            issues.push(`      ⚠️ ${path}: is identical to English reference text (untranslated): "${val.slice(0, 30)}..."`);
+          }
+        }
+      };
+
+      traverse(localeData);
+      return issues;
+    }
+
+    for (const file of files) {
+      const filePath = resolve(slugDir, file);
+      let localeData: Record<string, unknown>;
+
+      try {
+        localeData = JSON.parse(readFileSync(filePath, "utf-8"));
+      } catch (e) {
+        console.error(`   ❌ ${file}: invalid JSON (parse error)`);
+        totalFatalErrors++;
+        continue;
+      }
+
+      const localeKeys = flattenKeys(localeData);
+      const missing: string[] = [];
+
+      for (const key of referenceKeys) {
+        if (!localeKeys.has(key)) {
+          missing.push(key);
+        }
+      }
+
+      const discrepancies = checkInconsistencies(file, localeData, enData);
+
+      if (missing.length > 0 || discrepancies.length > 0) {
+        totalFatalErrors += missing.length;
+        totalWarnings += discrepancies.length;
+        
+        if (missing.length > 0) {
+          console.log(`   ❌ ${file}: ${missing.length} chiavi mancanti, ${discrepancies.length} avvisi`);
+          missing.slice(0, 5).forEach((k) => console.log(`      - Chiave mancante: ${k}`));
+          if (missing.length > 5) {
+            console.log(`      ... e ${missing.length - 5} altre chiavi mancanti`);
+          }
+        } else {
+          console.log(`   ⚠️ ${file}: 0 chiavi mancanti, ${discrepancies.length} avvisi di traduzione`);
+        }
+        
+        discrepancies.slice(0, 5).forEach((issue) => console.log(issue));
+        if (discrepancies.length > 5) {
+          console.log(`      ... e altri ${discrepancies.length - 5} avvisi di traduzione`);
+        }
+        console.log();
+      } else {
+        console.log(`   ✅ ${file}: OK (${localeKeys.size} keys)`);
+      }
+      totalFilesChecked++;
+    }
   }
 
-  console.log(`\n📊 Results: ${totalFiles} files checked, ${totalErrors > 0 ? `${totalErrors} errors` : "0 errors"}\n`);
+  console.log(`\n📊 Results: ${totalFilesChecked} files checked, ${totalFatalErrors} fatal errors, ${totalWarnings} warnings\n`);
 
-  if (totalErrors > 0) {
-    console.error(`❌ Validation FAILED — ${totalErrors} missing keys found.`);
-    console.error(`   Fix by adding the missing keys to the locale JSON files.`);
-    console.error(`   Or re-run: npx tsx scripts/translate/extract-locales.ts ${slug}`);
+  if (totalFatalErrors > 0) {
+    console.error(`❌ Validation FAILED — ${totalFatalErrors} fatal errors (missing keys/invalid JSON).`);
     process.exit(1);
   }
 
-  console.log(`✅ All ${totalFiles} locale files validated successfully against en.json!`);
+  if (totalWarnings > 0) {
+    console.log(`⚠️  Translation scan complete with ${totalWarnings} warnings. Please review warnings above to fix inconsistencies.`);
+  } else {
+    console.log(`✅ All ${totalFilesChecked} locale files validated successfully!`);
+  }
 }
 
 main();

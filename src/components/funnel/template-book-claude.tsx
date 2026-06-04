@@ -22,6 +22,9 @@ interface BookClaudeProps {
     cta?: string;
     prezzo?: string;
     currency?: string;
+    currentAmount?: number;
+    baseAmount?: number;
+    currencySymbol?: string;
     coverUrl?: string;
     lezioni?: { titolo: string; descrizione: string }[];
     /** UI translations from DB (labels + benefits + faq) */
@@ -170,11 +173,32 @@ export default function TemplateBookClaude({
   const lcLabels = lc?.ui?.labels ?? {};
   const benefits = lc?.modules?.items ?? data.ui?.benefits ?? [];
   const faqItems = lc?.faq?.items ?? data.ui?.faq ?? [];
-
   const hasBenefits = benefits.length > 0;
   const hasFaq = faqItems.length > 0;
 
-  const t = (key: LabelKey): string => lcLabels[key] ?? labels[key] ?? FALLBACK_LABELS[key] ?? key;
+  const baseAmount = data.baseAmount ?? 19;
+  const currentAmount = data.currentAmount ?? 19;
+  const currencySymbol = data.currencySymbol ?? "€";
+  const currency = data.currency ?? "EUR";
+
+  const localizeCurrency = (val: string): string => {
+    if (!val) return "";
+    const ratio = baseAmount > 0 ? (currentAmount / baseAmount) : 1;
+    return val.replace(/(?:[€$£¥₽]|[A-Z]{3})\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*(?:[€$£¥₽]|[A-Z]{3})/g, (match, p1, p2) => {
+      const rawVal = p1 || p2;
+      if (!rawVal) return match;
+      const parsedVal = parseFloat(rawVal.replace(",", "."));
+      if (isNaN(parsedVal)) return match;
+      const converted = Math.round(parsedVal * ratio);
+      const isSuffix = ["RUB", "₽", "PLN", "zł", "SEK", "NOK", "DKK", "kr"].includes(currency) || match.trim().endsWith(match.replace(/[\d\s.,]/g, ""));
+      return isSuffix ? `${converted} ${currencySymbol}` : `${currencySymbol}${converted}`;
+    });
+  };
+
+  const t = (key: LabelKey): string => {
+    const val = lcLabels[key] ?? labels[key] ?? FALLBACK_LABELS[key] ?? key;
+    return localizeCurrency(val);
+  };
 
   return (
     <div className="min-h-screen bg-white text-[#1A1A1A] font-sans selection:bg-[#FF6B00]/20 antialiased">

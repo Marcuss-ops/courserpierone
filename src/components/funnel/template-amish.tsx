@@ -25,6 +25,9 @@ interface AmishProps {
     cta?: string;
     prezzo?: string;
     currency?: string;
+    currentAmount?: number;
+    baseAmount?: number;
+    currencySymbol?: string;
     coverUrl?: string;
     author?: string;
     accentColor?: string; // hex, e.g. "#C9840D" — white-label override
@@ -66,13 +69,34 @@ export default function TemplateAmish({
   // ── Accent color — white-label override via config ──────────────
   const accent = data.accentColor ?? "#C9840D";
 
-  // ── Merge ALL label sources: localeContent.ui.labels → data.ui.labels ──
-  // Primary source is always data.ui.labels (from config.json per-language)
   const uiLabels: Record<string, string> = {
     ...(data.ui?.labels ?? {}),
     ...(data.localeContent?.ui?.labels ?? {}),
   };
-  const t = (key: string): string => uiLabels[key] ?? "";
+
+  const baseAmount = data.baseAmount ?? 19;
+  const currentAmount = data.currentAmount ?? 19;
+  const currencySymbol = data.currencySymbol ?? "€";
+  const currency = data.currency ?? "EUR";
+
+  const localizeCurrency = (val: string): string => {
+    if (!val) return "";
+    const ratio = baseAmount > 0 ? (currentAmount / baseAmount) : 1;
+    return val.replace(/(?:[€$£¥₽]|[A-Z]{3})\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*(?:[€$£¥₽]|[A-Z]{3})/g, (match, p1, p2) => {
+      const rawVal = p1 || p2;
+      if (!rawVal) return match;
+      const parsedVal = parseFloat(rawVal.replace(",", "."));
+      if (isNaN(parsedVal)) return match;
+      const converted = Math.round(parsedVal * ratio);
+      const isSuffix = ["RUB", "₽", "PLN", "zł", "SEK", "NOK", "DKK", "kr"].includes(currency) || match.trim().endsWith(match.replace(/[\d\s.,]/g, ""));
+      return isSuffix ? `${converted} ${currencySymbol}` : `${currencySymbol}${converted}`;
+    });
+  };
+
+  const t = (key: string): string => {
+    const val = uiLabels[key] ?? "";
+    return localizeCurrency(val);
+  };
 
   // ── Product title ─────────────────────────────────────────────
   const lang = (locale ?? "en").split("-")[0];

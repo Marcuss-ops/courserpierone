@@ -155,6 +155,10 @@ function mapConfigToTemplateData(data: CourseConfig, locale: string, lang: strin
   if (!content) return null;
 
   const { price, currency } = getPriceString(data, locale);
+  const priceConfig = data.prices?.[currency] ?? data.prices?.default;
+  const currentAmount = priceConfig?.amount ?? data.price ?? 19;
+  const baseAmount = data.price ?? 19;
+  const symbol = priceConfig?.symbol ?? "€";
 
   return {
     titolo: content.title,
@@ -165,6 +169,9 @@ function mapConfigToTemplateData(data: CourseConfig, locale: string, lang: strin
     cta: content.cta,
     prezzo: price,
     currency,
+    currentAmount,
+    baseAmount,
+    currencySymbol: symbol,
     coverUrl: data.cover || localeContent?.seo?.ogImage || "",
     authorImageUrl: data.authorImageUrl,
     storyImages: data.storyImages,
