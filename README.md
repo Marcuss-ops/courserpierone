@@ -351,10 +351,64 @@ npx prisma generate  # rigenera i tipi Prisma
 
 ---
 
-## Documentazione
+## Strumenti e Operazioni per Agenti AI (Agent Developer Guide)
+
+Courser include una suite completa di script e pipeline automatizzate utilizzate dagli agenti AI per tradurre, validare, rigenerare e deployare i funnel in pochi secondi.
+
+### 1. Traduzione Automatica Offline (Argos Translate)
+Per tradurre una landing page dall'inglese a tutte o alcune delle 49+ lingue supportate:
+```bash
+# Traduci in tutte le lingue disponibili
+python scripts/translate/translate-argos.py amish-secrets all
+
+# Traduci solo in alcune lingue specifiche
+python scripts/translate/translate-argos.py amish-secrets de fr es pt
+
+# Forza la sovrascrittura di tutte le traduzioni esistenti (ignora il merge intelligente)
+python scripts/translate/translate-argos.py --force amish-secrets all
+```
+*Nota*: Non utilizzare `extract-locales.ts` a meno che non si vogliano rigenerare i template da zero (sovrascriverebbe i testi custom come l'autore e le bio personalizzate).
+
+### 2. Validazione dei File di Lingua (Locales Validation)
+Prima di ogni build, è fondamentale validare che tutti i file JSON delle traduzioni contengano esattamente le stesse chiavi del file di riferimento inglese (`en.json`):
+```bash
+# Esegui la validazione per un corso specifico
+npm run validate:locales
+# Oppure direttamente via script:
+npx tsx scripts/validate/validate-locales.ts amish-secrets
+```
+
+### 3. Rigenerazione del Locale Resolver
+Se vengono modificate le localizzazioni del database o le regole di instradamento geografico, rigenera il resolver statico:
+```bash
+npm run generate:locales
+# Oppure direttamente via script:
+npx tsx scripts/generate/generate-locale-resolver.ts
+```
+
+### 4. Controllo di Qualità e Typecheck
+Sempre prima di un deploy, verifica che non ci siano errori di compilazione TypeScript o test falliti:
+```bash
+# Esegui il controllo dei tipi statico
+npm run typecheck
+
+# Esegui la suite di test unitari e di integrazione (Vitest)
+npm run test
+```
+
+### 5. Deploy Vercel (Produzione)
+Il deploy in produzione viene fatto direttamente tramite la CLI di Vercel:
+```bash
+npx vercel --prod
+```
+
+---
+
+## Documentazione Allegata
 
 - [MISSION.md](MISSION.md) — Bussola strategica del progetto
 - [ARCHITECTURE.md](ARCHITECTURE.md) — Architettura tecnica
 - [ROADMAP.md](ROADMAP.md) — Piano di sviluppo per fasi
 - [TECH-STACK.md](TECH-STACK.md) — Scelte tecnologiche
 - [MVP-SPEC.md](MVP-SPEC.md) — Specifica dettagliata del MVP
+
