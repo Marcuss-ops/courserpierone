@@ -60,10 +60,86 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
 
   // ── Resolve language from locale ("it-it" → "it") ──
   const lang = (locale ?? "en").split("-")[0];
-  const lc = data.localeContent;
-  const uiLabels = { ...lc?.ui?.labels, ...data.ui?.labels };
+  // Cast to any to access all localeContent fields (prop type is narrow for RSC serialization)
+  const lc = data.localeContent as any;
 
-  // ── Helper: read from localeContent sections, fallback to ui.labels ──
+  // ── Merge ALL localeContent into flat labels map ──
+  const uiLabels: Record<string, string> = {
+    // Hero
+    hero_badge: lc?.hero?.badge ?? "",
+    hero_subtitle: lc?.hero?.subtitle ?? "",
+    hero_cta_prefix: lc?.hero?.cta ?? "",
+    hero_no_sub: lc?.hero?.one_time_payment ?? "",
+    hero_secure: "Pagamento sicuro",
+    hero_readers: lc?.trust?.readers_count ?? "",
+    hero_verified: "recensioni verificate",
+    hero_no_sub_desc: lc?.hero?.one_time_payment ?? "",
+    hero_trust_ssl: "SSL Sicuro",
+    hero_trust_stripe: "Stripe",
+    hero_trust_paypal: "PayPal",
+    hero_trust_guarantee: lc?.offer?.guarantee_title ?? "",
+    top_bar: lc?.hero?.cta ?? "",
+    // Problem
+    problem_title: lc?.problem?.title ?? "",
+    problem_1_title: lc?.problem?.title ?? "",
+    problem_1_text: lc?.problem?.text ?? "",
+    problem_2_title: "",
+    problem_2_text: "",
+    problem_3_title: "",
+    problem_3_text: "",
+    // Author
+    author_role: lc?.author?.role ?? "",
+    author_title: lc?.author?.title ?? "",
+    author_bio_1: lc?.author?.bio ?? "",
+    // Modules
+    modules_title: lc?.modules?.title ?? "",
+    modules_desc: lc?.modules?.description ?? "",
+    // Testimonials
+    testimonials_title: lc?.testimonials?.title ?? "",
+    testimonials_subtitle: "",
+    // Includes
+    whats_included_title: lc?.includes?.title ?? "",
+    // Offer
+    offer_badge: lc?.offer?.badge ?? "",
+    offer_title: lc?.offer?.title ?? "",
+    offer_original_price: lc?.offer?.course_value ?? "",
+    offer_one_time: lc?.offer?.one_time ?? "",
+    offer_launch_note: lc?.offer?.launch_price ?? "",
+    offer_cta: lc?.offer?.cta ?? "",
+    offer_stripe_paypal: "Stripe / PayPal",
+    offer_invoice: "Fattura inclusa",
+    guarantee_title: lc?.offer?.guarantee_title ?? "",
+    guarantee_text: lc?.offer?.guarantee_text ?? "",
+    // FAQ
+    faq_title: lc?.faq?.title ?? "",
+    // Final CTA
+    final_cta_text: lc?.final_cta?.badge ?? lc?.offer?.cta ?? "",
+    // Footer
+    footer_project: "",
+    footer_rights: lc?.footer?.rights_reserved ?? "",
+    footer_email: "info@courssy.com",
+    footer_privacy: lc?.footer?.privacy ?? "",
+    footer_terms: lc?.footer?.terms ?? "",
+    footer_cookies: "Cookie",
+    footer_withdrawal: "Ritiro",
+    footer_legal_note: lc?.footer?.legal_note ?? "",
+    // Transform
+    transform_title: "",
+    transform_before_label: "",
+    transform_before_1: "",
+    transform_before_2: "",
+    transform_before_3: "",
+    transform_after_label: "",
+    transform_after_1: "",
+    transform_after_2: "",
+    transform_after_3: "",
+    transform_disclaimer: "",
+    // Fallback: merge ui.labels from locale files
+    ...lc?.ui?.labels,
+    // Override with data.ui.labels from DB config
+    ...data.ui?.labels,
+  };
+
   const t = (key: string): string => uiLabels[key] ?? "";
 
   // Use translated product title from config
