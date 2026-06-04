@@ -30,16 +30,8 @@ body {
   font-family: var(--font-serif), "Instrument Serif", Georgia, serif;
 }
 
-@layer base {
-  body {
-    background-color: #0a0a0c;
-    background-image:
-      radial-gradient(at 0% 0%, rgba(77, 142, 255, 0.05) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(221, 183, 255, 0.05) 0px, transparent 50%);
-    color: #e5e2e1;
-    font-family: var(--font-hanken);
-  }
-}
+/* Dark theme body styles scoped to admin layout (bg-dashboard-bg) */
+/* Landing pages use their own background colors via template components */
 
 @layer components {
   .premium-glass {
