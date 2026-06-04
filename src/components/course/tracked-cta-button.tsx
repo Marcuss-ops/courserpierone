@@ -30,6 +30,7 @@ interface TrackedCtaButtonProps {
   locale?: string;
   children: React.ReactNode;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export function TrackedCtaButton({
@@ -39,6 +40,7 @@ export function TrackedCtaButton({
   locale = "it",
   children,
   className,
+  style,
 }: TrackedCtaButtonProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -85,13 +87,13 @@ export function TrackedCtaButton({
           onClick={handleClick}
           disabled={loading}
           className={className}
+          style={style}
         >
           {loading ? (
             <Loader2 className="w-5 h-5 animate-spin" />
           ) : (
             children
           )}
-          {!loading && <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
         </button>
         {error && (
           <p className="text-[10px] text-red-400 font-medium animate-fadeIn">{error}</p>
@@ -107,9 +109,9 @@ export function TrackedCtaButton({
       rel="noopener noreferrer"
       onClick={handleClick}
       className={className}
+      style={style}
     >
       {children}
-      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
     </a>
   );
 }

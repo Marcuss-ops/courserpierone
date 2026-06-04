@@ -162,10 +162,14 @@ function mapConfigToTemplateData(data: CourseConfig, locale: string, lang: strin
     cta: content.cta,
     prezzo: price,
     currency,
-    coverUrl: localeContent?.seo?.ogImage || data.cover || "",
+    coverUrl: data.cover || localeContent?.seo?.ogImage || "",
+    authorImageUrl: data.authorImageUrl,
+    storyImages: data.storyImages,
+    accentColor: data.accentColor,
     author: data.author,
     languages: data.languages,
     ui: content.ui ?? undefined,
+    testimonials: (content.ui as any)?.testimonials ?? undefined,
     localeContent,
     lezioni: data.lessons.map((l) => ({
       titolo: l.titles[lang] ?? Object.values(l.titles)[0] ?? "",
@@ -238,7 +242,7 @@ export default async function LocaleLandingPage({
           <AnalyticsTracker productSlug={domain} />
           <TemplateComponent
             data={templateData}
-            locale={currentLang}
+            locale={currentLocale}
             productId={data.productId}
             productSlug={domain}
             checkoutUrl={checkoutUrl}

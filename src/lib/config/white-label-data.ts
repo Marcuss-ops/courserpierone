@@ -23,6 +23,9 @@ export interface CourseConfig {
   template?: "lumio" | "h612" | "horizon" | "book-claude" | "amish" | "default";
   defaultLanguage: string;
   cover: string;
+  authorImageUrl?: string;
+  storyImages?: string[];
+  accentColor?: string;
   checkoutUrl: string;
   author: string;
   price?: number;

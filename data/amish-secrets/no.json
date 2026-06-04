@@ -310,7 +310,17 @@
       "free": "GRATIS",
       "addtocart": "Legg i handlekurv",
       "select_currency": "Velg valuta",
-      "story_quote": "Amish-folket lever rike og fulle liv ved å bruke en brøkdel av det vi bruker. I dette kurset avslører vi hvordan de gjør det."
+      "story_quote": "Amish-folket lever rike og fulle liv ved å bruke en brøkdel av det vi bruker. I dette kurset avslører vi hvordan de gjør det.",
+      "footer_cookies": "Cookies",
+      "footer_email": "info@courssy.com",
+      "footer_withdrawal": "Withdrawal",
+      "hero_secure": "Secure payment",
+      "hero_trust_paypal": "PayPal",
+      "hero_trust_ssl": "SSL Secure",
+      "hero_trust_stripe": "Stripe",
+      "hero_verified": "verified reviews",
+      "offer_invoice": "Invoice included",
+      "offer_stripe_paypal": "Stripe / PayPal"
     }
   },
   "audience": {
