@@ -61,8 +61,8 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
   // ── Resolve language from locale ("it-it" → "it") ──
   const lang = (locale ?? "en").split("-")[0];
 
-  // All text comes from data.ui (loaded from config.json server-side)
-  const labels: Record<string, string> = data.ui?.labels ?? {};
+  // All text comes from data.ui (loaded from config.json) with localeContent fallback
+  const labels: Record<string, string> = { ...data.localeContent?.ui?.labels, ...data.ui?.labels };
   const t = (key: string): string => labels[key] ?? "";
 
   // Use translated product title from config, falling back through locales → English → generic
@@ -74,8 +74,8 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
   }
   const PRODUCT_TITLE = LOCALE_TITLE_MAP[lang] ?? LOCALE_TITLE_MAP["en"] ?? data.titolo ?? "Course Title";
 
-  const modules = data.ui?.benefits ?? [];
-  const faqItems = data.ui?.faq ?? [];
+  const modules = data.ui?.benefits?.length ? data.ui.benefits : data.localeContent?.modules?.items ?? [];
+  const faqItems = data.ui?.faq?.length ? data.ui.faq : data.localeContent?.faq?.items ?? [];
   const testimonials = data.ui?.testimonials ?? [];
   const hasModules = modules.length > 0;
   const hasFaq = faqItems.length > 0;
