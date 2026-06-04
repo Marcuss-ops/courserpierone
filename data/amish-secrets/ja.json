@@ -305,7 +305,17 @@
       "reviewer": "マルコR.、早期読者",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "story_quote": "アミッシュは、私たちが費やすもののほんの一部を費やしながら豊かでフルな生活を送る。 このコースでは、その方法を説明します。"
+      "story_quote": "アミッシュは、私たちが費やすもののほんの一部を費やしながら豊かでフルな生活を送る。 このコースでは、その方法を説明します。",
+      "hero_secure": "Pagamento sicuro",
+      "hero_verified": "recensioni verificate",
+      "hero_trust_ssl": "SSL Sicuro",
+      "hero_trust_stripe": "Stripe",
+      "hero_trust_paypal": "PayPal",
+      "offer_stripe_paypal": "Stripe / PayPal",
+      "offer_invoice": "Fattura inclusa",
+      "footer_cookies": "Cookie",
+      "footer_withdrawal": "Ritiro",
+      "footer_email": "info@courssy.com"
     }
   },
   "audience": {

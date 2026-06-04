@@ -305,7 +305,17 @@
       "reviewer": "मार्को आर, प्रारंभिक रीडर",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "story_quote": "हम जो खर्च करते हैं उसका एक अंश खर्च करते समय अमिश अमीर और पूर्ण जीवन जीते हैं। इस कोर्स में, हम बताते हैं कि वे कैसे करते हैं।"
+      "story_quote": "हम जो खर्च करते हैं उसका एक अंश खर्च करते समय अमिश अमीर और पूर्ण जीवन जीते हैं। इस कोर्स में, हम बताते हैं कि वे कैसे करते हैं।",
+      "hero_secure": "Pagamento sicuro",
+      "hero_verified": "recensioni verificate",
+      "hero_trust_ssl": "SSL Sicuro",
+      "hero_trust_stripe": "Stripe",
+      "hero_trust_paypal": "PayPal",
+      "offer_stripe_paypal": "Stripe / PayPal",
+      "offer_invoice": "Fattura inclusa",
+      "footer_cookies": "Cookie",
+      "footer_withdrawal": "Ritiro",
+      "footer_email": "info@courssy.com"
     }
   },
   "audience": {

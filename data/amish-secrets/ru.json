@@ -305,7 +305,17 @@
       "reviewer": "Марко Р. Ранний читатель",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "story_quote": "Амиши живут богатой и полной жизнью, тратя часть того, что мы тратим. В этой статье мы расскажем, как они это делают."
+      "story_quote": "Амиши живут богатой и полной жизнью, тратя часть того, что мы тратим. В этой статье мы расскажем, как они это делают.",
+      "hero_secure": "Pagamento sicuro",
+      "hero_verified": "recensioni verificate",
+      "hero_trust_ssl": "SSL Sicuro",
+      "hero_trust_stripe": "Stripe",
+      "hero_trust_paypal": "PayPal",
+      "offer_stripe_paypal": "Stripe / PayPal",
+      "offer_invoice": "Fattura inclusa",
+      "footer_cookies": "Cookie",
+      "footer_withdrawal": "Ritiro",
+      "footer_email": "info@courssy.com"
     }
   },
   "audience": {

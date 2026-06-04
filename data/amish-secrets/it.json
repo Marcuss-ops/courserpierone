@@ -305,7 +305,17 @@
       "reviewer": "Marco R., primi lettori",
       "language_switch": "IT",
       "language_switch_en": "EN",
-      "story_quote": "Gli Amish vivono vite ricche e piene spendendo una frazione di ciò che spendiamo noi. In questo corso, ti sveliamo come fanno."
+      "story_quote": "Gli Amish vivono vite ricche e piene spendendo una frazione di ciò che spendiamo noi. In questo corso, ti sveliamo come fanno.",
+      "hero_secure": "Pagamento sicuro",
+      "hero_verified": "recensioni verificate",
+      "hero_trust_ssl": "SSL Sicuro",
+      "hero_trust_stripe": "Stripe",
+      "hero_trust_paypal": "PayPal",
+      "offer_stripe_paypal": "Stripe / PayPal",
+      "offer_invoice": "Fattura inclusa",
+      "footer_cookies": "Cookie",
+      "footer_withdrawal": "Ritiro",
+      "footer_email": "info@courssy.com"
     }
   },
   "audience": {

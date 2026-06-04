@@ -305,7 +305,17 @@
       "reviewer": "مارکو آر .",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "story_quote": "امیہ دولت مند اور بھرپور زندگی گزارتی ہیں جبکہ ہمارے خرچے کا ایک حصہ خرچ ہوتا ہے۔ اِس طرح ہم ظاہر کرتے ہیں کہ وہ ایسا کیسے کرتے ہیں ۔"
+      "story_quote": "امیہ دولت مند اور بھرپور زندگی گزارتی ہیں جبکہ ہمارے خرچے کا ایک حصہ خرچ ہوتا ہے۔ اِس طرح ہم ظاہر کرتے ہیں کہ وہ ایسا کیسے کرتے ہیں ۔",
+      "hero_secure": "Pagamento sicuro",
+      "hero_verified": "recensioni verificate",
+      "hero_trust_ssl": "SSL Sicuro",
+      "hero_trust_stripe": "Stripe",
+      "hero_trust_paypal": "PayPal",
+      "offer_stripe_paypal": "Stripe / PayPal",
+      "offer_invoice": "Fattura inclusa",
+      "footer_cookies": "Cookie",
+      "footer_withdrawal": "Ritiro",
+      "footer_email": "info@courssy.com"
     }
   },
   "audience": {

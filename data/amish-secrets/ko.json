@@ -305,7 +305,17 @@
       "reviewer": "Marco R., 초기 리더",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "story_quote": "암시는 풍요롭고 풍요로운 삶을 살고, 우리가 보내는 것에 대한 반응을 보내는 동안. 이 과정에서 우리는 그들이하는 방법을 밝혀."
+      "story_quote": "암시는 풍요롭고 풍요로운 삶을 살고, 우리가 보내는 것에 대한 반응을 보내는 동안. 이 과정에서 우리는 그들이하는 방법을 밝혀.",
+      "hero_secure": "Pagamento sicuro",
+      "hero_verified": "recensioni verificate",
+      "hero_trust_ssl": "SSL Sicuro",
+      "hero_trust_stripe": "Stripe",
+      "hero_trust_paypal": "PayPal",
+      "offer_stripe_paypal": "Stripe / PayPal",
+      "offer_invoice": "Fattura inclusa",
+      "footer_cookies": "Cookie",
+      "footer_withdrawal": "Ritiro",
+      "footer_email": "info@courssy.com"
     }
   },
   "audience": {

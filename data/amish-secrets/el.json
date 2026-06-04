@@ -305,7 +305,17 @@
       "reviewer": "Μάρκο Ρ., Πρώτος Αναγνώστης",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "story_quote": "Οι Άμις ζουν πλούσιες και γεμάτες ζωές ενώ ξοδεύουμε ένα κλάσμα από αυτά που ξοδεύουμε. Σε αυτή την πορεία, αποκαλύπτουμε πώς το κάνουν."
+      "story_quote": "Οι Άμις ζουν πλούσιες και γεμάτες ζωές ενώ ξοδεύουμε ένα κλάσμα από αυτά που ξοδεύουμε. Σε αυτή την πορεία, αποκαλύπτουμε πώς το κάνουν.",
+      "hero_secure": "Pagamento sicuro",
+      "hero_verified": "recensioni verificate",
+      "hero_trust_ssl": "SSL Sicuro",
+      "hero_trust_stripe": "Stripe",
+      "hero_trust_paypal": "PayPal",
+      "offer_stripe_paypal": "Stripe / PayPal",
+      "offer_invoice": "Fattura inclusa",
+      "footer_cookies": "Cookie",
+      "footer_withdrawal": "Ritiro",
+      "footer_email": "info@courssy.com"
     }
   },
   "audience": {

@@ -305,7 +305,17 @@
       "reviewer": "Marco R., cititor timpuriu",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "story_quote": "Amish trăiesc vieţi bogate şi pline în timp ce cheltuim o fracţiune din ceea ce cheltuim. În acest curs, vom dezvălui cum o fac."
+      "story_quote": "Amish trăiesc vieţi bogate şi pline în timp ce cheltuim o fracţiune din ceea ce cheltuim. În acest curs, vom dezvălui cum o fac.",
+      "hero_secure": "Pagamento sicuro",
+      "hero_verified": "recensioni verificate",
+      "hero_trust_ssl": "SSL Sicuro",
+      "hero_trust_stripe": "Stripe",
+      "hero_trust_paypal": "PayPal",
+      "offer_stripe_paypal": "Stripe / PayPal",
+      "offer_invoice": "Fattura inclusa",
+      "footer_cookies": "Cookie",
+      "footer_withdrawal": "Ritiro",
+      "footer_email": "info@courssy.com"
     }
   },
   "audience": {

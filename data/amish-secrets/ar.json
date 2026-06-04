@@ -305,7 +305,17 @@
       "reviewer": "ماركو ر.، قارئ مبكر",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "story_quote": "يعيش الأميش حياة غنية وكاملة بينما ينفق جزء من ما ننفقه. في هذه الدورة، نكشف كيف يفعلون ذلك."
+      "story_quote": "يعيش الأميش حياة غنية وكاملة بينما ينفق جزء من ما ننفقه. في هذه الدورة، نكشف كيف يفعلون ذلك.",
+      "hero_secure": "Pagamento sicuro",
+      "hero_verified": "recensioni verificate",
+      "hero_trust_ssl": "SSL Sicuro",
+      "hero_trust_stripe": "Stripe",
+      "hero_trust_paypal": "PayPal",
+      "offer_stripe_paypal": "Stripe / PayPal",
+      "offer_invoice": "Fattura inclusa",
+      "footer_cookies": "Cookie",
+      "footer_withdrawal": "Ritiro",
+      "footer_email": "info@courssy.com"
     }
   },
   "audience": {

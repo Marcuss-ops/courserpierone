@@ -305,7 +305,17 @@
       "reviewer": "Marco R., tidig läsare",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "story_quote": "Amish lever rika och fulla liv medan vi spenderar en bråkdel av vad vi spenderar. I denna kurs avslöjar vi hur de gör det."
+      "story_quote": "Amish lever rika och fulla liv medan vi spenderar en bråkdel av vad vi spenderar. I denna kurs avslöjar vi hur de gör det.",
+      "hero_secure": "Pagamento sicuro",
+      "hero_verified": "recensioni verificate",
+      "hero_trust_ssl": "SSL Sicuro",
+      "hero_trust_stripe": "Stripe",
+      "hero_trust_paypal": "PayPal",
+      "offer_stripe_paypal": "Stripe / PayPal",
+      "offer_invoice": "Fattura inclusa",
+      "footer_cookies": "Cookie",
+      "footer_withdrawal": "Ritiro",
+      "footer_email": "info@courssy.com"
     }
   },
   "audience": {

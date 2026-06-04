@@ -305,7 +305,17 @@
       "reviewer": "มาร์ โค อาร์.",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "story_quote": "พวก อา มิช มี ชีวิต อยู่ อย่าง มี ความ สุข และ มี ชีวิต อยู่ อย่าง เต็ม ที่ ขณะ ที่ ใช้ เงิน ที่ เรา จ่าย ไป บ้าง. ในหลักสูตรนี้ เราเปิดเผยวิธีการทําของพวกเขา"
+      "story_quote": "พวก อา มิช มี ชีวิต อยู่ อย่าง มี ความ สุข และ มี ชีวิต อยู่ อย่าง เต็ม ที่ ขณะ ที่ ใช้ เงิน ที่ เรา จ่าย ไป บ้าง. ในหลักสูตรนี้ เราเปิดเผยวิธีการทําของพวกเขา",
+      "hero_secure": "Pagamento sicuro",
+      "hero_verified": "recensioni verificate",
+      "hero_trust_ssl": "SSL Sicuro",
+      "hero_trust_stripe": "Stripe",
+      "hero_trust_paypal": "PayPal",
+      "offer_stripe_paypal": "Stripe / PayPal",
+      "offer_invoice": "Fattura inclusa",
+      "footer_cookies": "Cookie",
+      "footer_withdrawal": "Ritiro",
+      "footer_email": "info@courssy.com"
     }
   },
   "audience": {

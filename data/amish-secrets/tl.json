@@ -305,7 +305,17 @@
       "reviewer": "Marco R., unang mambabasa",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "story_quote": "Ang mga Amish ay namumuhay nang mayaman at kasiya - siyang buhay samantalang gumugugol ng katiting na bahagi ng ating ginugugol. Sa ganitong paraan, isinisiwalat natin kung paano nila ito ginagawa."
+      "story_quote": "Ang mga Amish ay namumuhay nang mayaman at kasiya - siyang buhay samantalang gumugugol ng katiting na bahagi ng ating ginugugol. Sa ganitong paraan, isinisiwalat natin kung paano nila ito ginagawa.",
+      "hero_secure": "Pagamento sicuro",
+      "hero_verified": "recensioni verificate",
+      "hero_trust_ssl": "SSL Sicuro",
+      "hero_trust_stripe": "Stripe",
+      "hero_trust_paypal": "PayPal",
+      "offer_stripe_paypal": "Stripe / PayPal",
+      "offer_invoice": "Fattura inclusa",
+      "footer_cookies": "Cookie",
+      "footer_withdrawal": "Ritiro",
+      "footer_email": "info@courssy.com"
     }
   },
   "audience": {

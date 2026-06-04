@@ -305,7 +305,17 @@
       "reviewer": "Марко Р., алгачкы окурман",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "story_quote": "Амиштер бай жана толук кандуу жашашат, бирок биз жумшаган каражаттын бир бөлүгүн сарпташат. Бул курста биз алардын муну кантип жасаарын ачып беребиз."
+      "story_quote": "Амиштер бай жана толук кандуу жашашат, бирок биз жумшаган каражаттын бир бөлүгүн сарпташат. Бул курста биз алардын муну кантип жасаарын ачып беребиз.",
+      "hero_secure": "Pagamento sicuro",
+      "hero_verified": "recensioni verificate",
+      "hero_trust_ssl": "SSL Sicuro",
+      "hero_trust_stripe": "Stripe",
+      "hero_trust_paypal": "PayPal",
+      "offer_stripe_paypal": "Stripe / PayPal",
+      "offer_invoice": "Fattura inclusa",
+      "footer_cookies": "Cookie",
+      "footer_withdrawal": "Ritiro",
+      "footer_email": "info@courssy.com"
     }
   },
   "audience": {

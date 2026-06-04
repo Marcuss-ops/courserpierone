@@ -305,7 +305,17 @@
       "reviewer": "Marco R., pembaca awal",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "story_quote": "The Amish hidup kaya dan penuh kehidupan sementara menghabiskan sebagian dari apa yang kita habiskan. Pada perkuliahan ini, kita mengungkapkan bagaimana mereka melakukannya."
+      "story_quote": "The Amish hidup kaya dan penuh kehidupan sementara menghabiskan sebagian dari apa yang kita habiskan. Pada perkuliahan ini, kita mengungkapkan bagaimana mereka melakukannya.",
+      "hero_secure": "Pagamento sicuro",
+      "hero_verified": "recensioni verificate",
+      "hero_trust_ssl": "SSL Sicuro",
+      "hero_trust_stripe": "Stripe",
+      "hero_trust_paypal": "PayPal",
+      "offer_stripe_paypal": "Stripe / PayPal",
+      "offer_invoice": "Fattura inclusa",
+      "footer_cookies": "Cookie",
+      "footer_withdrawal": "Ritiro",
+      "footer_email": "info@courssy.com"
     }
   },
   "audience": {

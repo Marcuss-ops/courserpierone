@@ -64,19 +64,15 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
   const lc = data.localeContent as any;
 
   // ── Merge ALL localeContent into flat labels map ──
+  // Zero hardcoded strings — everything comes from locale JSON via lc?.ui?.labels
   const uiLabels: Record<string, string> = {
-    // Hero
+    // Hero — all from localeContent
     hero_badge: lc?.hero?.badge ?? "",
     hero_subtitle: lc?.hero?.subtitle ?? "",
     hero_cta_prefix: lc?.hero?.cta ?? "",
     hero_no_sub: lc?.hero?.one_time_payment ?? "",
-    hero_secure: "Pagamento sicuro",
     hero_readers: lc?.trust?.readers_count ?? "",
-    hero_verified: "recensioni verificate",
     hero_no_sub_desc: lc?.hero?.one_time_payment ?? "",
-    hero_trust_ssl: "SSL Sicuro",
-    hero_trust_stripe: "Stripe",
-    hero_trust_paypal: "PayPal",
     hero_trust_guarantee: lc?.offer?.guarantee_title ?? "",
     top_bar: lc?.hero?.cta ?? "",
     // Problem
@@ -106,8 +102,6 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
     offer_one_time: lc?.offer?.one_time ?? "",
     offer_launch_note: lc?.offer?.launch_price ?? "",
     offer_cta: lc?.offer?.cta ?? "",
-    offer_stripe_paypal: "Stripe / PayPal",
-    offer_invoice: "Fattura inclusa",
     guarantee_title: lc?.offer?.guarantee_title ?? "",
     guarantee_text: lc?.offer?.guarantee_text ?? "",
     // FAQ
@@ -117,11 +111,8 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
     // Footer
     footer_project: "",
     footer_rights: lc?.footer?.rights_reserved ?? "",
-    footer_email: "info@courssy.com",
     footer_privacy: lc?.footer?.privacy ?? "",
     footer_terms: lc?.footer?.terms ?? "",
-    footer_cookies: "Cookie",
-    footer_withdrawal: "Ritiro",
     footer_legal_note: lc?.footer?.legal_note ?? "",
     // Transform
     transform_title: "",
@@ -134,9 +125,9 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
     transform_after_2: "",
     transform_after_3: "",
     transform_disclaimer: "",
-    // Fallback: merge ui.labels from locale files
+    // ── Fallback: merge ALL ui.labels from locale JSON (overrides above) ──
     ...lc?.ui?.labels,
-    // Override with data.ui.labels from DB config
+    // ── Final override: data.ui.labels from DB config ──
     ...data.ui?.labels,
   };
 
@@ -149,7 +140,7 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
       if (localeData?.title) LOCALE_TITLE_MAP[localeKey] = localeData.title;
     }
   }
-  const PRODUCT_TITLE = LOCALE_TITLE_MAP[lang] ?? LOCALE_TITLE_MAP["en"] ?? data.titolo ?? "Course Title";
+  const PRODUCT_TITLE = LOCALE_TITLE_MAP[lang] ?? LOCALE_TITLE_MAP["en"] ?? data.titolo ?? "";
 
   // Structured data from localeContent
   const modules = lc?.modules?.items?.length ? lc.modules.items : data.ui?.benefits ?? [];
@@ -212,16 +203,16 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
                 <TrackedCtaButton href={checkoutUrl} productSlug={productSlug ?? ""} productId={productId} locale={locale}
                   className="inline-flex justify-center items-center px-7 py-4 bg-[#C9840D] hover:bg-[#B6750B] text-white font-semibold rounded-xl shadow-lg shadow-[#C9840D]/20 transition transform hover:-translate-y-0.5">
-                  {lc?.hero?.cta || t("hero_cta_prefix")} {data.prezzo ?? "$19"}
+                  {lc?.hero?.cta || t("hero_cta_prefix")} {data.prezzo}
                 </TrackedCtaButton>
-                <div className="flex items-center justify-center sm:justify-start gap-2 text-sm text-[#8A7B6B]">
+                {t("hero_secure") && <div className="flex items-center justify-center sm:justify-start gap-2 text-sm text-[#8A7B6B]">
                   <Shield className="w-4 h-4 text-[#C9840D]" /> {t("hero_secure")}
-                </div>
+                </div>}
               </div>
 
               <div className="mt-6 flex items-center gap-3">
                 <div className="flex text-[#C9840D]">{[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-current" />)}</div>
-                <p className="text-sm text-[#5A4E42]"><strong>{lc?.trust?.readers_count || t("hero_readers")}</strong> <span className="text-xs text-[#8A7B6B]">{t("hero_verified")}</span></p>
+                <p className="text-sm text-[#5A4E42]"><strong>{lc?.trust?.readers_count || t("hero_readers")}</strong> <span className="text-xs text-[#8A7B6B]">{lc?.ui?.labels?.hero_verified || t("hero_verified")}</span></p>
               </div>
             </div>
 
@@ -245,10 +236,10 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
 
           {/* Trust badges */}
           <div className="mt-12 flex flex-wrap items-center justify-center lg:justify-start gap-6 opacity-80">
-            <div className="flex items-center gap-2 text-xs font-medium"><Lock className="w-4 h-4 text-[#C9840D]" /> {t("hero_trust_ssl")}</div>
-            <div className="flex items-center gap-2 text-xs font-semibold"><CreditCard className="w-4 h-4 text-[#C9840D]" /> {t("hero_trust_stripe")}</div>
-            <div className="flex items-center gap-2 text-xs font-semibold"><CreditCard className="w-4 h-4 text-[#C9840D]" /> {t("hero_trust_paypal")}</div>
-            <div className="flex items-center gap-2 text-xs font-medium"><Check className="w-4 h-4 text-[#C9840D]" /> {t("hero_trust_guarantee")}</div>
+            {t("hero_trust_ssl") && <div className="flex items-center gap-2 text-xs font-medium"><Lock className="w-4 h-4 text-[#C9840D]" /> {t("hero_trust_ssl")}</div>}
+            {t("hero_trust_stripe") && <div className="flex items-center gap-2 text-xs font-semibold"><CreditCard className="w-4 h-4 text-[#C9840D]" /> {t("hero_trust_stripe")}</div>}
+            {t("hero_trust_paypal") && <div className="flex items-center gap-2 text-xs font-semibold"><CreditCard className="w-4 h-4 text-[#C9840D]" /> {t("hero_trust_paypal")}</div>}
+            {t("hero_trust_guarantee") && <div className="flex items-center gap-2 text-xs font-medium"><Check className="w-4 h-4 text-[#C9840D]" /> {t("hero_trust_guarantee")}</div>}
           </div>
         </div>
       </header>
@@ -287,10 +278,16 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
           <div className="bg-white rounded-[32px] shadow-md shadow-[#C9840D]/5 p-8 md:p-12 grid md:grid-cols-[220px_1fr] gap-8 items-start border border-[#F0E6D7]">
             <div className="text-center md:text-left">
               <div className="w-40 h-40 mx-auto md:mx-0 rounded-2xl overflow-hidden bg-[#FFFBF5] border-2 border-[#C9840D]/20">
-                <img src="/images/author-alessandro.png" alt={data.author || "Author"} className="w-full h-full object-cover" />
+                {lc?.author?.image ? (
+                  <img src={lc.author.image} alt={data.author || ""} className="w-full h-full object-cover" />
+                ) : data.coverUrl ? (
+                  <img src={data.coverUrl} alt={data.author || ""} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center"><User className="w-16 h-16 text-[#C9840D]/30" /></div>
+                )}
               </div>
               <p className="mt-4 text-xl font-semibold text-[#3C2F2F]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-                {data.author || "The Author"}
+                {data.author || ""}
               </p>                <p className="text-sm text-[#8A7B6B]">{lc?.author?.role || t("author_role")}</p>
             </div>
             <div>
@@ -300,13 +297,15 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
               <div className="space-y-4 text-[#4A4035] leading-relaxed">
                 <p>{authorBio || t("author_bio_1")}</p>
               </div>
-              <div className="grid grid-cols-3 gap-3 mt-6">
-                {["/images/amish-storia-1.png", "/images/amish-storia-2.png", "/images/amish-storia-3.png"].map((src, i) => (
-                  <div key={i} className="rounded-xl overflow-hidden aspect-[4/3] border border-[#F0E6D7]">
-                    <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
-                  </div>
-                ))}
-              </div>
+              {lc?.story?.image_captions?.length ? (
+                <div className="grid grid-cols-3 gap-3 mt-6">
+                  {lc.story.image_captions.slice(0, 3).map((_: string, i: number) => (
+                    <div key={i} className="rounded-xl overflow-hidden aspect-[4/3] border border-[#F0E6D7]">
+                      <div className="w-full h-full bg-[#C9840D]/5 flex items-center justify-center text-xs text-[#8A7B6B] p-2 text-center">{_}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
@@ -379,7 +378,7 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
             <div className="text-center mt-10">
               <TrackedCtaButton href={checkoutUrl} productSlug={productSlug ?? ""} productId={productId} locale={locale}
                 className="inline-flex px-8 py-4 bg-[#C9840D] text-white rounded-xl font-semibold hover:bg-[#B6750B] shadow-lg shadow-[#C9840D]/20 transition-all">
-                {t("hero_cta_prefix")} {data.prezzo ?? "$19"}
+                {t("hero_cta_prefix")} {data.prezzo}
               </TrackedCtaButton>
             </div>
           </div>
@@ -440,7 +439,11 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
           </div>
           <div className="relative">
             <div className="absolute -inset-4 bg-[#C9840D]/5 rounded-[32px] blur-xl" />
-            <img src="/images/amish-storia-1.png" alt="Course materials" className="relative rounded-[28px] shadow-lg shadow-[#C9840D]/10 w-full h-[420px] object-cover border border-[#F0E6D7]" />
+            {data.coverUrl ? (
+              <img src={data.coverUrl} alt="" className="relative rounded-[28px] shadow-lg shadow-[#C9840D]/10 w-full h-[420px] object-cover border border-[#F0E6D7]" />
+            ) : (
+              <div className="relative rounded-[28px] shadow-lg shadow-[#C9840D]/10 w-full h-[420px] bg-[#C9840D]/5 flex items-center justify-center border border-[#F0E6D7]"><BookOpen className="w-16 h-16 text-[#C9840D]/30" /></div>
+            )}
           </div>
         </div>
       </section>
@@ -458,18 +461,18 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
           <div className="bg-[#4A3D32]/80 backdrop-blur-sm border border-[#C9840D]/20 rounded-[32px] p-8 md:p-12 shadow-2xl text-center">
             <p className="inline-block bg-[#C9840D]/20 text-[#C9840D] px-3 py-1 rounded-full text-xs font-semibold tracking-wide mb-4">{lc?.offer?.badge || t("offer_badge")}</p>
             <h2 className="text-3xl md:text-4xl text-white" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-              {PRODUCT_TITLE.split(":")[0] || "Course"} &mdash; {lc?.offer?.title || t("offer_title")}
+              {PRODUCT_TITLE} &mdash; {lc?.offer?.title || t("offer_title")}
             </h2>
             <div className="mt-6 flex items-center justify-center gap-4">
               <span className="text-2xl line-through opacity-40">{lc?.offer?.course_value || t("offer_original_price")}</span>
-              <span className="text-5xl font-semibold text-white" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>{data.prezzo ?? "$19"}</span>
+              <span className="text-5xl font-semibold text-white" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>{data.prezzo}</span>
             </div>
             <p className="mt-2 text-white/60">{lc?.offer?.one_time || t("offer_one_time")}</p>
             <p className="mt-1 text-sm text-[#C9840D] font-medium">{lc?.offer?.launch_price || t("offer_launch_note")}</p>
 
             <TrackedCtaButton href={checkoutUrl} productSlug={productSlug ?? ""} productId={productId} locale={locale}
               className="mt-8 inline-flex w-full justify-center px-8 py-5 bg-[#C9840D] hover:bg-[#B6750B] text-white font-semibold rounded-xl text-lg shadow-lg shadow-[#C9840D]/30 transition transform hover:-translate-y-0.5">
-              {lc?.offer?.cta || t("offer_cta")} {data.prezzo ?? "$19"}
+              {lc?.offer?.cta || t("offer_cta")} {data.prezzo}
             </TrackedCtaButton>
 
             <div className="mt-4 flex items-center justify-center gap-4 text-xs text-white/40">
@@ -537,7 +540,7 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
               <p className="mt-1">{lc?.footer?.rights_reserved || t("footer_rights")}</p>
             </div>
             <div className="text-xs leading-relaxed">
-              <p>Courssy &mdash; {lc?.footer?.rights_reserved || t("footer_rights")}</p>
+              <p>{PRODUCT_TITLE} &mdash; {lc?.footer?.rights_reserved || t("footer_rights")}</p>
               <p>Email: <a href={`mailto:${t("footer_email")}`} className="underline text-[#C9840D]">{t("footer_email")}</a></p>
               <p className="mt-2">
                 <a href="/privacy" className="hover:text-[#C9840D] transition-colors">{lc?.footer?.privacy || t("footer_privacy")}</a> &middot;{" "}

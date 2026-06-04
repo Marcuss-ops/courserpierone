@@ -305,7 +305,17 @@
       "reviewer": "Marco R., vroege lezer",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "story_quote": "De Amish leven rijk en vol leven terwijl ze een fractie uitgeven van wat we uitgeven. In deze cursus laten we zien hoe ze het doen."
+      "story_quote": "De Amish leven rijk en vol leven terwijl ze een fractie uitgeven van wat we uitgeven. In deze cursus laten we zien hoe ze het doen.",
+      "hero_secure": "Pagamento sicuro",
+      "hero_verified": "recensioni verificate",
+      "hero_trust_ssl": "SSL Sicuro",
+      "hero_trust_stripe": "Stripe",
+      "hero_trust_paypal": "PayPal",
+      "offer_stripe_paypal": "Stripe / PayPal",
+      "offer_invoice": "Fattura inclusa",
+      "footer_cookies": "Cookie",
+      "footer_withdrawal": "Ritiro",
+      "footer_email": "info@courssy.com"
     }
   },
   "audience": {

@@ -305,7 +305,17 @@
       "reviewer": "Marco R.,早期读者",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "story_quote": "阿米什人过着丰富而充实的生活,却花费了我们花费的一小部分. 在这个过程中,我们揭示他们是如何做到的。"
+      "story_quote": "阿米什人过着丰富而充实的生活,却花费了我们花费的一小部分. 在这个过程中,我们揭示他们是如何做到的。",
+      "hero_secure": "Pagamento sicuro",
+      "hero_verified": "recensioni verificate",
+      "hero_trust_ssl": "SSL Sicuro",
+      "hero_trust_stripe": "Stripe",
+      "hero_trust_paypal": "PayPal",
+      "offer_stripe_paypal": "Stripe / PayPal",
+      "offer_invoice": "Fattura inclusa",
+      "footer_cookies": "Cookie",
+      "footer_withdrawal": "Ritiro",
+      "footer_email": "info@courssy.com"
     }
   },
   "audience": {

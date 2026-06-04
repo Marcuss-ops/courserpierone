@@ -305,7 +305,17 @@
       "reviewer": "Marko R., lexues i hershëm",
       "language_switch": "EN",
       "language_switch_en": "EN",
-      "story_quote": "Amishët jetojnë të pasur dhe të plotë ndërsa shpenzojnë një pjesëz të asaj që shpenzojmë. Në këtë drejtim, tregojmë se si e bëjnë."
+      "story_quote": "Amishët jetojnë të pasur dhe të plotë ndërsa shpenzojnë një pjesëz të asaj që shpenzojmë. Në këtë drejtim, tregojmë se si e bëjnë.",
+      "hero_secure": "Pagamento sicuro",
+      "hero_verified": "recensioni verificate",
+      "hero_trust_ssl": "SSL Sicuro",
+      "hero_trust_stripe": "Stripe",
+      "hero_trust_paypal": "PayPal",
+      "offer_stripe_paypal": "Stripe / PayPal",
+      "offer_invoice": "Fattura inclusa",
+      "footer_cookies": "Cookie",
+      "footer_withdrawal": "Ritiro",
+      "footer_email": "info@courssy.com"
     }
   },
   "audience": {
