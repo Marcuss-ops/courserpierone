@@ -10,6 +10,7 @@ import { loadLocaleContentSafe } from "@/lib/i18n/load-locale-content";
 import type { LocaleContent } from "@/lib/i18n/locale-content";
 import { AnalyticsTracker } from "@/components/course/analytics-tracker";
 import { TrackedCtaButton } from "@/components/course/tracked-cta-button";
+import LanguageAlert from "@/components/funnel/language-alert";
 
 // ─── All supported locale codes ────────────────
 const ALL_LOCALES = [
@@ -241,6 +242,12 @@ export default async function LocaleLandingPage({
       }
       return (
         <>
+          <LanguageAlert
+            currentLocale={currentLocale}
+            productSlug={domain}
+            availableLangs={Object.keys(data.languages)}
+            accentColor={data.accentColor ?? undefined}
+          />
           <AnalyticsTracker productSlug={domain} />
           <TemplateComponent
             data={templateData}
@@ -257,6 +264,12 @@ export default async function LocaleLandingPage({
   // ─── DEFAULT TEMPLATE ──────────────────────────
   return (
     <>
+      <LanguageAlert
+        currentLocale={currentLocale}
+        productSlug={domain}
+        availableLangs={Object.keys(data.languages)}
+        accentColor={data.accentColor ?? undefined}
+      />
       <AnalyticsTracker productSlug={domain} />
       <div className="min-h-screen bg-white text-gray-900 font-hanken overflow-x-hidden">
         <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">

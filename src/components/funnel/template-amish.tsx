@@ -69,8 +69,8 @@ export default function TemplateAmish({
   // ── Merge ALL label sources: localeContent.ui.labels → data.ui.labels ──
   // Primary source is always data.ui.labels (from config.json per-language)
   const uiLabels: Record<string, string> = {
-    ...(data.localeContent?.ui?.labels ?? {}),
     ...(data.ui?.labels ?? {}),
+    ...(data.localeContent?.ui?.labels ?? {}),
   };
   const t = (key: string): string => uiLabels[key] ?? "";
 
