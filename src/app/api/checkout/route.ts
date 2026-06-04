@@ -157,6 +157,15 @@ export async function POST(request: NextRequest) {
       ? await prisma.user.findUnique({ where: { email: userEmail } })
       : null;
 
+    // Resolve stripe checkout locale based on standard codes
+    const lang = locale.split("-")[0];
+    const supportedStripeLocales = [
+      "ar", "bg", "cs", "da", "de", "el", "en", "es", "et", "fi", "fil", "fr", "he",
+      "hr", "hu", "id", "it", "ja", "ko", "lt", "lv", "ms", "nb", "nl", "pl", "pt",
+      "ro", "ru", "sk", "sl", "sv", "th", "tr", "vi", "zh"
+    ];
+    const stripeLocale = supportedStripeLocales.includes(lang) ? lang : "auto";
+
     const stripeSession = await getStripe().checkout.sessions.create({
       mode: "payment",
       line_items: [
@@ -165,6 +174,8 @@ export async function POST(request: NextRequest) {
           quantity: 1,
         },
       ],
+      customer_email: userEmail || undefined,
+      locale: stripeLocale as any,
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/${product.slug}?success=1`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/${product.slug}?canceled=1`,
       metadata: {

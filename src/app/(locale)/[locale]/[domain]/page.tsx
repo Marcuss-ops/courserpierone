@@ -68,7 +68,9 @@ export async function generateMetadata({
 
   const title = seo?.title || langEntry?.title || domain;
   const description = seo?.description || langEntry?.description || "";
-  const ogImage = seo?.ogImage || data?.cover || undefined;
+  
+  // Dynamically generate Open Graph social preview cards in the current language
+  const ogImage = `${baseUrl}/api/og?title=${encodeURIComponent(title)}&author=${encodeURIComponent(data?.author || "")}&accent=${encodeURIComponent(data?.accentColor || "#C9840D")}`;
 
   // Full hreflang for all 71 locales
   const languages: Record<string, string> = {};
