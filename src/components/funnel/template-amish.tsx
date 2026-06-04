@@ -60,12 +60,59 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
 
   // ── Resolve language from locale ("it-it" → "it") ──
   const lang = (locale ?? "en").split("-")[0];
+  const lc = data.localeContent;
+  const uiLabels = { ...lc?.ui?.labels, ...data.ui?.labels };
 
-  // All text comes from data.ui (loaded from config.json) with localeContent fallback
-  const labels: Record<string, string> = { ...data.localeContent?.ui?.labels, ...data.ui?.labels };
-  const t = (key: string): string => labels[key] ?? "";
+  // ── Smart t() that reads from localeContent sections first ──
+  const t = (key: string): string => {
+    switch (key) {
+      case "hero_badge": return lc?.hero?.badge ?? uiLabels[key] ?? "";
+      case "hero_subtitle": return lc?.hero?.subtitle ?? uiLabels[key] ?? "";
+      case "hero_cta_prefix": return lc?.hero?.cta ?? uiLabels[key] ?? "";
+      case "hero_no_sub": return lc?.hero?.one_time_payment ?? uiLabels[key] ?? "";
+      case "hero_readers": return lc?.trust?.readers_count ?? uiLabels[key] ?? "";
+      case "problem_title": return lc?.problem?.title ?? uiLabels[key] ?? "";
+      case "author_role": return lc?.author?.role ?? uiLabels[key] ?? "";
+      case "author_title": return lc?.author?.title ?? uiLabels[key] ?? "";
+      case "modules_title": return lc?.modules?.title ?? uiLabels[key] ?? "";
+      case "modules_desc": return lc?.modules?.description ?? uiLabels[key] ?? "";
+      case "testimonials_title": return lc?.testimonials?.title ?? uiLabels[key] ?? "";
+      case "whats_included_title": return lc?.includes?.title ?? uiLabels[key] ?? "";
+      case "faq_title": return lc?.faq?.title ?? uiLabels[key] ?? "";
+      case "offer_badge": return lc?.offer?.badge ?? uiLabels[key] ?? "";
+      case "offer_title": return lc?.offer?.title ?? uiLabels[key] ?? "";
+      case "offer_original_price": return lc?.offer?.course_value ?? uiLabels[key] ?? "";
+      case "offer_one_time": return lc?.offer?.one_time ?? uiLabels[key] ?? "";
+      case "offer_launch_note": return lc?.offer?.launch_price ?? uiLabels[key] ?? "";
+      case "offer_cta": return lc?.offer?.cta ?? uiLabels[key] ?? "";
+      case "guarantee_title": return lc?.offer?.guarantee_title ?? uiLabels[key] ?? "";
+      case "guarantee_text": return lc?.offer?.guarantee_text ?? uiLabels[key] ?? "";
+      case "final_cta_text": return lc?.final_cta?.badge ?? lc?.offer?.cta ?? uiLabels[key] ?? "";
+      case "footer_rights": return lc?.footer?.rights_reserved ?? uiLabels[key] ?? "";
+      case "footer_privacy": return lc?.footer?.privacy ?? uiLabels[key] ?? "";
+      case "footer_terms": return lc?.footer?.terms ?? uiLabels[key] ?? "";
+      case "footer_legal_note": return lc?.footer?.legal_note ?? uiLabels[key] ?? "";
+      case "problem_1_title": return uiLabels[key] ?? "";
+      case "problem_1_text": return uiLabels[key] ?? "";
+      case "problem_2_title": return uiLabels[key] ?? "";
+      case "problem_2_text": return uiLabels[key] ?? "";
+      case "problem_3_title": return uiLabels[key] ?? "";
+      case "problem_3_text": return uiLabels[key] ?? "";
+      case "transform_title": return uiLabels[key] ?? "";
+      case "transform_before_label": return uiLabels[key] ?? "";
+      case "transform_before_1": return uiLabels[key] ?? "";
+      case "transform_before_2": return uiLabels[key] ?? "";
+      case "transform_before_3": return uiLabels[key] ?? "";
+      case "transform_after_label": return uiLabels[key] ?? "";
+      case "transform_after_1": return uiLabels[key] ?? "";
+      case "transform_after_2": return uiLabels[key] ?? "";
+      case "transform_after_3": return uiLabels[key] ?? "";
+      case "transform_disclaimer": return uiLabels[key] ?? "";
+      default: return uiLabels[key] ?? "";
+    }
+  };
 
-  // Use translated product title from config, falling back through locales → English → generic
+  // Use translated product title from config
   const LOCALE_TITLE_MAP: Record<string, string> = {};
   if (data.languages) {
     for (const [localeKey, localeData] of Object.entries(data.languages)) {
@@ -74,9 +121,12 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
   }
   const PRODUCT_TITLE = LOCALE_TITLE_MAP[lang] ?? LOCALE_TITLE_MAP["en"] ?? data.titolo ?? "Course Title";
 
-  const modules = data.ui?.benefits?.length ? data.ui.benefits : data.localeContent?.modules?.items ?? [];
-  const faqItems = data.ui?.faq?.length ? data.ui.faq : data.localeContent?.faq?.items ?? [];
-  const testimonials = data.ui?.testimonials ?? [];
+  // Structured data from localeContent
+  const modules = lc?.modules?.items?.length ? lc.modules.items : data.ui?.benefits ?? [];
+  const faqItems = lc?.faq?.items?.length ? lc.faq.items : data.ui?.faq ?? [];
+  const includesItems = lc?.includes?.items ?? [];
+  const testimonials = lc?.testimonials?.items?.map(tst => ({ name: tst.name, location: tst.role, avatar: "", text: tst.text })) ?? data.ui?.testimonials ?? [];
+  const authorBio = lc?.author?.bio ?? "";
   const hasModules = modules.length > 0;
   const hasFaq = faqItems.length > 0;
 
@@ -176,7 +226,7 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
       {/* ================================================================ */}
       {/* PROBLEM */}
       {/* ================================================================ */}
-      <section className="py-16 lg:py-24 bg-[#FFF8F0] border-y border-[#F0E6D7] relative z-10 overflow-hidden">
+      <section className="py-16 lg:py-24 bg-[#FFFBF5] border-y border-[#F0E6D7] relative z-10 overflow-hidden">
         <GradientBlob className="w-[600px] h-[600px] bg-[#C9840D]/5 -top-60 right-0 animate-[pulse_12s_ease-in-out_infinite]" />
         <div className="max-w-5xl mx-auto px-6 relative">
           <h2 className="text-3xl md:text-4xl text-center mb-12 text-[#3C2F2F]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
@@ -206,7 +256,7 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
         <div className="max-w-5xl mx-auto px-6 relative">
           <div className="bg-white rounded-[32px] shadow-md shadow-[#C9840D]/5 p-8 md:p-12 grid md:grid-cols-[220px_1fr] gap-8 items-start border border-[#F0E6D7]">
             <div className="text-center md:text-left">
-              <div className="w-40 h-40 mx-auto md:mx-0 rounded-2xl overflow-hidden bg-[#FFF8F0] border-2 border-[#C9840D]/20">
+              <div className="w-40 h-40 mx-auto md:mx-0 rounded-2xl overflow-hidden bg-[#FFFBF5] border-2 border-[#C9840D]/20">
                 <img src="/images/author-alessandro.png" alt={data.author || "Author"} className="w-full h-full object-cover" />
               </div>
               <p className="mt-4 text-xl font-semibold text-[#3C2F2F]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
@@ -219,9 +269,7 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
                 {t("author_title")}
               </h2>
               <div className="space-y-4 text-[#4A4035] leading-relaxed">
-                <p>{t("author_bio_1")}</p>
-                <p>{t("author_bio_2")}</p>
-                <p>{t("author_bio_3")}</p>
+                <p>{authorBio}</p>
               </div>
               <div className="grid grid-cols-3 gap-3 mt-6">
                 {["/images/amish-storia-1.png", "/images/amish-storia-2.png", "/images/amish-storia-3.png"].map((src, i) => (
@@ -312,7 +360,7 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
       {/* ================================================================ */}
       {/* TESTIMONIALS */}
       {/* ================================================================ */}
-      <section className="py-16 bg-[#FFF8F0] relative z-10 overflow-hidden">
+      <section className="py-16 bg-[#FFFBF5] relative z-10 overflow-hidden">
         <GradientBlob className="w-[500px] h-[500px] bg-[#C9840D]/5 top-0 -left-40 animate-[pulse_11s_ease-in-out_infinite_1s]" />
         <div className="max-w-6xl mx-auto px-6 relative">
           <h2 className="text-3xl text-center mb-2 text-[#3C2F2F]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
@@ -347,7 +395,13 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
               {t("whats_included_title")}
             </h2>
             <ul className="space-y-4">
-              {[1, 2, 3, 4, 5, 6].map((n) => (
+              {includesItems.map((item, i) => (
+                <li key={i} className="flex gap-3">
+                  <Check className="w-5 h-5 text-[#C9840D] shrink-0 mt-0.5" strokeWidth={2.5} />
+                  <span className="text-[#4A4035]">{item}</span>
+                </li>
+              ))}
+              {includesItems.length === 0 && [1, 2, 3, 4, 5, 6].map((n) => (
                 <li key={n} className="flex gap-3">
                   <Check className="w-5 h-5 text-[#C9840D] shrink-0 mt-0.5" strokeWidth={2.5} />
                   <span className="text-[#4A4035]">{t(`whats_included_${n}`)}</span>
@@ -446,7 +500,7 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
       {/* ================================================================ */}
       {/* FOOTER */}
       {/* ================================================================ */}
-      <footer className="bg-[#FFF8F0] border-t border-[#F0E6D7] py-10 text-sm text-[#8A7B6B] relative z-10">
+      <footer className="bg-[#FFFBF5] border-t border-[#F0E6D7] py-10 text-sm text-[#8A7B6B] relative z-10">
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between gap-6">
             <div>
