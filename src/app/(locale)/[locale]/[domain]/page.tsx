@@ -162,7 +162,7 @@ function mapConfigToTemplateData(data: CourseConfig, locale: string, lang: strin
     cta: content.cta,
     prezzo: price,
     currency,
-    coverUrl: data.cover ?? "",
+    coverUrl: localeContent?.seo?.ogImage || data.cover || "",
     author: data.author,
     languages: data.languages,
     ui: content.ui ?? undefined,

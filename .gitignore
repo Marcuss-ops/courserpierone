@@ -14,4 +14,3 @@ public/courses/*
 !public/courses/.gitkeep
 scripts/translate/__pycache__/
 *.pyc
-*.png
