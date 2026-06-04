@@ -71,6 +71,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // ─── Country-specific discount overrides ──────────────────
+    let effectiveDiscountCode: string | undefined = undefined;
+    if (country) {
+      const c = country.toUpperCase();
+      const emergingCountries = ["IN", "PK", "BD", "EG", "VN", "ID", "BR", "MX", "AR", "TR", "RU", "CO", "UA"];
+      if (emergingCountries.includes(c)) {
+        effectiveDiscountCode = "EMERGING60";
+      }
+    }
+
     // Validate at least one payment provider is configured
     if (!effectiveLemonVariantId && !effectiveStripePriceId) {
       return NextResponse.json(
@@ -81,29 +91,37 @@ export async function POST(request: NextRequest) {
 
     const userEmail = session?.user?.email ?? body.email ?? "";
 
-    // ─── Track abandoned checkout ────────────────────────────
-    if (userEmail) {
+    const saveAbandonedCheckout = async (checkoutUrl: string) => {
+      if (!userEmail) return;
       try {
-        // Evita duplicati: controlla se esiste già un checkout pending per stesso utente+prodotto
         const existing = await prisma.abandonedCheckout.findFirst({
           where: { email: userEmail, productId: product.id, status: "pending" },
         });
-        if (!existing) {
+        if (existing) {
+          await prisma.abandonedCheckout.update({
+            where: { id: existing.id },
+            data: {
+              checkoutUrl,
+              locale,
+              paymentProvider: effectiveLemonVariantId ? "lemonsqueezy" : "stripe",
+            },
+          });
+        } else {
           await prisma.abandonedCheckout.create({
             data: {
               email: userEmail,
               productId: product.id,
               locale,
               paymentProvider: effectiveLemonVariantId ? "lemonsqueezy" : "stripe",
+              checkoutUrl,
               status: "pending",
             },
           });
         }
       } catch (trackErr) {
-        // Non bloccare il checkout se il tracking fallisce
         console.error("Failed to track abandoned checkout:", trackErr);
       }
-    }
+    };
 
     // ─── Priority 1: Lemon Squeezy (if lemonVariantId is set) ──
     if (effectiveLemonVariantId) {
@@ -133,6 +151,7 @@ export async function POST(request: NextRequest) {
         checkoutData: {
           email: userEmail || undefined,
           custom: customData,
+          discountCode: effectiveDiscountCode,
         },
         productOptions: {
           redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/${product.slug}?success=1`,
@@ -148,7 +167,10 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Checkout creation failed" }, { status: 500 });
       }
 
-      return NextResponse.json({ url: checkout.data.data.attributes.url });
+      const checkoutUrl = checkout.data.data.attributes.url;
+      await saveAbandonedCheckout(checkoutUrl);
+
+      return NextResponse.json({ url: checkoutUrl });
     }
 
     // ─── Fallback: Stripe (legacy) ────────────────────────────
@@ -185,7 +207,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ url: stripeSession.url });
+    const checkoutUrl = stripeSession.url;
+    if (checkoutUrl) {
+      await saveAbandonedCheckout(checkoutUrl);
+    }
+
+    return NextResponse.json({ url: checkoutUrl });
   } catch (error) {
     console.error("POST /api/checkout error:", error);
     return NextResponse.json({ error: "Checkout failed" }, { status: 500 });

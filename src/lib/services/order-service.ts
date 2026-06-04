@@ -186,5 +186,22 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
     })
     .catch((e) => console.warn(`[${paymentProvider}] Failed to track analytics event:`, e));
 
+  // ── 9. Recover abandoned checkout ────────────────────────────
+  try {
+    await prisma.abandonedCheckout.updateMany({
+      where: {
+        email,
+        productId: product.id,
+        status: "pending",
+      },
+      data: {
+        status: "recovered",
+      },
+    });
+    console.log(`[OrderService] Marked abandoned checkouts for ${email} as recovered`);
+  } catch (recoverErr) {
+    console.error("[OrderService] Failed to mark abandoned checkouts as recovered:", recoverErr);
+  }
+
   console.log(`[OrderService] Order created: user=${user.id}, product=${product.slug}, provider=${paymentProvider}`);
 }

@@ -25,15 +25,19 @@ interface CountryPrice {
 type CountryOverrides = Record<string, CountryPrice>;
 
 const DEFAULT_COUNTRY_PRICES: CountryOverrides = {
-  // Mercati emergenti — prezzi adattati al potere d'acquisto locale
-  BR: { currency: "BRL", price: 9900, symbol: "R$" },
-  IN: { currency: "INR", price: 149900, symbol: "₹" },
-  MX: { currency: "MXN", price: 39000, symbol: "MX$" },
-  AR: { currency: "ARS", price: 210000, symbol: "ARS$" },
-  TR: { currency: "TRY", price: 69000, symbol: "₺" },
-  RU: { currency: "RUB", price: 190000, symbol: "₽" },
-  // Paesi con valuta simile ma potere d'acquisto diverso
-  JP: { currency: "JPY", price: 3100, symbol: "¥" },
+  // Mercati emergenti — prezzi adattati al potere d'acquisto locale (circa 5-7 EUR equivalenti)
+  BR: { currency: "BRL", price: 3900, symbol: "R$" },
+  IN: { currency: "INR", price: 49900, symbol: "₹" },
+  MX: { currency: "MXN", price: 12000, symbol: "MX$" },
+  AR: { currency: "ARS", price: 490000, symbol: "ARS$" }, // Argentinian Pesos (svalutato)
+  TR: { currency: "TRY", price: 19900, symbol: "₺" },
+  RU: { currency: "RUB", price: 49000, symbol: "₽" },
+  CO: { currency: "COP", price: 2490000, symbol: "COP$" },
+  UA: { currency: "UAH", price: 24900, symbol: "₴" },
+  VN: { currency: "VND", price: 12900000, symbol: "₫" }, // zero-decimal currency in cents representation
+  PK: { currency: "PKR", price: 149000, symbol: "₨" },
+  EG: { currency: "EGP", price: 24900, symbol: "EGP" },
+  ID: { currency: "IDR", price: 7900000, symbol: "Rp" }
 };
 
 async function main() {

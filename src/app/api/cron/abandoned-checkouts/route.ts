@@ -22,16 +22,16 @@ export async function GET(request: Request) {
       }
     }
 
-    // Trova checkout abbandonati (pending, più vecchi di 30 min, più recenti di 24h)
+    // Trova checkout abbandonati (pending, più vecchi di 1h, più recenti di 24h)
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+    const oneHourAgo = new Date(Date.now() - 1 * 60 * 60 * 1000);
 
     const abandonedCheckouts = await prisma.abandonedCheckout.findMany({
       where: {
         status: "pending",
         createdAt: {
           gte: twentyFourHoursAgo,
-          lte: thirtyMinutesAgo,
+          lte: oneHourAgo,
         },
         reminderSentAt: null,
       },

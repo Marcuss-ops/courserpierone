@@ -1,0 +1,159 @@
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db/prisma";
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const productSlug = searchParams.get("productSlug");
+    const locale = searchParams.get("locale") || "en";
+
+    if (!productSlug) {
+      return NextResponse.json({ error: "Product slug is required" }, { status: 400 });
+    }
+
+    const product = await prisma.product.findUnique({
+      where: { slug: productSlug },
+      include: {
+        lessons: {
+          include: {
+            translations: true,
+          },
+        },
+      },
+    });
+
+    if (!product) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    // 1. Fetch recent orders (completed)
+    const recentOrders = await prisma.order.findMany({
+      where: {
+        productId: product.id,
+        status: "completed",
+      },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    // 2. Fetch recent lesson completions for this product
+    const lessonIds = product.lessons.map((l) => l.id);
+    const recentProgress = await prisma.lessonProgress.findMany({
+      where: {
+        lessonId: { in: lessonIds },
+        completed: true,
+      },
+      orderBy: { updatedAt: "desc" },
+      take: 5,
+      include: {
+        lesson: {
+          include: {
+            translations: true,
+          },
+        },
+      },
+    });
+
+    // Fetch users for the lesson progress
+    const userIds = [...new Set(recentProgress.map((p) => p.userId))];
+    const users = await prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, name: true, email: true },
+    });
+    const userMap = new Map(users.map((u) => [u.id, u]));
+
+    // Helper to clean and format name
+    const formatName = (name?: string | null, email?: string | null): string => {
+      let raw = name || (email ? email.split("@")[0] : "");
+      if (!raw) return "Student";
+      // Clean names that look like emails or contain digits
+      raw = raw.split("@")[0].replace(/[0-9_.-]+/g, " ").trim();
+      const parts = raw.split(" ");
+      const first = parts[0];
+      if (!first) return "Student";
+      return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
+    };
+
+    // Helper to get city based on locale/country code
+    const getCity = (userLocale?: string | null): string => {
+      const cleanLocale = (userLocale || locale).toLowerCase();
+      const lang = cleanLocale.split("-")[0];
+
+      const cities: Record<string, string[]> = {
+        it: ["Milano", "Roma", "Torino", "Napoli", "Firenze", "Bologna", "Palermo", "Genova", "Venezia", "Bari"],
+        da: ["København", "Aarhus", "Odense", "Aalborg"],
+        ru: ["Mosca", "San Pietroburgo", "Novosibirsk", "Kazan", "Ekaterinburg"],
+        es: ["Madrid", "Barcelona", "Valencia", "Sevilla", "Zaragoza"],
+        fr: ["Parigi", "Lione", "Marsiglia", "Tolosa", "Nizza"],
+        de: ["Berlino", "Amburgo", "Monaco", "Colonia", "Francoforte"],
+        pt: ["San Paolo", "Rio de Janeiro", "Brasilia", "Salvador"],
+        en: ["Londra", "New York", "Los Angeles", "Chicago", "Toronto", "Sydney"],
+      };
+
+      const fallbackCities = cities.en;
+      const list = cities[lang] || fallbackCities;
+      const index = Math.abs(hashCode(userLocale || "default")) % list.length;
+      return list[index];
+    };
+
+    function hashCode(str: string): number {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      return hash;
+    }
+
+    // Standardized notifications list
+    const events: any[] = [];
+
+    // Map order events
+    recentOrders.forEach((order) => {
+      const name = formatName(order.user.name, order.user.email);
+      const city = getCity(order.locale);
+      events.push({
+        id: `order-${order.id}`,
+        type: "purchase",
+        name,
+        city,
+        createdAt: order.createdAt,
+      });
+    });
+
+    // Map progress events
+    recentProgress.forEach((prog) => {
+      const user = userMap.get(prog.userId);
+      const name = formatName(user?.name, user?.email);
+      const city = getCity(locale); // Fallback to current viewer's locale for lesson location
+      const lessonTitle = prog.lesson.translations.find((t) => t.locale.startsWith(locale.split("-")[0]))?.title
+        || prog.lesson.translations[0]?.title
+        || `Lezione ${prog.lesson.position}`;
+
+      events.push({
+        id: `progress-${prog.id}`,
+        type: "lesson",
+        name,
+        city,
+        lessonTitle,
+        lessonPosition: prog.lesson.position,
+        createdAt: prog.updatedAt,
+      });
+    });
+
+    // Sort by most recent
+    events.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    return NextResponse.json({ events });
+  } catch (error) {
+    console.error("GET /api/social-proof error:", error);
+    return NextResponse.json({ error: "Failed to get social proof events" }, { status: 500 });
+  }
+}

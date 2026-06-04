@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cookies, headers } from "next/headers";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 import type { Metadata } from "next";
-import dynamic from "next/dynamic";
+import nextDynamic from "next/dynamic";
 import { Play, Zap } from "lucide-react";
 import { getCourseConfig, type CourseConfig } from "@/lib/config/white-label-data";
 import { getCurrencyFromLocale } from "@/lib/i18n/locale-resolver";
@@ -11,6 +14,7 @@ import type { LocaleContent } from "@/lib/i18n/locale-content";
 import { AnalyticsTracker } from "@/components/course/analytics-tracker";
 import { TrackedCtaButton } from "@/components/course/tracked-cta-button";
 import LanguageAlert from "@/components/funnel/language-alert";
+import SocialProof from "@/components/funnel/social-proof";
 
 // ─── All supported locale codes ────────────────
 const ALL_LOCALES = [
@@ -120,11 +124,11 @@ export async function generateMetadata({
 }
 
 // Dynamic imports for template components
-const TemplateLumio = dynamic(() => import("@/components/funnel/template-lumio"));
-const TemplateH612 = dynamic(() => import("@/components/funnel/template-h612"));
-const TemplateHorizon = dynamic(() => import("@/components/funnel/template-horizon"));
-const TemplateBookClaude = dynamic(() => import("@/components/funnel/template-book-claude"));
-const TemplateAmish = dynamic(() => import("@/components/funnel/template-amish"));
+const TemplateLumio = nextDynamic(() => import("@/components/funnel/template-lumio"));
+const TemplateH612 = nextDynamic(() => import("@/components/funnel/template-h612"));
+const TemplateHorizon = nextDynamic(() => import("@/components/funnel/template-horizon"));
+const TemplateBookClaude = nextDynamic(() => import("@/components/funnel/template-book-claude"));
+const TemplateAmish = nextDynamic(() => import("@/components/funnel/template-amish"));
 
 function getPriceString(data: CourseConfig, locale: string): { price: string; currency: string } {
   // Derive currency from locale: pt-br → BRL, ja-jp → JPY, fr-fr → EUR
@@ -188,6 +192,29 @@ function mapConfigToTemplateData(data: CourseConfig, locale: string, lang: strin
   };
 }
 
+function flattenObject(obj: any, prefix = ""): Record<string, string> {
+  const result: Record<string, string> = {};
+  if (!obj || typeof obj !== "object") return result;
+
+  for (const [key, val] of Object.entries(obj)) {
+    const newKey = prefix ? `${prefix}_${key}` : key;
+    if (typeof val === "string") {
+      result[newKey] = val;
+    } else if (typeof val === "object" && !Array.isArray(val)) {
+      Object.assign(result, flattenObject(val, newKey));
+    } else if (Array.isArray(val)) {
+      val.forEach((item, index) => {
+        if (typeof item === "string") {
+          result[`${newKey}_${index + 1}`] = item;
+        } else if (typeof item === "object") {
+          Object.assign(result, flattenObject(item, `${newKey}_${index + 1}`));
+        }
+      });
+    }
+  }
+  return result;
+}
+
 export default async function LocaleLandingPage({
   params,
   searchParams,
@@ -232,6 +259,32 @@ export default async function LocaleLandingPage({
 
   // ─── Carica LocaleContent per la lingua corrente ──
   const localeContent = loadLocaleContentSafe(domain, currentLocale);
+
+  // Flatten root-level fields and merge into ui.labels so flat-key lookups work correctly
+  const flatFields = flattenObject({
+    nav: localeContent.nav,
+    hero: localeContent.hero,
+    problem: localeContent.problem,
+    story: localeContent.story,
+    author: localeContent.author,
+    modules: localeContent.modules,
+    includes: localeContent.includes,
+    testimonials: localeContent.testimonials,
+    offer: localeContent.offer,
+    faq: localeContent.faq,
+    final_cta: localeContent.final_cta,
+    footer: localeContent.footer,
+    trust: localeContent.trust,
+    audience: localeContent.audience,
+  });
+
+  if (!localeContent.ui) localeContent.ui = { labels: {} };
+  if (!localeContent.ui.labels) localeContent.ui.labels = {};
+  localeContent.ui.labels = {
+    ...flatFields,
+    ...localeContent.ui.labels,
+  };
+
   const lc = localeContent; // shorthand
 
   // ─── Multi-Template ────────────────────────────
@@ -263,6 +316,7 @@ export default async function LocaleLandingPage({
             productSlug={domain}
             checkoutUrl={checkoutUrl}
           />
+          <SocialProof productSlug={domain} locale={currentLocale} />
         </>
       );
     }
@@ -278,6 +332,7 @@ export default async function LocaleLandingPage({
         accentColor={data.accentColor ?? undefined}
       />
       <AnalyticsTracker productSlug={domain} />
+      <SocialProof productSlug={domain} locale={currentLocale} />
       <div className="min-h-screen bg-white text-gray-900 font-hanken overflow-x-hidden">
         <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
           <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">

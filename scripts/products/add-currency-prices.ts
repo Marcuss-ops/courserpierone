@@ -20,7 +20,7 @@ async function main() {
     USD: existing.USD ?? { price: 2100, symbol: "$", currency: "USD" },
     GBP: { price: 1600, symbol: "£", currency: "GBP" },
     JPY: { price: 3100, symbol: "¥", currency: "JPY" },
-    BRL: { price: 11500, symbol: "R$", currency: "BRL" },
+    BRL: { price: 3900, symbol: "R$", currency: "BRL" },
     CAD: { price: 2800, symbol: "CA$", currency: "CAD" },
     AUD: { price: 3200, symbol: "A$", currency: "AUD" },
     CHF: { price: 1800, symbol: "CHF", currency: "CHF" },
@@ -28,7 +28,16 @@ async function main() {
     NOK: { price: 22000, symbol: "kr", currency: "NOK" },
     DKK: { price: 14000, symbol: "kr", currency: "DKK" },
     PLN: { price: 8500, symbol: "zł", currency: "PLN" },
-    MXN: { price: 38000, symbol: "MX$", currency: "MXN" },
+    MXN: { price: 12000, symbol: "MX$", currency: "MXN" },
+    RUB: { price: 49000, symbol: "₽", currency: "RUB" },
+    INR: { price: 49900, symbol: "₹", currency: "INR" },
+    TRY: { price: 19900, symbol: "₺", currency: "TRY" },
+    COP: { price: 2490000, symbol: "COP$", currency: "COP" },
+    UAH: { price: 24900, symbol: "₴", currency: "UAH" },
+    VND: { price: 12900000, symbol: "₫", currency: "VND" },
+    PKR: { price: 149000, symbol: "₨", currency: "PKR" },
+    EGP: { price: 24900, symbol: "EGP", currency: "EGP" },
+    IDR: { price: 7900000, symbol: "Rp", currency: "IDR" }
   };
 
   await prisma.product.update({
