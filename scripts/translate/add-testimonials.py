@@ -15,6 +15,36 @@ NEW_TESTIMONIALS = {
       "text": "I was skeptical at first, but the budget method is clear and practical. I've already reduced my utility bills by 25%.",
       "name": "Giovanni P.",
       "role": "Turin — early reader"
+    },
+    {
+      "text": "As a Dane, I love efficiency. This course shows exactly how the Amish eliminate financial waste.",
+      "name": "Anders S.",
+      "role": "Copenhagen — engineer"
+    },
+    {
+      "text": "Managing a family of 4 in an expensive city is hard. Thanks to Amish planning techniques, I save over 30%.",
+      "name": "Sarah M.",
+      "role": "Boston — mother"
+    },
+    {
+      "text": "Fluctuating income gave me anxiety. The Amish budget taught me how to build stability and never carry debt.",
+      "name": "Mateo L.",
+      "role": "Madrid — freelancer"
+    },
+    {
+      "text": "Amish minimalism applied to household finance is brilliant. Great material, both theoretical and practical.",
+      "name": "Yuki T.",
+      "role": "Tokyo — analyst"
+    },
+    {
+      "text": "Very practical method. I eliminated all unnecessary installment payments and now manage monthly cash flow stress-free.",
+      "name": "Dmitry K.",
+      "role": "Moscow — marketer"
+    },
+    {
+      "text": "The guide to self-production and DIY repairs alone is worth the entire price. Finally in control of my bank account.",
+      "name": "Claire B.",
+      "role": "Paris — teacher"
     }
   ],
   "it": [
@@ -27,6 +57,36 @@ NEW_TESTIMONIALS = {
       "text": "All'inizio ero scettico, ma il metodo del budget è chiarissimo e pratico. Ho già ridotto le bollette del 25%.",
       "name": "Giovanni P.",
       "role": "Torino — studente"
+    },
+    {
+      "text": "Essendo danese adoro l'efficienza. Questo corso mostra esattamente come gli Amish eliminano gli sprechi finanziari.",
+      "name": "Anders S.",
+      "role": "Copenaghen — ingegnere"
+    },
+    {
+      "text": "Gestire una famiglia di 4 persone in una città costosa è difficile. Grazie alle tecniche di pianificazione Amish risparmio oltre il 30%.",
+      "name": "Sarah M.",
+      "role": "Boston — mamma"
+    },
+    {
+      "text": "Le entrate fluttuanti mi davano ansia. Il budget Amish mi ha insegnato come creare stabilità e non avere mai debiti.",
+      "name": "Mateo L.",
+      "role": "Madrid — freelance"
+    },
+    {
+      "text": "Il minimalismo Amish applicato alla finanza domestica è geniale. Ottimo materiale sia teorico che pratico.",
+      "name": "Yuki T.",
+      "role": "Tokyo — analista"
+    },
+    {
+      "text": "Metodo molto pratico. Ho eliminato tutti i pagamenti rateali inutili e ora gestisco il flusso di cassa mensile senza stress.",
+      "name": "Dmitry K.",
+      "role": "Mosca — marketer"
+    },
+    {
+      "text": "La guida all'autoproduzione e alla riparazione da soli vale l'intero prezzo. Finalmente ho il controllo sul mio conto bancario.",
+      "name": "Claire B.",
+      "role": "Parigi — insegnante"
     }
   ],
   "da": [
@@ -39,6 +99,36 @@ NEW_TESTIMONIALS = {
       "text": "Jeg var skeptisk i starten, men budgetmetoden er klar og praktisk. Jeg har allerede reduceret mine elregninger med 25%.",
       "name": "Giovanni P.",
       "role": "Torino - tidlige læsere"
+    },
+    {
+      "text": "Som dansker elsker jeg effektivitet. Dette kursus viser præcis, hvordan Amish eliminerer økonomisk spild.",
+      "name": "Anders S.",
+      "role": "København - ingeniør"
+    },
+    {
+      "text": "At administrere en familie på 4 i en dyr by er svært. Takket være Amish-planlægningsteknikker sparer jeg over 30%.",
+      "name": "Sarah M.",
+      "role": "Boston - mor"
+    },
+    {
+      "text": "Svingende indkomst gav mig angst. Amish-budgettet lærte mig at opbygge stabilitet og aldrig have gæld.",
+      "name": "Mateo L.",
+      "role": "Madrid - freelancer"
+    },
+    {
+      "text": "Amish-minimalisme anvendt på husholdningernes finanser er genialt. Fremragende materiale, både teoretisk og praktisk.",
+      "name": "Yuki T.",
+      "role": "Tokyo - analytiker"
+    },
+    {
+      "text": "Meget praktisk metode. Jeg eliminerede alle unødvendige afdragsbetalinger og administrerer nu den månedlige pengestrøm uden stress.",
+      "name": "Dmitry K.",
+      "role": "Moskva - marketingmedarbejder"
+    },
+    {
+      "text": "Vejledningen til selvproduktion og gør-det-selv-reparationer alene er hele prisen værd. Endelig har jeg kontrol over min bankkonto.",
+      "name": "Claire B.",
+      "role": "Paris - lærer"
     }
   ]
 }
@@ -95,7 +185,7 @@ def main():
         if "testimonials" not in data:
             data["testimonials"] = {"badge": "", "title": "", "items": []}
         
-        # Reset items to only have the first one if we need to reconstruct or re-run
+        # Reset items to only have the first one
         first_item = data["testimonials"]["items"][0] if data["testimonials"]["items"] else None
         
         if first_item:
@@ -103,7 +193,7 @@ def main():
         else:
             continue
 
-        # Add 2 new testimonials
+        # Add new testimonials
         if lang in NEW_TESTIMONIALS:
             data["testimonials"]["items"].extend(NEW_TESTIMONIALS[lang])
             print(f"Added pre-translated testimonials to {fname}")
@@ -122,7 +212,6 @@ def main():
                         })
                     except Exception as e:
                         print(f"Error translating testimonial to {lang}: {e}")
-                        # Fallback to English
                         data["testimonials"]["items"].append(t_item)
                 else:
                     data["testimonials"]["items"].append(t_item)

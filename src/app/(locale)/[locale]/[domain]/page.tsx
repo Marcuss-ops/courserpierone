@@ -280,9 +280,51 @@ export default async function LocaleLandingPage({
 
   if (!localeContent.ui) localeContent.ui = { labels: {} };
   if (!localeContent.ui.labels) localeContent.ui.labels = {};
+
+  // Dynamically resolve country name and override hero_badge
+  const headersList = await headers();
+  const countryCode = headersList.get("x-vercel-ip-country") || headersList.get("cf-ipcountry") || "IT";
+  
+  const getLocalizedCountryName = (code: string, langCode: string): string => {
+    const itMap: Record<string, string> = {
+      IT: "Italia", US: "Stati Uniti", DK: "Danimarca", ES: "Spagna", FR: "Francia",
+      DE: "Germania", BR: "Brasile", GB: "Regno Unito", CH: "Svizzera", AT: "Austria",
+      BE: "Belgio", NL: "Paesi Bassi", NO: "Norvegia", SE: "Svezia", FI: "Finlandia",
+      CA: "Canada", AU: "Australia", RU: "Russia", IN: "India", MX: "Messico", AR: "Argentina"
+    };
+    const daMap: Record<string, string> = {
+      IT: "Italien", US: "USA", DK: "Danmark", ES: "Spanien", FR: "Frankrig",
+      DE: "Tyskland", BR: "Brasilien", GB: "Storbritannien", CH: "Schweiz", AT: "Østrig",
+      BE: "Belgien", NL: "Holland", NO: "Norge", SE: "Sverige", FI: "Finland",
+      CA: "Canada", AU: "Australien", RU: "Rusland", IN: "Indien", MX: "Mexico", AR: "Argentina"
+    };
+    const enMap: Record<string, string> = {
+      IT: "Italy", US: "United States", DK: "Denmark", ES: "Spain", FR: "France",
+      DE: "Germany", BR: "Brazil", GB: "United Kingdom", CH: "Switzerland", AT: "Austria",
+      BE: "Belgium", NL: "Netherlands", NO: "Norway", SE: "Sweden", FI: "Finland",
+      CA: "Canada", AU: "Australia", RU: "Russia", IN: "India", MX: "Mexico", AR: "Argentina"
+    };
+
+    const c = code.toUpperCase();
+    if (langCode === "it") return itMap[c] || itMap.IT;
+    if (langCode === "da") return daMap[c] || daMap.DK;
+    return enMap[c] || enMap.US;
+  };
+
+  const countryName = getLocalizedCountryName(countryCode, currentLang);
+  let resolvedBadge = "";
+  if (currentLang === "it") {
+    resolvedBadge = `Metodo testato in ${countryName} • 2026`;
+  } else if (currentLang === "da") {
+    resolvedBadge = `Metode testet i ${countryName} • 2026`;
+  } else {
+    resolvedBadge = `Method tested in ${countryName} • 2026`;
+  }
+
   localeContent.ui.labels = {
     ...flatFields,
     ...localeContent.ui.labels,
+    hero_badge: resolvedBadge,
   };
 
   const lc = localeContent; // shorthand
