@@ -220,7 +220,7 @@ export default async function LocaleLandingPage({
   searchParams,
 }: {
   params: Promise<{ locale: string; domain: string }>;
-  searchParams: Promise<{ verified_token?: string; token?: string }>;
+  searchParams: Promise<{ verified_token?: string; token?: string; country?: string }>;
 }) {
   const { locale, domain } = await params;
   const searchParamsResolved = await searchParams;
