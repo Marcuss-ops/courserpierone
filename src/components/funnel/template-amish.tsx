@@ -258,7 +258,7 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
               { icon: <TrendingDown className="w-6 h-6 text-[#C9840D]" />, bg: "bg-[#C9840D]/10", title: t("problem_1_title"), text: t("problem_1_text") },
               { icon: <Zap className="w-6 h-6 text-[#C9840D]" />, bg: "bg-[#C9840D]/10", title: t("problem_2_title"), text: t("problem_2_text") },
               { icon: <Clock className="w-6 h-6 text-[#C9840D]" />, bg: "bg-[#C9840D]/10", title: t("problem_3_title"), text: t("problem_3_text") },
-            ].map((item, i) => (
+            ].filter(item => item.title || item.text).map((item, i) => (
               <div key={i} className="bg-white rounded-2xl p-6 shadow-md shadow-[#C9840D]/5 border border-[#F0E6D7]">
                 <div className={`w-12 h-12 rounded-xl ${item.bg} flex items-center justify-center mb-4`}>{item.icon}</div>
                 <h3 className="font-semibold mb-2 text-[#3C2F2F]">{item.title}</h3>
@@ -268,6 +268,44 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
           </div>
         </div>
       </section>
+
+      {/* ================================================================ */}
+      {/* AUDIENCE — Per Chi È */}
+      {/* ================================================================ */}
+      {lc?.audience?.title && (
+      <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
+        <GradientBlob className="w-[500px] h-[500px] bg-[#C9840D]/5 top-0 left-0 animate-[pulse_11s_ease-in-out_infinite]" />
+        <div className="max-w-5xl mx-auto px-6 relative">
+          <h2 className="text-3xl md:text-4xl text-center mb-12 text-[#3C2F2F]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+            {lc.audience.title}
+          </h2>
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="bg-white rounded-2xl p-8 border border-[#F0E6D7] shadow-md shadow-[#C9840D]/5">
+              <h3 className="font-semibold text-lg text-[#C9840D] mb-4">{lc.audience.perfect_for}</h3>
+              <ul className="space-y-3">
+                {lc.audience.perfect_items?.map((item: string, i: number) => (
+                  <li key={i} className="flex gap-3 items-start">
+                    <Check className="w-5 h-5 text-[#C9840D] shrink-0 mt-0.5" strokeWidth={2.5} />
+                    <span className="text-[#4A4035] text-[15px]">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="bg-white rounded-2xl p-8 border border-[#F0E6D7] shadow-md shadow-[#C9840D]/5">
+              <h3 className="font-semibold text-lg text-[#8A7B6B] mb-4">{lc.audience.not_for}</h3>
+              <ul className="space-y-3">
+                {lc.audience.not_items?.map((item: string, i: number) => (
+                  <li key={i} className="flex gap-3 items-start">
+                    <span className="text-[#C9840D]/60 mt-0.5 font-bold text-lg leading-none">&times;</span>
+                    <span className="text-[#4A4035] text-[15px]">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+      )}
 
       {/* ================================================================ */}
       {/* AUTHOR STORY */}
@@ -295,17 +333,36 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
               <div className="space-y-4 text-[#4A4035] leading-relaxed">
                 <p>{authorBio || t("author_bio_1")}</p>
               </div>
+              {lc?.story?.quote && (
+                <blockquote className="mt-6 pl-4 border-l-2 border-[#C9840D]/30 italic text-[#5A4E42] text-[15px] leading-relaxed">
+                  &ldquo;{lc.story.quote}&rdquo;
+                </blockquote>
+              )}
               {(() => {
                 const storyImages: string[] = lc?.story?.images ?? [];
-                if (storyImages.length === 0) return null;
+                const captions: string[] = lc?.story?.image_captions ?? [];
                 return (
-                  <div className="grid grid-cols-3 gap-3 mt-6">
-                    {storyImages.slice(0, 3).map((src: string, i: number) => (
-                      <div key={i} className="rounded-xl overflow-hidden aspect-[4/3] border border-[#F0E6D7]">
-                        <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
+                  <>
+                    {captions.length > 0 && (
+                      <div className="mt-6 space-y-3">
+                        {captions.map((cap: string, i: number) => (
+                          <div key={i} className="flex gap-3 items-start bg-[#FFFBF5] rounded-xl p-3 border border-[#F0E6D7]">
+                            <span className="w-6 h-6 rounded-full bg-[#C9840D]/10 text-[#C9840D] flex items-center justify-center text-xs font-bold shrink-0">{i + 1}</span>
+                            <p className="text-[#5A4E42] text-sm leading-relaxed">{cap}</p>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    )}
+                    {storyImages.length > 0 && (
+                      <div className="grid grid-cols-3 gap-3 mt-6">
+                        {storyImages.slice(0, 3).map((src: string, i: number) => (
+                          <div key={i} className="rounded-xl overflow-hidden aspect-[4/3] border border-[#F0E6D7]">
+                            <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
                 );
               })()}
             </div>
@@ -456,22 +513,19 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
       {/* OFFER */}
       {/* ================================================================ */}
       <section className="py-16 lg:py-24 relative overflow-hidden z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#3C2F2F] to-[#2A2118]" />
-        <GradientBlob className="w-[600px] h-[600px] bg-[#C9840D]/10 -top-40 -right-40 animate-[pulse_8s_ease-in-out_infinite]" />
-        <GradientBlob className="w-[400px] h-[400px] bg-[#C9840D]/8 bottom-0 -left-40 animate-[pulse_10s_ease-in-out_infinite_3s]" />
-        <div className="absolute inset-0 opacity-[0.03]"
-          style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")` }} />
+        <GradientBlob className="w-[600px] h-[600px] bg-[#C9840D]/8 -top-40 -right-40 animate-[pulse_8s_ease-in-out_infinite]" />
+        <GradientBlob className="w-[400px] h-[400px] bg-[#C9840D]/5 bottom-0 -left-40 animate-[pulse_10s_ease-in-out_infinite_3s]" />
         <div className="max-w-3xl mx-auto px-6 relative">
-          <div className="bg-[#4A3D32]/80 backdrop-blur-sm border border-[#C9840D]/20 rounded-[32px] p-8 md:p-12 shadow-2xl text-center">
-            <p className="inline-block bg-[#C9840D]/20 text-[#C9840D] px-3 py-1 rounded-full text-xs font-semibold tracking-wide mb-4">{lc?.offer?.badge || t("offer_badge")}</p>
-            <h2 className="text-3xl md:text-4xl text-white" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+          <div className="bg-white border-2 border-[#C9840D]/20 rounded-[32px] p-8 md:p-12 shadow-xl shadow-[#C9840D]/10 text-center">
+            <p className="inline-block bg-[#C9840D]/10 text-[#C9840D] px-3 py-1 rounded-full text-xs font-semibold tracking-wide mb-4">{lc?.offer?.badge || t("offer_badge")}</p>
+            <h2 className="text-3xl md:text-4xl text-[#3C2F2F]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
               {PRODUCT_TITLE} &mdash; {lc?.offer?.title || t("offer_title")}
             </h2>
             <div className="mt-6 flex items-center justify-center gap-4">
-              <span className="text-2xl line-through opacity-40">{lc?.offer?.course_value || t("offer_original_price")}</span>
-              <span className="text-5xl font-semibold text-white" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>{data.prezzo}</span>
+              <span className="text-2xl line-through text-[#8A7B6B]/60">{lc?.offer?.course_value || t("offer_original_price")}</span>
+              <span className="text-5xl font-semibold text-[#C9840D]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>{data.prezzo}</span>
             </div>
-            <p className="mt-2 text-white/60">{lc?.offer?.one_time || t("offer_one_time")}</p>
+            <p className="mt-2 text-[#5A4E42]">{lc?.offer?.one_time || t("offer_one_time")}</p>
             <p className="mt-1 text-sm text-[#C9840D] font-medium">{lc?.offer?.launch_price || t("offer_launch_note")}</p>
 
             <TrackedCtaButton href={checkoutUrl} productSlug={productSlug ?? ""} productId={productId} locale={locale}
@@ -479,18 +533,18 @@ export default function TemplateAmish({ data, locale = "en", productId, productS
               {lc?.offer?.cta || t("offer_cta")} {data.prezzo}
             </TrackedCtaButton>
 
-            <div className="mt-4 flex items-center justify-center gap-4 text-xs text-white/40">
-              <span className="flex items-center gap-1"><Lock className="w-3.5 h-3.5" /> {t("offer_stripe_paypal")}</span>
+            <div className="mt-4 flex items-center justify-center gap-4 text-xs text-[#8A7B6B]">
+              <span className="flex items-center gap-1"><Lock className="w-3.5 h-3.5 text-[#C9840D]" /> {t("offer_stripe_paypal")}</span>
               <span>&bull;</span>
               <span>{t("offer_invoice")}</span>
             </div>
 
-            <div className="mt-10 text-left bg-[#3C2F2F]/80 rounded-2xl p-6 border border-[#C9840D]/10">
+            <div className="mt-10 text-left bg-[#FFFBF5] rounded-2xl p-6 border border-[#F0E6D7]">
               <div className="flex gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#C9840D]/15 flex items-center justify-center shrink-0"><Shield className="w-5 h-5 text-[#C9840D]" /></div>
                 <div>
-                  <p className="font-semibold text-white">{lc?.offer?.guarantee_title || t("guarantee_title")}</p>
-                  <p className="text-sm text-white/60 mt-1 leading-relaxed">{lc?.offer?.guarantee_text || t("guarantee_text")}</p>
+                  <p className="font-semibold text-[#3C2F2F]">{lc?.offer?.guarantee_title || t("guarantee_title")}</p>
+                  <p className="text-sm text-[#5A4E42] mt-1 leading-relaxed">{lc?.offer?.guarantee_text || t("guarantee_text")}</p>
                 </div>
               </div>
             </div>

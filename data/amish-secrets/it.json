@@ -315,7 +315,13 @@
       "offer_invoice": "Fattura inclusa",
       "footer_cookies": "Cookie",
       "footer_withdrawal": "Ritiro",
-      "footer_email": "info@courssy.com"
+      "footer_email": "info@courssy.com",
+      "problem_1_text": "La società moderna ci spinge al consumo eccessivo, creando un ciclo di spese che ci lascia sempre a corto di risparmi.",
+      "problem_2_title": "I prezzi continuano a salire",
+      "problem_2_text": "Inflazione, bollette e costi della vita aumentano ogni anno, ma il tuo stipendio resta lo stesso.",
+      "problem_3_title": "Nessuno ti insegna a gestire i soldi",
+      "problem_3_text": "A scuola non insegnano educazione finanziaria. Impari per errore, con conseguenze durature.",
+      "testimonials_subtitle": "Dicono di noi"
     }
   },
   "audience": {
