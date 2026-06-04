@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Email non valida" }, { status: 400 });
     }
 
-    const { email, productId } = parsed.data;
+    const { email, productId, locale } = parsed.data;
 
     // Check if user has order for this product
     let hasAccess = false;
@@ -39,8 +39,11 @@ export async function POST(request: NextRequest) {
 
     const magicUrl = `${process.env.NEXT_PUBLIC_APP_URL}/login/verify?token=${token}${productId ? `&productId=${productId}` : ""}`;
 
+    // Determine target locale (param -> cookie -> default en)
+    const userLocale = locale || (request.cookies ? request.cookies.get("locale")?.value : null) || "en";
+
     // Invia email col magic link (in sviluppo logga al terminale, in produzione spedisce)
-    await sendMagicLinkEmail(email, magicUrl, productName);
+    await sendMagicLinkEmail(email, magicUrl, productName, userLocale);
 
     return NextResponse.json({ success: true, magicUrl, hasAccess });
   } catch (error) {

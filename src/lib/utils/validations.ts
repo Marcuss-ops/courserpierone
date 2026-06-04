@@ -23,6 +23,7 @@ export const analyticsEventSchema = z.object({
 export const magicLinkSchema = z.object({
   email: z.string().email("Email non valida"),
   productId: z.string().optional(),
+  locale: z.string().optional(),
 });
 
 // ─── Checkout ──────────────────────────────────────────────

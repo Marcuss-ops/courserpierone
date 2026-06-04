@@ -71,6 +71,7 @@ describe("POST /api/magic-link", () => {
       "test@example.com",
       expect.stringContaining("mock-token-123456"),
       undefined,
+      "en",
     );
   });
 

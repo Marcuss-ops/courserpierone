@@ -330,6 +330,86 @@ const MAGIC_LINK_TEMPLATES: Record<string, EmailContent> = {
     buttonText: "Sign In Now",
     footer: "If you didn't request this access, ignore this email.",
   },
+  fr: {
+    subject: "🎯 Votre lien d'accès — Courser",
+    heading: "Votre accès est prêt",
+    body: [
+      'Cliquez sur le bouton pour accéder à <strong style="color:#e5e2e1;">"{product}"</strong>.',
+      'Le lien est valide pendant <strong style="color:#e5e2e1;">24 heures</strong>.',
+    ],
+    buttonText: "Accéder Maintenant",
+    footer: "Si vous n'avez pas demandé cet accès, ignorez cet e-mail.",
+  },
+  de: {
+    subject: "🎯 Ihr Zugangslink — Courser",
+    heading: "Ihr Zugang ist bereit",
+    body: [
+      'Klicken Sie auf die Schaltfläche, um auf <strong style="color:#e5e2e1;">"{product}"</strong> zuzugreifen.',
+      'Der Link ist <strong style="color:#e5e2e1;">24 Stunden</strong> gültig.',
+    ],
+    buttonText: "Jetzt Anmelden",
+    footer: "Wenn Sie diesen Zugang nicht angefordert haben, ignorieren Sie diese E-Mail.",
+  },
+  es: {
+    subject: "🎯 Tu enlace de acceso — Courser",
+    heading: "Tu acceso está listo",
+    body: [
+      'Haz clic en el botón para acceder a <strong style="color:#e5e2e1;">"{product}"</strong>.',
+      'El enlace es válido por <strong style="color:#e5e2e1;">24 horas</strong>.',
+    ],
+    buttonText: "Acceder Ahora",
+    footer: "Si no solicitaste este acceso, ignora este correo.",
+  },
+  pt: {
+    subject: "🎯 Seu link de acesso — Courser",
+    heading: "Seu acesso está pronto",
+    body: [
+      'Clique no botão para acessar <strong style="color:#e5e2e1;">"{product}"</strong>.',
+      'O link é válido por <strong style="color:#e5e2e1;">24 horas</strong>.',
+    ],
+    buttonText: "Acessar Agora",
+    footer: "Se você não solicitou este acesso, ignore este e-mail.",
+  },
+  nl: {
+    subject: "🎯 Uw toegangslink — Courser",
+    heading: "Uw toegang is gereed",
+    body: [
+      'Klik op de knop om toegang te krijgen tot <strong style="color:#e5e2e1;">"{product}"</strong>.',
+      'De link is <strong style="color:#e5e2e1;">24 uur</strong> geldig.',
+    ],
+    buttonText: "Nu Inloggen",
+    footer: "Als u deze toegang nie heeft aangevraagd, negeer dan deze e-mail.",
+  },
+  pl: {
+    subject: "🎯 Twój link dostępu — Courser",
+    heading: "Twój dostęp jest gotowy",
+    body: [
+      'Kliknij przycisk, aby uzyskać dostęp do <strong style="color:#e5e2e1;">"{product}"</strong>.',
+      'Link jest ważny przez <strong style="color:#e5e2e1;">24 godziny</strong>.',
+    ],
+    buttonText: "Zaloguj się Teraz",
+    footer: "Jeśli nie prosiłeś o ten dostęp, zignoruj tę wiadomość.",
+  },
+  ja: {
+    subject: "🎯 アクセスリンク — Courser",
+    heading: "アクセスの準備が整いました",
+    body: [
+      'ボタンをクリックして <strong style="color:#e5e2e1;">「{product}」</strong> にアクセスしてください。',
+      'このリンクは <strong style="color:#e5e2e1;">24時間</strong> 有効です。',
+    ],
+    buttonText: "今すぐアクセス",
+    footer: "このアクセスを要求していない場合は、このメールを無視してください。",
+  },
+  ar: {
+    subject: "🎯 رابط الوصول الخاص بك — Courser",
+    heading: "الوصول الخاص بك جاهز",
+    body: [
+      'انقر فوق الزر للوصول إلى <strong style="color:#e5e2e1;">"{product}"</strong>.',
+      'الرابط صالح لمدة <strong style="color:#e5e2e1;">24 ساعة</strong>.',
+    ],
+    buttonText: "تسجيل الدخول الآن",
+    footer: "إذا لم تطلب هذا الوصول، يرجى تجاهل هذا البريد الإلكتروني.",
+  },
 };
 
 // ════════════════════════════════════════════════════════════

@@ -33,12 +33,20 @@ function LoginForm() {
     setError("");
 
     try {
+      // Detect locale on the client side
+      const detectedLocale = 
+        searchParams.get("lang") || 
+        searchParams.get("locale") || 
+        (typeof window !== "undefined" ? document.cookie.split("; ").find(row => row.startsWith("locale="))?.split("=")[1] : "") || 
+        (typeof navigator !== "undefined" ? navigator.language.split("-")[0] : "en");
+
       const res = await fetch("/api/magic-link", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: email.trim(),
           productId: productId || undefined,
+          locale: detectedLocale,
         }),
       });
 
