@@ -34,14 +34,6 @@ export interface CourseConfig {
   languages: Record<string, LanguageEntry>;
   lessons: LessonConfig[];
   ebookChapters: { it: string; en: string; page: number }[];
-  groupSection?: {
-    title?: string;
-    description?: string;
-    buttonText?: string;
-    link: string;
-    style: "telegram" | "discord" | "whatsapp" | "premium" | "default";
-    isActive?: boolean;
-  };
   /** Country-specific price overrides: { "BR": { currency: "BRL", price: 9900, symbol: "R$", ... } } */
   countryOverrides?: Record<string, { currency: string; price: number; symbol?: string; lemonVariantId?: string; stripePriceId?: string }> | string;
 }

@@ -48,14 +48,6 @@ export interface CourseConfig {
     duration: string;
   }[];
   ebookChapters: { it: string; en: string; page: number }[];
-  groupSection?: {
-    title?: string;
-    description?: string;
-    buttonText?: string;
-    link: string;
-    style: "telegram" | "discord" | "whatsapp" | "premium" | "default";
-    isActive?: boolean;
-  };
 }
 
 export async function generateCourseConfig(slug: string) {
@@ -186,7 +178,6 @@ export async function generateCourseConfig(slug: string) {
     languages,
     lessons,
     ebookChapters: existingConfig.ebookChapters || [],
-    groupSection: existingConfig.groupSection || undefined,
   };
 
   // Salva su disco (solo se non siamo su Vercel)
