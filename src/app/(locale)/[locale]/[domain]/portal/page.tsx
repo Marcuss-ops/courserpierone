@@ -7,8 +7,7 @@ import type { Metadata } from "next";
 import { 
   Play, 
   BookOpen, 
-  Send,  Sparkles,
-  GraduationCap,
+  Sparkles,
   ArrowRight,
   LogOut
 } from "lucide-react";
@@ -99,9 +98,6 @@ export default async function ProductPortalPage({
   // ID della prima lezione (per quick-start dopo acquisto)
   const firstLessonId = course.lessons?.[0]?.id ?? "lesson-1";
 
-  // Verifica se la community è configurata ed attiva
-  const hasCommunity = course.groupSection && course.groupSection.isActive !== false;
-
   return (
     <AccessGate productSlug={domain} courseTitle={content.title}>
       <div className="min-h-screen bg-[#f5f5f7] text-[#1d1d1f] font-sans overflow-x-hidden relative">
@@ -163,7 +159,7 @@ export default async function ProductPortalPage({
 
         {/* Hub Selection Cards */}
         <main className="max-w-5xl mx-auto px-6 py-8 md:py-12 space-y-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Card 1: Corso Video */}
             <Link
               href={`/${domain}/curso/${firstLessonId}?lang=${currentLang}`}
@@ -231,64 +227,6 @@ export default async function ProductPortalPage({
                 </span>
               </div>
             </Link>
-
-            {/* Card 3: Community / Gruppo Privato */}
-            {hasCommunity ? (
-              <a
-                href={course.groupSection?.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group bg-white rounded-[1.5rem] p-8 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] flex flex-col justify-between min-h-[320px] relative overflow-hidden border border-zinc-200/60"
-              >
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-amber-50/40 via-transparent to-orange-50/20" />
-                
-                <div className="space-y-6 relative z-10">
-                  <div 
-                    className="w-14 h-14 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500"
-                    style={{ backgroundColor: `${accent}12`, border: `1px solid ${accent}20` }}
-                  >
-                    <Send className="w-6 h-6 fill-current" style={{ color: accent }} />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-zinc-900">
-                      {lc.community_title || "Private Group"}
-                    </h3>
-                    <p className="text-zinc-500 text-xs mt-2 font-medium leading-relaxed">
-                      {lc.community_desc || "Join the private channel to exchange ideas, get real-time support and collaborate."}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-6 border-t border-zinc-100 relative z-10">
-                  <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-                    {lc.community_privata || "Private Community"}
-                  </span>
-                  <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest group-hover:gap-2 transition-all" style={{ color: accent }}>
-                    {lc.join_label || "Join"} <ArrowRight className="w-3.5 h-3.5" />
-                  </span>
-                </div>
-              </a>
-            ) : (
-              /* Fallback Card */
-              <div className="bg-white rounded-[1.5rem] p-8 border border-zinc-200/60 shadow-sm flex flex-col justify-between min-h-[320px] relative overflow-hidden opacity-50">
-                <div className="space-y-6">
-                  <div className="w-14 h-14 bg-zinc-50 rounded-2xl flex items-center justify-center border border-zinc-200">
-                    <GraduationCap className="w-6 h-6 text-zinc-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-zinc-400">
-                      {lc.extra_title || "Extra Resources"}
-                    </h3>
-                    <p className="text-zinc-500 text-xs mt-2 font-medium leading-relaxed">
-                      {lc.extra_desc || "New features and additional resources will be published soon in this area."}
-                    </p>
-                  </div>
-                </div>
-                <div className="pt-6 border-t border-zinc-100 text-[9px] font-black text-zinc-400 uppercase tracking-widest">
-                  {lc.coming_soon || "Coming Soon"}
-                </div>
-              </div>
-            )}
           </div>
         </main>
       </div>
