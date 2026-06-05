@@ -155,11 +155,11 @@ export default async function CoursePage({
             isLight ? "bg-white border-l border-zinc-200/80 text-zinc-800" : "bg-[#2c2c2e] border-l border-white/10 text-zinc-200"
           }`}>
             <div className={`p-8 border-b ${isLight ? "border-zinc-200" : "border-white/5"}`}>
-              <Link href={`/${domain}?lang=${currentLang}`} className={`flex items-center gap-2 transition-all duration-200 mb-6 text-[10px] font-black uppercase tracking-[0.2em] ${
+              <Link href={`/${domain}/portal?lang=${currentLang}`} className={`flex items-center gap-2 transition-all duration-200 mb-6 text-[10px] font-black uppercase tracking-[0.2em] ${
                 isLight ? "text-zinc-400 hover:text-zinc-900" : "text-zinc-500 hover:text-zinc-200"
               }`}>
                 <ChevronLeft className="w-4 h-4" />
-                Torna alla Landing
+                Area Studente
               </Link>
               <h2 className={`text-xl font-black leading-tight ${isLight ? "text-zinc-900" : "text-white text-contrast"}`}>
                 {course.languages[currentLang].title}

@@ -37,9 +37,9 @@ export default async function EbookPage({
       {/* Sidebar Struttura Libro */}
       <MobileSidebar toggleId="ebook-sidebar-toggle">
         <div className="p-8 border-b border-zinc-200/80 bg-white">
-          <Link href={`/${domain}?lang=${currentLang}`} className="flex items-center gap-2 text-zinc-400 hover:text-zinc-800 transition-colors mb-6 text-xs font-bold uppercase tracking-widest">
+          <Link href={`/${domain}/portal?lang=${currentLang}`} className="flex items-center gap-2 text-zinc-400 hover:text-zinc-800 transition-colors mb-6 text-xs font-bold uppercase tracking-widest">
             <ChevronLeft className="w-4 h-4" />
-            Torna alla Landing
+            Area Studente
           </Link>
           <div className="flex items-center gap-4 mb-4">
             <div className="w-12 h-16 bg-zinc-50 border border-zinc-200 rounded-lg flex items-center justify-center text-accent-secondary shadow-md overflow-hidden relative">
