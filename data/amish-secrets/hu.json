@@ -437,7 +437,9 @@
     "page_label": "Oldal",
     "reading_progress": "Előrehaladás",
     "download_pdf": "PDF letöltése",
-    "chapter": "Fejezet"
+    "chapter": "Fejezet",
+    "prev_lesson": "Előző",
+    "next_lesson": "Következő"
   },
   "lessons": {
     "badge": "/ / 04 - A tanfolyam tartalma",

@@ -437,7 +437,9 @@
     "page_label": "Page",
     "reading_progress": "Reading Progress",
     "download_pdf": "Download PDF",
-    "chapter": "Chapter"
+    "chapter": "Chapter",
+    "prev_lesson": "Precedente",
+    "next_lesson": "Successiva"
   },
   "lessons": {
     "badge": "// 04 — Contenuto del Corso",

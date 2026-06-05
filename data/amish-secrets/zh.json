@@ -437,7 +437,9 @@
     "page_label": "页次",
     "reading_progress": "读取进度",
     "download_pdf": "下载 PDF",
-    "chapter": "章 次 页 次"
+    "chapter": "章 次 页 次",
+    "prev_lesson": "上一课",
+    "next_lesson": "下一课"
   },
   "lessons": {
     "badge": "///04 — 课程内容",

@@ -437,7 +437,9 @@
     "page_label": "Sivu",
     "reading_progress": "Edistyminen",
     "download_pdf": "Lataa PDF",
-    "chapter": "Luku"
+    "chapter": "Luku",
+    "prev_lesson": "Edellinen",
+    "next_lesson": "Seuraava"
   },
   "lessons": {
     "badge": "// 04 ",

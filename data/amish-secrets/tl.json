@@ -437,7 +437,9 @@
     "page_label": "Pahina",
     "reading_progress": "Pagsulong sa Pagbabasa",
     "download_pdf": "Ibabang PDF",
-    "chapter": "Kabanata"
+    "chapter": "Kabanata",
+    "prev_lesson": "Nakaraan",
+    "next_lesson": "Susunod"
   },
   "lessons": {
     "badge": "// 04 — Kontento sa Landas",

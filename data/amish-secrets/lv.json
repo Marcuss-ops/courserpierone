@@ -437,7 +437,9 @@
     "page_label": "Lappuse",
     "reading_progress": "Lasīšana",
     "download_pdf": "Lejupielādēt PDF",
-    "chapter": "Nodaļa"
+    "chapter": "Nodaļa",
+    "prev_lesson": "Iepriekšējā",
+    "next_lesson": "Nākamā"
   },
   "lessons": {
     "badge": "04 – Kursu saturs",

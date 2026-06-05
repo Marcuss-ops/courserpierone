@@ -437,7 +437,9 @@
     "page_label": "पृष्ठ",
     "reading_progress": "पढ़ना प्रगति",
     "download_pdf": "PDF डाउनलोड करें",
-    "chapter": "अध्याय"
+    "chapter": "अध्याय",
+    "prev_lesson": "पिछला",
+    "next_lesson": "अगला"
   },
   "lessons": {
     "badge": "// 04 - पाठ्यक्रम सामग्री",

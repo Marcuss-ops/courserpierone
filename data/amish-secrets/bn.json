@@ -437,7 +437,9 @@
     "page_label": "পাগে",
     "reading_progress": "প্রস্তুতি চলছে",
     "download_pdf": "PDF ডাউনলোড করুন",
-    "chapter": "অধ্যায় মেনু ( C)"
+    "chapter": "অধ্যায় মেনু ( C)",
+    "prev_lesson": "আগের",
+    "next_lesson": "পরবর্তী"
   },
   "lessons": {
     "badge": "/ 0/44 - অবশ্যই বিষয়বস্তু লেখা",

@@ -437,7 +437,9 @@
     "page_label": "Bladzijde",
     "reading_progress": "Voortgang lezen",
     "download_pdf": "PDF downloaden",
-    "chapter": "Hoofdstuk"
+    "chapter": "Hoofdstuk",
+    "prev_lesson": "Vorige",
+    "next_lesson": "Volgende"
   },
   "lessons": {
     "badge": "// 04 Cursusinhoud",

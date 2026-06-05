@@ -437,7 +437,9 @@
     "page_label": "Faqja",
     "reading_progress": "Leximi i përparimit",
     "download_pdf": "Shkarkimi i PDF",
-    "chapter": "Kapitulli"
+    "chapter": "Kapitulli",
+    "prev_lesson": "Paraardhëse",
+    "next_lesson": "Tjetër"
   },
   "lessons": {
     "badge": "/ 04",

@@ -437,7 +437,9 @@
     "page_label": "Pàgina",
     "reading_progress": "S' està llegint el progrés",
     "download_pdf": "Descarrega PDF",
-    "chapter": "Capítol"
+    "chapter": "Capítol",
+    "prev_lesson": "Anterior",
+    "next_lesson": "Següent"
   },
   "lessons": {
     "badge": "/ 04 Content del camp de cursos",

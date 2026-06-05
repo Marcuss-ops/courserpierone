@@ -437,7 +437,9 @@
     "page_label": "Страница",
     "reading_progress": "Напредък при четене",
     "download_pdf": "Изтегляне на PDF",
-    "chapter": "Глава"
+    "chapter": "Глава",
+    "prev_lesson": "Предишна",
+    "next_lesson": "Следваща"
   },
   "lessons": {
     "badge": "/ / 04  год.",

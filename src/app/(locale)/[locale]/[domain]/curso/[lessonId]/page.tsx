@@ -20,6 +20,7 @@ import { TrackLessonView } from "@/components/course/track-lesson-view";
 import { MobileSidebar } from "@/components/layout/mobile-sidebar";
 import { SidebarToggleBtn } from "@/components/layout/sidebar-toggle-btn";
 import { AccessGate } from "@/components/course/access-gate";
+import { loadLocaleContentSafe } from "@/lib/i18n/load-locale-content";
 
 export default async function CoursePage({
   params,
@@ -45,6 +46,9 @@ export default async function CoursePage({
   const currentIdx = course.lessons.findIndex((l) => l.id === currentLesson.id);
   const prevLesson = currentIdx > 0 ? course.lessons[currentIdx - 1] : null;
   const nextLesson = currentIdx < course.lessons.length - 1 ? course.lessons[currentIdx + 1] : null;
+
+  const localeContent = loadLocaleContentSafe(domain, currentLang);
+  const lc = localeContent.course;
 
   return (
     <AccessGate productSlug={domain} courseTitle={course.languages[currentLang].title}>
@@ -107,7 +111,7 @@ export default async function CoursePage({
                           }`}
                         >
                           <ChevronLeft className="w-4 h-4" />
-                          Precedente
+                          {lc.prev_lesson || "Previous"}
                         </Link>
                       ) : (
                         <div />
@@ -122,7 +126,7 @@ export default async function CoursePage({
                               : "premium-glass text-accent-primary hover:text-white border-white/5"
                           }`}
                         >
-                          Successiva
+                          {lc.next_lesson || "Next"}
                           <ChevronRight className="w-4 h-4" />
                         </Link>
                       ) : (
@@ -159,7 +163,7 @@ export default async function CoursePage({
                 isLight ? "text-zinc-400 hover:text-zinc-900" : "text-zinc-500 hover:text-zinc-200"
               }`}>
                 <ChevronLeft className="w-4 h-4" />
-                Area Studente
+                {lc.back_to_course || "Back to Course"}
               </Link>
               <h2 className={`text-xl font-black leading-tight ${isLight ? "text-zinc-900" : "text-white text-contrast"}`}>
                 {course.languages[currentLang].title}
@@ -206,7 +210,7 @@ export default async function CoursePage({
                       {lesson.id === lessonId && (
                         <span className="flex items-center gap-1 text-[9px] font-black text-accent-primary uppercase animate-pulse">
                           <div className="w-1 h-1 rounded-full bg-accent-primary" />
-                          In riproduzione
+                          {lc.now_playing || "Now Playing"}
                         </span>
                       )}
                     </div>

@@ -437,7 +437,9 @@
     "page_label": "Страница",
     "reading_progress": "Прогресс чтения",
     "download_pdf": "Скачать PDF",
-    "chapter": "Глава"
+    "chapter": "Глава",
+    "prev_lesson": "Назад",
+    "next_lesson": "Далее"
   },
   "lessons": {
     "badge": "// 04 — Содержание курса",

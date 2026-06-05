@@ -437,7 +437,9 @@
     "page_label": "Pagina",
     "reading_progress": "Citirea progresului",
     "download_pdf": "Descărcați PDF",
-    "chapter": "Capitolul"
+    "chapter": "Capitolul",
+    "prev_lesson": "Anterior",
+    "next_lesson": "Următor"
   },
   "lessons": {
     "badge": "// 04 ",

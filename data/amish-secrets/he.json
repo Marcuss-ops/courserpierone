@@ -437,7 +437,9 @@
     "page_label": "עמוד Page",
     "reading_progress": "קריאה התקדמות",
     "download_pdf": "הורד PDF",
-    "chapter": "פרק פרק פרק"
+    "chapter": "פרק פרק פרק",
+    "prev_lesson": "הקודם",
+    "next_lesson": "הבא"
   },
   "lessons": {
     "badge": "המונחים: course content",

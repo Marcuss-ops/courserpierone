@@ -437,7 +437,9 @@
     "page_label": "(주)",
     "reading_progress": "회사 소개",
     "download_pdf": "PDF 다운로드",
-    "chapter": "이름 *"
+    "chapter": "이름 *",
+    "prev_lesson": "이전",
+    "next_lesson": "다음"
   },
   "lessons": {
     "badge": "// 04 - 코스 내용",

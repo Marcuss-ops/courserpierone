@@ -437,7 +437,9 @@
     "page_label": "Баракча",
     "reading_progress": "Окуунун жүрүшү",
     "download_pdf": "PDF жүктөө",
-    "chapter": "Бөлүм бөлүмү"
+    "chapter": "Бөлүм бөлүмү",
+    "prev_lesson": "Алдагы",
+    "next_lesson": "Кийинки"
   },
   "lessons": {
     "badge": "04 Курстун мазмуну",

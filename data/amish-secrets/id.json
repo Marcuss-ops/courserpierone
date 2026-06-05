@@ -437,7 +437,9 @@
     "page_label": "Halaman",
     "reading_progress": "Membaca Kemajuan",
     "download_pdf": "Unduh PDF",
-    "chapter": "Bab"
+    "chapter": "Bab",
+    "prev_lesson": "Sebelumnya",
+    "next_lesson": "Berikutnya"
   },
   "lessons": {
     "badge": "/ / 04 - Konten Kursus",

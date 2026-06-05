@@ -437,7 +437,9 @@
     "page_label": "Leathanach Baile",
     "reading_progress": "Amharc ar gach eolas",
     "download_pdf": "Íoslódáil an PDF",
-    "chapter": "Caibidil V"
+    "chapter": "Caibidil V",
+    "prev_lesson": "Roimhe",
+    "next_lesson": "Ar aghaidh"
   },
   "lessons": {
     "badge": "// 04 - Ábhar an Chúrsa",

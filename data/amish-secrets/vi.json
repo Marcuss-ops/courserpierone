@@ -437,7 +437,9 @@
     "page_label": "Trang",
     "reading_progress": "Đọc tiến trình",
     "download_pdf": "Tải PDF về",
-    "chapter": "Chương"
+    "chapter": "Chương",
+    "prev_lesson": "Trước",
+    "next_lesson": "Tiếp theo"
   },
   "lessons": {
     "badge": "/ 4 — Tất nhiên là thỏa lòng",

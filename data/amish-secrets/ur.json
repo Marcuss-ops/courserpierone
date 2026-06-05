@@ -437,7 +437,9 @@
     "page_label": "صفحہ",
     "reading_progress": "پڑھنے کی ترقی",
     "download_pdf": "دباؤ کا ریشو:",
-    "chapter": "باب"
+    "chapter": "باب",
+    "prev_lesson": "پچھلا",
+    "next_lesson": "اگلا"
   },
   "lessons": {
     "badge": "//04 — کورس مواد",

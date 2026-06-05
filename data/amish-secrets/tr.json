@@ -437,7 +437,9 @@
     "page_label": "Page Page Page",
     "reading_progress": "Okuma",
     "download_pdf": "PDF Download PDF indir",
-    "chapter": "Bölüm Bölüm Bölüm"
+    "chapter": "Bölüm Bölüm Bölüm",
+    "prev_lesson": "Önceki",
+    "next_lesson": "Sonraki"
   },
   "lessons": {
     "badge": "// 04 - Course Content",

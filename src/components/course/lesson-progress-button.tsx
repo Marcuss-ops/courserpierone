@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { CheckCircle2, Loader2, Lock } from "lucide-react";
+import { t } from "@/lib/i18n/player-locale";
 
 import { useSearchParams } from "next/navigation";
 
@@ -20,6 +21,7 @@ export function LessonProgressButton({
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
   const isLight = searchParams.get("theme") === "light";
+  const currentLang = searchParams.get("lang") || "it";
 
   const fetchProgress = useCallback(async () => {
     try {
@@ -87,7 +89,7 @@ export function LessonProgressButton({
         }`}
       >
         <Lock className="w-4 h-4" />
-        Accedi per Segnare Completata
+        {t(currentLang, "loginToComplete")}
       </button>
     );
   }
@@ -114,7 +116,7 @@ export function LessonProgressButton({
         ) : (
           <CheckCircle2 className="w-4 h-4" />
         )}
-        {completed ? "Completata ✓" : "Segna come Completata"}
+        {completed ? t(currentLang, "completed") : t(currentLang, "markComplete")}
       </button>
     </div>
   );

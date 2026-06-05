@@ -481,6 +481,8 @@ function buildLocaleContent(
       reading_progress: mergedLabels["reading_progress"] || "Reading Progress",
       download_pdf: mergedLabels["download_pdf"] || "Download PDF",
       chapter: mergedLabels["chapter"] || "Chapter",
+      prev_lesson: mergedLabels["prev_lesson"] || "Previous",
+      next_lesson: mergedLabels["next_lesson"] || "Next",
     },
     lessons: {
       badge: mergedLabels["section_content"] || "// 04 — Course Content",

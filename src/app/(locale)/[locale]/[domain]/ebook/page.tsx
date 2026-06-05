@@ -15,6 +15,7 @@ import { getCourseConfig } from "@/lib/config/white-label-data";
 import { MobileSidebar } from "@/components/layout/mobile-sidebar";
 import { SidebarToggleBtn } from "@/components/layout/sidebar-toggle-btn";
 import { sanitizeHtml } from "@/lib/utils/sanitize";
+import { loadLocaleContentSafe } from "@/lib/i18n/load-locale-content";
 
 export default async function EbookPage({
   params,
@@ -34,6 +35,9 @@ export default async function EbookPage({
 
   const accent = data.accentColor ?? "#C9840D";
 
+  const localeContent = loadLocaleContentSafe(domain, currentLang);
+  const lc = localeContent.course;
+
   return (
     <div className="flex h-screen bg-[#f5f5f7] text-[#1d1d1f] font-sans overflow-hidden">
       {/* Sidebar Struttura Libro */}
@@ -41,7 +45,7 @@ export default async function EbookPage({
         <div className="p-8 border-b border-zinc-200/80 bg-white">
           <Link href={`/${domain}/portal?lang=${currentLang}`} className="flex items-center gap-2 text-zinc-400 hover:text-zinc-800 transition-colors mb-6 text-xs font-bold uppercase tracking-widest">
             <ChevronLeft className="w-4 h-4" />
-            Area Studente
+            {lc.back_to_course || "Back to Course"}
           </Link>
           <div className="flex items-center gap-4 mb-4">
             <div 
@@ -61,7 +65,7 @@ export default async function EbookPage({
             </div>
           </div>
           <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-zinc-400 mt-6">
-            <span>Progresso Lettura</span>
+            <span>{lc.reading_progress || "Reading Progress"}</span>
             <span style={{ color: accent }}>12%</span>
           </div>
           <div className="w-full bg-zinc-200 h-1 rounded-full mt-2 overflow-hidden">
@@ -87,7 +91,7 @@ export default async function EbookPage({
             style={{background: `linear-gradient(135deg, ${accent} 0%, ${accent}CC 100%)`, boxShadow: `0 4px 20px ${accent}40`}}
           >
             <Download className="w-4 h-4" />
-            Download PDF
+            {lc.download_pdf || "Download PDF"}
           </a>
         </div>
       </MobileSidebar>
@@ -110,7 +114,7 @@ export default async function EbookPage({
             </div>
             <div className="h-4 w-px bg-zinc-200" />
             <div className="flex items-center gap-4 text-xs font-bold">
-               <span className="text-zinc-400 uppercase tracking-widest">Pagina</span>
+               <span className="text-zinc-400 uppercase tracking-widest">{lc.page_label || "Page"}</span>
                <div className="flex items-center gap-1">
                   <input type="text" defaultValue="1" className="w-8 bg-zinc-50 border border-zinc-200 rounded-lg py-1 text-center text-zinc-800" />
                   <span className="text-zinc-400">/ 120</span>
@@ -145,7 +149,7 @@ export default async function EbookPage({
               <ChevronLeft className="w-5 h-5" />
            </button>
            <div className="h-6 w-px bg-zinc-200" />
-           <span className="px-4 text-xs font-black uppercase tracking-widest text-zinc-800">Capitolo 1</span>
+           <span className="px-4 text-xs font-black uppercase tracking-widest text-zinc-800">{lc.chapter || "Chapter"} 1</span>
            <div className="h-6 w-px bg-zinc-200" />
            <button className="p-3 text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50 transition-colors rounded-xl">
               <ChevronRight className="w-5 h-5" />

@@ -437,7 +437,9 @@
     "page_label": "صفحه صفحه صفحه",
     "reading_progress": "مطالعه پیشرفت",
     "download_pdf": "دانلود بازی PDF",
-    "chapter": "فصل فصل"
+    "chapter": "فصل فصل",
+    "prev_lesson": "قبلی",
+    "next_lesson": "بعدی"
   },
   "lessons": {
     "badge": "۴- محتوای دوره",

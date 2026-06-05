@@ -167,6 +167,8 @@ export interface LocaleContent {
     reading_progress: string;
     download_pdf: string;
     chapter: string;
+    prev_lesson: string;
+    next_lesson: string;
   };
 
   /** Sezione lezioni */
@@ -238,6 +240,7 @@ export function createEmptyLocale(locale: string, defaults?: Partial<LocaleConte
     course: {
       back_to_course: "", module_label: "", now_playing: "",
       page_label: "", reading_progress: "", download_pdf: "", chapter: "",
+      prev_lesson: "", next_lesson: "",
     },
     lessons: { badge: "", title: "", items: [] },
     portal: {

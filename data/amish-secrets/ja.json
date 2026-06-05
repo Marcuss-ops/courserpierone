@@ -437,7 +437,9 @@
     "page_label": "サイトマップ",
     "reading_progress": "読書進捗",
     "download_pdf": "PDFダウンロード",
-    "chapter": "トピックス"
+    "chapter": "トピックス",
+    "prev_lesson": "前へ",
+    "next_lesson": "次へ"
   },
   "lessons": {
     "badge": "// 04 — コース内容",

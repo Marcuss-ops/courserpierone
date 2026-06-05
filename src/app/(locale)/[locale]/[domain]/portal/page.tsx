@@ -5,12 +5,10 @@ export const dynamic = "force-dynamic";
 import { 
   Play, 
   BookOpen, 
-  Send, 
-  Sparkles, 
-  GraduationCap, 
+  Send,  Sparkles,
+  GraduationCap,
   ArrowRight,
-  LogOut,
-  ChevronLeft
+  LogOut
 } from "lucide-react";
 import { getCourseConfig } from "@/lib/config/white-label-data";
 import { AccessGate } from "@/components/course/access-gate";
@@ -52,21 +50,17 @@ export default async function ProductPortalPage({
       <div className="min-h-screen bg-[#f5f5f7] text-[#1d1d1f] font-sans overflow-x-hidden relative">
         {/* Top Navigation */}
         <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-zinc-200/80">
-          <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div className="w-20" />
-
+          <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-center">
             <span className="text-xl font-black tracking-tighter text-zinc-900 uppercase">{course.slug}.</span>
 
-            <div className="flex items-center gap-4">
-              {isAuthenticated && (
-                <a
-                  href="/api/auth/signout"
-                  className="p-2.5 bg-zinc-100 hover:bg-zinc-200 rounded-xl text-zinc-600 hover:text-red-500 transition-all border border-zinc-200"
-                >
-                  <LogOut className="w-4 h-4" />
-                </a>
-              )}
-            </div>
+            {isAuthenticated && (
+              <a
+                href="/api/auth/signout"
+                className="absolute right-6 p-2.5 bg-zinc-100 hover:bg-zinc-200 rounded-xl text-zinc-600 hover:text-red-500 transition-all border border-zinc-200"
+              >
+                <LogOut className="w-4 h-4" />
+              </a>
+            )}
           </div>
         </nav>
 

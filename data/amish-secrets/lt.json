@@ -437,7 +437,9 @@
     "page_label": "Puslapis",
     "reading_progress": "Skaitymo pažanga",
     "download_pdf": "Atsisiųsti PDF",
-    "chapter": "Skyrius"
+    "chapter": "Skyrius",
+    "prev_lesson": "Ankstesnė",
+    "next_lesson": "Kita"
   },
   "lessons": {
     "badge": "/ 04 - Žinoma turinys",

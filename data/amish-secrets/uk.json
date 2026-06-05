@@ -437,7 +437,9 @@
     "page_label": "Навігація",
     "reading_progress": "Прогрес читання",
     "download_pdf": "Завантажити PDF",
-    "chapter": "Головна"
+    "chapter": "Головна",
+    "prev_lesson": "Попередня",
+    "next_lesson": "Наступна"
   },
   "lessons": {
     "badge": "// 04 — Зміст курсу",

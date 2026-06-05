@@ -437,7 +437,9 @@
     "page_label": "Paĝo",
     "reading_progress": "Leganta Progreson",
     "download_pdf": "Elŝutu PDF",
-    "chapter": "Ĉapitro Ĉapitro"
+    "chapter": "Ĉapitro Ĉapitro",
+    "prev_lesson": "Antaŭa",
+    "next_lesson": "Sekva"
   },
   "lessons": {
     "badge": "/ 04 - Kurso Enhavo",
