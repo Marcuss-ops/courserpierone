@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { RotateCcw, Play, Pause, Loader2 } from "lucide-react";
+import { RotateCcw, Play, Pause, Volume2, VolumeX, Loader2 } from "lucide-react";
 
 interface PremiumVideoPlayerProps {
   videoUrl: string;
@@ -16,6 +16,8 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title }: PremiumVide
   const [resumedTime, setResumedTime] = useState<number | null>(null);
   const [showResumeToast, setShowResumeToast] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [volume, setVolume] = useState(75);
+  const [isMuted, setIsMuted] = useState(false);
   const playerRef = useRef<any>(null);
 
   // Genera una chiave unica per localStorage
@@ -85,6 +87,7 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title }: PremiumVide
               onReady: () => {
                 setIsReady(true);
                 setIsPlaying(false);
+                playerRef.current.setVolume(75);
                 const savedTime = localStorage.getItem(storageKey);
                 if (savedTime) {
                   const time = parseFloat(savedTime);
@@ -238,6 +241,41 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title }: PremiumVide
             <div className={`w-16 h-16 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center transition-all duration-300 ${isPlaying ? "opacity-0" : "opacity-100"}`}>
               <Play className="w-7 h-7 text-white fill-white ml-1" />
             </div>
+          </div>
+          {/* Volume control — bottom left */}
+          <div className="absolute bottom-3 left-3 z-40 flex items-center gap-2 bg-black/60 backdrop-blur-md rounded-full px-3 py-1.5 border border-white/10" onPointerDown={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => {
+                if (!playerRef.current) return;
+                if (isMuted) {
+                  playerRef.current.unMute();
+                  setIsMuted(false);
+                } else {
+                  playerRef.current.mute();
+                  setIsMuted(true);
+                }
+              }}
+              className="text-white/70 hover:text-white transition-colors"
+            >
+              {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            </button>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={isMuted ? 0 : volume}
+              onChange={(e) => {
+                if (!playerRef.current) return;
+                const vol = Number(e.target.value);
+                playerRef.current.setVolume(vol);
+                setVolume(vol);
+                if (vol > 0 && isMuted) {
+                  playerRef.current.unMute();
+                  setIsMuted(false);
+                }
+              }}
+              className="w-20 h-1 accent-white cursor-pointer"
+            />
           </div>
           {/* Bottom strip: covers YouTube logo and share button at very bottom edge */}
           <div className="absolute bottom-0 left-0 right-0 h-5 z-30 bg-black pointer-events-auto" />

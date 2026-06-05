@@ -443,5 +443,24 @@
     "badge": "/ / 04 - Obsah kurzu",
     "title": "Co najdete uvnitř",
     "items": []
+  },
+  "portal": {
+    "access_badge": "Access Guaranteed",
+    "welcome_text": "Welcome to your private area. Choose which section to access to start your journey right away.",
+    "video_title": "Video Course",
+    "video_desc": "Access video lessons, watch detailed explanations and track your progress.",
+    "lessons_count_label": "Lessons",
+    "start_label": "Start",
+    "ebook_title": "Digital Book",
+    "ebook_desc": "Read the complete guide in eBook format directly from the web reader or download the offline PDF.",
+    "format_label": "PDF / Web Format",
+    "read_label": "Read",
+    "community_title": "Private Group",
+    "community_desc": "Join the private channel to exchange ideas, get real-time support and collaborate.",
+    "community_privata": "Private Community",
+    "join_label": "Join",
+    "extra_title": "Extra Resources",
+    "extra_desc": "New features and additional resources will be published soon in this area.",
+    "coming_soon": "Coming Soon"
   }
 }

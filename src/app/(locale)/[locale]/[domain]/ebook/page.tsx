@@ -8,7 +8,7 @@ import {
   Share2, 
   Download, 
   Bookmark,
-  ChevronRight,
+  ChevronRight, 
   Menu
 } from "lucide-react";
 import { getCourseConfig } from "@/lib/config/white-label-data";
@@ -32,6 +32,8 @@ export default async function EbookPage({
   const currentLang = lang || (data.defaultLanguage as string) || "en";
   const content = data.languages[currentLang] || data.languages[data.defaultLanguage];
 
+  const accent = data.accentColor ?? "#C9840D";
+
   return (
     <div className="flex h-screen bg-[#f5f5f7] text-[#1d1d1f] font-sans overflow-hidden">
       {/* Sidebar Struttura Libro */}
@@ -42,9 +44,12 @@ export default async function EbookPage({
             Area Studente
           </Link>
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-12 h-16 bg-zinc-50 border border-zinc-200 rounded-lg flex items-center justify-center text-accent-secondary shadow-md overflow-hidden relative">
-               <div className="absolute inset-0 bg-gradient-to-t from-accent-secondary/10 to-transparent" />
-               <BookOpen className="w-6 h-6 relative z-10" />
+            <div 
+              className="w-12 h-16 rounded-lg flex items-center justify-center shadow-md overflow-hidden relative"
+              style={{ backgroundColor: `${accent}12`, border: `1px solid ${accent}20` }}
+            >
+               <div className="absolute inset-0 bg-gradient-to-t opacity-30" style={{ backgroundImage: `linear-gradient(to top, ${accent}20, transparent)` }} />
+               <BookOpen className="w-6 h-6 relative z-10" style={{ color: accent }} />
             </div>
             <div>
               <h2 className="text-lg font-black text-zinc-900 leading-tight truncate w-44">
@@ -57,29 +62,29 @@ export default async function EbookPage({
           </div>
           <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-zinc-400 mt-6">
             <span>Progresso Lettura</span>
-            <span className="text-accent-secondary">12%</span>
+            <span style={{ color: accent }}>12%</span>
           </div>
           <div className="w-full bg-zinc-200 h-1 rounded-full mt-2 overflow-hidden">
-            <div className="bg-accent-secondary h-full w-[12%] shadow-[0_0_10px_#ddb7ff]" />
+            <div className="h-full w-[12%] rounded-full" style={{ backgroundColor: accent, boxShadow: `0 0 10px ${accent}40` }} />
           </div>
         </div>
 
         <nav className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-1 bg-white">
           {data.ebookChapters.map((chapter, idx) => (
-            <ChapterLink key={idx} title={(chapter as any)[currentLang] || (chapter as any)["en"] || ""} page={chapter.page} active={idx === 0} />
+            <ChapterLink key={idx} title={(chapter as any)[currentLang] || (chapter as any)["en"] || ""} page={chapter.page} active={idx === 0} accent={accent} />
           ))}
         </nav>
 
         <div className="p-6 border-t border-zinc-200 bg-white">
           <div className="flex gap-4 mb-6 justify-center">
-             <Link href={`?lang=it`} className={`text-[10px] font-black ${currentLang === 'it' ? 'text-accent-primary' : 'text-zinc-400'}`}>IT</Link>
-             <Link href={`?lang=en`} className={`text-[10px] font-black ${currentLang === 'en' ? 'text-accent-primary' : 'text-zinc-400'}`}>EN</Link>
+             <Link href={`?lang=it`} className={`text-[10px] font-black ${currentLang === 'it' ? '' : 'text-zinc-400'}`} style={currentLang === 'it' ? { color: accent } : {}}>IT</Link>
+             <Link href={`?lang=en`} className={`text-[10px] font-black ${currentLang === 'en' ? '' : 'text-zinc-400'}`} style={currentLang === 'en' ? { color: accent } : {}}>EN</Link>
           </div>
           <a
             href={`/api/ebook/${data.slug}/download?lang=${currentLang}`}
             download
             className="w-full py-3 rounded-xl text-xs font-black text-white flex items-center justify-center gap-2 transition-opacity"
-            style={{background: 'linear-gradient(135deg, #ddb7ff 0%, #9b6dff 100%)', boxShadow: '0 0 20px rgba(221, 183, 255, 0.2)'}}
+            style={{background: `linear-gradient(135deg, ${accent} 0%, ${accent}CC 100%)`, boxShadow: `0 4px 20px ${accent}40`}}
           >
             <Download className="w-4 h-4" />
             Download PDF
@@ -121,7 +126,7 @@ export default async function EbookPage({
         {/* Paper Content */}
         <div className="flex-1 overflow-y-auto custom-scrollbar p-8 lg:p-20 flex justify-center">
            <article className="max-w-3xl w-full bg-white p-12 lg:p-20 rounded-[2.5rem] border border-zinc-200 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent-secondary/30 to-transparent" />
+              <div className="absolute top-0 left-0 w-full h-1 rounded-full" style={{ background: `linear-gradient(to right, transparent, ${accent}40, transparent)` }} />
               
               <div className="prose prose-zinc max-w-none">
                 <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.ebookContent.replace(/\n/g, '<br/>')) }} className="text-zinc-800 leading-[2] font-medium text-lg" />
@@ -151,12 +156,12 @@ export default async function EbookPage({
   );
 }
 
-function ChapterLink({ title, page, active = false }: { title: string; page: number; active?: boolean }) {
+function ChapterLink({ title, page, active = false, accent = "#C9840D" }: { title: string; page: number; active?: boolean; accent?: string }) {
   return (
-    <button className={`w-full flex items-center justify-between p-3 rounded-xl transition-all duration-300 ${
-      active ? 'bg-accent-secondary/10 text-zinc-800' : 'text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50'
-    }`}>
-      <span className={`text-xs font-bold truncate pr-4 ${active ? 'text-accent-secondary' : ''}`}>{title}</span>
+    <button className={`w-full flex items-center justify-between p-3 rounded-xl transition-all duration-200 ${
+      active ? 'text-zinc-800' : 'text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50'
+    }`} style={active ? { backgroundColor: `${accent}10` } : {}}>
+      <span className={`text-xs font-bold truncate pr-4 ${active ? '' : ''}`} style={active ? { color: accent } : {}}>{title}</span>
       <span className="text-[9px] font-black text-zinc-400">P. {page}</span>
     </button>
   );

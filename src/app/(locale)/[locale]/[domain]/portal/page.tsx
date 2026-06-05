@@ -16,6 +16,7 @@ import { getCourseConfig } from "@/lib/config/white-label-data";
 import { AccessGate } from "@/components/course/access-gate";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/auth";
+import { loadLocaleContentSafe } from "@/lib/i18n/load-locale-content";
 
 export default async function ProductPortalPage({
   params,
@@ -36,6 +37,13 @@ export default async function ProductPortalPage({
   const currentLang = lang || (course.defaultLanguage as string) || "en";
   const content = course.languages[currentLang] || course.languages[course.defaultLanguage];
 
+  // Load locale content for translations
+  const localeContent = loadLocaleContentSafe(domain, currentLang);
+  const lc = localeContent.portal;
+
+  // Warm accent from product config, fallback to amber #C9840D
+  const accent = course.accentColor ?? "#C9840D";
+
   // Verifica se la community è configurata ed attiva
   const hasCommunity = course.groupSection && course.groupSection.isActive !== false;
 
@@ -45,10 +53,7 @@ export default async function ProductPortalPage({
         {/* Top Navigation */}
         <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-zinc-200/80">
           <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <Link href="/dashboard" className="flex items-center gap-2 text-zinc-500 hover:text-zinc-800 transition-colors text-xs font-bold uppercase tracking-widest">
-              <ChevronLeft className="w-4 h-4" />
-              Dashboard
-            </Link>
+            <div className="w-20" />
 
             <span className="text-xl font-black tracking-tighter text-zinc-900 uppercase">{course.slug}.</span>
 
@@ -65,51 +70,73 @@ export default async function ProductPortalPage({
           </div>
         </nav>
 
-        {/* Main Content */}
-        <main className="max-w-5xl mx-auto px-6 py-16 md:py-24 space-y-12">
-          {/* Header */}
-          <div className="text-center space-y-4 max-w-2xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-zinc-200/60 rounded-full border border-zinc-300/40">
-              <Sparkles className="w-3.5 h-3.5 text-accent-primary animate-pulse" />
-              <span className="text-[10px] font-black text-zinc-700 uppercase tracking-widest">
-                Accesso Garantito
-              </span>
+        {/* Hero Section */}
+        <div className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-50 via-orange-50/40 to-[#f5f5f7]" />
+          <div className="absolute top-0 right-0 w-96 h-96 bg-amber-200/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
+          <div className="absolute bottom-0 left-0 w-72 h-72 bg-orange-200/15 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/3" />
+          
+          <main className="relative max-w-5xl mx-auto px-6 pt-16 pb-8 md:pt-24 md:pb-12 space-y-12">
+            {/* Header */}
+            <div className="text-center space-y-4 max-w-2xl mx-auto">
+              <div 
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border"
+                style={{ 
+                  backgroundColor: `${accent}10`,
+                  borderColor: `${accent}30`
+                }}
+              >
+                <Sparkles className="w-3.5 h-3.5 animate-pulse" style={{ color: accent }} />
+                <span 
+                  className="text-[10px] font-black uppercase tracking-widest"
+                  style={{ color: accent }}
+                >
+                  {lc.access_badge || "Access Guaranteed"}
+                </span>
+              </div>
+              <h1 className="text-4xl md:text-5xl font-extrabold text-zinc-900 tracking-tight leading-tight">
+                {content.title}
+              </h1>
+              <p className="text-zinc-500 text-sm md:text-base font-medium leading-relaxed">
+                {lc.welcome_text || "Welcome to your private area. Choose which section to access to start your journey right away."}
+              </p>
             </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-zinc-900 tracking-tight leading-tight">
-              {content.title}
-            </h1>
-            <p className="text-zinc-500 text-sm md:text-base font-medium leading-relaxed">
-              Benvenuto nella tua area privata. Scegli a quale sezione accedere per iniziare subito il tuo percorso.
-            </p>
-          </div>
+          </main>
+        </div>
 
-          {/* Hub Selection Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pt-8">
+        {/* Hub Selection Cards */}
+        <main className="max-w-5xl mx-auto px-6 py-8 md:py-12 space-y-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Card 1: Corso Video */}
             <Link
               href={`/${domain}/curso/lesson-1?lang=${currentLang}`}
-              className="group bg-white rounded-[1.5rem] p-8 border border-zinc-200/80 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.01] flex flex-col justify-between min-h-[320px] relative overflow-hidden"
+              className="group bg-white rounded-[1.5rem] p-8 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] flex flex-col justify-between min-h-[320px] relative overflow-hidden border border-zinc-200/60"
             >
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-amber-50/50 via-transparent to-orange-50/30" />
+              
               <div className="space-y-6 relative z-10">
-                <div className="w-14 h-14 bg-zinc-50 rounded-2xl flex items-center justify-center border border-zinc-200 group-hover:scale-105 transition-transform duration-500">
-                  <Play className="w-6 h-6 text-accent-primary fill-current" />
+                <div 
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500"
+                  style={{ backgroundColor: `${accent}12`, border: `1px solid ${accent}20` }}
+                >
+                  <Play className="w-6 h-6 fill-current" style={{ color: accent }} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-zinc-900 group-hover:text-accent-primary transition-colors">
-                    Corso Video
+                  <h3 className="text-xl font-bold text-zinc-900">
+                    {lc.video_title || "Video Course"}
                   </h3>
                   <p className="text-zinc-500 text-xs mt-2 font-medium leading-relaxed">
-                    Accedi alle video lezioni, guarda le spiegazioni dettagliate e traccia il tuo progresso.
+                    {lc.video_desc || "Access video lessons, watch detailed explanations and track your progress."}
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center justify-between pt-6 border-t border-zinc-100 relative z-10">
                 <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-                  {course.lessons.length} Lezioni
+                  {course.lessons.length} {lc.lessons_count_label || "Lessons"}
                 </span>
-                <span className="flex items-center gap-1 text-[10px] font-black text-accent-primary uppercase tracking-widest group-hover:gap-2 transition-all">
-                  Inizia <ArrowRight className="w-3.5 h-3.5" />
+                <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest group-hover:gap-2 transition-all" style={{ color: accent }}>
+                  {lc.start_label || "Start"} <ArrowRight className="w-3.5 h-3.5" />
                 </span>
               </div>
             </Link>
@@ -117,28 +144,33 @@ export default async function ProductPortalPage({
             {/* Card 2: eBook */}
             <Link
               href={`/${domain}/ebook?lang=${currentLang}`}
-              className="group bg-white rounded-[1.5rem] p-8 border border-zinc-200/80 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.01] flex flex-col justify-between min-h-[320px] relative overflow-hidden"
+              className="group bg-white rounded-[1.5rem] p-8 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] flex flex-col justify-between min-h-[320px] relative overflow-hidden border border-zinc-200/60"
             >
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-orange-50/50 via-transparent to-amber-50/30" />
+              
               <div className="space-y-6 relative z-10">
-                <div className="w-14 h-14 bg-zinc-50 rounded-2xl flex items-center justify-center border border-zinc-200 group-hover:scale-105 transition-transform duration-500">
-                  <BookOpen className="w-6 h-6 text-accent-secondary" />
+                <div 
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500"
+                  style={{ backgroundColor: `${accent}12`, border: `1px solid ${accent}20` }}
+                >
+                  <BookOpen className="w-6 h-6" style={{ color: accent }} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-zinc-900 group-hover:text-accent-secondary transition-colors">
-                    Libro Digitale
+                  <h3 className="text-xl font-bold text-zinc-900">
+                    {lc.ebook_title || "Digital Book"}
                   </h3>
                   <p className="text-zinc-500 text-xs mt-2 font-medium leading-relaxed">
-                    Leggi la guida completa in formato eBook direttamente dal lettore web o scarica il PDF offline.
+                    {lc.ebook_desc || "Read the complete guide in eBook format directly from the web reader or download the offline PDF."}
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center justify-between pt-6 border-t border-zinc-100 relative z-10">
                 <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-                  Formato PDF / Web
+                  {lc.format_label || "PDF / Web Format"}
                 </span>
-                <span className="flex items-center gap-1 text-[10px] font-black text-accent-secondary uppercase tracking-widest group-hover:gap-2 transition-all">
-                  Leggi <ArrowRight className="w-3.5 h-3.5" />
+                <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest group-hover:gap-2 transition-all" style={{ color: accent }}>
+                  {lc.read_label || "Read"} <ArrowRight className="w-3.5 h-3.5" />
                 </span>
               </div>
             </Link>
@@ -149,51 +181,54 @@ export default async function ProductPortalPage({
                 href={course.groupSection?.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group bg-white rounded-[1.5rem] p-8 border border-zinc-200/80 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.01] flex flex-col justify-between min-h-[320px] relative overflow-hidden"
+                className="group bg-white rounded-[1.5rem] p-8 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] flex flex-col justify-between min-h-[320px] relative overflow-hidden border border-zinc-200/60"
               >
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-amber-50/40 via-transparent to-orange-50/20" />
+                
                 <div className="space-y-6 relative z-10">
-                  <div className="w-14 h-14 bg-zinc-50 rounded-2xl flex items-center justify-center border border-zinc-200 group-hover:scale-105 transition-transform duration-500">
-                    <Send className="w-6 h-6 text-accent-tertiary fill-current" />
+                  <div 
+                    className="w-14 h-14 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500"
+                    style={{ backgroundColor: `${accent}12`, border: `1px solid ${accent}20` }}
+                  >
+                    <Send className="w-6 h-6 fill-current" style={{ color: accent }} />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-zinc-900 group-hover:text-accent-tertiary transition-colors">
-                      Gruppo Riservato
+                    <h3 className="text-xl font-bold text-zinc-900">
+                      {lc.community_title || "Private Group"}
                     </h3>
                     <p className="text-zinc-500 text-xs mt-2 font-medium leading-relaxed">
-                      Entra nel canale privato per scambiare idee, ricevere supporto in tempo reale e collaborare.
+                      {lc.community_desc || "Join the private channel to exchange ideas, get real-time support and collaborate."}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between pt-6 border-t border-zinc-100 relative z-10">
                   <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-                    Community privata
+                    {lc.community_privata || "Private Community"}
                   </span>
-                  <span className="flex items-center gap-1 text-[10px] font-black text-accent-tertiary uppercase tracking-widest group-hover:gap-2 transition-all">
-                    Unisciti <ArrowRight className="w-3.5 h-3.5" />
+                  <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest group-hover:gap-2 transition-all" style={{ color: accent }}>
+                    {lc.join_label || "Join"} <ArrowRight className="w-3.5 h-3.5" />
                   </span>
                 </div>
               </a>
             ) : (
-              /* Fallback Card se la community non è impostata */
-              <div
-                className="bg-white rounded-[1.5rem] p-8 border border-zinc-200/80 shadow-sm flex flex-col justify-between min-h-[320px] relative overflow-hidden opacity-50"
-              >
+              /* Fallback Card */
+              <div className="bg-white rounded-[1.5rem] p-8 border border-zinc-200/60 shadow-sm flex flex-col justify-between min-h-[320px] relative overflow-hidden opacity-50">
                 <div className="space-y-6">
                   <div className="w-14 h-14 bg-zinc-50 rounded-2xl flex items-center justify-center border border-zinc-200">
                     <GraduationCap className="w-6 h-6 text-zinc-400" />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-zinc-400">
-                      Risorse Extra
+                      {lc.extra_title || "Extra Resources"}
                     </h3>
-                    <p className="text-zinc-550 text-xs mt-2 font-medium leading-relaxed">
-                      Nuove funzionalità e risorse aggiuntive verranno pubblicate prossimamente in questa area.
+                    <p className="text-zinc-500 text-xs mt-2 font-medium leading-relaxed">
+                      {lc.extra_desc || "New features and additional resources will be published soon in this area."}
                     </p>
                   </div>
                 </div>
                 <div className="pt-6 border-t border-zinc-100 text-[9px] font-black text-zinc-400 uppercase tracking-widest">
-                  Prossimamente
+                  {lc.coming_soon || "Coming Soon"}
                 </div>
               </div>
             )}
