@@ -61,6 +61,20 @@ export default async function RootLayout({
     <html lang={locale} className={`${playfair.variable} ${inter.variable}`}>
       <body className="bg-white text-gray-900 antialiased">
         {children}
+        {/* PWA Service Worker registration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').catch(function(err) {
+                    console.warn('[PWA] SW registration failed:', err);
+                  });
+                });
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   );

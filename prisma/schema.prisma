@@ -225,6 +225,23 @@ model CourseConfigCache {
   updatedAt DateTime @updatedAt
 }
 
+// ─── Coupon / Sconti ────────────────────────────────────────
+model Coupon {
+  id          String    @id @default(cuid())
+  code        String    @unique // es. "ESTATE2026"
+  type        String    @default("percent") // percent | fixed
+  value       Int       // percentuale (es. 20) o importo in centesimi (es. 1000)
+  minAmount   Int?      // importo minimo ordine in centesimi
+  maxUses     Int?      // numero massimo di utilizzi
+  usedCount   Int       @default(0)
+  productId   String?   // null = applicabile a tutti i prodotti
+  expiresAt   DateTime?
+  isActive    Boolean   @default(true)
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
 // ─── Tabella Locale: codici lingua-paese completi ─────────
 model Locale {
   id             String   @id @default(cuid())

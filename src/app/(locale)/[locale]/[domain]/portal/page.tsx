@@ -75,10 +75,10 @@ export default async function ProductPortalPage({
   searchParams,
 }: {
   params: Promise<{ locale: string; domain: string }>;
-  searchParams: Promise<{ lang?: string }>;
+  searchParams: Promise<{ lang?: string; onboarded?: string }>;
 }) {
   const { domain } = await params;
-  const { lang } = await searchParams;
+  const { lang, onboarded } = await searchParams;
   
   const course = await getCourseConfig(domain);
   if (!course) return notFound();
@@ -95,6 +95,9 @@ export default async function ProductPortalPage({
 
   // Warm accent from product config, fallback to amber #C9840D
   const accent = course.accentColor ?? "#C9840D";
+
+  // ID della prima lezione (per quick-start dopo acquisto)
+  const firstLessonId = course.lessons?.[0]?.id ?? "lesson-1";
 
   // Verifica se la community è configurata ed attiva
   const hasCommunity = course.groupSection && course.groupSection.isActive !== false;
@@ -148,6 +151,12 @@ export default async function ProductPortalPage({
               <p className="text-zinc-500 text-sm md:text-base font-medium leading-relaxed">
                 {lc.welcome_text || "Welcome to your private area. Choose which section to access to start your journey right away."}
               </p>
+              {onboarded === "1" && (
+                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-green-50 border border-green-200 text-green-700 text-xs font-bold animate-fadeIn">
+                  <Sparkles className="w-4 h-4" />
+                  {lc.onboarded_toast || "Accesso garantito! Inizia subito con la prima lezione."}
+                </div>
+              )}
             </div>
           </main>
         </div>
@@ -157,7 +166,7 @@ export default async function ProductPortalPage({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Card 1: Corso Video */}
             <Link
-              href={`/${domain}/curso/lesson-1?lang=${currentLang}`}
+              href={`/${domain}/curso/${firstLessonId}?lang=${currentLang}`}
               className="group bg-white rounded-[1.5rem] p-8 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] flex flex-col justify-between min-h-[320px] relative overflow-hidden border border-zinc-200/60"
             >
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-amber-50/50 via-transparent to-orange-50/30" />

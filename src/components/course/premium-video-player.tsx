@@ -24,6 +24,18 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title }: PremiumVide
   const playerRef = useRef<any>(null);
   const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
+  // Close speed menu on click outside
+  useEffect(() => {
+    if (!showSpeedMenu) return;
+    const handler = (e: MouseEvent) => {
+      if (speedMenuRef.current && !speedMenuRef.current.contains(e.target as Node)) {
+        setShowSpeedMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showSpeedMenu]);
+
   // Genera una chiave unica per localStorage
   const storageKey = `courser-progress-${productSlug}-${videoUrl}`;
 

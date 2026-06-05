@@ -41,6 +41,25 @@ function localeToLang(locale: string): string {
   return locale.split("-")[0]?.toLowerCase() ?? "en";
 }
 
+// ─── Parse country price overrides (shared helper) ────
+function getCountryPriceOverride(data: CourseConfig, country: string): { currency: string; price: number; symbol: string; amount: number } | null {
+  if (!country || !data.countryOverrides) return null;
+  try {
+    const overrides = typeof data.countryOverrides === 'string'
+      ? JSON.parse(data.countryOverrides)
+      : data.countryOverrides;
+    const override = overrides[country.toUpperCase()];
+    if (!override) return null;
+    const amount = override.price / 100;
+    return {
+      currency: override.currency,
+      price: override.price,
+      symbol: override.symbol || (override.currency === "BRL" ? "R$" : override.currency === "JPY" ? "¥" : override.currency === "GBP" ? "£" : "$"),
+      amount,
+    };
+  } catch { return null; }
+}
+
 // ─── Generate full SEO metadata per locale ─────
 export async function generateMetadata({
   params,
@@ -130,7 +149,15 @@ const TemplateHorizon = nextDynamic(() => import("@/components/funnel/template-h
 const TemplateBookClaude = nextDynamic(() => import("@/components/funnel/template-book-claude"));
 const TemplateAmish = nextDynamic(() => import("@/components/funnel/template-amish"));
 
-function getPriceString(data: CourseConfig, locale: string): { price: string; currency: string } {
+function getPriceString(data: CourseConfig, locale: string, country?: string): { price: string; currency: string } {
+  // Check for country-specific price override first
+  if (country) {
+    const countryPrice = getCountryPriceOverride(data, country);
+    if (countryPrice) {
+      return { price: `${countryPrice.symbol}${countryPrice.amount}`, currency: countryPrice.currency };
+    }
+  }
+
   // Derive currency from locale: pt-br → BRL, ja-jp → JPY, fr-fr → EUR
   const currency = getCurrencyFromLocale(locale);
 
@@ -154,15 +181,25 @@ function getDisplayPriceForCurrency(data: CourseConfig): string {
   return prices.join(" / ");
 }
 
-function mapConfigToTemplateData(data: CourseConfig, locale: string, lang: string, localeContent?: LocaleContent) {
+function mapConfigToTemplateData(data: CourseConfig, locale: string, lang: string, localeContent?: LocaleContent, country?: string) {
   const content = data.languages[lang] ?? data.languages[Object.keys(data.languages)[0]];
   if (!content) return null;
 
-  const { price, currency } = getPriceString(data, locale);
+  const { price, currency } = getPriceString(data, locale, country);
   const priceConfig = data.prices?.[currency] ?? data.prices?.default;
-  const currentAmount = priceConfig?.amount ?? data.price ?? 19;
+  
+  // Use shared helper for country override (avoid duplicate parsing)
+  let currentAmount: number;
+  let symbol: string;
+  const countryPrice = country ? getCountryPriceOverride(data, country) : null;
+  if (countryPrice) {
+    currentAmount = countryPrice.amount;
+    symbol = countryPrice.symbol;
+  } else {
+    currentAmount = priceConfig?.amount ?? data.price ?? 19;
+    symbol = priceConfig?.symbol ?? "€";
+  }
   const baseAmount = data.price ?? 19;
-  const symbol = priceConfig?.symbol ?? "€";
 
   return {
     titolo: content.title,
@@ -257,6 +294,13 @@ export default async function LocaleLandingPage({
   const firstLessonId = data.lessons?.[0]?.id ?? "#";
   const checkoutUrl = data.checkoutUrl ?? "#";
 
+  // ─── Rileva paese visitatore (per badge e prezzi) ──
+  const headersList = await headers();
+  const countryCode = countryOverride || headersList.get("x-vercel-ip-country") || headersList.get("cf-ipcountry") || "IT";
+
+  // ─── Prezzo dinamico per paese ────────────────────
+  const { price: displayPrice, currency: displayCurrency } = getPriceString(data, currentLocale, countryCode);
+
   // ─── Carica LocaleContent per la lingua corrente ──
   const localeContent = loadLocaleContentSafe(domain, currentLocale);
 
@@ -280,10 +324,6 @@ export default async function LocaleLandingPage({
 
   if (!localeContent.ui) localeContent.ui = { labels: {} };
   if (!localeContent.ui.labels) localeContent.ui.labels = {};
-
-  // Dynamically resolve country name and override hero_badge
-  const headersList = await headers();
-  const countryCode = countryOverride || headersList.get("x-vercel-ip-country") || headersList.get("cf-ipcountry") || "IT";
   
   const getLocalizedCountryName = (code: string, langCode: string): string => {
     try {
@@ -319,7 +359,7 @@ export default async function LocaleLandingPage({
 
   // ─── Multi-Template ────────────────────────────
   if (data.template === "lumio" || data.template === "h612" || data.template === "horizon" || data.template === "book-claude" || data.template === "amish" || data.template === "default") {
-    const templateData = mapConfigToTemplateData(data, currentLocale, currentLang, localeContent);
+    const templateData = mapConfigToTemplateData(data, currentLocale, currentLang, localeContent, countryCode);
     if (templateData) {
       let TemplateComponent;
       switch (data.template) {
@@ -435,7 +475,7 @@ export default async function LocaleLandingPage({
               </div>
               <div className="pt-6">
                  <div className="text-5xl font-black text-white mb-8 tracking-tighter">
-                    {data.prices?.EUR || data.prices?.USD ? getDisplayPriceForCurrency(data) : getPriceString(data, currentLocale).price}
+                    {displayPrice}
                     <span className="text-sm text-gray-500 font-bold ml-2 uppercase tracking-widest">{lc?.offer?.one_time || "One-Time Payment"}</span>
                  </div>
                  <TrackedCtaButton
