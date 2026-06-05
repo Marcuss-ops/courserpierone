@@ -1,3 +1,10 @@
+"""
+[DEPRECATED] Use translate-missing.py instead.
+
+  python scripts/translate/translate-missing.py
+  python scripts/translate/translate-missing.py --product amish-secrets --section portal
+"""
+
 import os
 import json
 import sys
