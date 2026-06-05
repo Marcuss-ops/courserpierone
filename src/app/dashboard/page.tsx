@@ -27,29 +27,61 @@ export default async function DashboardPage() {
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
-    include: {
-      orders: {
-        where: { status: "completed" },
-        include: {
-          product: {
-            select: {
-              id: true,
-              slug: true,
-              coverUrl: true,
-              price: true,
-              currency: true,
-              templateId: true,
-              _count: { select: { lessons: true } },
-            },
-          },
-        },
-        orderBy: { createdAt: "desc" },
-      },
-    },
   });
 
   if (!user) {
     redirect("/login");
+  }
+
+  let userOrders: any[] = [];
+  if (user.role === "admin") {
+    const publishedProducts = await prisma.product.findMany({
+      where: { status: "published" },
+      select: {
+        id: true,
+        slug: true,
+        coverUrl: true,
+        price: true,
+        currency: true,
+        templateId: true,
+        _count: { select: { lessons: true } },
+      },
+    });
+    userOrders = publishedProducts.map(p => ({
+      id: `admin-virtual-order-${p.id}`,
+      userId: user.id,
+      productId: p.id,
+      amount: p.price,
+      currency: p.currency,
+      locale: "it",
+      status: "completed",
+      createdAt: new Date(),
+      product: p,
+    }));
+  } else {
+    const dbUser = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      include: {
+        orders: {
+          where: { status: "completed" },
+          include: {
+            product: {
+              select: {
+                id: true,
+                slug: true,
+                coverUrl: true,
+                price: true,
+                currency: true,
+                templateId: true,
+                _count: { select: { lessons: true } },
+              },
+            },
+          },
+          orderBy: { createdAt: "desc" },
+        },
+      },
+    });
+    userOrders = dbUser?.orders ?? [];
   }
 
   // Progress stats — i conteggi lezioni sono già nell'include della query ordini
@@ -57,7 +89,7 @@ export default async function DashboardPage() {
     where: { userId: user.id, completed: true },
   });
 
-  const totalLessons = user.orders.reduce((sum, o) => sum + o.product._count.lessons, 0);
+  const totalLessons = userOrders.reduce((sum, o) => sum + o.product._count.lessons, 0);
   const progressPercent = totalLessons > 0 
     ? Math.round((completedLessons / totalLessons) * 100) 
     : 0;
@@ -132,10 +164,10 @@ export default async function DashboardPage() {
               </p>
             </div>
 
-            {user.orders.length > 0 && (
+            {userOrders.length > 0 && (
               <div className="flex items-center gap-6 p-6 premium-glass rounded-[2rem] border border-white/5 shrink-0">
                 <div className="text-center">
-                  <div className="text-3xl font-black text-white text-contrast">{user.orders.length}</div>
+                  <div className="text-3xl font-black text-white text-contrast">{userOrders.length}</div>
                   <div className="text-[9px] text-zinc-500 font-black uppercase tracking-widest mt-1">Corsi</div>
                 </div>
                 <div className="w-px h-12 bg-white/10" />
@@ -170,7 +202,6 @@ export default async function DashboardPage() {
                 <p className="text-xs text-zinc-500 font-medium">{user.email}</p>
               </div>
             </div>
-
             <div className="space-y-3 pt-4 border-t border-white/5">
               <div className="flex items-center gap-3 text-xs text-zinc-400">
                 <Calendar className="w-3.5 h-3.5 text-accent-primary/60" />
@@ -179,8 +210,8 @@ export default async function DashboardPage() {
               <div className="flex items-center gap-3 text-xs text-zinc-400">
                 <Award className="w-3.5 h-3.5 text-accent-tertiary/60" />
                 <span>
-                  {user.orders.length === 0 ? "Ancora nessun corso acquistato" : 
-                   `${user.orders.length} corso${user.orders.length > 1 ? "i" : ""} acquistato${user.orders.length > 1 ? "i" : ""}`}
+                  {userOrders.length === 0 ? "Ancora nessun corso acquistato" : 
+                   `${userOrders.length} corso${userOrders.length > 1 ? "i" : ""} acquistato${userOrders.length > 1 ? "i" : ""}`}
                 </span>
               </div>
               <div className="flex items-center gap-3 text-xs text-zinc-400">
@@ -189,14 +220,14 @@ export default async function DashboardPage() {
               </div>
             </div>
           </div>
-
+ 
           {/* Quick Stats */}
           <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-6">
             <StatCard 
               icon={<BookOpen className="w-5 h-5 text-accent-tertiary" />}
               label="Corsi Acquisti"
-              value={user.orders.length}
-              subtitle={user.orders.length > 0 ? "Pronti da studiare" : "Nessun corso ancora"}
+              value={userOrders.length}
+              subtitle={userOrders.length > 0 ? "Pronti da studiare" : "Nessun corso ancora"}
             />
             <StatCard 
               icon={<Play className="w-5 h-5 text-accent-primary" />}
@@ -221,13 +252,13 @@ export default async function DashboardPage() {
                 I Miei Corsi
               </h2>
               <p className="text-sm text-zinc-500 font-medium">
-                {user.orders.length === 0 
+                {userOrders.length === 0 
                   ? "Acquista il tuo primo corso per iniziare il tuo percorso di apprendimento"
-                  : `${user.orders.length} corso${user.orders.length > 1 ? "i" : ""} acquistato${user.orders.length > 1 ? "i" : ""} — riprendi da dove hai lasciato`
+                  : `${userOrders.length} corso${userOrders.length > 1 ? "i" : ""} acquistato${userOrders.length > 1 ? "i" : ""} — riprendi da dove hai lasciato`
                 }
               </p>
             </div>
-            {user.orders.length > 0 && (
+            {userOrders.length > 0 && (
               <Link 
                 href="/" 
                 className="hidden sm:flex items-center gap-2 px-5 py-2.5 premium-glass rounded-xl text-[10px] font-black uppercase tracking-widest text-accent-primary hover:text-white transition-all border border-white/5"
@@ -237,7 +268,7 @@ export default async function DashboardPage() {
             )}
           </div>
 
-          {user.orders.length === 0 ? (
+          {userOrders.length === 0 ? (
             <div className="premium-glass p-16 lg:p-20 rounded-[2.5rem] border border-white/5 text-center space-y-8 relative overflow-hidden group">
               <div className="absolute -right-32 -top-32 w-80 h-80 bg-accent-primary/5 rounded-full blur-[100px] group-hover:bg-accent-primary/10 transition-all duration-700" />
               
@@ -259,7 +290,7 @@ export default async function DashboardPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {user.orders.map((order) => (
+              {userOrders.map((order: any) => (
                 <CourseCard
                   key={order.id}
                   slug={order.product.slug}
@@ -274,19 +305,19 @@ export default async function DashboardPage() {
             </div>
           )}
         </section>
-
+ 
         {/* Continue Learning + Certificati */}
-        {user.orders.length > 0 && <ContinueAndCertificatesSection userId={user.id} orders={user.orders.map(o => ({
-    id: o.id,
-    createdAt: o.createdAt,
-    product: {
-      id: o.product.id,
-      slug: o.product.slug,
-      coverUrl: o.product.coverUrl,
-      templateId: o.product.templateId,
-      _count: { lessons: o.product._count.lessons },
-    },
-  }))} />}
+        {userOrders.length > 0 && <ContinueAndCertificatesSection userId={user.id} orders={userOrders.map(o => ({
+            id: o.id,
+            createdAt: o.createdAt,
+            product: {
+              id: o.product.id,
+              slug: o.product.slug,
+              coverUrl: o.product.coverUrl,
+              templateId: o.product.templateId,
+              _count: { lessons: o.product._count.lessons },
+            },
+          }))} />}
       </main>
     </div>
   );

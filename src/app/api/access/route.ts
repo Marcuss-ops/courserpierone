@@ -19,8 +19,8 @@ export async function GET(request: NextRequest) {
         include: { orders: { where: { productId, status: "completed" } } },
       });
       if (user) {
-        // Grant access if they have a completed order
-        if (user.orders.length > 0) {
+        // Grant access if they are admin or have a completed order
+        if (user.role === "admin" || user.orders.length > 0) {
           return NextResponse.json({ hasAccess: true, userId: user.id });
         }
         // Grant access if they have a used magic link for this product (test/demo flow)
