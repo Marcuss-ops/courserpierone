@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
         productOptions: {
           redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/${product.slug}?success=1`,
           receiptButtonText: "Accedi al Corso",
-          receiptLinkUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/${product.slug}/curso/lesson-1?lang=${locale}`,
+          receiptLinkUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/${product.slug}/portal?lang=${locale}`,
         },
         // Prevent multiple checkouts for the same variant
         expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 min

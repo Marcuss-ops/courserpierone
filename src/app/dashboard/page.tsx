@@ -489,7 +489,7 @@ function CourseCard({
 
   return (
     <Link
-      href={`/${slug}/curso/lesson-1?lang=it`}
+      href={`/${slug}/portal?lang=it`}
       className="group premium-glass rounded-[2rem] overflow-hidden border border-white/5 hover:border-white/20 transition-all duration-500"
     >
       {/* Cover */}

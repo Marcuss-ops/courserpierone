@@ -160,7 +160,7 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
     : (locale.split("-")[0] ?? "en");
 
   // ── 7. Send purchase confirmation email (localizzata) ─────────
-  const courseUrl = `${appUrl}/${product.slug}/curso/lesson-1?lang=${locale}&token=${token}`;
+  const courseUrl = `${appUrl}/${product.slug}/portal?lang=${locale}&token=${token}`;
   const ebookDownloadUrl = `${appUrl}/api/ebook/${product.slug}/download?lang=${ebookLang}&token=${token}`;
   try {
     await sendPurchaseConfirmation(email, product.slug, courseUrl, locale, ebookDownloadUrl);
