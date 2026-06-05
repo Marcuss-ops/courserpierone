@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
+import type { Metadata } from "next";
 import { 
   ChevronLeft, 
   BookOpen, 
@@ -16,6 +18,58 @@ import { MobileSidebar } from "@/components/layout/mobile-sidebar";
 import { SidebarToggleBtn } from "@/components/layout/sidebar-toggle-btn";
 import { sanitizeHtml } from "@/lib/utils/sanitize";
 import { loadLocaleContentSafe } from "@/lib/i18n/load-locale-content";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; domain: string }>;
+}): Promise<Metadata> {
+  const { locale, domain } = await params;
+
+  let host = "www.courssy.com";
+  try {
+    const h = await headers();
+    host = h.get("host") ?? host;
+  } catch {}
+
+  const scheme = process.env.NODE_ENV === "development" ? "http" : "https";
+  const baseUrl = `${scheme}://${host}`;
+
+  const course = await getCourseConfig(domain);
+  if (!course) return {};
+
+  const lang = locale.split("-")[0]?.toLowerCase() ?? "en";
+  const content = course.languages[locale] ?? course.languages[lang] ?? course.languages[course.defaultLanguage];
+  if (!content) return {};
+
+  const ebookTitle = content.ebookTitle || content.title;
+  const title = `eBook — ${ebookTitle}`;
+  const description = `Leggi l'eBook di "${ebookTitle}" direttamente dal lettore web.`;
+  const ogImage = `${baseUrl}/api/og?title=${encodeURIComponent(ebookTitle)}&author=${encodeURIComponent(course.author || "")}&accent=${encodeURIComponent(course.accentColor || "#C9840D")}`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}/${locale}/${domain}/ebook`,
+      type: "website",
+      siteName: "Courssy",
+      locale: locale.replace("-", "_"),
+      images: [{ url: ogImage, width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage],
+    },
+    alternates: {
+      canonical: `${baseUrl}/${locale}/${domain}/ebook`,
+    },
+  };
+}
 
 export default async function EbookPage({
   params,
