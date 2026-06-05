@@ -142,19 +142,11 @@ export default async function CoursePage({
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="flex -space-x-2">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="w-8 h-8 rounded-full border-2 border-[#050505] bg-zinc-800 flex items-center justify-center text-[10px] font-bold overflow-hidden">
-                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i + 10}`} alt="User" />
-                  </div>
-                ))}
-                <div className="w-8 h-8 rounded-full border-2 border-[#050505] bg-zinc-900 flex items-center justify-center text-[10px] font-bold text-zinc-500">
-                  +12
-                </div>
-              </div>
-              <button className="p-2.5 premium-glass rounded-xl text-zinc-400 hover:text-white transition-all">
-                <Layout className="w-5 h-5" />
-              </button>
+              {isAuthenticated ? (
+                <Link href="/dashboard" className="premium-glass px-4 py-2 rounded-xl text-[10px] font-black text-zinc-400 hover:text-white transition-colors border border-white/5 uppercase tracking-wider">
+                  Dashboard
+                </Link>
+              ) : null}
             </div>
           </header>
 
@@ -175,8 +167,8 @@ export default async function CoursePage({
               </div>
 
               {/* Lesson Details */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 pb-12">
-                <div className="lg:col-span-2 space-y-8">
+              <div className="space-y-8 pb-12">
+                <div className="space-y-8">
                   <div>
                     <h1 className="text-4xl font-black text-white text-contrast tracking-tight mb-4">
                       {currentLesson.titles[currentLang]}
@@ -225,14 +217,6 @@ export default async function CoursePage({
                       isAuthenticated={isAuthenticated}
                     />
                   </div>
-                </div>
-
-                <div className="space-y-6">
-                  <LessonNotes 
-                    lessonId={currentLesson.id} 
-                    locale={currentLang} 
-                    isAuthenticated={isAuthenticated}
-                  />
                 </div>
               </div>
             </div>
