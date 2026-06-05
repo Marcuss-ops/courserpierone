@@ -17,8 +17,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "Courser — Cervellone",
-    template: "%s | Courser",
+    default: "Courssy",
+    template: "%s | Courssy",
   },
   description: "Generatore automatico di Funnel e Aree Corsi multilingua",
   robots: {
@@ -26,15 +26,15 @@ export const metadata: Metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Courser — Cervellone",
+    title: "Courssy",
     description: "Generatore automatico di Funnel e Aree Corsi multilingua",
     type: "website",
-    siteName: "Courser",
+    siteName: "Courssy",
     locale: "it_IT",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Courser — Cervellone",
+    title: "Courssy",
     description: "Generatore automatico di Funnel e Aree Corsi multilingua",
   },
   icons: {

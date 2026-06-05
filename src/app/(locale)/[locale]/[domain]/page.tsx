@@ -94,7 +94,7 @@ export async function generateMetadata({
       description,
       url: currentUrl,
       type: "website",
-      siteName: "Courser",
+      siteName: "Courssy",
       locale: locale.replace("-", "_"), // og:locale usa underscore: "it_IT"
       ...(ogImage ? {
         images: [
