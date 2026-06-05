@@ -445,22 +445,22 @@
     "items": []
   },
   "portal": {
-    "access_badge": "Access Guaranteed",
-    "welcome_text": "Welcome to your private area. Choose which section to access to start your journey right away.",
-    "video_title": "Video Course",
-    "video_desc": "Access video lessons, watch detailed explanations and track your progress.",
-    "lessons_count_label": "Lessons",
-    "start_label": "Start",
-    "ebook_title": "Digital Book",
-    "ebook_desc": "Read the complete guide in eBook format directly from the web reader or download the offline PDF.",
+    "access_badge": "Tiyak ang Access",
+    "welcome_text": "Maligayang pagdating sa inyong pribadong lugar. Piliin kung aling bahagi ang magagamit mo upang simulan agad ang iyong paglalakbay.",
+    "video_title": "Landasin sa Video",
+    "video_desc": "Alamin ang mga leksiyon sa video, panoorin ang detalyadong mga paliwanag at subaybayan ang iyong pagsulong.",
+    "lessons_count_label": "Mga Aral",
+    "start_label": "Magsimula",
+    "ebook_title": "Digital na Aklat",
+    "ebook_desc": "Basahin ang kumpletong gabay sa eBOok format nang direkta mula sa web readure o i-upload ang offline PDF.",
     "format_label": "PDF / Web Format",
-    "read_label": "Read",
-    "community_title": "Private Group",
-    "community_desc": "Join the private channel to exchange ideas, get real-time support and collaborate.",
-    "community_privata": "Private Community",
-    "join_label": "Join",
-    "extra_title": "Extra Resources",
-    "extra_desc": "New features and additional resources will be published soon in this area.",
-    "coming_soon": "Coming Soon"
+    "read_label": "Basahin",
+    "community_title": "Pribadong Grupo",
+    "community_desc": "Sumali sa pribadong channel upang magpalitan ng mga ideya, kumuha ng real-time support at cooperative.",
+    "community_privata": "Pribadong Pamayanan",
+    "join_label": "Sumali",
+    "extra_title": "Karagdagang Yaman",
+    "extra_desc": "Malapit nang ilathala sa lugar na ito ang mga bagong katangian at karagdagang yaman.",
+    "coming_soon": "Malapit Nang Dumating"
   }
 }

@@ -445,22 +445,22 @@
     "items": []
   },
   "portal": {
-    "access_badge": "Access Guaranteed",
-    "welcome_text": "Welcome to your private area. Choose which section to access to start your journey right away.",
-    "video_title": "Video Course",
-    "video_desc": "Access video lessons, watch detailed explanations and track your progress.",
-    "lessons_count_label": "Lessons",
+    "access_badge": "Acces garantat",
+    "welcome_text": "Bun venit în zona ta privată. Alegeți care secțiune pentru a accesa pentru a începe călătoria imediat.",
+    "video_title": "Curs video",
+    "video_desc": "Accesați lecții video, urmăriți explicații detaliate și urmăriți progresul dumneavoastră.",
+    "lessons_count_label": "Lecţii",
     "start_label": "Start",
-    "ebook_title": "Digital Book",
-    "ebook_desc": "Read the complete guide in eBook format directly from the web reader or download the offline PDF.",
-    "format_label": "PDF / Web Format",
-    "read_label": "Read",
-    "community_title": "Private Group",
-    "community_desc": "Join the private channel to exchange ideas, get real-time support and collaborate.",
-    "community_privata": "Private Community",
-    "join_label": "Join",
-    "extra_title": "Extra Resources",
-    "extra_desc": "New features and additional resources will be published soon in this area.",
-    "coming_soon": "Coming Soon"
+    "ebook_title": "Carte digitală",
+    "ebook_desc": "Citiți ghidul complet în format eBook direct de la cititorul de web sau descărcați PDF-ul offline.",
+    "format_label": "PDF / Format web",
+    "read_label": "Citit",
+    "community_title": "Grup privat",
+    "community_desc": "Alăturați-vă canalului privat pentru a face schimb de idei, obține sprijin în timp real și colaborează.",
+    "community_privata": "Comunitatea privată",
+    "join_label": "Alătură-te",
+    "extra_title": "Resurse suplimentare",
+    "extra_desc": "Noi caracteristici și resurse suplimentare vor fi publicate în curând în acest domeniu.",
+    "coming_soon": "În curând"
   }
 }

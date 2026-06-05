@@ -445,22 +445,22 @@
     "items": []
   },
   "portal": {
-    "access_badge": "Access Guaranteed",
-    "welcome_text": "Welcome to your private area. Choose which section to access to start your journey right away.",
-    "video_title": "Video Course",
-    "video_desc": "Access video lessons, watch detailed explanations and track your progress.",
-    "lessons_count_label": "Lessons",
-    "start_label": "Start",
-    "ebook_title": "Digital Book",
-    "ebook_desc": "Read the complete guide in eBook format directly from the web reader or download the offline PDF.",
+    "access_badge": "Tillgång garanterad",
+    "welcome_text": "Välkommen till ditt privata område. Välj vilket avsnitt som ska komma åt för att starta din resa direkt.",
+    "video_title": "Videokurs",
+    "video_desc": "Få tillgång till videolektioner, se detaljerade förklaringar och spåra dina framsteg.",
+    "lessons_count_label": "Lärdomar",
+    "start_label": "Börja",
+    "ebook_title": "Digitalbok",
+    "ebook_desc": "Läs hela guiden i eBook-format direkt från webbläsaren eller ladda ner offline PDF.",
     "format_label": "PDF / Web Format",
-    "read_label": "Read",
+    "read_label": "Läs mer",
     "community_title": "Private Group",
-    "community_desc": "Join the private channel to exchange ideas, get real-time support and collaborate.",
-    "community_privata": "Private Community",
-    "join_label": "Join",
-    "extra_title": "Extra Resources",
-    "extra_desc": "New features and additional resources will be published soon in this area.",
-    "coming_soon": "Coming Soon"
+    "community_desc": "Gå med i den privata kanalen för att utbyta idéer, få realtidsstöd och samarbeta.",
+    "community_privata": "Privat gemenskap",
+    "join_label": "Gå med",
+    "extra_title": "Extra resurser",
+    "extra_desc": "Nya funktioner och ytterligare resurser publiceras snart i detta område.",
+    "coming_soon": "Kommer snart"
   }
 }

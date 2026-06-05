@@ -445,22 +445,22 @@
     "items": []
   },
   "portal": {
-    "access_badge": "Access Guaranteed",
-    "welcome_text": "Welcome to your private area. Choose which section to access to start your journey right away.",
-    "video_title": "Video Course",
-    "video_desc": "Access video lessons, watch detailed explanations and track your progress.",
-    "lessons_count_label": "Lessons",
-    "start_label": "Start",
-    "ebook_title": "Digital Book",
-    "ebook_desc": "Read the complete guide in eBook format directly from the web reader or download the offline PDF.",
+    "access_badge": "גישה מובטחת",
+    "welcome_text": "ברוכים הבאים לאזור הפרטי שלך. בחר איזה סעיף כדי להתחיל את המסע שלך מיד.",
+    "video_title": "קורס וידאו",
+    "video_desc": "התחלות וידאו גישה, לצפות הסברים מפורטים לעקוב אחר ההתקדמות שלך.",
+    "lessons_count_label": "שיעורים",
+    "start_label": "התחל",
+    "ebook_title": "ספר דיגיטלי",
+    "ebook_desc": "קרא את המדריך המלא בפורמט eBook ישירות מהקורא האינטרנט או להוריד את ה- PDF הלא מקוון.",
     "format_label": "PDF / Web Format",
-    "read_label": "Read",
-    "community_title": "Private Group",
-    "community_desc": "Join the private channel to exchange ideas, get real-time support and collaborate.",
-    "community_privata": "Private Community",
-    "join_label": "Join",
-    "extra_title": "Extra Resources",
-    "extra_desc": "New features and additional resources will be published soon in this area.",
-    "coming_soon": "Coming Soon"
+    "read_label": "Read Read Read",
+    "community_title": "קבוצה פרטית",
+    "community_desc": "הצטרף לערוץ הפרטי להחליף רעיונות, לקבל תמיכה בזמן אמת ולשתף פעולה.",
+    "community_privata": "קהילה פרטית",
+    "join_label": "להצטרף",
+    "extra_title": "משאבים נוספים",
+    "extra_desc": "תכונות חדשות ומשאבים נוספים יפורסמו בקרוב בתחום זה.",
+    "coming_soon": "בקרוב"
   }
 }
