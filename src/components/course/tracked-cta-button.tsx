@@ -54,10 +54,16 @@ export function TrackedCtaButton({
       e.preventDefault();
       setLoading(true);
       try {
+        const couponParam = new URLSearchParams(window.location.search).get("coupon");
         const res = await fetch("/api/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ productId, locale, currency: userCurrency }),
+          body: JSON.stringify({ 
+            productId, 
+            locale, 
+            currency: userCurrency,
+            couponCode: couponParam || undefined
+          }),
         });
         const data = await res.json();
         if (data.url) {

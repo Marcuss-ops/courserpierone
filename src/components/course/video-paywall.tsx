@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, Play, Loader2, Eye, Clock, ArrowRight } from "lucide-react";
 import { t } from "@/lib/i18n/player-locale";
+import { PremiumVideoPlayer } from "./premium-video-player";
 
 interface VideoPaywallProps {
   videoUrl: string;
@@ -117,11 +118,10 @@ export function VideoPaywall({
     return (
       <div className="relative aspect-video w-full rounded-[2.5rem] overflow-hidden premium-glass border border-white/10 shadow-2xl">
         {videoUrl ? (
-          <iframe
-            src={videoUrl}
-            className="w-full h-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
+          <PremiumVideoPlayer
+            videoUrl={videoUrl}
+            productSlug={productSlug}
+            title={title}
           />
         ) : (
           <VideoPlaceholder />

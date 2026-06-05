@@ -46,8 +46,16 @@ export async function GET(request: Request) {
 
     for (const checkout of abandonedCheckouts) {
       try {
-        const checkoutUrl = checkout.checkoutUrl
+        let checkoutUrl = checkout.checkoutUrl
           || `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/${checkout.product.slug}`;
+
+        // Applica sconto automatico 10% (RECOVERY10)
+        if (checkoutUrl.includes("lemonsqueezy.com")) {
+          checkoutUrl += checkoutUrl.includes("?") ? "&discount=RECOVERY10" : "?discount=RECOVERY10";
+        } else {
+          // Per Stripe, lo passiamo come parametro per essere inoltrato al checkout
+          checkoutUrl += checkoutUrl.includes("?") ? "&coupon=RECOVERY10" : "?coupon=RECOVERY10";
+        }
 
         const success = await sendAbandonedCheckoutEmail(
           checkout.email,

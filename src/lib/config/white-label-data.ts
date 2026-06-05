@@ -34,6 +34,14 @@ export interface CourseConfig {
   languages: Record<string, LanguageEntry>;
   lessons: LessonConfig[];
   ebookChapters: { it: string; en: string; page: number }[];
+  groupSection?: {
+    title?: string;
+    description?: string;
+    buttonText?: string;
+    link: string;
+    style: "telegram" | "discord" | "whatsapp" | "premium" | "default";
+    isActive?: boolean;
+  };
 }
 
 export interface LanguageEntry {

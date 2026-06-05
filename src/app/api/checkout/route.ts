@@ -71,9 +71,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ─── Country-specific discount overrides ──────────────────
-    let effectiveDiscountCode: string | undefined = undefined;
-    if (country) {
+    // ─── User-submitted or country-specific discount overrides ──────────────────
+    let effectiveDiscountCode: string | undefined = parsed.data.couponCode;
+    if (!effectiveDiscountCode && country) {
       const c = country.toUpperCase();
       const emergingCountries = ["IN", "PK", "BD", "EG", "VN", "ID", "BR", "MX", "AR", "TR", "RU", "CO", "UA"];
       if (emergingCountries.includes(c)) {
@@ -198,6 +198,7 @@ export async function POST(request: NextRequest) {
       ],
       customer_email: userEmail || undefined,
       locale: stripeLocale as any,
+      allow_promotion_codes: true,
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/${product.slug}?success=1`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/${product.slug}?canceled=1`,
       metadata: {

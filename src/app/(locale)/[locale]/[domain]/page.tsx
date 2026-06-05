@@ -15,6 +15,7 @@ import { AnalyticsTracker } from "@/components/course/analytics-tracker";
 import { TrackedCtaButton } from "@/components/course/tracked-cta-button";
 import LanguageAlert from "@/components/funnel/language-alert";
 import SocialProof from "@/components/funnel/social-proof";
+import { GroupSection } from "@/components/funnel/group-section";
 
 // ─── All supported locale codes ────────────────
 const ALL_LOCALES = [
@@ -346,6 +347,7 @@ export default async function LocaleLandingPage({
             productSlug={domain}
             checkoutUrl={checkoutUrl}
           />
+          <GroupSection config={data.groupSection} courseTitle={content.title} />
           <SocialProof productSlug={domain} locale={currentLocale} />
         </>
       );
@@ -449,6 +451,8 @@ export default async function LocaleLandingPage({
               </div>
            </div>
         </section>
+
+        <GroupSection config={data.groupSection} courseTitle={content.title} />
 
         <footer className="py-20 px-6 border-t border-gray-100 mt-20">
            <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10 opacity-60">

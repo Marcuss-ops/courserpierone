@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { 
   ChevronLeft, 
+  ChevronRight,
   Menu, 
   Layout,
   Lock
@@ -17,6 +18,7 @@ import { LessonAssets } from "@/components/course/lesson-assets";
 import { TrackLessonView } from "@/components/course/track-lesson-view";
 import { MobileSidebar } from "@/components/layout/mobile-sidebar";
 import { SidebarToggleBtn } from "@/components/layout/sidebar-toggle-btn";
+import { AccessGate } from "@/components/course/access-gate";
 
 export default async function CoursePage({
   params,
@@ -37,8 +39,12 @@ export default async function CoursePage({
   const currentLang = lang || (course.defaultLanguage as string) || "en";
   const currentLesson = course.lessons.find((l) => l.id === lessonId) || course.lessons[0];
 
+  const currentIdx = course.lessons.findIndex((l) => l.id === currentLesson.id);
+  const prevLesson = currentIdx > 0 ? course.lessons[currentIdx - 1] : null;
+  const nextLesson = currentIdx < course.lessons.length - 1 ? course.lessons[currentIdx + 1] : null;
+
   return (
-    <>
+    <AccessGate productSlug={domain} courseTitle={course.languages[currentLang].title}>
       <AnalyticsTracker productSlug={domain} />
       <TrackLessonView lessonId={currentLesson.id} isAuthenticated={isAuthenticated} />
       
@@ -175,9 +181,36 @@ export default async function CoursePage({
                     <h1 className="text-4xl font-black text-white text-contrast tracking-tight mb-4">
                       {currentLesson.titles[currentLang]}
                     </h1>
-                    <p className="text-zinc-400 leading-relaxed text-lg font-medium">
+                    <p className="text-zinc-400 leading-relaxed text-lg font-medium mb-8">
                       {currentLesson.descriptions[currentLang]}
                     </p>
+                    
+                    {/* Lezione Navigazione */}
+                    <div className="flex justify-between items-center pt-6 border-t border-white/5">
+                      {prevLesson ? (
+                        <Link
+                          href={`/${domain}/curso/${prevLesson.id}?lang=${currentLang}`}
+                          className="flex items-center gap-2 px-5 py-3 premium-glass rounded-xl text-xs font-bold text-zinc-400 hover:text-white transition-all border border-white/5"
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                          Precedente
+                        </Link>
+                      ) : (
+                        <div />
+                      )}
+
+                      {nextLesson ? (
+                        <Link
+                          href={`/${domain}/curso/${nextLesson.id}?lang=${currentLang}`}
+                          className="flex items-center gap-2 px-5 py-3 premium-glass rounded-xl text-xs font-bold text-accent-primary hover:text-white transition-all border border-white/5"
+                        >
+                          Successiva
+                          <ChevronRight className="w-4 h-4" />
+                        </Link>
+                      ) : (
+                        <div />
+                      )}
+                    </div>
                   </div>
 
                   <div className="flex flex-wrap gap-4">
@@ -206,6 +239,6 @@ export default async function CoursePage({
           </div>
         </main>
       </div>
-    </>
+    </AccessGate>
   );
 }

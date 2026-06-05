@@ -33,6 +33,7 @@ export const checkoutSchema = z.object({
   currency: z.string().length(3).optional(),
   channelId: z.string().optional(),
   email: z.string().email().optional(),
+  couponCode: z.string().optional(),
 });
 
 // ─── Product ───────────────────────────────────────────────
