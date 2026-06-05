@@ -438,8 +438,8 @@
     "reading_progress": "Lese fremgang",
     "download_pdf": "Last ned PDF",
     "chapter": "Kapittel",
-    "prev_lesson": "Previous",
-    "next_lesson": "Next"
+    "prev_lesson": "Forrige",
+    "next_lesson": "Neste"
   },
   "lessons": {
     "badge": "// 04 — Kursinnhold",
