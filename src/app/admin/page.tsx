@@ -58,7 +58,7 @@ export default function AdminDashboard() {
               averageCR: (analyticsData?.cr ?? "0") + "%",
               averageCRTrend: "-",
             },
-            products: products.map((p: { id: string; slug: string; templateId: string; status: string; locales: string[]; lessonsCount: number }) => ({
+            products: products.map((p: any) => ({
               id: p.id,
               slug: p.slug,
               title: p.slug,
@@ -66,8 +66,8 @@ export default function AdminDashboard() {
               status: (p.status ?? "draft") as "published" | "draft" | "archived",
               locales: p.locales ?? [],
               sales: p.lessonsCount ?? 0,
-              revenue: 0,
-              conversion: "0%",
+              revenue: p.revenue ?? 0,
+              conversion: p.conversion ?? "0%",
             })),
             trafficSources: [
               { label: "YouTube", value: analyticsData?.pageviews ?? 0, color: "bg-red-600" },

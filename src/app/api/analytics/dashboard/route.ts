@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
       pageviews,
       clicks,
       purchases,
-      totalRevenue,
+      totalRevenue: totalRevenue / 100,
       ctr: ctr.toFixed(1),
       conversion: conversion.toFixed(1),
       cr: avgCR.toFixed(1),

@@ -8,24 +8,38 @@ export async function GET() {
       include: {
         translations: { select: { locale: true } },
         _count: { select: { lessons: true } },
+        orders: { where: { status: "completed" } },
       },
       orderBy: { createdAt: "desc" },
     });
 
     // Formatta per la response
-    const formatted = products.map((p) => ({
-      id: p.id,
-      slug: p.slug,
-      price: p.price,
-      currency: p.currency,
-      pricesByCurrency: p.pricesByCurrency,
-      status: p.status,
-      coverUrl: p.coverUrl,
-      templateId: p.templateId,
-      lessonsCount: p._count.lessons,
-      locales: Array.from(new Set(p.translations.map((t: { locale: string }) => t.locale))),
-      createdAt: p.createdAt,
-    }));
+    const formatted = await Promise.all(
+      products.map(async (p) => {
+        const pageviews = await prisma.analyticEvent.count({
+          where: { productId: p.slug, eventType: "pageview" },
+        });
+        const purchases = p.orders.length;
+        const conversion = pageviews > 0 ? ((purchases / pageviews) * 100).toFixed(1) + "%" : "0%";
+        const productRevenue = p.orders.reduce((sum, o) => sum + o.amount, 0) / 100;
+
+        return {
+          id: p.id,
+          slug: p.slug,
+          price: p.price,
+          currency: p.currency,
+          pricesByCurrency: p.pricesByCurrency,
+          status: p.status,
+          coverUrl: p.coverUrl,
+          templateId: p.templateId,
+          lessonsCount: p._count.lessons,
+          locales: Array.from(new Set(p.translations.map((t: { locale: string }) => t.locale))),
+          createdAt: p.createdAt,
+          revenue: productRevenue,
+          conversion,
+        };
+      })
+    );
 
     return NextResponse.json(formatted);
   } catch (error) {
