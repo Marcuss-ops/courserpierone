@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { RotateCcw, Play, Pause, Volume2, VolumeX, Loader2 } from "lucide-react";
+import { RotateCcw, Play, Pause, Volume2, VolumeX, Loader2, Gauge } from "lucide-react";
 
 interface PremiumVideoPlayerProps {
   videoUrl: string;
@@ -18,7 +18,11 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title }: PremiumVide
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(75);
   const [isMuted, setIsMuted] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const [showSpeedMenu, setShowSpeedMenu] = useState(false);
+  const speedMenuRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<any>(null);
+  const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
   // Genera una chiave unica per localStorage
   const storageKey = `courser-progress-${productSlug}-${videoUrl}`;
@@ -276,6 +280,41 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title }: PremiumVide
               }}
               className="w-20 h-1 accent-white cursor-pointer"
             />
+            {/* Divider */}
+            <div className="w-px h-4 bg-white/20" />
+            {/* Playback Speed Control */}
+            <div className="relative" ref={speedMenuRef}>
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowSpeedMenu(!showSpeedMenu); }}
+                className="text-white/70 hover:text-white transition-colors text-[10px] font-black tracking-wider flex items-center gap-1"
+              >
+                <Gauge className="w-3.5 h-3.5" />
+                {playbackRate}x
+              </button>
+              {showSpeedMenu && (
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-black/90 backdrop-blur-md rounded-xl border border-white/10 p-1.5 shadow-2xl min-w-[72px]" onPointerDown={(e) => e.stopPropagation()}>
+                  {SPEEDS.map((speed) => (
+                    <button
+                      key={speed}
+                      onClick={() => {
+                        if (playerRef.current && typeof playerRef.current.setPlaybackRate === "function") {
+                          playerRef.current.setPlaybackRate(speed);
+                          setPlaybackRate(speed);
+                          setShowSpeedMenu(false);
+                        }
+                      }}
+                      className={`block w-full text-center px-3 py-1.5 rounded-lg text-[11px] font-bold transition-colors ${
+                        speed === playbackRate
+                          ? "text-white bg-white/20"
+                          : "text-zinc-400 hover:text-white hover:bg-white/10"
+                      }`}
+                    >
+                      {speed}x
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           {/* Bottom strip: covers YouTube logo and share button at very bottom edge */}
           <div className="absolute bottom-0 left-0 right-0 h-5 z-30 bg-black pointer-events-auto" />
