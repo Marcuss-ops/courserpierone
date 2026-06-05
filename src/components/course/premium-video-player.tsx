@@ -44,7 +44,7 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title }: PremiumVide
           videoId = url.split("youtu.be/")[1]?.split("?")[0] || "";
         }
         if (videoId) {
-          return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=3`;
+          return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=3&fs=0&controls=1&disablekb=1`;
         }
       } else if (isVimeo) {
         let videoId = "";
@@ -196,8 +196,18 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title }: PremiumVide
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const isYouTube = videoUrl.includes("youtube.com") || videoUrl.includes("youtu.be");
+
   return (
-    <div ref={containerRef} className="relative w-full h-full min-h-[300px] bg-zinc-950">
+    <div ref={containerRef} className="relative w-full h-full min-h-[300px] bg-zinc-950 overflow-hidden rounded-[2rem]">
+      {/* Overlay blockers to prevent clicking YouTube links/logos */}
+      {isYouTube && (
+        <>
+          <div className="absolute top-0 left-0 right-0 h-16 z-20 pointer-events-auto bg-transparent" />
+          <div className="absolute bottom-0 right-0 w-36 h-14 z-20 pointer-events-auto bg-transparent" />
+        </>
+      )}
+
       {!isReady && (
         <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70">
           <Loader2 className="w-8 h-8 animate-spin text-accent-primary" />
@@ -208,7 +218,6 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title }: PremiumVide
         ref={iframeRef}
         className="w-full h-full absolute inset-0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
       />
 
       {/* Toast di notifica ripresa video */}
