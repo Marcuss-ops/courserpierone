@@ -42,9 +42,10 @@ export async function generateMetadata({
   const content = course.languages[locale] ?? course.languages[lang] ?? course.languages[course.defaultLanguage];
   if (!content) return {};
 
+  const seo = content.seo;
   const ebookTitle = content.ebookTitle || content.title;
-  const title = `eBook — ${ebookTitle}`;
-  const description = `Leggi l'eBook di "${ebookTitle}" direttamente dal lettore web.`;
+  const title = seo?.title || `eBook — ${ebookTitle}`;
+  const description = seo?.description || `Leggi l'eBook di "${ebookTitle}" direttamente dal lettore web.`;
   const ogImage = `${baseUrl}/api/og?title=${encodeURIComponent(ebookTitle)}&author=${encodeURIComponent(course.author || "")}&accent=${encodeURIComponent(course.accentColor || "#C9840D")}`;
 
   return {

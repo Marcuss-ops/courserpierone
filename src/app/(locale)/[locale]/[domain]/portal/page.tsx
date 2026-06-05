@@ -41,8 +41,9 @@ export async function generateMetadata({
   const content = course.languages[locale] ?? course.languages[lang] ?? course.languages[course.defaultLanguage];
   if (!content) return {};
 
-  const title = `Area Studente — ${content.title}`;
-  const description = "Accedi al tuo corso, guarda le video lezioni e leggi l'eBook.";
+  const seo = content.seo;
+  const title = seo?.title || `Area Studente — ${content.title}`;
+  const description = seo?.description || "Accedi al tuo corso, guarda le video lezioni e leggi l'eBook.";
   const ogImage = `${baseUrl}/api/og?title=${encodeURIComponent(content.title)}&author=${encodeURIComponent(course.author || "")}&accent=${encodeURIComponent(course.accentColor || "#C9840D")}`;
 
   return {
