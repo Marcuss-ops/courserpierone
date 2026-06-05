@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { CheckCircle2, Loader2, Lock } from "lucide-react";
 
+import { useSearchParams } from "next/navigation";
+
 interface LessonProgressButtonProps {
   lessonId: string;
   productSlug: string;
@@ -16,6 +18,8 @@ export function LessonProgressButton({
 }: LessonProgressButtonProps) {
   const [completed, setCompleted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const isLight = searchParams.get("theme") === "light";
 
   const fetchProgress = useCallback(async () => {
     try {
@@ -78,7 +82,9 @@ export function LessonProgressButton({
     return (
       <button
         disabled
-        className="px-6 py-3 premium-glass rounded-2xl text-sm font-bold text-zinc-500 flex items-center gap-2 cursor-not-allowed opacity-60"
+        className={`px-6 py-3 rounded-2xl text-sm font-bold text-zinc-500 flex items-center gap-2 cursor-not-allowed opacity-60 border ${
+          isLight ? "bg-zinc-100 border-zinc-200" : "premium-glass border-white/5"
+        }`}
       >
         <Lock className="w-4 h-4" />
         Accedi per Segnare Completata
@@ -91,10 +97,14 @@ export function LessonProgressButton({
       <button
         onClick={toggleComplete}
         disabled={loading}
-        className={`px-6 py-3 premium-glass rounded-2xl text-sm font-bold transition-all flex items-center gap-2 ${
+        className={`px-6 py-3 rounded-2xl text-sm font-bold transition-all flex items-center gap-2 border ${
+          isLight 
+            ? "bg-zinc-100 hover:bg-zinc-200 border-zinc-200" 
+            : "premium-glass hover:bg-white/5 border-white/5"
+        } ${
           completed
             ? "text-accent-tertiary border border-accent-tertiary/30"
-            : "text-white hover:bg-white/5"
+            : isLight ? "text-zinc-800 hover:text-zinc-950" : "text-white hover:text-white"
         }`}
       >
         {loading ? (
@@ -124,6 +134,8 @@ export function ProgressBar({
   isAuthenticated,
 }: ProgressBarProps) {
   const [percent, setPercent] = useState(0);
+  const searchParams = useSearchParams();
+  const isLight = searchParams.get("theme") === "light";
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -142,7 +154,7 @@ export function ProgressBar({
 
   return (
     <div className="flex items-center gap-2 mt-3">
-      <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+      <div className={`w-full h-1.5 rounded-full overflow-hidden ${isLight ? "bg-zinc-200" : "bg-white/5"}`}>
         <div
           className="bg-accent-primary h-full shadow-[0_0_10px_#4d8eff] transition-all duration-500"
           style={{ width: `${percent}%` }}

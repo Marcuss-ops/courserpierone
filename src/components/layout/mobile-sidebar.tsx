@@ -26,10 +26,10 @@ export function MobileSidebar({ children, toggleId = "sidebar-toggle" }: MobileS
       {/* Sidebar with mobile drawer animation */}
       <aside
         className={`
-          fixed inset-y-0 left-0 z-50 w-80 sidebar-glass flex flex-col shrink-0 
-          border-r border-white/5
+          fixed inset-y-0 right-0 z-50 w-80 sidebar-glass flex flex-col shrink-0 
+          border-l border-white/5
           transition-transform duration-300 lg:relative lg:translate-x-0
-          ${open ? "translate-x-0" : "-translate-x-full"}
+          ${open ? "translate-x-0" : "translate-x-full"}
         `}
       >
         {children}

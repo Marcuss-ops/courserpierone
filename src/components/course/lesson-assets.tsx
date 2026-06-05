@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { FileText, Download, FileAudio } from "lucide-react";
 import { t } from "@/lib/i18n/player-locale";
 
+import { useSearchParams } from "next/navigation";
+
 interface Asset {
   id: string;
   type: string;
@@ -20,6 +22,8 @@ interface LessonAssetsProps {
 export function LessonAssets({ lessonId, locale, isAuthenticated }: LessonAssetsProps) {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
+  const searchParams = useSearchParams();
+  const isLight = searchParams.get("theme") === "light";
 
   useEffect(() => {
     async function fetchAssets() {
@@ -50,7 +54,11 @@ export function LessonAssets({ lessonId, locale, isAuthenticated }: LessonAssets
           href={asset.fileUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="px-5 py-3 premium-glass rounded-2xl text-sm font-bold text-accent-primary hover:text-white transition-all flex items-center gap-2 group"
+          className={`px-5 py-3 rounded-2xl text-sm font-bold text-accent-primary hover:text-white transition-all flex items-center gap-2 group border ${
+            isLight
+              ? "bg-zinc-100 hover:bg-zinc-200 border-zinc-200"
+              : "premium-glass hover:bg-white/5 border-white/5"
+          }`}
         >
           {asset.type === "audio" ? (
             <FileAudio className="w-4 h-4" />
