@@ -28,6 +28,38 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title }: PremiumVide
     const isYouTube = videoUrl.includes("youtube.com") || videoUrl.includes("youtu.be");
     const isVimeo = videoUrl.includes("vimeo.com");
 
+    const getCleanEmbedUrl = (url: string): string => {
+      if (isYouTube) {
+        let videoId = "";
+        if (url.includes("youtube.com/embed/")) {
+          videoId = url.split("youtube.com/embed/")[1]?.split("?")[0] || "";
+        } else if (url.includes("youtube.com/watch")) {
+          try {
+            const urlParams = new URLSearchParams(url.split("?")[1]);
+            videoId = urlParams.get("v") || "";
+          } catch {
+            videoId = "";
+          }
+        } else if (url.includes("youtu.be/")) {
+          videoId = url.split("youtu.be/")[1]?.split("?")[0] || "";
+        }
+        if (videoId) {
+          return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=3`;
+        }
+      } else if (isVimeo) {
+        let videoId = "";
+        // Extract Vimeo ID
+        const match = url.match(/(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/);
+        if (match) {
+          videoId = match[1];
+        }
+        if (videoId) {
+          return `https://player.vimeo.com/video/${videoId}?byline=0&portrait=0&title=0`;
+        }
+      }
+      return url;
+    };
+
     if (isYouTube) {
       // Carica l'SDK di YouTube se non è già presente
       if (!(window as any).YT) {
@@ -37,11 +69,7 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title }: PremiumVide
         firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
       }
 
-      // Prepara l'URL per YouTube con le API abilitate
-      let embedUrl = videoUrl;
-      if (!embedUrl.includes("enablejsapi=1")) {
-        embedUrl += embedUrl.includes("?") ? "&enablejsapi=1" : "?enablejsapi=1";
-      }
+      const embedUrl = getCleanEmbedUrl(videoUrl);
 
       if (iframeRef.current) {
         iframeRef.current.src = embedUrl;
@@ -97,6 +125,11 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title }: PremiumVide
         tag.src = "https://player.vimeo.com/api/player.js";
         const firstScriptTag = document.getElementsByTagName("script")[0];
         firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+      }
+
+      const embedUrl = getCleanEmbedUrl(videoUrl);
+      if (iframeRef.current) {
+        iframeRef.current.src = embedUrl;
       }
 
       const checkVimeo = setInterval(() => {
