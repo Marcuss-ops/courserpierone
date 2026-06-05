@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+
+export const dynamic = "force-dynamic";
 import { 
   ChevronLeft, 
   ChevronRight,
   Menu, 
-  Layout,
   Lock
 } from "lucide-react";
 import { getServerSession } from "next-auth/next";
@@ -50,56 +51,23 @@ export default async function CoursePage({
       <AnalyticsTracker productSlug={domain} />
       <TrackLessonView lessonId={currentLesson.id} isAuthenticated={isAuthenticated} />
       
-      <div className={`flex h-screen font-hanken overflow-hidden transition-colors duration-300 ${
-        isLight ? "bg-[#f8f9fa] text-[#1b1b1b]" : "bg-[#050505] text-[#e5e2e1]"
+      <div className={`flex h-screen font-sans overflow-hidden transition-colors duration-300 ${
+        isLight ? "bg-[#f5f5f7] text-[#1d1d1f]" : "bg-[#1c1c1e] text-[#f5f5f7]"
       }`}>
         {/* Main Content Area */}
         <main className="flex-1 flex flex-col relative overflow-hidden">
-          {/* Top Navigation */}
-          <header className={`h-20 flex items-center justify-between px-8 border-b transition-all duration-500 opacity-35 hover:opacity-100 z-10 ${
-            isLight ? "border-zinc-200 bg-white/80" : "border-white/5 bg-black/40"
-          } backdrop-blur-md`}>
-            <div className="flex items-center gap-4 lg:hidden">
-              <SidebarToggleBtn toggleId="course-sidebar-toggle" className={`p-2 rounded-xl ${isLight ? "bg-zinc-100 text-zinc-800" : "premium-glass text-white"}`}>
-                <Menu className="w-6 h-6" />
-              </SidebarToggleBtn>
-              <span className={`font-black text-lg tracking-tighter uppercase ${isLight ? "text-zinc-950" : "text-white"}`}>{course.slug}.</span>
-            </div>
-
-            <div className="hidden lg:block">
-              <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em]">Modulo • {course.languages[currentLang].title}</span>
-              <h3 className={`text-sm font-bold mt-0.5 ${isLight ? "text-zinc-950" : "text-white"}`}>{currentLesson.titles[currentLang]}</h3>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <Link 
-                href={`?lang=${currentLang}&theme=${isLight ? "dark" : "light"}`}
-                className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider border transition-colors ${
-                  isLight 
-                    ? "border-zinc-200 bg-zinc-100 text-zinc-700 hover:bg-zinc-200" 
-                    : "border-white/5 bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
-                }`}
-              >
-                {isLight ? "Dark Mode" : "Light Mode"}
-              </Link>
-              {isAuthenticated ? (
-                <Link href="/dashboard" className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider border transition-colors ${
-                  isLight 
-                    ? "border-zinc-200 bg-zinc-100 text-zinc-700 hover:bg-zinc-200" 
-                    : "border-white/5 bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
-                }`}>
-                  Dashboard
-                </Link>
-              ) : null}
-            </div>
-          </header>
+          {/* Floating Sidebar Toggle (mobile only) */}
+          <div className="absolute top-4 left-4 z-20 lg:hidden">
+            <SidebarToggleBtn toggleId="course-sidebar-toggle" className={`p-2.5 rounded-xl shadow-md ${isLight ? "bg-white border border-zinc-200 text-zinc-800" : "premium-glass text-white"}`}>
+              <Menu className="w-5 h-5" />
+            </SidebarToggleBtn>
+          </div>
 
           {/* Video & Info Section */}
           <div className="flex-1 overflow-y-auto custom-scrollbar p-6 lg:p-12">
             <div className="max-w-5xl mx-auto space-y-12">
               {/* Video Player with Paywall */}
-              <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-accent-primary/20 to-accent-secondary/20 rounded-[2.5rem] blur-xl opacity-50 group-hover:opacity-100 transition duration-1000"></div>
+              <div className="relative">
                 <VideoPaywall
                   videoUrl={currentLesson.videos[currentLang]}
                   title={currentLesson.titles[currentLang]}
@@ -183,12 +151,12 @@ export default async function CoursePage({
 
         {/* Sidebar Lezioni on the Right */}
         <MobileSidebar toggleId="course-sidebar-toggle">
-          <div className={`flex flex-col h-full opacity-35 hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300 ${
-            isLight ? "bg-white border-l border-zinc-200 text-zinc-800" : "bg-[#0c0c0e] border-l border-white/5 text-zinc-200"
+          <div className={`flex flex-col h-full ${
+            isLight ? "bg-white border-l border-zinc-200/80 text-zinc-800" : "bg-[#2c2c2e] border-l border-white/10 text-zinc-200"
           }`}>
             <div className={`p-8 border-b ${isLight ? "border-zinc-200" : "border-white/5"}`}>
-              <Link href={`/${domain}?lang=${currentLang}`} className={`flex items-center gap-2 transition-colors mb-6 text-xs font-bold uppercase tracking-widest ${
-                isLight ? "text-zinc-400 hover:text-zinc-800" : "text-zinc-500 hover:text-white"
+              <Link href={`/${domain}?lang=${currentLang}`} className={`flex items-center gap-2 transition-all duration-200 mb-6 text-[10px] font-black uppercase tracking-[0.2em] ${
+                isLight ? "text-zinc-400 hover:text-zinc-900" : "text-zinc-500 hover:text-zinc-200"
               }`}>
                 <ChevronLeft className="w-4 h-4" />
                 Torna alla Landing
@@ -208,10 +176,10 @@ export default async function CoursePage({
                 <Link
                   key={lesson.id}
                   href={`/${domain}/curso/${lesson.id}?lang=${currentLang}${isDark ? "&theme=dark" : ""}`}
-                  className={`flex items-start gap-4 p-4 rounded-2xl transition-all duration-300 group ${
+                  className={`flex items-start gap-4 p-4 rounded-2xl transition-all duration-200 group ${
                     lesson.id === lessonId
-                      ? (isLight ? "bg-zinc-100 border border-zinc-300/50 shadow-md" : "premium-glass border-white/10 shadow-lg")
-                      : "hover:bg-white/5"
+                      ? (isLight ? "bg-zinc-100 border border-zinc-200 shadow-sm" : "bg-white/10 border border-white/10 shadow-sm")
+                      : (isLight ? "hover:bg-zinc-50 border border-transparent hover:border-zinc-200/60" : "hover:bg-white/5 border border-transparent hover:border-white/10")
                   }`}
                 >
                   <div className="mt-1">

@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { cookies, headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
 import type { Metadata } from "next";
 import nextDynamic from "next/dynamic";
 import { Play, Zap } from "lucide-react";

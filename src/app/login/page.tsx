@@ -8,7 +8,7 @@ import { Mail, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+      <div className="min-h-screen bg-[#f5f5f7] flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-accent-primary" />
       </div>
     }>
@@ -65,21 +65,21 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-[#e5e2e1] font-hanken flex items-center justify-center p-6">
+    <div className="min-h-screen bg-[#f5f5f7] text-[#1d1d1f] font-sans flex items-center justify-center p-6">
       <div className="w-full max-w-md">
         {/* Brand */}
         <div className="text-center mb-10">
           <Link href="/" className="inline-flex items-center gap-3">
-            <div className="w-12 h-12 premium-glass rounded-2xl flex items-center justify-center font-bold text-2xl border border-white/10 text-white shadow-lg">C</div>
-            <span className="text-3xl font-black tracking-tighter text-white uppercase">Courser.</span>
+            <div className="w-12 h-12 bg-gray-900 rounded-2xl flex items-center justify-center font-bold text-2xl text-white shadow-sm">C</div>
+            <span className="text-3xl font-black tracking-tighter text-gray-900 uppercase">Courssy.</span>
           </Link>
         </div>
 
-        <div className="premium-glass p-10 rounded-[2rem] border border-white/10 shadow-2xl">
+        <div className="bg-white p-10 rounded-[2rem] border border-zinc-200/80 shadow-sm">
           {!sent ? (
             <>
               <div className="text-center mb-8">
-                <h1 className="text-2xl font-black text-white text-contrast tracking-tight">Accedi</h1>
+                <h1 className="text-2xl font-black text-zinc-900 tracking-tight">Accedi</h1>
                 <p className="text-zinc-500 text-sm mt-2 font-medium">
                   {productId ? "Hai già acquistato? Accedi per vedere il corso." : "Inserisci la tua email per ricevere il link magico"}
                 </p>
@@ -91,26 +91,26 @@ function LoginForm() {
                     Email
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="tu@email.com"
-                      className="w-full pl-12 pr-4 py-3.5 premium-glass rounded-2xl text-sm text-white placeholder:text-zinc-700 focus:outline-none focus:ring-1 focus:ring-accent-primary/30 transition-all"
+                      className="w-full pl-12 pr-4 py-3.5 bg-zinc-50 rounded-2xl text-sm text-zinc-900 placeholder:text-zinc-400 border border-zinc-200 focus:outline-none focus:ring-1 focus:ring-accent-primary/30 focus:border-accent-primary/30 transition-all"
                       required
                     />
                   </div>
                 </div>
 
                 {error && (
-                  <p className="text-red-400 text-xs font-medium">{error}</p>
+                  <p className="text-red-500 text-xs font-medium">{error}</p>
                 )}
 
                 <button
                   type="submit"
                   disabled={sending || !email.trim()}
-                  className="glow-btn w-full py-4 rounded-2xl text-sm font-bold text-white premium-glass flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full py-4 rounded-2xl text-sm font-bold text-white bg-gray-900 hover:bg-gray-800 flex items-center justify-center gap-2 disabled:opacity-50 transition-all"
                 >
                   {sending ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -124,16 +124,16 @@ function LoginForm() {
 
               <div className="relative my-8">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-white/5" />
+                  <div className="w-full border-t border-zinc-200" />
                 </div>
                 <div className="relative flex justify-center text-xs">
-                  <span className="bg-[#050505] px-4 text-zinc-600 font-bold uppercase tracking-widest">oppure</span>
+                  <span className="bg-white px-4 text-zinc-400 font-bold uppercase tracking-widest">oppure</span>
                 </div>
               </div>
 
               <a
                 href={`/api/auth/signin/google${productId ? `?callbackUrl=/${productId}` : ""}`}
-                className="w-full py-3.5 premium-glass rounded-2xl text-sm font-bold text-zinc-300 hover:text-white transition flex items-center justify-center gap-3 border border-white/5"
+                className="w-full py-3.5 bg-white rounded-2xl text-sm font-bold text-zinc-700 hover:text-zinc-900 transition flex items-center justify-center gap-3 border border-zinc-200 hover:bg-zinc-50"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
@@ -144,7 +144,7 @@ function LoginForm() {
                 Continua con Google
               </a>
 
-              <p className="mt-8 text-center text-[10px] text-zinc-600 font-medium">
+              <p className="mt-8 text-center text-[10px] text-zinc-400 font-medium">
                 Non hai ancora acquistato?{" "}
                 <Link href={productId ? `/${productId}` : "/"} className="text-accent-primary hover:underline">
                   Scopri i nostri corsi
@@ -153,18 +153,18 @@ function LoginForm() {
             </>
           ) : (
             <div className="text-center space-y-6">
-              <div className="w-16 h-16 premium-glass rounded-full flex items-center justify-center mx-auto border border-accent-tertiary/30">
-                <CheckCircle2 className="w-8 h-8 text-accent-tertiary" />
+              <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto border border-emerald-200">
+                <CheckCircle2 className="w-8 h-8 text-emerald-500" />
               </div>
               <div className="space-y-2">
-                <h2 className="text-xl font-black text-white text-contrast">Link Inviato!</h2>
+                <h2 className="text-xl font-black text-zinc-900 tracking-tight">Link Inviato!</h2>
                 <p className="text-zinc-500 text-sm font-medium">
-                  Controlla la tua casella email <strong className="text-white">{email}</strong>
+                  Controlla la tua casella email <strong className="text-zinc-900">{email}</strong>
                 </p>
               </div>
 
               {magicUrl && (
-                <div className="premium-glass p-6 rounded-2xl border border-white/5 space-y-3">
+                <div className="bg-zinc-50 p-6 rounded-2xl border border-zinc-200 space-y-3">
                   <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
                     Magic Link (Modalità Sviluppo)
                   </p>
@@ -179,7 +179,7 @@ function LoginForm() {
 
               <button
                 onClick={() => { setSent(false); setEmail(""); }}
-                className="text-sm text-zinc-500 hover:text-white transition font-medium"
+                className="text-sm text-zinc-500 hover:text-zinc-900 transition font-medium"
               >
                 Invia di nuovo
               </button>

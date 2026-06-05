@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { RotateCcw, Play, Loader2 } from "lucide-react";
+import { RotateCcw, Play, Pause, Loader2 } from "lucide-react";
 
 interface PremiumVideoPlayerProps {
   videoUrl: string;
@@ -15,6 +15,7 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title }: PremiumVide
   const [isReady, setIsReady] = useState(false);
   const [resumedTime, setResumedTime] = useState<number | null>(null);
   const [showResumeToast, setShowResumeToast] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const playerRef = useRef<any>(null);
 
   // Genera una chiave unica per localStorage
@@ -44,7 +45,7 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title }: PremiumVide
           videoId = url.split("youtu.be/")[1]?.split("?")[0] || "";
         }
         if (videoId) {
-          return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=3&fs=0&controls=1&disablekb=1`;
+          return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=3&fs=0&controls=0&disablekb=1&showinfo=0&color=white&playsinline=1&origin=${encodeURIComponent(typeof window !== 'undefined' ? window.location.origin : 'https://www.courssy.com')}`;
         }
       } else if (isVimeo) {
         let videoId = "";
@@ -83,6 +84,7 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title }: PremiumVide
             events: {
               onReady: () => {
                 setIsReady(true);
+                setIsPlaying(false);
                 const savedTime = localStorage.getItem(storageKey);
                 if (savedTime) {
                   const time = parseFloat(savedTime);
@@ -109,6 +111,10 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title }: PremiumVide
                 }, 2000);
 
                 return () => clearInterval(trackInterval);
+              },
+              onStateChange: (event: any) => {
+                // YT.PlayerState.PLAYING = 1, PAUSED = 2, ENDED = 0
+                setIsPlaying(event.data === 1);
               }
             }
           });
@@ -199,15 +205,7 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title }: PremiumVide
   const isYouTube = videoUrl.includes("youtube.com") || videoUrl.includes("youtu.be");
 
   return (
-    <div ref={containerRef} className="relative w-full h-full min-h-[300px] bg-zinc-950 overflow-hidden rounded-[2rem]">
-      {/* Overlay blockers to prevent clicking YouTube links/logos */}
-      {isYouTube && (
-        <>
-          <div className="absolute top-0 left-0 right-0 h-16 z-20 pointer-events-auto bg-transparent" />
-          <div className="absolute bottom-0 right-0 w-36 h-14 z-20 pointer-events-auto bg-transparent" />
-        </>
-      )}
-
+    <div ref={containerRef} className="relative w-full h-full min-h-[300px] bg-black overflow-hidden rounded-[2rem]">
       {!isReady && (
         <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70">
           <Loader2 className="w-8 h-8 animate-spin text-accent-primary" />
@@ -219,6 +217,34 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title }: PremiumVide
         className="w-full h-full absolute inset-0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
       />
+
+      {/* Custom play/pause button — replaces YouTube native controls */}
+      {isReady && isYouTube && (
+        <>
+          {/* Full-area invisible overlay to capture clicks for play/pause */}
+          <div
+            className="absolute inset-0 z-20 cursor-pointer"
+            onPointerUp={() => {
+              if (!playerRef.current) return;
+              if (isPlaying) {
+                playerRef.current.pauseVideo();
+              } else {
+                playerRef.current.playVideo();
+              }
+            }}
+          />
+          {/* Visual play/pause icon */}
+          <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
+            <div className={`w-16 h-16 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center transition-all duration-300 ${isPlaying ? "opacity-0" : "opacity-100"}`}>
+              <Play className="w-7 h-7 text-white fill-white ml-1" />
+            </div>
+          </div>
+          {/* Bottom strip: covers YouTube logo and share button at very bottom edge */}
+          <div className="absolute bottom-0 left-0 right-0 h-5 z-30 bg-black pointer-events-auto" />
+          {/* Top strip: covers YouTube branding at very top edge */}
+          <div className="absolute top-0 left-0 right-0 h-4 z-30 bg-black pointer-events-auto" />
+        </>
+      )}
 
       {/* Toast di notifica ripresa video */}
       {showResumeToast && resumedTime && (
