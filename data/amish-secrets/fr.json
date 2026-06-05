@@ -456,13 +456,6 @@
     "ebook_title": "Livre numérique",
     "ebook_desc": "Lisez le guide complet en format eBook directement depuis le lecteur Web ou téléchargez le PDF hors ligne.",
     "format_label": "Format PDF / Web",
-    "read_label": "Lire",
-    "community_title": "Groupe privé",
-    "community_desc": "Rejoignez le canal privé pour échanger des idées, obtenir un soutien en temps réel et collaborer.",
-    "community_privata": "Communauté privée",
-    "join_label": "Rejoignez",
-    "extra_title": "Ressources supplémentaires",
-    "extra_desc": "De nouveaux éléments et des ressources supplémentaires seront publiés prochainement dans ce domaine.",
-    "coming_soon": "Bientôt"
+    "read_label": "Lire"
   }
 }

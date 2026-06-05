@@ -456,13 +456,6 @@
     "ebook_title": "Digitalbok",
     "ebook_desc": "Läs hela guiden i eBook-format direkt från webbläsaren eller ladda ner offline PDF.",
     "format_label": "PDF / Web Format",
-    "read_label": "Läs mer",
-    "community_title": "Private Group",
-    "community_desc": "Gå med i den privata kanalen för att utbyta idéer, få realtidsstöd och samarbeta.",
-    "community_privata": "Privat gemenskap",
-    "join_label": "Gå med",
-    "extra_title": "Extra resurser",
-    "extra_desc": "Nya funktioner och ytterligare resurser publiceras snart i detta område.",
-    "coming_soon": "Kommer snart"
+    "read_label": "Läs mer"
   }
 }

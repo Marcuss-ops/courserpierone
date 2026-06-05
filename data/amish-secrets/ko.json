@@ -456,13 +456,6 @@
     "ebook_title": "디지털북",
     "ebook_desc": "웹 리더에서 직접 eBook 형식의 완벽한 가이드를 읽고 오프라인 PDF를 다운로드하십시오.",
     "format_label": "PDF / 웹 형식",
-    "read_label": "...에서",
-    "community_title": "개인 그룹",
-    "community_desc": "UXPA(사용자경험전문가협회)는 제품 및 서비스 UX를 리서치, 디자인, 평가한다.",
-    "community_privata": "회사 소개",
-    "join_label": "이름 *",
-    "extra_title": "추가 자료",
-    "extra_desc": "새로운 기능 및 추가 리소스는 곧이 지역에 게시 될 것입니다.",
-    "coming_soon": "현재 위치"
+    "read_label": "...에서"
   }
 }

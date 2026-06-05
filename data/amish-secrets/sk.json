@@ -456,13 +456,6 @@
     "ebook_title": "Digitálna kniha",
     "ebook_desc": "Prečítajte si kompletný sprievodca vo formáte eBook priamo z webovej čítačky alebo si stiahnite offline PDF.",
     "format_label": "PDF / Web Format",
-    "read_label": "Čítanie",
-    "community_title": "Súkromná skupina",
-    "community_desc": "Pripojte sa k súkromnému kanálu výmeny nápadov, získať podporu v reálnom čase a spolupracovať.",
-    "community_privata": "Súkromné spoločenstvo",
-    "join_label": "Pripojiť",
-    "extra_title": "Dodatočné zdroje",
-    "extra_desc": "V tejto oblasti budú čoskoro zverejnené nové prvky a dodatočné zdroje.",
-    "coming_soon": "Čoskoro"
+    "read_label": "Čítanie"
   }
 }

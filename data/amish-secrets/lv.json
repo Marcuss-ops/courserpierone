@@ -456,13 +456,6 @@
     "ebook_title": "Digitālā grāmata",
     "ebook_desc": "Lasīt pilnu ceļvedi eBook formātā tieši no tīmekļa lasītājs vai lejupielādēt bezsaistes PDF.",
     "format_label": "PDF / tīmekļa formāts",
-    "read_label": "Lasīt",
-    "community_title": "Privātā grupa",
-    "community_desc": "Pievienojies privātajam kanālam, lai apmainītos ar idejām, saņemtu reāllaika atbalstu un sadarbotos.",
-    "community_privata": "Privātā kopiena",
-    "join_label": "Pievienoties",
-    "extra_title": "Papildus resursi",
-    "extra_desc": "Drīzumā tiks publicētas jaunas funkcijas un papildu resursi šajā jomā.",
-    "coming_soon": "Drīz"
+    "read_label": "Lasīt"
   }
 }

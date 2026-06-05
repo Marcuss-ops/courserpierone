@@ -456,13 +456,6 @@
     "ebook_title": "Digital na Aklat",
     "ebook_desc": "Basahin ang kumpletong gabay sa eBOok format nang direkta mula sa web readure o i-upload ang offline PDF.",
     "format_label": "PDF / Web Format",
-    "read_label": "Basahin",
-    "community_title": "Pribadong Grupo",
-    "community_desc": "Sumali sa pribadong channel upang magpalitan ng mga ideya, kumuha ng real-time support at cooperative.",
-    "community_privata": "Pribadong Pamayanan",
-    "join_label": "Sumali",
-    "extra_title": "Karagdagang Yaman",
-    "extra_desc": "Malapit nang ilathala sa lugar na ito ang mga bagong katangian at karagdagang yaman.",
-    "coming_soon": "Malapit Nang Dumating"
+    "read_label": "Basahin"
   }
 }

@@ -456,13 +456,6 @@
     "ebook_title": "Digitaal boek",
     "ebook_desc": "Lees de volledige gids in eBook-formaat rechtstreeks van de weblezer of download de offline PDF.",
     "format_label": "PDF / webformaat",
-    "read_label": "Gelezen",
-    "community_title": "Particuliere groep",
-    "community_desc": "Word lid van het privékanaal om ideeën uit te wisselen, real-time ondersteuning te krijgen en samen te werken.",
-    "community_privata": "Particuliere gemeenschap",
-    "join_label": "Sluiten",
-    "extra_title": "Extra middelen",
-    "extra_desc": "Binnenkort zullen nieuwe functies en extra middelen op dit gebied worden gepubliceerd.",
-    "coming_soon": "Binnenkort."
+    "read_label": "Gelezen"
   }
 }

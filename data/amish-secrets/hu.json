@@ -456,13 +456,6 @@
     "ebook_title": "Digitális könyv",
     "ebook_desc": "Olvassa el a teljes útmutató eBook formátumban közvetlenül a web olvasó, vagy töltse le az offline PDF.",
     "format_label": "PDF / Web Format",
-    "read_label": "Olvassa el",
-    "community_title": "Magáncsoport",
-    "community_desc": "Csatlakozz a privát csatornához, hogy eszmecserét, kap real-time támogatást és együttműködik.",
-    "community_privata": "Magánközösség",
-    "join_label": "Csatlakozás",
-    "extra_title": "Extra források",
-    "extra_desc": "Ezen a területen hamarosan új jellemzőket és további forrásokat tesznek közzé.",
-    "coming_soon": "Hamarosan."
+    "read_label": "Olvassa el"
   }
 }

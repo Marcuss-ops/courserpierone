@@ -456,13 +456,6 @@
     "ebook_title": "Cifereca Libro",
     "ebook_desc": "Legu la kompletan gvidiston en eBook formato rekte de la interretleganto aŭ elŝutas la offline PDF.",
     "format_label": "PDF / Web Format",
-    "read_label": "Legu",
-    "community_title": "Privata Grupo",
-    "community_desc": "Aliĝu al la privata kanalo interŝanĝi ideojn, akiri realtempan subtenon kaj kunlabori.",
-    "community_privata": "Privata Komunumo",
-    "join_label": "Aliĝu aliĝi",
-    "extra_title": "Pliaj resursoj",
-    "extra_desc": "Novaj ecoj kaj kromaj resursoj baldaŭ estos publikigitaj en tiu areo.",
-    "coming_soon": "Baldaŭ baldaŭ"
+    "read_label": "Legu"
   }
 }

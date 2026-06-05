@@ -456,13 +456,6 @@
     "ebook_title": "Digiraamat",
     "ebook_desc": "Lugege täielikku juhendit e-raamatu vormingus otse veebilugejast või laadige alla võrguühenduseta PDF.",
     "format_label": "PDF / veebivorming",
-    "read_label": "Loe",
-    "community_title": "Eragrupp",
-    "community_desc": "Liitu privaatse kanaliga, et vahetada ideid, saada reaalajas tuge ja teha koostööd.",
-    "community_privata": "Erakogu",
-    "join_label": "Liitu",
-    "extra_title": "Lisaressursid",
-    "extra_desc": "Peagi avaldatakse selles valdkonnas uusi funktsioone ja lisavahendeid.",
-    "coming_soon": "Varsti tuleb"
+    "read_label": "Loe"
   }
 }

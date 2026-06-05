@@ -456,13 +456,6 @@
     "ebook_title": "Książka cyfrowa",
     "ebook_desc": "Przeczytaj kompletny przewodnik w formacie eBook bezpośrednio z czytnika stron internetowych lub pobierz offline PDF.",
     "format_label": "PDF / Web Format",
-    "read_label": "Czytaj",
-    "community_title": "Grupa prywatna",
-    "community_desc": "Dołącz do prywatnego kanału wymiany pomysłów, uzyskać wsparcie w czasie rzeczywistym i współpracować.",
-    "community_privata": "Wspólnota prywatna",
-    "join_label": "Dołącz",
-    "extra_title": "Dodatkowe zasoby",
-    "extra_desc": "Wkrótce w tej dziedzinie zostaną opublikowane nowe funkcje i dodatkowe zasoby.",
-    "coming_soon": "Wkrótce"
+    "read_label": "Czytaj"
   }
 }

@@ -456,13 +456,6 @@
     "ebook_title": "数字书",
     "ebook_desc": "用eBook格式直接从网络阅读器读取完整指南或下载离线PDF.",
     "format_label": "PDF / 网页格式",
-    "read_label": "读取",
-    "community_title": "私人集团",
-    "community_desc": "加入民间频道交流思想,获得实时支持并开展协作.",
-    "community_privata": "私人社区",
-    "join_label": "联合",
-    "extra_title": "额外资源",
-    "extra_desc": "不久将出版这方面的新特点和额外资源。",
-    "coming_soon": "快来了"
+    "read_label": "读取"
   }
 }

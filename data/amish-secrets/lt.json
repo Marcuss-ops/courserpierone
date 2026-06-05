@@ -456,13 +456,6 @@
     "ebook_title": "Comment",
     "ebook_desc": "Skaityti visą vadovą eBook formatu tiesiogiai iš interneto skaitytuvo arba atsisiųsti offline PDF.",
     "format_label": "PDF / Web formatas",
-    "read_label": "Skaityti",
-    "community_title": "Privačios grupės",
-    "community_desc": "Prisijungti prie privataus kanalo keistis idėjomis, gauti realaus laiko paramą ir bendradarbiauti.",
-    "community_privata": "privati bendrija",
-    "join_label": "Prisijungti",
-    "extra_title": "papildomi ištekliai",
-    "extra_desc": "Netrukus šioje srityje bus paskelbtos naujos funkcijos ir papildomi ištekliai.",
-    "coming_soon": "Netrukus"
+    "read_label": "Skaityti"
   }
 }

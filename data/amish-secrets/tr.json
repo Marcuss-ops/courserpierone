@@ -456,13 +456,6 @@
     "ebook_title": "Dijital Kitap",
     "ebook_desc": "eBook formatındaki tam kılavuzu doğrudan web okuyucudan okuyun veya çevrimdışı PDF'yi indirin.",
     "format_label": "PDF / Web Format",
-    "read_label": "Read Oku",
-    "community_title": "Private Group",
-    "community_desc": "Fikirleri değiştirmek için özel kanala katılın, gerçek zamanlı destek alın ve işbirliği yapın.",
-    "community_privata": "Özel Topluluk",
-    "join_label": "Katıl",
-    "extra_title": "Ekstra kaynaklar",
-    "extra_desc": "Yeni özellikler ve ek kaynaklar yakında bu alanda yayınlanacak.",
-    "coming_soon": "Yakında Geliyor"
+    "read_label": "Read Oku"
   }
 }

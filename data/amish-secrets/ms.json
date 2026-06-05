@@ -456,13 +456,6 @@
     "ebook_title": "Buku Digital",
     "ebook_desc": "Membaca panduan lengkap dalam format eBook langsung dari pembaca web atau mengunduh PDF luring.",
     "format_label": "PDF / Format Web",
-    "read_label": "Bacalah",
-    "community_title": "Grup Private",
-    "community_desc": "Join saluran swasta untuk bertukar ide, mendapatkan dukungan real-time dan berkolaborasi.",
-    "community_privata": "Private Community",
-    "join_label": "Join",
-    "extra_title": "Sumber Daya Ekstra FMF",
-    "extra_desc": "Fitur baru dan sumber daya tambahan akan segera diterbitkan di daerah ini.",
-    "coming_soon": "Segera Datang"
+    "read_label": "Bacalah"
   }
 }

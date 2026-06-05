@@ -456,13 +456,6 @@
     "ebook_title": "Sách số",
     "ebook_desc": "Đọc toàn bộ hướng dẫn trong định dạng eBook trực tiếp từ đầu đọc web hoặc tải về PDF ngoại tuyến.",
     "format_label": "PDF/ Web định dạng",
-    "read_label": "Đọc",
-    "community_title": "Nhóm riêng",
-    "community_desc": "Tham gia kênh riêng tư để trao đổi ý tưởng, nhận được hỗ trợ thời gian thực và hợp tác.",
-    "community_privata": "Cộng đồng riêng",
-    "join_label": "Tham gia",
-    "extra_title": "Tài nguyên thêm",
-    "extra_desc": "Các đặc điểm mới và tài nguyên phụ sẽ được xuất bản trong vùng này.",
-    "coming_soon": "Sắp đến rồi"
+    "read_label": "Đọc"
   }
 }

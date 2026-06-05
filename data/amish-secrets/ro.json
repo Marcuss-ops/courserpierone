@@ -456,13 +456,6 @@
     "ebook_title": "Carte digitală",
     "ebook_desc": "Citiți ghidul complet în format eBook direct de la cititorul de web sau descărcați PDF-ul offline.",
     "format_label": "PDF / Format web",
-    "read_label": "Citit",
-    "community_title": "Grup privat",
-    "community_desc": "Alăturați-vă canalului privat pentru a face schimb de idei, obține sprijin în timp real și colaborează.",
-    "community_privata": "Comunitatea privată",
-    "join_label": "Alătură-te",
-    "extra_title": "Resurse suplimentare",
-    "extra_desc": "Noi caracteristici și resurse suplimentare vor fi publicate în curând în acest domeniu.",
-    "coming_soon": "În curând"
+    "read_label": "Citit"
   }
 }

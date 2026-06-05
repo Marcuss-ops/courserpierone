@@ -456,13 +456,6 @@
     "ebook_title": "Buku Digital",
     "ebook_desc": "Baca panduan lengkap dalam format eBook langsung dari pembaca web atau unduh PDF luring.",
     "format_label": "Format PDF / Web",
-    "read_label": "Baca",
-    "community_title": "Grup Pribadi",
-    "community_desc": "Bergabung dengan saluran pribadi untuk bertukar ide, mendapatkan dukungan real-time dan berkolaborasi.",
-    "community_privata": "Komunitas Pribadi",
-    "join_label": "Gabung",
-    "extra_title": "Sumber Daya Ekstra",
-    "extra_desc": "Fitur baru dan sumber daya tambahan akan diterbitkan segera di daerah ini.",
-    "coming_soon": "Segera datang."
+    "read_label": "Baca"
   }
 }

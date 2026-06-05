@@ -456,13 +456,6 @@
     "ebook_title": "Digital bog",
     "ebook_desc": "Læs hele vejledningen i eBook format direkte fra web-læseren eller download offline PDF.",
     "format_label": "PDF / webformat",
-    "read_label": "Læs",
-    "community_title": "Private Group",
-    "community_desc": "Deltag i den private kanal for at udveksle ideer, få real-time støtte og samarbejde.",
-    "community_privata": "Det private Fællesskab",
-    "join_label": "Deltag",
-    "extra_title": "Ekstra ressourcer",
-    "extra_desc": "Der vil snart blive offentliggjort nye elementer og yderligere ressourcer på dette område.",
-    "coming_soon": "Kommer snart"
+    "read_label": "Læs"
   }
 }

@@ -456,13 +456,6 @@
     "ebook_title": "Digital Book",
     "ebook_desc": "EBook formatında tam guide-i web oxumaq və ya offline PDF download.",
     "format_label": "PDF / Web Format",
-    "read_label": "»",
-    "community_title": "Xüsusi Qrup",
-    "community_desc": "Fikirləri qazanmaq, real-time dəstək və əməkdaşlıq almaq üçün xüsusi kanala baxın.",
-    "community_privata": "İctimai Birliyi",
-    "join_label": "Qeydiyyat",
-    "extra_title": "Digər Resurslar",
-    "extra_desc": "Yeni xüsusiyyətlər və əlavə resurslar bu sahəsində dərc olunacaq.",
-    "coming_soon": "Haqqında"
+    "read_label": "»"
   }
 }

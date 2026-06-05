@@ -456,13 +456,6 @@
     "ebook_title": "Digitaalinen kirja",
     "ebook_desc": "Lue täydellinen opas eBook-muodossa suoraan web-lukijalta tai lataa offline PDF.",
     "format_label": "PDF / Web-muoto",
-    "read_label": "Lue",
-    "community_title": "Yksityinen ryhmä",
-    "community_desc": "Liity yksityisen kanavan vaihtaa ideoita, saada reaaliaikaista tukea ja yhteistyötä.",
-    "community_privata": "Yksityisyhteisö",
-    "join_label": "Liity",
-    "extra_title": "Ylimääräiset resurssit",
-    "extra_desc": "Tällä alalla julkaistaan pian uusia ominaisuuksia ja lisäresursseja.",
-    "coming_soon": "Tulossa pian"
+    "read_label": "Lue"
   }
 }

@@ -456,13 +456,6 @@
     "ebook_title": "Digitalna knjiga",
     "ebook_desc": "Preberite celoten vodnik v obliki eBook neposredno iz spletnega bralca ali prenesete offline PDF.",
     "format_label": "PDF / Spletna oblika",
-    "read_label": "Preberi",
-    "community_title": "Zasebna skupina",
-    "community_desc": "Pridružite se zasebnemu kanalu za izmenjavo idej, pridobivanje podpore v realnem času in sodelovanje.",
-    "community_privata": "Zasebna skupnost",
-    "join_label": "Pridruži se",
-    "extra_title": "Dodatni viri",
-    "extra_desc": "Na tem področju bodo kmalu objavljene nove značilnosti in dodatna sredstva.",
-    "coming_soon": "Kmalu."
+    "read_label": "Preberi"
   }
 }

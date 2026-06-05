@@ -456,13 +456,6 @@
     "ebook_title": "Digitales Buch",
     "ebook_desc": "Lesen Sie die komplette Anleitung im eBook-Format direkt vom Web-Reader oder laden Sie das Offline-PDF herunter.",
     "format_label": "PDF / Web Format",
-    "read_label": "Weiterlesen",
-    "community_title": "Privatgruppe",
-    "community_desc": "Verbinden Sie den privaten Kanal, um Ideen auszutauschen, Echtzeit-Unterstützung und Zusammenarbeit.",
-    "community_privata": "Privatgemeinschaft",
-    "join_label": "Mitglied",
-    "extra_title": "Extra Ressourcen",
-    "extra_desc": "Neue Features und zusätzliche Ressourcen werden bald in diesem Bereich veröffentlicht.",
-    "coming_soon": "Ich komme bald"
+    "read_label": "Weiterlesen"
   }
 }

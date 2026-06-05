@@ -456,13 +456,6 @@
     "ebook_title": "کتاب دیجیتال",
     "ebook_desc": "راهنمای کامل را در فرمت eBook به طور مستقیم از خواننده وب بخوانید یا PDF آفلاین را دانلود کنید.",
     "format_label": "PDF / Web Format",
-    "read_label": "Read Read",
-    "community_title": "گروه خصوصی",
-    "community_desc": "پیوستن به کانال خصوصی برای تبادل ایده ها، پشتیبانی زمان واقعی و همکاری.",
-    "community_privata": "جامعه خصوصی",
-    "join_label": "Join",
-    "extra_title": "منابع اضافی",
-    "extra_desc": "ویژگی های جدید و منابع اضافی به زودی در این منطقه منتشر خواهد شد.",
-    "coming_soon": "بزودی"
+    "read_label": "Read Read"
   }
 }

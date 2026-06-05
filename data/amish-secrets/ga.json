@@ -456,13 +456,6 @@
     "ebook_title": "Leabhar digiteach",
     "ebook_desc": "Léigh an treoir iomlán i bhformáid eBook go díreach ón léitheoir gréasáin nó a íoslódáil an PDF as líne.",
     "format_label": "Plean Gníomhaíochta don Oideachas",
-    "read_label": "Léigh ar aghaidh",
-    "community_title": "An tSraith Shinsearach",
-    "community_desc": "Member an cainéal príobháideach chun smaointe a mhalartú, a fháil tacaíocht fíor-ama agus comhoibriú.",
-    "community_privata": "Pobail agus Fiontair",
-    "join_label": "Bí páirteach",
-    "extra_title": "Acmhainní Breise",
-    "extra_desc": "Foilseofar gnéithe nua agus acmhainní breise go luath sa réimse seo.",
-    "coming_soon": "Ag teacht Soon"
+    "read_label": "Léigh ar aghaidh"
   }
 }

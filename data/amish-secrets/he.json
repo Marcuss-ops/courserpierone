@@ -456,13 +456,6 @@
     "ebook_title": "ספר דיגיטלי",
     "ebook_desc": "קרא את המדריך המלא בפורמט eBook ישירות מהקורא האינטרנט או להוריד את ה- PDF הלא מקוון.",
     "format_label": "PDF / Web Format",
-    "read_label": "Read Read Read",
-    "community_title": "קבוצה פרטית",
-    "community_desc": "הצטרף לערוץ הפרטי להחליף רעיונות, לקבל תמיכה בזמן אמת ולשתף פעולה.",
-    "community_privata": "קהילה פרטית",
-    "join_label": "להצטרף",
-    "extra_title": "משאבים נוספים",
-    "extra_desc": "תכונות חדשות ומשאבים נוספים יפורסמו בקרוב בתחום זה.",
-    "coming_soon": "בקרוב"
+    "read_label": "Read Read Read"
   }
 }

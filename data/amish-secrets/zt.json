@@ -456,13 +456,6 @@
     "ebook_title": "數位書",
     "ebook_desc": "从網路讀取者直接取自eBook格式的完整指南或下載下線 PDF 。",
     "format_label": "PDF / Web 格式",
-    "read_label": "讀取",
-    "community_title": "二等群組",
-    "community_desc": "加入私人頻道以交流想法,得到实时支持并合作.",
-    "community_privata": "二. 私立社区",
-    "join_label": "加入",
-    "extra_title": "額外資源",
-    "extra_desc": "此外,",
-    "coming_soon": "就快了"
+    "read_label": "讀取"
   }
 }

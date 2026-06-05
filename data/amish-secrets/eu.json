@@ -456,13 +456,6 @@
     "ebook_title": "Liburu digitala",
     "ebook_desc": "Irakurri gida osoa eBook formatuan web-irakurletik zuzenean edo deskargatu lineaz kanpoko PDFa.",
     "format_label": "PDF / Web formatua",
-    "read_label": "Irakurri",
-    "community_title": "Talde pribatua",
-    "community_desc": "Sartu kanal pribatura ideiak trukatzeko, denbora errealeko laguntza lortzeko eta elkarlanean aritzeko.",
-    "community_privata": "Komunitate pribatua",
-    "join_label": "Elkartu",
-    "extra_title": "Baliabide gehigarriak",
-    "extra_desc": "Ezaugarri berriak eta baliabide gehigarriak laster argitaratuko dira arlo honetan.",
-    "coming_soon": "Berehala nator."
+    "read_label": "Irakurri"
   }
 }

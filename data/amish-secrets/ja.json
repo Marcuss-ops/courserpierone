@@ -456,13 +456,6 @@
     "ebook_title": "デジタルブック",
     "ebook_desc": "Web リーダーから直接 eBook 形式の完全なガイドを読んで、オフライン PDF をダウンロードしてください。",
     "format_label": "PDF / Web フォーマット",
-    "read_label": "採用情報",
-    "community_title": "プライベートグループ",
-    "community_desc": "プライベートチャネルに参加してアイデアを交換し、リアルタイムでサポートし、コラボレーションします。",
-    "community_privata": "プライベートコミュニティ",
-    "join_label": "お問い合わせ",
-    "extra_title": "余分なリソース",
-    "extra_desc": "このエリアでは、新機能や追加リソースが公開されます。",
-    "coming_soon": "近日公開"
+    "read_label": "採用情報"
   }
 }

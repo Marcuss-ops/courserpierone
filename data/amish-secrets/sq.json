@@ -456,13 +456,6 @@
     "ebook_title": "Libri dixhital",
     "ebook_desc": "Lexo udhëzuesin e plotë në formatin eBook direkt nga lexuesi web ose shkarko PDF jashtë linje.",
     "format_label": "Format PDF / Web",
-    "read_label": "Lexo",
-    "community_title": "Grup privat",
-    "community_desc": "Bashkohu me kanalin privat për të shkëmbyer ide, për të marrë mbështetje dhe bashkëpunim në kohë reale.",
-    "community_privata": "Komuniteti privat",
-    "join_label": "Futu",
-    "extra_title": "Burimet",
-    "extra_desc": "Veçori të reja dhe burime shtesë do të botohen së shpejti në këtë fushë.",
-    "coming_soon": "Së shpejti"
+    "read_label": "Lexo"
   }
 }

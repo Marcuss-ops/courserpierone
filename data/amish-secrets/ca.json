@@ -456,13 +456,6 @@
     "ebook_title": "Llibre digital",
     "ebook_desc": "Llegeix la guia completa en format eBook directament des del lector web o descarrega el PDF fora de línia.",
     "format_label": "Format PDF / Web",
-    "read_label": "Lectura",
-    "community_title": "Grup privat",
-    "community_desc": "Uneix-te al canal privat per intercanviar idees, aconseguir suport en temps real i col·laborar.",
-    "community_privata": "Comunitat privada",
-    "join_label": "Uneix",
-    "extra_title": "Recursos extra",
-    "extra_desc": "En aquesta àrea es publicaran noves funcionalitats i recursos addicionals.",
-    "coming_soon": "Venent aviat"
+    "read_label": "Lectura"
   }
 }
