@@ -190,10 +190,6 @@ export interface LocaleContent {
     ebook_desc: string;
     format_label: string;
     read_label: string;
-    community_title: string;
-    community_desc: string;
-    community_privata: string;
-    join_label: string;
     extra_title: string;
     extra_desc: string;
     coming_soon: string;
@@ -248,7 +244,6 @@ export function createEmptyLocale(locale: string, defaults?: Partial<LocaleConte
       access_badge: "", welcome_text: "",
       video_title: "", video_desc: "", lessons_count_label: "", start_label: "",
       ebook_title: "", ebook_desc: "", format_label: "", read_label: "",
-      community_title: "", community_desc: "", community_privata: "", join_label: "",
       extra_title: "", extra_desc: "", coming_soon: "", onboarded_toast: "",
     },
     ...defaults,
