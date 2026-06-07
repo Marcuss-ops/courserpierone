@@ -21,8 +21,6 @@ export interface EnvVarDef {
   category: "critical" | "required" | "optional" | "auto";
   description: string;
   defaultValue?: string;
-  /** Usato solo in produzione */
-  productionOnly?: boolean;
   /** Feature disabilitabile (es. Supabase, OpenAI) */
   optional?: boolean;
 }
@@ -277,13 +275,6 @@ export const env = new Proxy(
 );
 
 // ─── Utility: formato leggibile ────────────────────────────
-
-const STATUS_ICONS: Record<string, string> = {
-  critical: "🔴",
-  required: "🟡",
-  optional: "⚪",
-  auto: "🤖",
-};
 
 export function formatEnvStatus(result: ValidationResult): string {
   const lines: string[] = [];

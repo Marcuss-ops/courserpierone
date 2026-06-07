@@ -116,16 +116,4 @@ export async function getCourseConfig(slug: string): Promise<CourseConfig | null
   return config;
 }
 
-/**
- * Invalida la cache in-memory per un dato slug
- */
-export function invalidateCourseConfig(slug: string): void {
-  _memoryCache.delete(slug);
-}
 
-/**
- * Invalida TUTTA la cache in-memory
- */
-export function invalidateAllCourseConfigs(): void {
-  _memoryCache.clear();
-}
