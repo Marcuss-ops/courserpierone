@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 import nextDynamic from "next/dynamic";
 import { Play, Zap } from "lucide-react";
 import { getCourseConfig, type CourseConfig } from "@/lib/config/white-label-data";
-import { getCurrencyFromLocale } from "@/lib/i18n/locale-resolver";
+import { getPriceString, getCurrentAmountAndSymbol } from "@/lib/utils/pricing";
 import { loadLocaleContentSafe } from "@/lib/i18n/load-locale-content";
 import type { LocaleContent } from "@/lib/i18n/locale-content";
 import { AnalyticsTracker } from "@/components/course/analytics-tracker";
@@ -40,24 +40,8 @@ function localeToLang(locale: string): string {
   return locale.split("-")[0]?.toLowerCase() ?? "en";
 }
 
-// ─── Parse country price overrides (shared helper) ────
-function getCountryPriceOverride(data: CourseConfig, country: string): { currency: string; price: number; symbol: string; amount: number } | null {
-  if (!country || !data.countryOverrides) return null;
-  try {
-    const overrides = typeof data.countryOverrides === 'string'
-      ? JSON.parse(data.countryOverrides)
-      : data.countryOverrides;
-    const override = overrides[country.toUpperCase()];
-    if (!override) return null;
-    const amount = override.price / 100;
-    return {
-      currency: override.currency,
-      price: override.price,
-      symbol: override.symbol || (override.currency === "BRL" ? "R$" : override.currency === "JPY" ? "¥" : override.currency === "GBP" ? "£" : "$"),
-      amount,
-    };
-  } catch { return null; }
-}
+// ─── Country price override (delegata a shared helper) ────
+// getCountryPriceOverride è importata da @/lib/utils/pricing
 
 // ─── Generate full SEO metadata per locale ─────
 export async function generateMetadata({
@@ -148,57 +132,16 @@ const TemplateHorizon = nextDynamic(() => import("@/components/funnel/template-h
 const TemplateBookClaude = nextDynamic(() => import("@/components/funnel/template-book-claude"));
 const TemplateAmish = nextDynamic(() => import("@/components/funnel/template-amish"));
 
-function getPriceString(data: CourseConfig, locale: string, country?: string): { price: string; currency: string } {
-  // Check for country-specific price override first
-  if (country) {
-    const countryPrice = getCountryPriceOverride(data, country);
-    if (countryPrice) {
-      return { price: `${countryPrice.symbol}${countryPrice.amount}`, currency: countryPrice.currency };
-    }
-  }
+// getPriceString è importata da @/lib/utils/pricing
 
-  // Derive currency from locale: pt-br → BRL, ja-jp → JPY, fr-fr → EUR
-  const currency = getCurrencyFromLocale(locale);
-
-  // Look up price by currency code (EUR, USD, BRL, JPY, GBP...)
-  const priceConfig = data.prices?.[currency] ?? data.prices?.default;
-  if (priceConfig) {
-    return { price: `${priceConfig.symbol}${priceConfig.amount}`, currency };
-  }
-
-  // Fallback: use product's base price
-  return { price: `€${data.price ?? 0}`, currency: "EUR" };
-}
-
-function getDisplayPriceForCurrency(data: CourseConfig): string {
-  const eur = data.prices?.EUR;
-  const usd = data.prices?.USD;
-  const prices: string[] = [];
-  if (eur) prices.push(`${eur.symbol ?? "€"}${eur.amount}`);
-  if (usd) prices.push(`${usd.symbol ?? "$"}${usd.amount}`);
-  if (prices.length === 0) prices.push(`€${data.price ?? 0}`);
-  return prices.join(" / ");
-}
+// getDisplayPriceForCurrency rimossa — usare getPriceString dal shared helper
 
 function mapConfigToTemplateData(data: CourseConfig, locale: string, lang: string, localeContent?: LocaleContent, country?: string) {
   const content = data.languages[lang] ?? data.languages[Object.keys(data.languages)[0]];
   if (!content) return null;
 
   const { price, currency } = getPriceString(data, locale, country);
-  const priceConfig = data.prices?.[currency] ?? data.prices?.default;
-  
-  // Use shared helper for country override (avoid duplicate parsing)
-  let currentAmount: number;
-  let symbol: string;
-  const countryPrice = country ? getCountryPriceOverride(data, country) : null;
-  if (countryPrice) {
-    currentAmount = countryPrice.amount;
-    symbol = countryPrice.symbol;
-  } else {
-    currentAmount = priceConfig?.amount ?? data.price ?? 19;
-    symbol = priceConfig?.symbol ?? "€";
-  }
-  const baseAmount = data.price ?? 19;
+  const { currentAmount, symbol, baseAmount } = getCurrentAmountAndSymbol(data, locale, country);
 
   return {
     titolo: content.title,

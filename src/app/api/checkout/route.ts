@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth/auth";
 import { initLS, getStoreId } from "@/lib/payment/lemonsqueezy";
 import { createCheckout } from "@lemonsqueezy/lemonsqueezy.js";
 import { checkoutSchema, validationErrorResponse } from "@/lib/utils/validations";
+import { parsePricesByCurrency, parseCountryOverrides } from "@/lib/utils/pricing";
 import { getCurrencyFromLocale } from "@/lib/i18n/locale-resolver";
 
 export async function POST(request: NextRequest) {
@@ -34,40 +35,22 @@ export async function POST(request: NextRequest) {
     let effectiveStripePriceId = product.stripePriceId;
 
     if (currency && product.pricesByCurrency) {
-      try {
-        const prices = JSON.parse(product.pricesByCurrency) as Record<string, {
-          price: number;
-          stripePriceId?: string | null;
-          lemonVariantId?: string | null;
-        }>;
-        const currencyPrices = prices[currency.toUpperCase()];
-        if (currencyPrices) {
-          effectiveLemonVariantId = currencyPrices.lemonVariantId ?? product.lemonVariantId;
-          effectiveStripePriceId = currencyPrices.stripePriceId ?? product.stripePriceId;
-        }
-      } catch {
-        // Parse error, fallback to defaults
+      const prices = parsePricesByCurrency(product.pricesByCurrency);
+      const currencyPrices = prices?.[currency.toUpperCase()];
+      if (currencyPrices) {
+        effectiveLemonVariantId = currencyPrices.lemonVariantId ?? product.lemonVariantId;
+        effectiveStripePriceId = currencyPrices.stripePriceId ?? product.stripePriceId;
       }
     }
 
     // ─── Country-specific price overrides ─────────────────────
     const country = request.headers.get("x-vercel-ip-country") ?? request.headers.get("cf-ipcountry");
     if (country && product.countryOverrides) {
-      try {
-        const overrides = JSON.parse(product.countryOverrides) as Record<string, {
-          currency: string;
-          price: number;
-          symbol?: string;
-          lemonVariantId?: string | null;
-          stripePriceId?: string | null;
-        }>;
-        const countryOverride = overrides[country.toUpperCase()];
-        if (countryOverride) {
-          effectiveLemonVariantId = countryOverride.lemonVariantId ?? effectiveLemonVariantId;
-          effectiveStripePriceId = countryOverride.stripePriceId ?? effectiveStripePriceId;
-        }
-      } catch {
-        // Parse error, fallback to defaults
+      const overrides = parseCountryOverrides(product.countryOverrides);
+      const countryOverride = overrides?.[country.toUpperCase()];
+      if (countryOverride) {
+        effectiveLemonVariantId = countryOverride.lemonVariantId ?? effectiveLemonVariantId;
+        effectiveStripePriceId = countryOverride.stripePriceId ?? effectiveStripePriceId;
       }
     }
 
@@ -205,6 +188,7 @@ export async function POST(request: NextRequest) {
         userId: user?.id ?? "guest",
         productId: product.id,
         locale,
+        customer_country: country ?? "",
       },
     });
 

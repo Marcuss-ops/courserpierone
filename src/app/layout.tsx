@@ -3,6 +3,11 @@ import { cookies } from "next/headers";
 import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 
+// ═══ Environment variable validation ═════════════════════
+// Il semplice import esegue la validazione all'avvio.
+// I warning/error vengono stampati su console.
+import "@/lib/env";
+
 const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-playfair",

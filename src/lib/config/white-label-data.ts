@@ -60,27 +60,72 @@ export interface LanguageEntry {
   };
 }
 
+/**
+ * Cache in-memory per ridurre letture disco/DB durante il lifecycle
+ * di una stessa richiesta. Azzerata ad ogni deploy su Vercel.
+ */
+const _memoryCache = new Map<string, { config: CourseConfig; cachedAt: number }>();
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minuti
+
+/**
+ * Carica la configurazione di un corso con read-through cache.
+ *
+ * Strategy:
+ *   1. Memory cache (per la durata della richiesta)
+ *   2. File system (sviluppo locale)
+ *   3. Database cache (CourseConfigCache — funziona su Vercel)
+ *   4. null
+ */
 export async function getCourseConfig(slug: string): Promise<CourseConfig | null> {
-  // Prova prima da disco (sviluppo locale)
+  // 1. Memory cache (fast path)
+  const cached = _memoryCache.get(slug);
+  if (cached && Date.now() - cached.cachedAt < CACHE_TTL_MS) {
+    return cached.config;
+  }
+
+  let config: CourseConfig | null = null;
+
+  // 2. File system (sviluppo locale)
   try {
     const configPath = path.join(process.cwd(), 'public', 'courses', slug, 'config.json');
     if (fs.existsSync(configPath)) {
       const fileContent = fs.readFileSync(configPath, 'utf8');
-      return JSON.parse(fileContent) as CourseConfig;
+      config = JSON.parse(fileContent) as CourseConfig;
     }
   } catch {
     // Fallback al DB
   }
 
-  // Fallback: leggi da DB (funziona su Vercel)
-  try {
-    const cached = await prisma.courseConfigCache.findUnique({ where: { slug } });
-    if (cached) {
-      return JSON.parse(cached.config) as CourseConfig;
+  // 3. Database cache (funziona su Vercel)
+  if (!config) {
+    try {
+      const cached = await prisma.courseConfigCache.findUnique({ where: { slug } });
+      if (cached) {
+        config = JSON.parse(cached.config) as CourseConfig;
+      }
+    } catch (error) {
+      console.error(`Error reading config from DB for ${slug}:`, error);
     }
-  } catch (error) {
-    console.error(`Error reading config from DB for ${slug}:`, error);
   }
 
-  return null;
+  // Popola memory cache
+  if (config) {
+    _memoryCache.set(slug, { config, cachedAt: Date.now() });
+  }
+
+  return config;
+}
+
+/**
+ * Invalida la cache in-memory per un dato slug
+ */
+export function invalidateCourseConfig(slug: string): void {
+  _memoryCache.delete(slug);
+}
+
+/**
+ * Invalida TUTTA la cache in-memory
+ */
+export function invalidateAllCourseConfigs(): void {
+  _memoryCache.clear();
 }

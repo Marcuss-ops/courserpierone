@@ -52,6 +52,7 @@ export async function POST(request: NextRequest) {
         amount: session.amount_total ?? 0,
         currency: session.currency ?? "eur",
         locale,
+        customerCountry: session.metadata?.customer_country ?? null,
       });
 
       console.log(`[Stripe] Order processed for session ${session.id}`);
