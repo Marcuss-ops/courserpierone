@@ -106,24 +106,36 @@ export default function SocialProof({ productSlug, locale }: SocialProofProps) {
   // Simulated fallback events when DB is empty or clean
   const getFallbackEvents = (): SocialProofEvent[] => {
     const itFallback: SocialProofEvent[] = [
-      { id: "mock-1", type: "purchase", name: "Marco", city: "Milano", timeString: "3 minuti fa" },
-      { id: "mock-2", type: "lesson", name: "Giulia", city: "Roma", lessonTitle: "Introduzione e Setup", timeString: "12 minuti fa" },
-      { id: "mock-3", type: "purchase", name: "Alessandro", city: "Torino", timeString: "28 minuti fa" },
-      { id: "mock-4", type: "lesson", name: "Sofia", city: "Bologna", lessonTitle: "I Primi Passi", timeString: "45 minuti fa" },
+      { id: "mock-1", type: "purchase", name: "Marco", city: "Milano", timeString: "2 minuti fa" },
+      { id: "mock-2", type: "lesson", name: "Elena", city: "Madrid", lessonTitle: "Introduzione e Setup", timeString: "7 minuti fa" },
+      { id: "mock-3", type: "purchase", name: "Lucas", city: "Parigi", timeString: "14 minuti fa" },
+      { id: "mock-4", type: "lesson", name: "Sofia", city: "Bologna", lessonTitle: "I Primi Passi", timeString: "21 minuti fa" },
+      { id: "mock-5", type: "purchase", name: "Thomas", city: "Berlino", timeString: "35 minuti fa" },
+      { id: "mock-6", type: "purchase", name: "Alessandro", city: "Torino", timeString: "50 minuti fa" },
+      { id: "mock-7", type: "lesson", name: "Emma", city: "Londra", lessonTitle: "Budget Amish", timeString: "1 ora fa" },
+      { id: "mock-8", type: "purchase", name: "Dmitry", city: "Mosca", timeString: "2 ore fa" },
+      { id: "mock-9", type: "purchase", name: "Mateo", city: "Roma", timeString: "3 ore fa" },
+      { id: "mock-10", type: "lesson", name: "Giulia", city: "Napoli", lessonTitle: "Dispensa Infinita", timeString: "4 ore fa" },
     ];
     const enFallback: SocialProofEvent[] = [
       { id: "mock-1", type: "purchase", name: "James", city: "New York", timeString: "5 mins ago" },
       { id: "mock-2", type: "lesson", name: "Emma", city: "London", lessonTitle: "Introduction & Setup", timeString: "15 mins ago" },
       { id: "mock-3", type: "purchase", name: "Michael", city: "Sydney", timeString: "32 mins ago" },
       { id: "mock-4", type: "lesson", name: "Olivia", city: "Toronto", lessonTitle: "First Steps", timeString: "50 mins ago" },
+      { id: "mock-5", type: "purchase", name: "Lucas", city: "Paris", timeString: "1 hour ago" },
+      { id: "mock-6", type: "purchase", name: "Marco", city: "Milan", timeString: "2 hours ago" },
+      { id: "mock-7", type: "purchase", name: "Thomas", city: "Berlin", timeString: "3 hours ago" },
+      { id: "mock-8", type: "lesson", name: "Elena", city: "Madrid", lessonTitle: "Amish Budget", timeString: "4 hours ago" },
     ];
     const daFallback: SocialProofEvent[] = [
       { id: "mock-1", type: "purchase", name: "Frederik", city: "København", timeString: "7 min. siden" },
       { id: "mock-2", type: "lesson", name: "Ida", city: "Aarhus", lessonTitle: "Introduktion", timeString: "18 min. siden" },
+      { id: "mock-3", type: "purchase", name: "Thomas", city: "Berlin", timeString: "45 min. siden" },
     ];
     const ruFallback: SocialProofEvent[] = [
       { id: "mock-1", type: "purchase", name: "Алексей", city: "Москва", timeString: "8 мин. назад" },
       { id: "mock-2", type: "lesson", name: "Елена", city: "Санкт-Петербург", lessonTitle: "Введение", timeString: "20 мин. назад" },
+      { id: "mock-3", type: "purchase", name: "Дмитрий", city: "Казань", timeString: "1 ч. назад" },
     ];
 
     if (lang === "it") return itFallback;
