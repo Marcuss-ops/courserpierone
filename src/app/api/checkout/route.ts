@@ -137,9 +137,9 @@ export async function POST(request: NextRequest) {
           discountCode: effectiveDiscountCode,
         },
         productOptions: {
-          redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/${product.slug}/portal?lang=${locale}&onboarded=1`,
+          redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/${locale}/${product.slug}/portal?onboarded=1`,
           receiptButtonText: "Accedi al Corso",
-          receiptLinkUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/${product.slug}/portal?lang=${locale}`,
+          receiptLinkUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/${locale}/${product.slug}/portal`,
         },
         // Prevent multiple checkouts for the same variant
         expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 min
@@ -182,7 +182,7 @@ export async function POST(request: NextRequest) {
       customer_email: userEmail || undefined,
       locale: stripeLocale as any,
       allow_promotion_codes: true,
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/${product.slug}/portal?lang=${locale}&onboarded=1`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/${locale}/${product.slug}/portal?onboarded=1`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/${product.slug}?canceled=1`,
       metadata: {
         userId: user?.id ?? "guest",
