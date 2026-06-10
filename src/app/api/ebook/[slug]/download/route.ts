@@ -4,6 +4,8 @@ import { getCourseConfig } from "@/lib/config/white-label-data";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/auth";
 import { prisma } from "@/lib/db/prisma";
+import fs from "fs";
+import path from "path";
 
 export async function GET(
   request: NextRequest,
@@ -63,6 +65,25 @@ export async function GET(
   const content = course.languages[lang] || course.languages[course.defaultLanguage];
   if (!content) {
     return NextResponse.json({ error: "Language not found" }, { status: 404 });
+  }
+
+  // Check if a pre-compiled PDF exists in the course folder
+  const staticPdfPath = path.join(process.cwd(), "public", "courses", slug, `${lang}.pdf`);
+  if (fs.existsSync(staticPdfPath)) {
+    try {
+      const pdfBuffer = fs.readFileSync(staticPdfPath);
+      const filename = `${slug}-${lang}-${content.ebookTitle.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase().slice(0, 40)}.pdf`;
+      return new NextResponse(pdfBuffer, {
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `attachment; filename="${filename}"`,
+          "Content-Length": pdfBuffer.length.toString(),
+        },
+      });
+    } catch (error) {
+      console.error(`Error reading static PDF at ${staticPdfPath}:`, error);
+      // Fallback to dynamic generation if file read fails
+    }
   }
 
   const doc = new jsPDF({ unit: "mm", format: "a4" });
