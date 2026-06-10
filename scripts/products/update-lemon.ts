@@ -3,7 +3,7 @@ import { generateCourseConfig } from "../../src/lib/config/generate-course-confi
 
 async function main() {
   const slug = "amish-secrets";
-  const newVariantId = "1732285";
+  const newVariantId = "1106218";
 
   console.log(`Updating ${slug} in database...`);
   const updatedProduct = await prisma.product.update({
