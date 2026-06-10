@@ -8,7 +8,10 @@ async function main() {
   console.log(`Updating ${slug} in database...`);
   const updatedProduct = await prisma.product.update({
     where: { slug },
-    data: { lemonVariantId: newVariantId }
+    data: { 
+      lemonVariantId: newVariantId,
+      coverUrl: "/images/amish-secrets-cover.png"
+    }
   });
 
   console.log(`Successfully updated product!`);
