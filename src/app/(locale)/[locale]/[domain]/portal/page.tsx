@@ -76,7 +76,7 @@ export default async function ProductPortalPage({
   params: Promise<{ locale: string; domain: string }>;
   searchParams: Promise<{ lang?: string; onboarded?: string }>;
 }) {
-  const { domain } = await params;
+  const { domain, locale } = await params;
   const { lang, onboarded } = await searchParams;
   
   const course = await getCourseConfig(domain);
@@ -162,7 +162,7 @@ export default async function ProductPortalPage({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Card 1: Corso Video */}
             <Link
-              href={`/${domain}/curso/${firstLessonId}?lang=${currentLang}`}
+              href={`/${locale}/${domain}/curso/${firstLessonId}?lang=${currentLang}`}
               className="group bg-white rounded-[1.5rem] p-8 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] flex flex-col justify-between min-h-[320px] relative overflow-hidden border border-zinc-200/60"
             >
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-amber-50/50 via-transparent to-orange-50/30" />
@@ -196,7 +196,7 @@ export default async function ProductPortalPage({
 
             {/* Card 2: eBook */}
             <Link
-              href={`/${domain}/ebook?lang=${currentLang}`}
+              href={`/${locale}/${domain}/ebook?lang=${currentLang}`}
               className="group bg-white rounded-[1.5rem] p-8 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] flex flex-col justify-between min-h-[320px] relative overflow-hidden border border-zinc-200/60"
             >
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-orange-50/50 via-transparent to-amber-50/30" />

@@ -8,6 +8,8 @@
  */
 
 import nodemailer from "nodemailer";
+import fs from "fs";
+import path from "path";
 
 // ─── Mail Transport ─────────────────────────────────────────
 let _transporter: nodemailer.Transporter | null = null;
@@ -666,6 +668,19 @@ export async function sendPurchaseConfirmation(
     ? [...filled.body, ebookLines.text]
     : filled.body;
 
+  // Resolve static PDF attachment if exists
+  const attachments: any[] = [];
+  if (productName) {
+    const staticPdfPath = path.join(process.cwd(), "public", "courses", productName, `${ebookLang}.pdf`);
+    if (fs.existsSync(staticPdfPath)) {
+      attachments.push({
+        filename: `${productName}-${ebookLang}.pdf`,
+        path: staticPdfPath,
+      });
+      console.log(`[EmailService] Attached static PDF: ${staticPdfPath}`);
+    }
+  }
+
   try {
     await transporter.sendMail({
       from,
@@ -691,6 +706,7 @@ export async function sendPurchaseConfirmation(
         courseUrl,
         filled.footer,
       ),
+      attachments,
     });
 
     console.log(`✅ Email di conferma inviata a ${email} (locale: ${locale})` + (ebookDownloadUrl ? ` con ebook download link` : ""));
