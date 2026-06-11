@@ -62,6 +62,7 @@ export async function GET(
   }
 
   const lang = (url.searchParams.get("lang") as "it" | "en") ?? "it";
+  const disposition = url.searchParams.get("disposition") === "attachment" ? "attachment" : "inline";
   const content = course.languages[lang] || course.languages[course.defaultLanguage];
   if (!content) {
     return NextResponse.json({ error: "Language not found" }, { status: 404 });
@@ -76,7 +77,7 @@ export async function GET(
       return new NextResponse(pdfBuffer, {
         headers: {
           "Content-Type": "application/pdf",
-          "Content-Disposition": `attachment; filename="${filename}"`,
+          "Content-Disposition": `${disposition}; filename="${filename}"`,
           "Content-Length": pdfBuffer.length.toString(),
         },
       });
@@ -238,7 +239,7 @@ export async function GET(
   return new NextResponse(pdfBuffer, {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Content-Disposition": `${disposition}; filename="${filename}"`,
       "Content-Length": pdfBuffer.length.toString(),
     },
   });

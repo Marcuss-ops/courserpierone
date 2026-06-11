@@ -115,8 +115,8 @@ export default async function DownloadPage({
 
   const availableLanguages = availableBooks;
 
-  const downloadUrl = `/api/ebook/${domain}/download?lang=${currentLang}${token ? `&token=${token}` : ""}`;
-  const viewerUrl = `/api/ebook/${domain}/download?lang=${currentLang}${token ? `&token=${token}` : ""}`;
+  const downloadUrl = `/api/ebook/${domain}/download?lang=${currentLang}&disposition=attachment${token ? `&token=${token}` : ""}`;
+  const viewerUrl = `/api/ebook/${domain}/download?lang=${currentLang}&disposition=inline${token ? `&token=${token}` : ""}`;
 
   return (
     <AccessGate productSlug={domain} courseTitle={content.title}>

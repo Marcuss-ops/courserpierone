@@ -96,7 +96,8 @@ export default async function EbookPage({
   const lc = localeContent.course;
   const activeBook = availableBooks.find((book) => book.code === currentLang) || availableBooks[0];
   const displayedTitle = activeBook ? `${content.ebookTitle} · ${activeBook.label}` : content.ebookTitle;
-  const viewerUrl = `/api/ebook/${data.slug}/download?lang=${encodeURIComponent(currentLang)}${token ? `&token=${encodeURIComponent(token)}` : ""}`;
+  const viewerUrl = `/api/ebook/${data.slug}/download?lang=${encodeURIComponent(currentLang)}&disposition=inline${token ? `&token=${encodeURIComponent(token)}` : ""}`;
+  const downloadUrl = `/api/ebook/${data.slug}/download?lang=${encodeURIComponent(currentLang)}&disposition=attachment${token ? `&token=${encodeURIComponent(token)}` : ""}`;
 
   return (
     <div className="flex h-screen bg-[#f5f5f7] text-[#1d1d1f] font-sans overflow-hidden">
@@ -153,7 +154,7 @@ export default async function EbookPage({
               {availableBooks.map((book) => (
                 <Link
                   key={book.code}
-                  href={`?lang=${book.code}`}
+            href={`?lang=${book.code}${token ? `&token=${encodeURIComponent(token)}` : ""}`}
                   className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-colors ${
                     currentLang === book.code
                       ? "bg-zinc-900 text-white border-zinc-900"
@@ -171,7 +172,7 @@ export default async function EbookPage({
             )}
           </div>
           <a
-            href={`/api/ebook/${data.slug}/download?lang=${currentLang}`}
+            href={downloadUrl}
             download
             className="w-full py-3 rounded-xl text-xs font-black text-white flex items-center justify-center gap-2 transition-opacity"
             style={{background: `linear-gradient(135deg, ${accent} 0%, ${accent}CC 100%)`, boxShadow: `0 4px 20px ${accent}40`}}
@@ -254,7 +255,7 @@ export default async function EbookPage({
                     return (
                         <Link
                           key={book.code}
-                        href={`?lang=${encodeURIComponent(book.code)}${token ? `&token=${encodeURIComponent(token)}` : ""}`}
+                  href={`?lang=${encodeURIComponent(book.code)}${token ? `&token=${encodeURIComponent(token)}` : ""}`}
                         className={`block rounded-2xl border px-4 py-3 transition-colors ${
                           isActive
                             ? "bg-zinc-900 text-white border-zinc-900"
