@@ -2,7 +2,7 @@
   "locale": "sv",
   "seo": {
     "title": "Amish Secrets: Hur man lever med sparande och hanterar pengar",
-    "description": "Jag tillbringade tre månader i Pennsylvania med 12 Amish familjer. Ingen teori: bara deras budgetsystem, skafferi, noll skuld och reparationer. Anpassad till livet år 2026.",
+    "description": "Jag tillbringade tre år i Pennsylvania med 12 Amish familjer. Ingen teori: bara deras budgetsystem, skafferi, noll skuld och reparationer. Anpassad till livet år 2026.",
     "ogImage": "/images/amish-secrets-cover.png"
   },
   "nav": {
@@ -20,7 +20,7 @@
   "hero": {
     "badge": "Nytt nytt",
     "title": "Amish Secrets: Hur man lever med sparande och hanterar pengar",
-    "subtitle": "Jag tillbringade tre månader i Pennsylvania med 12 Amish familjer. Ingen teori: bara deras budgetsystem, skafferi, noll skuld och reparationer. Anpassad till livet år 2026.",
+    "subtitle": "Jag tillbringade tre år i Pennsylvania med 12 Amish familjer. Ingen teori: bara deras budgetsystem, skafferi, noll skuld och reparationer. Anpassad till livet år 2026.",
     "cta": "Kom igång",
     "secondary_cta": "Lär dig mer",
     "price_label": "Speciellt lanseringspris",
@@ -46,7 +46,7 @@
     "title": "Bakom denna kurs",
     "name": "Alessandro Rinaldi",
     "role": "Forskare · Författare",
-    "bio": "År 2023 bodde jag i 3 månader utan el på en Amishgård i Pennsylvania. Inget kreditkort, ingen Amazon, inga avbetalningar. Jag åt vad de åt, fastställde vad de fastställde, budgeterade som de budgeterade.",
+    "bio": "År 2023 bodde jag i 3 år utan el på en Amishgård i Pennsylvania. Inget kreditkort, ingen Amazon, inga avbetalningar. Jag åt vad de åt, fastställde vad de fastställde, budgeterade som de budgeterade.",
     "tags": [
       "Finansiell visdom",
       "Hållbart liv",
@@ -113,7 +113,7 @@
         "role": "Rom – tidiga läsare"
       },
       {
-        "text": "Det oändliga skafferiet förändrade mitt liv. Jag har inte kastat bort mat på 3 månader och sparar ca $ 120 / månad. Mycket rekommenderat!",
+        "text": "Det oändliga skafferiet förändrade mitt liv. Jag har inte kastat bort mat på 3 år och sparar ca $ 120 / månad. Mycket rekommenderat!",
         "name": "Lucia G.",
         "role": "Milan - tidig läsare"
       },
@@ -259,7 +259,7 @@
       "behind_course": "Bakom denna kurs",
       "your_name": "Ditt namn här",
       "researcher_author": "Forskare · Författare",
-      "author_bio": "År 2023 bodde jag i 3 månader utan el på en Amishgård i Pennsylvania. Inget kreditkort, ingen Amazon, inga avbetalningar. Jag åt vad de åt, fastställde vad de fastställde, budgeterade som de budgeterade.",
+      "author_bio": "År 2023 bodde jag i 3 år utan el på en Amishgård i Pennsylvania. Inget kreditkort, ingen Amazon, inga avbetalningar. Jag åt vad de åt, fastställde vad de fastställde, budgeterade som de budgeterade.",
       "section_content": "// 04 - Kursinnehåll",
       "what_inside": "Vad du hittar inuti",
       "also_includes": "Inkluderar också:",
@@ -358,7 +358,7 @@
       "footer_email": "info@courssy.com",
       "top_bar": "lansering erbjuder aktiv: omedelbar tillgång till hela metoden",
       "hero_badge": "Metod som testats i Italien • 2026",
-      "hero_subtitle": "Jag tillbringade tre månader i Pennsylvania med 12 Amish familjer. Ingen teori: bara deras budgetsystem, skafferi, noll skuld och reparationer. Anpassad till livet år 2026.",
+      "hero_subtitle": "Jag tillbringade tre år i Pennsylvania med 12 Amish familjer. Ingen teori: bara deras budgetsystem, skafferi, noll skuld och reparationer. Anpassad till livet år 2026.",
       "hero_cta_prefix": "Jag vill ha metoden för",
       "hero_readers": "1 247+ läsare",
       "hero_no_sub": "Inga abonnemang",
@@ -373,7 +373,7 @@
       "problem_3_text": "Kreditkort, avbetalningar, prenumerationer. Du jobbar mer men matematiken lägger aldrig till. Du känner dig fångad.",
       "author_title": "Jag föddes inte Amish. Jag kopierade precis vad som fungerar.",
       "author_role": "Forskare · Författare · Traveler",
-      "author_bio_1": "År 2023 bodde jag i 3 månader utan el på en Amishgård i Pennsylvania. Inget kreditkort, ingen Amazon, inga avbetalningar. Jag åt vad de åt, fastställde vad de fastställde, budgeterade som de budgeterade.",
+      "author_bio_1": "År 2023 bodde jag i 3 år utan el på en Amishgård i Pennsylvania. Inget kreditkort, ingen Amazon, inga avbetalningar. Jag åt vad de åt, fastställde vad de fastställde, budgeterade som de budgeterade.",
       "author_bio_2": "Jag dokumenterade hur 12 Amish-familjer hanterar pengar utan banker: ett lakan fälldes i 4 (budgeten), ett skafferi som varar 90 dagar, ett system som aldrig har skuld. Jag såg familjer höja 6 barn på en enda inkomst - skuldfri.",
       "author_bio_3": "Tillbaka hem översatte jag allt för personer som bor i lägenheter i Milano, Berlin eller New York - med inteckningar, stormarknader och räkningar. Jag kallade det för Amish Secrets. Ingen folklore, bara praxis som fungerar.",
       "transform_title": "Vilka förändringar i 30 dagar",

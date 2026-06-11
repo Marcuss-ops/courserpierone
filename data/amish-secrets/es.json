@@ -2,7 +2,7 @@
   "locale": "es",
   "seo": {
     "title": "Secretos Amish: Cómo vivir con ahorros y gestionar dinero",
-    "description": "Pasé 3 meses en Pensilvania con 12 familias Amish. Ninguna teoría: sólo su sistema presupuestario, despensa, deuda cero y reparaciones. Adaptado a la vida en 2026.",
+    "description": "Pasé 3 años en Pensilvania con 12 familias Amish. Ninguna teoría: sólo su sistema presupuestario, despensa, deuda cero y reparaciones. Adaptado a la vida en 2026.",
     "ogImage": "/images/amish-secrets-cover.png"
   },
   "nav": {
@@ -20,7 +20,7 @@
   "hero": {
     "badge": "Nuevo",
     "title": "Secretos Amish: Cómo vivir con ahorros y gestionar dinero",
-    "subtitle": "Pasé 3 meses en Pensilvania con 12 familias Amish. Ninguna teoría: sólo su sistema presupuestario, despensa, deuda cero y reparaciones. Adaptado a la vida en 2026.",
+    "subtitle": "Pasé 3 años en Pensilvania con 12 familias Amish. Ninguna teoría: sólo su sistema presupuestario, despensa, deuda cero y reparaciones. Adaptado a la vida en 2026.",
     "cta": "Empieza.",
     "secondary_cta": "Más información",
     "price_label": "Precio especial de lanzamiento",
@@ -46,7 +46,7 @@
     "title": "Detrás de este curso",
     "name": "Alessandro Rinaldi",
     "role": "Investigador · Autor",
-    "bio": "En 2023 viví durante 3 meses sin electricidad en una granja Amish en Pennsylvania. Sin tarjeta de crédito, sin Amazon, sin cuotas. Me comí lo que comieron, arreglé lo que arreglaron, presupuestaron como lo presupuestaron.",
+    "bio": "En 2023 viví durante 3 años sin electricidad en una granja Amish en Pennsylvania. Sin tarjeta de crédito, sin Amazon, sin cuotas. Me comí lo que comieron, arreglé lo que arreglaron, presupuestaron como lo presupuestaron.",
     "tags": [
       "Sabiduría financiera",
       "Vida sostenible",
@@ -113,7 +113,7 @@
         "role": "Roma — lectores tempranos"
       },
       {
-        "text": "La despensa infinita cambió mi vida. No he tirado comida en 3 meses y ahorrando unos $120/mes. Muy recomendable!",
+        "text": "La despensa infinita cambió mi vida. No he tirado comida en 3 años y ahorrando unos $120/mes. Muy recomendable!",
         "name": "Lucia G.",
         "role": "Milán — lector temprano"
       },
@@ -259,7 +259,7 @@
       "behind_course": "Detrás de este curso",
       "your_name": "Su nombre aquí",
       "researcher_author": "Investigador · Autor",
-      "author_bio": "En 2023 viví durante 3 meses sin electricidad en una granja Amish en Pennsylvania. Sin tarjeta de crédito, sin Amazon, sin cuotas. Me comí lo que comieron, arreglé lo que arreglaron, presupuestaron como lo presupuestaron.",
+      "author_bio": "En 2023 viví durante 3 años sin electricidad en una granja Amish en Pennsylvania. Sin tarjeta de crédito, sin Amazon, sin cuotas. Me comí lo que comieron, arreglé lo que arreglaron, presupuestaron como lo presupuestaron.",
       "section_content": "// 04 - Contenido del curso",
       "what_inside": "Lo que encontrarás dentro",
       "also_includes": "También incluye:",
@@ -358,7 +358,7 @@
       "footer_email": "info@courssy.com",
       "top_bar": "🔥 Lanzar oferta activa: acceso instantáneo al método completo",
       "hero_badge": "Método probado en Italia • 2026",
-      "hero_subtitle": "Pasé 3 meses en Pensilvania con 12 familias Amish. Ninguna teoría: sólo su sistema presupuestario, despensa, deuda cero y reparaciones. Adaptado a la vida en 2026.",
+      "hero_subtitle": "Pasé 3 años en Pensilvania con 12 familias Amish. Ninguna teoría: sólo su sistema presupuestario, despensa, deuda cero y reparaciones. Adaptado a la vida en 2026.",
       "hero_cta_prefix": "Quiero el método para",
       "hero_readers": "1.247+ lectores",
       "hero_no_sub": "No suscripciones",
@@ -373,7 +373,7 @@
       "problem_3_text": "Tarjeta de crédito, cuotas, suscripciones. Trabajas más pero las matemáticas nunca se suman. Te sientes atrapado.",
       "author_title": "No nací Amish. Acabo de copiar lo que funciona.",
       "author_role": "Investigador · Autor · Viajero",
-      "author_bio_1": "En 2023 viví durante 3 meses sin electricidad en una granja Amish en Pennsylvania. Sin tarjeta de crédito, sin Amazon, sin cuotas. Me comí lo que comieron, arreglé lo que arreglaron, presupuestaron como lo presupuestaron.",
+      "author_bio_1": "En 2023 viví durante 3 años sin electricidad en una granja Amish en Pennsylvania. Sin tarjeta de crédito, sin Amazon, sin cuotas. Me comí lo que comieron, arreglé lo que arreglaron, presupuestaron como lo presupuestaron.",
       "author_bio_2": "documenté cómo 12 familias Amish manejan dinero sin bancos: una hoja plegada en 4 (el presupuesto), una despensa que dura 90 días, un sistema que nunca tiene deuda. Vi a las familias criar a 6 niños en un solo ingreso, sin deudas.",
       "author_bio_3": "En casa traduje todo para personas que viven en apartamentos en Milán, Berlín o Nueva York, con hipotecas, supermercados y facturas. Lo llamé Secretos Amish. Sin folclore, practica eso funciona.",
       "transform_title": "Qué cambia en 30 días",

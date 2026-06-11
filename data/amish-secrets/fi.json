@@ -2,7 +2,7 @@
   "locale": "fi",
   "seo": {
     "title": "Amish Secrets: Miten elää säästöt ja hallita rahaa",
-    "description": "Vietin 3 kuukautta Pennsylvaniassa 12 amishin perheen kanssa. Ei teoriaa: vain budjettijärjestelmä, ruokakomero, nolla velkaa, ja korjaukset. Sopeutunut elämään vuonna 2026.",
+    "description": "Vietin 3 vuotta Pennsylvaniassa 12 amishin perheen kanssa. Ei teoriaa: vain budjettijärjestelmä, ruokakomero, nolla velkaa, ja korjaukset. Sopeutunut elämään vuonna 2026.",
     "ogImage": "/images/amish-secrets-cover.png"
   },
   "nav": {
@@ -20,7 +20,7 @@
   "hero": {
     "badge": "Uusi",
     "title": "Amish Secrets: Miten elää säästöt ja hallita rahaa",
-    "subtitle": "Vietin 3 kuukautta Pennsylvaniassa 12 amishin perheen kanssa. Ei teoriaa: vain budjettijärjestelmä, ruokakomero, nolla velkaa, ja korjaukset. Sopeutunut elämään vuonna 2026.",
+    "subtitle": "Vietin 3 vuotta Pennsylvaniassa 12 amishin perheen kanssa. Ei teoriaa: vain budjettijärjestelmä, ruokakomero, nolla velkaa, ja korjaukset. Sopeutunut elämään vuonna 2026.",
     "cta": "Aloita",
     "secondary_cta": "Lue lisää",
     "price_label": "Erityinen käynnistyshinta",
@@ -46,7 +46,7 @@
     "title": "Tämän kurssin takana",
     "name": "Alessandro Rinaldi",
     "role": "Tutkija · Tekijä",
-    "bio": "Vuonna 2023 asuin 3 kuukautta ilman sähköä amissifarmilla Pennsylvaniassa. Ei luottokorttia, Amazonia tai eriä. Söin sen, mitä he söivät. Korjasin sen, minkä he korjasivat.",
+    "bio": "Vuonna 2023 asuin 3 vuotta ilman sähköä amissifarmilla Pennsylvaniassa. Ei luottokorttia, Amazonia tai eriä. Söin sen, mitä he söivät. Korjasin sen, minkä he korjasivat.",
     "tags": [
       "Taloudellinen viisaus",
       "Kestävä elämä",
@@ -259,7 +259,7 @@
       "behind_course": "Tämän kurssin takana",
       "your_name": "Nimi tässä",
       "researcher_author": "Tutkija · Tekijä",
-      "author_bio": "Vuonna 2023 asuin 3 kuukautta ilman sähköä amissifarmilla Pennsylvaniassa. Ei luottokorttia, Amazonia tai eriä. Söin sen, mitä he söivät. Korjasin sen, minkä he korjasivat.",
+      "author_bio": "Vuonna 2023 asuin 3 vuotta ilman sähköä amissifarmilla Pennsylvaniassa. Ei luottokorttia, Amazonia tai eriä. Söin sen, mitä he söivät. Korjasin sen, minkä he korjasivat.",
       "section_content": "// 04 ",
       "what_inside": "Mitä löydät sisältä",
       "also_includes": "Sisältää myös:",
@@ -358,7 +358,7 @@
       "footer_email": "info@courssy.com",
       "top_bar": "",
       "hero_badge": "Italiassa testattu menetelmä 2026",
-      "hero_subtitle": "Vietin 3 kuukautta Pennsylvaniassa 12 amishin perheen kanssa. Ei teoriaa: vain budjettijärjestelmä, ruokakomero, nolla velkaa, ja korjaukset. Sopeutunut elämään vuonna 2026.",
+      "hero_subtitle": "Vietin 3 vuotta Pennsylvaniassa 12 amishin perheen kanssa. Ei teoriaa: vain budjettijärjestelmä, ruokakomero, nolla velkaa, ja korjaukset. Sopeutunut elämään vuonna 2026.",
       "hero_cta_prefix": "Haluan menetelmän",
       "hero_readers": "1 247+ lukijaa",
       "hero_no_sub": "Ei tilausta",
@@ -373,7 +373,7 @@
       "problem_3_text": "Luottokortti, erät, tilaukset. Teet enemmän töitä, mutta matematiikka ei täsmää. Tunnet olevasi ansassa.",
       "author_title": "En syntynyt amishiksi. Kopioin vain mikä toimii.",
       "author_role": "Tutkija · Tekijä · Traveler",
-      "author_bio_1": "Vuonna 2023 asuin 3 kuukautta ilman sähköä amissifarmilla Pennsylvaniassa. Ei luottokorttia, Amazonia tai eriä. Söin sen, mitä he söivät. Korjasin sen, minkä he korjasivat.",
+      "author_bio_1": "Vuonna 2023 asuin 3 vuotta ilman sähköä amissifarmilla Pennsylvaniassa. Ei luottokorttia, Amazonia tai eriä. Söin sen, mitä he söivät. Korjasin sen, minkä he korjasivat.",
       "author_bio_2": "Olen dokumentoinut, miten 12 amish perheet hallita rahaa ilman pankkeja: arkin taitettu 4 (budjetti), ruokakomero, joka kestää 90 päivää, järjestelmä koskaan velkaa. Näin, kun perheet kasvattivat 6 lasta yhdellä tulolla.",
       "author_bio_3": "Kotona käänsin kaiken ihmisille, jotka asuvat asunnoissa Milanossa, Berliinissä tai New Yorkissa. Kutsuin sitä Amish Secretsiksi. Ei kansanperinnettä. Harjoittele vain.",
       "transform_title": "Mikä muuttuu 30 päivässä",
