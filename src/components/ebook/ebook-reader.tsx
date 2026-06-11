@@ -88,6 +88,22 @@ export function EbookReader({
     }
   }, [progressKey, totalPagesKey, course.ebookChapters]);
 
+  // Keyboard Arrow Page Navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "TEXTAREA") {
+        return;
+      }
+      if (e.key === "ArrowLeft") {
+        updatePage(currentPage - 1);
+      } else if (e.key === "ArrowRight") {
+        updatePage(currentPage + 1);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentPage, totalPages]);
+
   // Persist current page changes
   const updatePage = (page: number) => {
     const validPage = Math.max(1, Math.min(page, totalPages));
