@@ -16,7 +16,6 @@ import {
 import { getCourseConfig } from "@/lib/config/white-label-data";
 import { MobileSidebar } from "@/components/layout/mobile-sidebar";
 import { SidebarToggleBtn } from "@/components/layout/sidebar-toggle-btn";
-import { sanitizeHtml } from "@/lib/utils/sanitize";
 import { loadLocaleContentSafe } from "@/lib/i18n/load-locale-content";
 import { getAvailableEbookBooks } from "@/lib/books/ebook-catalog";
 
@@ -78,10 +77,10 @@ export default async function EbookPage({
   searchParams,
 }: {
   params: Promise<{ locale: string; domain: string }>;
-  searchParams: Promise<{ lang?: string }>;
+  searchParams: Promise<{ lang?: string; token?: string }>;
 }) {
   const { domain } = await params;
-  const { lang } = await searchParams;
+  const { lang, token } = await searchParams;
   const data = await getCourseConfig(domain);
 
   if (!data) return notFound();
@@ -96,6 +95,8 @@ export default async function EbookPage({
   const localeContent = loadLocaleContentSafe(domain, currentLang);
   const lc = localeContent.course;
   const activeBook = availableBooks.find((book) => book.code === currentLang) || availableBooks[0];
+  const displayedTitle = activeBook ? `${content.ebookTitle} · ${activeBook.label}` : content.ebookTitle;
+  const viewerUrl = `/api/ebook/${data.slug}/download?lang=${encodeURIComponent(currentLang)}${token ? `&token=${encodeURIComponent(token)}` : ""}`;
 
   return (
     <div className="flex h-screen bg-[#f5f5f7] text-[#1d1d1f] font-sans overflow-hidden">
@@ -190,42 +191,104 @@ export default async function EbookPage({
               <Menu className="w-6 h-6" />
             </SidebarToggleBtn>
             <div className="flex items-center gap-2">
-               <button className="p-2 text-zinc-400 hover:text-zinc-800 transition-colors">
-                  <Bookmark className="w-4 h-4" />
-               </button>
-               <button className="p-2 text-zinc-400 hover:text-zinc-800 transition-colors">
-                  <Share2 className="w-4 h-4" />
-               </button>
+              <button className="p-2 text-zinc-400 hover:text-zinc-800 transition-colors">
+                <Bookmark className="w-4 h-4" />
+              </button>
+              <button className="p-2 text-zinc-400 hover:text-zinc-800 transition-colors">
+                <Share2 className="w-4 h-4" />
+              </button>
             </div>
             <div className="h-4 w-px bg-zinc-200" />
             <div className="flex items-center gap-4 text-xs font-bold">
-               <span className="text-zinc-400 uppercase tracking-widest">{lc.page_label || "Page"}</span>
-               <div className="flex items-center gap-1">
-                  <input type="text" defaultValue="1" className="w-8 bg-zinc-50 border border-zinc-200 rounded-lg py-1 text-center text-zinc-800" />
-                  <span className="text-zinc-400">/ 120</span>
-               </div>
+              <span className="text-zinc-400 uppercase tracking-widest">{lc.page_label || "Page"}</span>
+              <div className="flex items-center gap-1">
+                <input type="text" defaultValue="1" className="w-8 bg-zinc-50 border border-zinc-200 rounded-lg py-1 text-center text-zinc-800" />
+                <span className="text-zinc-400">/ PDF</span>
+              </div>
             </div>
           </div>
 
           <div className="flex items-center gap-4 uppercase font-black text-[10px] tracking-tighter text-zinc-400">
-             {data.slug}.
+            {data.slug}.
           </div>
         </header>
 
-        {/* Paper Content */}
+        {/* Reader */}
         <div className="flex-1 overflow-y-auto custom-scrollbar p-8 lg:p-20 flex justify-center">
-           <article className="max-w-3xl w-full bg-white p-12 lg:p-20 rounded-[2.5rem] border border-zinc-200 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1 rounded-full" style={{ background: `linear-gradient(to right, transparent, ${accent}40, transparent)` }} />
-              
-              <div className="prose prose-zinc max-w-none">
-                <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.ebookContent.replace(/\n/g, '<br/>')) }} className="text-zinc-800 leading-[2] font-medium text-lg" />
+          <article className="max-w-5xl w-full bg-white rounded-[2.5rem] border border-zinc-200 shadow-sm overflow-hidden">
+            <div className="px-8 lg:px-10 py-6 border-b border-zinc-100 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">Libreria PDF</p>
+                <h1 className="text-2xl lg:text-3xl font-black text-zinc-900 tracking-tight mt-1">
+                  {displayedTitle}
+                </h1>
+                <p className="text-sm text-zinc-500 mt-2">
+                  {availableBooks.length} file disponibili nel catalogo locale.
+                </p>
               </div>
+              <a
+                href={viewerUrl}
+                download
+                className="inline-flex items-center gap-2 px-4 py-3 rounded-xl text-xs font-black text-white transition-opacity hover:opacity-90"
+                style={{
+                  background: `linear-gradient(135deg, ${accent} 0%, ${accent}CC 100%)`,
+                  boxShadow: `0 4px 20px ${accent}40`,
+                }}
+              >
+                <Download className="w-4 h-4" />
+                {lc.download_pdf || "Download PDF"}
+              </a>
+            </div>
 
-              <div className="mt-20 pt-10 border-t border-zinc-100 flex justify-between items-center opacity-30">
-                 <span className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500">{content.ebookTitle}</span>
-                 <span className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500">Pagina 1</span>
+            <div className="grid grid-cols-1 xl:grid-cols-[280px_1fr] min-h-[72vh]">
+              <aside className="border-b xl:border-b-0 xl:border-r border-zinc-100 bg-zinc-50/70 p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xs font-black uppercase tracking-[0.3em] text-zinc-500">Catalogo</h2>
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">
+                    {availableBooks.length}
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {availableBooks.map((book) => {
+                    const isActive = book.code === currentLang;
+                    return (
+                        <Link
+                          key={book.code}
+                        href={`?lang=${encodeURIComponent(book.code)}${token ? `&token=${encodeURIComponent(token)}` : ""}`}
+                        className={`block rounded-2xl border px-4 py-3 transition-colors ${
+                          isActive
+                            ? "bg-zinc-900 text-white border-zinc-900"
+                            : "bg-white text-zinc-700 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-100"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <div className="text-[10px] font-black uppercase tracking-[0.25em] opacity-70">
+                              {book.label}
+                            </div>
+                            <div className="text-sm font-bold mt-1 truncate">
+                              {book.fileName}
+                            </div>
+                          </div>
+                          <span className={`text-[10px] font-black uppercase tracking-widest ${isActive ? "text-white" : "text-zinc-400"}`}>
+                            Open
+                          </span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </aside>
+
+              <div className="bg-zinc-100">
+                <iframe
+                  src={viewerUrl}
+                  className="w-full h-[72vh] border-0"
+                  title={displayedTitle}
+                />
               </div>
-           </article>
+            </div>
+          </article>
         </div>
 
         {/* Bottom Navigation (Floating) */}
@@ -234,7 +297,7 @@ export default async function EbookPage({
               <ChevronLeft className="w-5 h-5" />
            </button>
            <div className="h-6 w-px bg-zinc-200" />
-           <span className="px-4 text-xs font-black uppercase tracking-widest text-zinc-800">{lc.chapter || "Chapter"} 1</span>
+           <span className="px-4 text-xs font-black uppercase tracking-widest text-zinc-800">{activeBook?.label || lc.chapter || "Chapter"}</span>
            <div className="h-6 w-px bg-zinc-200" />
            <button className="p-3 text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50 transition-colors rounded-xl">
               <ChevronRight className="w-5 h-5" />
