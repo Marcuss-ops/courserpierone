@@ -49,7 +49,7 @@ const FALLBACK_LABELS: Record<string, Record<string, string>> = {
     behind_course: "Chi c'è dietro questo corso",
     your_name: "Alessandro Rinaldi",
     researcher_author: "Ricercatore · Autore · Viaggiatore",
-    author_bio: "Ho vissuto 3 mesi in Pennsylvania, intervistato 12 famiglie Amish e studiato il loro sistema economico.",
+    author_bio: "Ho vissuto 3 anni in Pennsylvania, intervistato 12 famiglie Amish e studiato il loro sistema economico.",
     section_content: "// 04 — Contenuto del Corso",
     what_inside: "Cosa Troverai Dentro",
     also_includes: "Include anche:",
