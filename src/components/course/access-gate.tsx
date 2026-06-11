@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Lock, Play, ArrowRight, Eye, ShieldAlert, Sparkles } from "lucide-react";
 
 interface AccessGateProps {
@@ -13,16 +13,20 @@ interface AccessGateProps {
 export function AccessGate({ productSlug, courseTitle, children }: AccessGateProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Extract locale from pathname (e.g., "/en/amish-secrets/portal" → "en")
   const locale = pathname.split("/")[1] || "en";
+  const token = searchParams.get("token") ?? undefined;
 
   useEffect(() => {
     async function checkAccess() {
       try {
-        const res = await fetch(`/api/access?productId=${productSlug}`);
+        const params = new URLSearchParams({ productId: productSlug });
+        if (token) params.set("token", token);
+        const res = await fetch(`/api/access?${params.toString()}`);
         const data = await res.json();
         setHasAccess(data.hasAccess);
       } catch (e) {
@@ -33,7 +37,7 @@ export function AccessGate({ productSlug, courseTitle, children }: AccessGatePro
       }
     }
     void checkAccess();
-  }, [productSlug]);
+  }, [productSlug, token]);
 
   if (loading) {
     return (

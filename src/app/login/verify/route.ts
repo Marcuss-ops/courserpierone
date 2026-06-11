@@ -3,10 +3,16 @@ import { cookies } from "next/headers";
 import { prisma } from "@/lib/db/prisma";
 import { encode } from "next-auth/jwt";
 
-async function getProductSlug(productId: string): Promise<string | null> {
+async function getProductSlug(productIdentifier: string): Promise<string | null> {
   try {
+    const bySlug = await prisma.product.findUnique({
+      where: { slug: productIdentifier },
+      select: { slug: true },
+    });
+    if (bySlug) return bySlug.slug;
+
     const product = await prisma.product.findUnique({
-      where: { id: productId },
+      where: { id: productIdentifier },
       select: { slug: true },
     });
     return product?.slug || null;
@@ -19,6 +25,10 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const token = searchParams.get("token");
   const productId = searchParams.get("productId");
+  const lang =
+    searchParams.get("lang") ??
+    request.cookies.get("locale")?.value?.split("-")[0] ??
+    "it";
 
   if (!token) {
     return NextResponse.redirect(new URL("/login?error=missing_token", request.url));
@@ -84,7 +94,12 @@ export async function GET(request: NextRequest) {
   if (targetProductId) {
     const targetSlug = await getProductSlug(targetProductId);
     if (targetSlug) {
-      return NextResponse.redirect(new URL(`/${targetSlug}/curso/lesson-1?lang=it`, request.url));
+      return NextResponse.redirect(
+        new URL(
+          `/${targetSlug}/download?lang=${encodeURIComponent(lang)}&token=${encodeURIComponent(token)}`,
+          request.url
+        )
+      );
     }
   }
 

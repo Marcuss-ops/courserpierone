@@ -41,10 +41,11 @@ export async function POST(request: NextRequest) {
       data: { email, token, productId: productId || null, expiresAt },
     });
 
-    const magicUrl = `${process.env.NEXT_PUBLIC_APP_URL}/login/verify?token=${token}${productId ? `&productId=${productId}` : ""}`;
-
     // Determine target locale (param -> cookie -> default en)
     const userLocale = locale || (request.cookies ? request.cookies.get("locale")?.value : null) || "en";
+    const magicUrl = `${process.env.NEXT_PUBLIC_APP_URL}/login/verify?token=${token}` +
+      `${productId ? `&productId=${encodeURIComponent(productId)}` : ""}` +
+      `&lang=${encodeURIComponent(userLocale)}`;
 
     // Invia email col magic link (in sviluppo logga al terminale, in produzione spedisce)
     await sendMagicLinkEmail(email, magicUrl, productName, userLocale);
