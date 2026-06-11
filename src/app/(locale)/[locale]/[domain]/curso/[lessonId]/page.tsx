@@ -85,7 +85,7 @@ export default async function CoursePage({
   params: Promise<{ locale: string; domain: string; lessonId: string }>;
   searchParams: Promise<{ lang?: string; token?: string; theme?: string }>;
 }) {
-  const { domain, lessonId } = await params;
+  const { locale, domain, lessonId } = await params;
   const { lang, theme } = await searchParams;
   const isDark = theme === "dark";
   const isLight = !isDark;
@@ -98,6 +98,7 @@ export default async function CoursePage({
 
   const currentLang = lang || (course.defaultLanguage as string) || "en";
   const currentLesson = course.lessons.find((l) => l.id === lessonId) || course.lessons[0];
+  const basePath = `/${locale}/${domain}`;
 
   const currentIdx = course.lessons.findIndex((l) => l.id === currentLesson.id);
   const prevLesson = currentIdx > 0 ? course.lessons[currentIdx - 1] : null;
@@ -159,7 +160,7 @@ export default async function CoursePage({
                     }`}>
                       {prevLesson ? (
                         <Link
-                          href={`/${domain}/curso/${prevLesson.id}?lang=${currentLang}${isDark ? "&theme=dark" : ""}`}
+                          href={`${basePath}/curso/${prevLesson.id}?lang=${currentLang}${isDark ? "&theme=dark" : ""}`}
                           className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-bold transition-all border ${
                             isLight 
                               ? "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 border-zinc-200" 
@@ -175,7 +176,7 @@ export default async function CoursePage({
 
                       {nextLesson ? (
                         <Link
-                          href={`/${domain}/curso/${nextLesson.id}?lang=${currentLang}${isDark ? "&theme=dark" : ""}`}
+                          href={`${basePath}/curso/${nextLesson.id}?lang=${currentLang}${isDark ? "&theme=dark" : ""}`}
                           className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-bold transition-all border ${
                             isLight 
                               ? "bg-zinc-100 text-accent-primary hover:bg-zinc-200 border-zinc-200" 
@@ -215,7 +216,7 @@ export default async function CoursePage({
             isLight ? "bg-white border-l border-zinc-200/80 text-zinc-800" : "bg-[#2c2c2e] border-l border-white/10 text-zinc-200"
           }`}>
             <div className={`p-8 border-b ${isLight ? "border-zinc-200" : "border-white/5"}`}>
-              <Link href={`/${domain}/portal?lang=${currentLang}`} className={`flex items-center gap-2 transition-all duration-200 mb-6 text-[10px] font-black uppercase tracking-[0.2em] ${
+              <Link href={`${basePath}/portal?lang=${currentLang}`} className={`flex items-center gap-2 transition-all duration-200 mb-6 text-[10px] font-black uppercase tracking-[0.2em] ${
                 isLight ? "text-zinc-400 hover:text-zinc-900" : "text-zinc-500 hover:text-zinc-200"
               }`}>
                 <ChevronLeft className="w-4 h-4" />
@@ -235,7 +236,7 @@ export default async function CoursePage({
               {course.lessons.map((lesson) => (
                 <Link
                   key={lesson.id}
-                  href={`/${domain}/curso/${lesson.id}?lang=${currentLang}${isDark ? "&theme=dark" : ""}`}
+                  href={`${basePath}/curso/${lesson.id}?lang=${currentLang}${isDark ? "&theme=dark" : ""}`}
                   className={`flex items-start gap-4 p-4 rounded-2xl transition-all duration-200 group ${
                     lesson.id === lessonId
                       ? (isLight ? "bg-zinc-100 border border-zinc-200 shadow-sm" : "bg-white/10 border border-white/10 shadow-sm")

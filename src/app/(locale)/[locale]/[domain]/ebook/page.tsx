@@ -79,7 +79,7 @@ export default async function EbookPage({
   params: Promise<{ locale: string; domain: string }>;
   searchParams: Promise<{ lang?: string; token?: string }>;
 }) {
-  const { domain } = await params;
+  const { locale, domain } = await params;
   const { lang, token } = await searchParams;
   const data = await getCourseConfig(domain);
 
@@ -103,7 +103,7 @@ export default async function EbookPage({
       {/* Sidebar Struttura Libro */}
       <MobileSidebar toggleId="ebook-sidebar-toggle">
         <div className="p-8 border-b border-zinc-200/80 bg-white">
-          <Link href={`/${domain}/portal?lang=${currentLang}`} className="flex items-center gap-2 text-zinc-400 hover:text-zinc-800 transition-colors mb-6 text-xs font-bold uppercase tracking-widest">
+          <Link href={`/${locale}/${domain}/portal?lang=${currentLang}`} className="flex items-center gap-2 text-zinc-400 hover:text-zinc-800 transition-colors mb-6 text-xs font-bold uppercase tracking-widest">
             <ChevronLeft className="w-4 h-4" />
             {lc.back_to_course || "Back to Course"}
           </Link>
