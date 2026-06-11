@@ -46,6 +46,7 @@ export const metadata: Metadata = {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
   },
+  manifest: "/manifest.json",
 };
 
 export default async function RootLayout({

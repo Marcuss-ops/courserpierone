@@ -1,67 +1,41 @@
-// Courssy Service Worker — cache per navigazione offline base
-const CACHE_NAME = "courssy-v1";
-
-// Asset da cacheare all'installazione
-const PRECACHE_URLS = [
-  "/",
-  "/manifest.json",
-  "/favicon.svg",
-];
+const CACHE_NAME = "courser-v1";
+const STATIC_ASSETS = ["/", "/favicon.svg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(PRECACHE_URLS);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
   );
   self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((names) => {
-      return Promise.all(
-        names
-          .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
-      );
-    })
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
+      )
+    )
   );
   self.clients.claim();
 });
 
-// Network-first per navigazione, cache-first per asset statici
 self.addEventListener("fetch", (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
+  if (event.request.method !== "GET") return;
+  if (event.request.url.includes("/api/")) return;
 
-  // Solo richieste same-origin
-  if (url.origin !== self.location.origin) return;
-
-  // Cache-first per asset statici (js, css, immagini, font)
-  if (
-    request.destination === "style" ||
-    request.destination === "script" ||
-    request.destination === "image" ||
-    request.destination === "font"
-  ) {
-    event.respondWith(
-      caches.match(request).then((cached) => cached || fetch(request))
-    );
-    return;
-  }
-
-  // Network-first per navigazione — fallback a cache se offline
-  if (request.mode === "navigate") {
-    event.respondWith(
-      fetch(request)
+  event.respondWith(
+    caches.match(event.request).then((cached) => {
+      const fetched = fetch(event.request)
         .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
           return response;
         })
-        .catch(() => caches.match(request))
-    );
-    return;
-  }
+        .catch(() => cached);
+
+      return cached || fetched;
+    })
+  );
 });

@@ -88,6 +88,8 @@ model Order {
   product Product @relation(fields: [productId], references: [id])
 
   @@unique([paymentProvider, providerOrderId])
+  @@index([createdAt])
+  @@index([userId])
 }
 
 // ─── Utenti ─────────────────────────────────────────────────
@@ -197,6 +199,9 @@ model AnalyticEvent {
   createdAt DateTime @default(now())
 
   visitor VisitorSession? @relation(fields: [sessionId], references: [id])
+
+  @@index([eventType, createdAt])
+  @@index([productId])
 }
 
 // ─── Sessioni Visitatore (per funnel tracking) ──────────────
@@ -301,6 +306,9 @@ model AbandonedCheckout {
   updatedAt       DateTime  @updatedAt
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@index([email])
 }
 
 // ─── Magic Links ────────────────────────────────────────────

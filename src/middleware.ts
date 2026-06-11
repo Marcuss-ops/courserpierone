@@ -20,10 +20,13 @@ function isKnownPath(pathname: string): boolean {
 
 // ─── Set locale cookie helper ──────────────────
 function setLocaleCookie(response: NextResponse, locale: string) {
+  const isProd = process.env.NODE_ENV === "production";
   response.cookies.set("locale", locale, {
     path: "/",
     maxAge: 60 * 60 * 24 * 365,
     sameSite: "lax",
+    secure: isProd,
+    httpOnly: true,
   });
 }
 

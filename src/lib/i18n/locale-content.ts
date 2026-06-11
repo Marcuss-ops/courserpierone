@@ -192,6 +192,19 @@ export interface LocaleContent {
     read_label: string;
     onboarded_toast: string;
   };
+
+  /** Download page */
+  download: {
+    title: string;
+    subtitle: string;
+    download_button: string;
+    view_online: string;
+    language_label: string;
+    your_language: string;
+    other_languages: string;
+    success_message: string;
+    back_to_portal: string;
+  };
 }
 
 /**
@@ -242,6 +255,11 @@ export function createEmptyLocale(locale: string, defaults?: Partial<LocaleConte
       video_title: "", video_desc: "", lessons_count_label: "", start_label: "",
       ebook_title: "", ebook_desc: "", format_label: "", read_label: "",
       onboarded_toast: "",
+    },
+    download: {
+      title: "", subtitle: "", download_button: "", view_online: "",
+      language_label: "", your_language: "", other_languages: "",
+      success_message: "", back_to_portal: "",
     },
     ...defaults,
   };

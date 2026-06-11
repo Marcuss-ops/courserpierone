@@ -12,14 +12,16 @@ import { sendAbandonedCheckoutEmail } from "@/lib/services/email";
  */
 export async function GET(request: Request) {
   try {
-    // Protezione: richiede un secret configurato
     const authHeader = request.headers.get("authorization");
     const cronSecret = process.env.CRON_SECRET;
 
-    if (cronSecret) {
-      if (!authHeader || authHeader !== `Bearer ${cronSecret}`) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
+    if (!cronSecret) {
+      console.error("[Cron] CRON_SECRET not configured — rejecting request");
+      return NextResponse.json({ error: "Server misconfigured" }, { status: 503 });
+    }
+
+    if (!authHeader || authHeader !== `Bearer ${cronSecret}`) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Trova checkout abbandonati (pending, più vecchi di 1h, più recenti di 24h)

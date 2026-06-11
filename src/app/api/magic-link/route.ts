@@ -3,9 +3,13 @@ import { prisma } from "@/lib/db/prisma";
 import { randomBytes } from "crypto";
 import { sendMagicLinkEmail } from "@/lib/services/email";
 import { magicLinkSchema } from "@/lib/utils/validations";
+import { rateLimit, rateLimitResponse } from "@/lib/utils/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "unknown";
+    const rl = rateLimit(`magic-link:${ip}`, 5, 60 * 1000);
+    if (!rl.allowed) return rateLimitResponse(rl.resetIn);
     const body = await request.json();
     const parsed = magicLinkSchema.safeParse(body);
     if (!parsed.success) {

@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { analyticsEventSchema } from "@/lib/utils/validations";
+import { rateLimit, rateLimitResponse } from "@/lib/utils/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "unknown";
+    const rl = rateLimit(`analytics:${ip}`, 30, 60 * 1000);
+    if (!rl.allowed) return rateLimitResponse(rl.resetIn);
     const body = await request.json();
     const parsed = analyticsEventSchema.safeParse(body);
     if (!parsed.success) {
@@ -15,7 +19,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing eventType" }, { status: 400 });
     }
 
-    const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "unknown";
     const userAgent = request.headers.get("user-agent") ?? "";
 
     let resolvedSessionId: string | null = null;

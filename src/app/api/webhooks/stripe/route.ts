@@ -57,7 +57,12 @@ export async function POST(request: NextRequest) {
 
       console.log(`[Stripe] Order processed for session ${session.id}`);
     } catch (error) {
-      console.error("[Stripe] Failed to process order:", error);
+      const msg = error instanceof Error ? error.message : String(error);
+      const isTransient = msg.includes("ECONNREFUSED") || msg.includes("timeout") || msg.includes("rate limit");
+      console.error(`[Stripe] Failed to process order (${isTransient ? "retryable" : "permanent"}):`, error);
+      if (isTransient) {
+        return NextResponse.json({ error: "Temporary failure" }, { status: 503 });
+      }
     }
   }
 

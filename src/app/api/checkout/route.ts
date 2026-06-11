@@ -7,9 +7,13 @@ import { createCheckout } from "@lemonsqueezy/lemonsqueezy.js";
 import { checkoutSchema, validationErrorResponse } from "@/lib/utils/validations";
 import { parsePricesByCurrency, parseCountryOverrides } from "@/lib/utils/pricing";
 import { getCurrencyFromLocale } from "@/lib/i18n/locale-resolver";
+import { rateLimit, rateLimitResponse } from "@/lib/utils/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "unknown";
+    const rl = rateLimit(`checkout:${ip}`, 10, 60 * 1000);
+    if (!rl.allowed) return rateLimitResponse(rl.resetIn);
     const session = await getServerSession(authOptions);
     const body = await request.json();
     
@@ -137,9 +141,9 @@ export async function POST(request: NextRequest) {
           discountCode: effectiveDiscountCode,
         },
         productOptions: {
-          redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/${locale}/${product.slug}/portal?onboarded=1`,
-          receiptButtonText: "Accedi al Corso",
-          receiptLinkUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/${locale}/${product.slug}/portal`,
+          redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/${locale}/${product.slug}/download?lang=${locale}`,
+          receiptButtonText: "Scarica il tuo libro",
+          receiptLinkUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/${locale}/${product.slug}/download?lang=${locale}`,
         },
         // Prevent multiple checkouts for the same variant
         expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 min
@@ -182,7 +186,7 @@ export async function POST(request: NextRequest) {
       customer_email: userEmail || undefined,
       locale: stripeLocale as any,
       allow_promotion_codes: true,
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/${locale}/${product.slug}/portal?onboarded=1`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/${locale}/${product.slug}/download?lang=${locale}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/${product.slug}?canceled=1`,
       metadata: {
         userId: user?.id ?? "guest",
