@@ -94,7 +94,7 @@ export default async function ProductPortalPage({
 
   // Warm accent from product config, fallback to amber #C9840D
   const accent = course.accentColor ?? "#C9840D";
-  const hasVideoLessons = (course.lessons ?? []).some((lesson) =>
+  const hasVideoLessons = domain !== "amish-secrets" && (course.lessons ?? []).some((lesson) =>
     Object.values(lesson.videos ?? {}).some((videoUrl) => Boolean(videoUrl && videoUrl.trim()))
   );
 
