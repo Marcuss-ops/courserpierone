@@ -106,15 +106,15 @@ export default function SocialProof({ productSlug, locale }: SocialProofProps) {
   // Simulated fallback events when DB is empty or clean
   const getFallbackEvents = (): SocialProofEvent[] => {
     const itFallback: SocialProofEvent[] = [
-      { id: "mock-1", type: "purchase", name: "Marco", city: "Milano", timeString: "2 minuti fa" },
+      { id: "mock-1", type: "purchase", name: "Futurimilionariposta", city: "Roma", timeString: "2 minuti fa" },
       { id: "mock-2", type: "lesson", name: "Elena", city: "Madrid", lessonTitle: "Introduzione e Setup", timeString: "7 minuti fa" },
       { id: "mock-3", type: "purchase", name: "Lucas", city: "Parigi", timeString: "14 minuti fa" },
       { id: "mock-4", type: "lesson", name: "Sofia", city: "Bologna", lessonTitle: "I Primi Passi", timeString: "21 minuti fa" },
       { id: "mock-5", type: "purchase", name: "Thomas", city: "Berlino", timeString: "35 minuti fa" },
-      { id: "mock-6", type: "purchase", name: "Alessandro", city: "Torino", timeString: "50 minuti fa" },
+      { id: "mock-6", type: "purchase", name: "Diego", city: "San Paolo", timeString: "50 minuti fa" },
       { id: "mock-7", type: "lesson", name: "Emma", city: "Londra", lessonTitle: "Budget Amish", timeString: "1 ora fa" },
       { id: "mock-8", type: "purchase", name: "Dmitry", city: "Mosca", timeString: "2 ore fa" },
-      { id: "mock-9", type: "purchase", name: "Mateo", city: "Roma", timeString: "3 ore fa" },
+      { id: "mock-9", type: "purchase", name: "Yuki", city: "Tokyo", timeString: "3 ore fa" },
       { id: "mock-10", type: "lesson", name: "Giulia", city: "Napoli", lessonTitle: "Dispensa Infinita", timeString: "4 ore fa" },
     ];
     const enFallback: SocialProofEvent[] = [
@@ -203,20 +203,19 @@ export default function SocialProof({ productSlug, locale }: SocialProofProps) {
   // Format message text
   const messageText = currentEvent.type === "purchase"
     ? translations.purchase
-        .replace("{name}", currentEvent.name)
-        .replace("{city}", currentEvent.city)
+      .replace("{name}", currentEvent.name)
+      .replace("{city}", currentEvent.city)
     : translations.lesson
-        .replace("{name}", currentEvent.name)
-        .replace("{city}", currentEvent.city)
-        .replace("{lessonTitle}", currentEvent.lessonTitle || "");
+      .replace("{name}", currentEvent.name)
+      .replace("{city}", currentEvent.city)
+      .replace("{lessonTitle}", currentEvent.lessonTitle || "");
 
   return (
     <div
-      className={`fixed bottom-6 left-6 z-50 flex items-center gap-4 max-w-sm p-4 rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.15)] border transition-all duration-700 ease-out ${
-        visible
+      className={`fixed bottom-6 left-6 z-50 flex items-center gap-4 max-w-sm p-4 rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.15)] border transition-all duration-700 ease-out ${visible
           ? "opacity-100 translate-y-0 scale-100"
           : "opacity-0 translate-y-4 scale-95 pointer-events-none"
-      } bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border-zinc-200/50 dark:border-zinc-800/50 text-zinc-900 dark:text-zinc-50`}
+        } bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border-zinc-200/50 dark:border-zinc-800/50 text-zinc-900 dark:text-zinc-50`}
     >
       <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-500 shrink-0">
         {currentEvent.type === "purchase" ? (

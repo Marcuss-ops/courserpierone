@@ -242,53 +242,12 @@ export default async function EbookPage({
               </a>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-[280px_1fr] min-h-[72vh]">
-              <aside className="border-b xl:border-b-0 xl:border-r border-zinc-100 bg-zinc-50/70 p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xs font-black uppercase tracking-[0.3em] text-zinc-500">Catalogo</h2>
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">
-                    {availableBooks.length}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  {availableBooks.map((book) => {
-                    const isActive = book.code === currentLang;
-                    return (
-                        <Link
-                          key={book.code}
-                  href={`?lang=${encodeURIComponent(book.code)}${token ? `&token=${encodeURIComponent(token)}` : ""}`}
-                        className={`block rounded-2xl border px-4 py-3 transition-colors ${
-                          isActive
-                            ? "bg-zinc-900 text-white border-zinc-900"
-                            : "bg-white text-zinc-700 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-100"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between gap-3">
-                          <div>
-                            <div className="text-[10px] font-black uppercase tracking-[0.25em] opacity-70">
-                              {book.label}
-                            </div>
-                            <div className="text-sm font-bold mt-1 truncate">
-                              {book.fileName}
-                            </div>
-                          </div>
-                          <span className={`text-[10px] font-black uppercase tracking-widest ${isActive ? "text-white" : "text-zinc-400"}`}>
-                            Open
-                          </span>
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </aside>
-
-              <div className="bg-zinc-100">
-                <iframe
-                  src={viewerUrl}
-                  className="w-full h-[72vh] border-0"
-                  title={displayedTitle}
-                />
-              </div>
+            <div className="w-full bg-zinc-100 min-h-[72vh]">
+              <iframe
+                src={viewerUrl}
+                className="w-full h-[72vh] border-0"
+                title={displayedTitle}
+              />
             </div>
           </article>
         </div>

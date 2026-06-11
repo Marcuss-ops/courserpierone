@@ -200,7 +200,7 @@ describe("GET /api/analytics/dashboard", () => {
     expect(body.pageviews).toBe(100);
     expect(body.clicks).toBe(20);
     expect(body.purchases).toBe(5);
-    expect(body.totalRevenue).toBe(4900 + 2900 + 9900);
+    expect(body.totalRevenue).toBe((4900 + 2900 + 9900) / 100);
     expect(body.ctr).toBe("20.0"); // (20/100)*100
     expect(body.conversion).toBe("25.0"); // (5/20)*100
     expect(body.chartData.length).toBeGreaterThan(0);
@@ -249,7 +249,7 @@ describe("GET /api/analytics/dashboard", () => {
     const body = await response.json();
 
     // Only the valid metadata should count
-    expect(body.totalRevenue).toBe(9900);
+    expect(body.totalRevenue).toBe(9900 / 100);
   });
 
   it("returns error on prisma failure", async () => {

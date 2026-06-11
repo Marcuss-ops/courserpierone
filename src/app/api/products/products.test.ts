@@ -22,6 +22,9 @@ const mockPrisma = {
   lessonTranslation: {
     create: vi.fn(),
   },
+  analyticEvent: {
+    count: vi.fn(),
+  },
   $transaction: vi.fn(<T>(fn: (tx: typeof mockPrisma) => Promise<T>) => fn(mockPrisma)),
 };
 
@@ -67,9 +70,11 @@ describe("GET /api/products", () => {
         createdAt: new Date("2026-01-01"),
         translations: [{ locale: "it" }, { locale: "en" }],
         _count: { lessons: 5 },
+        orders: [],
       },
     ];
     mockPrisma.product.findMany.mockResolvedValue(fakeProducts);
+    mockPrisma.analyticEvent.count.mockResolvedValue(10);
 
     const { GET } = await import("./route");
     const response = await GET();

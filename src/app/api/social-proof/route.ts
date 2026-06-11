@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
     };
 
     // Helper to get city based on locale/country code
-    const getCity = (userLocale?: string | null): string => {
+    const getCity = (userLocale?: string | null, userName?: string | null, userEmail?: string | null): string => {
       const cleanLocale = (userLocale || locale).toLowerCase();
       const lang = cleanLocale.split("-")[0];
 
@@ -100,7 +100,16 @@ export async function GET(request: NextRequest) {
 
       const fallbackCities = cities.en;
       const list = cities[lang] || fallbackCities;
-      const index = Math.abs(hashCode(userLocale || "default")) % list.length;
+
+      // Specifically map futurimilionariposta to Roma
+      const nameLower = (userName || "").toLowerCase();
+      const emailLower = (userEmail || "").toLowerCase();
+      if (nameLower.includes("futurimilionari") || emailLower.includes("futurimilionari")) {
+        return "Roma";
+      }
+
+      const seed = userName || userEmail || userLocale || "default";
+      const index = Math.abs(hashCode(seed)) % list.length;
       return list[index];
     };
 
@@ -118,7 +127,7 @@ export async function GET(request: NextRequest) {
     // Map order events
     recentOrders.forEach((order) => {
       const name = formatName(order.user.name, order.user.email);
-      const city = getCity(order.locale);
+      const city = getCity(order.locale, order.user.name, order.user.email);
       events.push({
         id: `order-${order.id}`,
         type: "purchase",
@@ -132,7 +141,7 @@ export async function GET(request: NextRequest) {
     recentProgress.forEach((prog) => {
       const user = userMap.get(prog.userId);
       const name = formatName(user?.name, user?.email);
-      const city = getCity(locale); // Fallback to current viewer's locale for lesson location
+      const city = getCity(locale, user?.name, user?.email); // Fallback to current viewer's locale for lesson location
       const lessonTitle = prog.lesson.translations.find((t) => t.locale.startsWith(locale.split("-")[0]))?.title
         || prog.lesson.translations[0]?.title
         || `Lezione ${prog.lesson.position}`;
