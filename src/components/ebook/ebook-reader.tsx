@@ -8,9 +8,7 @@ import {
   BookOpen, 
   Download, 
   Menu, 
-  X,
-  Bookmark,
-  Share2
+  X
 } from "lucide-react";
 import type { CourseConfig, LanguageEntry } from "@/lib/config/white-label-data";
 import type { LocaleContent } from "@/lib/i18n/locale-content";
@@ -260,40 +258,6 @@ export function EbookReader({
           </button>
         )}
 
-        {/* Floating Header controls (Bookmark, page count) */}
-        <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
-          <div className="flex items-center gap-1.5 p-1 bg-white/90 backdrop-blur border border-zinc-200 rounded-xl shadow-md">
-            <button className="p-2 text-zinc-500 hover:text-zinc-800 transition-colors">
-              <Bookmark className="w-4 h-4" />
-            </button>
-            <button className="p-2 text-zinc-500 hover:text-zinc-800 transition-colors">
-              <Share2 className="w-4 h-4" />
-            </button>
-            <div className="h-4 w-px bg-zinc-200 mx-1" />
-            
-            {/* Interactive Page Selector */}
-            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider px-2">
-              <span className="text-zinc-400">{lc.page_label || "Page"}</span>
-              <input 
-                type="number" 
-                value={currentPage} 
-                min={1}
-                max={totalPages}
-                onChange={(e) => updatePage(parseInt(e.target.value, 10) || 1)}
-                className="w-10 bg-zinc-100 border border-zinc-200 rounded-lg py-0.5 text-center text-zinc-800 font-bold" 
-              />
-              <span className="text-zinc-400">/</span>
-              <input 
-                type="number" 
-                value={totalPages} 
-                min={1}
-                onChange={(e) => updateTotalPages(parseInt(e.target.value, 10) || 15)}
-                className="w-10 bg-zinc-100 border border-zinc-200 rounded-lg py-0.5 text-center text-zinc-400 font-bold" 
-                title="Edit total pages"
-              />
-            </div>
-          </div>
-        </div>
 
         {/* PDF Reader (Iframe) - Full screen area */}
         <div className="w-full h-full bg-zinc-900">
