@@ -274,20 +274,41 @@ export function EbookReader({
             onClick={() => updatePage(currentPage - 1)}
             disabled={currentPage <= 1}
             className="p-2.5 text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50 disabled:opacity-40 disabled:hover:bg-transparent transition-colors rounded-xl"
+            title="Precedente"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
+          
           <div className="h-5 w-px bg-zinc-200" />
-          <span 
-            className="px-4 text-[10px] font-black uppercase tracking-widest text-zinc-800 select-none"
-          >
-            {activeBook?.label || "PDF"}
-          </span>
+          
+          <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-800 px-2 select-none">
+            <span>Pag.</span>
+            <input 
+              type="number" 
+              value={currentPage} 
+              min={1}
+              max={totalPages}
+              onChange={(e) => updatePage(parseInt(e.target.value, 10) || 1)}
+              className="w-12 bg-zinc-100 border border-zinc-200 rounded-lg py-0.5 text-center text-zinc-800 font-bold" 
+            />
+            <span className="text-zinc-400">/</span>
+            <input 
+              type="number" 
+              value={totalPages} 
+              min={1}
+              onChange={(e) => updateTotalPages(parseInt(e.target.value, 10) || 15)}
+              className="w-12 bg-zinc-100 border border-zinc-200 rounded-lg py-0.5 text-center text-zinc-400 font-bold" 
+              title="Edit total pages"
+            />
+          </div>
+
           <div className="h-5 w-px bg-zinc-200" />
+          
           <button 
             onClick={() => updatePage(currentPage + 1)}
             disabled={currentPage >= totalPages}
             className="p-2.5 text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50 disabled:opacity-40 disabled:hover:bg-transparent transition-colors rounded-xl"
+            title="Successiva"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
