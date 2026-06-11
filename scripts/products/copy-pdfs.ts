@@ -14,6 +14,7 @@ const pdfMapping: Record<string, string> = {
   "Timeless Amish Principles for Modern Life.pdf": "en.pdf",
   "Wieczne zasady Amishów dla współczesnego życia.pdf": "pl.pdf",
   "Zeitlose Amish Prinzipien für das moderne Leben.pdf": "de.pdf",
+  "Zeitlose Amish Prinzipien für das moderne Leben-1.pdf": "de-1.pdf",
   "Вечные амисские принципы для современной жизни.pdf": "ru.pdf",
 };
 

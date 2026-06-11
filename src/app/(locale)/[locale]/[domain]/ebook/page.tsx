@@ -18,6 +18,7 @@ import { MobileSidebar } from "@/components/layout/mobile-sidebar";
 import { SidebarToggleBtn } from "@/components/layout/sidebar-toggle-btn";
 import { sanitizeHtml } from "@/lib/utils/sanitize";
 import { loadLocaleContentSafe } from "@/lib/i18n/load-locale-content";
+import { getAvailableEbookBooks } from "@/lib/books/ebook-catalog";
 
 export async function generateMetadata({
   params,
@@ -85,13 +86,16 @@ export default async function EbookPage({
 
   if (!data) return notFound();
 
-  const currentLang = lang || (data.defaultLanguage as string) || "en";
+  const availableBooks = getAvailableEbookBooks(domain);
+  const defaultLang = availableBooks[0]?.code || (data.defaultLanguage as string) || "en";
+  const currentLang = lang || defaultLang;
   const content = data.languages[currentLang] || data.languages[data.defaultLanguage];
 
   const accent = data.accentColor ?? "#C9840D";
 
   const localeContent = loadLocaleContentSafe(domain, currentLang);
   const lc = localeContent.course;
+  const activeBook = availableBooks.find((book) => book.code === currentLang) || availableBooks[0];
 
   return (
     <div className="flex h-screen bg-[#f5f5f7] text-[#1d1d1f] font-sans overflow-hidden">
@@ -135,9 +139,35 @@ export default async function EbookPage({
         </nav>
 
         <div className="p-6 border-t border-zinc-200 bg-white">
-          <div className="flex gap-4 mb-6 justify-center">
-             <Link href={`?lang=it`} className={`text-[10px] font-black ${currentLang === 'it' ? '' : 'text-zinc-400'}`} style={currentLang === 'it' ? { color: accent } : {}}>IT</Link>
-             <Link href={`?lang=en`} className={`text-[10px] font-black ${currentLang === 'en' ? '' : 'text-zinc-400'}`} style={currentLang === 'en' ? { color: accent } : {}}>EN</Link>
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">
+                Tutte le versioni
+              </p>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em]" style={{ color: accent }}>
+                {availableBooks.length} file
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {availableBooks.map((book) => (
+                <Link
+                  key={book.code}
+                  href={`?lang=${book.code}`}
+                  className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-colors ${
+                    currentLang === book.code
+                      ? "bg-zinc-900 text-white border-zinc-900"
+                      : "bg-zinc-50 text-zinc-500 border-zinc-200 hover:text-zinc-900 hover:border-zinc-300"
+                  }`}
+                >
+                  {book.label}
+                </Link>
+              ))}
+            </div>
+            {activeBook && (
+              <p className="mt-3 text-[10px] text-zinc-400 font-medium">
+                Versione attiva: <span className="font-black uppercase">{activeBook.label}</span>
+              </p>
+            )}
           </div>
           <a
             href={`/api/ebook/${data.slug}/download?lang=${currentLang}`}

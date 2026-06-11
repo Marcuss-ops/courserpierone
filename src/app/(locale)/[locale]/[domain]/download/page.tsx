@@ -8,6 +8,7 @@ import { Download, BookOpen, ArrowLeft, Globe, CheckCircle, ExternalLink } from 
 import { getCourseConfig } from "@/lib/config/white-label-data";
 import { AccessGate } from "@/components/course/access-gate";
 import { loadLocaleContentSafe } from "@/lib/i18n/load-locale-content";
+import { getAvailableEbookBooks } from "@/lib/books/ebook-catalog";
 
 const LANGUAGE_NAMES: Record<string, string> = {
   it: "Italiano",
@@ -102,7 +103,8 @@ export default async function DownloadPage({
   const course = await getCourseConfig(domain);
   if (!course) return notFound();
 
-  const currentLang = lang || locale.split("-")[0] || course.defaultLanguage || "en";
+  const availableBooks = getAvailableEbookBooks(domain);
+  const currentLang = lang || availableBooks[0]?.code || locale.split("-")[0] || course.defaultLanguage || "en";
   const content = course.languages[currentLang] || course.languages[course.defaultLanguage];
 
   const localeContent = loadLocaleContentSafe(domain, currentLang);
@@ -111,9 +113,7 @@ export default async function DownloadPage({
   const accent = course.accentColor ?? "#C9840D";
   const ebookTitle = content.ebookTitle || content.title;
 
-  const availableLanguages = Object.keys(course.languages).filter(
-    (l) => course.languages[l]?.ebookContent
-  );
+  const availableLanguages = availableBooks;
 
   const downloadUrl = `/api/ebook/${domain}/download?lang=${currentLang}${token ? `&token=${token}` : ""}`;
   const viewerUrl = `/api/ebook/${domain}/download?lang=${currentLang}${token ? `&token=${token}` : ""}`;
@@ -227,18 +227,18 @@ export default async function DownloadPage({
                 {availableLanguages.length > 1 && (
                   <div className="space-y-2">
                     <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-                      {lc.other_languages || "Altre lingue disponibili"}
+                      {lc.other_languages || "Altre versioni disponibili"}
                     </p>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                       {availableLanguages
-                        .filter((l) => l !== currentLang)
-                        .map((l) => (
+                        .filter((book) => book.code !== currentLang)
+                        .map((book) => (
                           <Link
-                            key={l}
-                            href={`/${locale}/${domain}/download?lang=${l}${token ? `&token=${token}` : ""}`}
-                            className="px-3 py-1.5 rounded-lg text-xs font-bold text-zinc-600 bg-zinc-100 hover:bg-zinc-200 transition-colors"
+                            key={book.code}
+                            href={`/${locale}/${domain}/download?lang=${book.code}${token ? `&token=${token}` : ""}`}
+                            className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest text-zinc-600 bg-zinc-100 hover:bg-zinc-200 transition-colors text-center"
                           >
-                            {LANGUAGE_NAMES[l] || l.toUpperCase()}
+                            {book.label}
                           </Link>
                         ))}
                     </div>
@@ -260,7 +260,7 @@ export default async function DownloadPage({
                 </div>
                 <div className="flex items-center gap-2 text-[10px] font-black text-zinc-400 uppercase tracking-widest">
                   <Globe className="w-3.5 h-3.5" />
-                  <span>{availableLanguages.length} Lingue</span>
+                  <span>{availableLanguages.length} Versioni</span>
                 </div>
               </div>
 
