@@ -18,6 +18,14 @@ function isKnownPath(pathname: string): boolean {
   return KNOWN_PREFIXES.some((p) => pathname.startsWith(p));
 }
 
+// Known sub-paths for products (without locale prefix)
+const PRODUCT_SUB_PATHS = ["/portal", "/download", "/curso", "/ebook"];
+
+function isProductSubPath(pathname: string): boolean {
+  return PRODUCT_SUB_PATHS.some((p) => pathname.endsWith(p)) ||
+    PRODUCT_SUB_PATHS.some((p) => pathname.includes(p + "?"));
+}
+
 // ─── Set locale cookie helper ──────────────────
 function setLocaleCookie(response: NextResponse, locale: string) {
   const isProd = process.env.NODE_ENV === "production";
@@ -118,6 +126,23 @@ export default withAuth(
 
     // ─── Case 5: Non-prefixed path (e.g. /amish-secrets) — detect and redirect ──
     if (!firstSegment || !isKnownLocale(firstSegment)) {
+      const result = resolveLocale({
+        cookieLocale,
+        acceptLanguage: req.headers.get("accept-language"),
+        ipCountry: req.headers.get("x-vercel-ip-country"),
+      });
+
+      const url = req.nextUrl.clone();
+      url.pathname = `/${result.selectedLocale}${pathname}`;
+      const redirect = NextResponse.redirect(url);
+      setLocaleCookie(redirect, result.selectedLocale);
+      return redirect;
+    }
+
+    // ─── Case 6: Product sub-path without locale (e.g. /amish-secrets/portal) ──
+    // This handles cases where the first segment looks like a product slug
+    // but the path contains a known sub-path like /portal, /download, etc.
+    if (isProductSubPath(pathname)) {
       const result = resolveLocale({
         cookieLocale,
         acceptLanguage: req.headers.get("accept-language"),

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Lock, Play, ArrowRight, Eye, ShieldAlert, Sparkles } from "lucide-react";
 
 interface AccessGateProps {
@@ -12,8 +12,12 @@ interface AccessGateProps {
 
 export function AccessGate({ productSlug, courseTitle, children }: AccessGateProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Extract locale from pathname (e.g., "/en/amish-secrets/portal" → "en")
+  const locale = pathname.split("/")[1] || "en";
 
   useEffect(() => {
     async function checkAccess() {
@@ -80,7 +84,7 @@ export function AccessGate({ productSlug, courseTitle, children }: AccessGatePro
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
           <a
-            href={`/${productSlug}`}
+            href={`/${locale}/${productSlug}`}
             className="glow-btn px-8 py-4 rounded-2xl text-sm font-black text-white premium-glass flex items-center gap-2 group w-full sm:w-auto justify-center"
           >
             <Play className="w-4 h-4 fill-current" />
@@ -88,7 +92,7 @@ export function AccessGate({ productSlug, courseTitle, children }: AccessGatePro
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </a>
           <button
-            onClick={() => router.push(`/login?productId=${productSlug}`)}
+            onClick={() => router.push(`/${locale}/login?productId=${productSlug}`)}
             className="px-8 py-4 premium-glass rounded-2xl text-sm font-black text-zinc-300 hover:text-white transition-all border border-white/5 flex items-center gap-2 w-full sm:w-auto justify-center"
           >
             <Eye className="w-4 h-4" />
