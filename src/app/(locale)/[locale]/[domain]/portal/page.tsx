@@ -94,6 +94,9 @@ export default async function ProductPortalPage({
 
   // Warm accent from product config, fallback to amber #C9840D
   const accent = course.accentColor ?? "#C9840D";
+  const hasVideoLessons = (course.lessons ?? []).some((lesson) =>
+    Object.values(lesson.videos ?? {}).some((videoUrl) => Boolean(videoUrl && videoUrl.trim()))
+  );
 
   // ID della prima lezione (per quick-start dopo acquisto)
   const firstLessonId = course.lessons?.[0]?.id ?? "lesson-1";
@@ -159,41 +162,41 @@ export default async function ProductPortalPage({
 
         {/* Hub Selection Cards */}
         <main className="max-w-5xl mx-auto px-6 py-8 md:py-12 space-y-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Card 1: Corso Video */}
-            <Link
-              href={`/${locale}/${domain}/curso/${firstLessonId}?lang=${currentLang}`}
-              className="group bg-white rounded-[1.5rem] p-8 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] flex flex-col justify-between min-h-[320px] relative overflow-hidden border border-zinc-200/60"
-            >
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-amber-50/50 via-transparent to-orange-50/30" />
-              
-              <div className="space-y-6 relative z-10">
-                <div 
-                  className="w-14 h-14 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500"
-                  style={{ backgroundColor: `${accent}12`, border: `1px solid ${accent}20` }}
-                >
-                  <Play className="w-6 h-6 fill-current" style={{ color: accent }} />
+          <div className={`grid grid-cols-1 ${hasVideoLessons ? "md:grid-cols-2" : ""} gap-8`}>
+            {hasVideoLessons && (
+              <Link
+                href={`/${locale}/${domain}/curso/${firstLessonId}?lang=${currentLang}`}
+                className="group bg-white rounded-[1.5rem] p-8 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] flex flex-col justify-between min-h-[320px] relative overflow-hidden border border-zinc-200/60"
+              >
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-amber-50/50 via-transparent to-orange-50/30" />
+                
+                <div className="space-y-6 relative z-10">
+                  <div 
+                    className="w-14 h-14 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500"
+                    style={{ backgroundColor: `${accent}12`, border: `1px solid ${accent}20` }}
+                  >
+                    <Play className="w-6 h-6 fill-current" style={{ color: accent }} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-zinc-900">
+                      {lc.video_title || "Video Course"}
+                    </h3>
+                    <p className="text-zinc-500 text-xs mt-2 font-medium leading-relaxed">
+                      {lc.video_desc || "Access video lessons, watch detailed explanations and track your progress."}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-xl font-bold text-zinc-900">
-                    {lc.video_title || "Video Course"}
-                  </h3>
-                  <p className="text-zinc-500 text-xs mt-2 font-medium leading-relaxed">
-                    {lc.video_desc || "Access video lessons, watch detailed explanations and track your progress."}
-                  </p>
+
+                <div className="flex items-center justify-between pt-6 border-t border-zinc-100 relative z-10">
+                  <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                    {course.lessons.length} {lc.lessons_count_label || "Lessons"}
+                  </span>
+                  <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest group-hover:gap-2 transition-all" style={{ color: accent }}>
+                    {lc.start_label || "Start"} <ArrowRight className="w-3.5 h-3.5" />
+                  </span>
                 </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-6 border-t border-zinc-100 relative z-10">
-                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-                  {course.lessons.length} {lc.lessons_count_label || "Lessons"}
-                </span>
-                <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest group-hover:gap-2 transition-all" style={{ color: accent }}>
-                  {lc.start_label || "Start"} <ArrowRight className="w-3.5 h-3.5" />
-                </span>
-              </div>
-            </Link>
-
+              </Link>
+            )}
             {/* Card 2: eBook */}
             <Link
               href={`/${locale}/${domain}/ebook?lang=${currentLang}`}

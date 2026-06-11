@@ -96,8 +96,9 @@ export default async function EbookPage({
   const lc = localeContent.course;
   const activeBook = availableBooks.find((book) => book.code === currentLang) || availableBooks[0];
   const displayedTitle = activeBook ? `${content.ebookTitle} · ${activeBook.label}` : content.ebookTitle;
-  const viewerUrl = `/api/ebook/${data.slug}/download?lang=${encodeURIComponent(currentLang)}&disposition=inline${token ? `&token=${encodeURIComponent(token)}` : ""}`;
-  const downloadUrl = `/api/ebook/${data.slug}/download?lang=${encodeURIComponent(currentLang)}&disposition=attachment${token ? `&token=${encodeURIComponent(token)}` : ""}`;
+  const staticBookUrl = activeBook ? `/courses/${data.slug}/${encodeURIComponent(activeBook.fileName)}` : null;
+  const viewerUrl = staticBookUrl || `/api/ebook/${data.slug}/download?lang=${encodeURIComponent(currentLang)}&disposition=inline${token ? `&token=${encodeURIComponent(token)}` : ""}`;
+  const downloadUrl = staticBookUrl || `/api/ebook/${data.slug}/download?lang=${encodeURIComponent(currentLang)}&disposition=attachment${token ? `&token=${encodeURIComponent(token)}` : ""}`;
 
   return (
     <div className="flex h-screen bg-[#f5f5f7] text-[#1d1d1f] font-sans overflow-hidden">
