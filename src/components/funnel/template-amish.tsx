@@ -54,6 +54,44 @@ interface AmishProps {
   checkoutUrl?: string;
 }
 
+const FALLBACKS: Record<string, Record<string, string>> = {
+  en: {
+    footer_email: "support@courssy.com",
+    footer_privacy: "Privacy Policy",
+    footer_terms: "Terms of Service",
+    footer_refund: "Refund Policy: 30-day money-back guarantee.",
+    footer_rights: "All rights reserved.",
+  },
+  it: {
+    footer_email: "support@courssy.com",
+    footer_privacy: "Privacy Policy",
+    footer_terms: "Termini di Servizio",
+    footer_refund: "Politica di Rimborso: Garanzia soddisatti o rimborsati di 30 giorni.",
+    footer_rights: "Tutti i diritti riservati.",
+  },
+  es: {
+    footer_email: "support@courssy.com",
+    footer_privacy: "Política de Privacidad",
+    footer_terms: "Términos de Servicio",
+    footer_refund: "Política de Reembolso: Garantía de devolución de 30 días.",
+    footer_rights: "Todos los derechos reservados.",
+  },
+  fr: {
+    footer_email: "support@courssy.com",
+    footer_privacy: "Politique de Confidentialité",
+    footer_terms: "Conditions d'Utilisation",
+    footer_refund: "Politique de Remboursement : Garantie satisfait ou remboursé de 30 jours.",
+    footer_rights: "Tous droits réservés.",
+  },
+  de: {
+    footer_email: "support@courssy.com",
+    footer_privacy: "Datenschutzerklärung",
+    footer_terms: "Nutzungsbedingungen",
+    footer_refund: "Rückerstattungsrichtlinie: 30-Tage-Geld-zurück-Garantie.",
+    footer_rights: "Alle Rechte vorbehalten.",
+  }
+};
+
 const MODULE_ICONS = [ShoppingCart, Home, TrendingDown, Wrench, User, Leaf, Zap, CalendarCheck];
 
 // ─── Component ────────────────────────────────────────────────────
@@ -94,7 +132,12 @@ export default function TemplateAmish({
   };
 
   const t = (key: string): string => {
-    const val = uiLabels[key] ?? "";
+    const langKey = locale.split("-")[0]?.toLowerCase() || "en";
+    const defaultLabels = FALLBACKS[langKey] ?? FALLBACKS["en"];
+    let val = uiLabels[key] ?? "";
+    if (!val && defaultLabels[key]) {
+      val = defaultLabels[key];
+    }
     return localizeCurrency(val);
   };
 
@@ -1051,6 +1094,11 @@ export default function TemplateAmish({
                   <a href="/terms" className="hover:text-gray-700 transition-colors">
                     {t("footer_terms")}
                   </a>
+                )}
+                {t("footer_refund") && (
+                  <span className="text-gray-500">
+                    • {t("footer_refund")}
+                  </span>
                 )}
                 {t("footer_cookies") && (
                   <a href="#" className="hover:text-gray-700 transition-colors">
