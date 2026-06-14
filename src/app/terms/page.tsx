@@ -18,8 +18,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Termini di Servizio",
-  description: "Termini e condizioni per l'utilizzo di Courssy",
+  title: "Terms & Conditions",
+  description: "Terms and conditions for using Courssy",
 };
 
 export default function TermsPage() {
@@ -51,12 +51,12 @@ export default function TermsPage() {
               className="font-serif italic font-normal text-[clamp(40px,7vw,64px)] leading-[1] tracking-[-0.5px] mb-16"
               style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
             >
-              Termini di Servizio
+              Terms & Conditions
             </h1>
 
             <div className="space-y-12 text-[17px] font-light leading-[1.75]">
               <p className="text-[22px]">
-                Ultimo aggiornamento: 1 gennaio 2026
+                Last updated: January 1, 2026
               </p>
 
               <div className="space-y-8">
@@ -64,13 +64,13 @@ export default function TermsPage() {
                   className="font-serif italic text-[28px] leading-none pt-4"
                   style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
                 >
-                  1. Accettazione
+                  1. Acceptance
                 </h2>
                 <p>
-                  Accedendo o utilizzando Courssy ("il servizio", "piattaforma"), accetti di essere vincolato da questi Termini di Servizio ("Termini"). Se non accetti questi Termini, non utilizzare il servizio.
+                  By accessing or using Courssy ("the service", "platform"), you agree to be bound by these Terms & Conditions ("Terms"). If you do not agree to these Terms, do not use the service.
                 </p>
                 <p>
-                  Utilizzando il servizio dichiari di avere almeno 18 anni e la capacità legale di stipulare contratti.
+                  By using the service, you represent that you are at least 18 years old and have the legal capacity to enter into contracts.
                 </p>
               </div>
 
@@ -79,23 +79,23 @@ export default function TermsPage() {
                   className="font-serif italic text-[28px] leading-none pt-4"
                   style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
                 >
-                  2. Descrizione del servizio
+                  2. Description of Service
                 </h2>
                 <p>
-                  Courssy è una piattaforma che permette di creare e gestire funnel di vendita per corsi digitali. I servizi includono:
+                  Courssy is a SaaS platform that allows users to create and manage sales funnels for digital courses. The services include:
                 </p>
                 <ul className="list-none space-y-3 border-t border-black pt-6">
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    Creazione di pagine di vendita e landing page
+                    Creation of sales pages and landing pages
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    Gestione di checkout e pagamenti
+                    Checkout and payment management
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    Distribuzione di contenuti digitali
+                    Distribution of digital content
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    Strumenti di analisi e tracciamento
+                    Analytics and tracking tools
                   </li>
                 </ul>
               </div>
@@ -105,20 +105,20 @@ export default function TermsPage() {
                   className="font-serif italic text-[28px] leading-none pt-4"
                   style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
                 >
-                  3. Account e accesso
+                  3. Account and Access
                 </h2>
                 <ul className="list-none space-y-3 border-t border-black pt-6">
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    Sei responsabile della riservatezza delle tue credenziali
+                    You are responsible for maintaining the confidentiality of your credentials
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    Devi notificare immediatamente qualsiasi uso non autorizzato
+                    You must immediately notify us of any unauthorized use
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    Non puoi condividere l&apos;account con terze parti
+                    You cannot share your account with third parties
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    Possiamo sospendere o chiudere account che violano questi Termini
+                    We may suspend or terminate accounts that violate these Terms
                   </li>
                 </ul>
               </div>
@@ -128,19 +128,19 @@ export default function TermsPage() {
                   className="font-serif italic text-[28px] leading-none pt-4"
                   style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
                 >
-                  4. Piani e pagamento
+                  4. Plans, Billing, and Refund Policy
                 </h2>
                 <p>
-                  <strong>Piano Starter:</strong> gratuito, 1 funnel, 100 studenti, branding Courssy visibile.
+                  <strong>Starter Plan:</strong> free, 1 funnel, 100 students, visible Courssy branding.
                 </p>
                 <p>
-                  <strong>Piano Pro:</strong> €29/mese, funnels illimitati, dominio personalizzato, zero commissioni su transazioni.
+                  <strong>Pro Plan:</strong> €29/month, unlimited funnels, custom domain, zero transaction fees.
                 </p>
                 <p className="pt-4">
-                  I pagamenti sono gestiti da Stripe. Non siamo responsabili per problemi di pagamento dovuti a Stripe. Le fatture vengono emesse automaticamente e sono accessibili dal tuo account.
+                  Payments are managed by Stripe and Lemon Squeezy. Invoices are generated automatically and are accessible from your account.
                 </p>
                 <p className="pt-4">
-                  Puoi cancellare l&apos;abbonamento in qualsiasi momento. Nessun rimborso per periodi già pagati.
+                  <strong>Refund Policy:</strong> We offer a 30-day money-back guarantee for your first billing cycle. If you are not satisfied with the platform within 30 days of subscribing, you may contact us at <a href="mailto:supporto@courssy.it" className="underline underline-offset-2">supporto@courssy.it</a> to request a full refund.
                 </p>
               </div>
 
@@ -149,16 +149,13 @@ export default function TermsPage() {
                   className="font-serif italic text-[28px] leading-none pt-4"
                   style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
                 >
-                  5. Contenuti del cliente
+                  5. Customer Content
                 </h2>
                 <p>
-                  I contenuti che carichi sulla piattaforma (corsi, testi, immagini) restano di tua proprietà. Ci concedi una licenza per utilizzarli per fornire il servizio.
+                  The content you upload to the platform (courses, text, images) remains your property. You grant us a license to use it to provide the service.
                 </p>
                 <p className="pt-4">
-                  Garantisci di avere tutti i diritti sui contenuti caricati e che non violano diritti di terzi.
-                </p>
-                <p className="pt-4">
-                  Non siamo responsabili per contenuti che violano diritti di proprietà intellettuale di terzi.
+                  You warrant that you own all rights to the uploaded content and that it does not infringe on third-party rights.
                 </p>
               </div>
 
@@ -167,24 +164,21 @@ export default function TermsPage() {
                   className="font-serif italic text-[28px] leading-none pt-4"
                   style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
                 >
-                  6. Uso accettabile
+                  6. Acceptable Use
                 </h2>
-                <p>Non puoi utilizzare il servizio per:</p>
+                <p>You may not use the service for:</p>
                 <ul className="list-none space-y-3 border-t border-black pt-6">
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    Attività illegali o che violano diritti di terzi
+                    Illegal activities or violating third-party rights
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    Contenuti fraudolenti, ingannevoli o di spam
+                    Fraudulent, deceptive, or spam content
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    Violazione di leggi su copyright, marchi, privacy
+                    Infringing on copyrights, trademarks, or privacy laws
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    Accesso non autorizzato a sistemi terzi
-                  </li>
-                  <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    Interferenza con il funzionamento del servizio
+                    Interfering with the operation of the service
                   </li>
                 </ul>
               </div>
@@ -194,16 +188,13 @@ export default function TermsPage() {
                   className="font-serif italic text-[28px] leading-none pt-4"
                   style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
                 >
-                  7. Limitazione di responsabilità
+                  7. Limitation of Liability
                 </h2>
                 <p>
-                  Il servizio è fornito "così com'è". Non garantiamo che il servizio sarà sempre disponibile, privo di errori o che funzionerà senza interruzioni.
+                  The service is provided "as is". We do not guarantee that the service will always be available, error-free, or run without interruptions.
                 </p>
                 <p className="pt-4">
-                  Non saremo responsabili per danni indiretti, consequenziali, speciali o punitivi, inclusi ma non limitati a perdita di profitti, dati o opportunità di business.
-                </p>
-                <p className="pt-4">
-                  La nostra responsabilità massima è limitata all&apos;importo che hai pagato negli ultimi 12 mesi.
+                  We will not be liable for any indirect, consequential, special, or punitive damages, including loss of profits, data, or business opportunities.
                 </p>
               </div>
 
@@ -212,13 +203,10 @@ export default function TermsPage() {
                   className="font-serif italic text-[28px] leading-none pt-4"
                   style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
                 >
-                  8. Proprietà intellettuale
+                  8. Intellectual Property
                 </h2>
                 <p>
-                  Courssy e il suo design, logo, interfaccia sono di nostra proprietà e protetti da copyright e altri diritti di proprietà intellettuale.
-                </p>
-                <p className="pt-4">
-                  Non puoi copiare, replicare o creare opere derivate dal servizio senza il nostro consenso.
+                  Courssy and its design, logo, and interface are our property and are protected by copyright and other intellectual property rights.
                 </p>
               </div>
 
@@ -227,13 +215,10 @@ export default function TermsPage() {
                   className="font-serif italic text-[28px] leading-none pt-4"
                   style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
                 >
-                  9. Risoluzione
+                  9. Termination
                 </h2>
                 <p>
-                  Possiamo sospendere o terminare il servizio in qualsiasi momento, con o senza preavviso, per violazione di questi Termini o per motivi di sicurezza.
-                </p>
-                <p className="pt-4">
-                  In caso di terminazione, il tuo account verrà disattivato e i contenuti eliminati entro 30 giorni.
+                  We may suspend or terminate your service at any time, with or without notice, for violation of these Terms or for security reasons.
                 </p>
               </div>
 
@@ -242,31 +227,16 @@ export default function TermsPage() {
                   className="font-serif italic text-[28px] leading-none pt-4"
                   style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
                 >
-                  10. Modifiche ai Termini
+                  10. Governing Law
                 </h2>
                 <p>
-                  Possiamo modificare questi Termini periodicamente. Le modifiche significative ti verranno notificate via email o con un avviso sulla piattaforma.
-                </p>
-                <p className="pt-4">
-                  L&apos;uso continuato del servizio dopo le modifiche costituisce accettazione dei nuovi Termini.
-                </p>
-              </div>
-
-              <div className="space-y-8">
-                <h2
-                  className="font-serif italic text-[28px] leading-none pt-4"
-                  style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
-                >
-                  11. Legge applicabile
-                </h2>
-                <p>
-                  Questi Termini sono regolati dalla legge italiana. Per qualsiasi controversia, il foro competente è il Tribunale di Roma.
+                  These Terms are governed by Italian law. Any dispute will be resolved exclusively in the Court of Rome.
                 </p>
               </div>
 
               <div className="pt-8 border-t border-black">
                 <p className="text-[15px] text-gray-600">
-                  Per domande su questi termini, contattaci a <a href="mailto:legal@courssy.com" className="underline underline-offset-2">legal@courssy.com</a>.
+                  For questions about these Terms, contact us at <a href="mailto:supporto@courssy.it" className="underline underline-offset-2">supporto@courssy.it</a>.
                 </p>
               </div>
             </div>
@@ -281,7 +251,7 @@ export default function TermsPage() {
               privacy
             </Link>
             <Link href="/terms" className="hover:underline underline-offset-3 no-underline hover:no-underline">
-              termini
+              terms
             </Link>
           </div>
         </footer>

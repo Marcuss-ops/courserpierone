@@ -19,7 +19,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "Informativa sulla privacy per Courssy",
+  description: "Privacy Policy for Courssy",
 };
 
 export default function PrivacyPage() {
@@ -56,7 +56,7 @@ export default function PrivacyPage() {
 
             <div className="space-y-12 text-[17px] font-light leading-[1.75]">
               <p className="text-[22px]">
-                Ultimo aggiornamento: 1 gennaio 2026
+                Last updated: January 1, 2026
               </p>
 
               <div className="space-y-8">
@@ -64,15 +64,15 @@ export default function PrivacyPage() {
                   className="font-serif italic text-[28px] leading-none pt-4"
                   style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
                 >
-                  1. Titolare del trattamento
+                  1. Data Controller
                 </h2>
                 <p>
-                  Courssy ("noi", "nostro" o "titolare") è responsabile del trattamento dei tuoi dati personali in conformità con il Regolamento Generale sulla Protezione dei Dati (GDPR).
+                  Courssy ("we", "our", or "controller") is responsible for the processing of your personal data in accordance with the General Data Protection Regulation (GDPR).
                 </p>
                 <p>
-                  <strong>Titolare:</strong> Courssy S.r.l.<br />
-                  <strong>Indirizzo:</strong> Via Roma 123, 00100 Roma, Italia<br />
-                  <strong>Email:</strong> privacy@courssy.com
+                  <strong>Entity:</strong> Courssy S.r.l.<br />
+                  <strong>Address:</strong> Via Roma 123, 00100 Rome, Italy<br />
+                  <strong>Email:</strong> <a href="mailto:supporto@courssy.it" className="underline">supporto@courssy.it</a>
                 </p>
               </div>
 
@@ -81,21 +81,21 @@ export default function PrivacyPage() {
                   className="font-serif italic text-[28px] leading-none pt-4"
                   style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
                 >
-                  2. Dati raccolti
+                  2. Collected Data
                 </h2>
-                <p>Raccogliamo le seguenti categorie di dati:</p>
+                <p>We collect the following categories of data:</p>
                 <ul className="list-none space-y-3 border-t border-black pt-6">
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    <strong>Dati di account:</strong> nome, email, password crittografata
+                    <strong>Account Information:</strong> name, email, encrypted password
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    <strong>Dati di pagamento:</strong> elaborati da Stripe, non memorizzati da noi
+                    <strong>Payment Information:</strong> processed securely by Stripe and Lemon Squeezy, never stored on our servers
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    <strong>Dati di utilizzo:</strong> pagine visitate, azioni, timestamp
+                    <strong>Usage Data:</strong> pages visited, actions performed, timestamps
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    <strong>Cookie:</strong> identificatori anonimi per funzionalità e analytics
+                    <strong>Cookies:</strong> anonymous identifiers for functionality and analytics
                   </li>
                 </ul>
               </div>
@@ -105,24 +105,24 @@ export default function PrivacyPage() {
                   className="font-serif italic text-[28px] leading-none pt-4"
                   style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
                 >
-                  3. Finalità del trattamento
+                  3. Purposes of Processing
                 </h2>
-                <p>Utilizziamo i tuoi dati per:</p>
+                <p>We process your data to:</p>
                 <ul className="list-none space-y-3 border-t border-black pt-6">
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    Fornirti l&apos;accesso alla piattaforma e ai tuoi corsi
+                    Provide access to the platform and your courses
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    Elaborare pagamenti e rilasciare ricevute
+                    Process payments and issue invoices/receipts
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    Inviarti email transazionali (conferme, recovery)
+                    Send transactional emails (e.g. order confirmations, recovery links)
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    Migliorare la piattaforma e l&apos;esperienza utente
+                    Improve the platform performance and user experience
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    Adempiere obblighi legali e fiscali
+                    Comply with legal and tax obligations
                   </li>
                 </ul>
               </div>
@@ -132,21 +132,21 @@ export default function PrivacyPage() {
                   className="font-serif italic text-[28px] leading-none pt-4"
                   style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
                 >
-                  4. Base giuridica
+                  4. Legal Basis
                 </h2>
-                <p>Il trattamento avviene sulla base di:</p>
+                <p>Data processing is based on:</p>
                 <ul className="list-none space-y-3 border-t border-black pt-6">
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    <strong>Esecuzione del contratto</strong> (art. 6.1.b GDPR) — per fornire i servizi richiesti
+                    <strong>Contract execution</strong> (GDPR Art. 6.1.b) — to deliver services you subscribed to
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    <strong>Consenso</strong> (art. 6.1.a GDPR) — per email marketing (sempre revocabile)
+                    <strong>Consent</strong> (GDPR Art. 6.1.a) — for direct marketing (which you can revoke anytime)
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    <strong>Legittimo interesse</strong> (art. 6.1.f GDPR) — per analytics e sicurezza
+                    <strong>Legitimate interest</strong> (GDPR Art. 6.1.f) — for platform security and basic analytics
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    <strong>Obbligo legale</strong> (art. 6.1.c GDPR) — per conservazione contabile
+                    <strong>Legal compliance</strong> (GDPR Art. 6.1.c) — for tax and accounting records
                   </li>
                 </ul>
               </div>
@@ -156,10 +156,10 @@ export default function PrivacyPage() {
                   className="font-serif italic text-[28px] leading-none pt-4"
                   style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
                 >
-                  5. Conservazione dei dati
+                  5. Data Retention
                 </h2>
                 <p>
-                  Conserviamo i tuoi dati per il tempo necessario alle finalità indicate. I dati di account vengono eliminati entro 30 giorni dalla richiesta di cancellazione. I dati di fatturazione vengono conservati per 10 anni per obblighi fiscali.
+                  We store your personal data for as long as necessary to fulfill the purposes outlined. Account data is deleted within 30 days of a cancellation request. Billing data is retained for 10 years to comply with statutory tax laws.
                 </p>
               </div>
 
@@ -168,31 +168,43 @@ export default function PrivacyPage() {
                   className="font-serif italic text-[28px] leading-none pt-4"
                   style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
                 >
-                  6. I tuoi diritti
+                  6. Your Rights
                 </h2>
-                <p>Hai il diritto di:</p>
+                <p>You have the right to:</p>
                 <ul className="list-none space-y-3 border-t border-black pt-6">
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    Accedere ai tuoi dati personali
+                    Access your personal data
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    Correggere dati inesatti
+                    Rectify inaccurate or incomplete data
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    Richiedere la cancellazione ("diritto all'oblio")
+                    Request erasure of your data ("right to be forgotten")
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    Limitare o opporti al trattamento
+                    Object to or restrict the processing of your data
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    Ricevere i tuoi dati in formato portabile
-                  </li>
-                  <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    Revocare il consenso in qualsiasi momento
+                    Data portability
                   </li>
                 </ul>
                 <p className="pt-4">
-                  Per esercitare i tuoi diritti, scrivi a <a href="mailto:privacy@courssy.com" className="underline underline-offset-2">privacy@courssy.com</a>.
+                  To exercise your rights, please contact us at <a href="mailto:supporto@courssy.it" className="underline underline-offset-2">supporto@courssy.it</a>.
+                </p>
+              </div>
+
+              <div className="space-y-8" id="cookies">
+                <h2
+                  className="font-serif italic text-[28px] leading-none pt-4"
+                  style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
+                >
+                  7. Cookie Policy
+                </h2>
+                <p>
+                  We use essential cookies (required for platform operation) and analytical cookies (to understand how you interact with our service). You can manage cookie preferences directly from your browser settings.
+                </p>
+                <p>
+                  Third-party services placing cookies: <strong>Stripe</strong> (payment processing), <strong>Lemon Squeezy</strong> (merchant of record), and <strong>Vercel</strong> (hosting provider).
                 </p>
               </div>
 
@@ -201,31 +213,16 @@ export default function PrivacyPage() {
                   className="font-serif italic text-[28px] leading-none pt-4"
                   style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
                 >
-                  7. Cookie
+                  8. Amendments
                 </h2>
                 <p>
-                  Utilizziamo cookie essenziali (necessari per il funzionamento) e cookie analitici (per capire come usi la piattaforma). Puoi gestire le preferenze cookie dalle impostazioni del tuo account.
-                </p>
-                <p>
-                  Cookie di terze parti: <strong>Stripe</strong> (pagamenti), <strong>Vercel</strong> (hosting).
-                </p>
-              </div>
-
-              <div className="space-y-8">
-                <h2
-                  className="font-serif italic text-[28px] leading-none pt-4"
-                  style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
-                >
-                  8. Modifiche
-                </h2>
-                <p>
-                  Questa informativa può essere aggiornata periodicamente. Le modifiche significative ti verranno notificate via email. Ti consigliamo di rivedere questa pagina regolarmente.
+                  This Privacy Policy may be updated periodically. Significant changes will be notified via email or displayed prominently on our platform.
                 </p>
               </div>
 
               <div className="pt-8 border-t border-black">
                 <p className="text-[15px] text-gray-600">
-                  Per domande su questa privacy policy, contattaci a <a href="mailto:privacy@courssy.com" className="underline underline-offset-2">privacy@courssy.com</a>.
+                  For any privacy inquiries, please contact us at <a href="mailto:supporto@courssy.it" className="underline underline-offset-2">supporto@courssy.it</a>.
                 </p>
               </div>
             </div>
@@ -240,7 +237,7 @@ export default function PrivacyPage() {
               privacy
             </Link>
             <Link href="/terms" className="hover:underline underline-offset-3 no-underline hover:no-underline">
-              termini
+              terms
             </Link>
           </div>
         </footer>
