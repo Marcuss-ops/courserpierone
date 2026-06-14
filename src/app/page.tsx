@@ -77,7 +77,7 @@ export default function HomePage() {
             href="/login"
             className="text-[15px] font-normal underline underline-offset-4 hover:opacity-60 transition-opacity"
           >
-            accedi
+            sign in
           </Link>
         </header>
 
@@ -88,10 +88,10 @@ export default function HomePage() {
               className="font-serif italic font-normal text-[clamp(48px,9vw,84px)] leading-[0.95] tracking-[-0.5px] mb-6"
               style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
             >
-              Crea funnel per corsi online.
+              Create beautiful e-learning funnels.
             </h1>
             <p className="text-[22px] font-light text-black/70">
-              In minuti, non in settimane.
+              Launch your online courses in minutes, not weeks.
             </p>
           </section>
 
@@ -101,15 +101,15 @@ export default function HomePage() {
               className="font-serif italic text-[36px] tracking-[-0.2px] mb-12"
               style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
             >
-              Tutto quello che serve per vendere online.
+              Everything you need to teach and sell online.
             </h2>
             <div className="space-y-12">
               <div className="grid grid-cols-[auto_1fr] gap-6 items-start">
                 <span className="font-serif italic text-[24px] text-black/40">— 01</span>
                 <div>
-                  <h3 className="text-[18px] font-medium mb-2">Design ad Alta Conversione</h3>
+                  <h3 className="text-[18px] font-medium mb-2">High-Converting Design</h3>
                   <p className="text-[16px] font-light text-black/60 leading-relaxed">
-                    Template pronti all'uso e ottimizzati per massimizzare le vendite dei tuoi infoprodotti e video corsi.
+                    Ready-to-use templates optimized to maximize your course sales and digital product delivery.
                   </p>
                 </div>
               </div>
@@ -117,9 +117,9 @@ export default function HomePage() {
               <div className="grid grid-cols-[auto_1fr] gap-6 items-start">
                 <span className="font-serif italic text-[24px] text-black/40">— 02</span>
                 <div>
-                  <h3 className="text-[18px] font-medium mb-2">Area Studenti Riservata</h3>
+                  <h3 className="text-[18px] font-medium mb-2">Private Student Portal</h3>
                   <p className="text-[16px] font-light text-black/60 leading-relaxed">
-                    Un portale protetto, elegante e minimale per far fruire i contenuti del corso in modo professionale.
+                    A secure, elegant, and minimal e-learning portal for your students to consume content professionally.
                   </p>
                 </div>
               </div>
@@ -127,9 +127,9 @@ export default function HomePage() {
               <div className="grid grid-cols-[auto_1fr] gap-6 items-start">
                 <span className="font-serif italic text-[24px] text-black/40">— 03</span>
                 <div>
-                  <h3 className="text-[18px] font-medium mb-2">Checkout e Pagamenti Integrati</h3>
+                  <h3 className="text-[18px] font-medium mb-2">Integrated Checkout & Payments</h3>
                   <p className="text-[16px] font-light text-black/60 leading-relaxed">
-                    Integrazione nativa con Lemon Squeezy e Stripe per accettare pagamenti in tutto il mondo in totale sicurezza.
+                    Native integration with Lemon Squeezy and Stripe to securely accept payments from all over the world.
                   </p>
                 </div>
               </div>
@@ -142,54 +142,54 @@ export default function HomePage() {
               className="font-serif italic text-[36px] tracking-[-0.2px] mb-4"
               style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
             >
-              Un prezzo semplice.
+              Simple, transparent pricing.
             </h2>
             <p className="text-[18px] font-light text-black/60 mb-12">
-              Nessun costo nascosto. Scegli il piano adatto a te.
+              No hidden fees. Choose the plan that fits your growth.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Starter Plan */}
               <div className="border border-black/10 p-8 rounded-xl bg-white/50 backdrop-blur-sm flex flex-col justify-between">
                 <div>
-                  <h3 className="text-[20px] font-medium mb-2">Piano Starter</h3>
-                  <p className="text-[15px] font-light text-black/50 mb-6">Per iniziare a lanciare il tuo primo corso.</p>
+                  <h3 className="text-[20px] font-medium mb-2">Starter Plan</h3>
+                  <p className="text-[15px] font-light text-black/50 mb-6">Perfect for launching your first course.</p>
                   <div className="mb-6">
                     <span className="font-serif italic text-[36px] font-normal" style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}>€0</span>
-                    <span className="text-[14px] font-light text-black/50"> / per sempre</span>
+                    <span className="text-[14px] font-light text-black/50"> / forever</span>
                   </div>
                   <ul className="space-y-3 text-[15px] font-light text-black/70 mb-8 border-t border-black/5 pt-6">
-                    <li className="flex items-center gap-2">✓ 1 Funnel attivo</li>
-                    <li className="flex items-center gap-2">✓ Fino a 100 studenti</li>
-                    <li className="flex items-center gap-2">✓ Branding Courssy</li>
+                    <li className="flex items-center gap-2">✓ 1 Active funnel</li>
+                    <li className="flex items-center gap-2">✓ Up to 100 students</li>
+                    <li className="flex items-center gap-2">✓ Courssy branding</li>
                   </ul>
                 </div>
                 <Link href="/login" className="block text-center py-3 px-4 bg-black/5 hover:bg-black/10 text-black rounded-lg text-[15px] font-medium transition-colors">
-                  Inizia Gratis
+                  Get Started Free
                 </Link>
               </div>
 
               {/* Pro Plan */}
               <div className="border-2 border-black p-8 rounded-xl bg-white flex flex-col justify-between relative shadow-sm">
                 <span className="absolute top-0 right-8 -translate-y-1/2 bg-black text-white text-[11px] font-medium px-3 py-1 rounded-full uppercase tracking-wider">
-                  Consigliato
+                  Recommended
                 </span>
                 <div>
-                  <h3 className="text-[20px] font-medium mb-2">Piano Pro</h3>
-                  <p className="text-[15px] font-light text-black/50 mb-6">Per chi fa sul serio con la vendita di corsi.</p>
+                  <h3 className="text-[20px] font-medium mb-2">Pro Plan</h3>
+                  <p className="text-[15px] font-light text-black/50 mb-6">For professional educators and creators.</p>
                   <div className="mb-6">
                     <span className="font-serif italic text-[36px] font-normal" style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}>€29</span>
-                    <span className="text-[14px] font-light text-black/50"> / mese</span>
+                    <span className="text-[14px] font-light text-black/50"> / month</span>
                   </div>
                   <ul className="space-y-3 text-[15px] font-light text-black/70 mb-8 border-t border-black/5 pt-6">
-                    <li className="flex items-center gap-2">✓ Funnel illimitati</li>
-                    <li className="flex items-center gap-2">✓ Studenti illimitati</li>
-                    <li className="flex items-center gap-2">✓ Dominio personalizzato</li>
-                    <li className="flex items-center gap-2">✓ Zero commissioni Courssy</li>
+                    <li className="flex items-center gap-2">✓ Unlimited funnels</li>
+                    <li className="flex items-center gap-2">✓ Unlimited students</li>
+                    <li className="flex items-center gap-2">✓ Custom domain</li>
+                    <li className="flex items-center gap-2">✓ 0% Courssy transaction fees</li>
                   </ul>
                 </div>
                 <Link href="/login" className="block text-center py-3 px-4 bg-black hover:bg-black/90 text-white rounded-lg text-[15px] font-medium transition-colors">
-                  Attiva Pro
+                  Go Pro
                 </Link>
               </div>
             </div>
@@ -204,7 +204,7 @@ export default function HomePage() {
               privacy
             </Link>
             <Link href="/terms" className="hover:underline underline-offset-3 no-underline hover:no-underline">
-              termini
+              terms
             </Link>
           </div>
         </footer>
