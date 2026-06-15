@@ -56,38 +56,43 @@ interface AmishProps {
 
 const FALLBACKS: Record<string, Record<string, string>> = {
   en: {
-    footer_email: "support@courssy.com",
+    footer_email: "supporto@courssy.it",
     footer_privacy: "Privacy Policy",
-    footer_terms: "Terms of Service",
-    footer_refund: "Refund Policy: 30-day money-back guarantee.",
+    footer_terms: "Terms & Conditions",
+    footer_cookies: "Cookie Policy",
+    footer_refund: "Refund Policy",
     footer_rights: "All rights reserved.",
   },
   it: {
-    footer_email: "support@courssy.com",
+    footer_email: "supporto@courssy.it",
     footer_privacy: "Privacy Policy",
-    footer_terms: "Termini di Servizio",
-    footer_refund: "Politica di Rimborso: Garanzia soddisatti o rimborsati di 30 giorni.",
+    footer_terms: "Termini e Condizioni",
+    footer_cookies: "Cookie Policy",
+    footer_refund: "Politica di Rimborso",
     footer_rights: "Tutti i diritti riservati.",
   },
   es: {
-    footer_email: "support@courssy.com",
+    footer_email: "supporto@courssy.it",
     footer_privacy: "Política de Privacidad",
-    footer_terms: "Términos de Servicio",
-    footer_refund: "Política de Reembolso: Garantía de devolución de 30 días.",
+    footer_terms: "Términos y Condiciones",
+    footer_cookies: "Política de Cookies",
+    footer_refund: "Política de Reembolso",
     footer_rights: "Todos los derechos reservados.",
   },
   fr: {
-    footer_email: "support@courssy.com",
+    footer_email: "supporto@courssy.it",
     footer_privacy: "Politique de Confidentialité",
-    footer_terms: "Conditions d'Utilisation",
-    footer_refund: "Politique de Remboursement : Garantie satisfait ou remboursé de 30 jours.",
+    footer_terms: "Conditions Générales",
+    footer_cookies: "Politique de Cookies",
+    footer_refund: "Politique de Remboursement",
     footer_rights: "Tous droits réservés.",
   },
   de: {
-    footer_email: "support@courssy.com",
+    footer_email: "supporto@courssy.it",
     footer_privacy: "Datenschutzerklärung",
-    footer_terms: "Nutzungsbedingungen",
-    footer_refund: "Rückerstattungsrichtlinie: 30-Tage-Geld-zurück-Garantie.",
+    footer_terms: "Allgemeine Geschäftsbedingungen",
+    footer_cookies: "Cookie-Richtlinie",
+    footer_refund: "Rückerstattungsrichtlinie",
     footer_rights: "Alle Rechte vorbehalten.",
   }
 };
@@ -1096,12 +1101,12 @@ export default function TemplateAmish({
                   </a>
                 )}
                 {t("footer_refund") && (
-                  <span className="text-gray-500">
-                    • {t("footer_refund")}
-                  </span>
+                  <a href="/refund" className="hover:text-gray-700 transition-colors">
+                    {t("footer_refund")}
+                  </a>
                 )}
                 {t("footer_cookies") && (
-                  <a href="#" className="hover:text-gray-700 transition-colors">
+                  <a href="/privacy#cookies" className="hover:text-gray-700 transition-colors">
                     {t("footer_cookies")}
                   </a>
                 )}

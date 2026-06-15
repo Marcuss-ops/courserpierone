@@ -199,12 +199,15 @@ export default function HomePage() {
         {/* Footer */}
         <footer className="py-10 pb-20 flex sm:flex-col sm:items-start justify-between items-center text-[14px] font-light gap-3 sm:gap-3 flex-wrap border-t border-black/10">
           <div>© 2026 Courssy</div>
-          <div className="flex gap-5">
+          <div className="flex gap-5 flex-wrap">
             <Link href="/privacy" className="hover:underline underline-offset-3 no-underline hover:no-underline">
-              privacy
+              Privacy Policy
             </Link>
             <Link href="/terms" className="hover:underline underline-offset-3 no-underline hover:no-underline">
-              terms
+              Terms of Service
+            </Link>
+            <Link href="/refund" className="hover:underline underline-offset-3 no-underline hover:no-underline">
+              Refund Policy
             </Link>
           </div>
         </footer>
