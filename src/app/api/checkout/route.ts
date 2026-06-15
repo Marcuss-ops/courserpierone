@@ -141,9 +141,9 @@ export async function POST(request: NextRequest) {
           discountCode: effectiveDiscountCode,
         },
         productOptions: {
-          redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/${locale}/${product.slug}/download?lang=${locale}`,
+          redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/${locale}/${product.slug}/download?lang=${locale}&order_id=[order_id]`,
           receiptButtonText: "Scarica il tuo libro",
-          receiptLinkUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/${locale}/${product.slug}/download?lang=${locale}`,
+          receiptLinkUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/${locale}/${product.slug}/download?lang=${locale}&order_id=[order_id]`,
         },
         // Prevent multiple checkouts for the same variant
         expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 min

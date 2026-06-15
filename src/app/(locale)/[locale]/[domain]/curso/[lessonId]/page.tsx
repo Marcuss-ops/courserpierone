@@ -97,6 +97,7 @@ export default async function CoursePage({
   const isAuthenticated = !!session?.user?.email;
 
   const currentLang = lang || (course.defaultLanguage as string) || "en";
+  const content = course.languages[currentLang] || course.languages[course.defaultLanguage] || Object.values(course.languages)[0];
   const currentLesson = course.lessons.find((l) => l.id === lessonId) || course.lessons[0];
   const basePath = `/${locale}/${domain}`;
 
@@ -108,7 +109,7 @@ export default async function CoursePage({
   const lc = localeContent.course;
 
   return (
-    <AccessGate productSlug={domain} courseTitle={course.languages[currentLang].title}>
+    <AccessGate productSlug={domain} courseTitle={content.title}>
       <AnalyticsTracker productSlug={domain} />
       <TrackLessonView lessonId={currentLesson.id} isAuthenticated={isAuthenticated} />
       
@@ -223,7 +224,7 @@ export default async function CoursePage({
                 {lc.back_to_course || "Back to Course"}
               </Link>
               <h2 className={`text-xl font-black leading-tight ${isLight ? "text-zinc-900" : "text-white text-contrast"}`}>
-                {course.languages[currentLang].title}
+                {content.title}
               </h2>
               <ProgressBar 
                 productSlug={domain} 

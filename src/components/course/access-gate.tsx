@@ -24,11 +24,34 @@ export function AccessGate({ productSlug, courseTitle, children }: AccessGatePro
   useEffect(() => {
     async function checkAccess() {
       try {
-        const params = new URLSearchParams({ productId: productSlug });
-        if (token) params.set("token", token);
+        const params = new URLSearchParams(window.location.search);
+        const urlToken = params.get("token");
+        const urlOrderId = params.get("order_id") || params.get("orderId");
+
+        // If not in URL, load from localStorage
+        if (!urlToken && !urlOrderId) {
+          const storedToken = localStorage.getItem(`access-token-${productSlug}`);
+          const storedOrderId = localStorage.getItem(`access-order-${productSlug}`);
+          if (storedToken) params.set("token", storedToken);
+          if (storedOrderId) params.set("order_id", storedOrderId);
+        }
+
+        params.set("productId", productSlug);
         const res = await fetch(`/api/access?${params.toString()}`);
         const data = await res.json();
-        setHasAccess(data.hasAccess);
+        
+        if (data.hasAccess) {
+          setHasAccess(true);
+          // Persist if loaded from URL
+          if (urlToken) {
+            localStorage.setItem(`access-token-${productSlug}`, urlToken);
+          }
+          if (urlOrderId) {
+            localStorage.setItem(`access-order-${productSlug}`, urlOrderId);
+          }
+        } else {
+          setHasAccess(false);
+        }
       } catch (e) {
         console.warn("[AccessGate] Access check failed:", e);
         setHasAccess(false);
@@ -37,7 +60,7 @@ export function AccessGate({ productSlug, courseTitle, children }: AccessGatePro
       }
     }
     void checkAccess();
-  }, [productSlug, token]);
+  }, [productSlug]);
 
   if (loading) {
     return (
