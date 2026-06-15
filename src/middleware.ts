@@ -117,11 +117,19 @@ export default withAuth(
     if (langParam) {
       const normalized = normalizeLocale(langParam);
       const url = req.nextUrl.clone();
-      url.pathname = `/${normalized}${pathname}`;
-      url.searchParams.delete("lang");
-      const redirect = NextResponse.redirect(url);
-      setLocaleCookie(redirect, normalized);
-      return redirect;
+      const firstSegment = pathname.split("/")[1]?.toLowerCase() ?? "";
+      if (firstSegment && isKnownLocale(firstSegment)) {
+        url.searchParams.delete("lang");
+        const redirect = NextResponse.redirect(url);
+        setLocaleCookie(redirect, normalized);
+        return redirect;
+      } else {
+        url.pathname = `/${normalized}${pathname}`;
+        url.searchParams.delete("lang");
+        const redirect = NextResponse.redirect(url);
+        setLocaleCookie(redirect, normalized);
+        return redirect;
+      }
     }
 
     // ─── Case 5: Non-prefixed path (e.g. /amish-secrets) — detect and redirect ──
