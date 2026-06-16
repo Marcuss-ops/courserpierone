@@ -135,15 +135,25 @@ export default function HomePage() {
       <div className="min-h-screen flex flex-col items-center justify-center text-center px-6">
         {/* Sleek icon */}
         <div className="relative mb-8">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[var(--cyan)] via-[var(--pink)] to-black flex items-center justify-center shadow-xl">
-            <svg viewBox="0 0 24 24" className="w-10 h-10 fill-white">
-              <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.77a8.19 8.19 0 0 0 4.77 1.52V6.79a4.85 4.85 0 0 1-1-.1z"/>
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[var(--cyan)] via-[var(--pink)] to-black flex items-center justify-center shadow-xl p-3">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-full h-full">
+              <defs>
+                <linearGradient id="courssy-logo-bg" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="#4d8eff"/>
+                  <stop offset="100%" stopColor="#005ac2"/>
+                </linearGradient>
+              </defs>
+              <circle cx="16" cy="16" r="16" fill="url(#courssy-logo-bg)"/>
+              <g transform="translate(6, 6) scale(0.833)" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1 0-3.12 3 3 0 0 1 0-4.88 2.5 2.5 0 0 1 0-3.12A2.5 2.5 0 0 1 9.5 2Z"/>
+                <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 0-3.12 3 3 0 0 0 0-4.88 2.5 2.5 0 0 0 0-3.12A2.5 2.5 0 0 0 14.5 2Z"/>
+              </g>
             </svg>
           </div>
         </div>
 
         <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-3" style={{ letterSpacing: "-0.02em" }}>
-          TikShare
+          Courssy
         </h1>
         <p className="text-base text-[var(--muted)] max-w-md mb-8 leading-relaxed">
           Upload video drafts to TikTok in one click. No watermarks. Simple and secure.
@@ -186,12 +196,22 @@ export default function HomePage() {
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-[var(--border)] bg-black/80 backdrop-blur-2xl">
         <div className="mx-auto max-w-4xl flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--cyan)] via-[var(--pink)] to-black flex items-center justify-center">
-              <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white">
-                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.77a8.19 8.19 0 0 0 4.77 1.52V6.79a4.85 4.85 0 0 1-1-.1z"/>
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--cyan)] via-[var(--pink)] to-black flex items-center justify-center p-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-full h-full">
+                <defs>
+                  <linearGradient id="courssy-nav-bg" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#4d8eff"/>
+                    <stop offset="100%" stopColor="#005ac2"/>
+                  </linearGradient>
+                </defs>
+                <circle cx="16" cy="16" r="16" fill="url(#courssy-nav-bg)"/>
+                <g transform="translate(6, 6) scale(0.833)" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1 0-3.12 3 3 0 0 1 0-4.88 2.5 2.5 0 0 1 0-3.12A2.5 2.5 0 0 1 9.5 2Z"/>
+                  <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 0-3.12 3 3 0 0 0 0-4.88 2.5 2.5 0 0 0 0-3.12A2.5 2.5 0 0 0 14.5 2Z"/>
+                </g>
               </svg>
             </div>
-            <span className="text-sm font-bold text-white tracking-tight">TikShare</span>
+            <span className="text-sm font-bold text-white tracking-tight">Courssy</span>
           </div>
           <div className="flex items-center gap-5">
             <a href="/terms" className="text-xs text-[var(--muted)] hover:text-white transition">Terms</a>
@@ -347,7 +367,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="border-t border-[var(--border)] py-8 px-6">
         <div className="mx-auto max-w-4xl flex items-center justify-between text-[10px] text-[var(--dimmed)]">
-          <span>© {new Date().getFullYear()} TikShare</span>
+          <span>© {new Date().getFullYear()} Courssy</span>
           <div className="flex gap-4">
             <a href="/terms" className="hover:text-white transition">Terms</a>
             <a href="/privacy" className="hover:text-white transition">Privacy</a>

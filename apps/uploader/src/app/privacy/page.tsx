@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — TikShare",
-  description: "Privacy Policy for TikShare, in compliance with GDPR.",
+  title: "Privacy Policy — Courssy",
+  description: "Privacy Policy for Courssy, in compliance with GDPR.",
 };
 
 export default function PrivacyPage() {
@@ -12,12 +12,22 @@ export default function PrivacyPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-[#1a1a1a] bg-black/80 backdrop-blur-xl">
         <div className="mx-auto max-w-3xl flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#25F4EE] via-[#FE2C55] to-black flex items-center justify-center">
-              <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white">
-                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.77a8.19 8.19 0 0 0 4.77 1.52V6.79a4.85 4.85 0 0 1-1-.1z"/>
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#25F4EE] via-[#FE2C55] to-black flex items-center justify-center p-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-full h-full">
+                <defs>
+                  <linearGradient id="courssy-privacy-bg" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#4d8eff"/>
+                    <stop offset="100%" stopColor="#005ac2"/>
+                  </linearGradient>
+                </defs>
+                <circle cx="16" cy="16" r="16" fill="url(#courssy-privacy-bg)"/>
+                <g transform="translate(6, 6) scale(0.833)" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1 0-3.12 3 3 0 0 1 0-4.88 2.5 2.5 0 0 1 0-3.12A2.5 2.5 0 0 1 9.5 2Z"/>
+                  <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 0-3.12 3 3 0 0 0 0-4.88 2.5 2.5 0 0 0 0-3.12A2.5 2.5 0 0 0 14.5 2Z"/>
+                </g>
               </svg>
             </div>
-            <span className="font-bold text-white">TikShare</span>
+            <span className="font-bold text-white">Courssy</span>
           </div>
           <Link href="/" className="text-sm text-gray-400 hover:text-white transition">← Back</Link>
         </div>
@@ -43,7 +53,7 @@ export default function PrivacyPage() {
 
             <section>
               <h2 className="text-lg font-bold text-white mb-3">2. Data Collected from TikTok</h2>
-              <p>When you use TikShare with your TikTok account, TikShare receives the following data from TikTok, according to the OAuth scopes you authorized:</p>
+              <p>When you use Courssy with your TikTok account, Courssy receives the following data from TikTok, according to the OAuth scopes you authorized:</p>
               <table className="mt-3 w-full rounded-xl border border-[#222] overflow-hidden text-xs">
                 <thead>
                   <tr style={{ background: "#111" }}>
@@ -68,12 +78,12 @@ export default function PrivacyPage() {
                   ))}
                 </tbody>
               </table>
-              <p className="mt-3">We do not collect, store, or process TikTok data outside of the session token necessary for video uploads. The uploaded videos are sent directly to the official TikTok Inc. APIs and are never stored or retained by TikShare. Profile data is not stored in any database; it only exists during the active session.</p>
+              <p className="mt-3">We do not collect, store, or process TikTok data outside of the session token necessary for video uploads. The uploaded videos are sent directly to the official TikTok Inc. APIs and are never stored or retained by Courssy. Profile data is not stored in any database; it only exists during the active session.</p>
             </section>
 
             <section>
               <h2 className="text-lg font-bold text-white mb-3">3. Legal Basis for Processing (GDPR)</h2>
-              <p>The processing of TikTok data in TikShare is based on:</p>
+              <p>The processing of TikTok data in Courssy is based on:</p>
               <div className="mt-3 rounded-xl border border-[#25F4EE]/30 bg-[#25F4EE]/5 p-4">
                 <p className="font-semibold text-[#25F4EE]">Art. 6(1)(b) GDPR — Performance of a contract</p>
                 <p className="mt-1 text-gray-400 text-xs">The user explicitly requests to upload videos to their TikTok account. Processing is necessary to fulfill this request.</p>
@@ -85,7 +95,7 @@ export default function PrivacyPage() {
               <h2 className="text-lg font-bold text-white mb-3">4. Storage and Security</h2>
               <ul className="mt-2 space-y-2 list-disc list-inside">
                 <li><strong className="text-white">Access token:</strong> Stored in an httpOnly cookie with secure flag and sameSite=lax. The cookie is restricted to the domain uploader.courssy.com and has an expiration duration matching the TikTok token (max 24h).</li>
-                <li><strong className="text-white">No Database:</strong> TikShare does not use any databases to store TikTok data. Profile data is not persistently saved.</li>
+                <li><strong className="text-white">No Database:</strong> Courssy does not use any databases to store TikTok data. Profile data is not persistently saved.</li>
                 <li><strong className="text-white">Infrastructure:</strong> The app is hosted on Vercel (EU/US infrastructure) with mandatory HTTPS connections.</li>
                 <li><strong className="text-white">Encryption:</strong> All communications between the browser and servers are encrypted using TLS 1.2+.</li>
               </ul>
@@ -93,7 +103,7 @@ export default function PrivacyPage() {
 
             <section>
               <h2 className="text-lg font-bold text-white mb-3">5. Third-Party Sharing</h2>
-              <p>TikShare does not share, sell, rent, or otherwise transfer users' TikTok data to third parties.</p>
+              <p>Courssy does not share, sell, rent, or otherwise transfer users' TikTok data to third parties.</p>
               <p className="mt-2">Data is shared with TikTok Inc. exclusively for the following purposes:</p>
               <ul className="mt-2 space-y-1 list-disc list-inside">
                 <li>OAuth Authentication (TikTok Login Kit)</li>
@@ -106,9 +116,9 @@ export default function PrivacyPage() {
               <h2 className="text-lg font-bold text-white mb-3">6. User Rights (GDPR)</h2>
               <p>Under GDPR, you have the following rights regarding your personal data:</p>
               <ul className="mt-2 space-y-1 list-disc list-inside">
-                <li><strong>Right of Access (Art. 15):</strong> Request a copy of the data TikShare received from TikTok for your account</li>
+                <li><strong>Right of Access (Art. 15):</strong> Request a copy of the data Courssy received from TikTok for your account</li>
                 <li><strong>Right to Erasure (Art. 17):</strong> Withdraw consent and request data removal — revoke TikTok access from your TikTok account settings</li>
-                <li><strong>Right to Withdraw Consent:</strong> Revoke access to TikShare at any time from your TikTok account settings on tiktok.com</li>
+                <li><strong>Right to Withdraw Consent:</strong> Revoke access to Courssy at any time from your TikTok account settings on tiktok.com</li>
                 <li><strong>Right to Portability (Art. 20):</strong> Receive your data in a structured, readable format</li>
               </ul>
               <p className="mt-3">To exercise your rights, please contact us at <span className="text-[#25F4EE]">info@courssy.com</span>.</p>
@@ -116,12 +126,12 @@ export default function PrivacyPage() {
 
             <section>
               <h2 className="text-lg font-bold text-white mb-3">7. Video Uploads and Content Data</h2>
-              <p>Videos uploaded through TikShare are sent directly to TikTok Inc. APIs. TikShare does not store, copy, or retain uploaded videos. Videos are processed by TikTok Inc. according to their <a href="https://www.tiktok.com/legal/privacy-policy" target="_blank" rel="noopener" className="text-[#25F4EE] hover:underline">Privacy Policy</a>.</p>
+              <p>Videos uploaded through Courssy are sent directly to TikTok Inc. APIs. Courssy does not store, copy, or retain uploaded videos. Videos are processed by TikTok Inc. according to their <a href="https://www.tiktok.com/legal/privacy-policy" target="_blank" rel="noopener" className="text-[#25F4EE] hover:underline">Privacy Policy</a>.</p>
             </section>
 
             <section>
               <h2 className="text-lg font-bold text-white mb-3">8. Cookie Policy</h2>
-              <p>TikShare uses the following cookies:</p>
+              <p>Courssy uses the following cookies:</p>
               <table className="mt-3 w-full rounded-xl border border-[#222] overflow-hidden text-xs">
                 <thead>
                   <tr style={{ background: "#111" }}>
