@@ -227,7 +227,22 @@ export default function TermsPage() {
                   className="font-serif italic text-[28px] leading-none pt-4"
                   style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
                 >
-                  10. Governing Law
+                  10. TikTok Integration &amp; Video Uploads
+                </h2>
+                <p>
+                  Courssy integrates with official TikTok APIs (TikTok Login Kit and Content Posting API) to facilitate video uploads to your TikTok account as drafts. 
+                </p>
+                <p>
+                  By using this integration, you agree to comply with TikTok's Terms of Service and Community Guidelines. Courssy is not responsible for any actions taken by TikTok Inc. regarding your account, including but not limited to content removal, suspension, or restrictions.
+                </p>
+              </div>
+
+              <div className="space-y-8">
+                <h2
+                  className="font-serif italic text-[28px] leading-none pt-4"
+                  style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
+                >
+                  11. Governing Law
                 </h2>
                 <p>
                   These Terms are governed by Italian law. Any dispute will be resolved exclusively in the Court of Rome.

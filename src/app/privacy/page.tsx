@@ -193,12 +193,36 @@ export default function PrivacyPage() {
                 </p>
               </div>
 
+              <div className="space-y-8">
+                <h2
+                  className="font-serif italic text-[28px] leading-none pt-4"
+                  style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
+                >
+                  7. TikTok Integration &amp; Data Deletion
+                </h2>
+                <p>
+                  When you use the TikTok Video Upload feature (Courssy Uploader), we interact with TikTok APIs (TikTok Login Kit and Content Posting API) under your authorization. 
+                </p>
+                <p>
+                  <strong>Data Collected:</strong> We process your TikTok Open ID (unique identifier), display name, username, and avatar URL to display your account information in the uploader dashboard. Uploaded videos are transferred directly to TikTok as drafts and are never stored or retained on our servers.
+                </p>
+                <p>
+                  <strong>Data Deletion Instructions:</strong> You can revoke our access to your TikTok account or request deletion of any session data at any time:
+                </p>
+                <ol className="list-decimal pl-6 space-y-2">
+                  <li>Go to your TikTok profile settings.</li>
+                  <li>Navigate to <strong>Security and login</strong> &gt; <strong>Manage app access</strong>.</li>
+                  <li>Select <strong>Courssy</strong> and click <strong>Remove access</strong>.</li>
+                  <li>Alternatively, send an email to <a href="mailto:info@courssy.com" className="underline">info@courssy.com</a> requesting data deletion, and any active session tokens will be removed within 48 hours.</li>
+                </ol>
+              </div>
+
               <div className="space-y-8" id="cookies">
                 <h2
                   className="font-serif italic text-[28px] leading-none pt-4"
                   style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
                 >
-                  7. Cookie Policy
+                  8. Cookie Policy
                 </h2>
                 <p>
                   We use essential cookies (required for platform operation) and analytical cookies (to understand how you interact with our service). You can manage cookie preferences directly from your browser settings.
