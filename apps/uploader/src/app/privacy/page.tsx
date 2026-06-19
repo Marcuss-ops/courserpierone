@@ -125,7 +125,18 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-bold text-white mb-3">7. Video Uploads and Content Data</h2>
+              <h2 className="text-lg font-bold text-white mb-3">7. Data Deletion Instructions</h2>
+              <p>You can request the deletion of your account data or revoke access at any time. To do so, follow these steps:</p>
+              <ol className="mt-2 space-y-2 list-decimal list-inside">
+                <li>Go to your TikTok profile settings.</li>
+                <li>Navigate to <strong>Security and login</strong> &gt; <strong>Manage app access</strong>.</li>
+                <li>Select <strong>Courssy</strong> and click <strong>Remove access</strong>.</li>
+                <li>Alternatively, send an email to <span className="text-[#25F4EE]">info@courssy.com</span> requesting data deletion, and we will delete any session data associated with your account within 48 hours.</li>
+              </ol>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-bold text-white mb-3">8. Video Uploads and Content Data</h2>
               <p>Videos uploaded through Courssy are sent directly to TikTok Inc. APIs. Courssy does not store, copy, or retain uploaded videos. Videos are processed by TikTok Inc. according to their <a href="https://www.tiktok.com/legal/privacy-policy" target="_blank" rel="noopener" className="text-[#25F4EE] hover:underline">Privacy Policy</a>.</p>
             </section>
 
