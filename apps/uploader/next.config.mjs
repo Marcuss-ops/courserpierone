@@ -6,6 +6,18 @@ const nextConfig = {
     TIKTOK_CLIENT_SECRET: process.env.TIKTOK_CLIENT_SECRET,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
   },
+  async rewrites() {
+    return [
+      {
+        source: "/ :path*",
+        destination: "/:path*",
+      },
+      {
+        source: "/%20/:path*",
+        destination: "/:path*",
+      },
+    ];
+  },
 };
 
 export default nextConfig;

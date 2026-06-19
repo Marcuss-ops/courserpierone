@@ -27,6 +27,18 @@ const nextConfig = {
   outputFileTracingIncludes: {
     '/**/*': ['./data/**/*'],
   },
+  async rewrites() {
+    return [
+      {
+        source: "/ :path*",
+        destination: "/:path*",
+      },
+      {
+        source: "/%20/:path*",
+        destination: "/:path*",
+      },
+    ];
+  },
   async headers() {
     return [
       {
