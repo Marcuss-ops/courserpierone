@@ -1,3 +1,4 @@
+// Privacy Policy for Courssy TikTok Uploader
 import type { Metadata } from "next";
 import Link from "next/link";
 
