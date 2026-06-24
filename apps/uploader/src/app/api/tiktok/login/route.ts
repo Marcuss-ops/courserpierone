@@ -1,17 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const clientKey = process.env.TIKTOK_CLIENT_KEY;
   if (!clientKey) {
     return new NextResponse("TIKTOK_CLIENT_KEY not configured", { status: 500 });
   }
 
-  const nextAuthUrl = process.env.NEXTAUTH_URL;
-  if (!nextAuthUrl) {
-    return new NextResponse("NEXTAUTH_URL not configured", { status: 500 });
-  }
-
-  const redirectUri = `${nextAuthUrl}/api/tiktok/callback`;
+  const host = request.headers.get("host") || "uploader.courssy.com";
+  const protocol = host.includes("localhost") ? "http" : "https";
+  const redirectUri = `${protocol}://${host}/api/tiktok/callback`;
   const scope = "user.info.basic,user.info.profile,user.info.stats,video.list,video.upload";
   const state = crypto.randomUUID();
 

@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-  const nextAuthUrl = process.env.NEXTAUTH_URL;
-  if (!nextAuthUrl) {
-    return NextResponse.json({ error: "NEXTAUTH_URL not configured" }, { status: 500 });
-  }
-
   const clientKey = process.env.TIKTOK_CLIENT_KEY;
   const clientSecret = process.env.TIKTOK_CLIENT_SECRET;
   if (!clientKey || !clientSecret) {
@@ -21,6 +16,10 @@ export async function GET(req: NextRequest) {
     );
   }
 
+  const host = req.headers.get("host") || "uploader.courssy.com";
+  const protocol = host.includes("localhost") ? "http" : "https";
+  const redirectUri = `${protocol}://${host}/api/tiktok/callback`;
+
   try {
     const tokenRes = await fetch("https://open.tiktokapis.com/v2/oauth/token/", {
       method: "POST",
@@ -30,7 +29,7 @@ export async function GET(req: NextRequest) {
         client_secret: clientSecret,
         code,
         grant_type: "authorization_code",
-        redirect_uri: `${nextAuthUrl}/api/tiktok/callback`,
+        redirect_uri: redirectUri,
       }),
     });
 
