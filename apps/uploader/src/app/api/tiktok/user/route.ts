@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const res = await fetch("https://open.tiktokapis.com/v2/user/info/", {
+    const res = await fetch("https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,avatar_url", {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
