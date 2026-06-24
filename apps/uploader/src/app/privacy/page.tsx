@@ -13,20 +13,8 @@ export default function PrivacyPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-[#1a1a1a] bg-black/80 backdrop-blur-xl">
         <div className="mx-auto max-w-3xl flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#25F4EE] via-[#FE2C55] to-black flex items-center justify-center p-1.5">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-full h-full">
-                <defs>
-                  <linearGradient id="courssy-privacy-bg" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#4d8eff"/>
-                    <stop offset="100%" stopColor="#005ac2"/>
-                  </linearGradient>
-                </defs>
-                <circle cx="16" cy="16" r="16" fill="url(#courssy-privacy-bg)"/>
-                <g transform="translate(6, 6) scale(0.833)" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1 0-3.12 3 3 0 0 1 0-4.88 2.5 2.5 0 0 1 0-3.12A2.5 2.5 0 0 1 9.5 2Z"/>
-                  <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 0-3.12 3 3 0 0 0 0-4.88 2.5 2.5 0 0 0 0-3.12A2.5 2.5 0 0 0 14.5 2Z"/>
-                </g>
-              </svg>
+            <div className="w-8 h-8 rounded-lg overflow-hidden border border-white/[0.08]">
+              <img src="/icon.png" alt="Courssy Logo" className="w-full h-full object-cover" />
             </div>
             <span className="font-bold text-white">Courssy</span>
           </div>

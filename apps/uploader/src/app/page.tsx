@@ -27,6 +27,7 @@ export default function HomePage() {
   const [allowShare, setAllowShare] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>("idle");
   const [uploadMessage, setUploadMessage] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -88,7 +89,8 @@ export default function HomePage() {
   const handleUpload = async () => {
     if (!uploadingFile || !privacyLevel) return;
     setUploadStatus("uploading");
-    setUploadMessage("Uploading video...");
+    setUploadProgress(10);
+    setUploadMessage("Preparing video file...");
 
     const fd = new FormData();
     fd.append("video", uploadingFile);
@@ -98,15 +100,33 @@ export default function HomePage() {
     fd.append("allow_duet", String(allowDuet));
     fd.append("allow_share", String(allowShare));
 
+    // Simulate upload progress
+    const progressInterval = setInterval(() => {
+      setUploadProgress((prev) => {
+        if (prev >= 90) return prev;
+        const step = prev < 40 ? 10 : prev < 75 ? 5 : 2;
+        return prev + step;
+      });
+    }, 300);
+
     try {
+      setTimeout(() => {
+        setUploadMessage("Uploading video to TikTok...");
+      }, 600);
+
       const res = await fetch("/api/tiktok/upload", { method: "POST", body: fd });
       const data = await res.json();
+      clearInterval(progressInterval);
+
       if (!res.ok) throw new Error(data.error ?? "Upload failed");
 
+      setUploadProgress(100);
       setUploadStatus(data.status === "published" ? "done" : "processing");
-      setUploadMessage(data.status === "published" ? "Video published! 🎉" : "Video processing on TikTok...");
+      setUploadMessage(data.status === "published" ? "Video published! 🎉" : "Video successfully sent to your TikTok drafts! 🎉");
       setShareUrl(data.share_url ?? null);
     } catch (err) {
+      clearInterval(progressInterval);
+      setUploadProgress(0);
       setUploadStatus("error");
       setUploadMessage(err instanceof Error ? err.message : "Unknown error");
     }
@@ -143,20 +163,8 @@ export default function HomePage() {
         <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/[0.04] bg-black/80 backdrop-blur-xl">
           <div className="mx-auto max-w-4xl flex items-center justify-between px-6 py-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--cyan)] via-[var(--pink)] to-black flex items-center justify-center p-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-full h-full">
-                  <defs>
-                    <linearGradient id="courssy-anon-logo-bg" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="#4d8eff"/>
-                      <stop offset="100%" stopColor="#005ac2"/>
-                    </linearGradient>
-                  </defs>
-                  <circle cx="16" cy="16" r="16" fill="url(#courssy-anon-logo-bg)"/>
-                  <g transform="translate(6, 6) scale(0.833)" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1 0-3.12 3 3 0 0 1 0-4.88 2.5 2.5 0 0 1 0-3.12A2.5 2.5 0 0 1 9.5 2Z"/>
-                    <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 0-3.12 3 3 0 0 0 0-4.88 2.5 2.5 0 0 0 0-3.12A2.5 2.5 0 0 0 14.5 2Z"/>
-                  </g>
-                </svg>
+              <div className="w-8 h-8 rounded-lg overflow-hidden border border-white/[0.08]">
+                <img src="/icon.png" alt="Courssy Logo" className="w-full h-full object-cover" />
               </div>
               <span className="text-sm font-bold text-white tracking-tight">Courssy</span>
             </div>
@@ -173,20 +181,8 @@ export default function HomePage() {
             {/* Logo container with pulse ring */}
             <div className="relative mb-6">
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[var(--cyan)] via-[var(--pink)] to-black blur-md opacity-40 animate-pulse" />
-              <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--cyan)] via-[var(--pink)] to-black flex items-center justify-center p-2.5">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-full h-full">
-                  <defs>
-                    <linearGradient id="courssy-logo-bg" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="#4d8eff"/>
-                      <stop offset="100%" stopColor="#005ac2"/>
-                    </linearGradient>
-                  </defs>
-                  <circle cx="16" cy="16" r="16" fill="url(#courssy-logo-bg)"/>
-                  <g transform="translate(6, 6) scale(0.833)" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1 0-3.12 3 3 0 0 1 0-4.88 2.5 2.5 0 0 1 0-3.12A2.5 2.5 0 0 1 9.5 2Z"/>
-                    <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 0-3.12 3 3 0 0 0 0-4.88 2.5 2.5 0 0 0 0-3.12A2.5 2.5 0 0 0 14.5 2Z"/>
-                  </g>
-                </svg>
+              <div className="relative w-16 h-16 rounded-2xl overflow-hidden border border-white/[0.08]">
+                <img src="/icon.png" alt="Courssy Logo" className="w-full h-full object-cover" />
               </div>
             </div>
 
@@ -259,20 +255,8 @@ export default function HomePage() {
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/[0.04] bg-black/80 backdrop-blur-xl">
         <div className="mx-auto max-w-4xl flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--cyan)] via-[var(--pink)] to-black flex items-center justify-center p-1.5">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-full h-full">
-                <defs>
-                  <linearGradient id="courssy-nav-bg" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#4d8eff"/>
-                    <stop offset="100%" stopColor="#005ac2"/>
-                  </linearGradient>
-                </defs>
-                <circle cx="16" cy="16" r="16" fill="url(#courssy-nav-bg)"/>
-                <g transform="translate(6, 6) scale(0.833)" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1 0-3.12 3 3 0 0 1 0-4.88 2.5 2.5 0 0 1 0-3.12A2.5 2.5 0 0 1 9.5 2Z"/>
-                  <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 0-3.12 3 3 0 0 0 0-4.88 2.5 2.5 0 0 0 0-3.12A2.5 2.5 0 0 0 14.5 2Z"/>
-                </g>
-              </svg>
+            <div className="w-8 h-8 rounded-lg overflow-hidden border border-white/[0.08]">
+              <img src="/icon.png" alt="Courssy Logo" className="w-full h-full object-cover" />
             </div>
             <span className="text-sm font-bold text-white tracking-tight">Courssy</span>
           </div>
@@ -339,7 +323,25 @@ export default function HomePage() {
                   }`}
                 >
                   {videoPreview ? (
-                    <video src={videoPreview!} className="h-full w-full rounded-xl object-cover" controls />
+                    <div className="relative h-full w-full rounded-xl overflow-hidden">
+                      <video src={videoPreview!} className="h-full w-full object-cover" controls />
+                      {(uploadStatus === "uploading" || uploadStatus === "processing") && (
+                        <div className="absolute inset-0 bg-black/85 backdrop-blur-sm flex flex-col items-center justify-center text-center p-6">
+                          <div className="w-12 h-12 rounded-full border-2 border-[var(--cyan)] border-t-transparent spin mb-4" />
+                          <p className="text-sm font-extrabold text-white tracking-wide">Sending to TikTok Drafts...</p>
+                          <p className="text-xs text-gray-400 mt-1 max-w-[200px]">Do not close or refresh this page.</p>
+                          
+                          {/* Progress bar */}
+                          <div className="w-48 bg-white/10 rounded-full h-1.5 mt-5 overflow-hidden">
+                            <div 
+                              className="bg-[var(--cyan)] h-1.5 rounded-full transition-all duration-300 shadow-[0_0_8px_rgba(37,244,238,0.6)]"
+                              style={{ width: `${uploadProgress}%` }}
+                            />
+                          </div>
+                          <span className="text-[10px] text-[var(--cyan)] font-extrabold mt-2">{uploadProgress}%</span>
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <div className="flex flex-col items-center text-center p-6">
                       <div className="w-12 h-12 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mb-3">
@@ -384,27 +386,41 @@ export default function HomePage() {
                     )}
                   </div>
                   <div className="grid grid-cols-3 gap-3">
-                    {privacyOptions.map((opt) => (
-                      <label
-                        key={opt.value}
-                        className={`flex flex-col cursor-pointer justify-center items-center rounded-xl border p-4 transition-all text-center ${
-                          privacyLevel === opt.value
-                            ? "border-[var(--cyan)] bg-[var(--cyan)]/5 shadow-md shadow-[var(--cyan)]/5 scale-[1.01]"
-                            : "border-white/[0.08] bg-white/[0.01] hover:border-white/[0.2]"
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="privacy"
-                          value={opt.value}
-                          checked={privacyLevel === opt.value}
-                          onChange={() => setPrivacyLevel(opt.value)}
-                          className="sr-only"
-                        />
-                        <span className="text-xs font-bold text-white mb-0.5">{opt.label}</span>
-                        <span className="text-[9px] text-gray-400 leading-tight">{opt.desc.split("—")[0]}</span>
-                      </label>
-                    ))}
+                    {privacyOptions.map((opt) => {
+                      const isSelected = privacyLevel === opt.value;
+                      return (
+                        <label
+                          key={opt.value}
+                          className={`relative flex flex-col cursor-pointer justify-center items-center rounded-xl border-2 p-4 transition-all text-center select-none ${
+                            isSelected
+                              ? "border-[var(--cyan)] bg-[var(--cyan)]/15 shadow-[0_0_20px_rgba(37,244,238,0.15)] scale-[1.02] text-white"
+                              : "border-white/[0.08] bg-white/[0.01] text-gray-400 hover:border-white/[0.2] hover:text-white"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="privacy"
+                            value={opt.value}
+                            checked={isSelected}
+                            onChange={() => setPrivacyLevel(opt.value)}
+                            className="sr-only"
+                          />
+                          {/* Checked indicator */}
+                          <div className={`absolute top-2.5 right-2.5 w-3.5 h-3.5 rounded-full border flex items-center justify-center transition-all duration-200 ${
+                            isSelected ? "border-[var(--cyan)] bg-[var(--cyan)]" : "border-white/20 bg-transparent"
+                          }`}>
+                            {isSelected && (
+                              <div className="w-1.5 h-1.5 rounded-full bg-black" />
+                            )}
+                          </div>
+                          
+                          <span className={`text-xs font-extrabold mb-1 mt-1 transition-colors ${isSelected ? "text-[var(--cyan)]" : "text-white"}`}>
+                            {opt.label}
+                          </span>
+                          <span className="text-[9px] leading-tight opacity-75">{opt.desc.split("—")[0]}</span>
+                        </label>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -417,12 +433,29 @@ export default function HomePage() {
                   }`}>
                     {uploadStatus === "uploading" && (
                       <div className="mb-2 h-1.5 w-full rounded-full bg-white/[0.08] overflow-hidden">
-                        <div className="h-full rounded-full bg-[var(--cyan)] animate-pulse" style={{ width: "60%" }} />
+                        <div 
+                          className="h-full rounded-full bg-[var(--cyan)] transition-all duration-300" 
+                          style={{ width: `${uploadProgress}%` }} 
+                        />
                       </div>
                     )}
-                    <div className="flex items-center gap-2">
-                      {uploadStatus === "uploading" && <div className="w-3.5 h-3.5 rounded-full border-2 border-[var(--cyan)] border-t-transparent spin" />}
-                      <span>{uploadMessage}</span>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2">
+                        {uploadStatus === "uploading" && <div className="w-3.5 h-3.5 rounded-full border-2 border-[var(--cyan)] border-t-transparent spin" />}
+                        <span>{uploadMessage}</span>
+                      </div>
+                      
+                      {uploadStatus === "error" && (uploadMessage.toLowerCase().includes("scope") || uploadMessage.toLowerCase().includes("authorize") || uploadMessage.toLowerCase().includes("permission")) && (
+                        <div className="mt-2 border-t border-[var(--red)]/20 pt-2 text-[11px] leading-relaxed text-gray-300">
+                          <p className="font-extrabold text-[var(--yellow)] mb-1">💡 How to fix this:</p>
+                          <ol className="list-decimal pl-4 space-y-1">
+                            <li>Click the <strong className="text-white">Sign out</strong> button at the top right.</li>
+                            <li>To force the authorization screen to appear, open this website (<code className="text-white">https://uploader.courssy.com</code>) in an <strong className="text-[var(--cyan)] font-bold">Incognito / Private Window</strong> (or log out of your account on tiktok.com).</li>
+                            <li>Click <strong className="text-white">Sign in with TikTok</strong> and log in.</li>
+                            <li>On TikTok's permissions screen, make sure you <strong className="text-[var(--cyan)] font-extrabold">check the box</strong> to authorize video/draft uploads before clicking Continue.</li>
+                          </ol>
+                        </div>
+                      )}
                     </div>
                     {shareUrl && (
                       <a href={shareUrl} target="_blank" rel="noopener" className="mt-1.5 inline-block text-[10px] underline hover:text-white transition">
@@ -432,15 +465,38 @@ export default function HomePage() {
                   </div>
                 )}
 
-                {/* Submit */}
-                <button
-                  onClick={handleUpload}
-                  disabled={!canUpload}
-                  className="w-full rounded-xl py-4 text-sm font-extrabold text-black transition-all hover:scale-[1.01] hover:opacity-95 disabled:opacity-30 disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  style={{ background: "linear-gradient(90deg, var(--cyan), var(--pink))" }}
-                >
-                  {uploadStatus === "uploading" ? "Uploading..." : "Publish to TikTok"}
-                </button>
+                {/* Submit / Reset Button */}
+                {uploadStatus === "done" || uploadStatus === "processing" ? (
+                  <button
+                    onClick={() => {
+                      setVideoPreview(null);
+                      setUploadingFile(null);
+                      setUploadStatus("idle");
+                      setUploadMessage("");
+                      setUploadProgress(0);
+                      setShareUrl(null);
+                    }}
+                    className="w-full rounded-xl py-4 text-sm font-extrabold text-white transition-all hover:scale-[1.01] hover:opacity-95 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10 bg-gradient-to-r from-emerald-500 to-teal-500"
+                  >
+                    <span>Upload Another Video</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleUpload}
+                    disabled={!canUpload}
+                    className="w-full rounded-xl py-4 text-sm font-extrabold text-black transition-all hover:scale-[1.01] hover:opacity-95 disabled:opacity-30 disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/10"
+                    style={{ background: "linear-gradient(90deg, var(--cyan), var(--pink))" }}
+                  >
+                    {uploadStatus === "uploading" ? (
+                      <>
+                        <div className="w-4 h-4 rounded-full border-2 border-black border-t-transparent spin" />
+                        <span>Transferring to TikTok...</span>
+                      </>
+                    ) : (
+                      "Publish to TikTok"
+                    )}
+                  </button>
+                )}
               </div>
             </div>
 
