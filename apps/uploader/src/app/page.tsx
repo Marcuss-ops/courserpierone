@@ -132,59 +132,77 @@ export default function HomePage() {
   // ── Not logged in ──────────────────────────────────────────
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-center px-6">
-        {/* Sleek icon */}
-        <div className="relative mb-8">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[var(--cyan)] via-[var(--pink)] to-black flex items-center justify-center shadow-xl p-3">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-full h-full">
-              <defs>
-                <linearGradient id="courssy-logo-bg" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#4d8eff"/>
-                  <stop offset="100%" stopColor="#005ac2"/>
-                </linearGradient>
-              </defs>
-              <circle cx="16" cy="16" r="16" fill="url(#courssy-logo-bg)"/>
-              <g transform="translate(6, 6) scale(0.833)" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1 0-3.12 3 3 0 0 1 0-4.88 2.5 2.5 0 0 1 0-3.12A2.5 2.5 0 0 1 9.5 2Z"/>
-                <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 0-3.12 3 3 0 0 0 0-4.88 2.5 2.5 0 0 0 0-3.12A2.5 2.5 0 0 0 14.5 2Z"/>
-              </g>
+      <div className="min-h-screen flex flex-col justify-between text-center">
+        <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+          {/* Sleek icon */}
+          <div className="relative mb-8">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[var(--cyan)] via-[var(--pink)] to-black flex items-center justify-center shadow-xl p-3">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-full h-full">
+                <defs>
+                  <linearGradient id="courssy-logo-bg" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#4d8eff"/>
+                    <stop offset="100%" stopColor="#005ac2"/>
+                  </linearGradient>
+                </defs>
+                <circle cx="16" cy="16" r="16" fill="url(#courssy-logo-bg)"/>
+                <g transform="translate(6, 6) scale(0.833)" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1 0-3.12 3 3 0 0 1 0-4.88 2.5 2.5 0 0 1 0-3.12A2.5 2.5 0 0 1 9.5 2Z"/>
+                  <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 0-3.12 3 3 0 0 0 0-4.88 2.5 2.5 0 0 0 0-3.12A2.5 2.5 0 0 0 14.5 2Z"/>
+                </g>
+              </svg>
+            </div>
+          </div>
+
+          <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-3" style={{ letterSpacing: "-0.02em" }}>
+            Courssy
+          </h1>
+          <p className="text-base text-[var(--muted)] max-w-md mb-8 leading-relaxed">
+            Upload video drafts to TikTok in one click. No watermarks. Simple and secure.
+          </p>
+
+          {error && (
+            <div className="mb-6 rounded-xl border border-[var(--red)]/30 bg-[var(--red)]/10 px-5 py-3 text-sm text-[var(--red)]">
+              ❌ {error.replace(/_/g, " ")}
+            </div>
+          )}
+
+          <a
+            href="/api/tiktok/login"
+            className="flex items-center gap-3 rounded-full px-8 py-3.5 text-sm font-bold text-black transition-all hover:scale-105 active:scale-95 mb-6"
+            style={{
+              background: "linear-gradient(90deg, var(--cyan), var(--pink))",
+              backgroundSize: "200% 200%",
+              animation: "gradientShift 3s ease infinite",
+            }}
+          >
+            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
+              <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.77a8.19 8.19 0 0 0 4.77 1.52V6.79a4.85 4.85 0 0 1-1-.1z"/>
             </svg>
+            Sign in with TikTok
+          </a>
+
+          <div className="flex items-center gap-6 text-xs text-[var(--dimmed)] mb-8">
+            <span>🔒 Secure OAuth 2.0</span>
+            <span>🚫 No password saved</span>
+            <span>✅ Revocable anytime</span>
+          </div>
+
+          <div className="text-[11px] text-[var(--dimmed)] max-w-sm mx-auto leading-relaxed border-t border-[#1a1a1a] pt-6">
+            <span className="block font-semibold text-white mb-1.5 text-xs">How we use your permissions:</span>
+            We access your profile information (<span className="text-white">user.info.basic</span>) to display your avatar and name in the dashboard, and use the <span className="text-white">video.upload</span> scope to securely transfer selected videos directly to your TikTok account as drafts. We do not store your credentials or retain your videos on our servers.
           </div>
         </div>
 
-        <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-3" style={{ letterSpacing: "-0.02em" }}>
-          Courssy
-        </h1>
-        <p className="text-base text-[var(--muted)] max-w-md mb-8 leading-relaxed">
-          Upload video drafts to TikTok in one click. No watermarks. Simple and secure.
-        </p>
-
-        {error && (
-          <div className="mb-6 rounded-xl border border-[var(--red)]/30 bg-[var(--red)]/10 px-5 py-3 text-sm text-[var(--red)]">
-            ❌ {error.replace(/_/g, " ")}
+        {/* Footer for anonymous users */}
+        <footer className="border-t border-[var(--border)] py-8 px-6">
+          <div className="mx-auto max-w-4xl flex items-center justify-between text-[10px] text-[var(--dimmed)]">
+            <span>© {new Date().getFullYear()} Courssy</span>
+            <div className="flex gap-4">
+              <a href="/terms" className="hover:text-white transition">Terms</a>
+              <a href="/privacy" className="hover:text-white transition">Privacy</a>
+            </div>
           </div>
-        )}
-
-        <a
-          href="/api/tiktok/login"
-          className="flex items-center gap-3 rounded-full px-8 py-3.5 text-sm font-bold text-black transition-all hover:scale-105 active:scale-95"
-          style={{
-            background: "linear-gradient(90deg, var(--cyan), var(--pink))",
-            backgroundSize: "200% 200%",
-            animation: "gradientShift 3s ease infinite",
-          }}
-        >
-          <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
-            <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.77a8.19 8.19 0 0 0 4.77 1.52V6.79a4.85 4.85 0 0 1-1-.1z"/>
-          </svg>
-          Sign in with TikTok
-        </a>
-
-        <div className="mt-8 flex items-center gap-6 text-xs text-[var(--dimmed)]">
-          <span>🔒 Secure OAuth 2.0</span>
-          <span>🚫 No password saved</span>
-          <span>✅ Revocable anytime</span>
-        </div>
+        </footer>
       </div>
     );
   }
