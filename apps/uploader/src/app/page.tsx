@@ -132,9 +132,15 @@ export default function HomePage() {
   // ── Not logged in ──────────────────────────────────────────
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col justify-between text-center" style={{ background: "#080808", fontFamily: "'Manrope', sans-serif" }}>
+      <div className="min-h-screen flex flex-col justify-between text-center relative overflow-hidden" style={{ background: "#050505", fontFamily: "'Manrope', sans-serif" }}>
+        {/* Glowing background orbs */}
+        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full pointer-events-none opacity-20"
+             style={{ background: "radial-gradient(circle, var(--cyan) 0%, transparent 80%)", filter: "blur(100px)" }} />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full pointer-events-none opacity-25"
+             style={{ background: "radial-gradient(circle, var(--pink) 0%, transparent 80%)", filter: "blur(120px)" }} />
+
         {/* Nav Header */}
-        <nav className="fixed top-0 left-0 right-0 z-50 border-b border-[#1a1a1a] bg-black/80 backdrop-blur-xl">
+        <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/[0.04] bg-black/80 backdrop-blur-xl">
           <div className="mx-auto max-w-4xl flex items-center justify-between px-6 py-4">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--cyan)] via-[var(--pink)] to-black flex items-center justify-center p-1.5">
@@ -162,68 +168,71 @@ export default function HomePage() {
         </nav>
 
         {/* Central Hero Block */}
-        <div className="flex-1 flex flex-col items-center justify-center px-6 pt-32 pb-12">
-          {/* Sleek icon */}
-          <div className="relative mb-8">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[var(--cyan)] via-[var(--pink)] to-black flex items-center justify-center shadow-xl p-3">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-full h-full">
-                <defs>
-                  <linearGradient id="courssy-logo-bg" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#4d8eff"/>
-                    <stop offset="100%" stopColor="#005ac2"/>
-                  </linearGradient>
-                </defs>
-                <circle cx="16" cy="16" r="16" fill="url(#courssy-logo-bg)"/>
-                <g transform="translate(6, 6) scale(0.833)" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1 0-3.12 3 3 0 0 1 0-4.88 2.5 2.5 0 0 1 0-3.12A2.5 2.5 0 0 1 9.5 2Z"/>
-                  <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 0-3.12 3 3 0 0 0 0-4.88 2.5 2.5 0 0 0 0-3.12A2.5 2.5 0 0 0 14.5 2Z"/>
-                </g>
+        <div className="flex-1 flex flex-col items-center justify-center px-6 pt-32 pb-12 relative z-10">
+          <div className="w-full max-w-md bg-white/[0.02] border border-white/[0.08] backdrop-blur-2xl rounded-3xl p-8 md:p-10 shadow-2xl flex flex-col items-center">
+            {/* Logo container with pulse ring */}
+            <div className="relative mb-6">
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[var(--cyan)] via-[var(--pink)] to-black blur-md opacity-40 animate-pulse" />
+              <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--cyan)] via-[var(--pink)] to-black flex items-center justify-center p-2.5">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-full h-full">
+                  <defs>
+                    <linearGradient id="courssy-logo-bg" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#4d8eff"/>
+                      <stop offset="100%" stopColor="#005ac2"/>
+                    </linearGradient>
+                  </defs>
+                  <circle cx="16" cy="16" r="16" fill="url(#courssy-logo-bg)"/>
+                  <g transform="translate(6, 6) scale(0.833)" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1 0-3.12 3 3 0 0 1 0-4.88 2.5 2.5 0 0 1 0-3.12A2.5 2.5 0 0 1 9.5 2Z"/>
+                    <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 0-3.12 3 3 0 0 0 0-4.88 2.5 2.5 0 0 0 0-3.12A2.5 2.5 0 0 0 14.5 2Z"/>
+                  </g>
+                </svg>
+              </div>
+            </div>
+
+            <h1 className="text-3xl font-black text-white tracking-tight mb-2" style={{ letterSpacing: "-0.03em" }}>
+              Courssy
+            </h1>
+            <p className="text-sm text-gray-400 max-w-sm mb-8 leading-relaxed">
+              Upload video drafts to TikTok in one click. No watermarks. Simple and secure.
+            </p>
+
+            {error && (
+              <div className="w-full mb-6 rounded-xl border border-[var(--red)]/30 bg-[var(--red)]/10 px-5 py-3 text-xs text-[var(--red)] text-left">
+                ❌ {error.replace(/_/g, " ")}
+              </div>
+            )}
+
+            <a
+              href="/api/tiktok/login"
+              className="w-full flex items-center justify-center gap-3 rounded-xl py-4 text-sm font-extrabold text-black transition-all hover:scale-[1.02] active:scale-[0.98] mb-6 shadow-lg shadow-cyan-500/10"
+              style={{
+                background: "linear-gradient(90deg, var(--cyan), var(--pink))",
+                backgroundSize: "200% 200%",
+                animation: "gradientShift 3s ease infinite",
+              }}
+            >
+              <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
+                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.77a8.19 8.19 0 0 0 4.77 1.52V6.79a4.85 4.85 0 0 1-1-.1z"/>
               </svg>
+              Sign in with TikTok
+            </a>
+
+            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] text-gray-500 mb-8">
+              <span className="flex items-center gap-1">🔒 Secure OAuth 2.0</span>
+              <span className="flex items-center gap-1">🚫 No password saved</span>
+              <span className="flex items-center gap-1">✅ Revocable anytime</span>
             </div>
-          </div>
 
-          <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-3" style={{ letterSpacing: "-0.02em" }}>
-            Courssy
-          </h1>
-          <p className="text-base text-[var(--muted)] max-w-md mb-8 leading-relaxed">
-            Upload video drafts to TikTok in one click. No watermarks. Simple and secure.
-          </p>
-
-          {error && (
-            <div className="mb-6 rounded-xl border border-[var(--red)]/30 bg-[var(--red)]/10 px-5 py-3 text-sm text-[var(--red)]">
-              ❌ {error.replace(/_/g, " ")}
+            <div className="text-[10px] text-gray-500 text-left border-t border-white/[0.06] pt-6 w-full leading-relaxed">
+              <span className="block font-bold text-gray-400 mb-1 text-[11px]">How we use your permissions:</span>
+              We access your profile information (<span className="text-gray-300">user.info.basic</span>) to display your avatar and name in the dashboard, and use the <span className="text-gray-300">video.upload</span> scope to securely transfer selected videos directly to your TikTok account as drafts. We do not store your credentials or retain your videos on our servers.
             </div>
-          )}
-
-          <a
-            href="/api/tiktok/login"
-            className="flex items-center gap-3 rounded-full px-8 py-3.5 text-sm font-bold text-black transition-all hover:scale-105 active:scale-95 mb-6"
-            style={{
-              background: "linear-gradient(90deg, var(--cyan), var(--pink))",
-              backgroundSize: "200% 200%",
-              animation: "gradientShift 3s ease infinite",
-            }}
-          >
-            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
-              <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.77a8.19 8.19 0 0 0 4.77 1.52V6.79a4.85 4.85 0 0 1-1-.1z"/>
-            </svg>
-            Sign in with TikTok
-          </a>
-
-          <div className="flex items-center gap-6 text-xs text-[var(--dimmed)] mb-10">
-            <span>🔒 Secure OAuth 2.0</span>
-            <span>🚫 No password saved</span>
-            <span>✅ Revocable anytime</span>
-          </div>
-
-          <div className="text-[11px] text-[var(--dimmed)] max-w-sm mx-auto leading-relaxed border-t border-[#1a1a1a] pt-8">
-            <span className="block font-semibold text-white mb-1.5 text-xs">How we use your permissions:</span>
-            We access your profile information (<span className="text-white">user.info.basic</span>) to display your avatar and name in the dashboard, and use the <span className="text-white">video.upload</span> scope to securely transfer selected videos directly to your TikTok account as drafts. We do not store your credentials or retain your videos on our servers.
           </div>
         </div>
 
         {/* Footer for anonymous users */}
-        <footer className="border-t border-[var(--border)] py-8 px-6 mt-auto">
+        <footer className="border-t border-white/[0.04] py-8 px-6 mt-auto relative z-10 bg-black/40">
           <div className="mx-auto max-w-4xl flex items-center justify-between text-[10px] text-[var(--dimmed)]">
             <span>© {new Date().getFullYear()} Courssy. All rights reserved.</span>
             <div className="flex gap-4">
