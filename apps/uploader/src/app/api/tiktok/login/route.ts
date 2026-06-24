@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   const host = request.headers.get("host") || "uploader.courssy.com";
   const protocol = host.includes("localhost") ? "http" : "https";
   const redirectUri = `${protocol}://${host}/api/tiktok/callback`;
-  const scope = "user.info.basic,user.info.profile,user.info.stats,video.list,video.upload";
+  const scope = "user.info.basic,video.upload";
   const state = crypto.randomUUID();
 
   const params = new URLSearchParams({
