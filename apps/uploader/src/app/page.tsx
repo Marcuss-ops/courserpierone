@@ -132,8 +132,37 @@ export default function HomePage() {
   // ── Not logged in ──────────────────────────────────────────
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col justify-between text-center">
-        <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+      <div className="min-h-screen flex flex-col justify-between text-center" style={{ background: "#080808", fontFamily: "'Manrope', sans-serif" }}>
+        {/* Nav Header */}
+        <nav className="fixed top-0 left-0 right-0 z-50 border-b border-[#1a1a1a] bg-black/80 backdrop-blur-xl">
+          <div className="mx-auto max-w-4xl flex items-center justify-between px-6 py-4">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--cyan)] via-[var(--pink)] to-black flex items-center justify-center p-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-full h-full">
+                  <defs>
+                    <linearGradient id="courssy-anon-logo-bg" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#4d8eff"/>
+                      <stop offset="100%" stopColor="#005ac2"/>
+                    </linearGradient>
+                  </defs>
+                  <circle cx="16" cy="16" r="16" fill="url(#courssy-anon-logo-bg)"/>
+                  <g transform="translate(6, 6) scale(0.833)" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1 0-3.12 3 3 0 0 1 0-4.88 2.5 2.5 0 0 1 0-3.12A2.5 2.5 0 0 1 9.5 2Z"/>
+                    <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 0-3.12 3 3 0 0 0 0-4.88 2.5 2.5 0 0 0 0-3.12A2.5 2.5 0 0 0 14.5 2Z"/>
+                  </g>
+                </svg>
+              </div>
+              <span className="text-sm font-bold text-white tracking-tight">Courssy</span>
+            </div>
+            <div className="flex gap-4">
+              <a href="/terms" className="text-xs text-[var(--muted)] hover:text-white transition">Terms</a>
+              <a href="/privacy" className="text-xs text-[var(--muted)] hover:text-white transition">Privacy</a>
+            </div>
+          </div>
+        </nav>
+
+        {/* Central Hero Block */}
+        <div className="flex-1 flex flex-col items-center justify-center px-6 pt-32 pb-12">
           {/* Sleek icon */}
           <div className="relative mb-8">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[var(--cyan)] via-[var(--pink)] to-black flex items-center justify-center shadow-xl p-3">
@@ -181,25 +210,26 @@ export default function HomePage() {
             Sign in with TikTok
           </a>
 
-          <div className="flex items-center gap-6 text-xs text-[var(--dimmed)] mb-8">
+          <div className="flex items-center gap-6 text-xs text-[var(--dimmed)] mb-10">
             <span>🔒 Secure OAuth 2.0</span>
             <span>🚫 No password saved</span>
             <span>✅ Revocable anytime</span>
           </div>
 
-          <div className="text-[11px] text-[var(--dimmed)] max-w-sm mx-auto leading-relaxed border-t border-[#1a1a1a] pt-6">
+          <div className="text-[11px] text-[var(--dimmed)] max-w-sm mx-auto leading-relaxed border-t border-[#1a1a1a] pt-8">
             <span className="block font-semibold text-white mb-1.5 text-xs">How we use your permissions:</span>
             We access your profile information (<span className="text-white">user.info.basic</span>) to display your avatar and name in the dashboard, and use the <span className="text-white">video.upload</span> scope to securely transfer selected videos directly to your TikTok account as drafts. We do not store your credentials or retain your videos on our servers.
           </div>
         </div>
 
         {/* Footer for anonymous users */}
-        <footer className="border-t border-[var(--border)] py-8 px-6">
+        <footer className="border-t border-[var(--border)] py-8 px-6 mt-auto">
           <div className="mx-auto max-w-4xl flex items-center justify-between text-[10px] text-[var(--dimmed)]">
-            <span>© {new Date().getFullYear()} Courssy</span>
+            <span>© {new Date().getFullYear()} Courssy. All rights reserved.</span>
             <div className="flex gap-4">
-              <a href="/terms" className="hover:text-white transition">Terms</a>
-              <a href="/privacy" className="hover:text-white transition">Privacy</a>
+              <a href="/terms" className="hover:text-white transition">Terms of Service</a>
+              <span className="text-gray-700">|</span>
+              <a href="/privacy" className="hover:text-white transition">Privacy Policy</a>
             </div>
           </div>
         </footer>
