@@ -248,9 +248,15 @@ export default function HomePage() {
 
   // ── Dashboard ──────────────────────────────────────────────
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen text-white relative overflow-hidden flex flex-col justify-between" style={{ background: "#050505", fontFamily: "'Manrope', sans-serif" }}>
+      {/* Glowing background orbs */}
+      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full pointer-events-none opacity-20"
+           style={{ background: "radial-gradient(circle, var(--cyan) 0%, transparent 80%)", filter: "blur(100px)" }} />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full pointer-events-none opacity-25"
+           style={{ background: "radial-gradient(circle, var(--pink) 0%, transparent 80%)", filter: "blur(120px)" }} />
+
       {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-[var(--border)] bg-black/80 backdrop-blur-2xl">
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/[0.04] bg-black/80 backdrop-blur-xl">
         <div className="mx-auto max-w-4xl flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--cyan)] via-[var(--pink)] to-black flex items-center justify-center p-1.5">
@@ -275,7 +281,7 @@ export default function HomePage() {
             <a href="/privacy" className="text-xs text-[var(--muted)] hover:text-white transition">Privacy</a>
             <button
               onClick={handleLogout}
-              className="text-xs text-[var(--red)] font-medium transition hover:opacity-85"
+              className="text-xs rounded-lg px-3 py-1.5 border border-[var(--red)]/35 text-[var(--red)] bg-[var(--red)]/5 font-medium transition hover:bg-[var(--red)]/15 active:scale-95 animate-none"
             >
               Sign out
             </button>
@@ -283,138 +289,159 @@ export default function HomePage() {
         </div>
       </nav>
 
-      {/* Main */}
-      <div className="pt-24 px-6 pb-16">
-        <div className="mx-auto max-w-4xl">
+      {/* Main Content */}
+      <div className="pt-28 px-6 pb-16 flex-1 relative z-10 flex flex-col justify-center">
+        <div className="mx-auto max-w-4xl w-full">
           {/* Two-column grid */}
-          <div className="grid gap-12 md:grid-cols-3">
+          <div className="grid gap-8 md:grid-cols-3 items-start">
             
             {/* ── LEFT/SIDEBAR: Profile info (1 col) ──────── */}
-            <div className="md:col-span-1 space-y-6">
-              <div className="rounded-2xl border border-[var(--border2)] p-6" style={{ background: "var(--surface)" }}>
+            <div className="md:col-span-1">
+              <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-2xl p-6 shadow-xl">
                 <div className="flex flex-col items-center text-center">
-                  {user.avatar_url ? (
-                    <img src={user.avatar_url} alt={user.display_name} className="w-16 h-16 rounded-full border-2 border-[var(--cyan)] object-cover mb-4" />
+                  <div className="relative mb-4">
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[var(--cyan)] to-[var(--pink)] blur-sm opacity-50" />
+                    {user.avatar_url ? (
+                      <img src={user.avatar_url} alt={user.display_name} className="relative w-20 h-20 rounded-full border-2 border-white object-cover" />
+                    ) : (
+                      <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-[var(--cyan)] to-[var(--pink)] flex items-center justify-center text-2xl font-black text-black">
+                        {user.display_name[0].toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <h3 className="font-bold text-white text-lg tracking-tight">{user.display_name}</h3>
+                  <p className="text-xs text-[var(--cyan)] font-semibold mb-3">@{user.username}</p>
+                  {user.bio ? (
+                    <p className="text-xs text-gray-400 leading-relaxed max-w-xs">{user.bio}</p>
                   ) : (
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--cyan)] to-[var(--pink)] flex items-center justify-center text-xl font-extrabold text-black mb-4">
-                      {user.display_name[0].toUpperCase()}
-                    </div>
+                    <p className="text-xs text-gray-500 italic">No bio available</p>
                   )}
-                  <h3 className="font-bold text-white text-lg">{user.display_name}</h3>
-                  <p className="text-xs text-[var(--cyan)] mb-2">@{user.username}</p>
-                  {user.bio && <p className="text-xs text-[var(--muted)] leading-relaxed">{user.bio}</p>}
                 </div>
               </div>
             </div>
 
             {/* ── RIGHT: Video Upload (2 cols) ───────────── */}
-            <div className="md:col-span-2 space-y-6">
-              <div className="space-y-1">
-                <h2 className="text-xl font-bold text-white">Upload Video</h2>
-                <p className="text-xs text-[var(--muted)]">All uploads are sent to TikTok as drafts.</p>
-              </div>
-
-              {/* Drop zone */}
-              <div
-                onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-                onDragLeave={() => setDragging(false)}
-                onDrop={handleDrop}
-                onClick={() => fileInputRef.current?.click()}
-                className={`relative flex h-40 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed transition-all ${dragging ? "border-[var(--cyan)] bg-[var(--cyan)]/5" : "border-[var(--border2)] hover:border-[var(--muted)]"}`}
-                style={{ background: "var(--surface)" }}
-              >
-                {videoPreview ? (
-                  <video src={videoPreview!} className="h-full w-full rounded-xl object-cover" controls />
-                ) : (
-                  <>
-                    <p className="text-sm text-[var(--muted)]">
-                      Drag and drop your video or <span className="text-[var(--cyan)]">browse</span>
-                    </p>
-                    <p className="mt-1 text-xs text-[var(--dimmed)]">MP4, MOV (max 100MB)</p>
-                  </>
-                )}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="video/*"
-                  className="hidden"
-                  onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]); }}
-                />
-              </div>
-
-              {/* Title */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[var(--muted)]">Title</label>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  maxLength={150}
-                  className="w-full rounded-xl border border-[var(--border2)] bg-[var(--surface)] px-4 py-2.5 text-sm text-white transition focus:border-[var(--cyan)]"
-                  placeholder="Video title..."
-                />
-              </div>
-
-              {/* Privacy */}
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-[var(--muted)]">Privacy Level</label>
-                {privacyLevel === "" && (
-                  <p className="text-[10px] text-[var(--yellow)]">⚠️ Please select privacy before publishing</p>
-                )}
-                <div className="grid grid-cols-3 gap-2">
-                  {privacyOptions.map((opt) => (
-                    <label
-                      key={opt.value}
-                      className={`flex flex-col cursor-pointer justify-center items-center rounded-xl border p-3 transition text-center ${privacyLevel === opt.value ? "border-[var(--cyan)] bg-[var(--cyan)]/5" : "border-[var(--border2)] hover:border-[var(--muted)]"}`}
-                    >
-                      <input
-                        type="radio"
-                        name="privacy"
-                        value={opt.value}
-                        checked={privacyLevel === opt.value}
-                        onChange={() => setPrivacyLevel(opt.value)}
-                        className="sr-only"
-                      />
-                      <span className="text-xs font-bold text-white mb-0.5">{opt.label}</span>
-                      <span className="text-[9px] text-[var(--dimmed)]">{opt.desc.split("—")[0]}</span>
-                    </label>
-                  ))}
+            <div className="md:col-span-2">
+              <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-2xl p-6 md:p-8 shadow-xl space-y-6">
+                <div className="space-y-1 border-b border-white/[0.06] pb-4">
+                  <h2 className="text-2xl font-black text-white tracking-tight">Upload Video</h2>
+                  <p className="text-xs text-gray-400">All uploads are securely sent to TikTok as drafts.</p>
                 </div>
-              </div>
 
-              {/* Status */}
-              {uploadStatus !== "idle" && (
-                <div className={`rounded-xl border p-4 text-xs font-medium ${
-                  uploadStatus === "error" ? "border-[var(--red)]/30 bg-[var(--red)]/10 text-[var(--red)]" :
-                  uploadStatus === "done" ? "border-[var(--green)]/30 bg-[var(--green)]/10 text-[var(--green)]" :
-                  "border-[var(--cyan)]/30 bg-[var(--cyan)]/10 text-[var(--cyan)]"
-                }`}>
-                  {uploadStatus === "uploading" && (
-                    <div className="mb-2 h-1 w-full rounded-full bg-[var(--surface2)]">
-                      <div className="h-1 rounded-full bg-[var(--cyan)] animate-pulse" style={{ width: "60%" }} />
+                {/* Drop zone */}
+                <div
+                  onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+                  onDragLeave={() => setDragging(false)}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`relative flex h-48 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed transition-all ${
+                    dragging ? "border-[var(--cyan)] bg-[var(--cyan)]/5" : "border-white/[0.1] hover:border-white/[0.25] bg-white/[0.01]"
+                  }`}
+                >
+                  {videoPreview ? (
+                    <video src={videoPreview!} className="h-full w-full rounded-xl object-cover" controls />
+                  ) : (
+                    <div className="flex flex-col items-center text-center p-6">
+                      <div className="w-12 h-12 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                      </div>
+                      <p className="text-sm font-semibold text-gray-200">
+                        Drag &amp; drop your video here, or <span className="text-[var(--cyan)] underline">browse</span>
+                      </p>
+                      <p className="mt-1.5 text-xs text-gray-500">MP4, MOV (max 100MB)</p>
                     </div>
                   )}
-                  <div className="flex items-center gap-2">
-                    {uploadStatus === "uploading" && <div className="w-3.5 h-3.5 rounded-full border-2 border-[var(--cyan)] border-t-transparent spin" />}
-                    <span>{uploadMessage}</span>
-                  </div>
-                  {shareUrl && (
-                    <a href={shareUrl} target="_blank" rel="noopener" className="mt-1.5 inline-block text-[10px] underline">
-                      Open on TikTok →
-                    </a>
-                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="video/*"
+                    className="hidden"
+                    onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]); }}
+                  />
                 </div>
-              )}
 
-              {/* Submit */}
-              <button
-                onClick={handleUpload}
-                disabled={!canUpload}
-                className="w-full rounded-xl py-3.5 text-sm font-bold text-black transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                style={{ background: "linear-gradient(90deg, var(--cyan), var(--pink))" }}
-              >
-                {uploadStatus === "uploading" ? "Uploading..." : "Publish to TikTok"}
-              </button>
+                {/* Title */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-400 tracking-wider uppercase">Title</label>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    maxLength={150}
+                    className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 text-sm text-white transition focus:border-[var(--cyan)] focus:bg-white/[0.04] outline-none"
+                    placeholder="Provide a video title..."
+                  />
+                </div>
+
+                {/* Privacy */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-gray-400 tracking-wider uppercase">Privacy Level</label>
+                    {privacyLevel === "" && (
+                      <span className="text-[10px] text-[var(--yellow)] font-semibold">⚠️ Select privacy before publishing</span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    {privacyOptions.map((opt) => (
+                      <label
+                        key={opt.value}
+                        className={`flex flex-col cursor-pointer justify-center items-center rounded-xl border p-4 transition-all text-center ${
+                          privacyLevel === opt.value
+                            ? "border-[var(--cyan)] bg-[var(--cyan)]/5 shadow-md shadow-[var(--cyan)]/5 scale-[1.01]"
+                            : "border-white/[0.08] bg-white/[0.01] hover:border-white/[0.2]"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="privacy"
+                          value={opt.value}
+                          checked={privacyLevel === opt.value}
+                          onChange={() => setPrivacyLevel(opt.value)}
+                          className="sr-only"
+                        />
+                        <span className="text-xs font-bold text-white mb-0.5">{opt.label}</span>
+                        <span className="text-[9px] text-gray-400 leading-tight">{opt.desc.split("—")[0]}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Status */}
+                {uploadStatus !== "idle" && (
+                  <div className={`rounded-xl border p-4 text-xs font-medium ${
+                    uploadStatus === "error" ? "border-[var(--red)]/30 bg-[var(--red)]/10 text-[var(--red)]" :
+                    uploadStatus === "done" ? "border-[var(--green)]/30 bg-[var(--green)]/10 text-[var(--green)]" :
+                    "border-[var(--cyan)]/30 bg-[var(--cyan)]/10 text-[var(--cyan)]"
+                  }`}>
+                    {uploadStatus === "uploading" && (
+                      <div className="mb-2 h-1.5 w-full rounded-full bg-white/[0.08] overflow-hidden">
+                        <div className="h-full rounded-full bg-[var(--cyan)] animate-pulse" style={{ width: "60%" }} />
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2">
+                      {uploadStatus === "uploading" && <div className="w-3.5 h-3.5 rounded-full border-2 border-[var(--cyan)] border-t-transparent spin" />}
+                      <span>{uploadMessage}</span>
+                    </div>
+                    {shareUrl && (
+                      <a href={shareUrl} target="_blank" rel="noopener" className="mt-1.5 inline-block text-[10px] underline hover:text-white transition">
+                        Open on TikTok →
+                      </a>
+                    )}
+                  </div>
+                )}
+
+                {/* Submit */}
+                <button
+                  onClick={handleUpload}
+                  disabled={!canUpload}
+                  className="w-full rounded-xl py-4 text-sm font-extrabold text-black transition-all hover:scale-[1.01] hover:opacity-95 disabled:opacity-30 disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  style={{ background: "linear-gradient(90deg, var(--cyan), var(--pink))" }}
+                >
+                  {uploadStatus === "uploading" ? "Uploading..." : "Publish to TikTok"}
+                </button>
+              </div>
             </div>
 
           </div>
@@ -422,12 +449,13 @@ export default function HomePage() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-[var(--border)] py-8 px-6">
+      <footer className="border-t border-white/[0.04] py-8 px-6 bg-black/40 relative z-10">
         <div className="mx-auto max-w-4xl flex items-center justify-between text-[10px] text-[var(--dimmed)]">
-          <span>© {new Date().getFullYear()} Courssy</span>
+          <span>© {new Date().getFullYear()} Courssy. All rights reserved.</span>
           <div className="flex gap-4">
-            <a href="/terms" className="hover:text-white transition">Terms</a>
-            <a href="/privacy" className="hover:text-white transition">Privacy</a>
+            <a href="/terms" className="hover:text-white transition">Terms of Service</a>
+            <span className="text-gray-700">|</span>
+            <a href="/privacy" className="hover:text-white transition">Privacy Policy</a>
           </div>
         </div>
       </footer>
