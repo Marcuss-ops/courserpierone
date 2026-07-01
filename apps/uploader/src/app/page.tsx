@@ -450,7 +450,7 @@ export default function HomePage() {
                           <p className="font-extrabold text-[var(--yellow)] mb-1">💡 How to fix this:</p>
                           <ol className="list-decimal pl-4 space-y-1">
                             <li>Click the <strong className="text-white">Sign out</strong> button at the top right.</li>
-                            <li>To force the authorization screen to appear, open this website (<code className="text-white">https://uploader.courssy.com</code>) in an <strong className="text-[var(--cyan)] font-bold">Incognito / Private Window</strong> (or log out of your account on tiktok.com).</li>
+                            <li>To force the authorization screen to appear, open this website (<code className="text-white">https://courssy.com</code>) in an <strong className="text-[var(--cyan)] font-bold">Incognito / Private Window</strong> (or log out of your account on tiktok.com).</li>
                             <li>Click <strong className="text-white">Sign in with TikTok</strong> and log in.</li>
                             <li>On TikTok's permissions screen, make sure you <strong className="text-[var(--cyan)] font-extrabold">check the box</strong> to authorize video/draft uploads before clicking Continue.</li>
                           </ol>

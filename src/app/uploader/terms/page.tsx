@@ -25,7 +25,7 @@ export default function TermsPage() {
       <div className="pt-28 px-6 pb-20">
         <div className="mx-auto max-w-3xl">
           <h1 className="text-4xl font-extrabold text-white mb-2">Terms of Service</h1>
-          <p className="text-sm text-gray-500 mb-10">uploader.courssy.com · Last updated: {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</p>
+          <p className="text-sm text-gray-500 mb-10">courssy.com · Last updated: {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</p>
 
           <div className="space-y-8 text-gray-400 text-sm leading-relaxed">
 

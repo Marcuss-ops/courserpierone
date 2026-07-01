@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
     return new NextResponse("TIKTOK_CLIENT_KEY not configured", { status: 500 });
   }
 
-  const host = request.headers.get("host") || "uploader.courssy.com";
+  const host = request.headers.get("host") || "courssy.com";
   const protocol = host.includes("localhost") ? "http" : "https";
   const redirectUri = `${protocol}://${host}/api/tiktok/callback`;
   const scope = "user.info.basic,video.upload";

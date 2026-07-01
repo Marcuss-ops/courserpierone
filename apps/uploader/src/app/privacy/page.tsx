@@ -25,7 +25,7 @@ export default function PrivacyPage() {
       <div className="pt-28 px-6 pb-20">
         <div className="mx-auto max-w-3xl">
           <h1 className="text-4xl font-extrabold text-white mb-2">Privacy Policy</h1>
-          <p className="text-sm text-gray-500 mb-10">uploader.courssy.com · Last updated: {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</p>
+          <p className="text-sm text-gray-500 mb-10">courssy.com · Last updated: {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</p>
 
           <div className="space-y-8 text-gray-400 text-sm leading-relaxed">
 
@@ -35,7 +35,7 @@ export default function PrivacyPage() {
               <div className="mt-3 rounded-xl border border-[#222] p-4" style={{ background: "#0a0a0a" }}>
                 <p className="font-semibold text-white">Courssy</p>
                 <p>Email: <span className="text-[#25F4EE]">info@courssy.com</span></p>
-                <p>Website: <span className="text-[#25F4EE]">uploader.courssy.com</span></p>
+                <p>Website: <span className="text-[#25F4EE]">courssy.com</span></p>
               </div>
               <p className="mt-3">For any questions regarding the processing of your personal data, contact us at info@courssy.com.</p>
             </section>
@@ -83,7 +83,7 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-lg font-bold text-white mb-3">4. Storage and Security</h2>
               <ul className="mt-2 space-y-2 list-disc list-inside">
-                <li><strong className="text-white">Access token:</strong> Stored in an httpOnly cookie with secure flag and sameSite=lax. The cookie is restricted to the domain uploader.courssy.com and has an expiration duration matching the TikTok token (max 24h).</li>
+                <li><strong className="text-white">Access token:</strong> Stored in an httpOnly cookie with secure flag and sameSite=lax. The cookie is restricted to the domain courssy.com and has an expiration duration matching the TikTok token (max 24h).</li>
                 <li><strong className="text-white">No Database:</strong> Courssy does not use any databases to store TikTok data. Profile data is not persistently saved.</li>
                 <li><strong className="text-white">Infrastructure:</strong> The app is hosted on Vercel (EU/US infrastructure) with mandatory HTTPS connections.</li>
                 <li><strong className="text-white">Encryption:</strong> All communications between the browser and servers are encrypted using TLS 1.2+.</li>

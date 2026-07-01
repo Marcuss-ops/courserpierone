@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const host = req.headers.get("host") || "uploader.courssy.com";
+  const host = req.headers.get("host") || "courssy.com";
   const protocol = host.includes("localhost") ? "http" : "https";
   const redirectUri = `${protocol}://${host}/api/tiktok/callback`;
 
