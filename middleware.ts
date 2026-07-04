@@ -190,7 +190,7 @@ export function middleware(request: NextRequest) {
     pathname.startsWith("/sw.js") ||
     pathname.startsWith("/manifest.json") ||
     pathname.startsWith("/courses/") ||
-    pathname.match(/\.(png|jpg|jpeg|gif|svg|webp|ico|css|js|woff2?)$/)
+    pathname.match(/\.(png|jpg|jpeg|gif|svg|webp|ico|css|js|woff2?|txt)$/)
   ) {
     return NextResponse.next();
   }
@@ -240,6 +240,6 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     // Skip API routes, static files, and Next.js internals
-    "/((?!api/|_next/|favicon|icon-|sw.js|manifest.json|courses/|[^/]*\\.[^/]*$).*)",
+    "/((?!api/|_next/|favicon|icon-|sw.js|manifest.json|courses/|.*\\.[a-zA-Z0-9]+$).*)",
   ],
 };
