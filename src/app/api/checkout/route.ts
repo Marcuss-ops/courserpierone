@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
 
     // ─── Fallback: Stripe (legacy) ────────────────────────────
     const { getStripe } = await import("@/lib/payment/stripe");
-    const user = userEmail
+    const dbUser = userEmail
       ? await prisma.user.findUnique({ where: { email: userEmail } })
       : null;
 
@@ -188,7 +188,7 @@ export async function POST(request: NextRequest) {
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/${locale}/${product.slug}/download?lang=${locale}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/${product.slug}?canceled=1`,
       metadata: {
-        userId: user?.id ?? "guest",
+        userId: dbUser?.id ?? "guest",
         productId: product.id,
         locale,
         customer_country: country ?? "",
