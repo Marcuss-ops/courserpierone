@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/auth";
+import { getServerUser } from "@/lib/supabase/get-user";
 
 // PUT — update a coupon
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user || (session.user as any).role !== "admin") {
+  const { user, dbUser } = await getServerUser();
+  if (!user || !dbUser || dbUser.role !== "admin") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -44,8 +43,8 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user || (session.user as any).role !== "admin") {
+  const { user, dbUser } = await getServerUser();
+  if (!user || !dbUser || dbUser.role !== "admin") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

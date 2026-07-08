@@ -1,6 +1,7 @@
 import { prisma } from "../db/prisma";
 import { sendPurchaseConfirmation } from "./email";
 import { COUNTRY_LOCALE } from "@/lib/i18n/_generated/locale-data";
+import { hashToken } from "@/lib/utils/token-hash";
 import crypto from "crypto";
 
 export interface ProcessOrderInput {
@@ -138,16 +139,18 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
     },
   });
 
-  // ── 5. Generate magic link ──────────────────────────────────
-  const token = crypto.randomBytes(32).toString("hex");
+  // ── 5. Generate magic link (token hashed in DB) ──────────
+  const plainToken = crypto.randomBytes(32).toString("hex");
+  const hashedToken = hashToken(plainToken);
   const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year
 
   await prisma.magicLink.create({
     data: {
       email,
-      token,
+      token: hashedToken,
       productId: product.id,
       expiresAt,
+      // tokenHashed: true è il default nello schema, omesso per brevità
     },
   });
 
@@ -160,8 +163,8 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
     : (locale.split("-")[0] ?? "en");
 
   // ── 7. Send purchase confirmation email (localizzata) ─────────
-  const courseUrl = `${appUrl}/${product.slug}/download?lang=${ebookLang}&token=${token}`;
-  const ebookDownloadUrl = `${appUrl}/api/ebook/${product.slug}/download?lang=${ebookLang}&token=${token}`;
+  const courseUrl = `${appUrl}/${product.slug}/download?lang=${ebookLang}&token=${plainToken}`;
+  const ebookDownloadUrl = `${appUrl}/api/ebook/${product.slug}/download?lang=${ebookLang}&token=${plainToken}`;
   try {
     await sendPurchaseConfirmation(email, product.slug, courseUrl, locale, ebookDownloadUrl);
   } catch (emailErr) {

@@ -313,13 +313,14 @@ model AbandonedCheckout {
 
 // ─── Magic Links ────────────────────────────────────────────
 model MagicLink {
-  id        String   @id @default(cuid())
-  email     String
-  token     String   @unique
-  productId String?
-  used      Boolean  @default(false)
-  expiresAt DateTime
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  email       String
+  token       String   @unique
+  productId   String?
+  used        Boolean  @default(false)
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  tokenHashed Boolean  @default(true) // true se token è già SHA-256 hash-ato
 }
 
 // ─── Traduzioni Landing Pages (DB condiviso per tutti i siti) ─

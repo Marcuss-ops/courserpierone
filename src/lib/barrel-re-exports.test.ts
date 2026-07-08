@@ -1,27 +1,17 @@
 import { describe, it, expect } from "vitest";
-import type { NextAuthOptions } from "next-auth";
 
 // ─── @/lib/auth ─────────────────────────────────────────────
 describe("@/lib/auth — barrel re-exports", () => {
-  it("exports NextAuth as default export", async () => {
+  it("exports createServerClient", async () => {
     const mod = await import("@/lib/auth");
-    expect(mod.NextAuth).toBeDefined();
-    expect(typeof mod.NextAuth).toBe("function");
+    expect(mod.createServerClient).toBeDefined();
+    expect(typeof mod.createServerClient).toBe("function");
   });
 
-  it("exports authOptions", async () => {
+  it("exports getServerUser", async () => {
     const mod = await import("@/lib/auth");
-    expect(mod.authOptions).toBeDefined();
-    expect(typeof mod.authOptions).toBe("object");
-  });
-
-  it("exports NextAuthOptions type", async () => {
-    const mod = await import("@/lib/auth");
-    // Type re-exports don't exist at runtime — verify the type is importable
-    type TestType = typeof mod extends { NextAuthOptions: infer T } ? T : never;
-    // If this compiles, the type is exported correctly
-    const _opts: NextAuthOptions | undefined = undefined;
-    expect(true).toBe(true);
+    expect(mod.getServerUser).toBeDefined();
+    expect(typeof mod.getServerUser).toBe("function");
   });
 });
 

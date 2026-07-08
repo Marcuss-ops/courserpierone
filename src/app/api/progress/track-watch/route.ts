@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/auth";
+import { getServerUser } from "@/lib/supabase/get-user";
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    const { user, dbUser } = await getServerUser();
+    if (!user?.email || !dbUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -16,15 +15,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing lessonId" }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({ where: { email: session.user.email } });
-    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
-
     // Upsert: crea o aggiorna lastWatchedAt
     const progress = await prisma.lessonProgress.upsert({
-      where: { userId_lessonId: { userId: user.id, lessonId } },
+      where: { userId_lessonId: { userId: dbUser.id, lessonId } },
       update: { lastWatchedAt: new Date() },
       create: {
-        userId: user.id,
+        userId: dbUser.id,
         lessonId,
         completed: false,
         lastWatchedAt: new Date(),

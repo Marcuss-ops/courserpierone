@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/auth";
+import { getServerUser } from "@/lib/supabase/get-user";
 import { initLS, getStoreId } from "@/lib/payment/lemonsqueezy";
 import { createCheckout } from "@lemonsqueezy/lemonsqueezy.js";
 import { checkoutSchema, validationErrorResponse } from "@/lib/utils/validations";
@@ -14,7 +13,7 @@ export async function POST(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "unknown";
     const rl = rateLimit(`checkout:${ip}`, 10, 60 * 1000);
     if (!rl.allowed) return rateLimitResponse(rl.resetIn);
-    const session = await getServerSession(authOptions);
+    const { user } = await getServerUser();
     const body = await request.json();
     
     // Validate body with Zod
@@ -76,7 +75,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const userEmail = session?.user?.email ?? body.email ?? "";
+    const userEmail = user?.email ?? body.email ?? "";
 
     const saveAbandonedCheckout = async (checkoutUrl: string) => {
       if (!userEmail) return;

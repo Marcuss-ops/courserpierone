@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/auth";
+import { getServerUser } from "@/lib/supabase/get-user";
 
 // GET — Recupera appunti per una lezione
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    const { user, dbUser } = await getServerUser();
+    if (!user?.email || !dbUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -17,11 +16,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Missing lessonId" }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({ where: { email: session.user.email } });
-    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
-
     const note = await prisma.lessonNote.findUnique({
-      where: { userId_lessonId: { userId: user.id, lessonId } },
+      where: { userId_lessonId: { userId: dbUser.id, lessonId } },
     });
 
     return NextResponse.json({ note });
@@ -34,8 +30,8 @@ export async function GET(request: NextRequest) {
 // POST — Salva/aggiorna appunti per una lezione
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    const { user, dbUser } = await getServerUser();
+    if (!user?.email || !dbUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -45,13 +41,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing lessonId or content" }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({ where: { email: session.user.email } });
-    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
-
     const note = await prisma.lessonNote.upsert({
-      where: { userId_lessonId: { userId: user.id, lessonId } },
+      where: { userId_lessonId: { userId: dbUser.id, lessonId } },
       update: { content },
-      create: { userId: user.id, lessonId, content },
+      create: { userId: dbUser.id, lessonId, content },
     });
 
     return NextResponse.json({ success: true, note });
@@ -64,8 +57,8 @@ export async function POST(request: NextRequest) {
 // DELETE — Elimina appunti di una lezione
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    const { user, dbUser } = await getServerUser();
+    if (!user?.email || !dbUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -75,11 +68,8 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Missing lessonId" }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({ where: { email: session.user.email } });
-    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
-
     await prisma.lessonNote.deleteMany({
-      where: { userId: user.id, lessonId },
+      where: { userId: dbUser.id, lessonId },
     });
 
     return NextResponse.json({ success: true });

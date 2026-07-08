@@ -10,8 +10,7 @@ import {
   Menu, 
   Lock
 } from "lucide-react";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/auth";
+import { getServerUser } from "@/lib/supabase/get-user";
 import { getCourseConfig } from "@/lib/config/white-label-data";
 import { AnalyticsTracker } from "@/components/course/analytics-tracker";
 import { LessonProgressButton, ProgressBar } from "@/components/course/lesson-progress-button";
@@ -93,8 +92,8 @@ export default async function CoursePage({
 
   if (!course) return notFound();
 
-  const session = await getServerSession(authOptions);
-  const isAuthenticated = !!session?.user?.email;
+  const { user } = await getServerUser();
+  const isAuthenticated = !!user?.email;
 
   const currentLang = lang || (course.defaultLanguage as string) || "en";
   const content = course.languages[currentLang] || course.languages[course.defaultLanguage] || Object.values(course.languages)[0];
@@ -289,7 +288,7 @@ export default async function CoursePage({
                       ? "bg-zinc-100 text-zinc-600 hover:text-zinc-900 border-zinc-200" 
                       : "premium-glass text-zinc-400 hover:text-white border-white/5"
                   }`}>
-                    {session.user?.email?.split("@")[0]}
+                    {user.email?.split("@")[0]}
                   </Link>
                 ) : (
                   <Link href={`/login?productId=${domain}`} className={`p-3 rounded-xl transition-colors border ${

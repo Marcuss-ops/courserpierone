@@ -13,8 +13,7 @@ import {
 } from "lucide-react";
 import { getCourseConfig } from "@/lib/config/white-label-data";
 import { AccessGate } from "@/components/course/access-gate";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/auth";
+import { getServerUser } from "@/lib/supabase/get-user";
 import { loadLocaleContentSafe } from "@/lib/i18n/load-locale-content";
 
 export async function generateMetadata({
@@ -82,8 +81,8 @@ export default async function ProductPortalPage({
   const course = await getCourseConfig(domain);
   if (!course) return notFound();
 
-  const session = await getServerSession(authOptions);
-  const isAuthenticated = !!session?.user?.email;
+  const { user } = await getServerUser();
+  const isAuthenticated = !!user?.email;
 
   const currentLang = lang || (course.defaultLanguage as string) || "en";
   const content = course.languages[currentLang] || course.languages[course.defaultLanguage];
@@ -124,7 +123,7 @@ export default async function ProductPortalPage({
 
             {isAuthenticated && (
               <a
-                href="/api/auth/signout"
+                href="/auth/signout"
                 className="absolute right-6 p-2.5 bg-zinc-100 hover:bg-zinc-200 rounded-xl text-zinc-600 hover:text-red-500 transition-all border border-zinc-200"
               >
                 <LogOut className="w-4 h-4" />

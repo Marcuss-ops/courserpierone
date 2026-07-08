@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
+import { hashToken } from "@/lib/utils/token-hash";
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,7 +11,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing token" }, { status: 400 });
     }
 
-    const magicLink = await prisma.magicLink.findUnique({ where: { token } });
+    const hashedToken = hashToken(token);
+    const magicLink = await prisma.magicLink.findUnique({ where: { token: hashedToken } });
 
     if (!magicLink) {
       return NextResponse.json({ error: "Invalid token" }, { status: 404 });

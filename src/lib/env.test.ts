@@ -25,8 +25,10 @@ describe("ENV_DEFINITIONS", () => {
     const critical = ENV_DEFINITIONS.filter((d) => d.category === "critical");
     const keys = critical.map((d) => d.key);
     expect(keys).toContain("DATABASE_URL");
-    expect(keys).toContain("NEXTAUTH_SECRET");
-    expect(keys).toContain("NEXTAUTH_URL");
+    expect(keys).toContain("SUPABASE_URL");
+    expect(keys).toContain("SUPABASE_SERVICE_ROLE_KEY");
+    expect(keys).toContain("NEXT_PUBLIC_SUPABASE_URL");
+    expect(keys).toContain("NEXT_PUBLIC_SUPABASE_ANON_KEY");
     expect(keys).toContain("NEXT_PUBLIC_APP_URL");
   });
 
@@ -56,8 +58,9 @@ describe("ENV_DEFINITIONS", () => {
 describe("validateEnv", () => {
   it("reports missing critical vars when none are set", () => {
     deleteEnv("DATABASE_URL");
-    deleteEnv("NEXTAUTH_SECRET");
-    deleteEnv("NEXTAUTH_URL");
+    deleteEnv("SUPABASE_URL");
+    deleteEnv("SUPABASE_SERVICE_ROLE_KEY");
+    deleteEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
     deleteEnv("NEXT_PUBLIC_APP_URL");
     setEnv("NODE_ENV", "test");
     resetEnvValidation();
@@ -66,43 +69,48 @@ describe("validateEnv", () => {
     expect(result.valid).toBe(false);
     expect(result.missingCritical.length).toBeGreaterThanOrEqual(1);
     expect(result.missingCritical).toContain("DATABASE_URL");
-    expect(result.missingCritical).toContain("NEXTAUTH_SECRET");
+    expect(result.missingCritical).toContain("SUPABASE_URL");
     expect(result.errors.length).toBeGreaterThanOrEqual(2);
   });
 
   it("passes when all critical vars are set", () => {
     setEnv("DATABASE_URL", "postgresql://localhost:5432/test");
-    setEnv("NEXTAUTH_SECRET", "super-secret-key-1234567890");
+    setEnv("SUPABASE_URL", "https://example.supabase.co");
+    setEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-key");
+    setEnv("NEXT_PUBLIC_SUPABASE_URL", "https://example.supabase.co");
+    setEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "anon-key");
     setEnv("NODE_ENV", "test");
     resetEnvValidation();
 
     const result = validateEnv();
-    // NEXTAUTH_URL e NEXT_PUBLIC_APP_URL hanno defaultValue → ok anche se non impostate
     expect(result.missingCritical.length).toBe(0);
     expect(result.valid).toBe(true);
   });
 
   it("warns about missing required but optional vars", () => {
     setEnv("DATABASE_URL", "postgresql://localhost:5432/test");
-    setEnv("NEXTAUTH_SECRET", "super-secret-key-1234567890");
+    setEnv("SUPABASE_URL", "https://example.supabase.co");
+    setEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-key");
+    setEnv("NEXT_PUBLIC_SUPABASE_URL", "https://example.supabase.co");
+    setEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "anon-key");
     setEnv("NODE_ENV", "test");
     resetEnvValidation();
 
     const result = validateEnv();
-    // Tutte le required hanno il flag optional=true → nessun errore
     expect(result.valid).toBe(true);
   });
 
   it("does not warn about vars with defaults", () => {
     setEnv("DATABASE_URL", "postgresql://localhost:5432/test");
-    setEnv("NEXTAUTH_SECRET", "super-secret-key-1234567890");
+    setEnv("SUPABASE_URL", "https://example.supabase.co");
+    setEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-key");
+    setEnv("NEXT_PUBLIC_SUPABASE_URL", "https://example.supabase.co");
+    setEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "anon-key");
     setEnv("NODE_ENV", "test");
-    // Assicuriamoci che EMAIL_SERVER_HOST non sia presente
     deleteEnv("EMAIL_SERVER_HOST");
     resetEnvValidation();
 
     const result = validateEnv();
-    // EMAIL_SERVER_HOST ha defaultValue "smtp.gmail.com" → nessun warning
     const emailWarning = result.warnings.find((w) => w.key === "EMAIL_SERVER_HOST");
     expect(emailWarning).toBeUndefined();
   });
@@ -110,7 +118,6 @@ describe("validateEnv", () => {
 
 describe("env proxy accessor", () => {
   it("returns default for unset vars with default values", async () => {
-    // Assicuriamoci che EMAIL_SERVER_HOST non sia impostato
     deleteEnv("EMAIL_SERVER_HOST");
     const { env } = await import("./env");
     expect(env.EMAIL_SERVER_HOST).toBe("smtp.gmail.com");

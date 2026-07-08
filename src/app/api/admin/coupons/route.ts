@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/auth";
+import { getServerUser } from "@/lib/supabase/get-user";
 
 // GET — list all coupons
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user || (session.user as any).role !== "admin") {
+  const { user, dbUser } = await getServerUser();
+  if (!user || !dbUser || dbUser.role !== "admin") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -16,8 +15,8 @@ export async function GET() {
 
 // POST — create a new coupon
 export async function POST(request: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user || (session.user as any).role !== "admin") {
+  const { user: user2, dbUser: dbUser2 } = await getServerUser();
+  if (!user2 || !dbUser2 || dbUser2.role !== "admin") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

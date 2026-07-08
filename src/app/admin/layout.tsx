@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { signOut } from "next-auth/react";
+import { createClient } from "@/lib/supabase/client";
+import AdminAuthGuard from "@/components/admin/admin-auth-guard";
 import { 
   LayoutDashboard, 
   Plus, 
@@ -156,7 +157,8 @@ export default function AdminLayout({
                 <button
                   onClick={async () => {
                     setIsProfileOpen(false);
-                    await signOut({ redirect: false });
+                    const supabase = createClient();
+                    await supabase.auth.signOut();
                     router.push("/login");
                   }}
                   className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-medium text-red-400 hover:bg-red-500/10 transition-colors"
@@ -183,7 +185,9 @@ export default function AdminLayout({
         </header>
         
         <div className="flex-1 overflow-hidden relative">
-          {children}
+          <AdminAuthGuard>
+            {children}
+          </AdminAuthGuard>
         </div>
       </main>
     </div>

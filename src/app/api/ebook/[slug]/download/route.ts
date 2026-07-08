@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jsPDF } from "jspdf";
 import { getCourseConfig } from "@/lib/config/white-label-data";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/auth";
+import { getServerUser } from "@/lib/supabase/get-user";
+import { hashToken } from "@/lib/utils/token-hash";
 import { prisma } from "@/lib/db/prisma";
 import fs from "fs";
 import path from "path";
@@ -14,25 +14,21 @@ export async function GET(
   const { slug } = await params;
 
   // Check access: user must be authenticated AND have purchased this product
-  const session = await getServerSession(authOptions);
+  const { user, dbUser } = await getServerUser();
   const url = new URL(request.url);
   const token = url.searchParams.get("token");
 
   let hasAccess = false;
 
-  if (session?.user?.email) {
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      include: {
-        orders: {
-          where: {
-            product: { slug },
-            status: "completed",
-          },
-        },
+  if (user?.email && dbUser) {
+    const hasOrder = await prisma.order.findFirst({
+      where: {
+        userId: dbUser.id,
+        product: { slug },
+        status: "completed",
       },
     });
-    if (user && user.orders.length > 0) {
+    if (hasOrder) {
       hasAccess = true;
     }
   }
@@ -41,7 +37,8 @@ export async function GET(
   if (!hasAccess && token) {
     const product = await prisma.product.findUnique({ where: { slug } });
     if (product) {
-      const magic = await prisma.magicLink.findUnique({ where: { token } });
+      const hashedToken = hashToken(token);
+      const magic = await prisma.magicLink.findUnique({ where: { token: hashedToken } });
       if (magic && magic.expiresAt > new Date() && magic.productId === product.id) {
         hasAccess = true;
       }

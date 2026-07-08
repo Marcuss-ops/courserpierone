@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/auth";
+import { getServerUser } from "@/lib/supabase/get-user";
+import { hashToken } from "@/lib/utils/token-hash";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const { user, dbUser } = await getServerUser();
     const { searchParams } = request.nextUrl;
     const productId = searchParams.get("productId");
     const token = searchParams.get("token");
@@ -27,29 +27,30 @@ export async function GET(request: NextRequest) {
     const dbProductId = product.id;
 
     // Check user by session
-    if (session?.user?.email) {
-      const user = await prisma.user.findUnique({
-        where: { email: session.user.email },
-        include: { orders: { where: { productId: dbProductId, status: "completed" } } },
+    if (user?.email && dbUser) {
+      // Grant access if they are admin or have a completed order
+      if (dbUser.role === "admin") {
+        return NextResponse.json({ hasAccess: true, userId: dbUser.id });
+      }
+      const hasOrder = await prisma.order.findFirst({
+        where: { userId: dbUser.id, productId: dbProductId, status: "completed" },
       });
-      if (user) {
-        // Grant access if they are admin or have a completed order
-        if (user.role === "admin" || user.orders.length > 0) {
-          return NextResponse.json({ hasAccess: true, userId: user.id });
-        }
-        // Grant access if they have a used magic link for this product (test/demo flow)
-        const magicAccess = await prisma.magicLink.findFirst({
-          where: { email: session.user.email, productId: dbProductId, used: true },
-        });
-        if (magicAccess) {
-          return NextResponse.json({ hasAccess: true, userId: user.id });
-        }
+      if (hasOrder) {
+        return NextResponse.json({ hasAccess: true, userId: dbUser.id });
+      }
+      // Grant access if they have a used magic link for this product (test/demo flow)
+      const magicAccess = await prisma.magicLink.findFirst({
+        where: { email: dbUser.email, productId: dbProductId, used: true },
+      });
+      if (magicAccess) {
+        return NextResponse.json({ hasAccess: true, userId: dbUser.id });
       }
     }
 
-    // Check magic link token
+    // Check magic link token (hash before lookup)
     if (token) {
-      const magic = await prisma.magicLink.findUnique({ where: { token } });
+      const hashedToken = hashToken(token);
+      const magic = await prisma.magicLink.findUnique({ where: { token: hashedToken } });
       if (magic && magic.expiresAt > new Date() && (magic.productId === dbProductId || magic.productId === product.slug)) {
         // Mark as used on first successful access
         if (!magic.used) {

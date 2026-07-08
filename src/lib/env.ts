@@ -33,15 +33,24 @@ export const ENV_DEFINITIONS: EnvVarDef[] = [
     description: "PostgreSQL connection string per Prisma",
   },
   {
-    key: "NEXTAUTH_SECRET",
+    key: "SUPABASE_URL",
     category: "critical",
-    description: "Secret per crittografia sessioni NextAuth — genera con: openssl rand -base64 32",
+    description: "Supabase project URL (per storage e auth)",
   },
   {
-    key: "NEXTAUTH_URL",
+    key: "SUPABASE_SERVICE_ROLE_KEY",
     category: "critical",
-    description: "URL base dell'app (usato per callback OAuth e magic link)",
-    defaultValue: "http://localhost:3000",
+    description: "Supabase service role key",
+  },
+  {
+    key: "NEXT_PUBLIC_SUPABASE_URL",
+    category: "critical",
+    description: "Supabase project URL (public, per client auth)",
+  },
+  {
+    key: "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    category: "critical",
+    description: "Supabase anon key (public, per client auth)",
   },
   {
     key: "NEXT_PUBLIC_APP_URL",
@@ -54,13 +63,13 @@ export const ENV_DEFINITIONS: EnvVarDef[] = [
   {
     key: "GOOGLE_CLIENT_ID",
     category: "required",
-    description: "Google OAuth Client ID",
+    description: "Google OAuth Client ID (configurato nella Supabase Auth dashboard)",
     optional: true,
   },
   {
     key: "GOOGLE_CLIENT_SECRET",
     category: "required",
-    description: "Google OAuth Client Secret",
+    description: "Google OAuth Client Secret (configurato nella Supabase Auth dashboard)",
     optional: true,
   },
   {
@@ -133,18 +142,6 @@ export const ENV_DEFINITIONS: EnvVarDef[] = [
     key: "OPENAI_API_KEY",
     category: "required",
     description: "OpenAI API key (per traduzioni automatiche)",
-    optional: true,
-  },
-  {
-    key: "SUPABASE_URL",
-    category: "required",
-    description: "Supabase project URL (per storage immagini)",
-    optional: true,
-  },
-  {
-    key: "SUPABASE_SERVICE_ROLE_KEY",
-    category: "required",
-    description: "Supabase service role key",
     optional: true,
   },
   {

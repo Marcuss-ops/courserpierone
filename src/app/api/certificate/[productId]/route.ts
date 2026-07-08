@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jsPDF } from "jspdf";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/auth";
+import { getServerUser } from "@/lib/supabase/get-user";
 import { prisma } from "@/lib/db/prisma";
 
 export async function GET(
@@ -11,17 +10,14 @@ export async function GET(
   try {
     const { productId } = await params;
 
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    const { user, dbUser } = await getServerUser();
+    if (!user?.email || !dbUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({ where: { email: session.user.email } });
-    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
-
     // Verifica che l'utente abbia acquistato il prodotto
     const order = await prisma.order.findFirst({
-      where: { userId: user.id, productId, status: "completed" },
+      where: { userId: dbUser.id, productId, status: "completed" },
     });
     if (!order) {
       return NextResponse.json({ error: "Acquista il corso per ottenere il certificato" }, { status: 403 });
@@ -44,7 +40,7 @@ export async function GET(
 
     const totalLessons = product.lessons.length;
     const completedCount = await prisma.lessonProgress.count({
-      where: { userId: user.id, lessonId: { in: product.lessons.map(l => l.id) }, completed: true },
+      where: { userId: dbUser.id, lessonId: { in: product.lessons.map(l => l.id) }, completed: true },
     });
 
     if (totalLessons === 0) {
@@ -111,7 +107,7 @@ export async function GET(
     doc.setFontSize(28);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(255, 255, 255);
-    const studentName = user.name ?? user.email?.split("@")[0] ?? "Studente";
+    const studentName = dbUser.name ?? dbUser.email?.split("@")[0] ?? "Studente";
     doc.text(studentName, pageWidth / 2, 120, { align: "center" });
 
     // Ha completato
@@ -153,7 +149,7 @@ export async function GET(
     doc.text(`© ${new Date().getFullYear()} Courser`, pageWidth / 2, 225, { align: "center" });
 
     // ID certificato
-    const certId = `CERT-${product.slug.toUpperCase().slice(0, 8)}-${user.id.slice(0, 8).toUpperCase()}-${new Date().getFullYear()}`;
+    const certId = `CERT-${product.slug.toUpperCase().slice(0, 8)}-${dbUser.id.slice(0, 8).toUpperCase()}-${new Date().getFullYear()}`;
     doc.setFontSize(7);
     doc.setTextColor(80, 80, 90);
     doc.text(`ID: ${certId}`, pageWidth - 25, pageHeight - 25, { align: "right" });

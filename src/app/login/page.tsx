@@ -1,9 +1,10 @@
 "use client";
 
-import { Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Mail, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   return (
@@ -19,49 +20,74 @@ export default function LoginPage() {
 
 function LoginForm() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const productId = searchParams.get("productId");
+  const callbackUrl = searchParams.get("callbackUrl");
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
-  const [magicUrl, setMagicUrl] = useState("");
   const [error, setError] = useState("");
 
+  // Gestisci il redirect dopo auth callback
+  useEffect(() => {
+    const supabase = createClient();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session) {
+        router.refresh();
+        if (callbackUrl) {
+          router.push(callbackUrl);
+        } else if (productId) {
+          router.push(`/${productId}/download?lang=it`);
+        } else {
+          router.push("/dashboard");
+        }
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [callbackUrl, productId, router]);
+
+  // Magic link via Supabase
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
     setSending(true);
     setError("");
 
-    try {
-      // Detect locale on the client side
-      const detectedLocale = 
-        searchParams.get("lang") || 
-        searchParams.get("locale") || 
-        (typeof window !== "undefined" ? document.cookie.split("; ").find(row => row.startsWith("locale="))?.split("=")[1] : "") || 
-        (typeof navigator !== "undefined" ? navigator.language.split("-")[0] : "en");
+    const supabase = createClient();
+    const redirectTo = `${window.location.origin}/auth/callback?next=${callbackUrl || (productId ? `/${productId}/download?lang=it` : "/dashboard")}`;
 
-      const res = await fetch("/api/magic-link", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: email.trim(),
-          productId: productId || undefined,
-          locale: detectedLocale,
-        }),
-      });
+    const { error: signInError } = await supabase.auth.signInWithOtp({
+      email: email.trim(),
+      options: {
+        emailRedirectTo: redirectTo,
+        data: { role: "student" },
+      },
+    });
 
-      const data = await res.json();
-      if (res.ok) {
-        setSent(true);
-        setMagicUrl(data.magicUrl ?? "");
-      } else {
-        setError(data.error ?? "Errore nell'invio del magic link");
-      }
-    } catch {
-      setError("Errore di connessione");
-    } finally {
-      setSending(false);
+    if (signInError) {
+      setError(signInError.message);
+    } else {
+      setSent(true);
     }
+    setSending(false);
+  };
+
+  // Google OAuth via Supabase
+  const handleGoogleLogin = async () => {
+    const supabase = createClient();
+    const redirectTo = `${window.location.origin}/auth/callback?next=${callbackUrl || (productId ? `/${productId}/download?lang=it` : "/dashboard")}`;
+
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo,
+        queryParams: {
+          access_type: "offline",
+          prompt: "consent",
+        },
+      },
+    });
   };
 
   return (
@@ -81,7 +107,9 @@ function LoginForm() {
               <div className="text-center mb-8">
                 <h1 className="text-2xl font-black text-zinc-900 tracking-tight">Accedi</h1>
                 <p className="text-zinc-500 text-sm mt-2 font-medium">
-                  {productId ? "Hai già acquistato? Accedi per vedere il corso." : "Inserisci la tua email per ricevere il link magico"}
+                  {productId
+                    ? "Hai già acquistato? Accedi per vedere il corso."
+                    : "Inserisci la tua email per ricevere il link magico"}
                 </p>
               </div>
 
@@ -131,8 +159,8 @@ function LoginForm() {
                 </div>
               </div>
 
-              <a
-                href={`/api/auth/signin/google${productId ? `?callbackUrl=/${productId}` : ""}`}
+              <button
+                onClick={handleGoogleLogin}
                 className="w-full py-3.5 bg-white rounded-2xl text-sm font-bold text-zinc-700 hover:text-zinc-900 transition flex items-center justify-center gap-3 border border-zinc-200 hover:bg-zinc-50"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -142,7 +170,7 @@ function LoginForm() {
                   <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                 </svg>
                 Continua con Google
-              </a>
+              </button>
 
               <p className="mt-8 text-center text-[10px] text-zinc-400 font-medium">
                 Non hai ancora acquistato?{" "}
@@ -161,21 +189,10 @@ function LoginForm() {
                 <p className="text-zinc-500 text-sm font-medium">
                   Controlla la tua casella email <strong className="text-zinc-900">{email}</strong>
                 </p>
+                <p className="text-xs text-zinc-400">
+                  Clicca il link nell'email per accedere. Se non lo trovi, controlla anche lo spam.
+                </p>
               </div>
-
-              {magicUrl && (
-                <div className="bg-zinc-50 p-6 rounded-2xl border border-zinc-200 space-y-3">
-                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
-                    Magic Link (Modalità Sviluppo)
-                  </p>
-                  <a
-                    href={magicUrl}
-                    className="block text-xs text-accent-primary break-all hover:underline font-medium"
-                  >
-                    {magicUrl}
-                  </a>
-                </div>
-              )}
 
               <button
                 onClick={() => { setSent(false); setEmail(""); }}

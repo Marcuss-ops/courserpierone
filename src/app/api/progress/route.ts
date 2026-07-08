@@ -1,23 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/auth";
+import { getServerUser } from "@/lib/supabase/get-user";
 import { progressSchema } from "@/lib/utils/validations";
 import type { Prisma } from "@prisma/client";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    const { user, dbUser } = await getServerUser();
+    if (!user?.email || !dbUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { searchParams } = request.nextUrl;
     const productId = searchParams.get("productId");
-    const user = await prisma.user.findUnique({ where: { email: session.user.email } });
-    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-    const where: Prisma.LessonProgressWhereInput = { userId: user.id };
+    const where: Prisma.LessonProgressWhereInput = { userId: dbUser.id };
     if (productId) where.lesson = { productId };
 
     const progress = await prisma.lessonProgress.findMany({ where });
@@ -37,8 +34,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    const { user, dbUser } = await getServerUser();
+    if (!user?.email || !dbUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -50,17 +47,14 @@ export async function POST(request: NextRequest) {
     const { lessonId, completed } = parsed.data;
     if (!lessonId) return NextResponse.json({ error: "Missing lessonId" }, { status: 400 });
 
-    const user = await prisma.user.findUnique({ where: { email: session.user.email } });
-    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
-
     const progress = await prisma.lessonProgress.upsert({
-      where: { userId_lessonId: { userId: user.id, lessonId } },
+      where: { userId_lessonId: { userId: dbUser.id, lessonId } },
       update: {
         completed: completed ?? true,
         completedAt: completed ? new Date() : null,
       },
       create: {
-        userId: user.id,
+        userId: dbUser.id,
         lessonId,
         completed: completed ?? true,
         completedAt: completed ? new Date() : null,

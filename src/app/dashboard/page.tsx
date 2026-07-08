@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/auth";
+import { getServerUser } from "@/lib/supabase/get-user";
 import { 
   BookOpen, 
   Play, 
@@ -19,22 +18,14 @@ import {
 } from "lucide-react";
 
 export default async function DashboardPage() {
-  const session = await getServerSession(authOptions);
+  const { user, dbUser } = await getServerUser();
 
-  if (!session?.user?.email) {
-    redirect("/login");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-  });
-
-  if (!user) {
+  if (!user?.email || !dbUser) {
     redirect("/login");
   }
 
   let userOrders: any[] = [];
-  if (user.role === "admin") {
+  if (dbUser.role === "admin") {
     const publishedProducts = await prisma.product.findMany({
       where: { status: "published" },
       select: {
@@ -49,7 +40,7 @@ export default async function DashboardPage() {
     });
     userOrders = publishedProducts.map(p => ({
       id: `admin-virtual-order-${p.id}`,
-      userId: user.id,
+      userId: dbUser.id,
       productId: p.id,
       amount: p.price,
       currency: p.currency,
@@ -59,8 +50,8 @@ export default async function DashboardPage() {
       product: p,
     }));
   } else {
-    const dbUser = await prisma.user.findUnique({
-      where: { email: session.user.email },
+    const dbUser2 = await prisma.user.findUnique({
+      where: { email: dbUser.email },
       include: {
         orders: {
           where: { status: "completed" },
@@ -81,12 +72,12 @@ export default async function DashboardPage() {
         },
       },
     });
-    userOrders = dbUser?.orders ?? [];
+    userOrders = dbUser2?.orders ?? [];
   }
 
   // Progress stats — i conteggi lezioni sono già nell'include della query ordini
   const completedLessons = await prisma.lessonProgress.count({
-    where: { userId: user.id, completed: true },
+    where: { userId: dbUser.id, completed: true },
   });
 
   const totalLessons = userOrders.reduce((sum, o) => sum + o.product._count.lessons, 0);
@@ -115,21 +106,21 @@ export default async function DashboardPage() {
             </Link>
             <div className="flex items-center gap-3 pl-4 border-l border-white/10">
               <div className="w-9 h-9 rounded-full bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20 border border-white/10 flex items-center justify-center overflow-hidden">
-                {user.image ? (
-                  <img src={user.image} alt="" className="w-full h-full object-cover" />
+                {dbUser.image ? (
+                  <img src={dbUser.image} alt="" className="w-full h-full object-cover" />
                 ) : (
                   <User className="w-4 h-4 text-zinc-400" />
                 )}
               </div>
               <div className="hidden sm:block">
-                <p className="text-xs font-bold text-white text-contrast">{user.name || user.email?.split("@")[0]}</p>
+                <p className="text-xs font-bold text-white text-contrast">{dbUser.name || dbUser.email?.split("@")[0]}</p>
                 <p className="text-[9px] text-zinc-500 font-black uppercase tracking-widest">
-                  {user.role === "admin" ? "Admin" : "Studente"}
+                  {dbUser.role === "admin" ? "Admin" : "Studente"}
                 </p>
               </div>
             </div>
             <a
-              href="/api/auth/signout"
+              href="/auth/signout"
               className="p-2.5 premium-glass rounded-xl text-zinc-500 hover:text-red-400 transition-all border border-white/5 hover:border-red-500/20"
             >
               <LogOut className="w-4 h-4" />
@@ -149,7 +140,7 @@ export default async function DashboardPage() {
               <div className="inline-flex items-center gap-2 px-4 py-1.5 premium-glass rounded-full border border-white/5">
                 <div className="w-2 h-2 rounded-full bg-accent-tertiary animate-pulse" />
                 <span className="text-[10px] font-black text-accent-tertiary uppercase tracking-widest">
-                  Benvenuto, {user.name?.split(" ")[0] ?? "Studente"}
+                  Benvenuto, {dbUser.name?.split(" ")[0] ?? "Studente"}
                 </span>
               </div>
               <h1 className="text-4xl lg:text-6xl font-black text-white text-contrast tracking-tighter leading-[0.95]">
@@ -191,21 +182,21 @@ export default async function DashboardPage() {
           <div className="premium-glass p-8 rounded-[2rem] border border-white/5 space-y-6">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20 border border-white/10 flex items-center justify-center overflow-hidden shadow-xl">
-                {user.image ? (
-                  <img src={user.image} alt="" className="w-full h-full object-cover" />
+                {dbUser.image ? (
+                  <img src={dbUser.image} alt="" className="w-full h-full object-cover" />
                 ) : (
                   <User className="w-7 h-7 text-zinc-400" />
                 )}
               </div>
               <div className="space-y-1">
-                <h2 className="text-lg font-bold text-white text-contrast">{user.name ?? "Studente"}</h2>
-                <p className="text-xs text-zinc-500 font-medium">{user.email}</p>
+                <h2 className="text-lg font-bold text-white text-contrast">{dbUser.name ?? "Studente"}</h2>
+                <p className="text-xs text-zinc-500 font-medium">{dbUser.email}</p>
               </div>
             </div>
             <div className="space-y-3 pt-4 border-t border-white/5">
               <div className="flex items-center gap-3 text-xs text-zinc-400">
                 <Calendar className="w-3.5 h-3.5 text-accent-primary/60" />
-                <span>Membro dal <strong className="text-zinc-300">{new Date(user.createdAt).toLocaleDateString("it-IT", { month: "long", year: "numeric" })}</strong></span>
+                <span>Membro dal <strong className="text-zinc-300">{new Date(dbUser.createdAt).toLocaleDateString("it-IT", { month: "long", year: "numeric" })}</strong></span>
               </div>
               <div className="flex items-center gap-3 text-xs text-zinc-400">
                 <Award className="w-3.5 h-3.5 text-accent-tertiary/60" />
@@ -307,7 +298,7 @@ export default async function DashboardPage() {
         </section>
  
         {/* Continue Learning + Certificati */}
-        {userOrders.length > 0 && <ContinueAndCertificatesSection userId={user.id} orders={userOrders.map(o => ({
+        {userOrders.length > 0 && <ContinueAndCertificatesSection userId={dbUser.id} orders={userOrders.map(o => ({
             id: o.id,
             createdAt: o.createdAt,
             product: {
