@@ -114,39 +114,58 @@ export function AuthForm({ lang }: AuthFormProps) {
   const isSignup = mode === "signup";
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8] text-black font-sans flex items-center justify-center p-6">
-      {/* Subtle gradient orb */}
+    <div className="min-h-screen text-black font-sans flex items-center justify-center p-6 relative overflow-hidden" style={{ background: "linear-gradient(135deg, #FFF8F0 0%, #FFF5E6 30%, #FAFAF8 70%, #F5F0E8 100%)" }}>
+      {/* Warm accent orb top-right */}
+      <div
+        className="fixed w-[600px] h-[600px] rounded-full pointer-events-none"
+        style={{
+          background: "radial-gradient(circle, rgba(255, 200, 130, 0.35) 0%, rgba(255, 170, 80, 0.15) 40%, transparent 70%)",
+          top: "-200px",
+          right: "-200px",
+          filter: "blur(80px)",
+        }}
+      />
+      {/* Warm accent orb bottom-left */}
       <div
         className="fixed w-[500px] h-[500px] rounded-full pointer-events-none"
         style={{
-          background:
-            "radial-gradient(circle, rgba(255, 230, 210, 0.4) 0%, transparent 70%)",
-          top: "-150px",
-          right: "-150px",
+          background: "radial-gradient(circle, rgba(255, 180, 100, 0.2) 0%, rgba(255, 140, 60, 0.1) 40%, transparent 70%)",
+          bottom: "-150px",
+          left: "-150px",
           filter: "blur(100px)",
         }}
       />
+      {/* Soft violet accent orb */}
+      <div
+        className="fixed w-[400px] h-[400px] rounded-full pointer-events-none"
+        style={{
+          background: "radial-gradient(circle, rgba(200, 170, 255, 0.15) 0%, transparent 70%)",
+          top: "50%",
+          left: "60%",
+          filter: "blur(80px)",
+        }}
+      />
 
-      <div className="relative w-full max-w-[400px]">
+      <div className="relative w-full max-w-[420px]">
         {/* Brand */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3 group">
             <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xl text-white shadow-sm"
+              className="w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-xl text-white shadow-md transition-all group-hover:shadow-lg group-hover:scale-105"
               style={{
-                background: "linear-gradient(135deg, #1a1a1a 0%, #333 100%)",
+                background: "linear-gradient(135deg, #1a1a1a 0%, #444 100%)",
               }}
             >
               C
             </div>
-            <span className="font-serif italic text-[28px] leading-none tracking-[-0.2px]">
+            <span className="font-serif italic text-[30px] leading-none tracking-[-0.2px]">
               courssy
             </span>
           </Link>
         </div>
 
-        {/* Card */}
-        <div className="bg-white p-8 rounded-2xl border border-black/[0.08] shadow-sm">
+        {/* Card — warm cream */}
+        <div className="p-8 rounded-3xl shadow-lg shadow-black/[0.04]" style={{ background: "linear-gradient(180deg, #FFFDF9 0%, #FFF9F0 100%)", border: "1px solid rgba(200, 180, 150, 0.25)" }}>
           {/* Title */}
           <div className="text-center mb-6">
             <h1 className="text-[20px] font-semibold tracking-tight text-black">
@@ -172,7 +191,7 @@ export function AuthForm({ lang }: AuthFormProps) {
           {/* Google OAuth button */}
           <button
             onClick={handleGoogleLogin}
-            className="w-full py-3.5 bg-white rounded-xl text-[14px] font-medium text-black/70 hover:text-black hover:bg-gray-50 transition-all flex items-center justify-center gap-3 border border-black/[0.08] hover:border-black/20 mb-5"
+            className="w-full py-3.5 rounded-xl text-[14px] font-medium text-black/70 hover:text-black transition-all flex items-center justify-center gap-3 hover:shadow-sm mb-5" style={{ background: "#FFFFFF", border: "1px solid rgba(200, 180, 150, 0.3)" }}
           >
             <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24">
               <path
@@ -218,7 +237,7 @@ export function AuthForm({ lang }: AuthFormProps) {
                 placeholder={t.email}
                 required
                 autoComplete="email"
-                className="w-full pl-10 pr-4 py-3 bg-white border border-black/[0.08] rounded-xl text-[14px] font-light text-black placeholder:text-black/30 focus:outline-none focus:border-black/20 focus:ring-1 focus:ring-black/[0.06] transition-all"
+                className="w-full pl-10 pr-4 py-3.5 rounded-xl text-[14px] font-light text-black placeholder:text-black/30 focus:outline-none focus:ring-2 transition-all" style={{ background: "#FFFCF7", border: "1px solid rgba(200, 180, 150, 0.25)", "--tw-ring-color": "rgba(200, 160, 80, 0.2)" } as React.CSSProperties}
               />
             </div>
             <div className="relative">
@@ -231,7 +250,7 @@ export function AuthForm({ lang }: AuthFormProps) {
                 required
                 minLength={6}
                 autoComplete={isSignup ? "new-password" : "current-password"}
-                className="w-full pl-10 pr-10 py-3 bg-white border border-black/[0.08] rounded-xl text-[14px] font-light text-black placeholder:text-black/30 focus:outline-none focus:border-black/20 focus:ring-1 focus:ring-black/[0.06] transition-all"
+                className="w-full pl-10 pr-10 py-3.5 rounded-xl text-[14px] font-light text-black placeholder:text-black/30 focus:outline-none focus:ring-2 transition-all" style={{ background: "#FFFCF7", border: "1px solid rgba(200, 180, 150, 0.25)", "--tw-ring-color": "rgba(200, 160, 80, 0.2)" } as React.CSSProperties}
               />
               <button
                 type="button"
@@ -249,7 +268,7 @@ export function AuthForm({ lang }: AuthFormProps) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-black hover:bg-black/90 text-white rounded-xl text-[14px] font-medium transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-2"
+              className="w-full py-3.5 text-white rounded-xl text-[14px] font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-2 shadow-md hover:shadow-lg hover:brightness-110" style={{ background: "linear-gradient(135deg, #1a1a1a 0%, #444 100%)" }}
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -271,7 +290,7 @@ export function AuthForm({ lang }: AuthFormProps) {
                 setError("");
                 setSuccess("");
               }}
-              className="text-black font-medium hover:underline underline-offset-2 transition-colors"
+              className="font-semibold hover:underline underline-offset-2 transition-colors" style={{ color: "#8B6914" }}
             >
               {isSignup ? t.login : t.register}
             </button>
@@ -279,8 +298,8 @@ export function AuthForm({ lang }: AuthFormProps) {
         </div>
 
         {/* Back link */}
-        <p className="mt-6 text-center text-[12px] text-black/30 font-light">
-          <Link href="/" className="hover:text-black/50 transition-colors">
+        <p className="mt-6 text-center text-[13px] text-black/40 font-light">
+          <Link href="/" className="hover:text-black/60 transition-colors">
             ← {t.backToHome}
           </Link>
         </p>
