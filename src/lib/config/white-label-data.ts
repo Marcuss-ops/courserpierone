@@ -108,6 +108,16 @@ export async function getCourseConfig(slug: string): Promise<CourseConfig | null
     }
   }
 
+  // 4. Auto-generate from DB if cache is empty (first visit after deploy)
+  if (!config) {
+    try {
+      const { generateCourseConfig } = await import("./generate-course-config");
+      config = await generateCourseConfig(slug);
+    } catch {
+      // Product might not exist — that's fine, return null
+    }
+  }
+
   // Popola memory cache
   if (config) {
     _memoryCache.set(slug, { config, cachedAt: Date.now() });

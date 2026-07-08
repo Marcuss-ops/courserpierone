@@ -19,9 +19,10 @@ export interface DiscoveryCourse {
 interface DiscoveryGridProps {
   courses: DiscoveryCourse[];
   categories: string[];
+  locale?: string;
 }
 
-export function DiscoveryGrid({ courses, categories }: DiscoveryGridProps) {
+export function DiscoveryGrid({ courses, categories, locale }: DiscoveryGridProps) {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
@@ -150,7 +151,7 @@ export function DiscoveryGrid({ courses, categories }: DiscoveryGridProps) {
               {filteredCourses.map((course) => (
                 <Link
                   key={course.id}
-                  href={`/${course.slug}`}
+                  href={locale ? `/${locale}/${course.slug}` : `/${course.slug}`}
                   className="group flex flex-col bg-white rounded-xl border border-black/[0.08] hover:border-black/20 hover:shadow-lg transition-all duration-200 overflow-hidden"
                 >
                   {/* Cover image */}

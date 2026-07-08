@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { Instrument_Serif, Inter } from "next/font/google";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { prisma } from "@/lib/db/prisma";
@@ -23,6 +24,14 @@ const inter = Inter({
 export default async function HomePage() {
   // Get current user (null if not logged in)
   const { dbUser } = await getServerUser();
+
+  // Read locale cookie to build correct product links
+  let currentLocale = "it-it";
+  try {
+    const cookieStore = await cookies();
+    currentLocale = cookieStore.get("locale")?.value ?? "it-it";
+  } catch {}
+
   const navUser = dbUser
     ? {
         name: dbUser.name,
@@ -185,7 +194,7 @@ export default async function HomePage() {
           </section>
 
           {/* ── Discovery Section (Skool-style) ───────────────────── */}
-          <DiscoveryGrid courses={discoveryCourses} categories={categories} />
+          <DiscoveryGrid courses={discoveryCourses} categories={categories} locale={currentLocale} />
 
           {/* Features Section */}
           <section className="py-16 border-t border-black/[0.08]">
