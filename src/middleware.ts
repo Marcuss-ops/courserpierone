@@ -11,7 +11,7 @@ import {
 const KNOWN_PREFIXES = [
   "/_next", "/api", "/admin", "/login", "/favicon.ico",
   "/images/", "/courses/", "/debug-locale", "/sitemap.xml",
-  "/robots.txt", "/privacy", "/terms", "/auth",
+  "/robots.txt", "/privacy", "/terms", "/auth", "/dashboard",
 ];
 
 function isKnownPath(pathname: string): boolean {
