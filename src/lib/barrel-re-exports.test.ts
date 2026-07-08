@@ -196,10 +196,9 @@ describe("@/lib/services — barrel re-exports", () => {
     expect(typeof mod.sendAbandonedCheckoutEmail).toBe("function");
   });
 
-  it("exports sendMagicLinkEmail function", async () => {
+  it("sendMagicLinkEmail removed (use Supabase Auth)", async () => {
     const mod = await import("@/lib/services");
-    expect(mod.sendMagicLinkEmail).toBeDefined();
-    expect(typeof mod.sendMagicLinkEmail).toBe("function");
+    expect(mod.sendMagicLinkEmail).toBeUndefined();
   });
 });
 
@@ -241,10 +240,9 @@ describe("@/lib/utils — barrel re-exports", () => {
     expect(typeof mod.analyticsEventSchema.safeParse).toBe("function");
   });
 
-  it("exports magicLinkSchema", async () => {
+  it("magicLinkSchema removed (use Supabase Auth)", async () => {
     const mod = await import("@/lib/utils");
-    expect(mod.magicLinkSchema).toBeDefined();
-    expect(typeof mod.magicLinkSchema.safeParse).toBe("function");
+    expect(mod.magicLinkSchema).toBeUndefined();
   });
 
   it("exports checkoutSchema", async () => {

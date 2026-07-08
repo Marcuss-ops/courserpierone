@@ -1,8 +1,6 @@
 import { prisma } from "../db/prisma";
 import { sendPurchaseConfirmation } from "./email";
 import { COUNTRY_LOCALE } from "@/lib/i18n/_generated/locale-data";
-import { hashToken } from "@/lib/utils/token-hash";
-import crypto from "crypto";
 
 export interface ProcessOrderInput {
   /** Customer email — used for find-or-create user */
@@ -139,32 +137,22 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
     },
   });
 
-  // ── 5. Generate magic link (token hashed in DB) ──────────
-  const plainToken = crypto.randomBytes(32).toString("hex");
-  const hashedToken = hashToken(plainToken);
-  const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year
-
-  await prisma.magicLink.create({
-    data: {
-      email,
-      token: hashedToken,
-      productId: product.id,
-      expiresAt,
-      // tokenHashed: true è il default nello schema, omesso per brevità
-    },
-  });
-
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-
-  // ── 6. Resolve ebook locale from country ───────────────────────
+  // ── 5. Resolve ebook locale from country ────────────────────────
   // Use customer_country → COUNTRY_LOCALE mapping, fallback to locale param, then "en"
   const ebookLang = (customerCountry && COUNTRY_LOCALE[customerCountry])
     ? COUNTRY_LOCALE[customerCountry].split("-")[0]
     : (locale.split("-")[0] ?? "en");
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+  // ── 6. Build email links (require auth — no magic-link tokens) ─────
+  // Users must log in to access their course and download the ebook.
+  // The email directs them to the course portal (which redirects to login
+  // if not authenticated) and the dashboard (for ebook downloads).
+  const courseUrl = `${appUrl}/${product.slug}/portal?lang=${ebookLang}`;
+  const ebookDownloadUrl = `${appUrl}/dashboard`;
+
   // ── 7. Send purchase confirmation email (localizzata) ─────────
-  const courseUrl = `${appUrl}/${product.slug}/download?lang=${ebookLang}&token=${plainToken}`;
-  const ebookDownloadUrl = `${appUrl}/api/ebook/${product.slug}/download?lang=${ebookLang}&token=${plainToken}`;
   try {
     await sendPurchaseConfirmation(email, product.slug, courseUrl, locale, ebookDownloadUrl);
   } catch (emailErr) {

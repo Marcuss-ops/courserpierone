@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
   analyticsEventSchema,
-  magicLinkSchema,
   checkoutSchema,
   createProductSchema,
   progressSchema,
@@ -56,31 +55,7 @@ describe("analyticsEventSchema", () => {
   });
 });
 
-// ─── Magic Link Schema ──────────────────────────────────────
-describe("magicLinkSchema", () => {
-  it("validates a correct email", () => {
-    const result = magicLinkSchema.safeParse({ email: "test@example.com" });
-    expect(result.success).toBe(true);
-  });
-
-  it("rejects an invalid email", () => {
-    const result = magicLinkSchema.safeParse({ email: "not-an-email" });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects an empty email", () => {
-    const result = magicLinkSchema.safeParse({ email: "" });
-    expect(result.success).toBe(false);
-  });
-
-  it("accepts optional productId", () => {
-    const result = magicLinkSchema.safeParse({
-      email: "test@example.com",
-      productId: "corso-foto",
-    });
-    expect(result.success).toBe(true);
-  });
-});
+// ─── Magic Link Schema (removed — use Supabase Auth) ────────
 
 // ─── Checkout Schema ────────────────────────────────────────
 describe("checkoutSchema", () => {

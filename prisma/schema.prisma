@@ -243,8 +243,8 @@ model Coupon {
   expiresAt   DateTime?
   isActive    Boolean   @default(true)
   description String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 // ─── Tabella Locale: codici lingua-paese completi ─────────
@@ -311,17 +311,7 @@ model AbandonedCheckout {
   @@index([email])
 }
 
-// ─── Magic Links ────────────────────────────────────────────
-model MagicLink {
-  id          String   @id @default(cuid())
-  email       String
-  token       String   @unique
-  productId   String?
-  used        Boolean  @default(false)
-  expiresAt   DateTime
-  createdAt   DateTime @default(now())
-  tokenHashed Boolean  @default(true) // true se token è già SHA-256 hash-ato
-}
+// ─── Magic Links (removed — use Supabase Auth sessions) ─────
 
 // ─── Traduzioni Landing Pages (DB condiviso per tutti i siti) ─
 // Una tabella unica per memorizzare le traduzioni di TUTTE le landing page

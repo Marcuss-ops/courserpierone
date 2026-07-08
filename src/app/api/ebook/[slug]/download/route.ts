@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { jsPDF } from "jspdf";
 import { getCourseConfig } from "@/lib/config/white-label-data";
 import { getServerUser } from "@/lib/supabase/get-user";
-import { hashToken } from "@/lib/utils/token-hash";
 import { prisma } from "@/lib/db/prisma";
 import fs from "fs";
 import path from "path";
@@ -16,7 +15,6 @@ export async function GET(
   // Check access: user must be authenticated AND have purchased this product
   const { user, dbUser } = await getServerUser();
   const url = new URL(request.url);
-  const token = url.searchParams.get("token");
 
   let hasAccess = false;
 
@@ -30,18 +28,6 @@ export async function GET(
     });
     if (hasOrder) {
       hasAccess = true;
-    }
-  }
-
-  // Also allow access via valid magic link token
-  if (!hasAccess && token) {
-    const product = await prisma.product.findUnique({ where: { slug } });
-    if (product) {
-      const hashedToken = hashToken(token);
-      const magic = await prisma.magicLink.findUnique({ where: { token: hashedToken } });
-      if (magic && magic.expiresAt > new Date() && magic.productId === product.id) {
-        hasAccess = true;
-      }
     }
   }
 
