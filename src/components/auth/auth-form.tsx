@@ -268,7 +268,7 @@ export function AuthForm({ lang }: AuthFormProps) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 text-white rounded-xl text-[14px] font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-2 shadow-md hover:shadow-lg hover:brightness-110" style={{ background: "linear-gradient(135deg, #1a1a1a 0%, #444 100%)" }}
+              className="w-full py-3.5 text-white rounded-xl text-[14px] font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-2 shadow-md hover:shadow-lg hover:brightness-110" style={{ background: "linear-gradient(135deg, #2a1800 0%, #5a3510 100%)" }}
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
