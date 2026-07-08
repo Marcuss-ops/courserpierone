@@ -112,7 +112,7 @@ export async function getCourseConfig(slug: string): Promise<CourseConfig | null
   if (!config) {
     try {
       const { generateCourseConfig } = await import("./generate-course-config");
-      config = await generateCourseConfig(slug);
+      config = (await generateCourseConfig(slug)) as CourseConfig;
     } catch {
       // Product might not exist — that's fine, return null
     }
