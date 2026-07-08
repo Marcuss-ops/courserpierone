@@ -21,7 +21,18 @@ import { prisma } from "@/lib/db/prisma";
  * dati nuovi e significativi (non sovrascriviamo valori DB esistenti).
  */
 export async function getServerUser() {
-  const supabase = await createClient();
+  // Gracefully handle missing Supabase env vars (e.g. local dev without .env)
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return { supabase: null, user: null, dbUser: null };
+  }
+
+  let supabase;
+  try {
+    supabase = await createClient();
+  } catch {
+    return { supabase: null, user: null, dbUser: null };
+  }
+
   const { data: { user }, error } = await supabase.auth.getUser();
 
   if (error || !user?.email) {
