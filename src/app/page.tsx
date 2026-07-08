@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Instrument_Serif, Inter } from "next/font/google";
+import { getServerUser } from "@/lib/supabase/get-user";
+import { UserNav } from "@/components/user-nav";
 
 const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
@@ -16,7 +18,18 @@ const inter = Inter({
   display: "swap",
 });
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Get current user (null if not logged in)
+  const { dbUser } = await getServerUser();
+  const navUser = dbUser
+    ? {
+        name: dbUser.name,
+        email: dbUser.email,
+        image: dbUser.image,
+        role: dbUser.role,
+      }
+    : null;
+
   // Ultra-minimal landing - hero + footer only
   return (
     <div
@@ -73,12 +86,7 @@ export default function HomePage() {
           >
             courssy
           </div>
-          <Link
-            href="/login"
-            className="text-[15px] font-normal underline underline-offset-4 hover:opacity-60 transition-opacity"
-          >
-            sign in
-          </Link>
+          <UserNav user={navUser} />
         </header>
 
         <main>

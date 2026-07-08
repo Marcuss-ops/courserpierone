@@ -19,11 +19,10 @@ function isKnownPath(pathname: string): boolean {
 }
 
 // Known sub-paths for products (without locale prefix)
-const PRODUCT_SUB_PATHS = ["/portal", "/download", "/curso", "/ebook"];
+const PRODUCT_SUB_PATHS = ["/portal", "/download", "/curso"];
 
 function isProductSubPath(pathname: string): boolean {
-  return PRODUCT_SUB_PATHS.some((p) => pathname.endsWith(p)) ||
-    PRODUCT_SUB_PATHS.some((p) => pathname.includes(p + "?"));
+  return PRODUCT_SUB_PATHS.some((p) => pathname.endsWith(p));
 }
 
 // ─── Set locale cookie helper ──────────────────
@@ -45,7 +44,18 @@ export async function middleware(request: NextRequest) {
   // ── Refresh Supabase session (cookie only, no getUser) ──
   const { supabaseResponse, hasSession } = await updateSession(request);
 
-  // ── Admin routes: redirect to login if no session ──
+  // ── Protected routes: redirect to login if no session ──
+  // Check veloce basato su cookie (no getUser per performance).
+  // La validazione completa avviene nel page component via getServerUser().
+  const protectedPaths = ["/dashboard"];
+  const isProtectedPath = protectedPaths.some((p) => pathname === p || pathname.startsWith(p + "/"));
+  if (isProtectedPath && !hasSession) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("callbackUrl", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // Admin routes: redirect to login if no session
   // La verifica del ruolo admin avviene nel layout/API route (server-side)
   if (pathname === "/admin" || pathname.startsWith("/admin/")) {
     if (!hasSession) {
@@ -63,6 +73,14 @@ export async function middleware(request: NextRequest) {
       loginUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(loginUrl);
     }
+  }
+
+  // Product sub-paths (/:locale/:slug/portal|download|curso|ebook): protected
+  // Quick cookie-based check; full validation happens in the page via getServerUser()
+  if (isProductSubPath(pathname) && !hasSession) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("callbackUrl", pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
   // ── Protected API routes: require admin role ──
