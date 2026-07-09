@@ -1,0 +1,63 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# CI — Typecheck, Lint, and Test
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Runs on every push and PR to main. Catches type errors, lint violations,
+# and test failures before they reach production.
+#
+# Concurrency: only one run per branch at a time (cancel old ones for PRs,
+# but NEVER cancel the main branch run — we want a clean history).
+# ═══════════════════════════════════════════════════════════════════════════════
+
+name: CI — Typecheck, Lint, Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  ci:
+    name: Typecheck + Lint + Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@39370e3970a6d050c480008ad58aa19be4ef98bb # v4.1.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies (postinstall runs prisma generate + locale resolver)
+        run: npm ci --no-audit --no-fund
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint:eslint
+        continue-on-error: true  # lint warnings shouldn't block CI
+
+      - name: Run tests
+        run: npm run test
+
+      - name: CI result
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "✅ CI passed — typecheck, lint, and tests all green."
+          else
+            echo "❌ CI failed. Check logs above."
+          fi

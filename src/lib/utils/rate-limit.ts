@@ -1,10 +1,10 @@
 /**
- * Rate limiter a finestra scorrevole (sliding window) in-memory.
+ * Rate limiter a finestra scorrevole (sliding window) — dual-mode Redis + in-memory.
  *
  * Design:
- *   - In-memory Map (pronto per essere sostituito da Redis/Upstash)
+ *   - Redis mode:    Atomic sliding window via INCR + EXPIRE (scalabile su multi-istanza Vercel)
+ *   - In-memory mode: Fallback automatico quando Redis non è configurato
  *   - Finestra scorrevole: il contatore resetta dopo windowMs dall'ultimo reset
- *   - Cleanup automatico ogni 60 secondi
  *
  * Tiers predefiniti:
  *   - PUBLIC:   100 req/min  (API pubbliche: prodotti, config, analytics)
@@ -13,6 +13,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { getRedis } from "@/lib/redis";
 
 // ─── Tiers ──────────────────────────────────────────────────
 const MINUTE = 60_000;
@@ -28,14 +29,13 @@ export const RATE_TIERS = {
 
 export type RateTier = keyof typeof RATE_TIERS;
 
-// ─── Store in-memory ───────────────────────────────────────
+// ─── Store in-memory (fallback) ────────────────────────────
 const hits = new Map<string, { count: number; resetAt: number }>();
 
-// Cleanup periodico per evitare memory leak
 let lastCleanup = Date.now();
 function cleanup() {
   const now = Date.now();
-  if (now - lastCleanup < 60_000) return; // max 1 cleanup al minuto
+  if (now - lastCleanup < 60_000) return;
   lastCleanup = now;
   for (const [key, val] of hits) {
     if (val.resetAt < now) hits.delete(key);
@@ -49,6 +49,10 @@ export interface RateLimitResult {
   resetIn: number; // millisecondi al reset
 }
 
+/**
+ * Rate limiter sincrono (in-memory fallback).
+ * Per il percorso Redis (async), usa `rateLimitAsync`.
+ */
 export function rateLimit(
   key: string,
   maxRequests: number,
@@ -73,6 +77,53 @@ export function rateLimit(
   return { allowed: true, remaining: maxRequests - entry.count, resetIn: entry.resetAt - now };
 }
 
+/**
+ * Rate limiter asincrono — Redis-backed con fallback in-memory.
+ *
+ * Algoritmo sliding window basato su Redis INCR + EXPIRE:
+ *   1. INCR key — atomico, incrementa contatore
+ *   2. Se è il primo incremento (count === 1), imposta EXPIRE
+ *   3. Se count > maxRequests → rate limited
+ *
+ * Se Redis non è disponibile, usa il fallback in-memory sincrono.
+ */
+export async function rateLimitAsync(
+  key: string,
+  maxRequests: number,
+  windowMs: number
+): Promise<RateLimitResult> {
+  const r = getRedis();
+  if (!r) {
+    // Fallback in-memory
+    return rateLimit(key, maxRequests, windowMs);
+  }
+
+  const now = Date.now();
+  const redisKey = `ratelimit:${key}`;
+  const windowSeconds = Math.ceil(windowMs / 1000);
+
+  try {
+    const count = await r.incr(redisKey);
+
+    // Sempre imposta EXPIRE: idempotente, evita memory leak se il processo
+    // crasha tra INCR e EXPIRE, e funziona come sliding window.
+    await r.expire(redisKey, windowSeconds);
+
+    // Recupera il TTL per calcolare resetIn
+    const ttl = await r.ttl(redisKey);
+    const resetIn = ttl > 0 ? ttl * 1000 : windowMs;
+
+    if (count > maxRequests) {
+      return { allowed: false, remaining: 0, resetIn };
+    }
+
+    return { allowed: true, remaining: maxRequests - count, resetIn };
+  } catch {
+    // Redis error → fallback in-memory
+    return rateLimit(key, maxRequests, windowMs);
+  }
+}
+
 // ─── Wrapper per Next.js Route Handlers ────────────────────
 type RouteHandler = (req: NextRequest, ...args: unknown[]) => Promise<Response>;
 
@@ -89,7 +140,8 @@ export function withRateLimit(
       ? keyFn(req)
       : `${tier}:${req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "unknown"}`;
 
-    const result = rateLimit(identifier, max, windowMs);
+    // Usa Redis-backed async rate limiting quando disponibile
+    const result = await rateLimitAsync(identifier, max, windowMs);
 
     if (!result.allowed) {
       return NextResponse.json(
@@ -121,6 +173,12 @@ export function withRateLimit(
     });
   };
 }
+
+/**
+ * Re-export per retrocompatibilità — rateLimit sincrono
+ * (usato internamente come fallback in-memory).
+ */
+export { rateLimit as rateLimitSync };
 
 // ─── Compatibilità legacy ──────────────────────────────────
 export function rateLimitResponse(resetIn: number) {
