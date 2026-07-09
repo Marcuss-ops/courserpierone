@@ -67,6 +67,26 @@ export function Footer({ currentLocale: cookieLocale }: FooterProps = {}) {
           <FooterLink href="/terms" label="Terms of Service" currentPath={pathname} />
           <FooterLink href="/refund" label="Refund Policy" currentPath={pathname} />
         </nav>
+
+        {/* Attribution row: Powered by Courssy */}
+        <div className="flex items-center justify-center pt-1">
+          <Link
+            href="https://www.courssy.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Powered by Courssy"
+            className="group inline-flex items-center gap-1.5 text-[12px] text-black/45 hover:text-black/80 transition-colors"
+          >
+            <span>Powered by</span>
+            <img
+              src="/icon.png"
+              alt=""
+              aria-hidden
+              className="w-4 h-4 rounded-sm transition-transform duration-200 ease-out group-hover:scale-110"
+            />
+            <span className="font-medium">Courssy</span>
+          </Link>
+        </div>
       </div>
     </footer>
   );
