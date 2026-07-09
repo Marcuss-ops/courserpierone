@@ -25,6 +25,17 @@ const config: Config = {
           peach: '#FFC882',
           orange: '#A0521A',
         },
+        // Warm dark mode (premium dark) — base + accents for dark surfaces
+        'cream-dark': {
+          bg: '#1A1208',         // deep warm dark — like dark chocolate
+          surface: '#221A10',     // slightly lighter for cards-on-dark
+          border: '#3A2D1E',      // subtle warm border on dark
+          text: '#FFF8F0',        // warm cream for text on dark
+          'text-soft': '#C9B896', // muted warm for secondary text on dark
+          gold: '#FFC882',        // brighter peach-gold for dark visibility
+          orange: '#FF8C42',      // bright orange for CTAs on dark
+          glow: 'rgba(255, 140, 66, 0.18)', // warm orange glow overlay
+        },
       },
       fontFamily: {
         serif: ['var(--font-playfair)', 'Georgia', 'serif'],

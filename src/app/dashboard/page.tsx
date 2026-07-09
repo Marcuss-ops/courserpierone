@@ -97,7 +97,6 @@ export default async function DashboardPage() {
   // ── Fetch data: 1 query for lessons (used twice), then 3 in parallel ──
   const orderProductIds = userOrders.map((o) => o.product.id);
 
-  // Query 1: tutti i lesson id per tutti i prodotti acquistati (no N+1)
   const allLessons: { id: string; productId: string }[] =
     orderProductIds.length > 0
       ? await prisma.lesson.findMany({
@@ -107,7 +106,6 @@ export default async function DashboardPage() {
       : [];
   const allLessonIds = allLessons.map((l) => l.id);
 
-  // Query 2-4: stats globali, resume link, progress completato (in parallelo)
   const [completedLessons, lastWatch, progressRecords] = await Promise.all([
     prisma.lessonProgress.count({
       where: { userId: dbUser.id, completed: true },
@@ -185,9 +183,19 @@ export default async function DashboardPage() {
     .map((p) => ({ productId: p.productId, slug: p.slug }));
 
   return (
-    <div className="min-h-screen bg-cream-bg text-cream-text font-sans antialiased">
-      {/* Top Navigation — warm cream, matches login aesthetic */}
-      <nav className="sticky top-0 z-50 bg-cream-bg/80 backdrop-blur-xl border-b border-cream-border">
+    <div className="min-h-screen bg-cream-dark-bg text-cream-dark-text font-sans antialiased relative overflow-x-hidden">
+      {/* Subtle warm glow overlay across the whole page */}
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse at top, rgba(255, 140, 66, 0.06) 0%, transparent 50%), radial-gradient(ellipse at bottom, rgba(255, 200, 130, 0.04) 0%, transparent 50%)",
+        }}
+        aria-hidden
+      />
+
+      {/* Top Navigation — warm dark, frosted glass */}
+      <nav className="sticky top-0 z-50 bg-cream-dark-bg/80 backdrop-blur-xl border-b border-cream-dark-border">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
             <div
@@ -196,13 +204,13 @@ export default async function DashboardPage() {
             >
               C
             </div>
-            <span className="font-serif italic text-[28px] leading-none tracking-[-0.2px] text-cream-text group-hover:opacity-70 transition-opacity">
+            <span className="font-serif italic text-[28px] leading-none tracking-[-0.2px] text-cream-dark-text group-hover:opacity-70 transition-opacity">
               courssy
             </span>
           </Link>
 
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-3 pl-4 pr-2 py-1.5 bg-cream-card border border-cream-border rounded-full">
+            <div className="hidden sm:flex items-center gap-3 pl-4 pr-2 py-1.5 bg-cream-dark-surface/80 border border-cream-dark-border rounded-full">
               <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#FFF5E6] to-[#FFE4C4] flex items-center justify-center overflow-hidden">
                 {dbUser.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -212,19 +220,18 @@ export default async function DashboardPage() {
                 )}
               </div>
               <div className="text-left">
-                <p className="text-xs font-semibold text-cream-text leading-none">
+                <p className="text-xs font-semibold text-cream-dark-text leading-none">
                   {dbUser.name || dbUser.email?.split("@")[0]}
                 </p>
-                <p className="text-[9px] text-cream-text-soft font-medium uppercase tracking-wider mt-0.5">
+                <p className="text-[9px] text-cream-dark-text-soft font-medium uppercase tracking-wider mt-0.5">
                   {dbUser.role === "admin" ? "Admin" : "Studente"}
                 </p>
               </div>
             </div>
-            {/* POST form per signout (GET sarebbe CSRF / prefetch rischioso) */}
             <form action="/auth/signout" method="post">
               <button
                 type="submit"
-                className="p-2.5 bg-cream-card border border-cream-border rounded-xl text-cream-text-soft hover:text-red-600 hover:border-red-200 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream-gold focus-visible:ring-offset-2 focus-visible:ring-offset-cream-bg"
+                className="p-2.5 bg-cream-dark-surface border border-cream-dark-border rounded-xl text-cream-dark-text-soft hover:text-red-400 hover:border-red-400/30 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream-dark-gold focus-visible:ring-offset-2 focus-visible:ring-offset-cream-dark-bg"
                 aria-label="Esci"
               >
                 <LogOut className="w-4 h-4" />
@@ -234,7 +241,7 @@ export default async function DashboardPage() {
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-6 py-10 lg:py-12 pb-24 space-y-10">
+      <main className="relative max-w-7xl mx-auto px-6 py-10 lg:py-12 pb-24 space-y-10">
         {/* Welcome banner with optional resume CTA */}
         <WelcomeBanner
           name={dbUser.name}
@@ -256,10 +263,10 @@ export default async function DashboardPage() {
         <section className="space-y-5">
           <div className="flex items-end justify-between gap-4">
             <div>
-              <h2 className="font-serif text-3xl text-cream-text leading-tight">
+              <h2 className="font-serif text-3xl text-cream-dark-text leading-tight">
                 I Tuoi Corsi
               </h2>
-              <p className="text-sm text-cream-text-soft font-light mt-1">
+              <p className="text-sm text-cream-dark-text-soft font-light mt-1">
                 {userOrders.length === 0
                   ? "Esplora il catalogo per iniziare"
                   : `${userOrders.length} ${userOrders.length === 1 ? "corso" : "corsi"} nella tua libreria`}
@@ -268,7 +275,7 @@ export default async function DashboardPage() {
             {userOrders.length > 0 && (
               <Link
                 href="/"
-                className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-cream-espresso hover:gap-2.5 transition-all"
+                className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-cream-dark-gold hover:gap-2.5 transition-all"
               >
                 Esplora il catalogo <ArrowRight className="w-3.5 h-3.5" />
               </Link>
