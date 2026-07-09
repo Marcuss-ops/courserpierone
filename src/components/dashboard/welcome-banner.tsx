@@ -13,7 +13,7 @@ export function WelcomeBanner({ name, courseCount, hasOrders, resumeHref, resume
   const firstName = (name ?? "Studente").split(" ")[0] ?? "Studente";
 
   return (
-    <section className="relative overflow-hidden rounded-[32px] border border-cream-dark-border bg-gradient-to-br from-cream-dark-bg via-cream-dark-surface to-[#2A1F15] p-8 lg:p-12 shadow-lg shadow-black/40">
+    <section className="relative overflow-hidden rounded-[32px] border border-cream-dark-border bg-gradient-to-br from-cream-dark-bg via-cream-dark-surface to-cream-dark-surface p-8 lg:p-12 shadow-2xl shadow-[#FF8C42]/20">
       {/* Brighter orange orb (more visible on dark base) */}
       <div
         className="absolute -top-32 -right-32 w-[480px] h-[480px] rounded-full pointer-events-none"
