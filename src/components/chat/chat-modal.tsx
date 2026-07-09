@@ -65,7 +65,7 @@ export function ChatModal({
       // Aggiorna il cursore SSE per evitare di ri-ricevere messaggi storici
       const msgs: MessageData[] = data.messages ?? [];
       if (msgs.length > 0) {
-        lastMessageDateRef.current = msgs[msgs.length - 1]!.createdAt;
+        lastMessageDateRef.current = msgs[msgs.length - 1].createdAt;
       }
     } catch (err) {
       setError("Impossibile caricare i messaggi. Riprova.");
@@ -107,7 +107,7 @@ export function ChatModal({
               const newOnes = data.messages.filter((m) => !existingIds.has(m.id));
               if (newOnes.length === 0) return prev;
               // Aggiorna il cursore
-              const lastMsg = newOnes[newOnes.length - 1]!;
+              const lastMsg = newOnes[newOnes.length - 1];
               lastMessageDateRef.current = lastMsg.createdAt;
               return [...prev, ...newOnes];
             });
