@@ -187,17 +187,9 @@ export function AuthForm({ lang }: AuthFormProps) {
 
       <div className="relative w-full max-w-[420px]">
         {/* Brand */}
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-3 group">
-            <div
-              className="w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-xl text-white shadow-md transition-all group-hover:shadow-lg group-hover:scale-105"
-              style={{
-                background: "linear-gradient(135deg, #1a1a1a 0%, #444 100%)",
-              }}
-            >
-              C
-            </div>
-            <span className="font-serif italic text-[30px] leading-none tracking-[-0.2px]">
+        <div className="text-center mb-10">
+          <Link href="/" className="inline-block group">
+            <span className="font-serif italic text-[38px] leading-none tracking-[-0.3px] group-hover:opacity-60 transition-opacity">
               courssy
             </span>
           </Link>
