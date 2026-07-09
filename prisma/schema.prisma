@@ -95,12 +95,17 @@ model Order {
 
 // ─── Utenti ─────────────────────────────────────────────────
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  image     String?
-  role      String   @default("student") // admin | student
-  createdAt DateTime @default(now())
+  id             String   @id @default(cuid())
+  email          String   @unique
+  name           String?
+  image          String?
+  role           String   @default("student") // admin | student
+  username       String?  @unique // URL pubblico: /u/username
+  bio            String?  @db.Text // Bio pubblica Markdown
+  socialLinks    String?  // JSON: { "twitter": "...", "instagram": "...", "youtube": "...", "linkedin": "...", "website": "..." }
+  coverImageUrl  String?  // URL immagine copertina profilo
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now()) @updatedAt
 
   orders   Order[]
   accounts Account[]

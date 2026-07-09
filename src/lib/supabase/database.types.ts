@@ -1,8 +1,21 @@
 /**
  * Tipi del database Supabase (generati automaticamente).
- * Per ora usiamo un tipo generico; dopo il primo `supabase gen types` 
- * questo file verrà sostituito con i tipi reali.
+ * Aggiornato con i nuovi campi profilo utente pubblico.
  */
+export interface UserRow {
+  id: string;
+  email: string;
+  name: string | null;
+  image: string | null;
+  role: string;
+  username: string | null;
+  bio: string | null;
+  socialLinks: string | null; // JSON: { twitter, instagram, youtube, linkedin, website }
+  coverImageUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type Database = {
   public: {
     Tables: Record<string, any>;
