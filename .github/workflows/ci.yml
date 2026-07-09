@@ -5,6 +5,12 @@
 # Runs on every push and PR to main. Catches type errors, lint violations,
 # and test failures before they reach production.
 #
+# Environment variables:
+#   Uses safe CI defaults for PUBLIC vars. No real credentials needed —
+#   tests use vi.mock(), typecheck only needs types, lint is static analysis.
+#   If integration tests are added later that need a real DB, add the
+#   DATABASE_URL secret in GitHub Settings → Secrets → Actions.
+#
 # Concurrency: only one run per branch at a time (cancel old ones for PRs,
 # but NEVER cancel the main branch run — we want a clean history).
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -29,6 +35,28 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
+
+    # ─── CI-safe env vars (dummy/non-sensitive) ──────────────
+    # Critical vars: valori dummy per evitare errori di import
+    # Required vars: lasciati vuoti — le feature corrispondenti
+    #                vengono disabilitate con graceful fallback
+    # Secrets reali: aggiungili su GitHub Settings → Secrets → Actions
+    #                se servono test di integrazione
+    env:
+      # Critical (con dummy values — non servono credenziali reali)
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/courser
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/courser
+      SUPABASE_URL: https://ci-dummy.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: ci-dummy-service-role-key
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-dummy.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-dummy-anon-key
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+
+      # Optional — lasciati vuoti (graceful fallback)
+      # Aggiungi valori reali come GitHub Secrets se servono per test integrazione
+
+      # Tell the app this is CI (skips env validation noise)
+      NODE_ENV: test
 
     steps:
       - name: Checkout
