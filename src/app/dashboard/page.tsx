@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LogOut, ArrowRight, User, Bell } from "lucide-react";
+import { LogOut, ArrowRight, User, Mail } from "lucide-react";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { WelcomeBanner } from "@/components/dashboard/welcome-banner";
@@ -179,17 +179,10 @@ export default async function DashboardPage() {
     ? `Riprendi: ${lastLessonTitle}`
     : undefined;
 
-  // ── Notifications unread count ────────────────────────
-  const unreadCount = await prisma.notification.count({
-    where: { userId: dbUser.id, read: false },
-  });
-
   // ── Unread messages count ──────────────────────────────
   const unreadMessages = await prisma.message.count({
     where: { receiverId: dbUser.id, read: false },
   });
-
-  const totalNotifications = unreadCount + unreadMessages;
 
   // ── Certificates (products fully completed) ──
   const completedProductIds = productProgress
@@ -224,19 +217,19 @@ export default async function DashboardPage() {
           </Link>
 
           <div className="flex items-center gap-3">
-            {/* Notification bell */}
-            <Link
-              href="/notifications"
-              className="relative p-2.5 bg-cream-dark-surface border border-cream-dark-border rounded-xl text-cream-dark-text-soft hover:text-cream-dark-gold hover:border-cream-dark-gold/30 transition-all"
-              aria-label={`Notifiche${totalNotifications > 0 ? `, ${totalNotifications} non lette` : ""}`}
+            {/* DM messages badge */}
+            <span
+              className="relative p-2.5 bg-cream-dark-surface border border-cream-dark-border rounded-xl text-cream-dark-text-soft transition-all"
+              aria-label={`Messaggi${unreadMessages > 0 ? `, ${unreadMessages} non letti` : ""}`}
+              title={unreadMessages > 0 ? `${unreadMessages} messaggi non letti — controlla i tuoi corsi` : "Nessun nuovo messaggio"}
             >
-              <Bell className="w-4 h-4" />
-              {totalNotifications > 0 && (
+              <Mail className="w-4 h-4" />
+              {unreadMessages > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center shadow-md">
-                  {totalNotifications > 99 ? "99+" : totalNotifications}
+                  {unreadMessages > 99 ? "99+" : unreadMessages}
                 </span>
               )}
-            </Link>
+            </span>
             <div className="hidden sm:flex items-center gap-3 pl-4 pr-2 py-1.5 bg-cream-dark-surface/80 border border-cream-dark-border rounded-full">
               <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#FFF5E6] to-[#FFE4C4] flex items-center justify-center overflow-hidden">
                 {dbUser.image ? (
