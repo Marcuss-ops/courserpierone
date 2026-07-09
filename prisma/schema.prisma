@@ -30,6 +30,7 @@ model Product {
   orders             Order[]
   abandonedCheckouts AbandonedCheckout[]
   discussionPosts    DiscussionPost[]
+  messages           Message[]
 }
 
 // ─── Traduzioni del Funnel (Problema, Storia, Recensioni, CTA) ─
@@ -115,6 +116,8 @@ model User {
   discussionComments DiscussionComment[]
   discussionLikes    DiscussionLike[]
   notifications      Notification[]
+  sentMessages       Message[]      @relation("SentMessages")
+  receivedMessages   Message[]      @relation("ReceivedMessages")
 }
 
 // ─── NextAuth ───────────────────────────────────────────────
@@ -419,4 +422,23 @@ model Notification {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, read, createdAt])
+}
+
+// ─── Direct Messages tra studente e creator ────────────────
+model Message {
+  id         String   @id @default(cuid())
+  senderId   String
+  receiverId String
+  productId  String?  // opzionale: scoping al corso da cui parte il DM
+  content    String   @db.Text
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  sender   User    @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User    @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  product  Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([senderId, receiverId, createdAt])
+  @@index([receiverId, read, createdAt])
+  @@index([productId])
 }
