@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Globe } from "lucide-react";
 
 /**
  * Global footer shown on the public website.
@@ -10,17 +9,6 @@ import { Globe } from "lucide-react";
  * Hidden on app routes (dashboard, admin, account, uploader, auth) because
  * those are full-screen app views with their own visual identity (dark warm
  * theme) — a light cream footer below them would clash visually.
- *
- * The current locale is passed as a prop from the server-rendered root
- * layout (which reads the httpOnly `locale` cookie). This is necessary
- * because the URL doesn't always include a locale prefix (e.g. on
- * /privacy, /terms, /refund, /, /login) — the switcher would otherwise
- * always show "Italiano" as active on those pages.
- *
- * Includes a compact language switcher (9 languages). The cookie is
- * httpOnly (set by middleware), so we can't set it from JS — switching
- * navigates to /{newLocale}/{restPath} and the middleware picks up the
- * locale, sets the cookie, and redirects to the proper path.
  */
 const HIDE_ON_PREFIXES = ["/dashboard", "/admin", "/account", "/uploader", "/auth", "/debug-locale"];
 
@@ -40,7 +28,6 @@ const KNOWN_LOCALES: ReadonlySet<string> = new Set(LANGUAGES.map((l) => l.code))
 const DEFAULT_LOCALE = "it-it";
 
 interface FooterProps {
-  /** Current locale code (e.g. "it-it", "en-us"), read from the cookie by the server layout. */
   currentLocale?: string;
 }
 
@@ -50,50 +37,77 @@ export function Footer({ currentLocale: cookieLocale }: FooterProps = {}) {
   if (isAppRoute) return null;
 
   return (
-    <footer className="border-t border-black/[0.08] bg-[#FAFAF8]">
-      <div className="max-w-7xl mx-auto px-6 py-8 flex flex-col gap-5 text-sm text-black/60 font-light">
-        {/* Top row: copyright + language switcher */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <small className="text-[13px]">© 2026 Courssy</small>
-          <LanguageSwitcher cookieLocale={cookieLocale} />
+    <footer className="border-t border-black/[0.06] bg-gradient-to-b from-[#FAFAF8] to-[#F5F4F0]">
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        {/* Main grid: brand + link columns + language */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
+          {/* Brand column */}
+          <div className="col-span-2 sm:col-span-1">
+            <Link
+              href="/"
+              className="inline-block text-lg font-serif italic text-black/80 hover:text-black transition-colors"
+            >
+              courssy
+            </Link>
+            <p className="mt-3 text-[13px] text-black/45 leading-relaxed max-w-[180px]">
+              Discover courses that change your life.
+            </p>
+          </div>
+
+          {/* Explore */}
+          <div>
+            <h4 className="text-[12px] font-semibold uppercase tracking-wider text-black/35 mb-3">
+              Explore
+            </h4>
+            <ul className="space-y-2">
+              <FooterLinkItem href="/" label="Home" currentPath={pathname} />
+              <FooterLinkItem href="/login" label="Sign in" currentPath={pathname} />
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h4 className="text-[12px] font-semibold uppercase tracking-wider text-black/35 mb-3">
+              Legal
+            </h4>
+            <ul className="space-y-2">
+              <FooterLinkItem href="/privacy" label="Privacy Policy" currentPath={pathname} />
+              <FooterLinkItem href="/terms" label="Terms of Service" currentPath={pathname} />
+              <FooterLinkItem href="/refund" label="Refund Policy" currentPath={pathname} />
+            </ul>
+          </div>
+
+          {/* Language */}
+          <div className="col-span-2 sm:col-span-1">
+            <h4 className="text-[12px] font-semibold uppercase tracking-wider text-black/35 mb-3">
+              Language
+            </h4>
+            <LanguageSwitcher cookieLocale={cookieLocale} />
+          </div>
         </div>
 
-        {/* Bottom row: legal links */}
-        <nav
-          aria-label="Legal"
-          className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[13px]"
-        >
-          <FooterLink href="/privacy" label="Privacy Policy" currentPath={pathname} />
-          <FooterLink href="/terms" label="Terms of Service" currentPath={pathname} />
-          <FooterLink href="/refund" label="Refund Policy" currentPath={pathname} />
-        </nav>
-
-        {/* Attribution row: Powered by Courssy */}
-        <div className="flex items-center justify-center pt-1">
-          <Link
-            href="https://www.courssy.com"
-            rel="noopener noreferrer"
-            aria-label="Powered by Courssy"
-            className="group inline-flex items-center gap-1.5 text-[12px] text-black/45 hover:text-black/80 transition-colors"
-          >
-            <span>Powered by</span>
-            <img
-              src="/icon.png"
-              alt=""
+        {/* Bottom bar */}
+        <div className="mt-10 pt-5 border-t border-black/[0.05] flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] text-black/35">
+          <span>© 2026 Courssy. All rights reserved.</span>
+          <span className="flex items-center gap-1">
+            Made with
+            <svg
+              className="w-3 h-3 text-red-400 animate-pulse"
+              viewBox="0 0 24 24"
+              fill="currentColor"
               aria-hidden
-              width={16}
-              height={16}
-              className="w-4 h-4 rounded-sm transition-transform duration-200 ease-out group-hover:scale-110"
-            />
-            <span className="font-medium">Courssy</span>
-          </Link>
+            >
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            </svg>
+            in Italy
+          </span>
         </div>
       </div>
     </footer>
   );
 }
 
-function FooterLink({
+function FooterLinkItem({
   href,
   label,
   currentPath,
@@ -102,64 +116,54 @@ function FooterLink({
   label: string;
   currentPath: string;
 }) {
-  // Match exact path OR a localized variant like /en-us/privacy
   const isCurrent = currentPath === href || currentPath.endsWith(href);
   return (
-    <Link
-      href={href}
-      aria-current={isCurrent ? "page" : undefined}
-      className="hover:text-black hover:underline underline-offset-3 transition-colors"
-    >
-      {label}
-    </Link>
+    <li>
+      <Link
+        href={href}
+        aria-current={isCurrent ? "page" : undefined}
+        className="text-[13px] text-black/55 hover:text-black hover:underline underline-offset-3 transition-colors"
+      >
+        {label}
+      </Link>
+    </li>
   );
 }
 
 function LanguageSwitcher({ cookieLocale }: { cookieLocale?: string }) {
   const pathname = usePathname();
-  // Prefer the cookie (read server-side, covers all routes including /privacy / /).
-  // Fall back to URL detection if no cookie is set yet.
   const fromCookie = cookieLocale && KNOWN_LOCALES.has(cookieLocale) ? cookieLocale : null;
   const firstSegment = pathname.split("/")[1]?.toLowerCase() ?? "";
   const fromUrl = firstSegment && KNOWN_LOCALES.has(firstSegment) ? firstSegment : null;
   const currentLocale = fromCookie ?? fromUrl ?? DEFAULT_LOCALE;
 
-  // Rest of the path (without locale prefix). Defaults to "/" for the homepage.
   let restPath: string;
   if (fromUrl) {
-    // URL has a locale prefix: /{locale}/{rest}
     restPath = pathname.slice(firstSegment.length + 1) || "/";
   } else {
-    // No locale prefix in URL (e.g. /privacy or /). Use full pathname.
     restPath = pathname || "/";
   }
 
   function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const newLocale = e.target.value;
     if (newLocale === currentLocale) return;
-    // Navigate to /{newLocale}/{restPath}. The middleware will set the httpOnly cookie.
     const target = `/${newLocale}${restPath === "/" ? "" : restPath}`;
     window.location.href = target;
   }
 
   return (
-    <div className="flex items-center gap-2 text-[13px]">
-      <label htmlFor="footer-locale" className="flex items-center gap-1.5 text-black/50">
-        <Globe className="w-3.5 h-3.5" aria-hidden />
-        <span className="sr-only">Language</span>
-      </label>
-      <select
-        id="footer-locale"
-        value={currentLocale}
-        onChange={handleChange}
-        className="bg-white border border-black/10 rounded-md px-2 py-1 text-[12px] font-medium text-black/70 hover:border-black/25 focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black/25 cursor-pointer transition-colors"
-      >
-        {LANGUAGES.map((lang) => (
-          <option key={lang.code} value={lang.code}>
-            {lang.flag} {lang.label}
-          </option>
-        ))}
-      </select>
-    </div>
+    <select
+      id="footer-locale"
+      value={currentLocale}
+      onChange={handleChange}
+      aria-label="Select language"
+      className="bg-white border border-black/10 rounded-lg px-3 py-2 text-[13px] font-medium text-black/70 hover:border-black/25 focus:outline-none focus:ring-2 focus:ring-amber-200 focus:border-amber-300 cursor-pointer transition-all w-full"
+    >
+      {LANGUAGES.map((lang) => (
+        <option key={lang.code} value={lang.code}>
+          {lang.flag} {lang.label}
+        </option>
+      ))}
+    </select>
   );
 }
