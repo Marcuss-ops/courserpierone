@@ -3,7 +3,7 @@ import { BookOpen, ArrowRight } from "lucide-react";
 
 export function DashboardEmptyState() {
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-cream-dark-bg via-cream-dark-surface to-[#2A1F15] border border-cream-dark-border rounded-[32px] p-12 lg:p-16 text-center shadow-lg shadow-black/30">
+    <div className="relative overflow-hidden bg-gradient-to-br from-cream-dark-bg via-cream-dark-surface to-cream-dark-surface border border-cream-dark-border rounded-[32px] p-12 lg:p-16 text-center shadow-2xl shadow-[#FF8C42]/15">
       <div
         className="absolute -top-20 -right-20 w-[360px] h-[360px] rounded-full pointer-events-none"
         style={{

@@ -27,7 +27,7 @@ export function CertificatesShowcase({ certificates }: CertificatesShowcaseProps
           <Link
             key={cert.productId}
             href={`/api/certificate/${cert.productId}`}
-            className="group relative overflow-hidden bg-gradient-to-br from-cream-dark-surface to-[#2A1F15] border border-cream-dark-border rounded-2xl p-6 hover:border-cream-dark-gold/40 hover:shadow-lg hover:shadow-[#FF8C42]/10 hover:-translate-y-0.5 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream-dark-gold focus-visible:ring-offset-2 focus-visible:ring-offset-cream-dark-bg"
+            className="group relative overflow-hidden bg-gradient-to-br from-cream-dark-surface to-cream-dark-surface border border-cream-dark-border rounded-2xl p-6 hover:border-cream-dark-gold/40 hover:shadow-lg hover:shadow-[#FF8C42]/10 hover:-translate-y-0.5 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream-dark-gold focus-visible:ring-offset-2 focus-visible:ring-offset-cream-dark-bg"
           >
             <div
               className="absolute -right-8 -top-8 w-32 h-32 rounded-full pointer-events-none"

@@ -29,7 +29,7 @@ export function ProgressBar({ value, label, showValue = true, className = "", to
           )}
         </div>
       )}
-      <div className="w-full h-1.5 bg-cream-border-soft rounded-full overflow-hidden">
+      <div className="w-full h-1.5 bg-cream-border rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-700 ease-out motion-reduce:transition-none ${fillClass}`}
           style={{ width: `${safeValue}%` }}
