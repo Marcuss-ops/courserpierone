@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Playfair_Display, Inter } from "next/font/google";
+import { Footer } from "@/components/footer";
 import "./globals.css";
 
 // ═══ Environment variable validation ═════════════════════
@@ -65,8 +66,9 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} className={`${playfair.variable} ${inter.variable}`}>
-      <body className="bg-white text-gray-900 antialiased">
-        {children}
+      <body className="bg-white text-gray-900 antialiased min-h-screen flex flex-col">
+        <div className="flex-1 flex flex-col">{children}</div>
+        <Footer />
         {/* PWA Service Worker registration */}
         <script
           dangerouslySetInnerHTML={{

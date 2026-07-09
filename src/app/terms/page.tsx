@@ -242,19 +242,6 @@ export default function TermsPage() {
             </div>
           </section>
         </main>
-
-        {/* Footer */}
-        <footer className="py-10 pb-20 flex sm:flex-col sm:items-start justify-between items-center text-[14px] font-light gap-3 sm:gap-3 flex-wrap border-t border-black">
-          <div>© 2026 Courssy</div>
-          <div className="flex gap-5">
-            <Link href="/privacy" className="hover:underline underline-offset-3 no-underline hover:no-underline">
-              privacy
-            </Link>
-            <Link href="/terms" className="hover:underline underline-offset-3 no-underline hover:no-underline">
-              terms
-            </Link>
-          </div>
-        </footer>
       </div>
     </div>
   );
