@@ -7,9 +7,10 @@
  *   - Finestra scorrevole: il contatore resetta dopo windowMs dall'ultimo reset
  *
  * Tiers predefiniti:
- *   - PUBLIC:   100 req/min  (API pubbliche: prodotti, config, analytics)
- *   - AUTH:      30 req/min  (endpoint di autenticazione/sensibili)
- *   - MESSAGES:  10 req/min  (invio DM)
+ *   - PUBLIC:    100 req/min  (API pubbliche: prodotti, config, analytics)
+ *   - AUTH:       30 req/min  (endpoint di autenticazione/sensibili)
+ *   - MESSAGES:   10 req/min  (invio DM)
+ *   - WEBHOOK:   200 req/min  (Stripe/Lemon Squeezy — firma verificata)
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -25,6 +26,8 @@ export const RATE_TIERS = {
   AUTH: { max: 30, windowMs: MINUTE },
   /** Invio messaggi DM */
   MESSAGES: { max: 10, windowMs: MINUTE },
+  /** Webhook Stripe/Lemon Squeezy — raffiche consentite, firma verificata */
+  WEBHOOK: { max: 200, windowMs: MINUTE },
 } as const;
 
 export type RateTier = keyof typeof RATE_TIERS;
