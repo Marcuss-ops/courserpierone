@@ -83,7 +83,7 @@ export async function getOnlineUsers(userIds: string[]): Promise<Set<string>> {
   if (!r) return new Set();
   try {
     const keys = userIds.map((id) => `${PRESENCE_PREFIX}${id}`);
-    const results = await r.mget<string[]>(...keys);
+    const results = await r.mget(...keys);
     const online = new Set<string>();
     userIds.forEach((id, i) => {
       if (results[i] !== null && results[i] !== undefined && results[i] !== "") {

@@ -1,12 +1,14 @@
 /**
- * redis.ts — Client Redis serverless (Upstash) con graceful fallback.
+ * redis.ts — Client Redis dual-mode: Upstash REST (produzione) + ioredis (locale).
  *
- * Usa le variabili d'ambiente automaticamente:
- *   UPSTASH_REDIS_REST_URL  — URL REST dell'istanza Upstash
- *   UPSTASH_REDIS_REST_TOKEN — Token di autenticazione
+ * Priorità connessione:
+ *   1. UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN → Upstash REST API
+ *   2. REDIS_URL (es. redis://localhost:6379) → ioredis (TCP diretto)
+ *   3. Nessuna config → graceful fallback (no-op, app funziona senza cache)
  *
- * Se le variabili non sono configurate (es. in dev locale), tutte le
- * operazioni Redis sono no-op — l'app funziona normalmente senza cache.
+ * Per sviluppo locale con docker-compose:
+ *   docker compose up -d redis
+ *   REDIS_URL=redis://localhost:6379
  *
  * Esporta `getRedis()` per uso condiviso tra i moduli:
  *   - Caching (cacheGet, cacheSet, cacheDel, cacheWrap)
@@ -15,28 +17,128 @@
  *   - Health check (/api/health)
  */
 
-import { Redis } from "@upstash/redis";
+import { Redis as UpstashRedis } from "@upstash/redis";
+import IORedis from "ioredis";
 
-let _redis: Redis | null | undefined = undefined;
+// ─── Adapter ioredis → Upstash API ──────────────────────────
+// Wrapper sottile che espone la stessa API di @upstash/redis
+// per i metodi che usiamo: get, set, del, incr, expire, ttl, mget, ping.
+
+interface RedisAdapter {
+  get<T = string>(key: string): Promise<T | null>;
+  set(key: string, value: string | number, opts?: { ex?: number }): Promise<"OK" | null>;
+  del(key: string): Promise<number>;
+  incr(key: string): Promise<number>;
+  expire(key: string, seconds: number): Promise<number>;
+  ttl(key: string): Promise<number>;
+  mget(...keys: string[]): Promise<(string | null)[]>;
+  ping(): Promise<string>;
+  pipeline(): {
+    get(key: string): void;
+    exec(): Promise<(string | null)[]>;
+  };
+}
+
+function createIORedisAdapter(redisUrl: string): RedisAdapter | null {
+  try {
+    const io = new IORedis(redisUrl, {
+      maxRetriesPerRequest: 1,
+      lazyConnect: false,
+      connectTimeout: 3000,
+    });
+
+    // Verifica connessione immediata
+    io.on("error", (err) => {
+      console.error("[redis] ioredis error:", err.message);
+    });
+
+    return {
+      async get<T = string>(key: string): Promise<T | null> {
+        const val = await io.get(key);
+        return val as T | null;
+      },
+      async set(key: string, value: string | number, opts?: { ex?: number }): Promise<"OK" | null> {
+        if (typeof value === "number") value = String(value);
+        if (opts?.ex) {
+          return io.set(key, value, "EX", opts.ex);
+        }
+        return io.set(key, value);
+      },
+      async del(key: string): Promise<number> {
+        return io.del(key);
+      },
+      async incr(key: string): Promise<number> {
+        return io.incr(key);
+      },
+      async expire(key: string, seconds: number): Promise<number> {
+        return io.expire(key, seconds);
+      },
+      async ttl(key: string): Promise<number> {
+        return io.ttl(key);
+      },
+      async mget(...keys: string[]): Promise<(string | null)[]> {
+        const vals = await io.mget(...keys);
+        return vals as (string | null)[];
+      },
+      async ping(): Promise<string> {
+        return io.ping();
+      },
+      pipeline() {
+        const pipe = io.pipeline();
+        return {
+          get(key: string) {
+            pipe.get(key);
+          },
+          async exec(): Promise<(string | null)[]> {
+            const results = await pipe.exec();
+            if (!results) return [];
+            return results.map(([err, val]) => (err ? null : (val as string | null)));
+          },
+        };
+      },
+    };
+  } catch (err) {
+    console.error("[redis] Failed to create ioredis adapter:", err);
+    return null;
+  }
+}
+
+export type RedisClient = UpstashRedis | RedisAdapter;
+
+let _redis: RedisClient | null | undefined = undefined;
 
 /**
  * Restituisce l'istanza Redis condivisa (lazy singleton).
+ * Priorità: Upstash REST → ioredis locale → null (fallback).
  * Tutti i moduli devono usare questa funzione — non crearne di proprie.
  */
-export function getRedis(): Redis | null {
+export function getRedis(): RedisClient | null {
   if (_redis !== undefined) return _redis;
 
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  // 1. Upstash REST (produzione)
+  const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
+  const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-  if (url && token) {
-    _redis = new Redis({ url, token });
+  if (upstashUrl && upstashToken) {
+    _redis = new UpstashRedis({ url: upstashUrl, token: upstashToken });
     console.log("[redis] Connected to Upstash");
-  } else {
-    _redis = null;
-    console.log("[redis] Upstash not configured — cache disabled");
+    return _redis;
   }
 
+  // 2. ioredis locale (sviluppo con docker-compose)
+  const redisUrl = process.env.REDIS_URL;
+  if (redisUrl) {
+    const adapter = createIORedisAdapter(redisUrl);
+    if (adapter) {
+      _redis = adapter;
+      console.log(`[redis] Connected to local Redis (${redisUrl.replace(/\/\/.*@/, "//***@")})`);
+      return _redis;
+    }
+  }
+
+  // 3. Nessuna configurazione — graceful fallback
+  _redis = null;
+  console.log("[redis] Redis not configured — cache, presence, and distributed rate limiting disabled");
   return _redis;
 }
 
