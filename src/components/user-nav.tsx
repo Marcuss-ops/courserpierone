@@ -115,7 +115,6 @@ export function UserNav({ user }: UserNavProps) {
         <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-black/10 rounded-xl shadow-lg overflow-hidden z-50">
           <div className="px-4 py-3 border-b border-black/5">
             <p className="text-[14px] font-medium text-black truncate">{displayName}</p>
-            <p className="text-[12px] text-black/50 truncate">{user.email}</p>
             {user.role === "admin" && (
               <span className="inline-block mt-1 px-2 py-0.5 bg-black/5 text-black/70 text-[10px] font-medium rounded uppercase tracking-wider">
                 Admin
@@ -130,6 +129,17 @@ export function UserNav({ user }: UserNavProps) {
             >
               <User className="w-4 h-4" />
               Dashboard
+            </Link>
+            <Link
+              href="/account/profile"
+              className="flex items-center gap-3 px-4 py-2 text-[14px] text-black hover:bg-black/5 transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              Modifica Profilo
             </Link>
             {user.role === "admin" && (
               <Link
