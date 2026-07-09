@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
           });
 
           if (newMessages.length > 0) {
-            const lastMsg = newMessages[newMessages.length - 1]!;
+            const lastMsg = newMessages[newMessages.length - 1];
             lastSeen = lastMsg.createdAt;
 
             controller.enqueue(
