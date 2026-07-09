@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, UserCog } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 export interface UserNavProps {
@@ -135,10 +135,7 @@ export function UserNav({ user }: UserNavProps) {
               className="flex items-center gap-3 px-4 py-2 text-[14px] text-black hover:bg-black/5 transition-colors"
               onClick={() => setIsOpen(false)}
             >
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
+              <UserCog className="w-4 h-4" />
               Modifica Profilo
             </Link>
             {user.role === "admin" && (
