@@ -18,6 +18,8 @@ export function AuthForm({ lang }: AuthFormProps) {
   const router = useRouter();
   const productId = searchParams.get("productId");
   const callbackUrl = searchParams.get("callbackUrl");
+  const oauthErrorParam = searchParams.get("oauth_error");
+  const oauthCodeParam = searchParams.get("oauth_code");
 
   const t = getAuthTranslations(lang);
 
@@ -27,7 +29,42 @@ export function AuthForm({ lang }: AuthFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [oauthDetail, setOauthDetail] = useState("");
   const [success, setSuccess] = useState("");
+
+  // Show OAuth error from URL fragment or query param on mount
+  useEffect(() => {
+    const fragment = window.location.hash.startsWith("#")
+      ? window.location.hash.slice(1)
+      : "";
+    const fragmentParams = new URLSearchParams(fragment);
+    const hashError =
+      fragmentParams.get("error_description") ||
+      fragmentParams.get("error");
+    const hashErrorCode = fragmentParams.get("error_code");
+
+    const oauthReason = hashError || oauthErrorParam;
+    if (oauthReason) {
+      const decoded = decodeURIComponent(oauthReason);
+      const codeSuffix =
+        hashErrorCode || oauthCodeParam
+          ? ` (${hashErrorCode || oauthCodeParam})`
+          : "";
+      setError(t.oauthError);
+      setOauthDetail(`${t.oauthErrorDetail}: ${decoded}${codeSuffix}\n${t.oauthErrorHint}`);
+      // Clean both fragment and query params so refresh doesn't reprocess
+      const cleanUrl =
+        window.location.pathname +
+        window.location.search
+          .replace(/[?&]oauth_error=[^&]*/g, "")
+          .replace(/[?&]oauth_code=[^&]*/g, "")
+          .replace(/[?&]$/, "");
+      window.history.replaceState(null, "", cleanUrl);
+    }
+    // t.* intentionally omitted: this is a one-shot error display set on mount.
+    // Re-running on language change would replace a meaningful error with a stale one.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const redirectTarget =
     callbackUrl ||
@@ -51,6 +88,7 @@ export function AuthForm({ lang }: AuthFormProps) {
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setOauthDetail("");
     setLoading(true);
     try {
       const supabase = createClient();
@@ -76,6 +114,7 @@ export function AuthForm({ lang }: AuthFormProps) {
   const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setOauthDetail("");
     setSuccess("");
     setLoading(true);
     try {
@@ -179,7 +218,12 @@ export function AuthForm({ lang }: AuthFormProps) {
           {/* Error / Success messages */}
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded-xl text-[13px] text-red-600">
-              {error}
+              <p className="font-medium">{error}</p>
+              {oauthDetail && (
+                <p className="mt-1.5 text-[12px] text-red-500/80 whitespace-pre-line leading-relaxed">
+                  {oauthDetail}
+                </p>
+              )}
             </div>
           )}
           {success && (

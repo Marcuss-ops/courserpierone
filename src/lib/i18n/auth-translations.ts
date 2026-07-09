@@ -28,6 +28,9 @@ const authTranslations: Record<string, AuthStrings> = {
     backToHome: "Torna alla home",
     discoverCourses: "Scopri i nostri corsi",
     alreadyPurchased: "Hai già acquistato? Accedi per vedere il corso.",
+    oauthError: "Accesso con Google non riuscito.",
+    oauthErrorDetail: "Motivo tecnico",
+    oauthErrorHint: "Verifica la connessione, riprova oppure usa email e password.",
   },
 
   // ═══ English ═══
@@ -51,6 +54,9 @@ const authTranslations: Record<string, AuthStrings> = {
     backToHome: "Back to home",
     discoverCourses: "Discover our courses",
     alreadyPurchased: "Already purchased? Sign in to view the course.",
+    oauthError: "Google sign-in failed.",
+    oauthErrorDetail: "Technical reason",
+    oauthErrorHint: "Check your connection, try again, or use email and password.",
   },
 
   // ═══ Français ═══
@@ -74,6 +80,9 @@ const authTranslations: Record<string, AuthStrings> = {
     backToHome: "Retour à l'accueil",
     discoverCourses: "Découvrez nos cours",
     alreadyPurchased: "Déjà acheté ? Connectez-vous pour voir le cours.",
+    oauthError: "La connexion avec Google a échoué.",
+    oauthErrorDetail: "Raison technique",
+    oauthErrorHint: "Vérifiez votre connexion, réessayez, ou utilisez email et mot de passe.",
   },
 
   // ═══ Español ═══
@@ -97,6 +106,9 @@ const authTranslations: Record<string, AuthStrings> = {
     backToHome: "Volver al inicio",
     discoverCourses: "Descubre nuestros cursos",
     alreadyPurchased: "¿Ya compraste? Inicia sesión para ver el curso.",
+    oauthError: "Falló el inicio de sesión con Google.",
+    oauthErrorDetail: "Motivo técnico",
+    oauthErrorHint: "Comprueba tu conexión, inténtalo de nuevo o usa correo y contraseña.",
   },
 
   // ═══ Deutsch ═══
@@ -120,6 +132,9 @@ const authTranslations: Record<string, AuthStrings> = {
     backToHome: "Zurück zur Startseite",
     discoverCourses: "Entdecke unsere Kurse",
     alreadyPurchased: "Bereits gekauft? Melde dich an, um den Kurs zu sehen.",
+    oauthError: "Google-Anmeldung fehlgeschlagen.",
+    oauthErrorDetail: "Technischer Grund",
+    oauthErrorHint: "Überprüfe deine Verbindung, versuche es erneut oder nutze E-Mail und Passwort.",
   },
 
   // ═══ Português ═══
@@ -143,6 +158,9 @@ const authTranslations: Record<string, AuthStrings> = {
     backToHome: "Voltar ao início",
     discoverCourses: "Descubra nossos cursos",
     alreadyPurchased: "Já comprou? Entre para ver o curso.",
+    oauthError: "Falha no login com Google.",
+    oauthErrorDetail: "Motivo técnico",
+    oauthErrorHint: "Verifique sua conexão, tente novamente ou use e-mail e senha.",
   },
 
   // ═══ 日本語 ═══
@@ -166,6 +184,9 @@ const authTranslations: Record<string, AuthStrings> = {
     backToHome: "ホームに戻る",
     discoverCourses: "コースを探す",
     alreadyPurchased: "購入済みですか？サインインしてコースを表示。",
+    oauthError: "Googleサインインに失敗しました。",
+    oauthErrorDetail: "技術的理由",
+    oauthErrorHint: "接続を確認、もう一度お試しいただくか、メールとパスワードをご利用ください。",
   },
 
   // ═══ العربية ═══
@@ -189,6 +210,9 @@ const authTranslations: Record<string, AuthStrings> = {
     backToHome: "العودة إلى الصفحة الرئيسية",
     discoverCourses: "اكتشف دوراتنا",
     alreadyPurchased: "اشتريت بالفعل؟ سجل الدخول لعرض الدورة.",
+    oauthError: "فشل تسجيل الدخول عبر Google.",
+    oauthErrorDetail: "السبب التقني",
+    oauthErrorHint: "تحقق من الاتصال، حاول مرة أخرى، أو استخدم البريد وكلمة المرور.",
   },
 
   // ═══ 中文 ═══
@@ -212,6 +236,9 @@ const authTranslations: Record<string, AuthStrings> = {
     backToHome: "返回首页",
     discoverCourses: "发现我们的课程",
     alreadyPurchased: "已购买？登录以查看课程。",
+    oauthError: "Google 登录失败。",
+    oauthErrorDetail: "技术原因",
+    oauthErrorHint: "检查网络连接，重试，或使用邮箱和密码登录。",
   },
 };
 
@@ -235,6 +262,9 @@ export interface AuthStrings {
   backToHome: string;
   discoverCourses: string;
   alreadyPurchased: string;
+  oauthError: string;
+  oauthErrorDetail: string;
+  oauthErrorHint: string;
 }
 
 // English as universal fallback
