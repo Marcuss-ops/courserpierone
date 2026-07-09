@@ -21,8 +21,13 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  // Skip non-HTTP(S) schemes (chrome-extension://, file://, blob:, data:, etc.)
+  // Il Cache API non supporta questi scheme e put() lancia TypeError.
+  const url = new URL(event.request.url);
+  if (url.protocol !== "http:" && url.protocol !== "https:") return;
   if (event.request.url.includes("/api/")) return;
 
+  // Stale-while-revalidate sicuro
   event.respondWith(
     caches.match(event.request).then((cached) => {
       const fetched = fetch(event.request)
@@ -33,8 +38,7 @@ self.addEventListener("fetch", (event) => {
           }
           return response;
         })
-        .catch(() => cached);
-
+        .catch(() => cached || Response.error());
       return cached || fetched;
     })
   );
