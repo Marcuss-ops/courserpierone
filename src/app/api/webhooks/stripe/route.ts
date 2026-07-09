@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/payment/stripe";
 import { processOrder } from "@/lib/services/order-service";
+import { withRateLimit } from "@/lib/utils/rate-limit";
 import Stripe from "stripe";
 
-export async function POST(request: NextRequest) {
+// Force dynamic — webhook non può essere statico
+export const dynamic = "force-dynamic";
+
+async function POST_IMPL(request: NextRequest) {
   const body = await request.text();
   const sig = request.headers.get("stripe-signature");
 
@@ -68,3 +72,5 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({ received: true });
 }
+
+export const POST = withRateLimit(POST_IMPL, "WEBHOOK");

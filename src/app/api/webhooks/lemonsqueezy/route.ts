@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processOrder } from "@/lib/services/order-service";
+import { withRateLimit } from "@/lib/utils/rate-limit";
 import crypto from "crypto";
 
-export async function POST(request: NextRequest) {
+// Force dynamic — webhook non può essere statico
+export const dynamic = "force-dynamic";
+
+async function POST_IMPL(request: NextRequest) {
   const body = await request.text();
   const signature = request.headers.get("x-signature");
 
@@ -122,3 +126,5 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({ received: true });
 }
+
+export const POST = withRateLimit(POST_IMPL, "WEBHOOK");
