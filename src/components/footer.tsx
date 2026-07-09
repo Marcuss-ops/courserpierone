@@ -13,11 +13,11 @@ import { usePathname } from "next/navigation";
  * Server components in the app router can't use `usePathname` directly, so
  * this is a small client component. The hydration cost is negligible.
  */
-const HIDE_ON_PREFIXES = ["/dashboard", "/admin", "/account", "/uploader", "/auth"];
+const HIDE_ON_PREFIXES = ["/dashboard", "/admin", "/account", "/uploader", "/auth", "/debug-locale"];
 
 export function Footer() {
   const pathname = usePathname();
-  const isAppRoute = HIDE_ON_PREFIXES.some((p) => pathname?.startsWith(p));
+  const isAppRoute = HIDE_ON_PREFIXES.some((p) => pathname.startsWith(p));
   if (isAppRoute) return null;
 
   return (
