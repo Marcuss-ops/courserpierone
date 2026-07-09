@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
 import type { Metadata } from "next";
+import nextDynamic from "next/dynamic";
 import { 
   Play, 
   BookOpen, 
@@ -15,6 +16,8 @@ import { getCourseConfig } from "@/lib/config/white-label-data";
 import { AccessGate } from "@/components/course/access-gate";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { loadLocaleContentSafe } from "@/lib/i18n/load-locale-content";
+
+const DiscussionFeed = nextDynamic(() => import("@/components/discussion/discussion-feed").then(m => ({ default: m.DiscussionFeed })));
 
 export async function generateMetadata({
   params,
@@ -112,6 +115,9 @@ export default async function ProductPortalPage({
 
   // ID della prima lezione (per quick-start dopo acquisto)
   const firstLessonId = course.lessons?.[0]?.id ?? "lesson-1";
+
+  // ── DiscussionFeed auth (reuses the same auth, getServerUser does upsert internally) ──
+  const feedAuth = await getServerUser().catch(() => null);
 
   return (
     <AccessGate productSlug={domain} courseTitle={content.title}>
@@ -284,6 +290,18 @@ export default async function ProductPortalPage({
             </Link>
           </div>
         </main>
+
+        {/* Community Discussion Feed */}
+        <div className="bg-[#f5f5f7]">
+          <div className="max-w-5xl mx-auto px-6 py-8 md:py-12">
+            <DiscussionFeed
+              productSlug={domain}
+              isAuthenticated={!!feedAuth?.user?.email && !!feedAuth?.dbUser}
+              currentUserId={feedAuth?.dbUser?.id}
+              currentUserImage={feedAuth?.dbUser?.image ?? undefined}
+            />
+          </div>
+        </div>
       </div>
     </AccessGate>
   );
