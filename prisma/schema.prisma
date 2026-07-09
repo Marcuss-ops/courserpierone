@@ -3,9 +3,17 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
+
+// ═══ Connection Pooling ═══════════════════════════════════
+// DATABASE_URL = Pooled connection (pgBouncer, port 6543)
+//   → usa ?pgbouncer=true&connection_limit=3 per serverless Vercel
+// DIRECT_URL   = Direct connection (port 5432, solo per migrations)
+//
+// Supabase: prendi entrambi gli URL da Project Settings → Database
 
 // ─── Prodotti (Libri / Corsi) ───────────────────────────────
 model Product {
