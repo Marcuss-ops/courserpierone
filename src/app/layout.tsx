@@ -68,7 +68,7 @@ export default async function RootLayout({
     <html lang={locale} className={`${playfair.variable} ${inter.variable}`}>
       <body className="bg-white text-gray-900 antialiased min-h-screen flex flex-col">
         <div className="flex-1 flex flex-col">{children}</div>
-        <Footer />
+        <Footer currentLocale={locale} />
         {/* PWA Service Worker registration */}
         <script
           dangerouslySetInnerHTML={{

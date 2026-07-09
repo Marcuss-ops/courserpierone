@@ -11,10 +11,16 @@ import { Globe } from "lucide-react";
  * those are full-screen app views with their own visual identity (dark warm
  * theme) — a light cream footer below them would clash visually.
  *
- * Includes a compact language switcher (9 languages). The cookie is httpOnly
- * (set by middleware), so we can't set it from JS — switching navigates to
- * /{newLocale}/{restPath} and the middleware picks up the locale, sets the
- * cookie, and redirects to the proper path.
+ * The current locale is passed as a prop from the server-rendered root
+ * layout (which reads the httpOnly `locale` cookie). This is necessary
+ * because the URL doesn't always include a locale prefix (e.g. on
+ * /privacy, /terms, /refund, /, /login) — the switcher would otherwise
+ * always show "Italiano" as active on those pages.
+ *
+ * Includes a compact language switcher (9 languages). The cookie is
+ * httpOnly (set by middleware), so we can't set it from JS — switching
+ * navigates to /{newLocale}/{restPath} and the middleware picks up the
+ * locale, sets the cookie, and redirects to the proper path.
  */
 const HIDE_ON_PREFIXES = ["/dashboard", "/admin", "/account", "/uploader", "/auth", "/debug-locale"];
 
@@ -30,9 +36,15 @@ const LANGUAGES = [
   { code: "zh-cn", label: "中文", flag: "🇨🇳" },
 ] as const;
 
-const KNOWN_LOCALES = new Set(LANGUAGES.map((l) => l.code));
+const KNOWN_LOCALES: ReadonlySet<string> = new Set(LANGUAGES.map((l) => l.code));
+const DEFAULT_LOCALE = "it-it";
 
-export function Footer() {
+interface FooterProps {
+  /** Current locale code (e.g. "it-it", "en-us"), read from the cookie by the server layout. */
+  currentLocale?: string;
+}
+
+export function Footer({ currentLocale: cookieLocale }: FooterProps = {}) {
   const pathname = usePathname();
   const isAppRoute = HIDE_ON_PREFIXES.some((p) => pathname.startsWith(p));
   if (isAppRoute) return null;
@@ -43,7 +55,7 @@ export function Footer() {
         {/* Top row: copyright + language switcher */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <small className="text-[13px]">© 2026 Courssy</small>
-          <LanguageSwitcher />
+          <LanguageSwitcher cookieLocale={cookieLocale} />
         </div>
 
         {/* Bottom row: legal links */}
@@ -81,15 +93,24 @@ function FooterLink({
   );
 }
 
-function LanguageSwitcher() {
+function LanguageSwitcher({ cookieLocale }: { cookieLocale?: string }) {
   const pathname = usePathname();
-  // Detect current locale from the first URL segment
+  // Prefer the cookie (read server-side, covers all routes including /privacy / /).
+  // Fall back to URL detection if no cookie is set yet.
+  const fromCookie = cookieLocale && KNOWN_LOCALES.has(cookieLocale) ? cookieLocale : null;
   const firstSegment = pathname.split("/")[1]?.toLowerCase() ?? "";
-  const currentLocale = KNOWN_LOCALES.has(firstSegment) ? firstSegment : "it-it";
+  const fromUrl = firstSegment && KNOWN_LOCALES.has(firstSegment) ? firstSegment : null;
+  const currentLocale = fromCookie ?? fromUrl ?? DEFAULT_LOCALE;
+
   // Rest of the path (without locale prefix). Defaults to "/" for the homepage.
-  const restPath = firstSegment && KNOWN_LOCALES.has(firstSegment)
-    ? pathname.slice(firstSegment.length + 1) || "/"
-    : pathname || "/";
+  let restPath: string;
+  if (fromUrl) {
+    // URL has a locale prefix: /{locale}/{rest}
+    restPath = pathname.slice(firstSegment.length + 1) || "/";
+  } else {
+    // No locale prefix in URL (e.g. /privacy or /). Use full pathname.
+    restPath = pathname || "/";
+  }
 
   function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const newLocale = e.target.value;
