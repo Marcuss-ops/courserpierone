@@ -11,7 +11,7 @@ interface ProfileFormProps {
 export function ProfileForm({ initialName }: ProfileFormProps) {
   const router = useRouter();
   const [name, setName] = useState(initialName);
-  const [originalName] = useState(initialName);
+  const [originalName, setOriginalName] = useState(initialName);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -38,6 +38,8 @@ export function ProfileForm({ initialName }: ProfileFormProps) {
         setError(data.error || "Errore durante il salvataggio");
         return;
       }
+      setOriginalName(trimmed); // reset dirty state so button disables after save
+      setName(trimmed); // normalize field to trimmed value
       setSuccess(true);
       // Refresh server components (header/dashboard) so the new name appears everywhere
       router.refresh();
@@ -51,11 +53,14 @@ export function ProfileForm({ initialName }: ProfileFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6" noValidate>
       <div className="bg-cream-card border border-cream-border rounded-[28px] p-7 shadow-md shadow-black/20 space-y-5">
         {/* Name field */}
         <div className="space-y-2">
-          <label htmlFor="name" className="text-[10px] font-semibold text-cream-text-soft uppercase tracking-widest block">
+          <label
+            htmlFor="name"
+            className="text-[10px] font-semibold text-cream-text-soft uppercase tracking-widest block"
+          >
             Nome Visualizzato
           </label>
           <input
@@ -66,9 +71,14 @@ export function ProfileForm({ initialName }: ProfileFormProps) {
             maxLength={60}
             autoComplete="name"
             placeholder="Il tuo nome"
-            className="w-full px-4 py-3.5 rounded-xl text-[15px] text-cream-text bg-cream-input border border-cream-border focus:outline-none focus:ring-2 focus:ring-cream-gold/40 focus:border-cream-gold transition-all placeholder:text-cream-text-soft/50"
+            aria-invalid={error ? "true" : "false"}
+            aria-describedby={error ? "name-error" : "name-help"}
+            className="w-full px-4 py-3.5 rounded-xl text-[15px] text-cream-text bg-cream-input border border-cream-border focus:outline-none focus:ring-2 focus:ring-cream-gold/40 focus:border-cream-gold transition-all placeholder:text-cream-text-soft/50 aria-[invalid=true]:border-red-300 aria-[invalid=true]:ring-red-200/40"
           />
-          <div className="flex items-center justify-between text-[11px] text-cream-text-soft">
+          <div
+            id="name-help"
+            className="flex items-center justify-between text-[11px] text-cream-text-soft"
+          >
             <span>Come ti vedranno gli admin e i tuoi certificati.</span>
             <span className="tabular-nums">{trimmed.length}/60</span>
           </div>
@@ -76,15 +86,23 @@ export function ProfileForm({ initialName }: ProfileFormProps) {
 
         {/* Error */}
         {error && (
-          <div className="flex items-start gap-2.5 p-3 bg-red-50 border border-red-100 rounded-xl text-[13px] text-red-700">
+          <div
+            id="name-error"
+            role="alert"
+            className="flex items-start gap-2.5 p-3 bg-red-50 border border-red-100 rounded-xl text-[13px] text-red-700"
+          >
             <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
             <p>{error}</p>
           </div>
         )}
 
-        {/* Success */}
+        {/* Success (aria-live for screen readers) */}
         {success && (
-          <div className="flex items-center gap-2.5 p-3 bg-green-50 border border-green-100 rounded-xl text-[13px] text-green-700">
+          <div
+            role="status"
+            aria-live="polite"
+            className="flex items-center gap-2.5 p-3 bg-green-50 border border-green-100 rounded-xl text-[13px] text-green-700"
+          >
             <Check className="w-4 h-4 shrink-0" />
             <p>Nome aggiornato con successo.</p>
           </div>
