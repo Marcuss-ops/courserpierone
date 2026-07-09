@@ -1,44 +1,59 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 /**
- * Global footer shown on every page of the site.
+ * Global footer shown on the public website.
  *
- * - Stays at the bottom of the viewport on short pages (root layout uses
- *   `min-h-screen flex flex-col` so the body fills the viewport).
- * - Uses a warm cream bg + subtle border so it reads correctly on both the
- *   white marketing pages and the dark warm dashboard.
- * - Matches the inline footers that used to live on /privacy /terms /refund
- *   (those have been removed to avoid duplication).
+ * Hidden on app routes (dashboard, admin, account, uploader, auth) because
+ * those are full-screen app views with their own visual identity (dark warm
+ * theme) — a light cream footer below them would clash visually.
+ *
+ * Server components in the app router can't use `usePathname` directly, so
+ * this is a small client component. The hydration cost is negligible.
  */
+const HIDE_ON_PREFIXES = ["/dashboard", "/admin", "/account", "/uploader", "/auth"];
+
 export function Footer() {
+  const pathname = usePathname();
+  const isAppRoute = HIDE_ON_PREFIXES.some((p) => pathname?.startsWith(p));
+  if (isAppRoute) return null;
+
   return (
     <footer className="border-t border-black/[0.08] bg-[#FAFAF8]">
       <div className="max-w-7xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-black/60 font-light">
-        <div>© 2026 Courssy</div>
+        <small className="text-[13px]">© 2026 Courssy</small>
         <nav
           aria-label="Legal"
           className="flex flex-wrap items-center gap-x-5 gap-y-2"
         >
-          <Link
-            href="/privacy"
-            className="hover:text-black hover:underline underline-offset-3 transition-colors"
-          >
-            Privacy Policy
-          </Link>
-          <Link
-            href="/terms"
-            className="hover:text-black hover:underline underline-offset-3 transition-colors"
-          >
-            Terms of Service
-          </Link>
-          <Link
-            href="/refund"
-            className="hover:text-black hover:underline underline-offset-3 transition-colors"
-          >
-            Refund Policy
-          </Link>
+          <FooterLink href="/privacy" label="Privacy Policy" currentPath={pathname} />
+          <FooterLink href="/terms" label="Terms of Service" currentPath={pathname} />
+          <FooterLink href="/refund" label="Refund Policy" currentPath={pathname} />
         </nav>
       </div>
     </footer>
+  );
+}
+
+function FooterLink({
+  href,
+  label,
+  currentPath,
+}: {
+  href: string;
+  label: string;
+  currentPath: string | null;
+}) {
+  const isCurrent = currentPath === href;
+  return (
+    <Link
+      href={href}
+      aria-current={isCurrent ? "page" : undefined}
+      className="hover:text-black hover:underline underline-offset-3 transition-colors"
+    >
+      {label}
+    </Link>
   );
 }
