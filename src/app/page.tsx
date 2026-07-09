@@ -160,14 +160,11 @@ export default async function HomePage() {
         {/* Header */}
         <header className="flex justify-between items-center py-6">
           <Link
-            href="/login"
-            className="flex items-center gap-3 group"
+            href="/"
+            className="group"
           >
-            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-sm transition-all group-hover:shadow-md group-hover:scale-105">
-              <img src="/icon.png" alt="UploaderCourssy Logo" className="w-full h-full object-cover" />
-            </div>
             <span
-              className="font-serif italic text-[28px] leading-none tracking-[-0.2px] group-hover:opacity-70 transition-opacity"
+              className="font-serif italic text-[32px] leading-none tracking-[-0.3px] group-hover:opacity-60 transition-opacity"
               style={{ fontFamily: "var(--font-serif), 'Instrument Serif', serif" }}
             >
               courssy
