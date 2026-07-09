@@ -4,6 +4,7 @@ node_modules/
 .env.local
 .env.*.local
 .env.tmp
+*.env.*.tmp
 *.tsbuildinfo
 next-env.d.ts
 .vercel
@@ -14,3 +15,4 @@ public/courses/*
 !public/courses/.gitkeep
 scripts/translate/__pycache__/
 *.pyc
+scripts/audit/
