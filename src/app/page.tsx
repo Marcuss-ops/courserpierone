@@ -163,11 +163,8 @@ export default async function HomePage() {
             href="/login"
             className="flex items-center gap-3 group"
           >
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xl text-white shadow-sm transition-all group-hover:shadow-md group-hover:scale-105"
-              style={{ background: "linear-gradient(135deg, #1a1a1a 0%, #333 100%)" }}
-            >
-              C
+            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-sm transition-all group-hover:shadow-md group-hover:scale-105">
+              <img src="/icon.png" alt="UploaderCourssy Logo" className="w-full h-full object-cover" />
             </div>
             <span
               className="font-serif italic text-[28px] leading-none tracking-[-0.2px] group-hover:opacity-70 transition-opacity"

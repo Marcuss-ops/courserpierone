@@ -43,8 +43,8 @@ export const metadata: Metadata = {
     description: "Generatore automatico di Funnel e Aree Corsi multilingua",
   },
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
+    icon: "/icon.png",
+    shortcut: "/icon.png",
   },
   manifest: "/manifest.json",
 };

@@ -368,7 +368,6 @@
 - [ ] **Discord community** bridge (notifiche acquisti)
 - [ ] **Google Analytics 4** / Tag Manager
 - [ ] **Facebook Pixel / Meta Ads** (conversion tracking)
-- [ ] **TikTok Pixel** per tracking
 
 ---
 
