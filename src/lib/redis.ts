@@ -1,19 +1,29 @@
 /**
  * redis.ts — Client Redis serverless (Upstash) con graceful fallback.
  *
- * Usa le variabili d'ambiente automaticamente con Redis.fromEnv():
+ * Usa le variabili d'ambiente automaticamente:
  *   UPSTASH_REDIS_REST_URL  — URL REST dell'istanza Upstash
  *   UPSTASH_REDIS_REST_TOKEN — Token di autenticazione
  *
  * Se le variabili non sono configurate (es. in dev locale), tutte le
  * operazioni Redis sono no-op — l'app funziona normalmente senza cache.
+ *
+ * Esporta `getRedis()` per uso condiviso tra i moduli:
+ *   - Caching (cacheGet, cacheSet, cacheDel, cacheWrap)
+ *   - Rate limiting distribuito (rate-limit.ts)
+ *   - Live presence (presence.ts)
+ *   - Health check (/api/health)
  */
 
 import { Redis } from "@upstash/redis";
 
 let _redis: Redis | null | undefined = undefined;
 
-function getRedis(): Redis | null {
+/**
+ * Restituisce l'istanza Redis condivisa (lazy singleton).
+ * Tutti i moduli devono usare questa funzione — non crearne di proprie.
+ */
+export function getRedis(): Redis | null {
   if (_redis !== undefined) return _redis;
 
   const url = process.env.UPSTASH_REDIS_REST_URL;
