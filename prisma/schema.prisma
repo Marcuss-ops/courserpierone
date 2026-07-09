@@ -57,6 +57,8 @@ model Lesson {
   progress     LessonProgress[]
   notes        LessonNote[]
   assets       LessonAsset[]
+
+  @@index([productId])
 }
 
 model LessonTranslation {
@@ -91,7 +93,7 @@ model Order {
 
   @@unique([paymentProvider, providerOrderId])
   @@index([createdAt])
-  @@index([userId])
+  @@index([userId, status])
 }
 
 // ─── Utenti ─────────────────────────────────────────────────
@@ -166,6 +168,8 @@ model LessonProgress {
   lesson Lesson @relation(fields: [lessonId], references: [id])
 
   @@unique([userId, lessonId])
+  @@index([userId, completed])
+  @@index([lessonId])
 }
 
 // ─── Appunti Studenti ──────────────────────────────────────
@@ -211,6 +215,7 @@ model AnalyticEvent {
 
   @@index([eventType, createdAt])
   @@index([productId])
+  @@index([sessionId])
 }
 
 // ─── Sessioni Visitatore (per funnel tracking) ──────────────
