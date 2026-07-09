@@ -337,7 +337,7 @@ async function ContinueAndCertificatesSection({
           id: true,
           position: true,
           product: { select: { slug: true, defaultLanguage: true } },
-          translations: { take: 1, select: { title: true, locale: true } },
+          translations: { take: 1, orderBy: { id: "desc" }, select: { title: true, locale: true } },
         },
       },
     },
