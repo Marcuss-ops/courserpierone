@@ -81,7 +81,8 @@ function FooterLink({
   label: string;
   currentPath: string;
 }) {
-  const isCurrent = currentPath === href;
+  // Match exact path OR a localized variant like /en-us/privacy
+  const isCurrent = currentPath === href || currentPath.endsWith(href);
   return (
     <Link
       href={href}
