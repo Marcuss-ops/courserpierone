@@ -8,6 +8,7 @@ import { StatsBento } from "@/components/dashboard/stats-bento";
 import { CourseCard } from "@/components/dashboard/course-card";
 import { DashboardEmptyState } from "@/components/dashboard/empty-state";
 import { CertificatesShowcase } from "@/components/dashboard/certificates-showcase";
+import { PWAInstallBanner } from "@/components/pwa-install-banner";
 
 interface ProductProgress {
   productId: string;
@@ -330,6 +331,7 @@ export default async function DashboardPage() {
         {/* Certificates */}
         <CertificatesShowcase certificates={completedProductIds} />
       </main>
+      <PWAInstallBanner />
     </div>
   );
 }

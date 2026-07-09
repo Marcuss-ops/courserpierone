@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offline — Courssy</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Inter", system-ui, sans-serif;
+      background: #1A1208;
+      color: #F5E6D3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .container {
+      text-align: center;
+      max-width: 400px;
+    }
+    .icon {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 24px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #1a1a1a 0%, #444 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: bold;
+      color: white;
+    }
+    h1 {
+      font-family: "Instrument Serif", Georgia, serif;
+      font-size: 28px;
+      margin-bottom: 8px;
+      color: #F5E6D3;
+    }
+    p {
+      font-size: 14px;
+      color: #8E7C6B;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 12px 28px;
+      border: 1px solid rgba(255, 140, 66, 0.3);
+      border-radius: 14px;
+      color: #FF8C42;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      background: rgba(255, 140, 66, 0.08);
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      background: rgba(255, 140, 66, 0.15);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">C</div>
+    <h1>Sei offline</h1>
+    <p>Non hai connessione internet. Alcune pagine che hai già visitato potrebbero essere ancora disponibili.</p>
+    <a href="/" class="btn">Riprova</a>
+  </div>
+</body>
+</html>
