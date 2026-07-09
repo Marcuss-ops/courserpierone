@@ -30,7 +30,12 @@ export const ENV_DEFINITIONS: EnvVarDef[] = [
   {
     key: "DATABASE_URL",
     category: "critical",
-    description: "PostgreSQL connection string per Prisma",
+    description: "PostgreSQL connection string per Prisma (pooled, pgBouncer port 6543 per serverless)",
+  },
+  {
+    key: "DIRECT_URL",
+    category: "optional",
+    description: "PostgreSQL direct connection per Prisma migrations (non-pooled, port 5432). Opzionale — se non impostato, Prisma usa DATABASE_URL anche per le migrations.",
   },
   {
     key: "SUPABASE_URL",
