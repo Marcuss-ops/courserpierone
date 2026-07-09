@@ -9,6 +9,7 @@ import { CourseCard } from "@/components/dashboard/course-card";
 import { DashboardEmptyState } from "@/components/dashboard/empty-state";
 import { CertificatesShowcase } from "@/components/dashboard/certificates-showcase";
 import { PWAInstallBanner } from "@/components/pwa-install-banner";
+import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 
 interface ProductProgress {
   productId: string;
@@ -332,6 +333,7 @@ export default async function DashboardPage() {
         <CertificatesShowcase certificates={completedProductIds} />
       </main>
       <PWAInstallBanner />
+      <MobileBottomNav />
     </div>
   );
 }
