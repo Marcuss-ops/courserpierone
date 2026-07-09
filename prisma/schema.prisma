@@ -29,7 +29,6 @@ model Product {
   lessons            Lesson[]
   orders             Order[]
   abandonedCheckouts AbandonedCheckout[]
-  discussionPosts    DiscussionPost[]
   messages           Message[]
 }
 
@@ -112,10 +111,6 @@ model User {
   orders             Order[]
   accounts           Account[]
   sessions           Session[]
-  discussionPosts    DiscussionPost[]
-  discussionComments DiscussionComment[]
-  discussionLikes    DiscussionLike[]
-  notifications      Notification[]
   sentMessages       Message[]      @relation("SentMessages")
   receivedMessages   Message[]      @relation("ReceivedMessages")
 }
@@ -351,77 +346,6 @@ model LandingTranslation {
   updatedAt       DateTime @updatedAt
 
   @@unique([slug, locale])
-}
-
-// ─── Community Feed: Post ──────────────────────────────────
-model DiscussionPost {
-  id        String   @id @default(cuid())
-  productId String
-  userId    String
-  title     String
-  content   String   @db.Text
-  pinned    Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  product  Product              @relation(fields: [productId], references: [id], onDelete: Cascade)
-  user     User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  comments DiscussionComment[]
-  likes    DiscussionLike[]
-
-  @@index([productId, createdAt])
-  @@index([userId])
-}
-
-// ─── Community Feed: Commento ──────────────────────────────
-model DiscussionComment {
-  id        String   @id @default(cuid())
-  postId    String
-  userId    String
-  content   String   @db.Text
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  post  DiscussionPost   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  likes DiscussionLike[]
-
-  @@index([postId, createdAt])
-  @@index([userId])
-}
-
-// ─── Community Feed: Like (post o commento) ────────────────
-model DiscussionLike {
-  id        String   @id @default(cuid())
-  userId    String
-  postId    String?
-  commentId String?
-  createdAt DateTime @default(now())
-
-  user    User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  post    DiscussionPost?    @relation(fields: [postId], references: [id], onDelete: Cascade)
-  comment DiscussionComment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, postId])
-  @@unique([userId, commentId])
-  @@index([postId])
-  @@index([commentId])
-}
-
-// ─── Notifiche Utente ──────────────────────────────────────
-model Notification {
-  id        String   @id @default(cuid())
-  userId    String
-  type      String // new_comment | new_like | new_post | post_pinned | reply
-  message   String
-  read      Boolean  @default(false)
-  link      String?  // URL a cui navigare (es. /product/discussions/123)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, read, createdAt])
 }
 
 // ─── Direct Messages tra studente e creator ────────────────

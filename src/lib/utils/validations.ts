@@ -73,13 +73,3 @@ export function validationErrorResponse(errors: { field: string; message: string
   );
 }
 
-// ─── Community Feed ───────────────────────────────────────
-export const createDiscussionPostSchema = z.object({
-  title: z.string().trim().min(1, "Titolo richiesto").max(200, "Titolo troppo lungo"),
-  content: z.string().trim().min(1, "Contenuto richiesto").max(10000, "Contenuto troppo lungo"),
-  pinned: z.boolean().optional().default(false),
-});
-
-export const createDiscussionCommentSchema = z.object({
-  content: z.string().trim().min(1, "Commento richiesto").max(5000, "Commento troppo lungo"),
-});
