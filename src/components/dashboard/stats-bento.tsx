@@ -11,8 +11,8 @@ interface StatsBentoProps {
 export function StatsBento({ courseCount, completedLessons, totalLessons, progressPercent }: StatsBentoProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-5">
-      {/* Main progress card - spans 2 cols on md+ */}
-      <div className="md:col-span-2 relative overflow-hidden bg-cream-card border border-cream-border rounded-[28px] p-7 shadow-sm hover:shadow-md transition-shadow duration-300">
+      {/* Main progress card — cream on dark, high contrast */}
+      <div className="md:col-span-2 relative overflow-hidden bg-cream-card border border-cream-border rounded-[28px] p-7 shadow-md shadow-black/20 hover:shadow-lg hover:shadow-black/30 transition-shadow duration-300">
         <div className="flex items-start justify-between mb-6">
           <div>
             <p className="text-[10px] font-semibold text-cream-text-soft uppercase tracking-widest mb-2">
@@ -44,8 +44,8 @@ export function StatsBento({ courseCount, completedLessons, totalLessons, progre
         </div>
       </div>
 
-      {/* Courses stat */}
-      <div className="bg-cream-card border border-cream-border rounded-[28px] p-7 shadow-sm hover:shadow-md transition-shadow duration-300">
+      {/* Courses stat — cream card */}
+      <div className="bg-cream-card border border-cream-border rounded-[28px] p-7 shadow-md shadow-black/20 hover:shadow-lg hover:shadow-black/30 transition-shadow duration-300">
         <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#FFF0E5] to-[#FFD9B8] flex items-center justify-center mb-6 shadow-sm">
           <BookOpen className="w-5 h-5 text-cream-orange" />
         </div>

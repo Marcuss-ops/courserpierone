@@ -35,7 +35,7 @@ export function CourseCard({
   return (
     <Link
       href={href}
-      className="group flex flex-col bg-cream-card border border-cream-border rounded-[24px] overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream-gold focus-visible:ring-offset-2 focus-visible:ring-offset-cream-bg"
+      className="group flex flex-col bg-cream-card border border-cream-border rounded-[24px] overflow-hidden shadow-md shadow-black/20 hover:shadow-xl hover:shadow-black/40 hover:-translate-y-1 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream-dark-gold focus-visible:ring-offset-2 focus-visible:ring-offset-cream-dark-bg"
     >
       <div className="aspect-[3/2] bg-gradient-to-br from-[#FFF9F0] to-[#F5E6D3] relative overflow-hidden">
         {coverUrl ? (
@@ -51,12 +51,12 @@ export function CourseCard({
           </div>
         )}
         {isCompleted && (
-          <div className="absolute top-4 right-4 px-3 py-1.5 bg-[#1B5E20] text-white text-[10px] font-semibold rounded-full uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+          <div className="absolute top-4 right-4 px-3 py-1.5 bg-[#1B5E20] text-white text-[10px] font-semibold rounded-full uppercase tracking-wider flex items-center gap-1.5 shadow-md">
             <span className="w-1.5 h-1.5 bg-white rounded-full" />
             Completato
           </div>
         )}
-        <div className="absolute bottom-4 left-4 flex items-center gap-1.5 px-3 py-1.5 bg-cream-card/95 backdrop-blur rounded-full shadow-sm">
+        <div className="absolute bottom-4 left-4 flex items-center gap-1.5 px-3 py-1.5 bg-cream-card/95 backdrop-blur rounded-full shadow-md">
           <Play className="w-3 h-3 text-cream-espresso fill-cream-espresso" />
           <span className="text-[10px] font-semibold text-cream-text">
             {lessonCount} lezioni
