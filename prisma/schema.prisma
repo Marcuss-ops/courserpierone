@@ -21,6 +21,7 @@ model Product {
   status           String   @default("draft") // draft | published | archived
   pricesByCurrency String? // JSON: { "USD": { "price": 5500, "symbol": "$", "stripePriceId": "...", "lemonVariantId": "..." }, ... }
   countryOverrides String? // JSON: { "BR": { "currency": "BRL", "price": 9900, "symbol": "R$", "lemonVariantId": "123456" }, ... }
+  defaultLanguage  String   @default("it") // Lingua default prodotto (per resume locale / content fallback)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -310,8 +311,6 @@ model AbandonedCheckout {
   @@index([status, createdAt])
   @@index([email])
 }
-
-// ─── Magic Links (removed — use Supabase Auth sessions) ─────
 
 // ─── Traduzioni Landing Pages (DB condiviso per tutti i siti) ─
 // Una tabella unica per memorizzare le traduzioni di TUTTE le landing page
