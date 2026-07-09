@@ -271,6 +271,72 @@ il template selezionato, le lezioni e il pulsante di acquisto.
 
 ---
 
+## ⚠️ Database Migrations (Vercel + Supabase)
+
+**Regola critica**: NON aggiungere `"postbuild": "prisma migrate deploy"` in `package.json`.
+
+Se lo fai, ogni build su Vercel resterà **infinite in "Building"** senza errori e senza log.
+Poi dovrai cancellare il deploy stuck con `vercel rm <full-url> --yes` e ritriggerare.
+
+### Perché
+
+Vercel esegue i build su infrastruttura **IPv4-only**. Supabase ha disabilitato
+IPv4 sulle connessioni dirette free-tier — l'host che Prisma usa di default
+è ora IPv6. Quando `prisma migrate deploy` parte in `postbuild`, il TCP
+handshake verso Supabase viene scartato silenziosamente → **TCP hang →
+build apparentemente attivo per ore senza progresso**.
+
+### Workflow corretto
+
+**Prima di ogni push che include modifiche a `prisma/schema.prisma`:**
+
+1. **Localmente** (la tua macchina ha sia IPv4 che IPv6 → funziona):
+   ```bash
+   npx prisma migrate dev --name <nome_descrittivo>
+   # crea prisma/migrations/<timestamp>_<nome>/migration.sql
+   npx prisma migrate deploy
+   # applica al DB production usando il tuo DATABASE_URL locale
+   ```
+2. **Poi** committa e pusha normalmente:
+   ```bash
+   git add prisma/
+   git commit -m "feat(db): <descrizione>"
+   git push
+   ```
+3. Vercel triggera il deploy **senza** applicare migrations
+   (`postbuild` non esiste più in `package.json`).
+
+### Alternativa (futuro): GitHub Actions
+
+Per automatizzare le migrations in CI:
+
+- Crea `.github/workflows/db-migrate.yml`
+- I runner GitHub Actions hanno IPv6 → possono raggiungere Supabase
+- Step: `npx prisma migrate deploy` con `DATABASE_URL` da GitHub Secrets
+
+### ⚠️ Pro tip: `DATABASE_URL` deve puntare al DB di produzione
+
+Per applicare le migrations al DB di **produzione**, il `DATABASE_URL` nel
+tuo `.env` locale deve puntare al DB remoto (Supabase / Neon / altro)
+**e non a localhost**. Altrimenti `migrate deploy` applica al DB sbagliato.
+
+Usa la string di connessione **direct** (porta `5432`) con un URL
+IPv4-capable dal progetto Supabase. I **pooler (porta `6543`)** non
+supportano `migrate deploy` — Prisma ha bisogno di lock e session
+features che PgBouncer in transaction-mode non espone.
+
+### TL;DR
+
+| Step | Comando |
+|---|---|
+| Modifica schema | edit `prisma/schema.prisma` |
+| Crea migration | localmente: `npx prisma migrate dev --name <name>` |
+| Applica a prod | localmente: `npx prisma migrate deploy` |
+| Push codice | `git add . && git commit && git push` |
+| Build Vercel | solo build (no migrations) |
+
+---
+
 ## Next.js Image Domains
 
 Le immagini remote caricate con il componente `next/image`
