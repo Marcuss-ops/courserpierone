@@ -21,7 +21,6 @@
 ```ts
 import {
   checkoutSchema,
-  magicLinkSchema,
   createProductSchema,
   translateSchema,
   analyticsEventSchema,
@@ -36,7 +35,6 @@ Tutti gli schemi Zod usano `z.object()` e supportano parsing con messaggi di err
 | Schema | Rotta |
 |---|---|
 | `checkoutSchema` | `POST /api/checkout` |
-| `magicLinkSchema` | `POST /api/magic-link` |
 | `createProductSchema` | `POST /api/products` |
 | `translateSchema` | `POST /api/translate` |
 | `analyticsEventSchema` | `POST /api/analytics` |

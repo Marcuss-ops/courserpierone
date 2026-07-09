@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 /**
- * Supabase Auth Callback — gestisce il redirect dopo OAuth (Google) o Magic Link.
+ * Supabase Auth Callback — gestisce il redirect dopo OAuth (Google).
  *
  * Behavior:
  *   1. Se arrivano ?code= e ?next=, scambia il code con una sessione

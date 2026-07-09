@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "npm run validate:locales && npm run generate:locales && next build",
+    "postbuild": "prisma migrate deploy",
     "start": "next start",
     "lint": "tsc --noEmit && eslint src/",
     "lint:eslint": "eslint src/ --fix",

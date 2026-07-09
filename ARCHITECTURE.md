@@ -53,7 +53,7 @@
 
 ### 4. Accesso & Utenti
 
-- **Auth**: NextAuth.js (Google, Email magic link)
+- **Auth**: Supabase Auth (Google OAuth)
 - **Ruoli**: Admin, Creator, Student
 - **Dashboard utente**: Lista acquisti, download PDF, progresso corsi
 - **Area admin**: Gestione prodotti, ordini, analytics

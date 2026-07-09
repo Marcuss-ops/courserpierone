@@ -18,7 +18,7 @@
 | **API** | tRPC (o REST se preferito) | Type safety end-to-end |
 | **ORM** | Prisma | Migration, type safety, DX |
 | **Database** | PostgreSQL | Robusto, JSON support, locale |
-| **Auth** | NextAuth.js | Google, magic link, sessioni |
+| **Auth** | Supabase Auth | Google OAuth, sessioni |
 
 ## Pagamenti
 

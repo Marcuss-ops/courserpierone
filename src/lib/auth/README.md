@@ -1,6 +1,8 @@
 # `auth/` — NextAuth Configuration
 
-> Autenticazione: Magic Link (email) + Google OAuth + JWT sessions.
+> Autenticazione: Google OAuth + Supabase Auth sessions.
+
+_(Legacy: questo README descrive la vecchia config NextAuth. La migration a Supabase Auth è il riferimento attuale.)_
 
 ## File
 
@@ -16,7 +18,7 @@ import { authOptions } from "@/lib/auth/auth";
 
 ## Providers
 
-- **Email** — Magic link via SMTP (`EMAIL_SERVER_*` env vars)
+- **Email** — (rimosso, vedi Supabase Auth)
 - **Google OAuth** — (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`)
 - **Session** — JWT strategy (no DB session table)
 

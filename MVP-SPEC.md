@@ -47,7 +47,6 @@ Il MVP è un sito web in 3 lingue (Italiano, Inglese, Spagnolo) che vende un sin
 - Navigazione lezioni precedente/successiva
 
 ### 6. Auth (`/{locale}/login`, `/api/auth/*`)
-- Magic link email
 - Google OAuth
 - Sessione gestita da NextAuth
 
@@ -216,7 +215,7 @@ STRIPE_PRICE_GBP=price_...
 - [ ] Setup progetto Next.js + TypeScript + Tailwind
 - [ ] Configurare Prisma + database PostgreSQL
 - [ ] Implementare sistema i18n con next-intl
-- [ ] Setup NextAuth (magic link + Google)
+- [ ] Setup Supabase Auth (Google OAuth)
 - [ ] Creare schema database
 - [ ] Admin panel: CRUD prodotti e lezioni
 - [ ] Pubblica prodotti con traduzioni

@@ -9,7 +9,7 @@ app/
 ├── admin/              # Pannello admin (products, orders, users)
 ├── api/                # API routes (tutte le integrazioni)
 ├── dashboard/          # Area riservata utente
-├── login/              # Autenticazione (magic link + Google)
+├── login/              # Autenticazione (Google)
 ├── [locale]/[domain]/  # Landing page funnel per locale (dinamico)
 ├── privacy/            # Pagina privacy policy
 ├── terms/              # Pagina termini e condizioni
@@ -42,13 +42,11 @@ Il middleware risolve il locale e passa la richiesta alla route corretta.
 | `api/analytics` | Registrazione eventi |
 | `api/analytics/dashboard` | Dashboard analytics |
 | `api/auth/[...nextauth]` | NextAuth handler |
-| `api/auth/verify-magic-link` | Verifica magic link |
 | `api/certificate/[productId]` | Genera certificato |
 | `api/checkout` | Crea sessione Stripe/LS |
 | `api/cron/abandoned-checkouts` | Cron: recupero carrelli abbandonati |
 | `api/ebook/[slug]/download` | Download ebook PDF |
 | `api/lessons/[lessonId]/assets` | Assets per lezione |
-| `api/magic-link` | Richiesta magic link |
 | `api/notes` | CRUD note utente |
 | `api/products` | CRUD prodotti |
 | `api/progress` | Tracciamento progresso lezioni |

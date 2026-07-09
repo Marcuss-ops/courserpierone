@@ -39,8 +39,7 @@ export interface ProcessOrderInput {
  * 2. Resolve product via productId / slug / variantId / stripePriceId
  * 3. Idempotency check (skip if order already exists)
  * 4. Create order
- * 5. Generate magic link for passwordless access
- * 6. Send purchase confirmation email
+ * 5. Send purchase confirmation email
  * 7. Track analytics purchase event
  */
 export async function processOrder(input: ProcessOrderInput): Promise<void> {
@@ -145,7 +144,7 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-  // ── 6. Build email links (require auth — no magic-link tokens) ─────
+  // ── 6. Build email links (require auth) ─────
   // Users must log in to access their course and download the ebook.
   // The email directs them to the course portal (which redirects to login
   // if not authenticated) and the dashboard (for ebook downloads).

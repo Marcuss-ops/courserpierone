@@ -8,7 +8,7 @@
 - [ ] Setup Next.js + TypeScript + Tailwind
 - [ ] Database schema (Prisma + PostgreSQL)
 - [ ] Sistema i18n base (3 lingue: IT, EN, ES)
-- [ ] Autenticazione (NextAuth — magic link + Google)
+- [ ] Autenticazione (Google OAuth via Supabase)
 - [ ] Layout base responsive
 
 ### Settimana 3: Prodotti & Contenuti

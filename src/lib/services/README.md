@@ -7,7 +7,7 @@
 | File | Descrizione |
 |---|---|
 | `order-service.ts` | Elaborazione ordini (crea/aggiorna Order + UserProduct + accesso) |
-| `email.ts` | Email transazionali localizzate (acquisto, abbandono, magic link) |
+| `email.ts` | Email transazionali localizzate (acquisto, abbandono) |
 
 ---
 
@@ -53,7 +53,6 @@ await processOrder({
 import {
   sendPurchaseConfirmation,
   sendAbandonedCheckoutEmail,
-  sendMagicLinkEmail,
 } from "@/lib/services/email";
 ```
 
@@ -64,10 +63,6 @@ Email conferma acquisto — locale-aware con 7 lingue.
 ### `sendAbandonedCheckoutEmail(email, product, checkoutUrl, locale?)`
 
 Email recupero carrello abbandonato — locale-aware.
-
-### `sendMagicLinkEmail(email, magicUrl, productName?, locale?)`
-
-Email con link di accesso magico — locale-aware.
 
 ### Lingue supportate
 

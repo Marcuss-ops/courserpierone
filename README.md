@@ -59,7 +59,7 @@ Tutte le variabili sono documentate in `.env.example`. Ecco un riepilogo:
 | `OPENAI_API_KEY` | ❌ | Solo per traduzioni automatiche |
 | `GOOGLE_CLIENT_ID` | ❌ | Solo per login con Google |
 | `GOOGLE_CLIENT_SECRET` | ❌ | Solo per login con Google |
-| `EMAIL_SERVER_HOST` | ❌ | SMTP host (solo magic link) |
+| `EMAIL_SERVER_HOST` | ❌ | SMTP host (email transazionali) |
 | `EMAIL_SERVER_PORT` | ❌ | SMTP port |
 | `EMAIL_SERVER_USER` | ❌ | SMTP username |
 | `EMAIL_SERVER_PASSWORD` | ❌ | SMTP password |
@@ -132,15 +132,14 @@ ma l'app funziona comunque.
 3. Configura l'URI di redirect: `http://localhost:3000/api/auth/callback/google`
 4. Copia Client ID e Client Secret nel `.env`
 
-Se non configurato, gli utenti potranno comunque accedere via Magic Link.
+Se non configurato, l'invio delle email transazionali viene loggato nei log del terminale.
 
 ---
 
-## Email (Magic Link)
+## Email (Transazionali)
 
-Il sistema di Magic Link usa SMTP per inviare le email.
-Se non configuri SMTP, puoi testare la funzionalità mock controllando
-il terminale: l'app stampa il link magico nei log.
+Il sistema email transazionale usa SMTP.
+Se non configuri SMTP, le email vengono loggate nei log del terminale (utile in dev).
 
 Provider consigliati:
 
@@ -323,12 +322,11 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
 # al segreto che Stripe CLI stampa al primo avvio
 ```
 
-### Magic Link non funziona
+### Email transazionali non funzionano
 
 - `NEXT_PUBLIC_APP_URL` deve essere impostato (anche a `http://localhost:3000`)
-- Se `EMAIL_SERVER_HOST` non è configurato, il magic link viene stampato
-  nei log del terminale invece che spedito via email (utile per debug locale)
-- Il link scade dopo 24 ore (modifica `expiresIn` in `src/app/api/magic-link/route.ts`)
+- Se `EMAIL_SERVER_HOST` non è configurato, le email vengono loggate nei log
+  del terminale invece che spedite (utile per debug locale)
 
 ### Build fallisce con errori TypeScript
 
@@ -344,10 +342,10 @@ npx prisma generate  # rigenera i tipi Prisma
 
 ### "Non riesco a vedere il corso dopo l'acquisto"
 
-1. Vai su `/login` e inserisci la tua email
-2. Controlla il terminale per il magic link (se SMTP non configurato)
-3. Clicca il link → vieni reindirizzato al corso
-4. Il token ti dà accesso fino a che non lo usi (poi viene consumato)
+1. Vai su `/login` e accedi con Google
+2. Verifica che l'email dell'ordine corrisponda a quella del login
+3. Dopo il login vieni reindirizzato al corso acquistato
+4. Se l'accesso non si attiva, controlla i webhook del provider di pagamento
 
 ---
 

@@ -196,10 +196,6 @@ describe("@/lib/services — barrel re-exports", () => {
     expect(typeof mod.sendAbandonedCheckoutEmail).toBe("function");
   });
 
-  it("sendMagicLinkEmail removed (use Supabase Auth)", async () => {
-    const mod = await import("@/lib/services");
-    expect(mod.sendMagicLinkEmail).toBeUndefined();
-  });
 });
 
 // ─── @/lib/utils ────────────────────────────────────────────
@@ -238,11 +234,6 @@ describe("@/lib/utils — barrel re-exports", () => {
     const mod = await import("@/lib/utils");
     expect(mod.analyticsEventSchema).toBeDefined();
     expect(typeof mod.analyticsEventSchema.safeParse).toBe("function");
-  });
-
-  it("magicLinkSchema removed (use Supabase Auth)", async () => {
-    const mod = await import("@/lib/utils");
-    expect(mod.magicLinkSchema).toBeUndefined();
   });
 
   it("exports checkoutSchema", async () => {

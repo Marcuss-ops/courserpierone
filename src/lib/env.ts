@@ -55,7 +55,7 @@ export const ENV_DEFINITIONS: EnvVarDef[] = [
   {
     key: "NEXT_PUBLIC_APP_URL",
     category: "critical",
-    description: "URL pubblico (usato per redirect, email, magic link)",
+    description: "URL pubblico (usato per redirect, email)",
     defaultValue: "http://localhost:3000",
   },
 
@@ -75,7 +75,7 @@ export const ENV_DEFINITIONS: EnvVarDef[] = [
   {
     key: "EMAIL_SERVER_HOST",
     category: "required",
-    description: "SMTP host per invio email (magic link, conferme acquisto)",
+    description: "SMTP host per invio email (conferme acquisto)",
     defaultValue: "smtp.gmail.com",
   },
   {

@@ -61,9 +61,6 @@ CREATE POLICY "deny_all_YouTubeChannel" ON "YouTubeChannel" FOR ALL USING (false
 ALTER TABLE "AbandonedCheckout" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "deny_all_AbandonedCheckout" ON "AbandonedCheckout" FOR ALL USING (false);
 
-ALTER TABLE "MagicLink" ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "deny_all_MagicLink" ON "MagicLink" FOR ALL USING (false);
-
 ALTER TABLE "LandingTranslation" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "deny_all_LandingTranslation" ON "LandingTranslation" FOR ALL USING (false);
 

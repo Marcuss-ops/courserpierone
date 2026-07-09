@@ -19,8 +19,6 @@ export const analyticsEventSchema = z.object({
   sessionId: z.string().optional(),
 });
 
-// ─── Magic Link (removed — use Supabase Auth sessions) ─────
-
 // ─── Checkout ──────────────────────────────────────────────
 export const checkoutSchema = z.object({
   productId: z.string().min(1, "ID prodotto richiesto"),

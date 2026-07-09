@@ -55,8 +55,6 @@ describe("analyticsEventSchema", () => {
   });
 });
 
-// ─── Magic Link Schema (removed — use Supabase Auth) ────────
-
 // ─── Checkout Schema ────────────────────────────────────────
 describe("checkoutSchema", () => {
   it("accepts valid checkout data with defaults", () => {

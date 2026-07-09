@@ -20,7 +20,6 @@
 ### 🔴 Email transazionali localizzate
 - [x] Purchase confirmation (IT/EN/FR/DE/ES/PT/JA)
 - [x] Abandoned checkout recovery (IT/EN/FR/DE/ES)
-- [x] Magic link email (IT/EN)
 - [ ] **Email di benvenuto** con credenziali e link al corso
 - [ ] **Email di upsell** (24h dopo acquisto: "Potrebbe interessarti anche...")
 - [ ] **Email di re-engagement** (30gg senza accesso: "Il corso ti aspetta")
@@ -112,8 +111,7 @@
   - Chi non ha comprato → vede CTA "Acquista Ora"
 
 ### 🟡 Auth & Sicurezza
-- [ ] **Magic link** con reindirizzamento alla pagina originale
-- [ ] **Reset password** (oltre magic link)
+- [ ] **Reset password**
 - [ ] **2FA** per utenti admin
 - [ ] **Rate limiting** su login e checkout API
 - [ ] **Session management** (vedi sessioni attive, revoca)
