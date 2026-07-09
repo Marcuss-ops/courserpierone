@@ -106,6 +106,10 @@ export function DiscussionFeed({
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const [likeCounts, setLikeCounts] = useState<Record<string, number>>({});
 
+  // Liked comments (optimistic, keyed by comment ID)
+  const [likedComments, setLikedComments] = useState<Set<string>>(new Set());
+  const [commentLikeCounts, setCommentLikeCounts] = useState<Record<string, number>>({});
+
   // Abort controller for comment fetches
   const [, setCommentAbort] = useState<Record<string, AbortController>>({});
 
@@ -135,7 +139,7 @@ export function DiscussionFeed({
   }, [productSlug]);
 
   useEffect(() => {
-    fetchPosts();
+    void fetchPosts();
   }, [fetchPosts]);
 
   // ── Create post ────────────────────────────────────────
@@ -228,6 +232,44 @@ export function DiscussionFeed({
       alert(e.message || "Errore nell'invio del commento");
     } finally {
       setReplySubmitting((prev) => ({ ...prev, [postId]: false }));
+    }
+  };
+
+  // ── Toggle comment like ────────────────────────────────
+  const toggleCommentLike = async (commentId: string) => {
+    const wasLiked = likedComments.has(commentId);
+    // Optimistic update
+    setLikedComments((prev) => {
+      const next = new Set(prev);
+      if (wasLiked) { next.delete(commentId); } else { next.add(commentId); }
+      return next;
+    });
+    setCommentLikeCounts((prev) => ({
+      ...prev,
+      [commentId]: (prev[commentId] ?? 0) + (wasLiked ? -1 : 1),
+    }));
+    try {
+      const res = await fetch(`/api/discussions/comments/${commentId}/like`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok || !data.liked) {
+        // Revert on server disagreement
+        setLikedComments((prev) => {
+          const next = new Set(prev);
+          if (data.liked) { next.add(commentId); } else { next.delete(commentId); }
+          return next;
+        });
+      }
+    } catch {
+      // Revert optimistic
+      setLikedComments((prev) => {
+        const next = new Set(prev);
+        if (wasLiked) { next.add(commentId); } else { next.delete(commentId); }
+        return next;
+      });
+      setCommentLikeCounts((prev) => ({
+        ...prev,
+        [commentId]: (prev[commentId] ?? 0) + (wasLiked ? 1 : -1),
+      }));
     }
   };
 
@@ -515,6 +557,22 @@ export function DiscussionFeed({
                               <p className="text-sm text-cream-dark-text-soft mt-0.5 whitespace-pre-line">
                                 {comment.content}
                               </p>
+                              {/* Comment like button */}
+                              <button
+                                type="button"
+                                onClick={() => toggleCommentLike(comment.id)}
+                                disabled={!isAuthenticated}
+                                className={`inline-flex items-center gap-1 mt-1.5 text-[10px] font-medium transition-all ${
+                                  likedComments.has(comment.id)
+                                    ? "text-red-400"
+                                    : "text-cream-dark-text-soft hover:text-red-400"
+                                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                              >
+                                <Heart className={`w-3 h-3 ${likedComments.has(comment.id) ? "fill-current" : ""}`} />
+                                {(commentLikeCounts[comment.id] ?? comment._count.likes) > 0 && (
+                                  <span>{commentLikeCounts[comment.id] ?? comment._count.likes}</span>
+                                )}
+                              </button>
                             </div>
                           </div>
                         ))}
@@ -582,21 +640,17 @@ export function DiscussionFeed({
                 <button
                   key={p}
                   onClick={() => {
-                    void (async () => {
-                      setLoading(true);
-                      try {
-                        const res = await fetch(
-                          `/api/discussions/${productSlug}?page=${p}&limit=20`
-                        );
-                        const data = await res.json();
+                    setLoading(true);
+                    fetch(`/api/discussions/${productSlug}?page=${p}&limit=20`)
+                      .then((res) => res.json())
+                      .then((data) => {
                         setPosts(data.posts);
                         setPagination(data.pagination);
-                      } catch {
+                      })
+                      .catch(() => {
                         // keep current state
-                      } finally {
-                        setLoading(false);
-                      }
-                    })();
+                      })
+                      .finally(() => setLoading(false));
                   }}
                   className={`w-9 h-9 rounded-lg text-xs font-semibold transition-all ${
                     p === pagination.page
