@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BookOpen, MessageSquare } from "lucide-react";
+import { Home, BookOpen } from "lucide-react";
 
 interface Tab {
   label: string;
@@ -12,19 +12,17 @@ interface Tab {
 
 /**
  * MobileBottomNav — Bottom tab navigation visibile solo su mobile (< 768px).
- * Mostra 4 tab: Home, Corsi, Community, Profilo.
+ * Essential tabs: Home, Corsi.
  */
 export function MobileBottomNav() {
   const pathname = usePathname();
 
   const tabs: Tab[] = [
     { label: "Home", href: "/", icon: Home },
-    { label: "Dashboard", href: "/dashboard", icon: BookOpen },
-    { label: "Notifiche", href: "/notifications", icon: MessageSquare },
+    { label: "Corsi", href: "/dashboard", icon: BookOpen },
   ];
 
   const isActive = (href: string) => {
-    if (href === "/notifications") return pathname === href || pathname.startsWith(href);
     if (href === "/") return pathname === "/";
     return pathname === href || pathname.startsWith(href);
   };
