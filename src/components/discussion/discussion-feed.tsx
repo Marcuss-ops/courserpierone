@@ -237,7 +237,7 @@ export function DiscussionFeed({
     // Optimistic update
     setLikedPosts((prev) => {
       const next = new Set(prev);
-      wasLiked ? next.delete(postId) : next.add(postId);
+      if (wasLiked) { next.delete(postId); } else { next.add(postId); }
       return next;
     });
     setLikeCounts((prev) => ({
@@ -250,17 +250,17 @@ export function DiscussionFeed({
           // Revert on server disagreement
           setLikedPosts((prev) => {
             const next = new Set(prev);
-            data.liked ? next.add(postId) : next.delete(postId);
+            if (data.liked) { next.add(postId); } else { next.delete(postId); }
             return next;
           });
           // Re-fetch to sync counts
-          fetchPosts();
+          void fetchPosts();
         }
     } catch {
       // Revert optimistic
       setLikedPosts((prev) => {
         const next = new Set(prev);
-        wasLiked ? next.add(postId) : next.delete(postId);
+        if (wasLiked) { next.add(postId); } else { next.delete(postId); }
         return next;
       });
       setLikeCounts((prev) => ({
@@ -581,20 +581,22 @@ export function DiscussionFeed({
               {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((p) => (
                 <button
                   key={p}
-                  onClick={async () => {
-                    setLoading(true);
-                    try {
-                      const res = await fetch(
-                        `/api/discussions/${productSlug}?page=${p}&limit=20`
-                      );
-                      const data = await res.json();
-                      setPosts(data.posts);
-                      setPagination(data.pagination);
-                    } catch {
-                      // keep current state
-                    } finally {
-                      setLoading(false);
-                    }
+                  onClick={() => {
+                    void (async () => {
+                      setLoading(true);
+                      try {
+                        const res = await fetch(
+                          `/api/discussions/${productSlug}?page=${p}&limit=20`
+                        );
+                        const data = await res.json();
+                        setPosts(data.posts);
+                        setPagination(data.pagination);
+                      } catch {
+                        // keep current state
+                      } finally {
+                        setLoading(false);
+                      }
+                    })();
                   }}
                   className={`w-9 h-9 rounded-lg text-xs font-semibold transition-all ${
                     p === pagination.page

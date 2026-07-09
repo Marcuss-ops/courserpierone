@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BookOpen, MessageSquare, User } from "lucide-react";
+import { Home, BookOpen, MessageSquare } from "lucide-react";
 
 interface Tab {
   label: string;
