@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { prisma } from "../db/prisma";
+import { cacheGet, cacheSet } from "../redis";
 
 export interface LessonConfig {
   number: number;
@@ -77,7 +78,12 @@ const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minuti
  *   4. null
  */
 export async function getCourseConfig(slug: string): Promise<CourseConfig | null> {
-  // 1. Memory cache (fast path)
+  // 1. Redis cache (cross-instance, 5 min TTL)
+  const redisKey = `config:${slug}`;
+  const redisCached = await cacheGet<CourseConfig>(redisKey);
+  if (redisCached) return redisCached;
+
+  // 2. Memory cache (per-request lifecycle)
   const cached = _memoryCache.get(slug);
   if (cached && Date.now() - cached.cachedAt < CACHE_TTL_MS) {
     return cached.config;
@@ -121,6 +127,8 @@ export async function getCourseConfig(slug: string): Promise<CourseConfig | null
   // Popola memory cache
   if (config) {
     _memoryCache.set(slug, { config, cachedAt: Date.now() });
+    // Popola anche Redis (fire-and-forget — non blocca il return)
+    cacheSet(redisKey, config).catch(() => {});
   }
 
   return config;

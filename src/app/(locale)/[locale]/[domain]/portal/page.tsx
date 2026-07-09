@@ -14,7 +14,7 @@ import {
 import { getCourseConfig } from "@/lib/config/white-label-data";
 import { AccessGate } from "@/components/course/access-gate";
 import { getServerUser } from "@/lib/supabase/get-user";
-import { loadLocaleContentSafe } from "@/lib/i18n/load-locale-content";
+import { loadLocaleContentCached } from "@/lib/i18n/load-locale-content";
 import { prisma } from "@/lib/db/prisma";
 import nextDynamic from "next/dynamic";
 
@@ -105,8 +105,8 @@ export default async function ProductPortalPage({
   const currentLang = lang || (course.defaultLanguage as string) || "en";
   const content = course.languages[currentLang] || course.languages[course.defaultLanguage];
 
-  // Load locale content for translations
-  const localeContent = loadLocaleContentSafe(domain, currentLang);
+  // Load locale content for translations (cached via Redis)
+  const localeContent = await loadLocaleContentCached(domain, currentLang);
   const lc = localeContent.portal;
 
   // Warm accent from product config, fallback to amber #C9840D

@@ -15,6 +15,7 @@ import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
 import type { LocaleContent } from "./locale-content";
 import { createEmptyLocale } from "./locale-content";
+import { cacheGet, cacheSet } from "../redis";
 
 const DATA_DIR = resolve(process.cwd(), "data");
 
@@ -63,4 +64,18 @@ export function loadLocaleContent(slug: string, locale: string): LocaleContent |
  */
 export function loadLocaleContentSafe(slug: string, locale: string): LocaleContent {
   return loadLocaleContent(slug, locale) ?? createEmptyLocale(locale);
+}
+
+/**
+ * Versione async con cache Redis (5 min TTL).
+ * Preferire questa a loadLocaleContentSafe nei server components.
+ */
+export async function loadLocaleContentCached(slug: string, locale: string): Promise<LocaleContent> {
+  const redisKey = `locale:${slug}:${locale}`;
+  const cached = await cacheGet<LocaleContent>(redisKey);
+  if (cached) return cached;
+
+  const result = loadLocaleContentSafe(slug, locale);
+  await cacheSet(redisKey, result).catch(() => {});
+  return result;
 }
