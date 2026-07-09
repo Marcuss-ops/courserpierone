@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Playfair_Display, Inter } from "next/font/google";
 import { Footer } from "@/components/footer";
+import { getSeoMetadata, SEO_LOCALES } from "@/lib/i18n/seo-metadata";
 import "./globals.css";
 
 // ═══ Environment variable validation ═════════════════════
@@ -21,34 +22,57 @@ const inter = Inter({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "Courssy",
-    template: "%s | Courssy",
-  },
-  description: "Generatore automatico di Funnel e Aree Corsi multilingua",
-  robots: {
-    index: true,
-    follow: true,
-  },
-  openGraph: {
-    title: "Courssy",
-    description: "Generatore automatico di Funnel e Aree Corsi multilingua",
-    type: "website",
-    siteName: "Courssy",
-    locale: "it_IT",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Courssy",
-    description: "Generatore automatico di Funnel e Aree Corsi multilingua",
-  },
-  icons: {
-    icon: "/icon.png",
-    shortcut: "/icon.png",
-  },
-  manifest: "/manifest.json",
-};
+/**
+ * Dynamic metadata generation — localized per visitor language.
+ *
+ * Reads the `locale` cookie set by middleware.ts (IT/EN/FR/ES/DE/PT...)
+ * and returns the corresponding title, description, and Open Graph tags.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  let langCode = "en";
+  try {
+    const cookieStore = await cookies();
+    langCode = cookieStore.get("locale")?.value ?? "en";
+  } catch {
+    // cookies() può fallire in build statica
+  }
+
+  const seo = getSeoMetadata(langCode);
+
+  return {
+    title: {
+      default: seo.title,
+      template: "%s | Courssy",
+    },
+    description: seo.description,
+    robots: { index: true, follow: true },
+    openGraph: {
+      title: seo.ogTitle,
+      description: seo.ogDescription,
+      type: "website",
+      siteName: "Courssy",
+      locale: langCode.replace("-", "_"),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: seo.ogTitle,
+      description: seo.ogDescription,
+    },
+    alternates: {
+      languages: Object.fromEntries(
+        SEO_LOCALES.map((code) => [
+          `${code}-${code.toUpperCase()}`,
+          `/${code}`,
+        ])
+      ),
+    },
+    icons: {
+      icon: "/icon.png",
+      shortcut: "/icon.png",
+    },
+    manifest: "/manifest.json",
+  };
+}
 
 export default async function RootLayout({
   children,
