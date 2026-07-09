@@ -6,13 +6,10 @@ import { createCheckout } from "@lemonsqueezy/lemonsqueezy.js";
 import { checkoutSchema, validationErrorResponse } from "@/lib/utils/validations";
 import { parsePricesByCurrency, parseCountryOverrides } from "@/lib/utils/pricing";
 import { getCurrencyFromLocale } from "@/lib/i18n/locale-resolver";
-import { rateLimit, rateLimitResponse } from "@/lib/utils/rate-limit";
+import { withRateLimit } from "@/lib/utils/rate-limit";
 
-export async function POST(request: NextRequest) {
+export const POST = withRateLimit(async function POST(request: NextRequest) {
   try {
-    const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "unknown";
-    const rl = rateLimit(`checkout:${ip}`, 10, 60 * 1000);
-    if (!rl.allowed) return rateLimitResponse(rl.resetIn);
     const { user } = await getServerUser();
     const body = await request.json();
     
@@ -205,4 +202,4 @@ export async function POST(request: NextRequest) {
     console.error("POST /api/checkout error:", error);
     return NextResponse.json({ error: "Checkout failed" }, { status: 500 });
   }
-}
+}, "AUTH");

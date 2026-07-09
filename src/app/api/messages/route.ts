@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
+import { withRateLimit } from "@/lib/utils/rate-limit";
 
 /**
  * GET /api/messages?with=<userId>&productId=<productId>
  * Recupera la conversazione tra l'utente corrente e un altro utente,
  * opzionalmente filtrata per prodotto.
  */
-export async function GET(request: NextRequest) {
+export const GET = withRateLimit(async function GET(request: NextRequest) {
   try {
     const { user, dbUser } = await getServerUser();
     if (!user?.email || !dbUser) {
@@ -44,14 +45,14 @@ export async function GET(request: NextRequest) {
     console.error("GET /api/messages error:", error);
     return NextResponse.json({ error: "Errore interno" }, { status: 500 });
   }
-}
+}, "AUTH");
 
 /**
  * POST /api/messages
  * Invia un nuovo messaggio.
  * Body: { receiverId: string, content: string, productId?: string }
  */
-export async function POST(request: NextRequest) {
+export const POST = withRateLimit(async function POST(request: NextRequest) {
   try {
     const { user, dbUser } = await getServerUser();
     if (!user?.email || !dbUser) {
@@ -94,4 +95,4 @@ export async function POST(request: NextRequest) {
     console.error("POST /api/messages error:", error);
     return NextResponse.json({ error: "Errore interno" }, { status: 500 });
   }
-}
+}, "MESSAGES");

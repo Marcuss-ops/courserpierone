@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { Prisma } from "@prisma/client";
 import { getServerUser } from "@/lib/supabase/get-user";
+import { withRateLimit } from "@/lib/utils/rate-limit";
 import { z } from "zod";
 
 const MAX_NAME_LENGTH = 60;
@@ -40,7 +41,7 @@ const profileUpdateSchema = z.object({
  *
  * Returns: 200 { success: true, profile } | 400 { error } | 401 { error } | 409 { error: username taken }
  */
-export async function PATCH(request: NextRequest) {
+export const PATCH = withRateLimit(async function PATCH(request: NextRequest) {
   const { user, dbUser } = await getServerUser();
   if (!user?.email || !dbUser) {
     return NextResponse.json({ error: "Non autenticato" }, { status: 401 });
@@ -122,4 +123,4 @@ export async function PATCH(request: NextRequest) {
     console.error("[api/account/profile] PATCH failed", err);
     return NextResponse.json({ error: "Errore interno, riprova" }, { status: 500 });
   }
-}
+}, "AUTH");
