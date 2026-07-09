@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
+import { withRateLimit } from "@/lib/utils/rate-limit";
 
-export async function GET(request: NextRequest) {
+export const GET = withRateLimit(async function GET(request: NextRequest) {
   try {
     const { user, dbUser } = await getServerUser();
     const { searchParams } = request.nextUrl;
@@ -60,4 +61,4 @@ export async function GET(request: NextRequest) {
     console.error("GET /api/access error:", error);
     return NextResponse.json({ hasAccess: false });
   }
-}
+}, "PUBLIC");
