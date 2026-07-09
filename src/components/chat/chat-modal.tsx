@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { X, Send, Loader2, MessageSquare } from "lucide-react";
+import { X, Send, Loader2, MessageSquare, Wifi, WifiOff } from "lucide-react";
 
 interface MessageData {
   id: string;
@@ -45,8 +45,11 @@ export function ChatModal({
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sseConnected, setSseConnected] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const esRef = useRef<EventSource | null>(null);
+  const lastMessageDateRef = useRef<string | null>(null);
 
   // Carica la conversazione quando la modale si apre
   const fetchMessages = useCallback(async () => {
@@ -59,6 +62,11 @@ export function ChatModal({
       if (!res.ok) throw new Error("Errore nel caricamento messaggi");
       const data = await res.json();
       setMessages(data.messages ?? []);
+      // Aggiorna il cursore SSE per evitare di ri-ricevere messaggi storici
+      const msgs: MessageData[] = data.messages ?? [];
+      if (msgs.length > 0) {
+        lastMessageDateRef.current = msgs[msgs.length - 1]!.createdAt;
+      }
     } catch (err) {
       setError("Impossibile caricare i messaggi. Riprova.");
       console.error("fetchMessages error:", err);
@@ -67,15 +75,82 @@ export function ChatModal({
     }
   }, [creatorId, productId]);
 
-  // Polling ogni 5 secondi quando la modale è aperta
+  // Inizializza: carica messaggi + avvia SSE (con polling fallback)
   useEffect(() => {
     if (!open) return;
+
     void fetchMessages();
-    pollRef.current = setInterval(() => { void fetchMessages(); }, 5000);
+    let fallbackPoll: ReturnType<typeof setInterval> | null = null;
+
+    // Costruisci URL SSE
+    const params = new URLSearchParams({ with: creatorId });
+    if (productId) params.set("productId", productId);
+    if (lastMessageDateRef.current) params.set("since", lastMessageDateRef.current);
+
+    const esUrl = `/api/messages/stream?${params.toString()}`;
+
+    try {
+      const es = new EventSource(esUrl);
+      esRef.current = es;
+
+      es.onopen = () => {
+        setSseConnected(true);
+      };
+
+      es.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data) as { messages: MessageData[] };
+          if (data.messages?.length > 0) {
+            setMessages((prev) => {
+              // Evita duplicati
+              const existingIds = new Set(prev.map((m) => m.id));
+              const newOnes = data.messages.filter((m) => !existingIds.has(m.id));
+              if (newOnes.length === 0) return prev;
+              // Aggiorna il cursore
+              const lastMsg = newOnes[newOnes.length - 1]!;
+              lastMessageDateRef.current = lastMsg.createdAt;
+              return [...prev, ...newOnes];
+            });
+          }
+        } catch {
+          // Ignora eventi malformati
+        }
+      };
+
+      es.onerror = () => {
+        setSseConnected(false);
+        es.close();
+        esRef.current = null;
+
+        // Fallback: polling ogni 5 secondi
+        if (!fallbackPoll) {
+          fallbackPoll = setInterval(() => {
+            void fetchMessages();
+          }, 5000);
+          pollRef.current = fallbackPoll;
+        }
+      };
+    } catch {
+      // EventSource non supportato — usa solo polling
+      fallbackPoll = setInterval(() => {
+        void fetchMessages();
+      }, 5000);
+      pollRef.current = fallbackPoll;
+    }
+
     return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
+      if (esRef.current) {
+        esRef.current.close();
+        esRef.current = null;
+      }
+      setSseConnected(false);
+      if (fallbackPoll) clearInterval(fallbackPoll);
+      if (pollRef.current) {
+        clearInterval(pollRef.current);
+        pollRef.current = null;
+      }
     };
-  }, [open, fetchMessages]);
+  }, [open, creatorId, productId, fetchMessages]);
 
   // Marca i messaggi ricevuti come letti
   useEffect(() => {
@@ -167,6 +242,10 @@ export function ChatModal({
                 <p className="text-xs text-cream-dark-text-soft font-light">
                   Scrivi come {currentUserName} — rispondo entro 24h
                 </p>
+                <span className={`inline-flex items-center gap-1 text-[10px] font-medium ${sseConnected ? "text-emerald-400" : "text-cream-dark-text-soft/50"}`}>
+                  {sseConnected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
+                  {sseConnected ? "Live" : "Polling"}
+                </span>
               </div>
               <button
                 onClick={() => setOpen(false)}
