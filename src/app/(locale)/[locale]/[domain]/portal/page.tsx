@@ -15,6 +15,10 @@ import { getCourseConfig } from "@/lib/config/white-label-data";
 import { AccessGate } from "@/components/course/access-gate";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { loadLocaleContentSafe } from "@/lib/i18n/load-locale-content";
+import { prisma } from "@/lib/db/prisma";
+import nextDynamic from "next/dynamic";
+
+const ChatModal = nextDynamic(() => import("@/components/chat/chat-modal").then(m => ({ default: m.ChatModal })));
 
 export async function generateMetadata({
   params,
@@ -81,8 +85,22 @@ export default async function ProductPortalPage({
   const course = await getCourseConfig(domain);
   if (!course) return notFound();
 
-  const { user } = await getServerUser();
+  const { user, dbUser } = await getServerUser();
   const isAuthenticated = !!user?.email;
+
+  // ── Trova il creator (admin) e il product ID per i DM ──
+  const [creator, product] = isAuthenticated && dbUser?.role !== "admin"
+    ? await Promise.all([
+        prisma.user.findFirst({
+          where: { role: "admin" },
+          select: { id: true, name: true },
+        }),
+        prisma.product.findUnique({
+          where: { slug: domain },
+          select: { id: true },
+        }),
+      ])
+    : [null, null];
 
   const currentLang = lang || (course.defaultLanguage as string) || "en";
   const content = course.languages[currentLang] || course.languages[course.defaultLanguage];
@@ -283,6 +301,19 @@ export default async function ProductPortalPage({
               </div>
             </Link>
           </div>
+
+          {/* DM: Scrivi al creator — visibile solo a studenti autenticati */}
+          {isAuthenticated && dbUser && creator && (
+            <div className="flex justify-center pt-4 border-t border-zinc-100">
+              <ChatModal
+                currentUserId={dbUser.id}
+                currentUserName={dbUser.name || "Studente"}
+                creatorId={creator.id}
+                creatorName={creator.name || course.author}
+                productId={product?.id || undefined}
+              />
+            </div>
+          )}
         </main>
 
       </div>

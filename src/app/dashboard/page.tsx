@@ -184,6 +184,13 @@ export default async function DashboardPage() {
     where: { userId: dbUser.id, read: false },
   });
 
+  // ── Unread messages count ──────────────────────────────
+  const unreadMessages = await prisma.message.count({
+    where: { receiverId: dbUser.id, read: false },
+  });
+
+  const totalNotifications = unreadCount + unreadMessages;
+
   // ── Certificates (products fully completed) ──
   const completedProductIds = productProgress
     .filter((p) => p.total > 0 && p.completed >= p.total)
@@ -221,12 +228,12 @@ export default async function DashboardPage() {
             <Link
               href="/notifications"
               className="relative p-2.5 bg-cream-dark-surface border border-cream-dark-border rounded-xl text-cream-dark-text-soft hover:text-cream-dark-gold hover:border-cream-dark-gold/30 transition-all"
-              aria-label={`Notifiche${unreadCount > 0 ? `, ${unreadCount} non lette` : ""}`}
+              aria-label={`Notifiche${totalNotifications > 0 ? `, ${totalNotifications} non lette` : ""}`}
             >
               <Bell className="w-4 h-4" />
-              {unreadCount > 0 && (
+              {totalNotifications > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center shadow-md">
-                  {unreadCount > 99 ? "99+" : unreadCount}
+                  {totalNotifications > 99 ? "99+" : totalNotifications}
                 </span>
               )}
             </Link>
