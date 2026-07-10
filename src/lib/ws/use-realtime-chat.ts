@@ -18,9 +18,10 @@ interface MessageData {
 }
 
 interface WsMessageEvent {
-  type: "newMessage";
-  conversationId: string;
-  message: MessageData;
+  type: "newMessage" | "typing" | "stopTyping";
+  conversationId?: string;
+  message?: MessageData;
+  userId?: string;
 }
 
 interface UseRealtimeChatOptions {
@@ -57,14 +58,38 @@ export function useRealtimeChat({
   const modeRef = useRef<"ws" | "sse" | "poll" | null>(null);
 
   const [connected, setConnected] = useState(false);
+  const [isOtherTyping, setIsOtherTyping] = useState(false);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const selfTypingRef = useRef(false);
 
   // Sync connected state
   useEffect(() => {
     onConnectionChange?.(connected);
   }, [connected, onConnectionChange]);
 
-  // ── Cleanup all connections ───────────────────────────────
+  // ── Send typing status via WebSocket ─────────────────────
+  const sendTyping = useCallback((isTyping: boolean) => {
+    if (selfTypingRef.current === isTyping) return; // No change
+    selfTypingRef.current = isTyping;
+
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ type: isTyping ? "typing" : "stopTyping" }));
+    }
+  }, []);
+
+  // Auto-stop typing after 4 seconds of inactivity
+  const resetTypingTimer = useCallback(() => {
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      sendTyping(false);
+    }, 4000);
+  }, [sendTyping]);
   const cleanup = useCallback(() => {
+    // Send stopTyping before closing
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && selfTypingRef.current) {
+      try { wsRef.current.send(JSON.stringify({ type: "stopTyping" })); } catch { /* ignore */ }
+      selfTypingRef.current = false;
+    }
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
@@ -82,6 +107,12 @@ export function useRealtimeChat({
       reconnectTimeoutRef.current = null;
     }
     modeRef.current = null;
+    setIsOtherTyping(false);
+    selfTypingRef.current = false;
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
   }, []);
 
   // ── HTTP polling (last-resort fallback) ───────────────────
@@ -173,6 +204,9 @@ export function useRealtimeChat({
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
+      // Reset typing state on new connection
+      selfTypingRef.current = false;
+
       ws.onopen = () => {
         if (!mountedRef.current) return;
         setConnected(true);
@@ -184,6 +218,10 @@ export function useRealtimeChat({
           const data = JSON.parse(event.data) as WsMessageEvent;
           if (data.type === "newMessage" && data.message) {
             onMessages([data.message]);
+          } else if (data.type === "typing" && data.userId === otherUserId) {
+            setIsOtherTyping(true);
+          } else if (data.type === "stopTyping" && data.userId === otherUserId) {
+            setIsOtherTyping(false);
           }
         } catch { /* ignore */ }
       };
@@ -230,5 +268,5 @@ export function useRealtimeChat({
     };
   }, [enabled, connectWs, cleanup]);
 
-  return { connected };
+  return { connected, isOtherTyping, sendTyping, resetTypingTimer };
 }
