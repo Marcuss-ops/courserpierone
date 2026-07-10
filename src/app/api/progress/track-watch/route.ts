@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
+import { apiErrorResponse } from "@/lib/errors";
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,7 +30,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, progress });
   } catch (error) {
-    console.error("POST /api/progress/track-watch error:", error);
-    return NextResponse.json({ error: "Failed to track watch" }, { status: 500 });
+    return apiErrorResponse(error, "Failed to track watch");
   }
 }

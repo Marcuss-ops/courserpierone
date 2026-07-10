@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
+import { apiErrorResponse } from "@/lib/errors";
 
 // GET — Dettaglio singolo prodotto
 export async function GET(
@@ -26,11 +27,7 @@ export async function GET(
 
     return NextResponse.json(product);
   } catch (error) {
-    console.error("GET /api/products/[id] error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch product" },
-      { status: 500 }
-    );
+    return apiErrorResponse(error, "Failed to fetch product");
   }
 }
 
@@ -154,11 +151,7 @@ export async function PUT(
 
     return NextResponse.json({ success: true, product });
   } catch (error) {
-    console.error("PUT /api/products/[id] error:", error);
-    return NextResponse.json(
-      { error: "Failed to update product" },
-      { status: 500 }
-    );
+    return apiErrorResponse(error, "Failed to update product");
   }
 }
 
@@ -173,10 +166,6 @@ export async function DELETE(
     await prisma.product.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("DELETE /api/products/[id] error:", error);
-    return NextResponse.json(
-      { error: "Failed to delete product" },
-      { status: 500 }
-    );
+    return apiErrorResponse(error, "Failed to delete product");
   }
 }

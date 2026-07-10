@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
+import { apiErrorResponse } from "@/lib/errors";
 
 /**
  * GET /api/users/[username]
@@ -159,7 +160,6 @@ export async function GET(
       })),
     });
   } catch (error) {
-    console.error("GET /api/users/[username] error:", error);
-    return NextResponse.json({ error: "Errore interno" }, { status: 500 });
+    return apiErrorResponse(error, "Errore interno");
   }
 }

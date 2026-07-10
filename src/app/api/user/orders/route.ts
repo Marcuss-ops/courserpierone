@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
+import { apiErrorResponse } from "@/lib/errors";
 
 export async function GET() {
   try {
@@ -68,7 +69,6 @@ export async function GET() {
       orders,
     });
   } catch (error) {
-    console.error("GET /api/user/orders error:", error);
-    return NextResponse.json({ error: "Failed to fetch orders" }, { status: 500 });
+    return apiErrorResponse(error, "Failed to fetch orders");
   }
 }

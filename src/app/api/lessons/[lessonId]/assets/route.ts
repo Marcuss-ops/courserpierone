@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
+import { apiErrorResponse } from "@/lib/errors";
 
 export async function GET(
   request: NextRequest,
@@ -20,7 +21,6 @@ export async function GET(
 
     return NextResponse.json({ assets });
   } catch (error) {
-    console.error("GET /api/lessons/[lessonId]/assets error:", error);
-    return NextResponse.json({ error: "Failed to fetch assets" }, { status: 500 });
+    return apiErrorResponse(error, "Failed to fetch assets");
   }
 }

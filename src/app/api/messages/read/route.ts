@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
+import { apiErrorResponse } from "@/lib/errors";
 
 /**
  * PATCH /api/messages/read
@@ -32,7 +33,6 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ success: true, count: result.count });
   } catch (error) {
-    console.error("PATCH /api/messages/read error:", error);
-    return NextResponse.json({ error: "Errore interno" }, { status: 500 });
+    return apiErrorResponse(error, "Errore interno");
   }
 }

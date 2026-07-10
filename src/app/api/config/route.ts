@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateCourseConfig } from "@/lib/config/generate-course-config";
+import { apiErrorResponse } from "@/lib/errors";
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,7 +10,6 @@ export async function POST(request: NextRequest) {
     const config = await generateCourseConfig(slug);
     return NextResponse.json({ success: true, config });
   } catch (error) {
-    console.error("POST /api/config error:", error);
-    return NextResponse.json({ error: "Failed to generate config" }, { status: 500 });
+    return apiErrorResponse(error, "Failed to generate config");
   }
 }

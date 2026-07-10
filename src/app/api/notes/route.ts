@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
+import { apiErrorResponse } from "@/lib/errors";
 
 // GET — Recupera appunti per una lezione
 export async function GET(request: NextRequest) {
@@ -22,8 +23,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ note });
   } catch (error) {
-    console.error("GET /api/notes error:", error);
-    return NextResponse.json({ error: "Failed to fetch note" }, { status: 500 });
+    return apiErrorResponse(error, "Failed to fetch note");
   }
 }
 
@@ -49,8 +49,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, note });
   } catch (error) {
-    console.error("POST /api/notes error:", error);
-    return NextResponse.json({ error: "Failed to save note" }, { status: 500 });
+    return apiErrorResponse(error, "Failed to save note");
   }
 }
 
@@ -74,7 +73,6 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("DELETE /api/notes error:", error);
-    return NextResponse.json({ error: "Failed to delete note" }, { status: 500 });
+    return apiErrorResponse(error, "Failed to delete note");
   }
 }

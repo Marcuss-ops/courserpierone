@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
+import { apiErrorResponse } from "@/lib/errors";
 
 // GET — list all coupons
 export async function GET() {
@@ -45,7 +46,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(coupon, { status: 201 });
   } catch (error) {
-    console.error("POST /api/admin/coupons error:", error);
-    return NextResponse.json({ error: "Failed to create coupon" }, { status: 500 });
+    return apiErrorResponse(error, "Failed to create coupon");
   }
 }

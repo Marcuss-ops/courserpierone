@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
+import { apiErrorResponse } from "@/lib/errors";
 
 export async function GET(request: NextRequest) {
   try {
@@ -162,7 +163,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ events });
   } catch (error) {
-    console.error("GET /api/social-proof error:", error);
-    return NextResponse.json({ error: "Failed to get social proof events" }, { status: 500 });
+    return apiErrorResponse(error, "Failed to get social proof events");
   }
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/db/supabase";
+import { apiErrorResponse } from "@/lib/errors";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
@@ -106,10 +107,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, url: publicUrl });
   } catch (error) {
-    console.error("POST /api/upload error:", error);
-    return NextResponse.json(
-      { error: "Errore interno nel upload" },
-      { status: 500 }
-    );
+    return apiErrorResponse(error, "Errore interno nel upload");
   }
 }

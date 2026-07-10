@@ -86,14 +86,13 @@ export class ValidationError extends AppError {
  * AppError → uses statusCode + code from the error
  * Unknown error → 500 with generic message
  */
-export function apiErrorResponse(error: unknown): NextResponse {
+export function apiErrorResponse(
+  error: unknown,
+  fallbackMessage?: string,
+): NextResponse {
   if (error instanceof AppError) {
-    // Operational errors: expose message to client
     return NextResponse.json(
-      {
-        error: error.message,
-        code: error.code,
-      },
+      { error: error.message, code: error.code },
       { status: error.statusCode },
     );
   }
@@ -106,7 +105,10 @@ export function apiErrorResponse(error: unknown): NextResponse {
   }
 
   return NextResponse.json(
-    { error: "Internal server error", code: "INTERNAL_ERROR" },
+    {
+      error: fallbackMessage ?? "Internal server error",
+      code: "INTERNAL_ERROR",
+    },
     { status: 500 },
   );
 }

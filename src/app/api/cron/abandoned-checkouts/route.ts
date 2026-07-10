@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { sendAbandonedCheckoutEmail } from "@/lib/services/email";
+import { apiErrorResponse } from "@/lib/errors";
 
 /**
  * GET /api/cron/abandoned-checkouts
@@ -86,7 +87,6 @@ export async function GET(request: Request) {
       results,
     });
   } catch (error) {
-    console.error("GET /api/cron/abandoned-checkouts error:", error);
-    return NextResponse.json({ error: "Cron job failed" }, { status: 500 });
+    return apiErrorResponse(error, "Cron job failed");
   }
 }

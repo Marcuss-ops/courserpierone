@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { withRateLimit } from "@/lib/utils/rate-limit";
+import { apiErrorResponse } from "@/lib/errors";
 
 /**
  * GET /api/messages?with=<userId>&productId=<productId>
@@ -42,8 +43,7 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
 
     return NextResponse.json({ messages });
   } catch (error) {
-    console.error("GET /api/messages error:", error);
-    return NextResponse.json({ error: "Errore interno" }, { status: 500 });
+    return apiErrorResponse(error, "Errore interno");
   }
 }, "AUTH");
 
@@ -92,7 +92,6 @@ export const POST = withRateLimit(async function POST(request: NextRequest) {
 
     return NextResponse.json({ message }, { status: 201 });
   } catch (error) {
-    console.error("POST /api/messages error:", error);
-    return NextResponse.json({ error: "Errore interno" }, { status: 500 });
+    return apiErrorResponse(error, "Errore interno");
   }
 }, "MESSAGES");

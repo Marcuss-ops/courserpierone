@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
+import { apiErrorResponse } from "@/lib/errors";
 
 // PUT — update a coupon
 export async function PUT(
@@ -33,8 +34,7 @@ export async function PUT(
 
     return NextResponse.json(coupon);
   } catch (error) {
-    console.error("PUT /api/admin/coupons/[id] error:", error);
-    return NextResponse.json({ error: "Failed to update coupon" }, { status: 500 });
+    return apiErrorResponse(error, "Failed to update coupon");
   }
 }
 
@@ -54,7 +54,6 @@ export async function DELETE(
     await prisma.coupon.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("DELETE /api/admin/coupons/[id] error:", error);
-    return NextResponse.json({ error: "Failed to delete coupon" }, { status: 500 });
+    return apiErrorResponse(error, "Failed to delete coupon");
   }
 }
