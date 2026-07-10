@@ -1,7 +1,8 @@
 // ─── AmishOffer — Dark pricing / offer section ─────────────
 
-import { ArrowRight, Lock, Shield } from "lucide-react";
-import { TrackedCtaButton } from "@/components/course/tracked-cta-button";
+import { Lock } from "lucide-react";
+import { SharedGuarantee } from "@/components/funnel/shared/SharedGuarantee";
+import { SharedCTAButton } from "@/components/funnel/shared/SharedCTAButton";
 import type { AmishProps, AmishT } from "./types";
 
 interface AmishOfferProps {
@@ -99,20 +100,18 @@ export function AmishOffer({
             </p>
           )}
 
-          <TrackedCtaButton
+          <SharedCTAButton
             href={checkoutUrl}
             productSlug={productSlug ?? ""}
             productId={productId}
             locale={locale}
-            style={{
-              background: `linear-gradient(135deg, ${accent} 0%, ${accent}CC 100%)`,
-              boxShadow: `0 8px 40px ${accent}50`,
-            }}
-            className="mt-10 inline-flex w-full justify-center items-center gap-2 px-8 py-5 text-white font-semibold rounded-2xl text-lg transition-all hover:-translate-y-0.5"
+            accentColor={accent}
+            fullWidth
+            boxShadow={`0 8px 40px ${accent}50`}
+            className="mt-10 px-8 py-5 text-lg"
           >
             {t("offer_cta")} {data.prezzo}
-            <ArrowRight className="w-5 h-5" />
-          </TrackedCtaButton>
+          </SharedCTAButton>
 
           <div className="mt-5 flex items-center justify-center gap-4 text-xs text-white/40">
             {t("offer_stripe_paypal") && (
@@ -130,32 +129,12 @@ export function AmishOffer({
           </div>
 
           {/* Guarantee */}
-          {t("guarantee_title") && (
-            <div
-              className="mt-10 text-left rounded-2xl p-6"
-              style={{
-                background: "rgba(255,255,255,0.05)",
-                border: `1px solid ${accent}20`,
-              }}
-            >
-              <div className="flex gap-4">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                  style={{ background: `${accent}20`, color: accent }}
-                >
-                  <Shield className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="font-semibold text-white">
-                    {t("guarantee_title")}
-                  </p>
-                  <p className="text-sm text-white/55 mt-1 leading-relaxed">
-                    {t("guarantee_text")}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
+          <SharedGuarantee
+            title={t("guarantee_title")}
+            text={t("guarantee_text")}
+            accentColor={accent}
+            dark
+          />
         </div>
       </div>
     </section>

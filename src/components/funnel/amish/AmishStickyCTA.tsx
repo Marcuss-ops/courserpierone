@@ -1,7 +1,6 @@
-// ─── AmishStickyCTA — Mobile bottom CTA bar ────────────────
+// ─── AmishStickyCTA — Mobile bottom CTA bar (thin wrapper) ──
 
-import { ArrowRight } from "lucide-react";
-import { TrackedCtaButton } from "@/components/course/tracked-cta-button";
+import { SharedCTAButton } from "@/components/funnel/shared/SharedCTAButton";
 import type { AmishProps, AmishT } from "./types";
 
 interface AmishStickyCTAProps {
@@ -43,20 +42,16 @@ export function AmishStickyCTA({
             {t("hero_no_sub")}
           </div>
         </div>
-        <TrackedCtaButton
+        <SharedCTAButton
           href={checkoutUrl}
           productSlug={productSlug ?? ""}
           productId={productId}
           locale={locale}
-          style={{
-            background: `linear-gradient(135deg, ${accent} 0%, ${accent}CC 100%)`,
-            boxShadow: `0 4px 20px ${accent}40`,
-          }}
-          className="text-white px-6 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center gap-2"
+          accentColor={accent}
+          className="px-6 py-3.5 font-bold text-sm"
         >
           {t("hero_cta_prefix")} {data.prezzo}
-          <ArrowRight className="w-4 h-4" />
-        </TrackedCtaButton>
+        </SharedCTAButton>
       </div>
     </div>
   );

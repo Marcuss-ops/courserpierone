@@ -12,7 +12,7 @@ import { LumioStory } from "./LumioStory";
 import { LumioLessons } from "./LumioLessons";
 import { LumioTestimonials } from "./LumioTestimonials";
 import { LumioCTA } from "./LumioCTA";
-import { LumioFooter } from "./LumioFooter";
+import { SharedFooter, type FooterLink } from "@/components/funnel/shared/SharedFooter";
 
 export default function TemplateLumio({
   data,
@@ -36,7 +36,16 @@ export default function TemplateLumio({
       <LumioLessons lezioni={data.lezioni} lc={lc} t={t} />
       <LumioTestimonials recensioni={data.recensioni} lc={lc} t={t} />
       <LumioCTA data={data} lc={lc} t={t} />
-      <LumioFooter lc={lc} t={t} />
+      <SharedFooter
+        brand={lc?.nav?.brand || "Brand"}
+        links={[
+          { label: lc?.footer?.privacy || t("privacy", "Privacy"), href: "#" },
+          { label: lc?.footer?.terms || t("terms", "Terms"), href: "#" },
+          { label: lc?.footer?.contact || t("contact", "Contact"), href: "#" },
+        ]}
+        rightsReserved={lc?.footer?.rights_reserved || t("rights_reserved", "All rights reserved.")}
+        variant="dark"
+      />
     </div>
   );
 }

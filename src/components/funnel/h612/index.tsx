@@ -11,7 +11,7 @@ import { H612Story } from "./H612Story";
 import { H612Lessons } from "./H612Lessons";
 import { H612Testimonials } from "./H612Testimonials";
 import { H612CTA } from "./H612CTA";
-import { H612Footer } from "./H612Footer";
+import { SharedFooter, type FooterLink } from "@/components/funnel/shared/SharedFooter";
 
 export default function TemplateH612({
   data,
@@ -38,7 +38,16 @@ export default function TemplateH612({
       <H612Lessons lezioni={data.lezioni} lc={lc} t={t} />
       <H612Testimonials recensioni={data.recensioni} lc={lc} t={t} />
       <H612CTA data={data} lc={lc} t={t} />
-      <H612Footer lc={lc} t={t} />
+      <SharedFooter
+        brand={lc?.nav?.brand || "Brand"}
+        links={[
+          { label: lc?.footer?.privacy || t("privacy", "Privacy"), href: "#" },
+          { label: lc?.footer?.terms || t("terms", "Terms"), href: "#" },
+          { label: lc?.footer?.contact || t("contact", "Contact"), href: "#" },
+        ]}
+        rightsReserved={lc?.footer?.rights_reserved || t("rights_reserved", "All rights reserved.")}
+        variant="bordered"
+      />
 
       {/* Keyframe animations (ported from original) */}
       <style jsx>{`
