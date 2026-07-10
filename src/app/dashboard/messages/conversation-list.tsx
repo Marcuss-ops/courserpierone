@@ -2,29 +2,12 @@
 
 import Link from "next/link";
 import { User, Clock, ChevronRight } from "lucide-react";
+import { timeAgo } from "@/lib/utils/time-ago";
 import type { ConversationPreview } from "./page";
 
 interface ConversationListProps {
   previews: ConversationPreview[];
   currentUserId: string;
-}
-
-/**
- * Formats a date into a human-readable relative time string.
- * Accepts both Date objects and ISO strings (from server→client serialization).
- */
-function timeAgo(date: Date | string): string {
-  const d = typeof date === "string" ? new Date(date) : date;
-  const now = Date.now();
-  const diff = now - d.getTime();
-  const mins = Math.floor(diff / 60_000);
-  if (mins < 1) return "Adesso";
-  if (mins < 60) return `${mins}m fa`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h fa`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}g fa`;
-  return d.toLocaleDateString("it-IT", { day: "numeric", month: "short" });
 }
 
 export function ConversationList({ previews, currentUserId }: ConversationListProps) {

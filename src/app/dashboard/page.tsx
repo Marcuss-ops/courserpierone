@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LogOut, ArrowRight, User, Mail } from "lucide-react";
+import { LogOut, ArrowRight, User } from "lucide-react";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { WelcomeBanner } from "@/components/dashboard/welcome-banner";
@@ -8,6 +8,7 @@ import { StatsBento } from "@/components/dashboard/stats-bento";
 import { CourseCard } from "@/components/dashboard/course-card";
 import { DashboardEmptyState } from "@/components/dashboard/empty-state";
 import { CertificatesShowcase } from "@/components/dashboard/certificates-showcase";
+import { NotificationsDropdown, type UnreadConversation } from "@/components/dashboard/notifications-dropdown";
 import { PWAInstallBanner } from "@/components/pwa-install-banner";
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 
@@ -179,12 +180,11 @@ export default async function DashboardPage() {
     ? `Riprendi: ${lastLessonTitle}`
     : undefined;
 
-  // ── Unread messages count ──────────────────────────────
-  // New schema: count unread messages across all conversations where user is a participant
+  // ── Unread messages count + recent unread conversations for dropdown ──
   const unreadMessages = await prisma.message.count({
     where: {
       read: false,
-      senderId: { not: dbUser.id }, // only messages FROM others
+      senderId: { not: dbUser.id },
       conversation: {
         OR: [
           { userOneId: dbUser.id },
@@ -193,6 +193,71 @@ export default async function DashboardPage() {
       },
     },
   });
+
+  // Fetch top 5 conversations with unread messages for the dropdown
+  const unreadConversationRows =
+    unreadMessages > 0
+      ? await prisma.conversation.findMany({
+          where: {
+            OR: [{ userOneId: dbUser.id }, { userTwoId: dbUser.id }],
+            messages: {
+              some: {
+                read: false,
+                senderId: { not: dbUser.id },
+              },
+            },
+          },
+          include: {
+            userOne: { select: { id: true, name: true, image: true } },
+            userTwo: { select: { id: true, name: true, image: true } },
+            messages: {
+              orderBy: { createdAt: "desc" },
+              take: 1,
+              select: { id: true, content: true, createdAt: true, senderId: true, read: true },
+            },
+          },
+          orderBy: { updatedAt: "desc" },
+          take: 5,
+        })
+      : [];
+
+  // Build unread conversation previews for dropdown
+  const unreadConversations: UnreadConversation[] = unreadConversationRows.map((c) => {
+    const otherUser = c.userOneId === dbUser.id ? c.userTwo : c.userOne;
+    const lastMsg = c.messages[0];
+
+    return {
+      conversationId: c.id,
+      otherUserId: otherUser.id,
+      otherUserName: otherUser.name,
+      otherUserImage: otherUser.image,
+      lastMessageContent: lastMsg
+        ? lastMsg.content.length > 60
+          ? lastMsg.content.slice(0, 60) + "…"
+          : lastMsg.content
+        : "",
+      lastMessageCreatedAt: lastMsg?.createdAt.toISOString() ?? c.updatedAt.toISOString(),
+      unreadCount: 0, // placeholder — computed below
+    };
+  });
+
+  // Compute per-conversation unread counts with one batch query
+  if (unreadConversations.length > 0) {
+    const convIds = unreadConversationRows.map((c) => c.id);
+    const unreadRows = await prisma.message.groupBy({
+      by: ["conversationId"],
+      where: {
+        conversationId: { in: convIds },
+        read: false,
+        senderId: { not: dbUser.id },
+      },
+      _count: { id: true },
+    });
+    const unreadMap = new Map(unreadRows.map((r) => [r.conversationId, r._count.id]));
+    for (const conv of unreadConversations) {
+      conv.unreadCount = unreadMap.get(conv.conversationId) ?? 0;
+    }
+  }
 
   // ── Certificates (products fully completed) ──
   const completedProductIds = productProgress
@@ -227,20 +292,11 @@ export default async function DashboardPage() {
           </Link>
 
           <div className="flex items-center gap-3">
-            {/* DM messages badge */}
-            <Link
-              href="/dashboard/messages"
-              className="relative p-2.5 bg-cream-dark-surface border border-cream-dark-border rounded-xl text-cream-dark-text-soft hover:text-cream-dark-gold hover:border-cream-dark-gold/30 transition-all"
-              aria-label={`Messaggi${unreadMessages > 0 ? `, ${unreadMessages} non letti` : ""}`}
-              title={unreadMessages > 0 ? `${unreadMessages} messaggi non letti — vai alla inbox` : "Apri inbox messaggi"}
-            >
-              <Mail className="w-4 h-4" />
-              {unreadMessages > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center shadow-md">
-                  {unreadMessages > 99 ? "99+" : unreadMessages}
-                </span>
-              )}
-            </Link>
+            {/* DM messages — notification dropdown */}
+            <NotificationsDropdown
+              conversations={unreadConversations}
+              totalUnread={unreadMessages}
+            />
             <div className="hidden sm:flex items-center gap-3 pl-4 pr-2 py-1.5 bg-cream-dark-surface/80 border border-cream-dark-border rounded-full">
               <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#FFF5E6] to-[#FFE4C4] flex items-center justify-center overflow-hidden">
                 {dbUser.image ? (
@@ -344,7 +400,7 @@ export default async function DashboardPage() {
         <CertificatesShowcase certificates={completedProductIds} />
       </main>
       <PWAInstallBanner />
-      <MobileBottomNav />
+      <MobileBottomNav unreadCount={unreadMessages} />
     </div>
   );
 }
