@@ -4,6 +4,7 @@ import { ArrowLeft, Mail } from "lucide-react";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { ConversationList } from "./conversation-list";
+import { UserSearchBar } from "@/components/chat/user-search-bar";
 
 /** Maximum chars to show for the last-message preview. */
 const PREVIEW_MAX = 80;
@@ -147,6 +148,11 @@ export default async function MessagesPage() {
 
       {/* Main content */}
       <main className="relative max-w-4xl mx-auto px-6 py-8 lg:py-10 pb-24">
+        {/* Search bar */}
+        <div className="mb-6">
+          <UserSearchBar />
+        </div>
+
         {previews.length === 0 ? (
           /* Empty state */
           <div className="relative overflow-hidden bg-gradient-to-br from-cream-dark-bg via-cream-dark-surface to-cream-dark-surface border border-cream-dark-border rounded-[32px] p-12 lg:p-16 text-center shadow-2xl shadow-[#FF8C42]/15">
