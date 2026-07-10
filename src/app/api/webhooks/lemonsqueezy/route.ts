@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processOrder } from "@/lib/services/order-service";
 import { withRateLimit } from "@/lib/utils/rate-limit";
+import { prisma } from "@/lib/db/prisma";
+import { Prisma } from "@prisma/client";
 import crypto from "crypto";
 
 // Force dynamic — webhook non può essere statico
@@ -47,63 +49,84 @@ async function POST_IMPL(request: NextRequest) {
     return NextResponse.json({ received: true });
   }
 
-  // ─── Helper: process LS order/subscription ──────────────────
-  async function handleLsOrder(attributes: any, orderId: string) {
-    const customData = attributes?.first_order_item?.product_options?.custom_data ?? {};
-    const customerEmail = attributes?.user_email ?? attributes?.customer_email ?? "";
+  // ─── Idempotency guard ──────────────────────────────────────
+  // LemonSqueezy doesn't have a dedicated delivery_id. We use a
+  // composite of data.id + event_name as the unique key.
+  const deliveryId = `LS-${data.id}-${eventName}`;
 
-    if (!customerEmail) {
-      console.error("Missing customer email in LS order", orderId);
-      return;
-    }
-
-    const variantId = String(attributes?.first_order_item?.variant_id ?? "");
-    const amount = attributes?.total ?? 0;
-    const currency = attributes?.currency ?? "usd";
-    const productSlug = customData.courseSlug ?? customData.productSlug ?? "";
-    const customerName = attributes?.user_name ?? "";
-
-    await processOrder({
-      email: customerEmail,
-      customerName,
-      productSlug,
-      variantId,
-      providerOrderId: orderId,
-      paymentProvider: "lemonsqueezy",
-      amount,
-      currency,
-      locale: customData.locale ?? "it",
-      customerCountry: attributes?.customer_country ?? attributes?.country ?? null,
+  try {
+    await prisma.processedWebhook.create({
+      data: {
+        provider: "lemonsqueezy",
+        deliveryId,
+        eventType: eventName,
+      },
     });
-  }
-
-  // ─── Order Created ──────────────────────────────────────────
-  if (eventName === "order_created") {
-    const attributes = data.attributes;
-    const orderId = String(data.id);
-
-    console.log(`[LS Webhook] order_created: ${orderId}, email: ${attributes?.user_email ?? attributes?.customer_email}`);
-
-    try {
-      await handleLsOrder(attributes, orderId);
-    } catch (error) {
-      console.error("Failed to process order from LS webhook:", error);
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      // Already processed — ack silently
+      return NextResponse.json({ received: true });
     }
+    throw error;
   }
 
-  // ─── Subscription Created ───────────────────────────────────
-  if (eventName === "subscription_created") {
-    const attributes = data.attributes;
-    const orderId = String(data.id);
-    const customerEmail = attributes?.user_email ?? attributes?.customer_email ?? "";
+  // ─── Process the event ──────────────────────────────────────
+  try {
+    // ─── Helper: process LS order/subscription ──────────────────
+    async function handleLsOrder(attributes: any, orderId: string) {
+      const customData = attributes?.first_order_item?.product_options?.custom_data ?? {};
+      const customerEmail = attributes?.user_email ?? attributes?.customer_email ?? "";
 
-    if (customerEmail) {
-      const variantId = String(attributes?.variant_id ?? attributes?.product_variant_id ?? "");
-      const customData = attributes?.custom_data ?? {};
-      const productSlug = customData.courseSlug ?? "";
+      if (!customerEmail) {
+        console.error("Missing customer email in LS order", orderId);
+        return;
+      }
+
+      const variantId = String(attributes?.first_order_item?.variant_id ?? "");
+      const amount = attributes?.total ?? 0;
+      const currency = attributes?.currency ?? "usd";
+      const productSlug = customData.courseSlug ?? customData.productSlug ?? "";
       const customerName = attributes?.user_name ?? "";
 
-      try {
+      await processOrder({
+        email: customerEmail,
+        customerName,
+        productSlug,
+        variantId,
+        providerOrderId: orderId,
+        paymentProvider: "lemonsqueezy",
+        amount,
+        currency,
+        locale: customData.locale ?? "it",
+        customerCountry: attributes?.customer_country ?? attributes?.country ?? null,
+      });
+    }
+
+    // ─── Order Created ──────────────────────────────────────────
+    if (eventName === "order_created") {
+      const attributes = data.attributes;
+      const orderId = String(data.id);
+
+      console.log(`[LS Webhook] order_created: ${orderId}, email: ${attributes?.user_email ?? attributes?.customer_email}`);
+
+      await handleLsOrder(attributes, orderId);
+    }
+
+    // ─── Subscription Created ───────────────────────────────────
+    if (eventName === "subscription_created") {
+      const attributes = data.attributes;
+      const orderId = String(data.id);
+      const customerEmail = attributes?.user_email ?? attributes?.customer_email ?? "";
+
+      if (customerEmail) {
+        const variantId = String(attributes?.variant_id ?? attributes?.product_variant_id ?? "");
+        const customData = attributes?.custom_data ?? {};
+        const productSlug = customData.courseSlug ?? "";
+        const customerName = attributes?.user_name ?? "";
+
         await processOrder({
           email: customerEmail,
           customerName,
@@ -116,12 +139,21 @@ async function POST_IMPL(request: NextRequest) {
           locale: customData.locale ?? "it",
           customerCountry: attributes?.customer_country ?? attributes?.country ?? null,
         });
-      } catch (error) {
-        console.error("Failed to process subscription from LS webhook:", error);
       }
-    }
 
-    console.log("[LS Webhook] subscription_created:", data.id);
+      console.log("[LS Webhook] subscription_created:", data.id);
+    }
+  } catch (error) {
+    // Processing failed — delete the idempotency record so LS
+    // can retry the webhook.
+    await prisma.processedWebhook
+      .delete({ where: { deliveryId } })
+      .catch(() => {
+        // Silently ignore — record might have been cleaned up already
+      });
+
+    console.error("Failed to process LS webhook:", error);
+    return NextResponse.json({ error: "Temporary failure" }, { status: 503 });
   }
 
   return NextResponse.json({ received: true });
