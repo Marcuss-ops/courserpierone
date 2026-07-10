@@ -10,6 +10,7 @@
 import nodemailer from "nodemailer";
 import fs from "fs";
 import path from "path";
+import { AppError } from "@/lib/errors";
 
 // ─── Mail Transport ─────────────────────────────────────────
 let _transporter: nodemailer.Transporter | null = null;
@@ -463,7 +464,10 @@ export async function sendAbandonedCheckoutEmail(
     return true;
   } catch (error) {
     console.error(`❌ Errore invio recupero a ${email}:`, error);
-    return false;
+    throw new AppError(`Failed to send abandoned checkout email`, {
+      statusCode: 502,
+      code: "EMAIL_SEND_FAILED",
+    });
   }
 }
 
@@ -557,6 +561,9 @@ export async function sendPurchaseConfirmation(
     return true;
   } catch (error) {
     console.error(`❌ Errore invio conferma a ${email}:`, error);
-    return false;
+    throw new AppError(`Failed to send purchase confirmation email`, {
+      statusCode: 502,
+      code: "EMAIL_SEND_FAILED",
+    });
   }
 }
