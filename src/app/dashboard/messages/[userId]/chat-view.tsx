@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Send, Loader2, Wifi, WifiOff, ArrowUp, User } from "lucide-react";
+import { useRealtimeChat } from "@/lib/ws/use-realtime-chat";
 
 interface MessageData {
   id: string;
@@ -45,7 +46,6 @@ export function ChatView({
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sseConnected, setSseConnected] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(initialConversationId);
 
   const [hasMore, setHasMore] = useState(false);
@@ -54,11 +54,30 @@ export function ChatView({
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const esRef = useRef<EventSource | null>(null);
   const lastMessageDateRef = useRef<string | null>(null);
 
   const otherUserId = otherUser.id;
+
+  // ── WebSocket real-time (with SSE fallback) ──────────────
+  const handleRealtimeMessages = useCallback(
+    (newMessages: MessageData[]) => {
+      setMessages((prev) => {
+        const existingIds = new Set(prev.map((m) => m.id));
+        const newOnes = newMessages.filter((m) => !existingIds.has(m.id));
+        if (newOnes.length === 0) return prev;
+        const lastMsg = newOnes[newOnes.length - 1];
+        lastMessageDateRef.current = lastMsg.createdAt;
+        return [...prev, ...newOnes];
+      });
+    },
+    [],
+  );
+
+  const { connected } = useRealtimeChat({
+    otherUserId,
+    onMessages: handleRealtimeMessages,
+    enabled: true,
+  });
 
   // Fetch initial messages
   const fetchInitialMessages = useCallback(async () => {
@@ -134,77 +153,10 @@ export function ChatView({
     }
   }, [hasMore, loadingOlder, loadOlderMessages]);
 
-  // Initialize: fetch messages + SSE (with polling fallback)
+  // Initialize: fetch messages on mount
   useEffect(() => {
     void fetchInitialMessages();
-
-    // Polling fallback
-    const pollNewMessages = async () => {
-      try {
-        const p = new URLSearchParams({ with: otherUserId, limit: String(PAGE_SIZE) });
-        const res = await fetch(`/api/messages?${p.toString()}`);
-        if (!res.ok) return;
-        const data = await res.json();
-        const freshMsgs: MessageData[] = (data.messages ?? []).reverse();
-        if (freshMsgs.length === 0) return;
-        setMessages((prev) => {
-          const existingIds = new Set(prev.map((m) => m.id));
-          const newOnes = freshMsgs.filter((m) => !existingIds.has(m.id));
-          return newOnes.length === 0 ? prev : [...prev, ...newOnes];
-        });
-      } catch { /* ignore */ }
-    };
-
-    let fallbackPoll: ReturnType<typeof setInterval> | null = null;
-
-    const params = new URLSearchParams({ with: otherUserId });
-    if (lastMessageDateRef.current) params.set("since", lastMessageDateRef.current);
-
-    const esUrl = `/api/messages/stream?${params.toString()}`;
-
-    try {
-      const es = new EventSource(esUrl);
-      esRef.current = es;
-
-      es.onopen = () => setSseConnected(true);
-
-      es.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data) as { messages: MessageData[] };
-          if (data.messages?.length > 0) {
-            setMessages((prev) => {
-              const existingIds = new Set(prev.map((m) => m.id));
-              const newOnes = data.messages.filter((m) => !existingIds.has(m.id));
-              if (newOnes.length === 0) return prev;
-              const lastMsg = newOnes[newOnes.length - 1];
-              lastMessageDateRef.current = lastMsg.createdAt;
-              return [...prev, ...newOnes];
-            });
-          }
-        } catch { /* ignore */ }
-      };
-
-      es.onerror = () => {
-        setSseConnected(false);
-        es.close();
-        esRef.current = null;
-        if (!fallbackPoll) {
-          fallbackPoll = setInterval(pollNewMessages, 5000);
-          pollRef.current = fallbackPoll;
-        }
-      };
-    } catch {
-      fallbackPoll = setInterval(pollNewMessages, 5000);
-      pollRef.current = fallbackPoll;
-    }
-
-    return () => {
-      if (esRef.current) { esRef.current.close(); esRef.current = null; }
-      setSseConnected(false);
-      if (fallbackPoll) clearInterval(fallbackPoll);
-      if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
-    };
-  }, [otherUserId, fetchInitialMessages]);
+  }, [fetchInitialMessages]);
 
   // Mark received messages as read
   useEffect(() => {
@@ -367,11 +319,11 @@ export function ChatView({
       <div className="px-4 sm:px-6 py-1 flex items-center justify-center">
         <span
           className={`inline-flex items-center gap-1 text-[10px] font-medium ${
-            sseConnected ? "text-emerald-400" : "text-cream-dark-text-soft/50"
+            connected ? "text-emerald-400" : "text-cream-dark-text-soft/50"
           }`}
         >
-          {sseConnected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
-          {sseConnected ? "Live" : "Polling"}
+          {connected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
+          {connected ? "Live" : "Reconnecting..."}
         </span>
       </div>
 

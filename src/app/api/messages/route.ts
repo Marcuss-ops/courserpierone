@@ -4,6 +4,7 @@ import { getServerUser } from "@/lib/supabase/get-user";
 import { withRateLimit } from "@/lib/utils/rate-limit";
 import { sanitizeHtml } from "@/lib/utils/sanitize";
 import { apiErrorResponse } from "@/lib/errors";
+import { messageBroker, NEW_MESSAGE } from "@/lib/ws/broker";
 
 /**
  * Trova o crea una conversazione tra due utenti.
@@ -182,6 +183,15 @@ export const POST = withRateLimit(async function POST(request: NextRequest) {
         sender: {
           select: { id: true, name: true, image: true, role: true },
         },
+      },
+    });
+
+    // Emit to WebSocket broker for real-time delivery to connected clients
+    messageBroker.emit(NEW_MESSAGE, {
+      conversationId: conversation.id,
+      message: {
+        ...message,
+        createdAt: message.createdAt.toISOString(),
       },
     });
 

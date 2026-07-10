@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { X, Send, Loader2, MessageSquare, Wifi, WifiOff, ArrowUp } from "lucide-react";
+import { useRealtimeChat } from "@/lib/ws/use-realtime-chat";
 
 interface MessageData {
   id: string;
@@ -43,7 +44,6 @@ export function ChatModal({
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sseConnected, setSseConnected] = useState(false);
 
   // Cursor pagination state
   const [hasMore, setHasMore] = useState(false);
@@ -52,9 +52,28 @@ export function ChatModal({
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const esRef = useRef<EventSource | null>(null);
   const lastMessageDateRef = useRef<string | null>(null);
+
+  // ── WebSocket real-time (with SSE fallback) ──────────────
+  const handleRealtimeMessages = useCallback(
+    (newMessages: MessageData[]) => {
+      setMessages((prev) => {
+        const existingIds = new Set(prev.map((m) => m.id));
+        const newOnes = newMessages.filter((m) => !existingIds.has(m.id));
+        if (newOnes.length === 0) return prev;
+        const lastMsg = newOnes[newOnes.length - 1];
+        lastMessageDateRef.current = lastMsg.createdAt;
+        return [...prev, ...newOnes];
+      });
+    },
+    [],
+  );
+
+  const { connected } = useRealtimeChat({
+    otherUserId: creatorId,
+    onMessages: handleRealtimeMessages,
+    enabled: open,
+  });
 
   // Fetch initial messages (most recent page)
   const fetchInitialMessages = useCallback(async () => {
@@ -124,83 +143,13 @@ export function ChatModal({
     }
   }, [hasMore, loadingOlder, loadOlderMessages]);
 
-  // Inizializza: carica messaggi + avvia SSE (con polling fallback)
+  // Initialize: fetch messages when modal opens
   useEffect(() => {
     if (!open) return;
-
     void fetchInitialMessages();
+  }, [open, fetchInitialMessages]);
 
-    // Polling fallback helper: fetch recent messages, merge without resetting cursor
-    const pollNewMessages = async () => {
-      try {
-        const p = new URLSearchParams({ with: creatorId, limit: String(PAGE_SIZE) });
-        if (productId) p.set("productId", productId);
-        const res = await fetch(`/api/messages?${p.toString()}`);
-        if (!res.ok) return;
-        const data = await res.json();
-        const freshMsgs: MessageData[] = (data.messages ?? []).reverse();
-        if (freshMsgs.length === 0) return;
-        setMessages((prev) => {
-          const existingIds = new Set(prev.map((m) => m.id));
-          const newOnes = freshMsgs.filter((m) => !existingIds.has(m.id));
-          return newOnes.length === 0 ? prev : [...prev, ...newOnes];
-        });
-      } catch { /* ignore poll errors */ }
-    };
-
-    let fallbackPoll: ReturnType<typeof setInterval> | null = null;
-
-    const params = new URLSearchParams({ with: creatorId });
-    if (productId) params.set("productId", productId);
-    if (lastMessageDateRef.current) params.set("since", lastMessageDateRef.current);
-
-    const esUrl = `/api/messages/stream?${params.toString()}`;
-
-    try {
-      const es = new EventSource(esUrl);
-      esRef.current = es;
-
-      es.onopen = () => setSseConnected(true);
-
-      es.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data) as { messages: MessageData[] };
-          if (data.messages?.length > 0) {
-            setMessages((prev) => {
-              const existingIds = new Set(prev.map((m) => m.id));
-              const newOnes = data.messages.filter((m) => !existingIds.has(m.id));
-              if (newOnes.length === 0) return prev;
-              const lastMsg = newOnes[newOnes.length - 1];
-              lastMessageDateRef.current = lastMsg.createdAt;
-              return [...prev, ...newOnes];
-            });
-          }
-        } catch { /* ignore malformed events */ }
-      };
-
-      es.onerror = () => {
-        setSseConnected(false);
-        es.close();
-        esRef.current = null;
-        if (!fallbackPoll) {
-          fallbackPoll = setInterval(pollNewMessages, 5000);
-          pollRef.current = fallbackPoll;
-        }
-      };
-    } catch {
-      fallbackPoll = setInterval(pollNewMessages, 5000);
-      pollRef.current = fallbackPoll;
-    }
-
-    return () => {
-      if (esRef.current) { esRef.current.close(); esRef.current = null; }
-      setSseConnected(false);
-      if (fallbackPoll) clearInterval(fallbackPoll);
-      if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
-    };
-  }, [open, creatorId, productId, fetchInitialMessages]);
-
-  // Marca i messaggi ricevuti come letti
+  // Mark received messages as read
   useEffect(() => {
     if (!open) return;
     const unreadFromCreator = messages.filter(
@@ -217,7 +166,6 @@ export function ChatModal({
   }, [messages, creatorId, open]);
 
   // Auto-scroll to bottom only when user is already near the bottom.
-  // Prevents yanking the user down while they're reading older messages.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el || !bottomRef.current) return;
@@ -294,9 +242,9 @@ export function ChatModal({
                 <p className="text-xs text-cream-dark-text-soft font-light">
                   Scrivi come {currentUserName} — rispondo entro 24h
                 </p>
-                <span className={`inline-flex items-center gap-1 text-[10px] font-medium ${sseConnected ? "text-emerald-400" : "text-cream-dark-text-soft/50"}`}>
-                  {sseConnected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
-                  {sseConnected ? "Live" : "Polling"}
+                <span className={`inline-flex items-center gap-1 text-[10px] font-medium ${connected ? "text-emerald-400" : "text-cream-dark-text-soft/50"}`}>
+                  {connected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
+                  {connected ? "Live" : "Reconnecting..."}
                 </span>
               </div>
               <button
