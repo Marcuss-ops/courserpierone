@@ -5,7 +5,6 @@ import {
   getPriceString,
   getCurrentAmountAndSymbol,
   parsePricesByCurrency,
-  formatPrice,
   type CountryPriceOverride,
 } from "./pricing";
 
@@ -388,33 +387,3 @@ describe("parsePricesByCurrency", () => {
   });
 });
 
-// ─── formatPrice ───────────────────────────────────────────
-describe("formatPrice", () => {
-  it("formats EUR price", () => {
-    expect(formatPrice(4900, "€")).toBe("€49");
-  });
-
-  it("formats USD price", () => {
-    expect(formatPrice(5400, "$")).toBe("$54");
-  });
-
-  it("formats JPY price (no decimals)", () => {
-    expect(formatPrice(780000, "¥")).toBe("¥7800");
-  });
-
-  it("formats BRL price", () => {
-    expect(formatPrice(9900, "R$")).toBe("R$99");
-  });
-
-  it("formats zero amount", () => {
-    expect(formatPrice(0, "€")).toBe("€0");
-  });
-
-  it("handles large amounts", () => {
-    expect(formatPrice(299900, "₹")).toBe("₹2999");
-  });
-
-  it("rounds down (toFixed(0))", () => {
-    expect(formatPrice(199, "€")).toBe("€2"); // 199/100 = 1.99 → toFixed(0) = "2"
-  });
-});

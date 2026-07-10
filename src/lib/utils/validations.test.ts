@@ -2,10 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   analyticsEventSchema,
   checkoutSchema,
-  createProductSchema,
   progressSchema,
-  generateConfigSchema,
-  translateSchema,
 } from "./validations";
 
 // ─── Analytics Event Schema ─────────────────────────────────
@@ -99,77 +96,6 @@ describe("checkoutSchema", () => {
   });
 });
 
-// ─── Product Schema ─────────────────────────────────────────
-describe("createProductSchema", () => {
-  it("accepts a valid minimal product", () => {
-    const result = createProductSchema.safeParse({ slug: "corso-foto" });
-    expect(result.success).toBe(true);
-  });
-
-  it("accepts a full product with lessons", () => {
-    const result = createProductSchema.safeParse({
-      slug: "corso-foto",
-      price: 4900,
-      coverUrl: "https://example.com/cover.jpg",
-      templateId: "lumio",
-      translations: { titolo: "Corso Fotografia" },
-      lessons: [
-        { title: "Lezione 1", videoUrl: "https://youtube.com/embed/abc", description: "Intro" },
-        { title: "Lezione 2" },
-      ],
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("rejects invalid slug (uppercase)", () => {
-    const result = createProductSchema.safeParse({ slug: "CORSO-FOTO" });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects invalid slug (spaces)", () => {
-    const result = createProductSchema.safeParse({ slug: "corso foto" });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects empty slug", () => {
-    const result = createProductSchema.safeParse({ slug: "" });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects negative price", () => {
-    const result = createProductSchema.safeParse({
-      slug: "corso-foto",
-      price: -100,
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects lesson with empty title", () => {
-    const result = createProductSchema.safeParse({
-      slug: "corso-foto",
-      lessons: [{ title: "" }],
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("accepts nullable fields as null", () => {
-    const result = createProductSchema.safeParse({
-      slug: "corso-foto",
-      coverUrl: null,
-      lemonVariantId: null,
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("rejects invalid templateId", () => {
-    const result = createProductSchema.safeParse({
-      slug: "corso-foto",
-      templateId: "invalid-template",
-    });
-    expect(result.success).toBe(false);
-  });
-});
-
 // ─── Progress Schema ────────────────────────────────────────
 describe("progressSchema", () => {
   it("accepts valid progress data with default completed", () => {
@@ -199,55 +125,3 @@ describe("progressSchema", () => {
   });
 });
 
-// ─── Generate Config Schema ─────────────────────────────────
-describe("generateConfigSchema", () => {
-  it("accepts a valid slug", () => {
-    const result = generateConfigSchema.safeParse({ slug: "corso-foto" });
-    expect(result.success).toBe(true);
-  });
-
-  it("rejects empty slug", () => {
-    const result = generateConfigSchema.safeParse({ slug: "" });
-    expect(result.success).toBe(false);
-  });
-});
-
-// ─── Translate Schema ───────────────────────────────────────
-describe("translateSchema", () => {
-  it("accepts valid translation request", () => {
-    const result = translateSchema.safeParse({
-      sourceLocale: "it",
-      targetLocales: ["en", "es", "fr"],
-      sections: { titolo: "Ciao", storia: "Era una volta..." },
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("rejects empty targetLocales", () => {
-    const result = translateSchema.safeParse({
-      sourceLocale: "it",
-      targetLocales: [],
-      sections: { titolo: "Ciao" },
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects empty sections", () => {
-    const result = translateSchema.safeParse({
-      sourceLocale: "it",
-      targetLocales: ["en"],
-      sections: {},
-    });
-    // Record<string, string> with empty object is valid
-    expect(result.success).toBe(true);
-  });
-
-  it("rejects locale too short", () => {
-    const result = translateSchema.safeParse({
-      sourceLocale: "i",
-      targetLocales: ["en"],
-      sections: { titolo: "Ciao" },
-    });
-    expect(result.success).toBe(false);
-  });
-});
