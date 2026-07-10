@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { withRateLimit } from "@/lib/utils/rate-limit";
+import { sanitizeHtml } from "@/lib/utils/sanitize";
 import { apiErrorResponse } from "@/lib/errors";
 
 /**
@@ -121,7 +122,7 @@ export const POST = withRateLimit(async function POST(request: NextRequest) {
         senderId: dbUser.id,
         receiverId,
         productId: productId || null,
-        content: content.trim(),
+        content: sanitizeHtml(content.trim()),
       },
       include: {
         sender: {
