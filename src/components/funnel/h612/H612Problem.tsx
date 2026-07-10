@@ -1,5 +1,6 @@
-// ─── H612Problem — Problem statement section ──────────────
+// ─── H612Problem — Thin wrapper ────────────────────────────
 
+import { SharedProblem } from "@/components/funnel/shared/SharedProblem";
 import type { H612LocaleContent, H612T } from "./types";
 
 interface H612ProblemProps {
@@ -9,30 +10,16 @@ interface H612ProblemProps {
 }
 
 export function H612Problem({ problema, lc, t }: H612ProblemProps) {
-  if (!problema) return null;
-
   return (
-    <section className="py-24">
-      <div className="mx-auto max-w-3xl px-6">
-        <span
-          className="mb-4 inline-block text-xs font-semibold uppercase tracking-widest"
-          style={{ color: "#8e9192" }}
-        >
-          {lc?.problem?.badge ||
-            t("the_problem", "The Problem")}
-        </span>
-        <h2
-          className="mt-4"
-          style={{
-            fontFamily: "'Noto Serif', serif",
-            fontSize: "clamp(28px, 4vw, 48px)",
-            lineHeight: 1.2,
-            letterSpacing: "-0.01em",
-          }}
-        >
-          {problema}
-        </h2>
-      </div>
-    </section>
+    <SharedProblem
+      text={problema}
+      badge={lc?.problem?.badge || t("the_problem", "The Problem")}
+      badgeBg="transparent"
+      badgeColor="#8e9192"
+      align="left"
+      headingColor="#ffffff"
+      headingFont="'Noto Serif', serif"
+      className="py-24"
+    />
   );
 }
