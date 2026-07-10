@@ -2,7 +2,7 @@
 
 import { Lock } from "lucide-react";
 import { SharedGuarantee } from "@/components/funnel/shared/SharedGuarantee";
-import { SharedCTAButton } from "@/components/funnel/shared/SharedCTAButton";
+import { SharedCTA } from "@/components/funnel/shared/SharedCTA";
 import type { AmishProps, AmishT } from "./types";
 
 interface AmishOfferProps {
@@ -100,7 +100,7 @@ export function AmishOffer({
             </p>
           )}
 
-          <SharedCTAButton
+          <SharedCTA
             href={checkoutUrl}
             productSlug={productSlug ?? ""}
             productId={productId}
@@ -111,7 +111,7 @@ export function AmishOffer({
             className="mt-10 px-8 py-5 text-lg"
           >
             {t("offer_cta")} {data.prezzo}
-          </SharedCTAButton>
+          </SharedCTA>
 
           <div className="mt-5 flex items-center justify-center gap-4 text-xs text-white/40">
             {t("offer_stripe_paypal") && (
