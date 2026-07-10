@@ -1,6 +1,7 @@
 import { prisma } from "../db/prisma";
 import { sendPurchaseConfirmation } from "./email";
 import { COUNTRY_LOCALE } from "@/lib/i18n/_generated/locale-data";
+import { NotFoundError } from "@/lib/errors";
 
 export interface ProcessOrderInput {
   /** Customer email — used for find-or-create user */
@@ -97,7 +98,9 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
     console.error(
       `[OrderService] Product not found — directId: ${directProductId ?? "—"}, slug: ${productSlug ?? "—"}, variantId: ${variantId ?? "—"}, stripePriceId: ${stripePriceId ?? "—"}`
     );
-    return;
+    throw new NotFoundError(
+      `Product not resolvable from provided identifiers`
+    );
   }
 
   // ── 3. Idempotency check ────────────────────────────────────
