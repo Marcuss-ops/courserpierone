@@ -123,6 +123,7 @@ model User {
   bio            String?  @db.Text // Bio pubblica Markdown
   socialLinks    String?  // JSON: { "twitter": "...", "instagram": "...", "youtube": "...", "linkedin": "...", "website": "..." }
   coverImageUrl  String?  // URL immagine copertina profilo
+  lastSeenAt    DateTime? // ultima attività (WebSocket connect/disconnect)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @default(now()) @updatedAt
 
