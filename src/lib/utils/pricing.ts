@@ -92,7 +92,7 @@ export function getPriceString(
   }
 
   // 2. Derive currency from locale
-  const currency = getCurrencyFromLocaleCode(locale);
+  const currency = getCurrencyFromLocale(locale.toLowerCase());
 
   // 3. Look up price by currency code
   const priceConfig = data.prices?.[currency] ?? data?.prices?.default;
@@ -123,20 +123,12 @@ export function getCurrentAmountAndSymbol(
   }
 
   // Locale-based lookup
-  const currencyCode = getCurrencyFromLocaleCode(locale);
+  const currencyCode = getCurrencyFromLocale(locale.toLowerCase());
   const priceConfig = data.prices?.[currencyCode] ?? data.prices?.default;
   const symbol = priceConfig?.symbol ?? "€";
   const currentAmount = priceConfig?.amount ?? baseAmount;
 
   return { currentAmount, symbol, currency: currencyCode, baseAmount };
-}
-
-/**
- * Mappa locale → codice valuta (delega a LOCALE_CURRENCY da DB).
- * La singola fonte di verità è src/lib/i18n/_generated/locale-data.ts
- */
-function getCurrencyFromLocaleCode(locale: string): string {
-  return getCurrencyFromLocale(locale.toLowerCase());
 }
 
 /**
