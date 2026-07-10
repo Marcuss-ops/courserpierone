@@ -10,6 +10,7 @@
  */
 
 import type { CourseConfig, PriceByLocale } from "@/lib/config/white-label-data";
+import { getCurrencyFromLocale } from "@/lib/i18n/locale-resolver";
 
 // ─── Country Override Interface ───────────────────────────
 export interface CountryPriceOverride {
@@ -131,31 +132,11 @@ export function getCurrentAmountAndSymbol(
 }
 
 /**
- * Mappa locale → codice valuta (es. "pt-br" → "BRL", "ja-jp" → "JPY")
+ * Mappa locale → codice valuta (delega a LOCALE_CURRENCY da DB).
+ * La singola fonte di verità è src/lib/i18n/_generated/locale-data.ts
  */
 function getCurrencyFromLocaleCode(locale: string): string {
-  const localeCurrencyMap: Record<string, string> = {
-    "it-it": "EUR", "it": "EUR",
-    "en": "USD", "en-us": "USD", "en-gb": "GBP", "en-ca": "CAD", "en-au": "AUD", "en-nz": "NZD", "en-ie": "EUR",
-    "fr-fr": "EUR", "fr-ch": "CHF", "fr-ca": "CAD",
-    "de-de": "EUR", "de-at": "EUR", "de-ch": "CHF",
-    "es-es": "EUR", "es-mx": "MXN", "es-ar": "ARS", "es-co": "COP", "es-cl": "CLP", "es-pe": "PEN",
-    "pt-pt": "EUR", "pt-br": "BRL",
-    "nl-nl": "EUR", "nl-be": "EUR",
-    "ja-jp": "JPY", "ko-kr": "KRW",
-    "zh-cn": "CNY", "zh-tw": "TWD", "zh-hk": "HKD",
-    "ru-ru": "RUB", "uk-ua": "UAH",
-    "tr-tr": "TRY",
-    "th-th": "THB", "vi-vn": "VND", "id-id": "IDR",
-    "in-in": "INR", "hi-in": "INR",
-    "ar-ae": "AED", "ar-sa": "SAR", "ar-eg": "EGP",
-    "he-il": "ILS",
-    "pl-pl": "PLN", "sv-se": "SEK", "da-dk": "DKK", "nb-no": "NOK", "fi-fi": "EUR",
-    "cs-cz": "CZK", "hu-hu": "HUF", "ro-ro": "RON",
-    "bg-bg": "BGN", "hr-hr": "EUR",
-  };
-  const normalized = locale.toLowerCase();
-  return localeCurrencyMap[normalized] ?? localeCurrencyMap[normalized.split("-")[0]] ?? "EUR";
+  return getCurrencyFromLocale(locale.toLowerCase());
 }
 
 /**
