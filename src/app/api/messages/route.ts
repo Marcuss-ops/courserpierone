@@ -56,14 +56,17 @@ async function findConversation(
 }
 
 /**
- * GET /api/messages?with=<userId>&productId=<productId>
+ * GET /api/messages?with=<userId>&productId=<productId>&cursor=<id>&limit=50
  *
- * Recupera la conversazione tra l'utente corrente e un altro utente,
- * opzionalmente filtrata per prodotto.
+ * Cursor-based pagination per la conversazione tra due utenti.
  *
- * CONTROLLO DI ACCESSO: cerca la Conversation tra i due utenti.
- * Se non esiste, restituisce 403 (nessuna conversazione autorizzata).
- * Se esiste, recupera i messaggi filtrati per conversationId.
+ * - Senza cursor: restituisce i messaggi più recenti (prima pagina)
+ * - Con cursor: restituisce i messaggi più vecchi del cursor
+ * - Ordine: createdAt DESC (più recenti prima)
+ * - Risposta: { messages, nextCursor }
+ *   nextCursor = id del messaggio più vecchio nella pagina, o null se non ce ne sono altri
+ *
+ * CONTROLLO DI ACCESSO: verifica che la Conversation esista e appartenga all'utente.
  */
 export const GET = withRateLimit(async function GET(request: NextRequest) {
   try {
@@ -75,17 +78,17 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const withUserId = searchParams.get("with");
     const productId = searchParams.get("productId") || undefined;
+    const cursor = searchParams.get("cursor") || undefined;
+    const limit = Math.min(parseInt(searchParams.get("limit") ?? "50", 10) || 50, 100);
 
     if (!withUserId) {
       return NextResponse.json({ error: "Parametro 'with' obbligatorio" }, { status: 400 });
     }
 
-    // Impedisci a un utente di interrogare i propri messaggi
     if (withUserId === dbUser.id) {
       return NextResponse.json({ error: "Non puoi visualizzare una conversazione con te stesso" }, { status: 400 });
     }
 
-    // Verifica che l'utente destinatario esista
     const otherUser = await prisma.user.findUnique({
       where: { id: withUserId },
       select: { id: true },
@@ -94,7 +97,6 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Utente non trovato" }, { status: 404 });
     }
 
-    // Cerca la conversazione tra i due utenti
     const conversation = await findConversation(dbUser.id, withUserId, productId);
 
     if (!conversation) {
@@ -104,18 +106,27 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
       );
     }
 
-    // Recupera messaggi della conversazione
+    // Cursor-based: fetch one extra to determine if there's a next page
     const messages = await prisma.message.findMany({
-      where: { conversationId: conversation.id },
+      where: {
+        conversationId: conversation.id,
+        ...(cursor ? { id: { lt: cursor } } : {}),
+      },
       include: {
         sender: {
           select: { id: true, name: true, image: true, role: true },
         },
       },
-      orderBy: { createdAt: "asc" },
+      orderBy: { createdAt: "desc" },
+      take: limit + 1,
     });
 
-    return NextResponse.json({ messages });
+    const hasMore = messages.length > limit;
+    const page = hasMore ? messages.slice(0, limit) : messages;
+    // nextCursor = ID of the oldest message in this page (to fetch the next older page)
+    const nextCursor = hasMore ? page[page.length - 1].id : null;
+
+    return NextResponse.json({ messages: page, nextCursor });
   } catch (error) {
     return apiErrorResponse(error, "Errore interno");
   }
