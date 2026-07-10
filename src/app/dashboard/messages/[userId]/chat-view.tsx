@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Send, Loader2, Wifi, WifiOff, ArrowUp, User } from "lucide-react";
 import { useRealtimeChat } from "@/lib/ws/use-realtime-chat";
+import { useChatT } from "@/lib/i18n/use-chat-t";
 
 interface MessageData {
   id: string;
@@ -56,6 +57,7 @@ export function ChatView({
   const bottomRef = useRef<HTMLDivElement>(null);
   const lastMessageDateRef = useRef<string | null>(null);
 
+  const t = useChatT();
   const otherUserId = otherUser.id;
 
   // ── WebSocket real-time (with SSE fallback) ──────────────
@@ -95,7 +97,7 @@ export function ChatView({
         return;
       }
 
-      if (!res.ok) throw new Error("Errore nel caricamento messaggi");
+      if (!res.ok) throw new Error(t.loadError);
       const data = await res.json();
 
       const msgs: MessageData[] = (data.messages ?? []).reverse();
@@ -110,12 +112,12 @@ export function ChatView({
         }
       }
     } catch (err) {
-      setError("Impossibile caricare i messaggi. Riprova.");
+      setError(t.loadErrorRetry);
       console.error("fetchMessages error:", err);
     } finally {
       setLoading(false);
     }
-  }, [otherUserId, conversationId]);
+  }, [otherUserId, conversationId, t]);
 
   // Load older messages
   const loadOlderMessages = useCallback(async () => {
@@ -129,7 +131,7 @@ export function ChatView({
         limit: String(PAGE_SIZE),
       });
       const res = await fetch(`/api/messages?${params.toString()}`);
-      if (!res.ok) throw new Error("Errore nel caricamento");
+      if (!res.ok) throw new Error(t.loadErrorShort);
       const data = await res.json();
 
       const olderMsgs: MessageData[] = (data.messages ?? []).reverse();
@@ -143,7 +145,7 @@ export function ChatView({
     } finally {
       setLoadingOlder(false);
     }
-  }, [otherUserId, loadingOlder]);
+  }, [otherUserId, loadingOlder, t]);
 
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
@@ -201,7 +203,7 @@ export function ChatView({
       });
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error || "Errore nell'invio");
+        throw new Error(err.error || t.sendError);
       }
       const data = await res.json();
       setMessages((prev) => [...prev, data.message]);
@@ -211,7 +213,7 @@ export function ChatView({
         setConversationId(data.message.conversationId);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Errore nell'invio");
+      setError(err instanceof Error ? err.message : t.sendError);
     } finally {
       setSending(false);
     }
@@ -224,7 +226,7 @@ export function ChatView({
     }
   };
 
-  const otherName = otherUser.name || "Utente";
+  const otherName = otherUser.name || t.userFallback;
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
@@ -247,7 +249,7 @@ export function ChatView({
               ) : (
                 <ArrowUp className="w-3 h-3" />
               )}
-              {loadingOlder ? "Caricamento..." : "Messaggi precedenti"}
+              {loadingOlder ? t.loading : t.olderMessages}
             </button>
           </div>
         )}
@@ -275,7 +277,7 @@ export function ChatView({
             <div className="space-y-1">
               <h3 className="font-serif text-lg text-cream-dark-text">{otherName}</h3>
               <p className="text-sm text-cream-dark-text-soft font-light max-w-[280px]">
-                Scrivi qui il tuo primo messaggio. Risponderò il prima possibile.
+                {t.emptyChatHint}
               </p>
             </div>
           </div>
@@ -324,7 +326,7 @@ export function ChatView({
           }`}
         >
           {connected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
-          {connected ? "Live" : "Reconnecting..."}
+          {connected ? t.live : t.reconnecting}
         </span>
       </div>
 
@@ -337,7 +339,7 @@ export function ChatView({
               <span className="w-1.5 h-1.5 rounded-full bg-cream-dark-gold animate-bounce" style={{ animationDelay: "150ms" }} />
               <span className="w-1.5 h-1.5 rounded-full bg-cream-dark-gold animate-bounce" style={{ animationDelay: "300ms" }} />
             </span>
-            {otherName} sta scrivendo…
+            {otherName} {t.typing}
           </span>
         </div>
       )}
@@ -349,7 +351,7 @@ export function ChatView({
             type="text"
             value={input}
             onKeyDown={handleKeyDown}
-            placeholder={`Scrivi a ${otherName}...`}
+            placeholder={t.writeToName.replace("{name}", otherName)}
             maxLength={5000}
             disabled={sending}
                   onChange={(e) => {
@@ -367,7 +369,7 @@ export function ChatView({
             onClick={() => { void handleSend(); }}
             disabled={!input.trim() || sending}
             className="p-2.5 rounded-xl bg-cream-dark-gold/20 border border-cream-dark-gold/30 text-cream-dark-gold hover:bg-cream-dark-gold/30 disabled:opacity-30 disabled:cursor-not-allowed transition-all shrink-0"
-            aria-label="Invia messaggio"
+            aria-label={t.sendMessage}
           >
             {sending ? (
               <Loader2 className="w-4 h-4 animate-spin" />

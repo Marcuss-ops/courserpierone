@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Search, User, MessageSquare, Loader2, X } from "lucide-react";
+import { useChatT } from "@/lib/i18n/use-chat-t";
 
 interface UserResult {
   id: string;
@@ -17,6 +18,7 @@ const MIN_QUERY = 2;
 const DEBOUNCE_MS = 300;
 
 export function UserSearchBar() {
+  const t = useChatT();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<UserResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -70,13 +72,13 @@ export function UserSearchBar() {
       const res = await fetch(`/api/users/search?${params.toString()}`);
       // Discard stale responses
       if (requestId !== requestIdRef.current) return;
-      if (!res.ok) throw new Error("Errore nella ricerca");
+      if (!res.ok) throw new Error(t.searchFetchError);
       const data = await res.json();
       if (requestId !== requestIdRef.current) return;
       setResults(data.users ?? []);
     } catch (err) {
       if (requestId !== requestIdRef.current) return;
-      setError("Impossibile cercare utenti. Riprova.");
+      setError(t.searchError);
       setResults([]);
     } finally {
       if (requestId === requestIdRef.current) {
@@ -122,14 +124,14 @@ export function UserSearchBar() {
           onFocus={() => {
             if (results.length > 0) setOpen(true);
           }}
-          placeholder="Cerca utenti per nome o username..."
+          placeholder={t.searchPlaceholder}
           className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-cream-dark-surface border border-cream-dark-border text-cream-dark-text placeholder:text-cream-dark-text-soft/40 text-sm focus:outline-none focus:border-cream-dark-gold/50 focus:ring-1 focus:ring-cream-dark-gold/20 transition-all"
         />
         {query && (
           <button
             onClick={handleClear}
             className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-md text-cream-dark-text-soft/50 hover:text-cream-dark-text transition-colors"
-            aria-label="Pulisci ricerca"
+            aria-label={t.clearSearch}
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -155,7 +157,7 @@ export function UserSearchBar() {
             <div className="px-4 py-6 text-center">
               <User className="w-8 h-8 text-cream-dark-text-soft/30 mx-auto mb-2" />
               <p className="text-sm text-cream-dark-text-soft font-light">
-                Nessun utente trovato per &quot;{query}&quot;
+                {t.noUsersFound.replace("{query}", query)}
               </p>
             </div>
           )}
@@ -185,11 +187,11 @@ export function UserSearchBar() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-semibold text-cream-dark-text truncate group-hover:text-cream-dark-gold transition-colors">
-                        {user.name || "Utente senza nome"}
+                        {user.name || t.userNoName}
                       </span>
                       {user.role === "admin" && (
                         <span className="shrink-0 px-1.5 py-0.5 bg-cream-dark-gold/15 border border-cream-dark-gold/30 rounded-full text-[9px] font-bold uppercase text-cream-dark-gold">
-                          Creator
+                          {t.creatorBadge}
                         </span>
                       )}
                     </div>
@@ -213,7 +215,7 @@ export function UserSearchBar() {
                     className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cream-dark-gold/10 border border-cream-dark-gold/20 text-cream-dark-gold text-xs font-semibold hover:bg-cream-dark-gold/20 transition-all"
                   >
                     <MessageSquare className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Scrivi</span>
+                    <span className="hidden sm:inline">{t.writeButton}</span>
                   </Link>
                 </div>
               ))}

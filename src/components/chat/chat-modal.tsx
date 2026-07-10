@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { X, Send, Loader2, MessageSquare, Wifi, WifiOff, ArrowUp } from "lucide-react";
 import { useRealtimeChat } from "@/lib/ws/use-realtime-chat";
+import { useChatT } from "@/lib/i18n/use-chat-t";
 
 interface MessageData {
   id: string;
@@ -36,8 +37,9 @@ export function ChatModal({
   creatorId,
   creatorName,
   productId,
-  triggerLabel = "Scrivi al creator",
+  triggerLabel,
 }: ChatModalProps) {
+  const t = useChatT();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<MessageData[]>([]);
   const [input, setInput] = useState("");
@@ -83,7 +85,7 @@ export function ChatModal({
       const params = new URLSearchParams({ with: creatorId, limit: String(PAGE_SIZE) });
       if (productId) params.set("productId", productId);
       const res = await fetch(`/api/messages?${params.toString()}`);
-      if (!res.ok) throw new Error("Errore nel caricamento messaggi");
+      if (!res.ok) throw new Error(t.loadError);
       const data = await res.json();
 
       // API returns DESC (newest first) — reverse for ASC display (oldest → newest)
@@ -96,12 +98,12 @@ export function ChatModal({
         lastMessageDateRef.current = msgs[msgs.length - 1].createdAt;
       }
     } catch (err) {
-      setError("Impossibile caricare i messaggi. Riprova.");
+      setError(t.loadErrorRetry);
       console.error("fetchMessages error:", err);
     } finally {
       setLoading(false);
     }
-  }, [creatorId, productId]);
+  }, [creatorId, productId, t]);
 
   // Load older messages (cursor-based pagination)
   const loadOlderMessages = useCallback(async () => {
@@ -116,7 +118,7 @@ export function ChatModal({
       });
       if (productId) params.set("productId", productId);
       const res = await fetch(`/api/messages?${params.toString()}`);
-      if (!res.ok) throw new Error("Errore nel caricamento");
+      if (!res.ok) throw new Error(t.loadErrorShort);
       const data = await res.json();
 
       // API returns DESC — reverse and prepend to existing messages
@@ -131,7 +133,7 @@ export function ChatModal({
     } finally {
       setLoadingOlder(false);
     }
-  }, [creatorId, productId, loadingOlder]);
+  }, [creatorId, productId, loadingOlder, t]);
 
   // Detect scroll-to-top to load older messages
   const handleScroll = useCallback(() => {
@@ -196,14 +198,14 @@ export function ChatModal({
       });
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error || "Errore nell'invio");
+        throw new Error(err.error || t.sendError);
       }
       const data = await res.json();
       setMessages((prev) => [...prev, data.message]);
       setInput("");
       sendTyping(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Errore nell'invio");
+      setError(err instanceof Error ? err.message : t.sendError);
     } finally {
       setSending(false);
     }
@@ -223,7 +225,7 @@ export function ChatModal({
         className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cream-dark-surface border border-cream-dark-border text-cream-dark-text-soft hover:text-cream-dark-gold hover:border-cream-dark-gold/30 transition-all text-sm font-semibold"
       >
         <MessageSquare className="w-4 h-4" />
-        <span>{triggerLabel}</span>
+      <span>{triggerLabel || t.writeToCreator}</span>
       </button>
 
       {open && (
@@ -241,17 +243,17 @@ export function ChatModal({
                   {creatorName}
                 </h3>
                 <p className="text-xs text-cream-dark-text-soft font-light">
-                  Scrivi come {currentUserName} — rispondo entro 24h
+                  {t.writeAs} {currentUserName} — {t.respondWithin}
                 </p>
                 <span className={`inline-flex items-center gap-1 text-[10px] font-medium ${connected ? "text-emerald-400" : "text-cream-dark-text-soft/50"}`}>
                   {connected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
-                  {connected ? "Live" : "Reconnecting..."}
+                  {connected ? t.live : t.reconnecting}
                 </span>
               </div>
               <button
                 onClick={() => setOpen(false)}
                 className="p-2 rounded-xl bg-cream-dark-surface border border-cream-dark-border text-cream-dark-text-soft hover:text-cream-dark-text hover:border-cream-dark-gold/30 transition-all"
-                aria-label="Chiudi chat"
+                aria-label={t.closeChat}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -276,7 +278,7 @@ export function ChatModal({
                     ) : (
                       <ArrowUp className="w-3 h-3" />
                     )}
-                    {loadingOlder ? "Caricamento..." : "Messaggi precedenti"}
+                    {loadingOlder ? t.loading : t.olderMessages}
                   </button>
                 </div>
               )}
@@ -291,7 +293,7 @@ export function ChatModal({
                 <div className="flex flex-col items-center justify-center h-full text-center gap-3">
                   <MessageSquare className="w-10 h-10 text-cream-dark-text-soft/40" />
                   <p className="text-sm text-cream-dark-text-soft font-light max-w-[280px]">
-                    Scrivi qui il tuo primo messaggio. Risponderò il prima possibile.
+                    {t.emptyChatHint}
                   </p>
                 </div>
               )}
@@ -340,7 +342,7 @@ export function ChatModal({
                     <span className="w-1.5 h-1.5 rounded-full bg-cream-dark-gold animate-bounce" style={{ animationDelay: "150ms" }} />
                     <span className="w-1.5 h-1.5 rounded-full bg-cream-dark-gold animate-bounce" style={{ animationDelay: "300ms" }} />
                   </span>
-                  {creatorName} sta scrivendo…
+                  {creatorName} {t.typing}
                 </span>
               </div>
             )}
@@ -352,7 +354,7 @@ export function ChatModal({
                   type="text"
                   value={input}
                   onKeyDown={handleKeyDown}
-                  placeholder="Scrivi un messaggio..."
+                  placeholder={t.typePlaceholder}
                   maxLength={5000}
                   disabled={sending}
                   onChange={(e) => {
@@ -370,7 +372,7 @@ export function ChatModal({
                   onClick={() => { void handleSend(); }}
                   disabled={!input.trim() || sending}
                   className="p-2.5 rounded-xl bg-cream-dark-gold/20 border border-cream-dark-gold/30 text-cream-dark-gold hover:bg-cream-dark-gold/30 disabled:opacity-30 disabled:cursor-not-allowed transition-all shrink-0"
-                  aria-label="Invia messaggio"
+                  aria-label={t.sendMessage}
                 >
                   {sending ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -380,7 +382,7 @@ export function ChatModal({
                 </button>
               </div>
               <p className="text-[9px] text-cream-dark-text-soft/40 mt-1.5 text-center font-light">
-                I tuoi messaggi sono privati. Solo tu e {creatorName} potete vederli.
+                {t.privacyNote.replace("{name}", creatorName)}
               </p>
             </div>
           </div>

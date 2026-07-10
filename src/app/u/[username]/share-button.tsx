@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Share2, Check } from "lucide-react";
+import { useChatT } from "@/lib/i18n/use-chat-t";
 
 interface ShareProfileButtonProps {
   username: string;
@@ -9,6 +10,8 @@ interface ShareProfileButtonProps {
 
 export function ShareProfileButton({ username }: ShareProfileButtonProps) {
   const [copied, setCopied] = useState(false);
+
+  const t = useChatT();
 
   const handleShare = async () => {
     const url = `${window.location.origin}/u/${username}`;
@@ -33,14 +36,14 @@ export function ShareProfileButton({ username }: ShareProfileButtonProps) {
     <button
       onClick={handleShare}
       className="inline-flex items-center gap-2 px-4 py-2.5 bg-cream-dark-surface border border-cream-dark-border rounded-xl text-xs font-medium text-cream-dark-text-soft hover:text-cream-dark-gold hover:border-cream-dark-gold/30 transition-all"
-      title="Copia link profilo"
+      title={t.shareTitle}
     >
       {copied ? (
         <Check className="w-4 h-4 text-emerald-400" />
       ) : (
         <Share2 className="w-4 h-4" />
       )}
-      <span className="hidden sm:inline">{copied ? "Copiato!" : "Condividi"}</span>
+      <span className="hidden sm:inline">{copied ? t.copied : t.share}</span>
     </button>
   );
 }
