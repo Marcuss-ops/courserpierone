@@ -133,6 +133,7 @@ export default async function CoursePage({
                   videoUrl={currentLesson.videos[currentLang]}
                   title={currentLesson.titles[currentLang]}
                   productSlug={domain}
+                  lessonId={currentLesson.id}
                   isAuthenticated={isAuthenticated}
                   locale={currentLang}
                   previewDuration={120}
