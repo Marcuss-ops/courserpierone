@@ -9,6 +9,7 @@ import { getServerUser } from "@/lib/supabase/get-user";
 import { UserNav } from "@/components/user-nav";
 import { DiscoveryGrid } from "@/components/discovery-grid";
 import { fetchPublishedProducts } from "@/lib/data/homepage-data";
+import { prisma } from "@/lib/db/prisma";
 import {
   transformToDiscoveryCourses,
   extractCategories,
@@ -53,7 +54,22 @@ export default async function HomePage() {
 
   try {
     const { products } = await fetchPublishedProducts();
-    discoveryCourses = transformToDiscoveryCourses(products);
+
+    // Determine which products the user already owns
+    let ownedProductIds = new Set<string>();
+    if (dbUser) {
+      try {
+        const orders = await prisma.order.findMany({
+          where: { userId: dbUser.id, status: "completed" },
+          select: { productId: true },
+        });
+        ownedProductIds = new Set(orders.map((o) => o.productId));
+      } catch {
+        // Order lookup failed — treat all as unowned
+      }
+    }
+
+    discoveryCourses = transformToDiscoveryCourses(products, ownedProductIds, currentLocale);
     categories = extractCategories(discoveryCourses);
   } catch {
     // Database unreachable — show empty discovery section
