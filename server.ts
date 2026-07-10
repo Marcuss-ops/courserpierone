@@ -135,6 +135,27 @@ app.prepare().then(() => {
         clients.delete(userId);
       }
     });
+
+    // ── Handle client messages (typing indicators) ─────────
+    ws.on("message", (raw) => {
+      try {
+        const data = JSON.parse(raw.toString());
+        if (data.type === "typing" || data.type === "stopTyping") {
+          // Relay typing status to the other participant
+          const otherWs = clients.get(withUserId);
+          if (otherWs && otherWs.readyState === WebSocket.OPEN) {
+            otherWs.send(
+              JSON.stringify({
+                type: data.type,
+                userId,
+              })
+            );
+          }
+        }
+      } catch {
+        // Ignore malformed messages
+      }
+    });
   });
 
   // ── Bridge: REST API → WebSocket ────────────────────────────

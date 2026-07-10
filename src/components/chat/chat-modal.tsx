@@ -69,7 +69,7 @@ export function ChatModal({
     [],
   );
 
-  const { connected } = useRealtimeChat({
+  const { connected, isOtherTyping, sendTyping, resetTypingTimer } = useRealtimeChat({
     otherUserId: creatorId,
     onMessages: handleRealtimeMessages,
     enabled: open,
@@ -201,6 +201,7 @@ export function ChatModal({
       const data = await res.json();
       setMessages((prev) => [...prev, data.message]);
       setInput("");
+      sendTyping(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Errore nell'invio");
     } finally {
@@ -330,17 +331,39 @@ export function ChatModal({
               <div ref={bottomRef} />
             </div>
 
+            {/* Typing indicator */}
+            {isOtherTyping && (
+              <div className="px-5 py-2 text-center animate-fadeIn">
+                <span className="inline-flex items-center gap-1.5 text-[11px] text-cream-dark-gold font-medium">
+                  <span className="flex gap-0.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-cream-dark-gold animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-cream-dark-gold animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-cream-dark-gold animate-bounce" style={{ animationDelay: "300ms" }} />
+                  </span>
+                  {creatorName} sta scrivendo…
+                </span>
+              </div>
+            )}
+
             {/* Input */}
             <div className="px-5 py-4 border-t border-cream-dark-border shrink-0">
               <div className="flex items-center gap-2">
                 <input
                   type="text"
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Scrivi un messaggio..."
                   maxLength={5000}
                   disabled={sending}
+                  onChange={(e) => {
+                    setInput(e.target.value);
+                    if (e.target.value.trim()) {
+                      sendTyping(true);
+                      resetTypingTimer();
+                    } else {
+                      sendTyping(false);
+                    }
+                  }}
                   className="flex-1 px-4 py-2.5 rounded-xl bg-cream-dark-surface border border-cream-dark-border text-cream-dark-text placeholder:text-cream-dark-text-soft/40 text-sm focus:outline-none focus:border-cream-dark-gold/50 focus:ring-1 focus:ring-cream-dark-gold/20 transition-all disabled:opacity-50"
                 />
                 <button
