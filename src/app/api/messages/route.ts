@@ -6,15 +6,64 @@ import { sanitizeHtml } from "@/lib/utils/sanitize";
 import { apiErrorResponse } from "@/lib/errors";
 
 /**
+ * Trova o crea una conversazione tra due utenti.
+ * L'ordinamento degli ID è deterministico (sort lessicografico) per garantire
+ * che l'unique constraint su [userOneId, userTwoId] funzioni correttamente.
+ */
+async function findOrCreateConversation(
+  userId: string,
+  otherUserId: string,
+  productId?: string,
+) {
+  const [minId, maxId] = [userId, otherUserId].sort();
+
+  const existing = await prisma.conversation.findUnique({
+    where: {
+      userOneId_userTwoId: { userOneId: minId, userTwoId: maxId },
+    },
+  });
+
+  if (existing) return existing;
+
+  return prisma.conversation.create({
+    data: {
+      userOneId: minId,
+      userTwoId: maxId,
+      productId: productId || null,
+    },
+  });
+}
+
+/**
+ * Cerca una conversazione esistente tra due utenti.
+ */
+async function findConversation(
+  userId: string,
+  otherUserId: string,
+  productId?: string,
+) {
+  const [minId, maxId] = [userId, otherUserId].sort();
+
+  return prisma.conversation.findFirst({
+    where: {
+      OR: [
+        { userOneId: minId, userTwoId: maxId },
+        { userOneId: maxId, userTwoId: minId },
+      ],
+      ...(productId ? { productId } : {}),
+    },
+  });
+}
+
+/**
  * GET /api/messages?with=<userId>&productId=<productId>
  *
  * Recupera la conversazione tra l'utente corrente e un altro utente,
  * opzionalmente filtrata per prodotto.
  *
- * CONTROLLO DI ACCESSO: la clausola WHERE limita i risultati ai soli
- * messaggi in cui l'utente autenticato è sender o receiver.
- * Se un utente malintenzionato modifica il parametro `with`, vedrà
- * solo messaggi propri con quell'utente (array vuoto se non ci sono).
+ * CONTROLLO DI ACCESSO: cerca la Conversation tra i due utenti.
+ * Se non esiste, restituisce 403 (nessuna conversazione autorizzata).
+ * Se esiste, recupera i messaggi filtrati per conversationId.
  */
 export const GET = withRateLimit(async function GET(request: NextRequest) {
   try {
@@ -31,7 +80,7 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Parametro 'with' obbligatorio" }, { status: 400 });
     }
 
-    // Impedisci a un utente di interrogare i propri messaggi (senza senso)
+    // Impedisci a un utente di interrogare i propri messaggi
     if (withUserId === dbUser.id) {
       return NextResponse.json({ error: "Non puoi visualizzare una conversazione con te stesso" }, { status: 400 });
     }
@@ -45,16 +94,19 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Utente non trovato" }, { status: 404 });
     }
 
-    // Recupera messaggi tra i due utenti (entrambe le direzioni).
-    // Il WHERE garantisce isolamento: l'utente vede SOLO i propri messaggi.
+    // Cerca la conversazione tra i due utenti
+    const conversation = await findConversation(dbUser.id, withUserId, productId);
+
+    if (!conversation) {
+      return NextResponse.json(
+        { error: "Accesso negato — nessuna conversazione con questo utente" },
+        { status: 403 },
+      );
+    }
+
+    // Recupera messaggi della conversazione
     const messages = await prisma.message.findMany({
-      where: {
-        OR: [
-          { senderId: dbUser.id, receiverId: withUserId },
-          { senderId: withUserId, receiverId: dbUser.id },
-        ],
-        ...(productId ? { productId } : {}),
-      },
+      where: { conversationId: conversation.id },
       include: {
         sender: {
           select: { id: true, name: true, image: true, role: true },
@@ -62,17 +114,6 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
       },
       orderBy: { createdAt: "asc" },
     });
-
-    // CONTROLLO DI ACCESSO ESPLICITO: se non ci sono messaggi tra i due
-    // utenti, l'utente corrente non è autorizzato a visualizzare questa
-    // conversazione (non esiste). Ritorna 403 per evitare information
-    // leakage (200 [] rivelerebbe che l'utente esiste).
-    if (messages.length === 0) {
-      return NextResponse.json(
-        { error: "Accesso negato — nessuna conversazione con questo utente" },
-        { status: 403 },
-      );
-    }
 
     return NextResponse.json({ messages });
   } catch (error) {
@@ -85,8 +126,8 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
  * Invia un nuovo messaggio.
  * Body: { receiverId: string, content: string, productId?: string }
  *
- * CONTROLLO DI ACCESSO: il senderId è sempre l'utente autenticato.
- * Impedisce auto-invio (senderId === receiverId).
+ * Trova o crea una Conversation tra sender e receiver, poi crea il Message.
+ * Il senderId è sempre l'utente autenticato.
  */
 export const POST = withRateLimit(async function POST(request: NextRequest) {
   try {
@@ -117,11 +158,13 @@ export const POST = withRateLimit(async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Destinatario non trovato" }, { status: 404 });
     }
 
+    // Trova o crea la conversazione (ordinamento deterministico)
+    const conversation = await findOrCreateConversation(dbUser.id, receiverId, productId);
+
     const message = await prisma.message.create({
       data: {
+        conversationId: conversation.id,
         senderId: dbUser.id,
-        receiverId,
-        productId: productId || null,
         content: sanitizeHtml(content.trim()),
       },
       include: {

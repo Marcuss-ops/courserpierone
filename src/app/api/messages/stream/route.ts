@@ -14,7 +14,6 @@ import { getServerUser } from "@/lib/supabase/get-user";
  *
  * Il server polla il DB ogni 2 secondi e invia i nuovi messaggi tramite SSE.
  * Heartbeat ogni 15s per mantenere la connessione viva.
- * Timeout: dipende dal piano Vercel — il client si riconnette automaticamente.
  */
 export async function GET(request: NextRequest) {
   const { user, dbUser } = await getServerUser();
@@ -32,8 +31,24 @@ export async function GET(request: NextRequest) {
   }
 
   const since = sinceRaw ? new Date(sinceRaw) : new Date(0);
-  const userId = dbUser.id; // catturato fuori dalla closure per TS narrowing
-  const otherUserId = withUserId; // ora è string (controllato sopra)
+
+  // Cerca la conversation tra i due utenti (ordinamento deterministico)
+  const [minId, maxId] = [dbUser.id, withUserId].sort();
+  const conversation = await prisma.conversation.findFirst({
+    where: {
+      OR: [
+        { userOneId: minId, userTwoId: maxId },
+        { userOneId: maxId, userTwoId: minId },
+      ],
+      ...(productId ? { productId } : {}),
+    },
+    select: { id: true },
+  });
+
+  // Se non esiste conversazione, connetti comunque la SSE (il client
+  // riceverà heartbeat ma nessun messaggio finché la conversazione non esiste).
+  // Il poll loop riproverà a cercare la conversazione ogni 2 secondi.
+  let conversationId = conversation?.id ?? null;
 
   const encoder = new TextEncoder();
   let stopped = false;
@@ -52,17 +67,33 @@ export async function GET(request: NextRequest) {
         }
       }, 15_000);
 
-      // Poll DB con setTimeout ricorsivo (evita race condition di setInterval asincrono)
+      // Poll DB con setTimeout ricorsivo
       async function poll(): Promise<void> {
         if (stopped) return;
+
+        // Se non esiste ancora una conversazione, riprova a cercarla
+        // (potrebbe essere stata creata dal POST handler nel frattempo)
+        if (!conversationId) {
+          const found = await prisma.conversation.findFirst({
+            where: {
+              OR: [
+                { userOneId: minId, userTwoId: maxId },
+                { userOneId: maxId, userTwoId: minId },
+              ],
+              ...(productId ? { productId } : {}),
+            },
+            select: { id: true },
+          });
+          conversationId = found?.id ?? null;
+
+          if (!stopped) setTimeout(poll, 2_000);
+          return;
+        }
+
         try {
           const newMessages = await prisma.message.findMany({
             where: {
-              OR: [
-                { senderId: userId, receiverId: otherUserId },
-                { senderId: otherUserId, receiverId: userId },
-              ],
-              ...(productId ? { productId } : {}),
+              conversationId,
               createdAt: { gt: lastSeen },
             },
             include: {
@@ -93,7 +124,7 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      // Avvia il primo poll dopo 500ms (lascia tempo al client di connettersi)
+      // Avvia il primo poll dopo 500ms
       setTimeout(poll, 500);
 
       // Cleanup alla disconnessione

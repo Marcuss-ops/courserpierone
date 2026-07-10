@@ -5,8 +5,8 @@ import { X, Send, Loader2, MessageSquare, Wifi, WifiOff } from "lucide-react";
 
 interface MessageData {
   id: string;
+  conversationId: string;
   senderId: string;
-  receiverId: string;
   content: string;
   read: boolean;
   createdAt: string;
@@ -152,17 +152,22 @@ export function ChatModal({
     };
   }, [open, creatorId, productId, fetchMessages]);
 
-  // Marca i messaggi ricevuti come letti
+  // Marca i messaggi ricevuti come letti (usa conversationId dal primo messaggio)
   useEffect(() => {
     if (!open) return;
     const unreadFromCreator = messages.filter(
       (m) => m.senderId === creatorId && !m.read
     );
     if (unreadFromCreator.length === 0) return;
+
+    // Trova il conversationId dal primo messaggio
+    const convId = messages[0]?.conversationId;
+    if (!convId) return;
+
     void fetch("/api/messages/read", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ senderId: creatorId }),
+      body: JSON.stringify({ conversationId: convId }),
     }).catch(console.error);
   }, [messages, creatorId, open]);
 
