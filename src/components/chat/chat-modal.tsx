@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { X, Send, Loader2, MessageSquare, Wifi, WifiOff } from "lucide-react";
+import { X, Send, Loader2, MessageSquare, Wifi, WifiOff, ArrowUp } from "lucide-react";
 
 interface MessageData {
   id: string;
@@ -19,17 +19,15 @@ interface MessageData {
 }
 
 interface ChatModalProps {
-  /** L'utente corrente (studente) */
   currentUserId: string;
   currentUserName: string;
-  /** L'utente creator (admin) a cui scrivere */
   creatorId: string;
   creatorName: string;
-  /** ID prodotto per scoping conversazione (deve essere il Prisma cuid, non lo slug) */
   productId?: string;
-  /** Etichetta custom per il bottone di apertura */
   triggerLabel?: string;
 }
+
+const PAGE_SIZE = 50;
 
 export function ChatModal({
   currentUserId,
@@ -46,24 +44,35 @@ export function ChatModal({
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sseConnected, setSseConnected] = useState(false);
+
+  // Cursor pagination state
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const nextCursorRef = useRef<string | null>(null);
+
   const scrollRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const esRef = useRef<EventSource | null>(null);
   const lastMessageDateRef = useRef<string | null>(null);
 
-  // Carica la conversazione quando la modale si apre
-  const fetchMessages = useCallback(async () => {
+  // Fetch initial messages (most recent page)
+  const fetchInitialMessages = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams({ with: creatorId });
+      const params = new URLSearchParams({ with: creatorId, limit: String(PAGE_SIZE) });
       if (productId) params.set("productId", productId);
       const res = await fetch(`/api/messages?${params.toString()}`);
       if (!res.ok) throw new Error("Errore nel caricamento messaggi");
       const data = await res.json();
-      setMessages(data.messages ?? []);
-      // Aggiorna il cursore SSE per evitare di ri-ricevere messaggi storici
-      const msgs: MessageData[] = data.messages ?? [];
+
+      // API returns DESC (newest first) — reverse for ASC display (oldest → newest)
+      const msgs: MessageData[] = (data.messages ?? []).reverse();
+      setMessages(msgs);
+      setHasMore(data.nextCursor !== null);
+      nextCursorRef.current = data.nextCursor as string | null;
+
       if (msgs.length > 0) {
         lastMessageDateRef.current = msgs[msgs.length - 1].createdAt;
       }
@@ -75,14 +84,72 @@ export function ChatModal({
     }
   }, [creatorId, productId]);
 
+  // Load older messages (cursor-based pagination)
+  const loadOlderMessages = useCallback(async () => {
+    if (!nextCursorRef.current || loadingOlder) return;
+    setLoadingOlder(true);
+
+    try {
+      const params = new URLSearchParams({
+        with: creatorId,
+        cursor: nextCursorRef.current,
+        limit: String(PAGE_SIZE),
+      });
+      if (productId) params.set("productId", productId);
+      const res = await fetch(`/api/messages?${params.toString()}`);
+      if (!res.ok) throw new Error("Errore nel caricamento");
+      const data = await res.json();
+
+      // API returns DESC — reverse and prepend to existing messages
+      const olderMsgs: MessageData[] = (data.messages ?? []).reverse();
+      if (olderMsgs.length > 0) {
+        setMessages((prev) => [...olderMsgs, ...prev]);
+      }
+      setHasMore(data.nextCursor !== null);
+      nextCursorRef.current = data.nextCursor as string | null;
+    } catch (err) {
+      console.error("loadOlderMessages error:", err);
+    } finally {
+      setLoadingOlder(false);
+    }
+  }, [creatorId, productId, loadingOlder]);
+
+  // Detect scroll-to-top to load older messages
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    // Trigger when scrolled within 80px of the top
+    if (el.scrollTop < 80 && hasMore && !loadingOlder) {
+      void loadOlderMessages();
+    }
+  }, [hasMore, loadingOlder, loadOlderMessages]);
+
   // Inizializza: carica messaggi + avvia SSE (con polling fallback)
   useEffect(() => {
     if (!open) return;
 
-    void fetchMessages();
+    void fetchInitialMessages();
+
+    // Polling fallback helper: fetch recent messages, merge without resetting cursor
+    const pollNewMessages = async () => {
+      try {
+        const p = new URLSearchParams({ with: creatorId, limit: String(PAGE_SIZE) });
+        if (productId) p.set("productId", productId);
+        const res = await fetch(`/api/messages?${p.toString()}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const freshMsgs: MessageData[] = (data.messages ?? []).reverse();
+        if (freshMsgs.length === 0) return;
+        setMessages((prev) => {
+          const existingIds = new Set(prev.map((m) => m.id));
+          const newOnes = freshMsgs.filter((m) => !existingIds.has(m.id));
+          return newOnes.length === 0 ? prev : [...prev, ...newOnes];
+        });
+      } catch { /* ignore poll errors */ }
+    };
+
     let fallbackPoll: ReturnType<typeof setInterval> | null = null;
 
-    // Costruisci URL SSE
     const params = new URLSearchParams({ with: creatorId });
     if (productId) params.set("productId", productId);
     if (lastMessageDateRef.current) params.set("since", lastMessageDateRef.current);
@@ -93,77 +160,55 @@ export function ChatModal({
       const es = new EventSource(esUrl);
       esRef.current = es;
 
-      es.onopen = () => {
-        setSseConnected(true);
-      };
+      es.onopen = () => setSseConnected(true);
 
       es.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data) as { messages: MessageData[] };
           if (data.messages?.length > 0) {
             setMessages((prev) => {
-              // Evita duplicati
               const existingIds = new Set(prev.map((m) => m.id));
               const newOnes = data.messages.filter((m) => !existingIds.has(m.id));
               if (newOnes.length === 0) return prev;
-              // Aggiorna il cursore
               const lastMsg = newOnes[newOnes.length - 1];
               lastMessageDateRef.current = lastMsg.createdAt;
               return [...prev, ...newOnes];
             });
           }
-        } catch {
-          // Ignora eventi malformati
-        }
+        } catch { /* ignore malformed events */ }
       };
 
       es.onerror = () => {
         setSseConnected(false);
         es.close();
         esRef.current = null;
-
-        // Fallback: polling ogni 5 secondi
         if (!fallbackPoll) {
-          fallbackPoll = setInterval(() => {
-            void fetchMessages();
-          }, 5000);
+          fallbackPoll = setInterval(pollNewMessages, 5000);
           pollRef.current = fallbackPoll;
         }
       };
     } catch {
-      // EventSource non supportato — usa solo polling
-      fallbackPoll = setInterval(() => {
-        void fetchMessages();
-      }, 5000);
+      fallbackPoll = setInterval(pollNewMessages, 5000);
       pollRef.current = fallbackPoll;
     }
 
     return () => {
-      if (esRef.current) {
-        esRef.current.close();
-        esRef.current = null;
-      }
+      if (esRef.current) { esRef.current.close(); esRef.current = null; }
       setSseConnected(false);
       if (fallbackPoll) clearInterval(fallbackPoll);
-      if (pollRef.current) {
-        clearInterval(pollRef.current);
-        pollRef.current = null;
-      }
+      if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
     };
-  }, [open, creatorId, productId, fetchMessages]);
+  }, [open, creatorId, productId, fetchInitialMessages]);
 
-  // Marca i messaggi ricevuti come letti (usa conversationId dal primo messaggio)
+  // Marca i messaggi ricevuti come letti
   useEffect(() => {
     if (!open) return;
     const unreadFromCreator = messages.filter(
       (m) => m.senderId === creatorId && !m.read
     );
     if (unreadFromCreator.length === 0) return;
-
-    // Trova il conversationId dal primo messaggio
     const convId = messages[0]?.conversationId;
     if (!convId) return;
-
     void fetch("/api/messages/read", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -171,12 +216,18 @@ export function ChatModal({
     }).catch(console.error);
   }, [messages, creatorId, open]);
 
-  // Auto-scroll in fondo
+  // Auto-scroll to bottom only when user is already near the bottom.
+  // Prevents yanking the user down while they're reading older messages.
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    const el = scrollRef.current;
+    if (!el || !bottomRef.current) return;
+
+    // Only auto-scroll if user is within 150px of the bottom
+    const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 150;
+    if (isNearBottom) {
+      bottomRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages]);
+  }, [messages.length]);
 
   // Invia messaggio
   const handleSend = async () => {
@@ -218,7 +269,6 @@ export function ChatModal({
 
   return (
     <>
-      {/* Bottone trigger */}
       <button
         onClick={() => setOpen(true)}
         className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cream-dark-surface border border-cream-dark-border text-cream-dark-text-soft hover:text-cream-dark-gold hover:border-cream-dark-gold/30 transition-all text-sm font-semibold"
@@ -227,16 +277,13 @@ export function ChatModal({
         <span>{triggerLabel}</span>
       </button>
 
-      {/* Modale */}
       {open && (
         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center">
-          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setOpen(false)}
           />
 
-          {/* Pannello chat */}
           <div className="relative w-full sm:max-w-lg sm:rounded-2xl bg-cream-dark-bg border border-cream-dark-border shadow-2xl flex flex-col h-[90vh] sm:h-[600px] sm:max-h-[80vh] overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-cream-dark-border shrink-0">
@@ -261,11 +308,30 @@ export function ChatModal({
               </button>
             </div>
 
-            {/* Messaggi */}
+            {/* Messages — cursor-based pagination with scroll-to-top trigger */}
             <div
               ref={scrollRef}
+              onScroll={handleScroll}
               className="flex-1 overflow-y-auto px-5 py-4 space-y-4"
             >
+              {/* Load older indicator */}
+              {hasMore && (
+                <div className="flex justify-center pb-2">
+                  <button
+                    onClick={loadOlderMessages}
+                    disabled={loadingOlder}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-cream-dark-surface border border-cream-dark-border text-xs text-cream-dark-text-soft hover:text-cream-dark-gold hover:border-cream-dark-gold/30 transition-all disabled:opacity-40"
+                  >
+                    {loadingOlder ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <ArrowUp className="w-3 h-3" />
+                    )}
+                    {loadingOlder ? "Caricamento..." : "Messaggi precedenti"}
+                  </button>
+                </div>
+              )}
+
               {loading && messages.length === 0 && (
                 <div className="flex items-center justify-center h-full">
                   <Loader2 className="w-6 h-6 animate-spin text-cream-dark-text-soft" />
@@ -312,6 +378,8 @@ export function ChatModal({
                   {error}
                 </p>
               )}
+
+              <div ref={bottomRef} />
             </div>
 
             {/* Input */}
