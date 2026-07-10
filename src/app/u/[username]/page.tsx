@@ -9,8 +9,14 @@ import {
   Calendar,
   Clock,
   ChevronRight,
+  MessageSquare,
+  Share2,
+  CheckCircle,
 } from "lucide-react";
 import { prisma } from "@/lib/db/prisma";
+import { getServerUser } from "@/lib/supabase/get-user";
+import { ShareProfileButton } from "./share-button";
+import { MessageProfileButton } from "./message-button";
 
 // ─── Social icon SVGs (inline per evitare dipendenze) ─────────
 const SocialIcons: Record<string, React.ReactNode> = {
@@ -86,50 +92,63 @@ export default async function PublicProfilePage({
 }) {
   const { username } = await params;
 
-  const user = await prisma.user.findUnique({
-    where: { username },
-    select: {
-      id: true,
-      username: true,
-      name: true,
-      image: true,
-      bio: true,
-      socialLinks: true,
-      coverImageUrl: true,
-      role: true,
-      createdAt: true,
-      orders: {
-        where: { status: "completed" },
-        select: {
-          product: {
-            select: {
-              id: true,
-              slug: true,
-              coverUrl: true,
-              _count: { select: { lessons: true } },
+  const [profileUser, auth] = await Promise.all([
+    prisma.user.findUnique({
+      where: { username },
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        image: true,
+        bio: true,
+        socialLinks: true,
+        coverImageUrl: true,
+        role: true,
+        lastSeenAt: true,
+        createdAt: true,
+        orders: {
+          where: { status: "completed" },
+          select: {
+            product: {
+              select: {
+                id: true,
+                slug: true,
+                coverUrl: true,
+                _count: { select: { lessons: true } },
+              },
             },
+            createdAt: true,
           },
-          createdAt: true,
+          orderBy: { createdAt: "desc" },
         },
-        orderBy: { createdAt: "desc" },
       },
-    },
-  });
+    }),
+    getServerUser(),
+  ]);
 
-  if (!user) return notFound();
+  if (!profileUser) return notFound();
+
+  const currentUserId = auth?.dbUser?.id ?? null;
+  const isOwnProfile = currentUserId === profileUser.id;
 
   // Parse social links
   let socialLinks: Record<string, string> | null = null;
-  if (user.socialLinks) {
+  if (profileUser.socialLinks) {
     try {
-      socialLinks = JSON.parse(user.socialLinks);
+      socialLinks = JSON.parse(profileUser.socialLinks);
     } catch {
       socialLinks = null;
     }
   }
 
+  // ── Online status ─────────────────────────────────────
+  const ONLINE_THRESHOLD = 5 * 60 * 1000; // 5 minutes
+  const isOnline =
+    profileUser.lastSeenAt != null &&
+    Date.now() - profileUser.lastSeenAt.getTime() < ONLINE_THRESHOLD;
+
   // ── Course progress ──────────────────────────────────
-  const productIds = user.orders.map((o) => o.product.id);
+  const productIds = profileUser.orders.map((o) => o.product.id);
   const allLessons =
     productIds.length > 0
       ? await prisma.lesson.findMany({
@@ -143,7 +162,7 @@ export default async function PublicProfilePage({
   const completedProgress =
     allLessonIds.length > 0
       ? await prisma.lessonProgress.findMany({
-          where: { userId: user.id, lessonId: { in: allLessonIds }, completed: true },
+          where: { userId: profileUser.id, lessonId: { in: allLessonIds }, completed: true },
           select: { lessonId: true },
         })
       : [];
@@ -158,19 +177,21 @@ export default async function PublicProfilePage({
     totalByProduct.set(l.productId, (totalByProduct.get(l.productId) ?? 0) + 1);
   }
 
-  const courses = user.orders.map((o) => {
-    const total = totalByProduct.get(o.product.id) ?? 0;
-    const completed = completedByProduct.get(o.product.id) ?? 0;
-    return {
-      productId: o.product.id,
-      slug: o.product.slug,
-      coverUrl: o.product.coverUrl,
-      lessonCount: total,
-      completedLessons: completed,
-      isCompleted: total > 0 && completed >= total,
-      progress: total > 0 ? Math.round((completed / total) * 100) : 0,
-    };
-  }).filter((c) => c.lessonCount > 0);
+  const courses = profileUser.orders
+    .map((o) => {
+      const total = totalByProduct.get(o.product.id) ?? 0;
+      const completed = completedByProduct.get(o.product.id) ?? 0;
+      return {
+        productId: o.product.id,
+        slug: o.product.slug,
+        coverUrl: o.product.coverUrl,
+        lessonCount: total,
+        completedLessons: completed,
+        isCompleted: total > 0 && completed >= total,
+        progress: total > 0 ? Math.round((completed / total) * 100) : 0,
+      };
+    })
+    .filter((c) => c.lessonCount > 0);
 
   const certificates = courses.filter((c) => c.isCompleted);
   const totalCompletedLessons = completedProgress.length;
@@ -178,7 +199,7 @@ export default async function PublicProfilePage({
 
   // ── Recent activity ──────────────────────────────────
   const recentActivity = await prisma.lessonProgress.findMany({
-    where: { userId: user.id, lastWatchedAt: { not: null } },
+    where: { userId: profileUser.id, lastWatchedAt: { not: null } },
     orderBy: { lastWatchedAt: "desc" },
     take: 8,
     select: {
@@ -198,8 +219,13 @@ export default async function PublicProfilePage({
     },
   });
 
-  const displayName = user.name || user.username || "Utente";
+  const displayName = profileUser.name || profileUser.username || "Utente";
   const hasSocialLinks = socialLinks && Object.keys(socialLinks).length > 0;
+
+  // Bio paragraphs for formatted display
+  const bioParagraphs = profileUser.bio
+    ? profileUser.bio.split(/\n+/).filter((p) => p.trim().length > 0)
+    : [];
 
   return (
     <div className="min-h-screen bg-cream-dark-bg text-cream-dark-text font-sans antialiased">
@@ -227,23 +253,35 @@ export default async function PublicProfilePage({
               courssy
             </span>
           </Link>
-          <Link
-            href="/login"
-            className="px-5 py-2.5 bg-cream-dark-surface border border-cream-dark-border rounded-xl text-xs font-semibold text-cream-dark-gold hover:bg-cream-dark-gold/10 transition-all"
-          >
-            Accedi
-          </Link>
+
+          <div className="flex items-center gap-2">
+            {currentUserId ? (
+              <Link
+                href="/dashboard"
+                className="px-5 py-2.5 bg-cream-dark-surface border border-cream-dark-border rounded-xl text-xs font-semibold text-cream-dark-gold hover:bg-cream-dark-gold/10 transition-all"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="px-5 py-2.5 bg-cream-dark-surface border border-cream-dark-border rounded-xl text-xs font-semibold text-cream-dark-gold hover:bg-cream-dark-gold/10 transition-all"
+              >
+                Accedi
+              </Link>
+            )}
+          </div>
         </div>
       </nav>
 
       {/* ─── Hero Cover ──────────────────────────────────── */}
       <section className="relative">
         {/* Cover image */}
-        <div className="w-full h-56 md:h-72 bg-gradient-to-br from-[#3A2D1E] via-[#2C2214] to-[#1A1208] relative overflow-hidden">
-          {user.coverImageUrl ? (
+        <div className="w-full h-56 md:h-80 bg-gradient-to-br from-[#3A2D1E] via-[#2C2214] to-[#1A1208] relative overflow-hidden">
+          {profileUser.coverImageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={user.coverImageUrl}
+              src={profileUser.coverImageUrl}
               alt=""
               className="w-full h-full object-cover opacity-60"
             />
@@ -256,61 +294,78 @@ export default async function PublicProfilePage({
               }}
             />
           )}
-          {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-cream-dark-bg via-cream-dark-bg/60 to-transparent" />
         </div>
 
         {/* Avatar + Info overlaid */}
-        <div className="max-w-5xl mx-auto px-6 relative -mt-20 md:-mt-24 z-10">
+        <div className="max-w-5xl mx-auto px-6 relative -mt-24 md:-mt-28 z-10">
           <div className="flex flex-col md:flex-row md:items-end gap-5 md:gap-8">
-            {/* Avatar */}
+            {/* Avatar — larger with glow */}
             <div className="relative shrink-0">
               <div
-                className="w-28 h-28 md:w-36 md:h-36 rounded-2xl overflow-hidden border-4 border-cream-dark-bg shadow-2xl"
+                className="w-32 h-32 md:w-40 md:h-40 rounded-3xl overflow-hidden border-4 border-cream-dark-bg shadow-2xl relative group"
                 style={{ background: "linear-gradient(135deg, #FFE4C4 0%, #D4A574 100%)" }}
               >
-                {user.image ? (
+                {profileUser.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={user.image}
+                    src={profileUser.image}
                     alt={displayName}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <span className="text-5xl font-bold text-cream-dark-bg/40">
+                    <span className="text-6xl font-bold text-cream-dark-bg/40">
                       {displayName[0]?.toUpperCase()}
                     </span>
                   </div>
                 )}
+                {/* Subtle glow ring on hover */}
+                <div className="absolute inset-0 rounded-3xl ring-1 ring-cream-dark-gold/20 group-hover:ring-cream-dark-gold/40 transition-all pointer-events-none" />
               </div>
               {/* Role badge */}
-              {user.role === "admin" && (
-                <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-cream-dark-gold flex items-center justify-center shadow-lg border-2 border-cream-dark-bg">
+              {profileUser.role === "admin" && (
+                <div className="absolute -top-2 -right-2 w-9 h-9 rounded-full bg-cream-dark-gold flex items-center justify-center shadow-lg border-2 border-cream-dark-bg">
                   <Award className="w-4 h-4 text-cream-dark-bg" />
                 </div>
+              )}
+              {/* Online indicator */}
+              {isOnline && (
+                <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 ring-2 ring-cream-dark-bg shadow-md" title="Online" />
               )}
             </div>
 
             {/* Name & Bio */}
-            <div className="flex-1 pb-2 space-y-2">
+            <div className="flex-1 pb-2 space-y-3">
               <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="font-serif text-3xl md:text-4xl text-cream-dark-text tracking-tight">
+                <h1 className="font-serif text-3xl md:text-5xl text-cream-dark-text tracking-tight">
                   {displayName}
                 </h1>
-                {user.role === "admin" && (
+                {profileUser.role === "admin" && (
                   <span className="px-2.5 py-0.5 bg-cream-dark-gold/15 border border-cream-dark-gold/30 rounded-full text-[10px] font-bold uppercase tracking-widest text-cream-dark-gold">
                     Creator
                   </span>
                 )}
+                {isOnline && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[10px] font-semibold text-emerald-400">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Online
+                  </span>
+                )}
               </div>
               <p className="text-sm text-cream-dark-text-soft font-medium">
-                @{user.username}
+                @{profileUser.username}
               </p>
-              {user.bio && (
-                <p className="text-sm text-cream-dark-text-soft leading-relaxed max-w-2xl pt-1 whitespace-pre-line">
-                  {user.bio}
-                </p>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex items-center gap-2 shrink-0 pb-1">
+              <ShareProfileButton username={profileUser.username!} />
+              {!isOwnProfile && currentUserId && (
+                <MessageProfileButton
+                  otherUserId={profileUser.id}
+                  otherUserName={displayName}
+                />
               )}
             </div>
           </div>
@@ -318,6 +373,28 @@ export default async function PublicProfilePage({
       </section>
 
       <main className="relative max-w-5xl mx-auto px-6 py-10 space-y-12">
+        {/* ─── Bio Card ──────────────────────────────────── */}
+        {bioParagraphs.length > 0 && (
+          <section className="bg-cream-dark-surface border border-cream-dark-border rounded-2xl p-6 md:p-8">
+            <div className="flex items-center gap-2 mb-4">
+              <BookOpen className="w-4 h-4 text-cream-dark-gold" />
+              <h2 className="text-xs font-bold uppercase tracking-widest text-cream-dark-text-soft">
+                Bio
+              </h2>
+            </div>
+            <div className="space-y-3">
+              {bioParagraphs.map((paragraph, i) => (
+                <p
+                  key={i}
+                  className="text-sm md:text-base text-cream-dark-text-soft leading-relaxed"
+                >
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* ─── Social Links ───────────────────────────────── */}
         {hasSocialLinks && (
           <div className="flex flex-wrap gap-3">
@@ -327,7 +404,7 @@ export default async function PublicProfilePage({
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-cream-dark-surface border border-cream-dark-border rounded-xl text-xs font-medium text-cream-dark-text-soft hover:text-cream-dark-gold hover:border-cream-dark-gold/30 transition-all"
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-cream-dark-surface border border-cream-dark-border rounded-xl text-xs font-medium text-cream-dark-text-soft hover:text-cream-dark-gold hover:border-cream-dark-gold/30 hover:-translate-y-0.5 transition-all"
               >
                 <span className="text-cream-dark-gold">
                   {SocialIcons[platform] ?? <Globe className="w-4 h-4" />}
@@ -343,7 +420,7 @@ export default async function PublicProfilePage({
           {[
             {
               icon: <BookOpen className="w-5 h-5 text-cream-dark-gold" />,
-              value: user.orders.length.toString(),
+              value: profileUser.orders.length.toString(),
               label: "Corsi",
             },
             {
@@ -359,7 +436,7 @@ export default async function PublicProfilePage({
             },
             {
               icon: <Calendar className="w-5 h-5 text-cream-dark-gold" />,
-              value: new Date(user.createdAt).toLocaleDateString("it-IT", {
+              value: new Date(profileUser.createdAt).toLocaleDateString("it-IT", {
                 month: "short",
                 year: "numeric",
               }),
@@ -421,7 +498,7 @@ export default async function PublicProfilePage({
                     )}
                     {course.isCompleted && (
                       <div className="absolute top-3 right-3 px-2.5 py-1 bg-[#1B5E20] text-white text-[10px] font-bold rounded-full uppercase tracking-wider flex items-center gap-1 shadow-md">
-                        <span className="w-1.5 h-1.5 bg-white rounded-full" />
+                        <CheckCircle className="w-3 h-3" />
                         Completato
                       </div>
                     )}
@@ -467,9 +544,14 @@ export default async function PublicProfilePage({
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#3A2D1E] to-[#221A10] flex items-center justify-center shadow-md border border-cream-dark-border">
                 <Award className="w-5 h-5 text-cream-dark-gold" />
               </div>
-              <h2 className="font-serif text-2xl text-cream-dark-text tracking-tight">
-                Certificati
-              </h2>
+              <div>
+                <h2 className="font-serif text-2xl text-cream-dark-text tracking-tight">
+                  Certificati
+                </h2>
+                <p className="text-xs text-cream-dark-text-soft font-light mt-0.5">
+                  {certificates.length} {certificates.length === 1 ? "corso completato" : "corsi completati"} al 100%
+                </p>
+              </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {certificates.map((cert) => (
@@ -481,23 +563,24 @@ export default async function PublicProfilePage({
                   <div
                     className="absolute -right-6 -top-6 w-24 h-24 rounded-full pointer-events-none"
                     style={{
-                      background: "radial-gradient(circle, rgba(255, 140, 66, 0.35) 0%, transparent 70%)",
+                      background:
+                        "radial-gradient(circle, rgba(255, 140, 66, 0.35) 0%, transparent 70%)",
                     }}
                     aria-hidden
                   />
                   <div className="relative flex items-center gap-4">
-                    <div className="w-11 h-11 rounded-xl bg-cream-dark-bg border border-cream-dark-border flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
-                      <Award className="w-4 h-4 text-cream-dark-gold" />
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1B5E20]/20 to-[#4CAF50]/10 border border-emerald-500/20 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                      <Award className="w-5 h-5 text-emerald-400" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-sm font-semibold text-cream-dark-text capitalize truncate">
                         {cert.slug.replace(/-/g, " ")}
                       </h3>
-                      <p className="text-[10px] text-cream-dark-text-soft font-medium uppercase tracking-wider mt-1">
-                        Completato al 100%
+                      <p className="text-[10px] text-cream-dark-text-soft font-medium uppercase tracking-wider mt-0.5">
+                        Completato • {cert.lessonCount} lezioni
                       </p>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-cream-dark-gold group-hover:translate-x-1 transition-transform" />
+                    <ChevronRight className="w-4 h-4 text-cream-dark-gold group-hover:translate-x-1 transition-transform shrink-0" />
                   </div>
                 </Link>
               ))}
@@ -528,7 +611,8 @@ export default async function PublicProfilePage({
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-cream-dark-text truncate group-hover:text-cream-dark-gold transition-colors">
-                      {activity.lesson.translations[0]?.title ?? `Lezione ${activity.lesson.position}`}
+                      {activity.lesson.translations[0]?.title ??
+                        `Lezione ${activity.lesson.position}`}
                     </p>
                     <p className="text-[11px] text-cream-dark-text-soft capitalize">
                       {activity.lesson.product.slug.replace(/-/g, " ")}
