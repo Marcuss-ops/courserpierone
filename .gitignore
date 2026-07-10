@@ -16,3 +16,4 @@ public/courses/*
 scripts/translate/__pycache__/
 *.pyc
 scripts/audit/
+.env*
