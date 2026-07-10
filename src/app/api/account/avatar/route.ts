@@ -7,8 +7,8 @@ import { apiErrorResponse } from "@/lib/errors";
 
 /** Allowed MIME types for avatars. */
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
-/** Max avatar file size: 2 MB. */
-const MAX_SIZE = 2 * 1024 * 1024;
+/** Max avatar file size: 5 MB. */
+const MAX_SIZE = 5 * 1024 * 1024;
 
 /**
  * POST /api/account/avatar
