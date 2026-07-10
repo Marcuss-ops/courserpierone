@@ -28,11 +28,9 @@ const STALE_WHILE_REVALIDATE_PATTERNS = [
 
 // ─── Install ──────────────────────────────────────────────
 self.addEventListener("install", (event) => {
-  const installEvent = event as ExtendableEvent;
-  installEvent.waitUntil(
+  event.waitUntil(
     (async () => {
       const cache = await caches.open(CACHE_NAME);
-      // Pre-cache solo gli asset più critici (ignora errori)
       await Promise.allSettled(
         PRECACHE_ASSETS.map((url) =>
           fetch(url, { cache: "no-cache" })
@@ -42,20 +40,19 @@ self.addEventListener("install", (event) => {
       );
     })()
   );
-  (self as any as ServiceWorkerGlobalScope).skipWaiting();
+  self.skipWaiting();
 });
 
 // ─── Activate ─────────────────────────────────────────────
 self.addEventListener("activate", (event) => {
-  const activateEvent = event as ExtendableEvent;
-  activateEvent.waitUntil(
+  event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
         keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
       )
     )
   );
-  (self as any as ServiceWorkerGlobalScope).clients.claim();
+  self.clients.claim();
 });
 
 // ─── Helper: match pattern ───────────────────────────────
@@ -65,8 +62,7 @@ function matchesPatterns(url: string, patterns: RegExp[]): boolean {
 
 // ─── Fetch ────────────────────────────────────────────────
 self.addEventListener("fetch", (event) => {
-  const fetchEvent = event as FetchEvent;
-  const { request } = fetchEvent;
+  const { request } = event;
 
   // Solo GET
   if (request.method !== "GET") return;
@@ -85,7 +81,7 @@ self.addEventListener("fetch", (event) => {
 
   // ── Strategia 1: Cache First (immagini, font, static Next.js) ──
   if (matchesPatterns(urlPath, CACHE_FIRST_PATTERNS)) {
-    fetchEvent.respondWith(
+    event.respondWith(
       caches.match(request).then((cached) => {
         if (cached) return cached;
         return fetch(request).then((response) => {
@@ -102,7 +98,7 @@ self.addEventListener("fetch", (event) => {
 
   // ── Strategia 2: Stale-While-Revalidate (landing pages, lezioni) ──
   if (matchesPatterns(urlPath, STALE_WHILE_REVALIDATE_PATTERNS)) {
-    fetchEvent.respondWith(
+    event.respondWith(
       caches.match(request).then((cached) => {
         const fetched = fetch(request)
           .then((response) => {
@@ -120,7 +116,7 @@ self.addEventListener("fetch", (event) => {
   }
 
   // ── Strategia 3: Network First con fallback offline ──────
-  fetchEvent.respondWith(
+  event.respondWith(
     fetch(request)
       .then((response) => {
         if (response.ok) {
