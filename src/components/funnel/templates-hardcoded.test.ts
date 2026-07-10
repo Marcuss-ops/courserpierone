@@ -4,12 +4,26 @@ import path from "path";
 
 // ─── Configuration ─────────────────────────────────────────
 const TEMPLATES_DIR = __dirname;
-const TEMPLATE_FILES = [
-  "template-book-claude.tsx",
-  "template-h612.tsx",
-  "template-horizon.tsx",
-  "template-lumio.tsx",
-];
+
+/** Recursively collect all .tsx files under funnel/ (excludes this test file). */
+function findTsxFiles(dir: string): string[] {
+  const results: string[] = [];
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      results.push(...findTsxFiles(fullPath));
+    } else if (entry.isFile() && entry.name.endsWith(".tsx")) {
+      results.push(fullPath);
+    }
+  }
+  return results;
+}
+
+const TEMPLATE_FILES = findTsxFiles(TEMPLATES_DIR)
+  .map((f) => path.relative(TEMPLATES_DIR, f))
+  .filter((f) => f !== path.basename(__filename))
+  .sort();
 
 /**
  * Italian strings that should ONLY appear as fallbacks
@@ -72,9 +86,15 @@ const ITALIAN_STRINGS: string[] = [
  * We track them separately and only warn (not fail).
  */
 const ALLOWED_FALLBACK_PATTERNS: string[] = [
+  // Single-line data.xxx ?? fallbacks
   'data.titolo ?? "Titolo del',
   'data.sottotitolo ?? "Sottotitolo',
   'split("\\n")[0] ?? "La storia del prodotto"',
+  // Multi-line fallbacks — locale ref (lc?. / data.xxx ??) is on preceding line(s)
+  '"Sottotitolo che introduce il valore del prodotto in modo elegante',
+  '"Sottotitolo che descrive il valore del prodotto in modo chiaro',
+  '"Acquista Ora"}',       // HorizonPricing: lc?.ui?.labels?.buy_now on prev line
+  '"All rights reserved."', // horizon/index.tsx SharedFooter: lc?. refs on prev lines
 ];
 
 // ─── Helpers ────────────────────────────────────────────────
