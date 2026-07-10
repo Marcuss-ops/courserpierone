@@ -143,9 +143,3 @@ export function parsePricesByCurrency(raw: string | null | undefined): Record<st
   }
 }
 
-/**
- * Helper: formato prezzo per currency
- */
-export function formatPrice(amount: number, symbol: string): string {
-  return `${symbol}${(amount / 100).toFixed(0)}`;
-}
