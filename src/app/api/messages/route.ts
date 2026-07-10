@@ -6,8 +6,14 @@ import { apiErrorResponse } from "@/lib/errors";
 
 /**
  * GET /api/messages?with=<userId>&productId=<productId>
+ *
  * Recupera la conversazione tra l'utente corrente e un altro utente,
  * opzionalmente filtrata per prodotto.
+ *
+ * CONTROLLO DI ACCESSO: la clausola WHERE limita i risultati ai soli
+ * messaggi in cui l'utente autenticato è sender o receiver.
+ * Se un utente malintenzionato modifica il parametro `with`, vedrà
+ * solo messaggi propri con quell'utente (array vuoto se non ci sono).
  */
 export const GET = withRateLimit(async function GET(request: NextRequest) {
   try {
@@ -24,7 +30,22 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Parametro 'with' obbligatorio" }, { status: 400 });
     }
 
-    // Recupera messaggi tra i due utenti (entrambe le direzioni)
+    // Impedisci a un utente di interrogare i propri messaggi (senza senso)
+    if (withUserId === dbUser.id) {
+      return NextResponse.json({ error: "Non puoi visualizzare una conversazione con te stesso" }, { status: 400 });
+    }
+
+    // Verifica che l'utente destinatario esista
+    const otherUser = await prisma.user.findUnique({
+      where: { id: withUserId },
+      select: { id: true },
+    });
+    if (!otherUser) {
+      return NextResponse.json({ error: "Utente non trovato" }, { status: 404 });
+    }
+
+    // Recupera messaggi tra i due utenti (entrambe le direzioni).
+    // Il WHERE garantisce isolamento: l'utente vede SOLO i propri messaggi.
     const messages = await prisma.message.findMany({
       where: {
         OR: [
@@ -41,6 +62,17 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
       orderBy: { createdAt: "asc" },
     });
 
+    // CONTROLLO DI ACCESSO ESPLICITO: se non ci sono messaggi tra i due
+    // utenti, l'utente corrente non è autorizzato a visualizzare questa
+    // conversazione (non esiste). Ritorna 403 per evitare information
+    // leakage (200 [] rivelerebbe che l'utente esiste).
+    if (messages.length === 0) {
+      return NextResponse.json(
+        { error: "Accesso negato — nessuna conversazione con questo utente" },
+        { status: 403 },
+      );
+    }
+
     return NextResponse.json({ messages });
   } catch (error) {
     return apiErrorResponse(error, "Errore interno");
@@ -51,6 +83,9 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
  * POST /api/messages
  * Invia un nuovo messaggio.
  * Body: { receiverId: string, content: string, productId?: string }
+ *
+ * CONTROLLO DI ACCESSO: il senderId è sempre l'utente autenticato.
+ * Impedisce auto-invio (senderId === receiverId).
  */
 export const POST = withRateLimit(async function POST(request: NextRequest) {
   try {
@@ -68,6 +103,11 @@ export const POST = withRateLimit(async function POST(request: NextRequest) {
 
     if (content.length > 5000) {
       return NextResponse.json({ error: "Il messaggio non può superare 5000 caratteri" }, { status: 400 });
+    }
+
+    // Impedisci auto-invio
+    if (receiverId === dbUser.id) {
+      return NextResponse.json({ error: "Non puoi inviare un messaggio a te stesso" }, { status: 400 });
     }
 
     // Verifica che il receiver esista
