@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
+import { apiErrorResponse } from "@/lib/errors";
 
 // GET — Lista tutti i prodotti
 export async function GET() {
@@ -43,11 +44,7 @@ export async function GET() {
 
     return NextResponse.json(formatted);
   } catch (error) {
-    console.error("GET /api/products error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch products" },
-      { status: 500 }
-    );
+    return apiErrorResponse(error, "Failed to fetch products");
   }
 }
 
@@ -159,10 +156,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, product });
   } catch (error) {
-    console.error("POST /api/products error:", error);
-    return NextResponse.json(
-      { error: "Failed to create product" },
-      { status: 500 }
-    );
+    return apiErrorResponse(error, "Failed to create product");
   }
 }

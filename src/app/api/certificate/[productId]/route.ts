@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { jsPDF } from "jspdf";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { prisma } from "@/lib/db/prisma";
+import { apiErrorResponse } from "@/lib/errors";
 
 export async function GET(
   request: NextRequest,
@@ -166,7 +167,6 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("GET /api/certificate error:", error);
-    return NextResponse.json({ error: "Failed to generate certificate" }, { status: 500 });
+    return apiErrorResponse(error, "Failed to generate certificate");
   }
 }

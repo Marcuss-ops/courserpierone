@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { analyticsEventSchema } from "@/lib/utils/validations";
 import { rateLimit, rateLimitResponse } from "@/lib/utils/rate-limit";
+import { apiErrorResponse } from "@/lib/errors";
 
 export async function POST(request: NextRequest) {
   try {
@@ -64,7 +65,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, event });
   } catch (error) {
-    console.error("POST /api/analytics error:", error);
-    return NextResponse.json({ error: "Failed to record event" }, { status: 500 });
+    return apiErrorResponse(error, "Failed to record event");
   }
 }

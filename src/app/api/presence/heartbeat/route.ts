@@ -13,6 +13,7 @@ import { NextResponse } from "next/server";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { heartbeat } from "@/lib/presence";
 import { withRateLimit } from "@/lib/utils/rate-limit";
+import { apiErrorResponse } from "@/lib/errors";
 
 // Force dynamic — heartbeat è sempre runtime
 export const dynamic = "force-dynamic";
@@ -28,8 +29,7 @@ async function POST_IMPL() {
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error("[presence/heartbeat] error:", error);
-    return NextResponse.json({ error: "Errore interno" }, { status: 500 });
+    return apiErrorResponse(error, "Errore interno");
   }
 }
 

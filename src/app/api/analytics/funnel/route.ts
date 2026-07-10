@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
+import { apiErrorResponse } from "@/lib/errors";
 
 const FUNNEL_STEPS = [
   "pageview",
@@ -159,7 +160,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("GET /api/analytics/funnel error:", error);
-    return NextResponse.json({ error: "Failed to fetch funnel data" }, { status: 500 });
+    return apiErrorResponse(error, "Failed to fetch funnel data");
   }
 }

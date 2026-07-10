@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { progressSchema } from "@/lib/utils/validations";
+import { apiErrorResponse } from "@/lib/errors";
 import type { Prisma } from "@prisma/client";
 
 export async function GET(request: NextRequest) {
@@ -27,8 +28,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ progress, lessons });
   } catch (error) {
-    console.error("GET /api/progress error:", error);
-    return NextResponse.json({ error: "Failed to fetch progress" }, { status: 500 });
+    return apiErrorResponse(error, "Failed to fetch progress");
   }
 }
 
@@ -63,7 +63,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, progress });
   } catch (error) {
-    console.error("POST /api/progress error:", error);
-    return NextResponse.json({ error: "Failed to save progress" }, { status: 500 });
+    return apiErrorResponse(error, "Failed to save progress");
   }
 }

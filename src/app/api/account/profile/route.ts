@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db/prisma";
 import { Prisma } from "@prisma/client";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { withRateLimit } from "@/lib/utils/rate-limit";
+import { apiErrorResponse } from "@/lib/errors";
 import { z } from "zod";
 
 const MAX_NAME_LENGTH = 60;
@@ -115,12 +116,10 @@ export const PATCH = withRateLimit(async function PATCH(request: NextRequest) {
         ...updated,
         socialLinks: updated.socialLinks ? JSON.parse(updated.socialLinks) : null,
       },
-    });
-  } catch (err) {
-    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
-      return NextResponse.json({ error: "Username già in uso" }, { status: 409 });
+    });    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+        return NextResponse.json({ error: "Username già in uso" }, { status: 409 });
+      }
+      return apiErrorResponse(err, "Errore interno, riprova");
     }
-    console.error("[api/account/profile] PATCH failed", err);
-    return NextResponse.json({ error: "Errore interno, riprova" }, { status: 500 });
-  }
 }, "AUTH");

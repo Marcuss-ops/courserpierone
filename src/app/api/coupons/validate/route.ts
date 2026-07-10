@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
+import { apiErrorResponse } from "@/lib/errors";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -60,7 +61,6 @@ export async function GET(request: NextRequest) {
       discountAmount,
     });
   } catch (error) {
-    console.error("GET /api/coupons/validate error:", error);
-    return NextResponse.json({ error: "Validation failed" }, { status: 500 });
+    return apiErrorResponse(error, "Validation failed");
   }
 }

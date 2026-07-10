@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getOpenAI, type Locale, translateContent } from "@/lib/openai";
+import { apiErrorResponse } from "@/lib/errors";
 
 /**
  * POST /api/translate
@@ -81,10 +82,6 @@ Rispondi con un JSON con questa struttura:
       usage: response.usage,
     });
   } catch (error) {
-    console.error("Translation error:", error);
-    return NextResponse.json(
-      { error: "Translation failed" },
-      { status: 500 }
-    );
+    return apiErrorResponse(error, "Translation failed");
   }
 }
