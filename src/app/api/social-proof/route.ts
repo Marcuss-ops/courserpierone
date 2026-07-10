@@ -38,8 +38,8 @@ export async function GET(request: NextRequest) {
       include: {
         user: {
           select: {
+            id: true,
             name: true,
-            email: true,
           },
         },
       },
@@ -67,24 +67,22 @@ export async function GET(request: NextRequest) {
     const userIds = [...new Set(recentProgress.map((p) => p.userId))];
     const users = await prisma.user.findMany({
       where: { id: { in: userIds } },
-      select: { id: true, name: true, email: true },
+      select: { id: true, name: true },
     });
     const userMap = new Map(users.map((u) => [u.id, u]));
 
-    // Helper to clean and format name
-    const formatName = (name?: string | null, email?: string | null): string => {
-      let raw = name || (email ? email.split("@")[0] : "");
-      if (!raw) return "Student";
-      // Clean names that look like emails or contain digits
-      raw = raw.split("@")[0].replace(/[0-9_.-]+/g, " ").trim();
+    // Helper to clean and format name (no email exposure)
+    const formatName = (name?: string | null): string => {
+      if (!name) return "Student";
+      const raw = name.split("@")[0].replace(/[0-9_.-]+/g, " ").trim();
       const parts = raw.split(" ");
       const first = parts[0];
       if (!first) return "Student";
       return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
     };
 
-    // Helper to get city based on locale/country code
-    const getCity = (userLocale?: string | null, userName?: string | null, userEmail?: string | null): string => {
+    // Helper to get city based on locale + deterministic user seed (no email)
+    const getCity = (userLocale?: string | null, userName?: string | null, userId?: string | null): string => {
       const cleanLocale = (userLocale || locale).toLowerCase();
       const lang = cleanLocale.split("-")[0];
 
@@ -102,14 +100,8 @@ export async function GET(request: NextRequest) {
       const fallbackCities = cities.en;
       const list = cities[lang] || fallbackCities;
 
-      // Specifically map futurimilionariposta to Roma
-      const nameLower = (userName || "").toLowerCase();
-      const emailLower = (userEmail || "").toLowerCase();
-      if (nameLower.includes("futurimilionari") || emailLower.includes("futurimilionari")) {
-        return "Roma";
-      }
-
-      const seed = userName || userEmail || userLocale || "default";
+      // Deterministic seed: userId > name > locale
+      const seed = userId || userName || userLocale || "default";
       const index = Math.abs(hashCode(seed)) % list.length;
       return list[index];
     };
@@ -127,8 +119,8 @@ export async function GET(request: NextRequest) {
 
     // Map order events
     recentOrders.forEach((order) => {
-      const name = formatName(order.user.name, order.user.email);
-      const city = getCity(order.locale, order.user.name, order.user.email);
+      const name = formatName(order.user.name);
+      const city = getCity(order.locale, order.user.name, order.user.id);
       events.push({
         id: `order-${order.id}`,
         type: "purchase",
@@ -141,8 +133,8 @@ export async function GET(request: NextRequest) {
     // Map progress events
     recentProgress.forEach((prog) => {
       const user = userMap.get(prog.userId);
-      const name = formatName(user?.name, user?.email);
-      const city = getCity(locale, user?.name, user?.email); // Fallback to current viewer's locale for lesson location
+      const name = formatName(user?.name);
+      const city = getCity(locale, user?.name, user?.id);
       const lessonTitle = prog.lesson.translations.find((t) => t.locale.startsWith(locale.split("-")[0]))?.title
         || prog.lesson.translations[0]?.title
         || `Lezione ${prog.lesson.position}`;
