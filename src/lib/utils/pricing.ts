@@ -10,7 +10,7 @@
  */
 
 import type { CourseConfig, PriceByLocale } from "@/lib/config/white-label-data";
-import { getCurrencyFromLocale } from "@/lib/i18n/locale-resolver";
+import { getCurrencyFromLocale } from "@/lib/i18n/currency-map";
 
 // ─── Country Override Interface ───────────────────────────
 export interface CountryPriceOverride {
