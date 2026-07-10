@@ -1,5 +1,6 @@
-// ─── LumioTestimonials — Quote + avatar section ────────────
+// ─── LumioTestimonials — Thin wrapper ──────────────────────
 
+import { SharedTestimonials } from "@/components/funnel/shared/SharedTestimonials";
 import type { LumioLocaleContent, LumioT } from "./types";
 
 interface LumioTestimonialsProps {
@@ -8,62 +9,21 @@ interface LumioTestimonialsProps {
   t: LumioT;
 }
 
-export function LumioTestimonials({
-  recensioni,
-  lc,
-  t,
-}: LumioTestimonialsProps) {
-  if (!recensioni) return null;
-
+export function LumioTestimonials({ recensioni, lc, t }: LumioTestimonialsProps) {
   return (
-    <section id="testimonials" className="py-20">
-      <div className="mx-auto max-w-3xl px-6 text-center">
-        <span
-          className="mb-4 inline-block rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider"
-          style={{ background: "#F0EFEB", color: "#8C8880" }}
-        >
-          {lc?.testimonials?.badge || t("testimonials", "Testimonianze")}
-        </span>
-        <div
-          className="mt-6 text-xl leading-relaxed"
-          style={{ color: "#1B1B1B" }}
-        >
-          <span
-            style={{
-              background: "linear-gradient(135deg, #FF416C, #FF4B2B)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              fontSize: "48px",
-            }}
-          >
-            &ldquo;
-          </span>
-          <p
-            className="mt-2"
-            style={{ fontSize: "clamp(18px, 2.5vw, 24px)" }}
-          >
-            {recensioni}
-          </p>
-        </div>
-        <div className="mt-6 flex items-center justify-center gap-3">
-          <div
-            className="h-10 w-10 rounded-full"
-            style={{
-              background: "linear-gradient(135deg, #FF416C, #FF4B2B)",
-            }}
-          />
-          <div className="text-left">
-            <p className="text-sm font-semibold" style={{ color: "#1B1B1B" }}>
-              {lc?.testimonials?.items?.[0]?.name ||
-                t("testimonial_name", "Nome Cliente")}
-            </p>
-            <p className="text-xs" style={{ color: "#8C8880" }}>
-              {lc?.testimonials?.items?.[0]?.role ||
-                t("testimonial_role", "Ruolo, Azienda")}
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
+    <SharedTestimonials
+      text={recensioni}
+      badge={lc?.testimonials?.badge || t("testimonials", "Testimonianze")}
+      id="testimonials"
+      name={lc?.testimonials?.items?.[0]?.name || t("testimonial_name", "Nome Cliente")}
+      role={lc?.testimonials?.items?.[0]?.role || t("testimonial_role", "Ruolo, Azienda")}
+      accentColor="#FF416C"
+      badgeBg="#F0EFEB"
+      badgeColor="#8C8880"
+      textColor="#1B1B1B"
+      nameColor="#1B1B1B"
+      roleColor="#8C8880"
+      avatarBg="linear-gradient(135deg, #FF416C, #FF4B2B)"
+    />
   );
 }
