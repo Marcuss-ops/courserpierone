@@ -82,6 +82,10 @@ async function POST_IMPL(request: NextRequest) {
         email: customerEmail,
         productId,
         stripeSessionId: session.id,
+        stripeSubscriptionId:
+          typeof session.subscription === "string"
+            ? session.subscription
+            : undefined,
         paymentProvider: "stripe",
         amount: session.amount_total ?? 0,
         currency: session.currency ?? "eur",
@@ -115,16 +119,36 @@ async function POST_IMPL(request: NextRequest) {
       }
     }
 
-    // ── invoice.payment_failed → log warning (no automatic revoke) ──
-    // TODO: add stripeSubscriptionId to Order model to enable targeted revoke.
-    // Mass-revoking ALL orders for the customer is too aggressive.
+    // ── invoice.payment_failed → revoke access for subscription orders ──
     if (event.type === "invoice.payment_failed") {
       const invoice = event.data.object as Stripe.Invoice;
-      console.warn(
-        `[Stripe] invoice.payment_failed for ${invoice.customer_email ?? "unknown"} — ` +
-        `manual intervention may be required. ` +
-        `TODO: add stripeSubscriptionId to Order for automatic targeted revoke.`
-      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sub = (invoice as any).subscription;
+      const subscriptionId = typeof sub === "string" ? sub : undefined;
+
+      if (subscriptionId) {
+        const updated = await prisma.order.updateMany({
+          where: {
+            stripeSubscriptionId: subscriptionId,
+            status: "completed",
+          },
+          data: { status: "failed" },
+        });
+
+        if (updated.count > 0) {
+          console.log(
+            `[Stripe] invoice.payment_failed: revoked ${updated.count} order(s) for subscription ${subscriptionId}`
+          );
+        } else {
+          console.log(
+            `[Stripe] invoice.payment_failed for subscription ${subscriptionId} — no matching completed orders found`
+          );
+        }
+      } else {
+        console.warn(
+          `[Stripe] invoice.payment_failed without subscription ID — cannot revoke`
+        );
+      }
     }
 
     // ── charge.refunded → mark order as refunded (auto-revoke access) ──
@@ -172,15 +196,24 @@ async function POST_IMPL(request: NextRequest) {
       }
     }
 
-    // ── customer.subscription.deleted → log warning (no automatic revoke) ──
-    // TODO: add stripeSubscriptionId to Order model to enable targeted revoke.
+    // ── customer.subscription.deleted → revoke access for subscription ──
     if (event.type === "customer.subscription.deleted") {
       const subscription = event.data.object as Stripe.Subscription;
-      console.warn(
-        `[Stripe] Subscription ${subscription.id} deleted for customer ${subscription.customer} — ` +
-        `manual intervention may be required. ` +
-        `TODO: add stripeSubscriptionId to Order for automatic targeted revoke.`
-      );
+      const subscriptionId = subscription.id;
+
+      const updated = await prisma.order.updateMany({
+        where: {
+          stripeSubscriptionId: subscriptionId,
+          status: "completed",
+        },
+        data: { status: "failed" },
+      });
+
+      if (updated.count > 0) {
+        console.log(
+          `[Stripe] Subscription deleted: revoked ${updated.count} order(s) for subscription ${subscriptionId}`
+        );
+      }
     }
   } catch (error) {
     // Processing failed — delete the idempotency record so Stripe
