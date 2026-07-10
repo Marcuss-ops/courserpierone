@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { BookOpen, Users, Play, Search, X } from "lucide-react";
+import { BookOpen, Users, Play, Search, X, ArrowRight } from "lucide-react";
 
 export interface DiscoveryCourse {
   id: string;
@@ -14,6 +14,8 @@ export interface DiscoveryCourse {
   lessonCount: number;
   studentCount: number;
   category: string;
+  owned: boolean;
+  portalUrl: string;
 }
 
 interface DiscoveryGridProps {
@@ -151,7 +153,7 @@ export function DiscoveryGrid({ courses, categories, locale }: DiscoveryGridProp
               {filteredCourses.map((course) => (
                 <Link
                   key={course.id}
-                  href={locale ? `/${locale}/${course.slug}` : `/${course.slug}`}
+                  href={course.owned ? course.portalUrl : (locale ? `/${locale}/${course.slug}` : `/${course.slug}`)}
                   className="group flex flex-col bg-white rounded-xl border border-black/[0.08] hover:border-black/20 hover:shadow-lg transition-all duration-200 overflow-hidden"
                 >
                   {/* Cover image */}
@@ -168,11 +170,17 @@ export function DiscoveryGrid({ courses, categories, locale }: DiscoveryGridProp
                         <BookOpen className="w-10 h-10 text-black/15" />
                       </div>
                     )}
-                    {/* Price badge */}
+                    {/* Price badge — or owned badge */}
                     <div className="absolute top-3 right-3">
-                      <span className="inline-block bg-white/90 backdrop-blur-sm text-black text-[12px] font-semibold px-3 py-1 rounded-full shadow-sm">
-                        {course.price}
-                      </span>
+                      {course.owned ? (
+                        <span className="inline-block bg-green-500 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-sm">
+                          ✓ Acquistato
+                        </span>
+                      ) : (
+                        <span className="inline-block bg-white/90 backdrop-blur-sm text-black text-[12px] font-semibold px-3 py-1 rounded-full shadow-sm">
+                          {course.price}
+                        </span>
+                      )}
                     </div>
                     {/* Category badge */}
                     {course.category && (
@@ -210,6 +218,17 @@ export function DiscoveryGrid({ courses, categories, locale }: DiscoveryGridProp
                         </span>
                       </div>
                     </div>
+
+                    {/* Owned: show access button */}
+                    {course.owned && (
+                      <Link
+                        href={course.portalUrl}
+                        className="mt-3 flex items-center justify-center gap-2 w-full py-2.5 bg-green-600 hover:bg-green-700 text-white text-[13px] font-semibold rounded-lg transition-colors"
+                      >
+                        Accedi al corso
+                        <ArrowRight className="w-4 h-4" />
+                      </Link>
+                    )}
                   </div>
                 </Link>
               ))}

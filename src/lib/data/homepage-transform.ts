@@ -12,6 +12,10 @@ export interface DiscoveryCourse {
   lessonCount: number;
   studentCount: number;
   category: string;
+  /** Whether the current user already owns this course. */
+  owned: boolean;
+  /** Portal URL for owned courses. */
+  portalUrl: string;
 }
 
 const CATEGORY_MAP: Record<string, string> = {
@@ -28,7 +32,11 @@ const CATEGORY_MAP: Record<string, string> = {
  */
 export function transformToDiscoveryCourses(
   products: PublishedProductRow[],
+  ownedProductIds?: Set<string>,
+  locale?: string,
 ): DiscoveryCourse[] {
+  const owned = ownedProductIds ?? new Set<string>();
+  const loc = locale ?? "it-it";
   return products.map((product) => {
     const translationsByLocale: Record<string, Record<string, string>> = {};
     for (const t of product.translations) {
@@ -51,6 +59,7 @@ export function transformToDiscoveryCourses(
     const category =
       CATEGORY_MAP[product.templateId] || product.templateId;
 
+    const isOwned = owned.has(product.id);
     return {
       id: product.id,
       slug: product.slug,
@@ -61,6 +70,8 @@ export function transformToDiscoveryCourses(
       lessonCount,
       studentCount,
       category,
+      owned: isOwned,
+      portalUrl: isOwned ? `/${loc}/${product.slug}/portal` : "",
     };
   });
 }
