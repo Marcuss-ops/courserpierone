@@ -5,8 +5,8 @@ import { apiErrorResponse } from "@/lib/errors";
 
 /**
  * PATCH /api/messages/read
- * Segna come letti tutti i messaggi da un mittente specifico.
- * Body: { senderId: string }
+ * Segna come letti tutti i messaggi in una conversazione specifica.
+ * Body: { conversationId: string }
  */
 export async function PATCH(request: NextRequest) {
   try {
@@ -16,16 +16,32 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { senderId } = body;
+    const { conversationId } = body;
 
-    if (!senderId) {
-      return NextResponse.json({ error: "senderId obbligatorio" }, { status: 400 });
+    if (!conversationId) {
+      return NextResponse.json({ error: "conversationId obbligatorio" }, { status: 400 });
+    }
+
+    // Verifica che la conversazione appartenga all'utente (accesso controllato)
+    const conversation = await prisma.conversation.findFirst({
+      where: {
+        id: conversationId,
+        OR: [
+          { userOneId: dbUser.id },
+          { userTwoId: dbUser.id },
+        ],
+      },
+      select: { id: true },
+    });
+
+    if (!conversation) {
+      return NextResponse.json({ error: "Conversazione non trovata o accesso negato" }, { status: 403 });
     }
 
     const result = await prisma.message.updateMany({
       where: {
-        receiverId: dbUser.id,
-        senderId,
+        conversationId,
+        senderId: { not: dbUser.id }, // non segnare come letti i propri messaggi
         read: false,
       },
       data: { read: true },

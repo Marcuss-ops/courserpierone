@@ -180,8 +180,18 @@ export default async function DashboardPage() {
     : undefined;
 
   // ── Unread messages count ──────────────────────────────
+  // New schema: count unread messages across all conversations where user is a participant
   const unreadMessages = await prisma.message.count({
-    where: { receiverId: dbUser.id, read: false },
+    where: {
+      read: false,
+      senderId: { not: dbUser.id }, // only messages FROM others
+      conversation: {
+        OR: [
+          { userOneId: dbUser.id },
+          { userTwoId: dbUser.id },
+        ],
+      },
+    },
   });
 
   // ── Certificates (products fully completed) ──

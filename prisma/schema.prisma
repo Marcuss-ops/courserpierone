@@ -43,7 +43,7 @@ model Product {
   lessons            Lesson[]
   orders             Order[]
   abandonedCheckouts AbandonedCheckout[]
-  messages           Message[]
+  conversations      Conversation[]
 }
 
 // ─── Traduzioni del Funnel (Problema, Storia, Recensioni, CTA) ─
@@ -127,8 +127,9 @@ model User {
   orders             Order[]
   accounts           Account[]
   sessions           Session[]
-  sentMessages       Message[]      @relation("SentMessages")
-  receivedMessages   Message[]      @relation("ReceivedMessages")
+  sentMessages       Message[]        @relation("MessageSender")
+  conversationsAsU1  Conversation[]   @relation("ConversationUserOne")
+  conversationsAsU2  Conversation[]   @relation("ConversationUserTwo")
 }
 
 // ─── NextAuth ───────────────────────────────────────────────
@@ -367,21 +368,37 @@ model LandingTranslation {
   @@unique([slug, locale])
 }
 
+// ─── Conversations (stanze per DM tra due utenti) ──────────
+model Conversation {
+  id        String   @id @default(cuid())
+  userOneId String   // uno dei due partecipanti
+  userTwoId String   // l'altro partecipante
+  productId String?  // opzionale: scoping al corso da cui parte la conversazione
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userOne  User      @relation("ConversationUserOne", fields: [userOneId], references: [id], onDelete: Cascade)
+  userTwo  User      @relation("ConversationUserTwo", fields: [userTwoId], references: [id], onDelete: Cascade)
+  product  Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
+  messages Message[]
+
+  @@unique([userOneId, userTwoId])
+  @@index([userOneId, updatedAt])
+  @@index([userTwoId, updatedAt])
+}
+
 // ─── Direct Messages tra studente e creator ────────────────
 model Message {
-  id         String   @id @default(cuid())
-  senderId   String
-  receiverId String
-  productId  String?  // opzionale: scoping al corso da cui parte il DM
-  content    String   @db.Text
-  read       Boolean  @default(false)
-  createdAt  DateTime @default(now())
+  id             String   @id @default(cuid())
+  conversationId String
+  senderId       String   // chi ha inviato QUESTO messaggio
+  content        String   @db.Text
+  read           Boolean  @default(false)
+  createdAt      DateTime @default(now())
 
-  sender   User    @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver User    @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
-  product  Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
 
-  @@index([senderId, receiverId, createdAt])
-  @@index([receiverId, read, createdAt])
-  @@index([productId])
+  @@index([conversationId, createdAt])
+  @@index([senderId])
 }
