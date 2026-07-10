@@ -242,14 +242,14 @@ describe("getPriceString", () => {
     expect(result.currency).toBe("EUR");
   });
 
-  it("handles 2-letter language code (en → USD)", () => {
-    const result = getPriceString(MOCK_PRODUCT, "en");
+  it("handles full locale code (en-us → USD)", () => {
+    const result = getPriceString(MOCK_PRODUCT, "en-us");
     expect(result.currency).toBe("USD");
     expect(result.price).toBe("$54");
   });
 
-  it("handles 2-letter language code (fr → EUR)", () => {
-    const result = getPriceString(MOCK_PRODUCT, "fr");
+  it("handles full locale code (fr-fr → EUR)", () => {
+    const result = getPriceString(MOCK_PRODUCT, "fr-fr");
     expect(result.currency).toBe("EUR");
     expect(result.price).toBe("€49");
   });
