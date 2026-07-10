@@ -24,10 +24,12 @@
 import {
   COUNTRY_LOCALE,
   LANG_TO_DEFAULT_LOCALE,
-  LOCALE_CURRENCY,
   ALL_KNOWN_LOCALES,
   DEFAULT_LOCALE,
 } from "./_generated/locale-data";
+import { getCurrencyFromLocale } from "./currency-map";
+
+export { getCurrencyFromLocale };
 
 export interface LocaleInfo {
   code: string;            // "fr-fr"
@@ -37,12 +39,6 @@ export interface LocaleInfo {
   nativeName: string;      // "Français (France)"
   fallbackLocale: string;  // "en-us"
   currency: string;        // "EUR"
-}
-
-/** Get the currency code for a given locale. Falls back to EUR. */
-export function getCurrencyFromLocale(locale: string): string {
-  const normalized = normalizeLocale(locale);
-  return LOCALE_CURRENCY[normalized] ?? LOCALE_CURRENCY[localeToLanguage(normalized)] ?? "EUR";
 }
 
 export { LANG_TO_DEFAULT_LOCALE, DEFAULT_LOCALE };
