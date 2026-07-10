@@ -1,11 +1,11 @@
-// ─── SharedCTAButton — Accent-themed CTA button ────────────
+// ─── SharedCTA — Accent-themed CTA button ──────────────────
 // Thin wrapper around TrackedCtaButton with accent gradient styling.
 // Used by: amish, lumio templates. Eliminates duplicate gradient/boxShadow patterns.
 
 import { ArrowRight } from "lucide-react";
 import { TrackedCtaButton } from "@/components/course/tracked-cta-button";
 
-interface SharedCTAButtonProps {
+interface SharedCTAProps {
   href?: string;
   productSlug: string;
   productId?: string;
@@ -22,7 +22,7 @@ interface SharedCTAButtonProps {
   className?: string;
 }
 
-export function SharedCTAButton({
+export function SharedCTA({
   href,
   productSlug,
   productId,
@@ -32,7 +32,7 @@ export function SharedCTAButton({
   fullWidth,
   boxShadow,
   className = "",
-}: SharedCTAButtonProps) {
+}: SharedCTAProps) {
   return (
     <TrackedCtaButton
       href={href}

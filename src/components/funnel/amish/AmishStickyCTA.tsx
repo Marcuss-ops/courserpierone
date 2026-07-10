@@ -1,6 +1,6 @@
 // ─── AmishStickyCTA — Mobile bottom CTA bar (thin wrapper) ──
 
-import { SharedCTAButton } from "@/components/funnel/shared/SharedCTAButton";
+import { SharedCTA } from "@/components/funnel/shared/SharedCTA";
 import type { AmishProps, AmishT } from "./types";
 
 interface AmishStickyCTAProps {
@@ -42,7 +42,7 @@ export function AmishStickyCTA({
             {t("hero_no_sub")}
           </div>
         </div>
-        <SharedCTAButton
+        <SharedCTA
           href={checkoutUrl}
           productSlug={productSlug ?? ""}
           productId={productId}
@@ -51,7 +51,7 @@ export function AmishStickyCTA({
           className="px-6 py-3.5 font-bold text-sm"
         >
           {t("hero_cta_prefix")} {data.prezzo}
-        </SharedCTAButton>
+        </SharedCTA>
       </div>
     </div>
   );
