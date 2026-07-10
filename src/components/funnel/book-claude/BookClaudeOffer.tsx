@@ -1,7 +1,8 @@
 // ─── BookClaudeOffer — Pricing/offer section ────────────────
 
-import { Check, Clock, Shield, Zap } from "lucide-react";
+import { Check, Clock, Zap } from "lucide-react";
 import { TrackedCtaButton } from "@/components/course/tracked-cta-button";
+import { SharedGuarantee } from "@/components/funnel/shared/SharedGuarantee";
 import type { LabelKey } from "./useBookClaudeI18n";
 
 interface BookClaudeOfferProps {
@@ -58,13 +59,12 @@ export function BookClaudeOffer({ data, t, locale, productSlug, productId, check
                   {t("unlock_now")} — {data.prezzo ?? ""}
                 </TrackedCtaButton>
               </div>
-              <div className="mt-6 bg-[#FFF3EB] rounded-2xl p-5 border border-[#FF6B00]/15">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Shield className="w-5 h-5 text-[#059669]" />
-                  <span className="font-black text-sm uppercase tracking-wider">{t("guarantee_title")}</span>
-                </div>
-                <p className="text-xs text-[#6B7280] leading-relaxed">{t("guarantee_text")}</p>
-              </div>
+              <SharedGuarantee
+                title={t("guarantee_title")}
+                text={t("guarantee_text")}
+                accentColor="#FF6B00"
+                dark={false}
+              />
             </div>
           </div>
         </div>

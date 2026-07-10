@@ -2,7 +2,6 @@
 // Composes section components from ./book-claude/ subfolder.
 
 import LanguageSelector from "@/components/funnel/language-selector";
-import { SharedFooter } from "@/components/funnel/shared/SharedFooter";
 import type { BookClaudeProps } from "./types";
 import {
   createBookClaudeT,
