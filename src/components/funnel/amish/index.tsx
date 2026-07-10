@@ -211,7 +211,6 @@ export default function TemplateAmish({
 
       <AmishFAQ
         faqItems={faqItems}
-        data={data}
         t={t}
         accent={accent}
         locale={locale}
