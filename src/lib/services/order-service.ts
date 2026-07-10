@@ -18,6 +18,8 @@ export interface ProcessOrderInput {
   stripePriceId?: string;
   /** Stripe session ID (unique constraint on Order.stripeSessionId) */
   stripeSessionId?: string;
+  /** Stripe subscription ID (for targeted revoke on payment failure/cancellation) */
+  stripeSubscriptionId?: string;
   /** Provider's own order ID (unique per provider via @@unique) */
   providerOrderId?: string;
   /** Payment provider identifier */
@@ -52,6 +54,7 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
     variantId,
     stripePriceId,
     stripeSessionId,
+    stripeSubscriptionId,
     providerOrderId,
     paymentProvider,
     amount,
@@ -131,6 +134,7 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
       productId: product.id,
       paymentProvider,
       stripeSessionId: stripeSessionId ?? null,
+      stripeSubscriptionId: stripeSubscriptionId ?? null,
       providerOrderId: providerOrderId ?? null,
       amount,
       currency,

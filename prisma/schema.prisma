@@ -90,22 +90,24 @@ model LessonTranslation {
 
 // ─── Ordini / Pagamenti ─────────────────────────────────────
 model Order {
-  id              String   @id @default(cuid())
-  userId          String
-  productId       String
-  paymentProvider String   @default("stripe") // stripe | lemonsqueezy
-  stripeSessionId String?  @unique // Stripe session ID (legacy)
-  providerOrderId String? // Order ID dal provider (Lemon Squeezy order ID)
+  id                   String   @id @default(cuid())
+  userId               String
+  productId            String
+  paymentProvider      String   @default("stripe") // stripe | lemonsqueezy
+  stripeSessionId      String?  @unique // Stripe session ID (legacy)
+  stripeSubscriptionId String?  // Stripe subscription ID (per targeted revoke)
+  providerOrderId      String? // Order ID dal provider (Lemon Squeezy order ID)
   amount          Int // in centesimi
   currency        String
   locale          String? // lingua al momento dell'acquisto
-  status          String   @default("pending") // pending | completed | refunded
+  status          String   @default("pending") // pending | completed | failed | refunded
   createdAt       DateTime @default(now())
 
   user    User    @relation(fields: [userId], references: [id])
   product Product @relation(fields: [productId], references: [id])
 
   @@unique([paymentProvider, providerOrderId])
+  @@index([stripeSubscriptionId])
   @@index([createdAt])
   @@index([userId, status])
 }
