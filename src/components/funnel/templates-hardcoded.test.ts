@@ -95,6 +95,7 @@ const ALLOWED_FALLBACK_PATTERNS: string[] = [
   '"Sottotitolo che descrive il valore del prodotto in modo chiaro',
   '"Acquista Ora"}',       // HorizonPricing: lc?.ui?.labels?.buy_now on prev line
   '"All rights reserved."', // horizon/index.tsx SharedFooter: lc?. refs on prev lines
+  'placeholderLabel || "Cover del Prodotto"', // SharedStory: wrappers pass locale-aware prop
 ];
 
 // ─── Helpers ────────────────────────────────────────────────
