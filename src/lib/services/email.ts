@@ -411,6 +411,131 @@ function fillTemplate(tpl: EmailContent, product: string): EmailContent {
   };
 }
 
+// ─── DM Notification ────────────────────────────────────────
+
+const DM_NOTIFICATION_TEMPLATES: Record<string, EmailContent> = {
+  it: {
+    subject: `💬 Nuovo messaggio da {sender} su Courser`,
+    heading: "Hai un nuovo messaggio!",
+    body: [
+      '<strong style="color:#e5e2e1;">{sender}</strong> ti ha inviato un messaggio.',
+      "Accedi alla tua dashboard per leggere e rispondere.",
+    ],
+    buttonText: "Vai ai Messaggi",
+    footer: "Ricevi questa email perché hai una conversazione attiva su Courser.",
+  },
+  en: {
+    subject: `💬 New message from {sender} on Courser`,
+    heading: "You have a new message!",
+    body: [
+      '<strong style="color:#e5e2e1;">{sender}</strong> sent you a message.',
+      "Log in to your dashboard to read and reply.",
+    ],
+    buttonText: "Go to Messages",
+    footer: "You're receiving this because you have an active conversation on Courser.",
+  },
+  es: {
+    subject: `💬 Nuevo mensaje de {sender} en Courser`,
+    heading: "¡Tienes un nuevo mensaje!",
+    body: [
+      '<strong style="color:#e5e2e1;">{sender}</strong> te ha enviado un mensaje.',
+      "Accede a tu dashboard para leer y responder.",
+    ],
+    buttonText: "Ir a Mensajes",
+    footer: "Recibes este correo porque tienes una conversación activa en Courser.",
+  },
+  fr: {
+    subject: `💬 Nouveau message de {sender} sur Courser`,
+    heading: "Vous avez un nouveau message !",
+    body: [
+      '<strong style="color:#e5e2e1;">{sender}</strong> vous a envoyé un message.',
+      "Connectez-vous à votre tableau de bord pour lire et répondre.",
+    ],
+    buttonText: "Voir les Messages",
+    footer: "Vous recevez cet email car vous avez une conversation active sur Courser.",
+  },
+  de: {
+    subject: `💬 Neue Nachricht von {sender} auf Courser`,
+    heading: "Sie haben eine neue Nachricht!",
+    body: [
+      '<strong style="color:#e5e2e1;">{sender}</strong> hat Ihnen eine Nachricht gesendet.',
+      "Melden Sie sich in Ihrem Dashboard an, um zu lesen und zu antworten.",
+    ],
+    buttonText: "Zu Nachrichten",
+    footer: "Sie erhalten diese E-Mail, weil Sie eine aktive Konversation auf Courser haben.",
+  },
+  pt: {
+    subject: `💬 Nova mensagem de {sender} no Courser`,
+    heading: "Você tem uma nova mensagem!",
+    body: [
+      '<strong style="color:#e5e2e1;">{sender}</strong> enviou uma mensagem para você.',
+      "Acesse seu painel para ler e responder.",
+    ],
+    buttonText: "Ir para Mensagens",
+    footer: "Você está recebendo este e-mail porque tem uma conversa ativa no Courser.",
+  },
+};
+
+/** Invia notifica email per un nuovo DM (se il destinatario è offline). */
+export async function sendDmNotificationEmail(
+  email: string,
+  senderName: string,
+  locale = "en",
+): Promise<boolean> {
+  const transporter = getTransporter();
+
+  if (!transporter) {
+    console.log(`\n💬 DM notification per ${email}: nuovo messaggio da ${senderName} (locale: ${locale})\n`);
+    return false;
+  }
+
+  const from = process.env.EMAIL_FROM ?? "noreply@courser.app";
+  const tpl = resolveTemplate(locale, DM_NOTIFICATION_TEMPLATES);
+  const inboxUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://courser.app"}/dashboard/messages`;
+
+  const filled: EmailContent = {
+    subject: tpl.subject.replace(/{sender}/g, senderName),
+    heading: tpl.heading,
+    body: tpl.body.map((l) => l.replace(/{sender}/g, senderName)),
+    buttonText: tpl.buttonText,
+    footer: tpl.footer.replace(/{sender}/g, senderName),
+  };
+
+  try {
+    await transporter.sendMail({
+      from,
+      to: email,
+      subject: filled.subject,
+      html: buildHtmlEmail(
+        undefined,
+        filled.heading,
+        filled.body,
+        filled.buttonText,
+        inboxUrl,
+        filled.footer,
+        "💬",
+        "rgba(255,140,66,0.15)",
+        "rgba(255,140,66,0.3)",
+        "linear-gradient(135deg,#FF8C42,#e07730)",
+        "rgba(255,140,66,0.3)",
+        "#FF8C42",
+      ),
+      text: buildTextEmail(
+        filled.body,
+        filled.buttonText,
+        inboxUrl,
+        filled.footer,
+      ),
+    });
+
+    console.log(`✅ Email notifica DM inviata a ${email} (locale: ${locale})`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Errore invio notifica DM a ${email}:`, error);
+    return false;
+  }
+}
+
 // ════════════════════════════════════════════════════════════
 // PUBLIC API
 // ════════════════════════════════════════════════════════════

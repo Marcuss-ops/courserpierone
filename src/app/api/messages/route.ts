@@ -5,6 +5,7 @@ import { withRateLimit } from "@/lib/utils/rate-limit";
 import { sanitizeHtml } from "@/lib/utils/sanitize";
 import { apiErrorResponse } from "@/lib/errors";
 import { messageBroker, NEW_MESSAGE } from "@/lib/ws/broker";
+import { sendDmNotificationEmail } from "@/lib/services/email";
 
 /**
  * Trova o crea una conversazione tra due utenti.
@@ -165,7 +166,10 @@ export const POST = withRateLimit(async function POST(request: NextRequest) {
     }
 
     // Verifica che il receiver esista
-    const receiver = await prisma.user.findUnique({ where: { id: receiverId } });
+    const receiver = await prisma.user.findUnique({
+      where: { id: receiverId },
+      select: { id: true, email: true, lastSeenAt: true },
+    });
     if (!receiver) {
       return NextResponse.json({ error: "Destinatario non trovato" }, { status: 404 });
     }
@@ -194,6 +198,34 @@ export const POST = withRateLimit(async function POST(request: NextRequest) {
         createdAt: message.createdAt.toISOString(),
       },
     });
+
+    // Send email notification if receiver appears offline.
+    // Only send if lastSeenAt has been populated (WS server is tracking activity)
+    // AND it was more than 5 minutes ago.
+    const OFFLINE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
+    const isOffline =
+      receiver.lastSeenAt != null &&
+      Date.now() - receiver.lastSeenAt.getTime() > OFFLINE_THRESHOLD_MS;
+
+    if (isOffline && receiver.email) {
+      // Cooldown: only send if receiver has ≤ 1 unread message in this conversation
+      // (prevents email spam from rapid-fire messages)
+      const unreadCount = await prisma.message.count({
+        where: {
+          conversationId: conversation.id,
+          senderId: { not: receiver.id },
+          read: false,
+        },
+      });
+
+      if (unreadCount <= 1) {
+        sendDmNotificationEmail(
+          receiver.email,
+          dbUser.name || dbUser.email?.split("@")[0] || "Uno studente",
+          "en",
+        ).catch((err) => console.error("[dm-email] Failed to send:", err));
+      }
+    }
 
     return NextResponse.json({ message }, { status: 201 });
   } catch (error) {

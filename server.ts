@@ -3,6 +3,7 @@ import { parse } from "url";
 import next from "next";
 import { WebSocketServer, WebSocket } from "ws";
 import { createHmac } from "crypto";
+import { prisma } from "./src/lib/db/prisma";
 import { messageBroker, NEW_MESSAGE, type NewMessageEvent } from "./src/lib/ws/broker";
 
 const dev = process.env.NODE_ENV !== "production";
@@ -99,6 +100,10 @@ app.prepare().then(() => {
 
     clients.set(userId, ws);
 
+    // Update lastSeenAt in DB (user is now online)
+    prisma.user.update({ where: { id: userId }, data: { lastSeenAt: new Date() } })
+      .catch((err) => console.error("[ws] Failed to update lastSeenAt on connect:", err));
+
     // Track which conversation this user is viewing
     if (!userConversations.has(userId)) {
       userConversations.set(userId, new Set());
@@ -126,6 +131,9 @@ app.prepare().then(() => {
         convs.delete(withUserId);
         if (convs.size === 0) userConversations.delete(userId);
       }
+      // Update lastSeenAt on disconnect (last known activity)
+      prisma.user.update({ where: { id: userId }, data: { lastSeenAt: new Date() } })
+        .catch((err) => console.error("[ws] Failed to update lastSeenAt on disconnect:", err));
       console.log(`[ws] Client disconnected: ${userId}`);
     });
 
