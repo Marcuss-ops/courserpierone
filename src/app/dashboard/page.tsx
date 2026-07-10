@@ -228,10 +228,11 @@ export default async function DashboardPage() {
 
           <div className="flex items-center gap-3">
             {/* DM messages badge */}
-            <span
-              className="relative p-2.5 bg-cream-dark-surface border border-cream-dark-border rounded-xl text-cream-dark-text-soft transition-all"
+            <Link
+              href="/dashboard/messages"
+              className="relative p-2.5 bg-cream-dark-surface border border-cream-dark-border rounded-xl text-cream-dark-text-soft hover:text-cream-dark-gold hover:border-cream-dark-gold/30 transition-all"
               aria-label={`Messaggi${unreadMessages > 0 ? `, ${unreadMessages} non letti` : ""}`}
-              title={unreadMessages > 0 ? `${unreadMessages} messaggi non letti — controlla i tuoi corsi` : "Nessun nuovo messaggio"}
+              title={unreadMessages > 0 ? `${unreadMessages} messaggi non letti — vai alla inbox` : "Apri inbox messaggi"}
             >
               <Mail className="w-4 h-4" />
               {unreadMessages > 0 && (
@@ -239,7 +240,7 @@ export default async function DashboardPage() {
                   {unreadMessages > 99 ? "99+" : unreadMessages}
                 </span>
               )}
-            </span>
+            </Link>
             <div className="hidden sm:flex items-center gap-3 pl-4 pr-2 py-1.5 bg-cream-dark-surface/80 border border-cream-dark-border rounded-full">
               <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#FFF5E6] to-[#FFE4C4] flex items-center justify-center overflow-hidden">
                 {dbUser.image ? (

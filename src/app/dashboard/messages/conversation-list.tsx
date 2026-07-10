@@ -1,0 +1,102 @@
+"use client";
+
+import Link from "next/link";
+import { User, Clock, ChevronRight } from "lucide-react";
+import type { ConversationPreview } from "./page";
+
+interface ConversationListProps {
+  previews: ConversationPreview[];
+  currentUserId: string;
+}
+
+/**
+ * Formats a date into a human-readable relative time string.
+ * Accepts both Date objects and ISO strings (from server→client serialization).
+ */
+function timeAgo(date: Date | string): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  const now = Date.now();
+  const diff = now - d.getTime();
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 1) return "Adesso";
+  if (mins < 60) return `${mins}m fa`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h fa`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}g fa`;
+  return d.toLocaleDateString("it-IT", { day: "numeric", month: "short" });
+}
+
+export function ConversationList({ previews, currentUserId }: ConversationListProps) {
+  return (
+    <div className="space-y-3">
+      {previews.map((conv) => {
+        const isUnread =
+          conv.unreadCount > 0 ||
+          (conv.lastMessage !== null &&
+            conv.lastMessage.senderId !== currentUserId &&
+            !conv.lastMessage.read);
+
+        return (
+          <Link
+            key={conv.id}
+            href={`/dashboard/messages/${conv.otherUser.id}`}
+            className={`group flex items-center gap-4 p-4 sm:p-5 rounded-2xl border transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream-dark-gold focus-visible:ring-offset-2 focus-visible:ring-offset-cream-dark-bg ${
+              isUnread
+                ? "bg-cream-dark-gold/5 border-cream-dark-gold/20 shadow-sm hover:shadow-md hover:border-cream-dark-gold/40"
+                : "bg-cream-dark-surface border-cream-dark-border hover:shadow-lg hover:border-cream-dark-gold/20"
+            }`}
+          >
+            {/* Avatar */}
+            <div className="shrink-0 relative">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-[#FFF5E6] to-[#FFE4C4] flex items-center justify-center overflow-hidden shadow-md ring-2 ring-cream-dark-border">
+                {conv.otherUser.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={conv.otherUser.image}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User className="w-5 h-5 sm:w-6 sm:h-6 text-cream-gold" />
+                )}
+              </div>
+            </div>
+
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-2">
+                <h3
+                  className={`font-semibold text-sm sm:text-base truncate ${
+                    isUnread ? "text-cream-dark-text" : "text-cream-dark-text-soft"
+                  }`}
+                >
+                  {conv.otherUser.name || "Utente"}
+                </h3>
+                {conv.lastMessage && (
+                  <span className="shrink-0 inline-flex items-center gap-1 text-[10px] text-cream-dark-text-soft/60">
+                    <Clock className="w-3 h-3" />
+                    {timeAgo(conv.lastMessage.createdAt)}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between gap-2 mt-1">
+                <p className="text-xs sm:text-sm text-cream-dark-text-soft/70 truncate max-w-[280px]">
+                  {conv.lastMessage ? conv.lastMessage.content : "Nessun messaggio"}
+                </p>
+                {conv.unreadCount > 0 && (
+                  <span className="shrink-0 inline-flex items-center justify-center min-w-[22px] h-[22px] rounded-full bg-red-500 text-white text-[10px] font-bold px-1.5 shadow-md">
+                    {conv.unreadCount > 99 ? "99+" : conv.unreadCount}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <ChevronRight className="shrink-0 w-4 h-4 text-cream-dark-text-soft/40 group-hover:text-cream-dark-gold group-hover:translate-x-0.5 transition-all" />
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
