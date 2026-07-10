@@ -58,8 +58,9 @@ async function POST_IMPL(request: NextRequest) {
 
   // ─── Process the event ──────────────────────────────────────
   try {
+    // ── checkout.session.completed → create completed order ────
     if (event.type === "checkout.session.completed") {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- Stripe union types don't narrow automatically
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       const session = event.data.object as Stripe.Checkout.Session;
 
       const productId = session.metadata?.productId;
@@ -89,6 +90,97 @@ async function POST_IMPL(request: NextRequest) {
       });
 
       console.log(`[Stripe] Order processed for session ${session.id}`);
+    }
+
+    // ── checkout.session.expired → mark order as failed ───────
+    if (event.type === "checkout.session.expired") {
+      const session = event.data.object as Stripe.Checkout.Session;
+
+      if (!session.id) {
+        return NextResponse.json({ received: true });
+      }
+
+      const updated = await prisma.order.updateMany({
+        where: {
+          stripeSessionId: session.id,
+          status: "completed", // only downgrade completed orders
+        },
+        data: { status: "failed" },
+      });
+
+      if (updated.count > 0) {
+        console.log(
+          `[Stripe] Marked ${updated.count} order(s) as failed for expired session ${session.id}`
+        );
+      }
+    }
+
+    // ── invoice.payment_failed → log warning (no automatic revoke) ──
+    // TODO: add stripeSubscriptionId to Order model to enable targeted revoke.
+    // Mass-revoking ALL orders for the customer is too aggressive.
+    if (event.type === "invoice.payment_failed") {
+      const invoice = event.data.object as Stripe.Invoice;
+      console.warn(
+        `[Stripe] invoice.payment_failed for ${invoice.customer_email ?? "unknown"} — ` +
+        `manual intervention may be required. ` +
+        `TODO: add stripeSubscriptionId to Order for automatic targeted revoke.`
+      );
+    }
+
+    // ── charge.refunded → mark order as refunded (auto-revoke access) ──
+    // Only revoke on FULL refunds — partial refunds should not block access.
+    if (event.type === "charge.refunded") {
+      const charge = event.data.object as Stripe.Charge;
+
+      // charge.refunded (the boolean field) is true only when FULLY refunded
+      if (!charge.refunded) {
+        console.log(
+          `[Stripe] charge.refunded — partial refund for ${charge.id}, skipping revoke`
+        );
+        return NextResponse.json({ received: true });
+      }
+
+      const paymentIntent = charge.payment_intent as string | undefined;
+
+      if (paymentIntent) {
+        // Find the checkout session linked to this payment intent
+        const sessions = await getStripe().checkout.sessions.list({
+          payment_intent: paymentIntent,
+          limit: 1,
+        });
+        const stripeSessionId = sessions.data[0]?.id;
+
+        if (stripeSessionId) {
+          const updated = await prisma.order.updateMany({
+            where: {
+              stripeSessionId,
+              status: "completed",
+            },
+            data: { status: "refunded" },
+          });
+
+          if (updated.count > 0) {
+            console.log(
+              `[Stripe] charge.refunded: marked ${updated.count} order(s) as refunded for session ${stripeSessionId}`
+            );
+          }
+        } else {
+          console.log(
+            `[Stripe] charge.refunded for payment_intent ${paymentIntent} — no checkout session found, skipping`
+          );
+        }
+      }
+    }
+
+    // ── customer.subscription.deleted → log warning (no automatic revoke) ──
+    // TODO: add stripeSubscriptionId to Order model to enable targeted revoke.
+    if (event.type === "customer.subscription.deleted") {
+      const subscription = event.data.object as Stripe.Subscription;
+      console.warn(
+        `[Stripe] Subscription ${subscription.id} deleted for customer ${subscription.customer} — ` +
+        `manual intervention may be required. ` +
+        `TODO: add stripeSubscriptionId to Order for automatic targeted revoke.`
+      );
     }
   } catch (error) {
     // Processing failed — delete the idempotency record so Stripe

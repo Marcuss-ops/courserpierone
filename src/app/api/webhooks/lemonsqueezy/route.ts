@@ -143,6 +143,66 @@ async function POST_IMPL(request: NextRequest) {
 
       console.log("[LS Webhook] subscription_created:", data.id);
     }
+
+    // ── subscription_cancelled → revoke access ─────────────────
+    if (eventName === "subscription_cancelled") {
+      const orderId = String(data.id);
+
+      const updated = await prisma.order.updateMany({
+        where: {
+          paymentProvider: "lemonsqueezy",
+          providerOrderId: orderId,
+          status: "completed", // only downgrade completed orders
+        },
+        data: { status: "failed" },
+      });
+
+      if (updated.count > 0) {
+        console.log(
+          `[LS Webhook] subscription_cancelled: revoked ${updated.count} order(s) for ${orderId}`
+        );
+      }
+    }
+
+    // ── subscription_payment_failed → revoke access ────────────
+    if (eventName === "subscription_payment_failed") {
+      const orderId = String(data.id);
+
+      const updated = await prisma.order.updateMany({
+        where: {
+          paymentProvider: "lemonsqueezy",
+          providerOrderId: orderId,
+          status: "completed",
+        },
+        data: { status: "failed" },
+      });
+
+      if (updated.count > 0) {
+        console.log(
+          `[LS Webhook] subscription_payment_failed: revoked ${updated.count} order(s) for ${orderId}`
+        );
+      }
+    }
+
+    // ── order_refunded → mark order as refunded (auto-revoke access) ──
+    if (eventName === "order_refunded") {
+      const orderId = String(data.id);
+
+      const updated = await prisma.order.updateMany({
+        where: {
+          paymentProvider: "lemonsqueezy",
+          providerOrderId: orderId,
+          status: "completed",
+        },
+        data: { status: "refunded" },
+      });
+
+      if (updated.count > 0) {
+        console.log(
+          `[LS Webhook] order_refunded: marked ${updated.count} order(s) as refunded for ${orderId}`
+        );
+      }
+    }
   } catch (error) {
     // Processing failed — delete the idempotency record so LS
     // can retry the webhook.
