@@ -387,6 +387,18 @@ model Conversation {
   @@index([userTwoId, updatedAt])
 }
 
+// ─── Webhook Idempotency ──────────────────────────────────
+// Previene ordini duplicati quando Stripe/LemonSqueezy
+// inviano lo stesso webhook più di una volta.
+model ProcessedWebhook {
+  id         String   @id @default(cuid())
+  provider   String   // stripe | lemonsqueezy
+  deliveryId String   @unique // Stripe event.id | LS composite ID
+  eventType  String   // checkout.session.completed, order_created, etc.
+  processedAt DateTime @default(now())
+  createdAt  DateTime  @default(now())
+}
+
 // ─── Direct Messages tra studente e creator ────────────────
 model Message {
   id             String   @id @default(cuid())
