@@ -1,5 +1,6 @@
-// ─── LumioNav — Floating pill navigation ───────────────────
+// ─── LumioNav — Thin wrapper ────────────────────────────
 
+import { SharedNav } from "@/components/funnel/shared/SharedNav";
 import type { LumioLocaleContent, LumioT } from "./types";
 
 interface LumioNavProps {
@@ -9,38 +10,15 @@ interface LumioNavProps {
 
 export function LumioNav({ lc, t }: LumioNavProps) {
   return (
-    <nav className="fixed left-1/2 top-4 z-50 -translate-x-1/2">
-      <div
-        className="flex items-center gap-8 rounded-full px-6 py-3"
-        style={{
-          background: "#1B1B1B",
-          backdropFilter: "blur(20px)",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
-        }}
-      >
-        <span className="text-sm font-semibold text-white">
-          {lc?.nav?.brand || "Brand"}
-        </span>
-        <div className="hidden items-center gap-6 text-sm text-gray-400 md:flex">
-          <a href="#features" className="hover:text-white transition">
-            {lc?.nav?.features || "Features"}
-          </a>
-          <a href="#pricing" className="hover:text-white transition">
-            {lc?.nav?.pricing || "Pricing"}
-          </a>
-          <a href="#testimonials" className="hover:text-white transition">
-            {lc?.nav?.testimonials || "Testimonials"}
-          </a>
-        </div>
-        <button
-          className="rounded-full px-4 py-1.5 text-sm font-medium text-white"
-          style={{
-            background: "linear-gradient(135deg, #FF416C, #FF4B2B)",
-          }}
-        >
-          {lc?.nav?.get_started || "Get Started"}
-        </button>
-      </div>
-    </nav>
+    <SharedNav
+      variant="pill-dark"
+      brand={lc?.nav?.brand || "Brand"}
+      links={[
+        { label: lc?.nav?.features || "Features", href: "#features" },
+        { label: lc?.nav?.pricing || "Pricing", href: "#pricing" },
+        { label: lc?.nav?.testimonials || "Testimonials", href: "#testimonials" },
+      ]}
+      ctaLabel={lc?.nav?.get_started || "Get Started"}
+    />
   );
 }

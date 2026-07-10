@@ -1,5 +1,6 @@
-// ─── H612Nav — Fixed top nav bar ──────────────────────────
+// ─── H612Nav — Thin wrapper ────────────────────────────
 
+import { SharedNav } from "@/components/funnel/shared/SharedNav";
 import type { H612LocaleContent, H612T } from "./types";
 
 interface H612NavProps {
@@ -9,39 +10,14 @@ interface H612NavProps {
 
 export function H612Nav({ lc, t }: H612NavProps) {
   return (
-    <nav
-      className="fixed left-0 right-0 top-0 z-50 border-b"
-      style={{
-        background: "rgba(20,19,19,0.8)",
-        backdropFilter: "blur(20px)",
-        borderColor: "#353434",
-      }}
-    >
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <span className="text-lg font-semibold text-white">
-          {lc?.nav?.brand || "Brand"}
-        </span>
-        <div className="flex items-center gap-6">
-          <a
-            href="#features"
-            className="text-sm text-gray-400 hover:text-white transition"
-          >
-            {lc?.nav?.features || "Features"}
-          </a>
-          <a
-            href="#pricing"
-            className="text-sm text-gray-400 hover:text-white transition"
-          >
-            {lc?.nav?.pricing || "Pricing"}
-          </a>
-          <button
-            className="rounded-full border px-5 py-2 text-sm font-medium text-white transition hover:bg-white/10"
-            style={{ borderColor: "#444748" }}
-          >
-            {lc?.nav?.get_started || "Get Started"}
-          </button>
-        </div>
-      </div>
-    </nav>
+    <SharedNav
+      variant="bar-dark"
+      brand={lc?.nav?.brand || "Brand"}
+      links={[
+        { label: lc?.nav?.features || "Features", href: "#features" },
+        { label: lc?.nav?.pricing || "Pricing", href: "#pricing" },
+      ]}
+      ctaLabel={lc?.nav?.get_started || "Get Started"}
+    />
   );
 }
