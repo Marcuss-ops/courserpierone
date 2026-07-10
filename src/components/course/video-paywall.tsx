@@ -10,6 +10,7 @@ interface VideoPaywallProps {
   videoUrl: string;
   title: string;
   productSlug: string;
+  lessonId: string;
   isAuthenticated: boolean;
   locale?: string;
   /** Seconds before showing the paywall overlay (default: 120 = 2 min) */
@@ -32,6 +33,7 @@ export function VideoPaywall({
   videoUrl,
   title,
   productSlug,
+  lessonId,
   isAuthenticated,
   locale = "it",
   previewDuration = 120,
@@ -40,6 +42,7 @@ export function VideoPaywall({
   const [hasAccess, setHasAccess] = useState<boolean | null>(
     isAuthenticated ? null : false
   );
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [showOverlay, setShowOverlay] = useState(false);
   const [checking, setChecking] = useState(true);
@@ -113,19 +116,44 @@ export function VideoPaywall({
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
 
-  // If user has full access, show video directly — no paywall
+  // Fetch video URL via API when access is granted (server-side gate).
+  // The URL is NEVER taken from the prop — it must pass the API access check.
+  useEffect(() => {
+    if (!hasAccess) return;
+    const fetchUrl = async () => {
+      try {
+        const params = new URLSearchParams({ lessonId, productSlug, lang: locale });
+        const res = await fetch(`/api/videos/stream?${params.toString()}`);
+        if (res.ok) {
+          const data = await res.json();
+          setSignedUrl(data.videoUrl);
+        }
+      } catch (e) {
+        console.warn("[VideoPaywall] Failed to fetch video URL:", e);
+      }
+    };
+    void fetchUrl();
+  }, [hasAccess, lessonId, productSlug, locale]);
+
+  // If user has full access, show video via API-fetched URL only.
+  // The videoUrl prop is intentionally ignored here — must pass server-side access gate.
   if (hasAccess) {
+    if (!signedUrl) {
+      return (
+        <div className="relative aspect-video w-full rounded-[2.5rem] overflow-hidden premium-glass border border-white/10 shadow-2xl">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/70">
+            <Loader2 className="w-8 h-8 animate-spin text-accent-primary" />
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="relative aspect-video w-full rounded-[2.5rem] overflow-hidden premium-glass border border-white/10 shadow-2xl">
-        {videoUrl ? (
-          <PremiumVideoPlayer
-            videoUrl={videoUrl}
-            productSlug={productSlug}
-            title={title}
-          />
-        ) : (
-          <VideoPlaceholder />
-        )}
+        <PremiumVideoPlayer
+          videoUrl={signedUrl}
+          productSlug={productSlug}
+          title={title}
+        />
       </div>
     );
   }
