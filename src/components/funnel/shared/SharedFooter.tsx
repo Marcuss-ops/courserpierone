@@ -1,6 +1,14 @@
+"use client";
+
 // ─── SharedFooter — Reusable footer for funnel templates ───
 // Used by: Lumio, H612 (and future Horizon, Book-Claude)
 // Not used by: Amish (has its own richer footer structure)
+//
+// Marked as a Client Component because the hover effect uses styled-jsx
+// (`<style jsx>`), which is only legal inside Client Components. The footer
+// takes serializable props (strings + a discriminated variant), so moving
+// the whole component to the client boundary does not lose any server-only
+// data — and keeps the Server tree that imports it free of styled-jsx.
 
 export interface FooterLink {
   label: string;
