@@ -1,3 +1,5 @@
+"use client";
+
 // ─── TemplateH612 — Thin orchestrator ────────────────────
 // Composes section components from ./h612/ subfolder.
 
