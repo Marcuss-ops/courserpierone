@@ -30,9 +30,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getRedis } from "@/lib/redis";
 import { rateLimitAsync, RATE_TIERS } from "@/lib/utils/rate-limit";
-
-const SEVEN_DAYS_SECONDS = 7 * 24 * 60 * 60;
-const DEDUP_WINDOW_SECONDS = 60;
+import {
+  DEDUP_WINDOW_SECONDS,
+  GLOBAL_CAP_PER_MINUTE,
+  SEVEN_DAYS_SECONDS,
+} from "@/lib/logging/constants";
 
 const errorPayloadSchema = z.object({
   digest: z.string().max(200).optional(),
@@ -111,7 +113,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     if (globalCount === 1) {
       await r.expire("errlog:counter:global", DEDUP_WINDOW_SECONDS);
     }
-    if (globalCount > 50) {
+    if (globalCount > GLOBAL_CAP_PER_MINUTE) {
       return new NextResponse(null, { status: 204 });
     }
 

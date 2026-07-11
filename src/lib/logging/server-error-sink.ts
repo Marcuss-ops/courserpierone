@@ -21,10 +21,11 @@
  */
 
 import { getRedis } from "@/lib/redis";
-
-const SEVEN_DAYS_SECONDS = 7 * 24 * 60 * 60;
-const DEDUP_WINDOW_SECONDS = 60;
-const GLOBAL_CAP_PER_MINUTE = 50;
+import {
+  DEDUP_WINDOW_SECONDS,
+  GLOBAL_CAP_PER_MINUTE,
+  SEVEN_DAYS_SECONDS,
+} from "@/lib/logging/constants";
 
 export interface ServerErrorPayload {
   digest: string;
