@@ -109,15 +109,25 @@ let _redis: RedisClient | null | undefined = undefined;
 
 /**
  * Restituisce l'istanza Redis condivisa (lazy singleton).
- * Priorità: Upstash REST → ioredis locale → null (fallback).
+ * Priorità: Upstash REST (via UPSTASH_* o KV_REST_API_*) → ioredis locale → null (fallback).
  * Tutti i moduli devono usare questa funzione — non crearne di proprie.
  */
 export function getRedis(): RedisClient | null {
   if (_redis !== undefined) return _redis;
 
-  // 1. Upstash REST (produzione)
-  const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
-  const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+  // 1. Upstash REST (produzione).
+  // Supportiamo DUE naming convention perché il progetto può essere
+  // provisionato in due modi:
+  //   - Vercel Marketplace (storage tab → Add Upstash) → KV_REST_API_*
+  //     [predefinito per i nuovi deploy]
+  //   - Upstash diretto (console.upstash.com) → UPSTASH_REDIS_REST_*
+  //     [legacy / per chi preferisce non passare per Vercel]
+  // I valori sono interscambiabili: stesse REST API, stessi endpoint, stessi token.
+  // KV_* ha priorità perché è la convenzione moderna di Vercel.
+  const upstashUrl =
+    process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
+  const upstashToken =
+    process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
 
   if (upstashUrl && upstashToken) {
     _redis = new UpstashRedis({ url: upstashUrl, token: upstashToken });
@@ -128,6 +138,13 @@ export function getRedis(): RedisClient | null {
   // 2. ioredis locale (sviluppo con docker-compose)
   const redisUrl = process.env.REDIS_URL;
   if (redisUrl) {
+    if (process.env.NODE_ENV === "production") {
+      console.warn(
+        "[redis] REDIS_URL detected → ioredis fallback. " +
+        "This is unreliable on serverless (Vercel/Lambda) — use " +
+        "Upstash REST API (KV_REST_API_URL + KV_REST_API_TOKEN) instead."
+      );
+    }
     const adapter = createIORedisAdapter(redisUrl);
     if (adapter) {
       _redis = adapter;
