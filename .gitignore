@@ -1,19 +1,16 @@
-node_modules/
-.next/
 .env
 .env.local
-.env.*.local
 .env.tmp
-*.env.*.tmp
-*.tsbuildinfo
+.next/
 next-env.d.ts
-.vercel
+node_modules/
 nul
-
 # Product Cache (White Label)
 public/courses/*
 !public/courses/.gitkeep
-scripts/translate/__pycache__/
 *.pyc
 scripts/audit/
-.env*
+scripts/translate/__pycache__/
+*.tsbuildinfo
+.vercel
+
