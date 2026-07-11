@@ -155,7 +155,7 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
   // Users must log in to access their course and download the ebook.
   // The email directs them to the course portal (which redirects to login
   // if not authenticated) and the dashboard (for ebook downloads).
-  const courseUrl = `${appUrl}/${product.slug}/portal?lang=${ebookLang}`;
+  const courseUrl = `${appUrl}/${locale}/${product.slug}/portal`;
   const ebookDownloadUrl = `${appUrl}/dashboard`;
 
   // ── 7. Send purchase confirmation email (localizzata) ─────────

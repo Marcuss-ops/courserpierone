@@ -68,7 +68,7 @@ export function AuthForm({ lang }: AuthFormProps) {
 
   const redirectTarget =
     callbackUrl ||
-    (productId ? `/${productId}/download?lang=${lang}` : "/dashboard");
+    (productId ? `/${lang}/${productId}/download` : "/dashboard");
 
   // Handle redirect after auth
   useEffect(() => {

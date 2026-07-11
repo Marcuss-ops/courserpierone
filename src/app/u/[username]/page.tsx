@@ -480,7 +480,7 @@ export default async function PublicProfilePage({
               {courses.map((course) => (
                 <Link
                   key={course.productId}
-                  href={`/${course.slug}/portal?lang=it`}
+                  href={`/it/${course.slug}/portal`}
                   className="group flex flex-col bg-cream-dark-surface border border-cream-dark-border rounded-[20px] overflow-hidden hover:border-cream-dark-gold/30 hover:shadow-lg hover:shadow-[#FF8C42]/8 hover:-translate-y-0.5 transition-all duration-300"
                 >
                   <div className="aspect-[3/2] bg-gradient-to-br from-[#2A2218] to-[#1A1208] relative overflow-hidden">
@@ -603,7 +603,7 @@ export default async function PublicProfilePage({
               {recentActivity.map((activity, i) => (
                 <Link
                   key={i}
-                  href={`/${activity.lesson.product.slug}/curso/${activity.lesson.id}`}
+                  href={`/it/${activity.lesson.product.slug}/curso/${activity.lesson.id}`}
                   className="flex items-center gap-4 px-5 py-3.5 rounded-xl hover:bg-cream-dark-surface/60 transition-colors group"
                 >
                   <div className="w-9 h-9 rounded-lg bg-cream-dark-surface border border-cream-dark-border flex items-center justify-center shrink-0">

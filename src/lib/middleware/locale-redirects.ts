@@ -8,7 +8,6 @@ import {
   normalizeLocale,
   LANG_TO_DEFAULT_LOCALE,
 } from "@/lib/i18n/locale-resolver";
-import { isProductSubPath } from "./protected-routes";
 import { setLocaleCookie } from "./locale-cookie";
 
 // ─── Helpers ───────────────────────────────────────────────
@@ -23,6 +22,10 @@ function getAcceptLanguage(request: NextRequest): string | null {
 
 function getIpCountry(request: NextRequest): string | null {
   return request.headers.get("x-vercel-ip-country");
+}
+
+function withoutLeadingSlash(path: string): string {
+  return path.startsWith("/") ? path.slice(1) : path;
 }
 
 // ─── Case 1: Full locale prefix (fr-fr, pt-br, en-us) ──────
@@ -72,7 +75,7 @@ export function handleShortLang(
     LANG_TO_DEFAULT_LOCALE[firstSegment] ?? `${firstSegment}-${firstSegment}`;
   const restPath = pathname.slice(firstSegment.length + 1) || "";
   const url = request.nextUrl.clone();
-  url.pathname = `/${targetLocale}${restPath}`;
+  url.pathname = `/${targetLocale}/${withoutLeadingSlash(restPath)}`;
   const redirect = NextResponse.redirect(url);
   setLocaleCookie(redirect, targetLocale);
   return redirect;
@@ -115,7 +118,7 @@ export function handleLangParam(
     return redirect;
   }
 
-  url.pathname = `/${normalized}${pathname}`;
+  url.pathname = `/${normalized}/${withoutLeadingSlash(pathname)}`;
   url.searchParams.delete("lang");
   const redirect = NextResponse.redirect(url);
   setLocaleCookie(redirect, normalized);
@@ -138,30 +141,9 @@ export function handleNoPrefix(
     ipCountry: getIpCountry(request),
   });
   const url = request.nextUrl.clone();
-  url.pathname = `/${result.selectedLocale}${pathname}`;
+  url.pathname = `/${result.selectedLocale}/${withoutLeadingSlash(pathname)}`;
   const redirect = NextResponse.redirect(url);
   setLocaleCookie(redirect, result.selectedLocale);
   return redirect;
 }
 
-// ─── Case 6: Product sub-path without locale prefix ────────
-
-export function handleProductSubPathLocale(
-  request: NextRequest,
-): NextResponse | null {
-  const { pathname } = request.nextUrl;
-
-  if (!isProductSubPath(pathname)) return null;
-
-  // Resolve locale and redirect to prefix the path
-  const result = resolveLocale({
-    cookieLocale: getCookieLocale(request),
-    acceptLanguage: getAcceptLanguage(request),
-    ipCountry: getIpCountry(request),
-  });
-  const url = request.nextUrl.clone();
-  url.pathname = `/${result.selectedLocale}${pathname}`;
-  const redirect = NextResponse.redirect(url);
-  setLocaleCookie(redirect, result.selectedLocale);
-  return redirect;
-}

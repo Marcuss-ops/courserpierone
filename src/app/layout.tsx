@@ -66,10 +66,6 @@ export async function generateMetadata(): Promise<Metadata> {
         ])
       ),
     },
-    icons: {
-      icon: "/icon.png",
-      shortcut: "/icon.png",
-    },
     manifest: "/manifest.json",
   };
 }

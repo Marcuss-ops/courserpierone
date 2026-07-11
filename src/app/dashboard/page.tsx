@@ -26,13 +26,8 @@ interface DisplayOrder {
     id: string;
     slug: string;
     coverUrl: string | null;
-    templateId: string;
-    price: number;
-    currency: string;
     _count: { lessons: number };
   };
-  amount: number;
-  currency: string;
   createdAt: Date;
 }
 
@@ -52,17 +47,12 @@ export default async function DashboardPage() {
         id: true,
         slug: true,
         coverUrl: true,
-        price: true,
-        currency: true,
-        templateId: true,
         _count: { select: { lessons: true } },
       },
     });
     userOrders = publishedProducts.map((p) => ({
       id: `admin-virtual-order-${p.id}`,
       product: p,
-      amount: p.price,
-      currency: p.currency,
       createdAt: new Date(),
     }));
   } else {
@@ -77,9 +67,6 @@ export default async function DashboardPage() {
                 id: true,
                 slug: true,
                 coverUrl: true,
-                price: true,
-                currency: true,
-                templateId: true,
                 _count: { select: { lessons: true } },
               },
             },
@@ -91,8 +78,6 @@ export default async function DashboardPage() {
     userOrders = (dbUser2?.orders ?? []).map((o) => ({
       id: o.id,
       product: o.product,
-      amount: o.amount,
-      currency: o.currency,
       createdAt: o.createdAt,
     }));
   }
@@ -174,7 +159,7 @@ export default async function DashboardPage() {
   const resumePosition = lastWatch?.lesson?.position;
   const resumeHref =
     resumeSlug && resumePosition
-      ? `/${resumeSlug}/curso/lesson-${resumePosition}?lang=${resumeLocale}`
+      ? `/it/${resumeSlug}/curso/lesson-${resumePosition}`
       : undefined;
   const resumeLabel = lastLessonTitle
     ? `Riprendi: ${lastLessonTitle}`
@@ -377,18 +362,14 @@ export default async function DashboardPage() {
                 const progress = productProgress.find(
                   (p) => p.productId === order.product.id
                 );
-                return (
-                  <CourseCard
+                return (                    <CourseCard
                     key={order.id}
                     slug={order.product.slug}
                     coverUrl={order.product.coverUrl}
-                    templateId={order.product.templateId}
                     lessonCount={order.product._count.lessons}
                     completedLessons={progress?.completed ?? 0}
                     purchasedAt={order.createdAt}
-                    amount={order.amount}
-                    currency={order.currency}
-                    href={`/${order.product.slug}/portal?lang=it`}
+                    href={`/it/${order.product.slug}/portal`}
                   />
                 );
               })}

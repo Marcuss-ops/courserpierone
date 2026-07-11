@@ -5,12 +5,9 @@ import { ProgressBar } from "./progress-bar";
 interface CourseCardProps {
   slug: string;
   coverUrl: string | null;
-  templateId: string;
   lessonCount: number;
   completedLessons: number;
   purchasedAt: Date;
-  amount: number;
-  currency: string;
   href: string;
 }
 
@@ -20,11 +17,8 @@ export function CourseCard({
   lessonCount,
   completedLessons,
   purchasedAt,
-  amount,
-  currency,
   href,
 }: CourseCardProps) {
-  const currencySymbol = currency === "eur" ? "€" : currency === "usd" ? "$" : "£";
   const title = slug
     .split("-")
     .map((w) => (w[0] ? w[0].toUpperCase() + w.slice(1) : w))
@@ -78,11 +72,7 @@ export function CourseCard({
           <ProgressBar value={progress} label="Avanzamento" tone={isCompleted ? "green" : "warm"} />
         </div>
 
-        <div className="flex items-center justify-between pt-1">
-          <div className="text-sm font-semibold text-cream-text tabular-nums">
-            {currencySymbol}
-            {(amount / 100).toFixed(2)}
-          </div>
+        <div className="flex items-center justify-end pt-1">
           <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-cream-espresso group-hover:gap-2.5 transition-all">
             {isCompleted ? "Riguarda" : progress > 0 ? "Continua" : "Inizia"}
             <ChevronRight className="w-3.5 h-3.5" />

@@ -6,14 +6,13 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
-import { isKnownPath, isProductSubPath, checkProtectedAccess } from "@/lib/middleware/protected-routes";
+import { isKnownPath, checkProtectedAccess } from "@/lib/middleware/protected-routes";
 import {
   handleFullLocale,
   handleShortLang,
   handleRootLocale,
   handleLangParam,
   handleNoPrefix,
-  handleProductSubPathLocale,
 } from "@/lib/middleware/locale-redirects";
 
 export async function middleware(request: NextRequest) {
@@ -32,13 +31,15 @@ export async function middleware(request: NextRequest) {
   }
 
   // ── 4. Locale redirect cascade ──
+  // NB: handleLangParam MUST run before handleRootLocale, otherwise the
+  // `?lang=...` query string is ignored on "/" (the root handler returns
+  // first and short-circuits the cascade).
   return (
     handleFullLocale(request, supabaseResponse) ??
     handleShortLang(request) ??
-    handleRootLocale(request, supabaseResponse) ??
     handleLangParam(request) ??
+    handleRootLocale(request, supabaseResponse) ??
     handleNoPrefix(request) ??
-    handleProductSubPathLocale(request) ??
     supabaseResponse
   );
 }
