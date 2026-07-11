@@ -7,6 +7,7 @@ import {
   isKnownLocale,
   normalizeLocale,
   LANG_TO_DEFAULT_LOCALE,
+  langToLocale,
 } from "@/lib/i18n/locale-resolver";
 import { setLocaleCookie } from "./locale-cookie";
 
@@ -107,6 +108,9 @@ export function handleLangParam(
   if (!langParam) return null;
 
   const normalized = normalizeLocale(langParam);
+  // Resolve ?lang= to a full locale (e.g. "es" -> "es-es") so the request
+  // redirects in a single step instead of bouncing through handleShortLang.
+  const resolvedLocale = langToLocale(normalized);
   const url = request.nextUrl.clone();
   const { pathname } = url;
   const firstSegment = pathname.split("/")[1]?.toLowerCase() ?? "";
@@ -114,14 +118,14 @@ export function handleLangParam(
   if (firstSegment && isKnownLocale(firstSegment)) {
     url.searchParams.delete("lang");
     const redirect = NextResponse.redirect(url);
-    setLocaleCookie(redirect, normalized);
+    setLocaleCookie(redirect, resolvedLocale);
     return redirect;
   }
 
-  url.pathname = `/${normalized}/${withoutLeadingSlash(pathname)}`;
+  url.pathname = `/${resolvedLocale}/${withoutLeadingSlash(pathname)}`;
   url.searchParams.delete("lang");
   const redirect = NextResponse.redirect(url);
-  setLocaleCookie(redirect, normalized);
+  setLocaleCookie(redirect, resolvedLocale);
   return redirect;
 }
 
