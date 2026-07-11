@@ -56,7 +56,10 @@ self.addEventListener("activate", (event) => {
 });
 
 // ─── Helper: match pattern ───────────────────────────────
-function matchesPatterns(url: string, patterns: RegExp[]): boolean {
+// NB: must be plain JavaScript — service workers run in a separate
+// scope and are parsed as JS, not TS. Adding type annotations here
+// breaks registration with "ServiceWorker script evaluation failed".
+function matchesPatterns(url, patterns) {
   return patterns.some((p) => p.test(url));
 }
 
