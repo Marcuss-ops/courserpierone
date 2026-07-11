@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useLogError } from "@/lib/logging/use-log-error";
 
 export default function PortalError({
   error,
@@ -11,6 +12,7 @@ export default function PortalError({
   reset: () => void;
 }) {
   const pathname = usePathname();
+  useLogError(error, pathname);
   const locale = pathname.split("/")[1] || "it";
 
   return (

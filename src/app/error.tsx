@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useLogError } from "@/lib/logging/use-log-error";
 
 export default function ErrorPage({
   error,
@@ -9,6 +11,8 @@ export default function ErrorPage({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const pathname = usePathname();
+  useLogError(error, pathname);
   return (
     <div className="min-h-screen text-black font-sans flex items-center justify-center p-6 relative overflow-hidden" style={{ background: "linear-gradient(135deg, #FFF8F0 0%, #FFF5E6 30%, #FAFAF8 70%, #F5F0E8 100%)" }}>
       {/* Warm accent orb */}
