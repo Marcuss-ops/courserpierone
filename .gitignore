@@ -14,3 +14,16 @@ scripts/translate/__pycache__/
 *.tsbuildinfo
 .vercel
 
+
+# --- restored project-universal (post-cleanup 2026-07-11) ---
+.nyc_output/
+.pnp
+.pnp.js
+.turbo/
+/build/
+/out/
+/prisma/.env
+/prisma/migrations/dev.db
+/prisma/migrations/dev.db-journal
+coverage/
+yarn-error.log*
