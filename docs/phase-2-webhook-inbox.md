@@ -151,9 +151,12 @@ model PaymentWebhookEvent {
   // `lockedAt` is the soft TTL for worker re-claim. The worker's
   // WHERE clause asserts `lockedAt IS NULL OR lockedAt < now() - 5min`
   // so an orphaned lock from a Vercel function that was OOM-killed
-  // is reclaimed after 5 minutes.
+  // is reclaimed after 5 minutes. The worker's drain helper sets
+  // `lockedAt = NOW()` AND `lockedBy = process.env.HOSTNAME ?? 'unknown'`
+  // (Vercel sets HOSTNAME to the function instance name) so an
+  // operator can see which worker claimed a stuck row.
   lockedAt        DateTime?
-  lockedBy        String?  // optional: worker host id for debug
+  lockedBy        String?
 
   lastError       String?  // truncated to 1KB; full error in server logs
   processedAt     DateTime?
@@ -597,17 +600,45 @@ function extractLsIds(payload: Record<string, unknown>): { deliveryId: string; e
 function extractStripeIds(payload: Record<string, unknown>): { deliveryId: string; eventType: string; correlationKey: string | null } {
   const id = (payload.id as string | undefined) ?? "";
   const eventType = (payload.type as string | undefined) ?? "unknown";
-  // Stripe's payment_intent or session id is the correlation key for
-  // refund/subscription events. For checkout.session.completed, the
-  // session id is the canonical reference; for invoice.payment_failed,
-  // the invoice id maps via the subscription.
+  // The correlation key MUST be the right field per event type,
+  // because the Order lookup is keyed differently for each:
+  //   - checkout.session.*       → Order.stripeSessionId (= obj.id)
+  //   - charge.refunded          → Order.stripeSessionId via payment_intent
+  //                                  (we look up the session by payment_intent
+  //                                  in markOrderRefunded)
+  //   - invoice.payment_failed   → Order.stripeSubscriptionId
+  //                                  (extracted from invoice.subscription)
+  //   - customer.subscription.*  → Order.stripeSubscriptionId (= obj.id)
+  // A wrong key silently fails the Order lookup → NotFoundError →
+  // dead-letter. The shape is event-type-aware.
   const data = payload.data as { object?: Record<string, unknown> } | undefined;
   const obj = data?.object ?? {};
-  const correlationKey = (
-    (obj.id as string | undefined) ??  // session/invoice/subscription id
-    (obj.payment_intent as string | undefined) ??
-    null
-  );
+  let correlationKey: string | null = null;
+  switch (eventType) {
+    case "checkout.session.completed":
+    case "checkout.session.expired":
+      correlationKey = (obj.id as string | undefined) ?? null;
+      break;
+    case "charge.refunded":
+      // markOrderRefunded looks up the session via payment_intent.
+      correlationKey = (obj.payment_intent as string | undefined) ?? null;
+      break;
+    case "invoice.payment_failed":
+      // markOrderFailedForInvoice looks up via stripeSubscriptionId
+      // (extracted from invoice.subscription).
+      correlationKey = (obj.subscription as string | undefined) ?? null;
+      break;
+    case "customer.subscription.deleted":
+    case "customer.subscription.updated":
+      correlationKey = (obj.id as string | undefined) ?? null;
+      break;
+    default:
+      // Fallback for unknown event types — the worker will
+      // classify the row via eventType and the empty correlation
+      // key will trigger a NotFoundError → dead-letter (visible
+      // to ops rather than silently dropped).
+      correlationKey = null;
+  }
   return { deliveryId: id, eventType, correlationKey };
 }
 ```
@@ -826,7 +857,7 @@ async function revokeSubscriptionAccess(event: PaymentEvent): Promise<{ orderId:
 }
 
 async function markOrderRefunded(event: PaymentEvent): Promise<{ orderId: string | null }> {
-  const order = await findOrderByCorrelationKey(event);
+  const order = await findOrderRefundedOrder(event);
   if (!order) throw new NotFoundError(`No order found for refund event ${event.correlationKey}`);
   // Stripe's charge.refunded fires for FULL refunds only (the
   // current code's `if (!charge.refunded) return` guard). LS's
@@ -847,6 +878,60 @@ async function markOrderRefunded(event: PaymentEvent): Promise<{ orderId: string
     data: { status: "revoked", revokedAt: new Date() },
   });
   return { orderId: order.id };
+}
+
+// Stripe-specific: charge.refunded's correlation key is the
+// payment_intent, but Order.stripeSessionId is the lookup column.
+// We translate payment_intent → session via the Stripe API (V2 may
+// cache this in the inbox payload if the provider returns both).
+async function findOrderRefundedOrder(event: PaymentEvent): Promise<{ id: string } | null> {
+  if (event.provider !== "stripe" || event.eventType !== "charge.refunded") {
+    return findOrderByCorrelationKey(event);
+  }
+  // For charge.refunded, correlationKey is the payment_intent. Look
+  // up the session via the Stripe API. If the API call fails, retryable.
+  // (V2: have the webhook handler also stash session_id in the payload
+  // to avoid the extra round-trip.)
+  const sessions = await getStripe().checkout.sessions.list({
+    payment_intent: event.correlationKey ?? "",
+    limit: 1,
+  });
+  const sessionId = sessions.data[0]?.id;
+  if (!sessionId) return null;
+  return prisma.order.findFirst({
+    where: { stripeSessionId: sessionId },
+    select: { id: true },
+  });
+}
+
+async function markOrderFailed(event: PaymentEvent): Promise<{ orderId: string | null }> {
+  // checkout.session.expired and similar "order never completed"
+  // events. The current code does `updateMany({ stripeSessionId,
+  // status: 'completed' }) → { status: 'failed' }` — i.e.,
+  // downgrade a completed order to failed when the session
+  // expires. The semantics: an expired session may have been
+  // marked completed by a delayed webhook; the expiry event
+  // arrives later; we flip the status to failed to be safe.
+  //
+  // The AccessGrant stays active (the order DID complete at some
+  // point; the expiry is a UX signal, not an access revocation).
+  // If the customer disputes the charge later, the refund
+  // webhook fires and revokeSubscriptionAccess / markOrderRefunded
+  // does the actual revocation.
+  const updated = await prisma.order.updateMany({
+    where: {
+      stripeSessionId: event.correlationKey ?? "",
+      status: "completed",  // only downgrade completed orders
+    },
+    data: { status: "failed" },
+  });
+  if (updated.count === 0) {
+    // No matching order, or order already in another state. The
+    // current code logs "no matching completed orders found" and
+    // moves on. We return null (idempotent no-op).
+    return { orderId: null };
+  }
+  return { orderId: null };  // session-expiry doesn't bind to a single order
 }
 ```
 
@@ -933,7 +1018,7 @@ async function drainOneBatch(
   // processing. The lock is released on transaction commit.
   const claimed = await prisma.$transaction(async (tx) => {
     const rows = await tx.$queryRaw<{ id: string }[]>`
-      UPDATE "${table}" SET "status" = 'processing', "lockedAt" = NOW(), "updatedAt" = NOW()
+      UPDATE "${table}" SET "status" = 'processing', "lockedAt" = NOW(), "lockedBy" = ${process.env.HOSTNAME ?? 'unknown'}, "updatedAt" = NOW()
       WHERE "id" IN (
         SELECT "id" FROM "${table}"
         WHERE "status" IN ('received', 'pending', 'retry_scheduled')
@@ -949,12 +1034,28 @@ async function drainOneBatch(
   });
 
   let processed = 0, retried = 0, deadLettered = 0;
+  // Per-row timeout: 2 seconds. A single slow row (a stuck Prisma
+  // query, a slow downstream call) MUST NOT push the Vercel
+  // function past its 10s hard limit and silently drop the rest
+  // of the batch. A timeout is treated as a retryable error:
+  // the row is rescheduled with the standard backoff, the rest
+  // of the batch is processed normally. The hard cap of
+  // BATCH_SIZE * 2s = 100s in the worst case is theoretical
+  // (the 2s timeout includes the lock TTL reclaim, not the
+  // total budget) — in practice the average row completes in
+  // < 200ms, and the per-row timeout is a safety net.
+  const PER_ROW_TIMEOUT_MS = 2_000;
   for (const id of claimed) {
     try {
-      await processOne(id);
+      await Promise.race([
+        processOne(id),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error(`Worker per-row timeout after ${PER_ROW_TIMEOUT_MS}ms`)), PER_ROW_TIMEOUT_MS)
+        ),
+      ]);
       await prisma[table].update({
         where: { id },
-        data: { status: "completed", processedAt: new Date(), lockedAt: null },
+        data: { status: "completed", processedAt: new Date(), lockedAt: null, lockedBy: null },
       });
       processed++;
     } catch (err: unknown) {
@@ -967,6 +1068,7 @@ async function drainOneBatch(
             status: "dead_letter",
             lastError: truncate(String(err instanceof Error ? err.message : err), 1024),
             lockedAt: null,
+            lockedBy: null,
             processedAt: new Date(),
           },
         });
@@ -982,6 +1084,7 @@ async function drainOneBatch(
             nextAttemptAt: new Date(Date.now() + backoffMs),
             lastError: truncate(String(err instanceof Error ? err.message : err), 1024),
             lockedAt: null,
+            lockedBy: null,
           },
         });
         retried++;
@@ -1293,6 +1396,24 @@ export async function dispatchOutboxEvent(event: {
   payload: Record<string, unknown>;
 }): Promise<void> {
   const handlers = consumers.get(event.eventType) ?? [];
+  // Empty-consumer guard: an event with no registered handlers
+  // is almost always a bug (the publisher didn't realize no
+  // consumer was registered, or a Phase 3/5/6 consumer hasn't
+  // shipped yet). Logging a WARN with the event type + id makes
+  // the gap visible in the Vercel runtime logs. The dispatcher
+  // does NOT throw — the row is still marked `completed`
+  // (otherwise the same no-op event would retry every cron
+  // tick forever). V2 addendum: an `unhandledEvents` counter
+  // for a dedicated alert.
+  if (handlers.length === 0) {
+    console.warn(
+      `[OutboxDispatcher] No consumer registered for eventType='${event.eventType}', ` +
+      `aggregateType='${event.aggregateType}', aggregateId='${event.aggregateId}', ` +
+      `eventId='${event.id}'. Marking as completed to avoid infinite retry. ` +
+      `Register a handler in src/lib/commerce/outbox/consumers.ts.`
+    );
+    return;
+  }
   // Run all handlers in sequence. (Parallelism is a V2 addendum —
   // a handler that fails partway shouldn't block its peers.)
   for (const handler of handlers) {
@@ -1371,6 +1492,12 @@ dual-write window:
 
 ### 8.1 Step 1 — Add `PaymentWebhookEvent` (Day 0)
 
+**Scope of this step: the table + the receipt helper ONLY. The
+worker endpoint is NOT enabled yet.** Enabling the worker
+before `applyPaymentEvent` is implemented would mark rows
+`status='completed'` with no side effects — silent data
+corruption. The strict step ordering is:
+
 - Run the migration `prisma/migrations/20260716XXXXXX_phase2_webhook_inbox/migration.sql`
   (idempotent CREATE TABLE IF NOT EXISTS for all three tables
   + the `pg_notify` trigger).
@@ -1379,10 +1506,20 @@ dual-write window:
   the existing `prisma.processedWebhook.create` stays
   (for backward compat with any code that still reads it);
   the new `prisma.paymentWebhookEvent.create` is added.
-- The worker endpoint is added but inactive (the webhook
-  handlers still do the inline `processOrder` path).
-  The worker drains inbox rows but `applyPaymentEvent` is
-  a no-op (logs only) until the cutover.
+- The receipt helper (`receiveWebhook`) is wired in. The
+  inbox rows accumulate with `status='received'` — no
+  worker is draining them yet.
+- The webhook handlers STILL call the inline `processOrder`
+  path. The inbox rows are dormant for the dual-write
+  window. This is intentional: it validates the receipt
+  path (HMAC, payload extraction, P2002 dedupe) without
+  the worker doing real work yet.
+- A daily `cron`-driven check at
+  `/api/internal/jobs/inbox-health` (V2 addendum) verifies
+  that inbox rows are accumulating and being inserted
+  correctly. For Phase 2, an ops manual check
+  (`SELECT COUNT(*) FROM "PaymentWebhookEvent" WHERE
+  createdAt > now() - INTERVAL '1 hour'`) is sufficient.
 
 ### 8.2 Step 2 — Convert `ProcessedWebhook` rows (Day 0, after Step 1)
 
