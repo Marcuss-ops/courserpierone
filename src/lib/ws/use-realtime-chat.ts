@@ -140,10 +140,11 @@ export function useRealtimeChat({
   }, []);
 
   // ── HTTP polling (last-resort fallback) ───────────────────
-  // Fase 4.1: il polling usa /api/conversations/[conversationId]/messages
-  // (non ancora implementato — V2). Per V1 fallback su /api/messages
-  // con filter legacy `with`+`productId` se il caller li passa. Best-
-  // effort: il polling è l'ultimo resort, degradato ma funzionale.
+  // Fase 4.x canonical: il polling usa
+  // GET /api/conversations/[id]/messages (REST canonico, keyato sulla
+  // Conversation). Stesso contract della SSE fallback ma con una
+  // round-trip ogni 10s invece di 2s. Attivo solo se sia WS che SSE
+  // falliscono — degrado consapevole.
   const startPolling = useCallback(() => {
     if (!mountedRef.current || modeRef.current === "poll") return;
     cleanup();
@@ -152,18 +153,11 @@ export function useRealtimeChat({
     const poll = async () => {
       if (!mountedRef.current) return;
       try {
-        // Polling sulla Conversation via parametro. Il path
-        // /api/messages richiede ancora with+productId (Fase 1.6);
-        // qui siamo nel fallback tale per cui possiamo passare
-        // what we have: with=otherUserId non è più necessario perché
-        // conversationId è già sufficient — basta chiamare un endpoint
-        // dedicato. Per V1 accettiamo il polling degradato.
-        const p = new URLSearchParams({
-          with: otherUserId,
-          conversationId,
-          limit: "50",
-        });
-        const res = await fetch(`/api/messages?${p.toString()}`);
+        const res = await fetch(
+          `/api/conversations/${encodeURIComponent(
+            conversationId,
+          )}/messages?limit=50`,
+        );
         if (!res.ok) return;
         const data = await res.json();
         const freshMsgs: MessageData[] = (data.messages ?? []).reverse();
@@ -179,17 +173,21 @@ export function useRealtimeChat({
     void poll();
     // Polling più conservativo (10s) in fallback degrado.
     pollRef.current = setInterval(poll, 10_000);
-  }, [conversationId, otherUserId, onMessages, cleanup]);
+  }, [conversationId, onMessages, cleanup]);
 
   // ── SSE fallback ──────────────────────────────────────────
-  // Fase 4.1: l'URL SSE porta il conversationId invece di with+productId.
+  // Fase 4.x canonical: l'URL SSE è keyato sul conversationId via path
+  // segment (Next.js dynamic route `[id]`). Niente più `?conversationId=`
+  // query. Coesiste con la legacy `/api/messages/stream` finché tutti i
+  // client non sono migrati.
   const connectSse = useCallback(() => {
     if (!mountedRef.current || modeRef.current === "sse") return;
     cleanup();
     modeRef.current = "sse";
 
-    const params = new URLSearchParams({ conversationId });
-    const esUrl = `/api/messages/stream?${params.toString()}`;
+    const esUrl = `/api/conversations/${encodeURIComponent(
+      conversationId,
+    )}/stream`;
 
     try {
       const es = new EventSource(esUrl);

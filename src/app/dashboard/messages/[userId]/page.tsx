@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { ChatView } from "@/components/chat/chat-view";
+import { findOrCreateConversation } from "@/lib/messaging/find-or-create-conversation";
 
 /**
  * Forza dynamic rendering sulla chat deep-link.
@@ -95,19 +96,19 @@ export default async function ConversationPage({ params, searchParams }: ChatPag
     );
   }
 
-  // Verify a conversation exists between the two users for this product
-  // (or it will be lazily created by chat-view on the first message).
-  const [minId, maxId] = [dbUser.id, otherUser.id].sort();
-  const conversation = await prisma.conversation.findUnique({
-    where: {
-      userOneId_userTwoId_productId: {
-        userOneId: minId,
-        userTwoId: maxId,
-        productId,
-      },
-    },
-    select: { id: true, productId: true },
-  });
+  // FASE 4.x canonical migration: la pagina risolve-or-crea la
+  // Conversation server-side PRIMA di montare ChatView. Il ChatView
+  // canonico richiede un conversationId non-null come prop — non c'è
+  // più il fallback "auto-create lazy al primo fetch" sul client.
+  // Authorization (Order.completed + creatorId match) è già effettuata
+  // dal read-side guard sopra, quindi findOrCreateConversation opera
+  // post-authorization (lo helper NON esegue check autorizzativi
+  // propri, vedi JSDoc di @/lib/messaging/find-or-create-conversation).
+  const conversation = await findOrCreateConversation(
+    dbUser.id,
+    otherUser.id,
+    productId,
+  );
 
   // Fetch del prodotto per l'header (titolo visibile nella chat) — già
   // recuperato sopra nel read-side guard; riusa l'oggetto esistente.
@@ -169,7 +170,7 @@ export default async function ConversationPage({ params, searchParams }: ChatPag
 
       {/* Chat area */}
       <ChatView
-        conversationId={conversation?.id ?? null}
+        conversationId={conversation.id}
         productId={productId}
         currentUserId={dbUser.id}
         currentUserName={dbUser.name || dbUser.email?.split("@")[0] || "Tu"}

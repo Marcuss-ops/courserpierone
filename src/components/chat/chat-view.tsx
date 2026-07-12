@@ -28,10 +28,23 @@ interface OtherUser {
 }
 
 interface ChatViewProps {
-  conversationId: string | null;
   /**
-   * Phase 1.3: ogni DM è scoped a un prodotto. Il ChatView deve passarlo
-   * a GET /api/messages, POST /api/messages e al real-time hook.
+   * Fase 4.x canonical: `conversationId` è REQUIRED non-null. I
+   * parents garantiscono l'id prima del mount:
+   *   - `[userId]/page.tsx` chiama `findOrCreateConversation`
+   *     server-side (no client round-trip per la risoluzione)
+   *   - `creator-inbox.tsx` legge l'id dalla lista canonica
+   *     `GET /api/conversations` (l'item esiste iff la Conversation
+   *     esiste nel DB)
+   * Non esiste più il fallback "auto-create lazy al primo fetch" —
+   * la creazione è demandata al `POST /api/conversations` (parent)
+   * o all'helper server-side (page.tsx).
+   */
+  conversationId: string;
+  /**
+   * Conservato per future global header contexts (es. product title
+   * sopra la chat). NON usato dai fetch canonici (il server deriva
+   * productId dalla Conversation row via loadAuthorizedConversation).
    */
   productId: string;
   currentUserId: string;
@@ -54,21 +67,29 @@ const PAGE_SIZE = 50;
 /**
  * ChatView — shared component for rendering a single conversation thread.
  *
- * Fase 3.2 refactor: estratto da `app/dashboard/messages/[userId]/chat-view.tsx`
- * a `src/components/chat/chat-view.tsx` per evitare cross-route component
- * imports (il segmento `[userId]` di Next.js non dovrebbe essere importato
- * da altre pagine). Entrambe le route (student messages e creator inbox)
- * ora importano dalla stessa location.
+ * Fase 4.x canonical migration (POST /api/messages → /api/conversations):
+ *   - fetchInitialMessages → GET /api/conversations/[id]/messages
+ *   - loadOlderMessages    → GET /api/conversations/[id]/messages?cursor=…
+ *   - mark-as-read         → PATCH /api/conversations/[id]/read (no body)
+ *   - handleSend           → POST /api/conversations/[id]/messages { content }
+ *   - real-time            → useRealtimeChat su /api/conversations/[id]/stream
  *
  * Logica invariata:
- * - Fetch initial messages via cursor-based pagination.
- * - Mark received messages as read via PATCH /api/messages/read.
- * - Real-time subscription via useRealtimeChat (conversazioneId-based,
- *   Fase 4.1).
- * - Typing indicator forward via WS.
+ *   - Fetch initial messages via cursor-based pagination.
+ *   - Mark received messages as read idempotente via PATCH …/read.
+ *   - Real-time subscription via useRealtimeChat (conversazioneId-based,
+ *     Fase 4.1 server WS; SSE fallback al canonical stream endpoint).
+ *   - Typing indicator forward via WS.
+ *
+ * Fase 3.2 refactor (precedente): estratto da
+ * `app/dashboard/messages/[userId]/chat-view.tsx` a
+ * `src/components/chat/chat-view.tsx` per evitare cross-route component
+ * imports (il segmento `[userId]` di Next.js non dovrebbe essere
+ * importato da altre pagine). Entrambe le route (student messages e
+ * creator inbox) ora importano dalla stessa location.
  */
 export function ChatView({
-  conversationId: initialConversationId,
+  conversationId,
   productId,
   currentUserId,
   currentUserName,
@@ -80,7 +101,6 @@ export function ChatView({
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [conversationId, setConversationId] = useState<string | null>(initialConversationId);
 
   const [hasMore, setHasMore] = useState(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
@@ -108,32 +128,32 @@ export function ChatView({
     [],
   );
 
-  const { connected, isOtherTyping, sendTyping, resetTypingTimer } = useRealtimeChat({
-    // Fase 4.1: subscription WS/SSE è scoped sulla ConversationId
-    // (canonical, deriva dal token HMAC e dal membership check).
-    // productId non serve più nel protocollo realtime.
-    conversationId: conversationId ?? "",
-    otherUserId,
-    onMessages: handleRealtimeMessages,
-    // Gate: la subscription parte solo quando conosciamo la ConversationId.
-    // Una chat "nuova" (senza conversationId ancora) non può aprire WS/SSE.
-    enabled: conversationId !== null,
-  });
+  const { connected, isOtherTyping, sendTyping, resetTypingTimer } =
+    useRealtimeChat({
+      // Fase 4.1: subscription WS/SSE è scoped sulla Conversation
+      // (canonical). ConversationId ora è sempre non-null come prop —
+      // niente più fallback stringa vuota + gate enabled.
+      conversationId,
+      otherUserId,
+      onMessages: handleRealtimeMessages,
+    });
 
-  // Fetch initial messages
+  // ── Fetch initial messages (CANONICAL: GET /api/conversations/[id]/messages) ──
   const fetchInitialMessages = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams({
-        with: otherUserId,
-        productId, // Phase 1.3
-        limit: String(PAGE_SIZE),
-      });
-      const res = await fetch(`/api/messages?${params.toString()}`);
+      const params = new URLSearchParams({ limit: String(PAGE_SIZE) });
+      const res = await fetch(
+        `/api/conversations/${encodeURIComponent(
+          conversationId,
+        )}/messages?${params.toString()}`,
+      );
 
-      // If conversation doesn't exist yet (403), just show empty state
-      if (res.status === 403) {
+      // If conversation exists but is denied (403 — refund retroattivo,
+      // 404 — membership drift upstream, o membership non valido),
+      // mostriamo empty state invece di far esplodere l'errore.
+      if (res.status === 403 || res.status === 404) {
         setMessages([]);
         setHasMore(false);
         nextCursorRef.current = null;
@@ -150,9 +170,6 @@ export function ChatView({
 
       if (msgs.length > 0) {
         lastMessageDateRef.current = msgs[msgs.length - 1].createdAt;
-        if (!conversationId && msgs[0]?.conversationId) {
-          setConversationId(msgs[0].conversationId);
-        }
       }
     } catch (err) {
       setError(t.loadErrorRetry);
@@ -160,21 +177,23 @@ export function ChatView({
     } finally {
       setLoading(false);
     }
-  }, [otherUserId, productId, conversationId, t]);
+  }, [conversationId, t]);
 
-  // Load older messages
+  // ── Load older messages (CANONICAL: same endpoint with cursor) ──
   const loadOlderMessages = useCallback(async () => {
     if (!nextCursorRef.current || loadingOlder) return;
     setLoadingOlder(true);
 
     try {
       const params = new URLSearchParams({
-        with: otherUserId,
-        productId, // Phase 1.3
         cursor: nextCursorRef.current,
         limit: String(PAGE_SIZE),
       });
-      const res = await fetch(`/api/messages?${params.toString()}`);
+      const res = await fetch(
+        `/api/conversations/${encodeURIComponent(
+          conversationId,
+        )}/messages?${params.toString()}`,
+      );
       if (!res.ok) throw new Error(t.loadErrorShort);
       const data = await res.json();
 
@@ -189,7 +208,7 @@ export function ChatView({
     } finally {
       setLoadingOlder(false);
     }
-  }, [otherUserId, productId, loadingOlder, t]);
+  }, [conversationId, loadingOlder, t]);
 
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
@@ -204,20 +223,19 @@ export function ChatView({
     void fetchInitialMessages();
   }, [fetchInitialMessages]);
 
-  // Mark received messages as read
+  // ── Mark received messages as read (CANONICAL: PATCH /api/conversations/[id]/read) ──
+  // Il conversationId ora è canonico nell'URL (path segment) — niente
+  // più `{ conversationId }` nel body. Idempotente lato server.
   useEffect(() => {
     const unreadFromOther = messages.filter(
       (m) => m.senderId === otherUserId && !m.read,
     );
     if (unreadFromOther.length === 0) return;
-    const convId = messages[0]?.conversationId;
-    if (!convId) return;
-    void fetch("/api/messages/read", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ conversationId: convId }),
-    }).catch(console.error);
-  }, [messages, otherUserId]);
+    void fetch(
+      `/api/conversations/${encodeURIComponent(conversationId)}/read`,
+      { method: "PATCH" },
+    ).catch(console.error);
+  }, [messages, otherUserId, conversationId]);
 
   // Auto-scroll to bottom when near bottom
   useEffect(() => {
@@ -229,7 +247,10 @@ export function ChatView({
     }
   }, [messages.length]);
 
-  // Send message
+  // ── Send message (CANONICAL: POST /api/conversations/[id]/messages { content }) ──
+  // Body rimosso: receiverId e productId sono derivati server-side dalla
+  // Conversation row via loadAuthorizedConversation (la coppia canonica
+  // <partnerId, productId> è già implicita nella Conversation stessa).
   const handleSend = async () => {
     const trimmed = input.trim();
     if (!trimmed || sending) return;
@@ -237,15 +258,14 @@ export function ChatView({
     setError(null);
 
     try {
-      const res = await fetch("/api/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          receiverId: otherUserId,
-          content: trimmed,
-          productId, // Phase 1.3: productId obbligatorio
-        }),
-      });
+      const res = await fetch(
+        `/api/conversations/${encodeURIComponent(conversationId)}/messages`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: trimmed }),
+        },
+      );
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.error || t.sendError);
@@ -254,9 +274,6 @@ export function ChatView({
       setMessages((prev) => [...prev, data.message]);
       setInput("");
       sendTyping(false);
-      if (!conversationId && data.message?.conversationId) {
-        setConversationId(data.message.conversationId);
-      }
     } catch (err) {
       setError(err instanceof Error ? err.message : t.sendError);
     } finally {
