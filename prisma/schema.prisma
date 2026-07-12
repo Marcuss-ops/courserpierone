@@ -57,6 +57,14 @@ model Product {
 
   // Phase 1.2: indice sulle query "tutti i prodotti del creator X"
   @@index([creatorId])
+  // Compound index per inbox creator queries che filtrano pubblicati.
+  // Query tipica: ``WHERE creatorId = X AND status = 'published'`` —
+  // il compound permette un B-tree seek diretto invece di un filter
+  // post-index-scan su creatorId. NOTA V2: il ``@@index([creatorId])``
+  // singolo diventa ridondante (leftmost-prefix rule PG copre la parte
+  // ``creatorId``); cleanup in un followup successivo per non
+  // appesantire write-amplification con due indici sullo stesso campo.
+  @@index([creatorId, status])
 }
 
 // ─── Traduzioni del Funnel (Problema, Storia, Recensioni, CTA) ─
