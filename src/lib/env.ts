@@ -189,13 +189,13 @@ export const ENV_DEFINITIONS: EnvVarDef[] = [
 
 // ─── Validazione eseguita all'import ───────────────────────
 
-type ValidationResult = {
+interface ValidationResult {
   valid: boolean;
   errors: { key: string; message: string }[];
   warnings: { key: string; message: string }[];
   missingCritical: string[];
   missingRequired: string[];
-};
+}
 
 let _cachedResult: ValidationResult | null = null;
 
@@ -272,8 +272,10 @@ export function validateEnv(): ValidationResult {
  *   env.NEXT_PUBLIC_APP_URL     → string con default
  *   env.EMAIL_SERVER_HOST       → string con default "smtp.gmail.com"
  */
+const _envTarget: Record<string, string | undefined> = {};
+
 export const env = new Proxy(
-  {} as Record<string, string | undefined>,
+  _envTarget,
   {
     get(_target, prop: string) {
       const def = ENV_DEFINITIONS.find((d) => d.key === prop);
