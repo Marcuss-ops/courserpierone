@@ -89,14 +89,23 @@ describe("resolveMessagingPermission", () => {
   // è REQUIRED + ON DELETE RESTRICT a livello DB. Vedi nuova
   // invariante sotto.
   it("rejects when creatorId would be null (post-fase 4 schema invariant)", async () => {
-    // Post-migration: `product.creatorId` è non-nullable. Qualsiasi mock
-    // che restituisse `creatorId: null` sarebbe impossibile senza cast
-    // non-sicuri (verifica a livello Prisma client static type).
+    // Two-line defense per il post-fase 4 invariant:
     //
-    // Questo test verifica l'invariante RUNTIME: il resolver NON esegue
-    // più la query legacy `prisma.user.findFirst({ where: { role: "admin" } })`
-    // — il fallback admin è stato rimosso. L'assenza di fall-through al
-    // admin-fallback è la prova che la pulizia è completa.
+    //   1) FIRST LINE: type system. `Product.creatorId` è REQUIRED
+    //      (`String`, non `String?`) nel prisma schema + FK Restrict
+    //      (migration `20260712210000_creator_id_required_restrict`).
+    //      Il Prisma client static type impedisce staticamente a `null`
+    //      di raggiungere `resolveMessagingPermission` — qualsiasi mock
+    //      che restituisse `creatorId: null` richiederebbe un cast
+    //      non-sicuro e non passerebbe `tsc`.
+    //
+    //   2) SECOND LINE: runtime. Questo test asserisce che il resolver
+    //      NON esegue la query legacy `prisma.user.findFirst({ where:
+    //      { role: "admin" } })` per il fallback admin. L'assenza di
+    //      fall-through è la prova runtime che la pulizia è completa.
+    //
+    // Insieme le due difese garantiscono l'invariante "creatorId sempre
+    // non-null e non-risolto-via-fallback" post-fase 4.
     mockPrisma.product.findUnique.mockResolvedValue({
       id: PRODUCT_ID,
       creatorId: CREATOR_ID, // post-migration: mai null

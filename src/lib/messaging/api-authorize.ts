@@ -18,9 +18,8 @@
  *
  * Fase 4 hardening (`20260712210000_creator_id_required_restrict`):
  * la colonna `Product.creatorId` è REQUIRED + FK Restrict a livello DB.
- * Di conseguenza il deny-reason `NoCreatorForProduct` non è più
- * raggiungibile dal resolver ed è stato rimosso anche da questa mappa
- * REASON_TO_STATUS (vedi nota inline più sotto).
+ * I 4 deny reasons raggiungibili del resolver sono mappati nella tabella
+ * REASON_TO_STATUS qui sotto.
  */
 
 import { NextResponse } from "next/server";
@@ -44,13 +43,6 @@ export type AuthorizeDmDecision =
       response: NextResponse;
     };
 
-// NB post-fase 4 hardening: `MessagingDenyReason.NoCreatorForProduct` è
-// stato rimosso dal resolver perché la colonna `Product.creatorId` è ora
-// REQUIRED + FK Restrict a livello DB. L'eventuale presenza di un creator
-// mancante nel DB è ora un problema di integrità DB (recovery via
-// migration `*_creator_id_required_restrict` + scripts/products/backfill-
-// primary-creator.ts versione mutante pre-fase 4, oppure psql manuale),
-// non un errore di permesso runtime che la route possa tradurre in 4xx.
 const REASON_TO_STATUS: Record<string, { status: number; error: string }> = {
   [MessagingDenyReason.SelfMessage]: {
     status: 400,

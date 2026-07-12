@@ -99,8 +99,8 @@ export async function GET(
   // ── Permission check (Fase 2.0 wire, single source of truth) ─────
   // Deriva (targetId, productId) dalla row Conversation e delega al
   // resolver via authorizeDmRequest. Recupera anche lo status code
-  // corretto dal deny mapping di api-authorize (404 ProductNotFound,
-  // 403 NoCompletedOrderForStudent, 409 NoCreatorForProduct, ecc.)
+  // corretto dal deny mapping di api-authorize (400 SelfMessage,
+  // 404 ProductNotFound, 403 NotCreatorStudentPair, 403 NoCompletedOrderForStudent)
   // per propagarlo in avanti senza reimplementare la matrice.
   //
   // Phase 2.0 V2: usa `getPartnerId` helper per DRY (la stessa logica

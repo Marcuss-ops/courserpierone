@@ -35,15 +35,11 @@
  * feedback coerenti.
  *
  * Fase 4 hardening (migration `20260712210000_creator_id_required_restrict`):
- *   Il deny-reason storico `NoCreatorForProduct` non è più raggiungibile
- *   runtime (la colonna `Product.creatorId` è REQUIRED + FK Restrict a
- *   livello DB). Tuttavia il constant rimane ESPORTATO con tag
- *   `@deprecated` per compatibilità con i consumer già in produzione
- *   (server.ts WS bridge + SSE stream handler + route WS upgrade).
- *   Questi consumer si traducono in "messaggio impossibile" via la
- *   tabella REASON_TO_STATUS in `api-authorize.ts`. Future V2 cleanup:
- *   migrare i consumer ad un deny-reason canonico (es. ProductNotFound
- *   condizionale) e rimuovere il constant.
+ *   `Product.creatorId` è REQUIRED + FK Restrict a livello DB. Il resolver
+ *   non ha più un deny-reason "no creator" perché tale condizione non può
+ *   più verificarsi runtime (sarebbe un problema di integrità DB). I 4 deny
+ *   reasons raggiungibili sono: SelfMessage, ProductNotFound,
+ *   NotCreatorStudentPair, NoCompletedOrderForStudent.
  */
 
 import { prisma } from "@/lib/db/prisma";
@@ -80,22 +76,6 @@ export const MessagingDenyReason = {
   SelfMessage: "self_message_blocked",
   /** productId non esiste (404 upstream) */
   ProductNotFound: "product_not_found",
-  /**
-   * @deprecated Post-fase 4 hardening (migration
-   * `20260712210000_creator_id_required_restrict`): `Product.creatorId`
-   * è ora REQUIRED + FK Restrict a livello DB, di conseguenza questo
-   * deny-reason non è più raggiungibile dal resolver. Il constant è
-   * mantenuto ESPORTATO per compatibilità con i consumer già in
-   * produzione (server.ts WS bridge + src/app/api/conversations/[id]/stream/route.ts
-   * SSE handler + src/lib/messaging/api-authorize.ts HTTP error mapper).
-   * Poiché il resolver non lo restituisce mai più, le route lo
-   * traducono in stato "irragiungibile" come safety net.
-   *
-   * Future V2 cleanup: migrare i consumer ad un deny-reason canonico
-   * (es. un nuovo `ProductIntegrityViolation` per audit purposes) e
-   * rimuovere questo constant.
-   */
-  NoCreatorForProduct: "no_creator_for_product",
   /**
    * I due partecipanti non sono coppia (creator, student) sul prodotto:
    * entrambi creator, entrambi student di quel prodotto, o entrambi

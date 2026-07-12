@@ -215,9 +215,10 @@ app.prepare().then(() => {
           console.log(
             `[ws] Upgrade refused: resolver deny (user=${userId}, conv=${conversationId}, reason=${permission.reason ?? MessagingDenyReason.NoCompletedOrderForStudent})`,
           );
-          // 403 per deny canonico. ProductNotFound/NoCreatorForProduct
-          // sarebbero 404/409 nel path API ma la WS upgrade handshake
-          // usa solo 403 + socket close; i dettagli sono nel log.
+          // 403 per deny canonico. Status code specifico (400/404) è
+          // disponibile in api-authorize.ts via REASON_TO_STATUS, ma
+          // la WS upgrade handshake usa solo 403 + socket close; i
+          // dettagli (reason) sono nel log.
           socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
           socket.destroy();
           return;
