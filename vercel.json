@@ -4,5 +4,6 @@
       "path": "/api/cron/check-supabase-pitr",
       "schedule": "0 9 * * 1"
     }
-  ]
+  ],
+  "ignoreCommand": "bash scripts/ops/vercel-ignore-docs.sh"
 }
