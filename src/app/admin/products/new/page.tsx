@@ -49,9 +49,15 @@ export default function NewProductPage() {
     Object.fromEntries(FUNNEL_SECTIONS.map((s) => [s.key, ""]))
   );
   const [lessons, setLessons] = useState<LessonFormItem[]>([
-    { translations: { en: { title: "", videoUrl: "" } }, assets: [] },
+    { translations: { it: { title: "", videoUrl: "" } }, assets: [] },
   ]);
-  const [sourceLocale] = useState("en");
+  // The new-product wizard UI is entirely Italian (labels, placeholders,
+  // textarea hints). The default source locale must therefore be "it" so that
+  // typed content is stored under the correct DB locale. Hardcoding "en" here
+  // causes Italian admin content to be silently misclassified as English in
+  // `ProductTranslation`, which then breaks English visitor rendering and the
+  // AI translation loop (en→es from already-Italian source).
+  const [sourceLocale] = useState("it");
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiResult, setAiResult] = useState<string | null>(null);
 
