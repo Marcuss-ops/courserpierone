@@ -46,6 +46,11 @@ export function ChatModal({
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Fase 4.1: la conversationId viene derivata dal primo fetch o
+  // dalla risposta POST (entrambi restituiscono messages[].conversationId).
+  // Viene usata dal hook realtime per aprire WS/SSE subscritti sulla
+  // Conversation canonica (in HMAC + DB membership check).
+  const [chatConversationId, setChatConversationId] = useState<string | null>(null);
 
   // Cursor pagination state
   const [hasMore, setHasMore] = useState(false);
@@ -72,10 +77,18 @@ export function ChatModal({
   );
 
   const { connected, isOtherTyping, sendTyping, resetTypingTimer } = useRealtimeChat({
+    // Fase 4.1: subscription WS/SSE è scoped sulla ConversationId (canonical).
+    // productId non serve più nel protocollo realtime. La conversationId
+    // viene derivata dal primo fetch (messages[0].conversationId) o
+    // dalla risposta del primo POST (`data.message.conversationId`).
+    conversationId: chatConversationId ?? "",
     otherUserId: creatorId,
-    productId, // Phase 1.3: propaga productId al WS/SSE/poll
     onMessages: handleRealtimeMessages,
-    enabled: open,
+    // Gate: la subscription è attiva solo quando il modal è aperto
+    // E la conversationId è nota. Senza conversationId il fallback
+    // sarebbe polling legacy; meglio richiedere la conversationId prima
+    // di tentare WS/SSE.
+    enabled: open && chatConversationId !== null,
   });
 
   // Fetch initial messages (most recent page)
@@ -93,11 +106,13 @@ export function ChatModal({
       const msgs: MessageData[] = (data.messages ?? []).reverse();
       setMessages(msgs);
       setHasMore(data.nextCursor !== null);
-      nextCursorRef.current = data.nextCursor as string | null;
-
-      if (msgs.length > 0) {
-        lastMessageDateRef.current = msgs[msgs.length - 1].createdAt;
-      }
+      nextCursorRef.current = data.nextCursor as string | null;        if (msgs.length > 0) {
+          lastMessageDateRef.current = msgs[msgs.length - 1].createdAt;
+          // Fase 4.1: cattura la conversationId per il real-time hook.
+          if (msgs[0]?.conversationId) {
+            setChatConversationId(msgs[0].conversationId);
+          }
+        }
     } catch (err) {
       setError(t.loadErrorRetry);
       console.error("fetchMessages error:", err);
@@ -203,6 +218,12 @@ export function ChatModal({
       }
       const data = await res.json();
       setMessages((prev) => [...prev, data.message]);
+      // Fase 4.1: il POST /api/messages risponde con `message.conversationId`
+      // (Fase 2.2). Cattura la prima che arriva, anche se era già
+      // conosciuta dal fetch iniziale (idempotente).
+      if (data.message?.conversationId) {
+        setChatConversationId(data.message.conversationId);
+      }
       setInput("");
       sendTyping(false);
     } catch (err) {

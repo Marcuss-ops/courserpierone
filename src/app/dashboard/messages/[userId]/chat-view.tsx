@@ -82,10 +82,15 @@ export function ChatView({
   );
 
   const { connected, isOtherTyping, sendTyping, resetTypingTimer } = useRealtimeChat({
+    // Fase 4.1: subscription WS/SSE è scoped sulla ConversationId
+    // (canonical, deriva dal token HMAC e dal membership check).
+    // productId non serve più nel protocollo realtime.
+    conversationId: conversationId ?? "",
     otherUserId,
-    productId, // Phase 1.3: anche WS subscribe è scoped per prodotto
     onMessages: handleRealtimeMessages,
-    enabled: true,
+    // Gate: la subscription parte solo quando conosciamo la ConversationId.
+    // Una chat "nuova" (senza conversationId ancora) non può aprire WS/SSE.
+    enabled: conversationId !== null,
   });
 
   // Fetch initial messages

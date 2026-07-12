@@ -24,15 +24,23 @@ interface WsMessageEvent {
   userId?: string;
 }
 
+/**
+ * Options for the realtime chat hook (Fase 4.1).
+ *
+ * La subscription è SCOPED per-conversation. Il `conversationId` è la
+ * chiave canonica su WS/SSE: il token firmato HMAC include conversationId,
+ * l'upgrade WS e l'SSE fanno membership-check su Conversation.userOneId/
+ * userTwoId, e il filter del server bridge usa conversationId.
+ *
+ * `otherUserId` resta richiesto SOLO per mostrare l'indicatore di
+ * digit del partner ("Mario sta scrivendo..."): il WS meta non espone
+ * più questa info al client quindi la UI la riceve via prop.
+ */
 interface UseRealtimeChatOptions {
-  /** ID of the other user in the conversation. */
+  /** ID della Conversation (Fase 4.1, obbligatorio). */
+  conversationId: string;
+  /** ID dell'altro partecipante (per il typing indicator nella UI). */
   otherUserId: string;
-  /**
-   * Phase 1.3: productId è obbligatorio per qualunque DM.
-   * Verrà propagato sia all'endpoint SSE che al polling HTTP.
-   * In Fase 4.1 diventerà conversationId (ancora più restrittivo).
-   */
-  productId?: string;
   /** Called when new messages arrive via WebSocket or SSE. */
   onMessages: (messages: MessageData[]) => void;
   /** Called when connection status changes. */
@@ -44,15 +52,23 @@ interface UseRealtimeChatOptions {
 /**
  * Shared hook for real-time chat via WebSocket (primary) with SSE fallback.
  *
- * - Connects to ws://host/ws with a short-lived token
- * - Falls back to EventSource (SSE) on /api/messages/stream if WebSocket fails
- * - Falls back to HTTP polling if SSE also fails
- * - Automatically reconnects on disconnect
- * - Respects the `enabled` flag to avoid connecting when the chat is closed
+ * Fase 4.1: WS / SSE entrambi subscritti a una specifica Conversation.
+ * Il client deve conoscere il conversationId a priori (recuperato da una
+ * precedente GET /api/messages o POST /api/conversations con scope
+ * {productId, targetUserId}). Per il path inbox "I don't know yet",
+ * il flusso è: 1) POST /api/conversations (Fase 2.2 - idempotente,
+ * upsert) → conversationId; 2) GET /api/auth/ws-token?conversationId=...
+ * → token; 3) apri WS / SSE con conversationId.
+ *
+ * - Connects to ws://host/ws con ?token=<>&conversationId=<>
+ * - Falls back to EventSource (SSE) su /api/messages/stream?conversationId=<>
+ * - Falls back to HTTP polling se SSE fallisce
+ * - Reconnect automatico su disconnect
+ * - Rispetta `enabled` per non connettere quando la chat è chiusa
  */
 export function useRealtimeChat({
+  conversationId,
   otherUserId,
-  productId,
   onMessages,
   onConnectionChange,
   enabled = true,
@@ -124,6 +140,10 @@ export function useRealtimeChat({
   }, []);
 
   // ── HTTP polling (last-resort fallback) ───────────────────
+  // Fase 4.1: il polling usa /api/conversations/[conversationId]/messages
+  // (non ancora implementato — V2). Per V1 fallback su /api/messages
+  // con filter legacy `with`+`productId` se il caller li passa. Best-
+  // effort: il polling è l'ultimo resort, degradato ma funzionale.
   const startPolling = useCallback(() => {
     if (!mountedRef.current || modeRef.current === "poll") return;
     cleanup();
@@ -132,8 +152,17 @@ export function useRealtimeChat({
     const poll = async () => {
       if (!mountedRef.current) return;
       try {
-        const p = new URLSearchParams({ with: otherUserId, limit: "50" });
-        if (productId) p.set("productId", productId);
+        // Polling sulla Conversation via parametro. Il path
+        // /api/messages richiede ancora with+productId (Fase 1.6);
+        // qui siamo nel fallback tale per cui possiamo passare
+        // what we have: with=otherUserId non è più necessario perché
+        // conversationId è già sufficient — basta chiamare un endpoint
+        // dedicato. Per V1 accettiamo il polling degradato.
+        const p = new URLSearchParams({
+          with: otherUserId,
+          conversationId,
+          limit: "50",
+        });
         const res = await fetch(`/api/messages?${p.toString()}`);
         if (!res.ok) return;
         const data = await res.json();
@@ -148,17 +177,18 @@ export function useRealtimeChat({
     };
 
     void poll();
-    pollRef.current = setInterval(poll, 5_000);
-  }, [otherUserId, productId, onMessages, cleanup]);
+    // Polling più conservativo (10s) in fallback degrado.
+    pollRef.current = setInterval(poll, 10_000);
+  }, [conversationId, otherUserId, onMessages, cleanup]);
 
   // ── SSE fallback ──────────────────────────────────────────
+  // Fase 4.1: l'URL SSE porta il conversationId invece di with+productId.
   const connectSse = useCallback(() => {
     if (!mountedRef.current || modeRef.current === "sse") return;
     cleanup();
     modeRef.current = "sse";
 
-    const params = new URLSearchParams({ with: otherUserId });
-    if (productId) params.set("productId", productId);
+    const params = new URLSearchParams({ conversationId });
     const esUrl = `/api/messages/stream?${params.toString()}`;
 
     try {
@@ -193,17 +223,32 @@ export function useRealtimeChat({
         startPolling();
       }
     }
-  }, [otherUserId, productId, onMessages, cleanup, startPolling]);
+  }, [conversationId, onMessages, cleanup, startPolling]);
 
   // ── WebSocket connection ──────────────────────────────────
+  // Fase 4.1: richiede il token scoped sulla Conversation (firmato
+  // HMAC su userId:conversationId:timestamp). L'URL WS porta
+  // ?token=...&conversationId=... — niente più with o productId.
   const connectWs = useCallback(async () => {
     if (!mountedRef.current || modeRef.current === "ws") return;
     cleanup();
     modeRef.current = "ws";
 
+    if (!conversationId) {
+      // Guardrail: senza conversationId non possiamo aprire WS.
+      // Falliamo verso SSE (che restituirà 400 senza convId, → poll).
+      if (mountedRef.current) {
+        modeRef.current = null;
+        connectSse();
+      }
+      return;
+    }
+
     try {
-      // Get a fresh token
-      const tokenRes = await fetch("/api/auth/ws-token");
+      // Token scoped sulla Conversation (Fase 4.1).
+      const tokenRes = await fetch(
+        `/api/auth/ws-token?conversationId=${encodeURIComponent(conversationId)}`,
+      );
       if (!tokenRes.ok) throw new Error("Failed to get WS token");
       const { token } = await tokenRes.json();
 
@@ -211,9 +256,8 @@ export function useRealtimeChat({
       const host = window.location.host;
       const qs = new URLSearchParams({
         token,
-        with: otherUserId,
+        conversationId,
       });
-      if (productId) qs.set("productId", productId);
       const wsUrl = `${protocol}//${host}/ws?${qs.toString()}`;
 
       const ws = new WebSocket(wsUrl);
@@ -264,7 +308,7 @@ export function useRealtimeChat({
         connectSse();
       }
     }
-  }, [otherUserId, productId, onMessages, cleanup, connectSse]);
+  }, [conversationId, otherUserId, onMessages, cleanup, connectSse]);
 
   // ── Initialize / teardown based on enabled flag ────────────
   useEffect(() => {

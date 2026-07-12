@@ -1,20 +1,23 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
-import { authorizeDmRequest } from "@/lib/messaging/api-authorize";
 
 /**
- * GET /api/messages/stream?with=<userId>&productId=<productId>&since=<ISO timestamp>
+ * GET /api/messages/stream?conversationId=<id>&since=<ISO timestamp>
  *
- * SSE (Server-Sent Events) endpoint per ricevere nuovi messaggi in tempo reale.
+ * SSE (Server-Sent Events) endpoint per ricevere nuovi messaggi in
+ * tempo reale con subscription per-conversation (Fase 4.1).
  *
- * Phase 1.6: il check autorizzativo passa da authorizeDmRequest →
- * resolveMessagingPermission. Se la DM non è autorizzata, restituiamo
- * 403 subito senza aprire lo stream.
- *
- * NB: lo stream resta connesso anche su conversation "non esistente" —
- * continuerà a polllare e ad aprire la chat quando i due utenti avranno
- * il primo scambio autorizzato.
+ * Cambiamenti rispetto a Fase 1.3 / Fase 1.6:
+ *   - Niente più `withUserId` o `productId` come query param.
+ *   - Membership check diretta via `prisma.conversation.findUnique`
+ *     (l'utente DEVE essere userOneId O userTwoId della Conversation).
+ *     Niente più pass-through al `resolveMessagingPermission` policy
+ *     layer: una volta che la Conversation row esiste, i suoi due
+ *     partecipanti possono streamare in/out senza re-verificare
+ *     Order.status ogni volta.
+ *   - Niente più loop di "aspetta che la Conversation venga creata":
+ *     il conversationId è già nel path, si sa subito se esiste.
  */
 export async function GET(request: NextRequest) {
   const { user, dbUser } = await getServerUser();
@@ -23,45 +26,39 @@ export async function GET(request: NextRequest) {
   }
 
   const { searchParams } = new URL(request.url);
-  const withUserId = searchParams.get("with");
-  const productId = searchParams.get("productId") || undefined;
+  const conversationIdParam = searchParams.get("conversationId");
   const sinceRaw = searchParams.get("since");
 
-  if (!withUserId) {
-    return new Response("Missing 'with' parameter", { status: 400 });
-  }
-  if (!productId) {
-    return new Response("Missing 'productId' parameter", { status: 400 });
-  }
-
-  // ── Permission check (Phase 1.6 single source of truth) ─────
-  const auth = await authorizeDmRequest({
-    actorId: dbUser.id,
-    targetId: withUserId,
-    productId,
-  });
-  if (!auth.allowed) {
-    return new Response(auth.permission.reason ?? "forbidden", {
-      status: auth.response.status,
+  if (!conversationIdParam) {
+    return new Response("Missing 'conversationId' parameter (Fase 4.1)", {
+      status: 400,
     });
   }
 
-  const since = sinceRaw ? new Date(sinceRaw) : new Date(0);
+  // Narrowed local: il controllo sopra esclude il null, ma la closure
+  // ReadableStream.start() cattura la const nello scope esterno. TS non
+  // porta automaticamente la narrowing dentro arrow function annidate,
+  // quindi riassegnamo a `conversationId: string` (non-null) qui.
+  const conversationId: string = conversationIdParam;
 
-  // Cerca la conversation tra i due utenti scope al prodotto (ordinamento deterministico)
-  const [minId, maxId] = [dbUser.id, withUserId].sort();
-  const conversation = await prisma.conversation.findFirst({
-    where: {
-      productId,
-      OR: [
-        { userOneId: minId, userTwoId: maxId },
-        { userOneId: maxId, userTwoId: minId },
-      ],
-    },
-    select: { id: true },
+  // ── Membership check (Fase 4.1, O(1) via unique) ────────
+  const conversation = await prisma.conversation.findUnique({
+    where: { id: conversationId },
+    select: { userOneId: true, userTwoId: true },
   });
 
-  let conversationId = conversation?.id ?? null;
+  if (!conversation) {
+    return new Response("Conversation not found", { status: 404 });
+  }
+
+  if (
+    conversation.userOneId !== dbUser.id &&
+    conversation.userTwoId !== dbUser.id
+  ) {
+    return new Response("Forbidden", { status: 403 });
+  }
+
+  const since = sinceRaw ? new Date(sinceRaw) : new Date(0);
 
   const encoder = new TextEncoder();
   let stopped = false;
@@ -81,23 +78,6 @@ export async function GET(request: NextRequest) {
 
       async function poll(): Promise<void> {
         if (stopped) return;
-
-        if (!conversationId) {
-          const found = await prisma.conversation.findFirst({
-            where: {
-              productId,
-              OR: [
-                { userOneId: minId, userTwoId: maxId },
-                { userOneId: maxId, userTwoId: minId },
-              ],
-            },
-            select: { id: true },
-          });
-          conversationId = found?.id ?? null;
-
-          if (!stopped) setTimeout(poll, 2_000);
-          return;
-        }
 
         try {
           const newMessages = await prisma.message.findMany({
@@ -120,8 +100,8 @@ export async function GET(request: NextRequest) {
 
             controller.enqueue(
               encoder.encode(
-                `data: ${JSON.stringify({ messages: newMessages })}\n\n`
-              )
+                `data: ${JSON.stringify({ messages: newMessages })}\n\n`,
+              ),
             );
           }
         } catch (err) {
