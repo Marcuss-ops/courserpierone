@@ -3,6 +3,8 @@ import { jsPDF } from "jspdf";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { prisma } from "@/lib/db/prisma";
 import { apiErrorResponse } from "@/lib/errors";
+import { getCertificateTranslations } from "@/lib/i18n/certificate-translations";
+import { getUiTranslations, interpolate } from "@/lib/i18n/ui-translations";
 
 export async function GET(
   request: NextRequest,
@@ -16,15 +18,26 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Verifica che l'utente abbia acquistato il prodotto
+    // Derive user lang for localized error messages (Accept-Language is best-
+    // effort here because the order isn't loaded yet for the no-purchase path).
+    const acceptLang = request.headers.get("accept-language") ?? "en";
+    const errLang = acceptLang.split(",")[0]?.split("-")[0]?.toLowerCase() ?? "en";
+
+    // Verify the user has purchased the product
     const order = await prisma.order.findFirst({
       where: { userId: dbUser.id, productId, status: "completed" },
     });
     if (!order) {
-      return NextResponse.json({ error: "Acquista il corso per ottenere il certificato" }, { status: 403 });
+      // Localized "you haven't purchased yet" error. Falls back to English
+      // automatically when errLang isn't a registered key.
+      const t = getUiTranslations(errLang);
+      return NextResponse.json(
+        { error: t.dashCertNotPurchased },
+        { status: 403 }
+      );
     }
 
-    // Verifica che tutte le lezioni siano completate
+    // Verify all lessons are completed
     const product = await prisma.product.findUnique({
       where: { id: productId },
       include: {
@@ -44,24 +57,30 @@ export async function GET(
       where: { userId: dbUser.id, lessonId: { in: product.lessons.map(l => l.id) }, completed: true },
     });
 
+    const locale = order.locale ?? "it";
+    const lang = locale.split("-")[0];
+    const ui = getUiTranslations(lang);
+
     if (totalLessons === 0) {
+      // Localized "no lessons" error via ui-translations dashCertNoLessons.
       return NextResponse.json(
-        { error: "Questo corso non ha lezioni — impossibile generare il certificato" },
+        { error: ui.dashCertNoLessons },
         { status: 400 }
       );
     }
     if (completedCount < totalLessons) {
+      // Localized message via ui-translations dashStats*.
+      const lessonsCompletedTemplate = interpolate(ui.dashStatsLessonsCompleted, { n: totalLessons });
       return NextResponse.json(
-        { error: `Completa tutte le ${totalLessons} lezioni per ottenere il certificato (${completedCount}/${totalLessons})` },
+        { error: `${lessonsCompletedTemplate} (${completedCount}/${totalLessons})` },
         { status: 400 }
       );
     }
 
     const courseTitle = product.translations[0]?.content || product.slug;
-    const locale = order.locale ?? "it";
-    const lang = locale || "en";
+    const cert = getCertificateTranslations(lang);
 
-    // ─── Genera PDF Certificato ─────────────────────────────
+    // ─── Generate PDF Certificate ─────────────────────────────
     const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "landscape" });
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -88,35 +107,32 @@ export async function GET(
     doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(77, 142, 255);
-    doc.text("COURSER", pageWidth / 2, 42, { align: "center" });
+    doc.text(cert.brandLabel, pageWidth / 2, 42, { align: "center" });
 
     // Titolo certificato
     doc.setFontSize(36);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(255, 255, 255);
-    const certTitle = lang === "en" ? "CERTIFICATE OF COMPLETION" : "CERTIFICATO DI COMPLETAMENTO";
-    doc.text(certTitle, pageWidth / 2, 75, { align: "center" });
+    doc.text(cert.certTitle, pageWidth / 2, 75, { align: "center" });
 
     // Sottotitolo
     doc.setFontSize(12);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(160, 160, 170);
-    const thisIsTo = lang === "en" ? "This is to certify that" : "Si certifica che";
-    doc.text(thisIsTo, pageWidth / 2, 95, { align: "center" });
+    doc.text(cert.certThisIsTo, pageWidth / 2, 95, { align: "center" });
 
     // Nome studente
     doc.setFontSize(28);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(255, 255, 255);
-    const studentName = dbUser.name ?? dbUser.email?.split("@")[0] ?? "Studente";
+    const studentName = dbUser.name ?? dbUser.email?.split("@")[0] ?? ui.dashWelcomeDefaultName;
     doc.text(studentName, pageWidth / 2, 120, { align: "center" });
 
     // Ha completato
     doc.setFontSize(12);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(160, 160, 170);
-    const hasCompleted = lang === "en" ? "has successfully completed the course" : "ha completato con successo il corso";
-    doc.text(hasCompleted, pageWidth / 2, 138, { align: "center" });
+    doc.text(cert.certHasCompleted, pageWidth / 2, 138, { align: "center" });
 
     // Nome corso
     doc.setFontSize(22);
@@ -128,15 +144,20 @@ export async function GET(
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(140, 140, 150);
-    const completedDate = lang === "en"
-      ? `Completed on: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`
-      : `Completato il: ${new Date().toLocaleDateString("it-IT", { year: "numeric", month: "long", day: "numeric" })}`;
+    const formatterLocale = lang === "en" ? "en-US" : lang === "es" ? "es-ES" : "it-IT";
+    const completedDate = `${cert.certDateLabel} ${new Date().toLocaleDateString(formatterLocale, {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })}`;
     doc.text(completedDate, pageWidth / 2, 182, { align: "center" });
 
-    const lessonText = lang === "en"
-      ? `${totalLessons} lessons completed`
-      : `${totalLessons} lezioni completate`;
-    doc.text(lessonText, pageWidth / 2, 193, { align: "center" });
+    doc.text(
+      interpolate(cert.certLessonsCompleted, { n: totalLessons }),
+      pageWidth / 2,
+      193,
+      { align: "center" }
+    );
 
     // Linea decorativa inferiore
     doc.setDrawColor(77, 142, 255);
@@ -147,7 +168,7 @@ export async function GET(
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(120, 120, 130);
-    doc.text(`© ${new Date().getFullYear()} Courser`, pageWidth / 2, 225, { align: "center" });
+    doc.text(`© ${new Date().getFullYear()} ${cert.brandLabel}`, pageWidth / 2, 225, { align: "center" });
 
     // ID certificato
     const certId = `CERT-${product.slug.toUpperCase().slice(0, 8)}-${dbUser.id.slice(0, 8).toUpperCase()}-${new Date().getFullYear()}`;
@@ -157,7 +178,8 @@ export async function GET(
 
     // ─── Generate buffer and return ──────────────────────────
     const pdfBuffer = Buffer.from(doc.output("arraybuffer"));
-    const filename = `certificato-${product.slug}-${lang}.pdf`;
+    // Localize the filename so the download is recognizable in the user's language.
+    const filename = `cert-${product.slug}-${lang}.pdf`;
 
     return new NextResponse(pdfBuffer, {
       headers: {

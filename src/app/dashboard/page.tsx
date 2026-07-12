@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { LogOut, ArrowRight, User } from "lucide-react";
+import { cookies } from "next/headers";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { WelcomeBanner } from "@/components/dashboard/welcome-banner";
@@ -12,6 +13,15 @@ import { CertificatesShowcase } from "@/components/dashboard/certificates-showca
 import { NotificationsDropdown, type UnreadConversation } from "@/components/dashboard/notifications-dropdown";
 import { PWAInstallBanner } from "@/components/pwa-install-banner";
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
+
+/**
+ * Read the user's active 2-letter lang from the `locale` cookie so all
+ * child components can render their strings via getUiTranslations(lang).
+ * Falls back to "it" (default brand locale).
+ */
+function dashboardLang(): string {
+  return cookies().get("locale")?.value?.toLowerCase().split("-")[0] ?? "it";
+}
 
 interface ProductProgress {
   productId: string;
@@ -39,6 +49,8 @@ export default async function DashboardPage() {
   if (!user?.email || !dbUser) {
     redirect("/login");
   }
+
+  const lang = dashboardLang();
 
   // ── Fetch orders (admin sees all published products as virtual orders) ──
   let userOrders: DisplayOrder[];
@@ -183,7 +195,6 @@ export default async function DashboardPage() {
     },
   });
 
-  // Fetch top 5 conversations with unread messages for the dropdown
   const unreadConversationRows =
     unreadMessages > 0
       ? await prisma.conversation.findMany({
@@ -210,7 +221,6 @@ export default async function DashboardPage() {
         })
       : [];
 
-  // Build unread conversation previews for dropdown
   const unreadConversations: UnreadConversation[] = unreadConversationRows.map((c) => {
     const otherUser = c.userOneId === dbUser.id ? c.userTwo : c.userOne;
     const lastMsg = c.messages[0];
@@ -230,7 +240,6 @@ export default async function DashboardPage() {
     };
   });
 
-  // Compute per-conversation unread counts with one batch query
   if (unreadConversations.length > 0) {
     const convIds = unreadConversationRows.map((c) => c.id);
     const unreadRows = await prisma.message.groupBy({
@@ -281,7 +290,6 @@ export default async function DashboardPage() {
           </Link>
 
           <div className="flex items-center gap-3">
-            {/* DM messages — notification dropdown */}
             <NotificationsDropdown
               conversations={unreadConversations}
               totalUnread={unreadMessages}
@@ -324,6 +332,7 @@ export default async function DashboardPage() {
           hasOrders={userOrders.length > 0}
           resumeHref={resumeHref}
           resumeLabel={resumeLabel}
+          lang={lang}
         />
 
         {/* Stats Bento */}
@@ -332,6 +341,7 @@ export default async function DashboardPage() {
           completedLessons={completedLessons}
           totalLessons={totalLessons}
           progressPercent={progressPercent}
+          lang={lang}
         />
 
         {/* My Courses Section */}
@@ -358,14 +368,15 @@ export default async function DashboardPage() {
           </div>
 
           {userOrders.length === 0 ? (
-            <DashboardEmptyState />
+            <DashboardEmptyState lang={lang} />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {userOrders.map((order) => {
                 const progress = productProgress.find(
                   (p) => p.productId === order.product.id
                 );
-                return (                    <CourseCard
+                return (
+                  <CourseCard
                     key={order.id}
                     slug={order.product.slug}
                     coverUrl={order.product.coverUrl}
@@ -373,6 +384,7 @@ export default async function DashboardPage() {
                     completedLessons={progress?.completed ?? 0}
                     purchasedAt={order.createdAt}
                     href={`/${order.product.defaultLanguage ?? "it"}/${order.product.slug}/portal`}
+                    lang={lang}
                   />
                 );
               })}
@@ -381,7 +393,7 @@ export default async function DashboardPage() {
         </section>
 
         {/* Certificates */}
-        <CertificatesShowcase certificates={completedProductIds} />
+        <CertificatesShowcase certificates={completedProductIds} lang={lang} />
       </main>
       <PWAInstallBanner />
       <MobileBottomNav unreadCount={unreadMessages} />

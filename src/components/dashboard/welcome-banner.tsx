@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Play, ArrowRight, Sparkles } from "lucide-react";
+import { getUiTranslations, uiT } from "@/lib/i18n";
 
 interface WelcomeBannerProps {
   name: string | null;
@@ -7,10 +8,17 @@ interface WelcomeBannerProps {
   hasOrders: boolean;
   resumeHref?: string;
   resumeLabel?: string;
+  lang?: string;
 }
 
-export function WelcomeBanner({ name, courseCount, hasOrders, resumeHref, resumeLabel }: WelcomeBannerProps) {
-  const firstName = (name ?? "Studente").split(" ")[0] ?? "Studente";
+export function WelcomeBanner({ name, courseCount, hasOrders, resumeHref, resumeLabel, lang = "it" }: WelcomeBannerProps) {
+  const t = getUiTranslations(lang);
+  const firstName = (name ?? t.dashWelcomeDefaultName).split(" ")[0] ?? t.dashWelcomeDefaultName;
+
+  const hasOrdersLabel =
+    courseCount === 1
+      ? t.dashWelcomeHasOrdersOne
+      : uiT(t, "dashWelcomeHasOrdersMany", { n: courseCount });
 
   return (
     <section className="relative overflow-hidden rounded-[32px] border border-cream-dark-border bg-gradient-to-br from-cream-dark-bg via-cream-dark-surface to-cream-dark-surface p-8 lg:p-12 shadow-2xl shadow-[#FF8C42]/20">
@@ -47,18 +55,16 @@ export function WelcomeBanner({ name, courseCount, hasOrders, resumeHref, resume
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-cream-dark-surface/80 backdrop-blur border border-cream-dark-border rounded-full">
             <Sparkles className="w-3 h-3 text-cream-dark-gold" />
             <span className="text-[10px] font-semibold text-cream-dark-gold uppercase tracking-widest">
-              Bentornato
+              {t.dashWelcomeBadge}
             </span>
           </div>
           <h1 className="font-serif text-4xl lg:text-6xl text-cream-dark-text leading-[0.95] tracking-[-0.02em]">
-            Bentornato,
+            {t.dashWelcomeGreeting}
             <br />
             <span className="italic text-cream-dark-gold">{firstName}</span>
           </h1>
           <p className="text-cream-dark-text-soft text-base lg:text-lg font-light leading-relaxed max-w-md">
-            {hasOrders
-              ? `Hai ${courseCount} ${courseCount === 1 ? "corso attivo" : "corsi attivi"}. Riprendi da dove hai lasciato.`
-              : "Esplora il catalogo e inizia il tuo primo percorso di apprendimento."}
+            {hasOrders ? hasOrdersLabel : t.dashWelcomeNoOrders}
           </p>
         </div>
 
@@ -70,7 +76,7 @@ export function WelcomeBanner({ name, courseCount, hasOrders, resumeHref, resume
             <span className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center group-hover:bg-white/25 transition-colors">
               <Play className="w-4 h-4 fill-white" />
             </span>
-            <span className="line-clamp-1">{resumeLabel ?? "Riprendi da dove hai lasciato"}</span>
+            <span className="line-clamp-1">{resumeLabel ?? t.dashWelcomeResumeFallback}</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         )}

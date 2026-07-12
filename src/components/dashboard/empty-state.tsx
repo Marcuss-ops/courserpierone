@@ -1,7 +1,14 @@
 import Link from "next/link";
 import { BookOpen, ArrowRight } from "lucide-react";
+import { getUiTranslations } from "@/lib/i18n";
 
-export function DashboardEmptyState() {
+interface DashboardEmptyStateProps {
+  lang?: string;
+}
+
+export function DashboardEmptyState({ lang = "it" }: DashboardEmptyStateProps = {}) {
+  const t = getUiTranslations(lang);
+
   return (
     <div className="relative overflow-hidden bg-gradient-to-br from-cream-dark-bg via-cream-dark-surface to-cream-dark-surface border border-cream-dark-border rounded-[32px] p-12 lg:p-16 text-center shadow-2xl shadow-[#FF8C42]/15">
       <div
@@ -17,16 +24,16 @@ export function DashboardEmptyState() {
           <BookOpen className="w-9 h-9 text-cream-dark-gold" />
         </div>
         <div className="space-y-2">
-          <h3 className="font-serif text-3xl text-cream-dark-text">Nessun corso ancora</h3>
+          <h3 className="font-serif text-3xl text-cream-dark-text">{t.dashEmptyTitle}</h3>
           <p className="text-cream-dark-text-soft text-sm font-light leading-relaxed">
-            Non hai ancora acquistato nessun corso. Esplora il catalogo e inizia il tuo percorso di apprendimento.
+            {t.dashEmptyBody}
           </p>
         </div>
         <Link
           href="/"
           className="inline-flex items-center gap-2 bg-cream-dark-orange text-white px-6 py-3.5 rounded-xl text-sm font-semibold shadow-lg shadow-[#FF8C42]/20 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream-dark-gold focus-visible:ring-offset-2 focus-visible:ring-offset-cream-dark-bg"
         >
-          Scopri i Corsi <ArrowRight className="w-4 h-4" />
+          {t.dashEmptyCta} <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
     </div>

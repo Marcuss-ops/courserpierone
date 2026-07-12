@@ -1,14 +1,26 @@
 import { BookOpen, TrendingUp } from "lucide-react";
 import { ProgressBar } from "./progress-bar";
+import { getUiTranslations, uiT } from "@/lib/i18n";
 
 interface StatsBentoProps {
   courseCount: number;
   completedLessons: number;
   totalLessons: number;
   progressPercent: number;
+  lang?: string;
 }
 
-export function StatsBento({ courseCount, completedLessons, totalLessons, progressPercent }: StatsBentoProps) {
+export function StatsBento({ courseCount, completedLessons, totalLessons, progressPercent, lang = "it" }: StatsBentoProps) {
+  const t = getUiTranslations(lang);
+
+  // Pluralization for the courseCount label: 0 → zero, 1 → one, >1 → many
+  const coursesLabel =
+    courseCount === 0
+      ? t.dashStatsCoursesZero
+      : courseCount === 1
+      ? t.dashStatsCoursesOne
+      : uiT(t, "dashStatsCoursesMany", { n: courseCount });
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-5">
       {/* Main progress card — cream on dark, high contrast */}
@@ -16,7 +28,7 @@ export function StatsBento({ courseCount, completedLessons, totalLessons, progre
         <div className="flex items-start justify-between mb-6">
           <div>
             <p className="text-[10px] font-semibold text-cream-text-soft uppercase tracking-widest mb-2">
-              Il Tuo Progresso
+              {t.dashStatsProgressHeader}
             </p>
             <p className="font-serif text-5xl text-cream-text leading-none tabular-nums">
               {progressPercent}
@@ -32,13 +44,15 @@ export function StatsBento({ courseCount, completedLessons, totalLessons, progre
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-cream-gold" />
             <span>
-              <strong className="text-cream-text font-semibold">{completedLessons}</strong> lezioni completate
+              <strong className="text-cream-text font-semibold">{completedLessons}</strong>{" "}
+              {uiT(t, "dashStatsLessonsCompleted", { n: completedLessons })}
             </span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-cream-border" />
             <span>
-              <strong className="text-cream-text font-semibold">{totalLessons}</strong> totali
+              <strong className="text-cream-text font-semibold">{totalLessons}</strong>{" "}
+              {t.dashStatsTotalLabel}
             </span>
           </div>
         </div>
@@ -50,15 +64,11 @@ export function StatsBento({ courseCount, completedLessons, totalLessons, progre
           <BookOpen className="w-5 h-5 text-cream-orange" />
         </div>
         <p className="text-[10px] font-semibold text-cream-text-soft uppercase tracking-widest mb-2">
-          I Tuoi Corsi
+          {t.dashStatsCoursesHeader}
         </p>
         <p className="font-serif text-4xl text-cream-text leading-none mb-2 tabular-nums">{courseCount}</p>
         <p className="text-xs text-cream-text-soft font-light">
-          {courseCount === 0
-            ? "Inizia il tuo primo corso"
-            : courseCount === 1
-            ? "1 corso attivo"
-            : `${courseCount} corsi attivi`}
+          {coursesLabel}
         </p>
       </div>
     </div>

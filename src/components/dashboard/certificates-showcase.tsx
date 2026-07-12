@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { Award, ArrowRight } from "lucide-react";
+import { getUiTranslations } from "@/lib/i18n";
 
 interface CertificatesShowcaseProps {
   certificates: { productId: string; slug: string }[];
+  lang?: string;
 }
 
-export function CertificatesShowcase({ certificates }: CertificatesShowcaseProps) {
+export function CertificatesShowcase({ certificates, lang = "it" }: CertificatesShowcaseProps) {
+  const t = getUiTranslations(lang);
   if (certificates.length === 0) return null;
 
   return (
@@ -15,9 +18,9 @@ export function CertificatesShowcase({ certificates }: CertificatesShowcaseProps
           <Award className="w-5 h-5 text-cream-dark-gold" />
         </div>
         <div>
-          <h2 className="font-serif text-2xl text-cream-dark-text leading-tight">I Tuoi Certificati</h2>
+          <h2 className="font-serif text-2xl text-cream-dark-text leading-tight">{t.dashCertHeader}</h2>
           <p className="text-xs text-cream-dark-text-soft font-light">
-            Scarica e condividi i tuoi traguardi
+            {t.dashCertSub}
           </p>
         </div>
       </div>
@@ -45,7 +48,7 @@ export function CertificatesShowcase({ certificates }: CertificatesShowcaseProps
                   {cert.slug.replace(/-/g, " ")}
                 </h3>
                 <p className="text-[10px] text-cream-dark-text-soft font-medium uppercase tracking-wider mt-1">
-                  Certificato Disponibile
+                  {t.dashCertAvailable}
                 </p>
               </div>
               <ArrowRight className="w-4 h-4 text-cream-dark-gold group-hover:translate-x-1 transition-transform" />

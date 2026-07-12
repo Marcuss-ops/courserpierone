@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { BookOpen, Users, Play, Search, X, ArrowRight } from "lucide-react";
+import { getUiTranslations, uiT } from "@/lib/i18n";
 
 export interface DiscoveryCourse {
   id: string;
@@ -25,18 +26,17 @@ interface DiscoveryGridProps {
 }
 
 export function DiscoveryGrid({ courses, categories, locale }: DiscoveryGridProps) {
+  const t = getUiTranslations(locale ?? "it");
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const filteredCourses = useMemo(() => {
     let result = courses;
 
-    // Filter by category
     if (activeCategory) {
       result = result.filter((c) => c.category === activeCategory);
     }
 
-    // Filter by search query
     const q = search.trim().toLowerCase();
     if (q) {
       result = result.filter(
@@ -50,31 +50,35 @@ export function DiscoveryGrid({ courses, categories, locale }: DiscoveryGridProp
     return result;
   }, [courses, activeCategory, search]);
 
+  const coursesCountLabel =
+    courses.length === 1
+      ? uiT(t, "discCoursesCountOne", { n: courses.length })
+      : uiT(t, "discCoursesCountMany", { n: courses.length });
+
   return (
     <section className="pb-20">
       {/* Section header */}
       <div className="flex items-center justify-between mb-6 pb-4 border-b border-black/[0.08]">
         <div>
           <h2 className="text-[24px] font-semibold tracking-tight text-black">
-            Discovery
+            {t.discHeader}
           </h2>
           <p className="text-[14px] text-black/50 mt-1">
-            {courses.length} course{courses.length !== 1 ? "s" : ""} available
+            {coursesCountLabel}
           </p>
         </div>
       </div>
 
       {courses.length === 0 ? (
-        /* Empty state */
         <div className="text-center py-20 border border-dashed border-black/10 rounded-2xl">
           <div className="w-16 h-16 rounded-full bg-black/5 flex items-center justify-center mx-auto mb-5">
             <BookOpen className="w-7 h-7 text-black/30" />
           </div>
           <h3 className="text-[18px] font-medium text-black/70 mb-2">
-            No courses yet
+            {t.discNoCourses}
           </h3>
           <p className="text-[15px] font-light text-black/40 max-w-sm mx-auto">
-            New courses are being created. Check back soon for exciting content.
+            {t.discNoCoursesBody}
           </p>
         </div>
       ) : (
@@ -86,14 +90,14 @@ export function DiscoveryGrid({ courses, categories, locale }: DiscoveryGridProp
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search courses..."
+              placeholder={t.discSearchPlaceholder}
               className="w-full pl-11 pr-10 py-3.5 bg-white border border-black/[0.08] rounded-xl text-[15px] font-light text-black placeholder:text-black/30 focus:outline-none focus:border-black/20 focus:ring-1 focus:ring-black/[0.06] transition-all"
             />
             {search && (
               <button
                 onClick={() => setSearch("")}
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-black/5 transition-colors"
-                aria-label="Clear search"
+                aria-label={t.pwaCloseAria /* generic close */}
               >
                 <X className="w-4 h-4 text-black/40" />
               </button>
@@ -111,7 +115,7 @@ export function DiscoveryGrid({ courses, categories, locale }: DiscoveryGridProp
                     : "bg-white text-black/60 border-black/[0.08] hover:border-black/20 hover:text-black/80"
                 }`}
               >
-                All
+                {t.discAllFilter}
               </button>
               {categories.map((cat) => (
                 <button
@@ -136,7 +140,7 @@ export function DiscoveryGrid({ courses, categories, locale }: DiscoveryGridProp
             <div className="text-center py-16 border border-dashed border-black/10 rounded-2xl">
               <Search className="w-8 h-8 text-black/20 mx-auto mb-3" />
               <p className="text-[15px] text-black/40 font-light">
-                No courses match your search.
+                {t.discNoMatch}
               </p>
               <button
                 onClick={() => {
@@ -145,7 +149,7 @@ export function DiscoveryGrid({ courses, categories, locale }: DiscoveryGridProp
                 }}
                 className="mt-3 text-[13px] text-black/50 underline underline-offset-2 hover:text-black/70 transition-colors"
               >
-                Clear filters
+                {t.discClearFilters}
               </button>
             </div>
           ) : (
@@ -174,7 +178,7 @@ export function DiscoveryGrid({ courses, categories, locale }: DiscoveryGridProp
                     <div className="absolute top-3 right-3">
                       {course.owned ? (
                         <span className="inline-block bg-green-500 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-sm">
-                          ✓ Acquistato
+                          {t.discOwnedBadge}
                         </span>
                       ) : (
                         <span className="inline-block bg-white/90 backdrop-blur-sm text-black text-[12px] font-semibold px-3 py-1 rounded-full shadow-sm">
@@ -206,15 +210,17 @@ export function DiscoveryGrid({ courses, categories, locale }: DiscoveryGridProp
                       <div className="flex items-center gap-1.5 text-[12px] text-black/40">
                         <Users className="w-3.5 h-3.5" />
                         <span>
-                          {course.studentCount} student
-                          {course.studentCount !== 1 ? "s" : ""}
+                          {course.studentCount === 1
+                            ? uiT(t, "discStudentCountOne", { n: course.studentCount })
+                            : uiT(t, "discStudentCountMany", { n: course.studentCount })}
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5 text-[12px] text-black/40">
                         <Play className="w-3.5 h-3.5" />
                         <span>
-                          {course.lessonCount} lesson
-                          {course.lessonCount !== 1 ? "s" : ""}
+                          {course.lessonCount === 1
+                            ? uiT(t, "discLessonCountOne", { n: course.lessonCount })
+                            : uiT(t, "discLessonCountMany", { n: course.lessonCount })}
                         </span>
                       </div>
                     </div>
@@ -225,7 +231,7 @@ export function DiscoveryGrid({ courses, categories, locale }: DiscoveryGridProp
                         href={course.portalUrl}
                         className="mt-3 flex items-center justify-center gap-2 w-full py-2.5 bg-green-600 hover:bg-green-700 text-white text-[13px] font-semibold rounded-lg transition-colors"
                       >
-                        Accedi al corso
+                        {t.discAccessCta}
                         <ArrowRight className="w-4 h-4" />
                       </Link>
                     )}

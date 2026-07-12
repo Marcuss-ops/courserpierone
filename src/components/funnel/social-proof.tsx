@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ShoppingBag, BookOpen } from "lucide-react";
+import { getUiTranslations, interpolate } from "@/lib/i18n";
 
 interface SocialProofEvent {
   id: string;
@@ -19,64 +20,29 @@ interface SocialProofProps {
   locale: string;
 }
 
-// Localized message formats
-const MESSAGES: Record<string, { purchase: string; lesson: string; justNow: string; minsAgo: string; hoursAgo: string }> = {
-  it: {
-    purchase: "{name} da {city} ha acquistato il corso",
-    lesson: "{name} da {city} ha completato la lezione: {lessonTitle}",
-    justNow: "proprio ora",
-    minsAgo: "{n} minuti fa",
-    hoursAgo: "{n} ore fa",
-  },
-  en: {
-    purchase: "{name} from {city} purchased the course",
-    lesson: "{name} from {city} completed the lesson: {lessonTitle}",
-    justNow: "just now",
-    minsAgo: "{n} minutes ago",
-    hoursAgo: "{n} hours ago",
-  },
-  da: {
-    purchase: "{name} fra {city} købte kurset",
-    lesson: "{name} fra {city} fuldførte lektionen: {lessonTitle}",
-    justNow: "lige nu",
-    minsAgo: "{n} minutter siden",
-    hoursAgo: "{n} timer siden",
-  },
-  ru: {
-    purchase: "{name} из г. {city} приобрёл курс",
-    lesson: "{name} из г. {city} завершил урок: {lessonTitle}",
-    justNow: "только что",
-    minsAgo: "{n} мин. назад",
-    hoursAgo: "{n} ч. назад",
-  },
-  es: {
-    purchase: "{name} de {city} compró el curso",
-    lesson: "{name} de {city} completó la lección: {lessonTitle}",
-    justNow: "ahora mismo",
-    minsAgo: "hace {n} minutos",
-    hoursAgo: "hace {n} horas",
-  },
-  fr: {
-    purchase: "{name} de {city} a acheté le cours",
-    lesson: "{name} de {city} a terminé la leçon : {lessonTitle}",
-    justNow: "à l'instant",
-    minsAgo: "il y a {n} minutes",
-    hoursAgo: "il y a {n} heures",
-  },
-  de: {
-    purchase: "{name} aus {city} hat den Kurs gekauft",
-    lesson: "{name} aus {city} hat die Lektion abgeschlossen: {lessonTitle}",
-    justNow: "gerade eben",
-    minsAgo: "vor {n} Minuten",
-    hoursAgo: "vor {n} Stunden",
-  },
-  pt: {
-    purchase: "{name} de {city} comprou o curso",
-    lesson: "{name} de {city} concluiu a lição: {lessonTitle}",
-    justNow: "agora mesmo",
-    minsAgo: "há {n} minutos",
-    hoursAgo: "há {n} horas",
-  },
+const FALLBACK_EVENTS: Record<string, SocialProofEvent[]> = {
+  it: [
+    { id: "mock-1", type: "purchase", name: "Futurimilionariposta", city: "Roma" },
+    { id: "mock-2", type: "lesson", name: "Elena", city: "Madrid", lessonTitle: "Introduzione e Setup" },
+    { id: "mock-3", type: "purchase", name: "Lucas", city: "Parigi" },
+    { id: "mock-4", type: "lesson", name: "Sofia", city: "Bologna", lessonTitle: "I Primi Passi" },
+    { id: "mock-5", type: "purchase", name: "Thomas", city: "Berlino" },
+    { id: "mock-6", type: "purchase", name: "Diego", city: "San Paolo" },
+    { id: "mock-7", type: "lesson", name: "Emma", city: "Londra", lessonTitle: "Budget Amish" },
+    { id: "mock-8", type: "purchase", name: "Dmitry", city: "Mosca" },
+    { id: "mock-9", type: "purchase", name: "Yuki", city: "Tokyo" },
+    { id: "mock-10", type: "lesson", name: "Giulia", city: "Napoli", lessonTitle: "Dispensa Infinita" },
+  ],
+  en: [
+    { id: "mock-1", type: "purchase", name: "James", city: "New York" },
+    { id: "mock-2", type: "lesson", name: "Emma", city: "London", lessonTitle: "Introduction & Setup" },
+    { id: "mock-3", type: "purchase", name: "Michael", city: "Sydney" },
+    { id: "mock-4", type: "lesson", name: "Olivia", city: "Toronto", lessonTitle: "First Steps" },
+    { id: "mock-5", type: "purchase", name: "Lucas", city: "Paris" },
+    { id: "mock-6", type: "purchase", name: "Marco", city: "Milan" },
+    { id: "mock-7", type: "purchase", name: "Thomas", city: "Berlin" },
+    { id: "mock-8", type: "lesson", name: "Elena", city: "Madrid", lessonTitle: "Amish Budget" },
+  ],
 };
 
 export default function SocialProof({ productSlug, locale }: SocialProofProps) {
@@ -85,63 +51,28 @@ export default function SocialProof({ productSlug, locale }: SocialProofProps) {
   const [visible, setVisible] = useState(false);
 
   const lang = locale.split("-")[0]?.toLowerCase() || "en";
-  const translations = MESSAGES[lang] || MESSAGES.en;
+  const t = getUiTranslations(lang);
 
   // Format relative time strings
   const getRelativeTime = (dateStr?: string): string => {
-    if (!dateStr) return translations.justNow;
+    if (!dateStr) return t.socialJustNow;
     const diffMs = Date.now() - new Date(dateStr).getTime();
     const diffMins = Math.max(1, Math.floor(diffMs / (60 * 1000)));
 
     if (diffMins < 60) {
-      return translations.minsAgo.replace("{n}", String(diffMins));
+      return interpolate(t.socialMinsAgo, { n: diffMins });
     }
     const diffHours = Math.floor(diffMins / 60);
     if (diffHours < 24) {
-      return translations.hoursAgo.replace("{n}", String(diffHours));
+      return interpolate(t.socialHoursAgo, { n: diffHours });
     }
-    return translations.justNow;
+    return t.socialJustNow;
   };
 
-  // Simulated fallback events when DB is empty or clean
+  // Fetch social proof events from /api/social-proof (DB) with locale-specific
+  // fallback when DB is empty.
   const getFallbackEvents = (): SocialProofEvent[] => {
-    const itFallback: SocialProofEvent[] = [
-      { id: "mock-1", type: "purchase", name: "Futurimilionariposta", city: "Roma", timeString: "2 minuti fa" },
-      { id: "mock-2", type: "lesson", name: "Elena", city: "Madrid", lessonTitle: "Introduzione e Setup", timeString: "7 minuti fa" },
-      { id: "mock-3", type: "purchase", name: "Lucas", city: "Parigi", timeString: "14 minuti fa" },
-      { id: "mock-4", type: "lesson", name: "Sofia", city: "Bologna", lessonTitle: "I Primi Passi", timeString: "21 minuti fa" },
-      { id: "mock-5", type: "purchase", name: "Thomas", city: "Berlino", timeString: "35 minuti fa" },
-      { id: "mock-6", type: "purchase", name: "Diego", city: "San Paolo", timeString: "50 minuti fa" },
-      { id: "mock-7", type: "lesson", name: "Emma", city: "Londra", lessonTitle: "Budget Amish", timeString: "1 ora fa" },
-      { id: "mock-8", type: "purchase", name: "Dmitry", city: "Mosca", timeString: "2 ore fa" },
-      { id: "mock-9", type: "purchase", name: "Yuki", city: "Tokyo", timeString: "3 ore fa" },
-      { id: "mock-10", type: "lesson", name: "Giulia", city: "Napoli", lessonTitle: "Dispensa Infinita", timeString: "4 ore fa" },
-    ];
-    const enFallback: SocialProofEvent[] = [
-      { id: "mock-1", type: "purchase", name: "James", city: "New York", timeString: "5 mins ago" },
-      { id: "mock-2", type: "lesson", name: "Emma", city: "London", lessonTitle: "Introduction & Setup", timeString: "15 mins ago" },
-      { id: "mock-3", type: "purchase", name: "Michael", city: "Sydney", timeString: "32 mins ago" },
-      { id: "mock-4", type: "lesson", name: "Olivia", city: "Toronto", lessonTitle: "First Steps", timeString: "50 mins ago" },
-      { id: "mock-5", type: "purchase", name: "Lucas", city: "Paris", timeString: "1 hour ago" },
-      { id: "mock-6", type: "purchase", name: "Marco", city: "Milan", timeString: "2 hours ago" },
-      { id: "mock-7", type: "purchase", name: "Thomas", city: "Berlin", timeString: "3 hours ago" },
-      { id: "mock-8", type: "lesson", name: "Elena", city: "Madrid", lessonTitle: "Amish Budget", timeString: "4 hours ago" },
-    ];
-    const daFallback: SocialProofEvent[] = [
-      { id: "mock-1", type: "purchase", name: "Frederik", city: "København", timeString: "7 min. siden" },
-      { id: "mock-2", type: "lesson", name: "Ida", city: "Aarhus", lessonTitle: "Introduktion", timeString: "18 min. siden" },
-      { id: "mock-3", type: "purchase", name: "Thomas", city: "Berlin", timeString: "45 min. siden" },
-    ];
-    const ruFallback: SocialProofEvent[] = [
-      { id: "mock-1", type: "purchase", name: "Алексей", city: "Москва", timeString: "8 мин. назад" },
-      { id: "mock-2", type: "lesson", name: "Елена", city: "Санкт-Петербург", lessonTitle: "Введение", timeString: "20 мин. назад" },
-      { id: "mock-3", type: "purchase", name: "Дмитрий", city: "Казань", timeString: "1 ч. назад" },
-    ];
-
-    if (lang === "it") return itFallback;
-    if (lang === "da") return daFallback;
-    if (lang === "ru") return ruFallback;
-    return enFallback;
+    return FALLBACK_EVENTS[lang] ?? FALLBACK_EVENTS.en;
   };
 
   useEffect(() => {
@@ -169,7 +100,6 @@ export default function SocialProof({ productSlug, locale }: SocialProofProps) {
 
     const showNext = () => {
       const event = events[currentIndex];
-      // Format dynamic relative time for DB events
       const formattedEvent = {
         ...event,
         timeString: event.timeString || getRelativeTime(event.createdAt),
@@ -178,7 +108,6 @@ export default function SocialProof({ productSlug, locale }: SocialProofProps) {
       setCurrentEvent(formattedEvent);
       setVisible(true);
 
-      // Hide after 6 seconds
       setTimeout(() => {
         setVisible(false);
       }, 6000);
@@ -186,10 +115,7 @@ export default function SocialProof({ productSlug, locale }: SocialProofProps) {
       currentIndex = (currentIndex + 1) % events.length;
     };
 
-    // Initial trigger after 4 seconds
     const initialTimeout = setTimeout(showNext, 4000);
-
-    // Show new event every 16 seconds
     const interval = setInterval(showNext, 16000);
 
     return () => {
@@ -200,15 +126,14 @@ export default function SocialProof({ productSlug, locale }: SocialProofProps) {
 
   if (!currentEvent) return null;
 
-  // Format message text
+  // Format message text using the active locale's translation
   const messageText = currentEvent.type === "purchase"
-    ? translations.purchase
-      .replace("{name}", currentEvent.name)
-      .replace("{city}", currentEvent.city)
-    : translations.lesson
-      .replace("{name}", currentEvent.name)
-      .replace("{city}", currentEvent.city)
-      .replace("{lessonTitle}", currentEvent.lessonTitle || "");
+    ? interpolate(t.socialPurchase, { name: currentEvent.name, city: currentEvent.city })
+    : interpolate(t.socialLesson, {
+        name: currentEvent.name,
+        city: currentEvent.city,
+        lessonTitle: currentEvent.lessonTitle || "",
+      });
 
   return (
     <div

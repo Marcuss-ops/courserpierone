@@ -4,6 +4,7 @@ import { getStripe } from "@/lib/payment/stripe";
 import { env } from "@/lib/env";
 import { createCheckout } from "@lemonsqueezy/lemonsqueezy.js";
 import { CheckoutError } from "@/lib/errors";
+import { getUiTranslations } from "@/lib/i18n/ui-translations";
 
 export interface CheckoutProduct {
   id: string;
@@ -82,6 +83,12 @@ export class CheckoutService {
     const appUrl = env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
     const redirectUrl = `${appUrl}/${locale}/${product.slug}/download?lang=${locale}&order_id=[order_id]`;
 
+    // Localize Lemon Squeezy hosted-checkout receipt button text so ES/FR
+    // buyers see "Descargar tu libro" / "Téléchargez votre livre" instead of
+    // the previous hardcoded Italian. Falls back to IT via FALLBACK chain.
+    const lang = locale.split("-")[0];
+    const receiptButtonText = getUiTranslations(lang).dlTitle;
+
     const checkout = await createCheckout(storeId, variantId, {
       checkoutData: {
         email: userEmail || undefined,
@@ -90,7 +97,7 @@ export class CheckoutService {
       },
       productOptions: {
         redirectUrl,
-        receiptButtonText: "Scarica il tuo libro",
+        receiptButtonText,
         receiptLinkUrl: redirectUrl,
       },
       expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
