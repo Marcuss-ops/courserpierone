@@ -37,6 +37,16 @@ interface ChatViewProps {
   currentUserId: string;
   currentUserName: string;
   otherUser: OtherUser;
+  /**
+   * Fase 3.1: contesto opzionale. Quando lo studente atterra nella chat
+   * da una pagina lezione (es. ContactCreatorButton cliccato da
+   * /curso/[lessonId]), la URL passa `?lessonId=XYZ` e la route lo
+   * propaga. ChatView mostra un piccolo banner contestuale sopra la
+   * lista messaggi per ricordare da dove l'utente sta scrivendo.
+   * NB: V1 non iniettiamo nulla nel content dei messaggi — il contesto
+   * è solo UI-ornament. V2 potrebbe prefisso automatico del primo msg.
+   */
+  lessonId?: string;
 }
 
 const PAGE_SIZE = 50;
@@ -63,6 +73,7 @@ export function ChatView({
   currentUserId,
   currentUserName,
   otherUser,
+  lessonId,
 }: ChatViewProps) {
   const [messages, setMessages] = useState<MessageData[]>([]);
   const [input, setInput] = useState("");
@@ -264,6 +275,18 @@ export function ChatView({
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
+      {/* Fase 3.1 — Contesto lezione (banner). V1: copy generico (no
+          lessonId raw) per evitare UX scadente (mostrare un ID opaco
+          mentre l'utente ha appena visto il titolo sopra). V2 potrà
+          passare lessonTitle risolto via course config. */}
+      {lessonId && (
+        <div className="px-4 sm:px-6 pt-3 pb-1">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cream-dark-gold/10 border border-cream-dark-gold/20 text-[11px] font-medium text-cream-dark-gold">
+            <span>Contesto lezione attiva</span>
+          </div>
+        </div>
+      )}
+
       {/* Messages area */}
       <div
         ref={scrollRef}

@@ -22,6 +22,8 @@ import { MobileSidebar } from "@/components/layout/mobile-sidebar";
 import { SidebarToggleBtn } from "@/components/layout/sidebar-toggle-btn";
 import { AccessGate } from "@/components/course/access-gate";
 import { loadLocaleContentSafe } from "@/lib/i18n/load-locale-content";
+import { ContactCreatorButton } from "@/components/chat/contact-creator-button";
+import { getDmContext } from "@/lib/messaging/get-dm-context";
 
 export async function generateMetadata({
   params,
@@ -92,8 +94,16 @@ export default async function CoursePage({
 
   if (!course) return notFound();
 
-  const { user } = await getServerUser();
+  const { user, dbUser } = await getServerUser();
   const isAuthenticated = !!user?.email;
+
+  // Fase 3.1: recupera creator (admin) + product per il bottone DM.
+  // Stessa logica di /portal/page.tsx — riusa getDmContext helper
+  // (single source of truth Fase 3.1).
+  const { creator, product: lessonProduct } = await getDmContext(
+    domain,
+    isAuthenticated && dbUser?.role !== "admin",
+  );
 
   const currentLang = lang || course.defaultLanguage || "en";
   const content = course.languages[currentLang] || course.languages[course.defaultLanguage] || Object.values(course.languages)[0];
@@ -199,17 +209,28 @@ export default async function CoursePage({
                     </div>
                   </div>
 
+                  {/* Fase 3.1: bottone "Contatta il creator" accanto alle
+                      azioni della lezione. lessonId propagato come contesto;
+                      ChatView mostrerà il banner "Contesto: Lezione XYZ". */}
                   <div className="flex flex-wrap gap-4">
-                    <LessonAssets 
-                      lessonId={currentLesson.id} 
-                      locale={currentLang} 
+                    <LessonAssets
+                      lessonId={currentLesson.id}
+                      locale={currentLang}
                       isAuthenticated={isAuthenticated}
                     />
-                    <LessonProgressButton 
-                      lessonId={currentLesson.id} 
-                      productSlug={domain} 
+                    <LessonProgressButton
+                      lessonId={currentLesson.id}
+                      productSlug={domain}
                       isAuthenticated={isAuthenticated}
                     />
+                    {isAuthenticated && dbUser && creator && lessonProduct?.id && (
+                      <ContactCreatorButton
+                        creatorId={creator.id}
+                        productId={lessonProduct.id}
+                        currentUserId={dbUser.id}
+                        lessonId={currentLesson.id}
+                      />
+                    )}
                   </div>
                 </div>
               </div>

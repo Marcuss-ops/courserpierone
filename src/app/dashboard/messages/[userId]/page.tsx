@@ -19,12 +19,17 @@ export const dynamic = "force-dynamic";
 
 interface ChatPageProps {
   params: Promise<{ userId: string }>;
-  searchParams: Promise<{ productId?: string }>;
+  /**
+   * Fase 3.1: lessonId opzionale per passare il contesto lezione a
+   * ChatView (mostra banner "Contesto: Lezione XYZ"). Originato dal
+   * bottone ContactCreatorButton nelle pagine lezione (/curso/[lessonId]).
+   */
+  searchParams: Promise<{ productId?: string; lessonId?: string }>;
 }
 
 export default async function ConversationPage({ params, searchParams }: ChatPageProps) {
   const { userId } = await params;
-  const { productId } = await searchParams;
+  const { productId, lessonId } = await searchParams;
   const { user, dbUser } = await getServerUser();
 
   if (!user?.email || !dbUser) {
@@ -169,6 +174,7 @@ export default async function ConversationPage({ params, searchParams }: ChatPag
         currentUserId={dbUser.id}
         currentUserName={dbUser.name || dbUser.email?.split("@")[0] || "Tu"}
         otherUser={otherUser}
+        lessonId={lessonId}
       />
     </div>
   );

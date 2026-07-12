@@ -15,10 +15,8 @@ import { getCourseConfig } from "@/lib/config/white-label-data";
 import { AccessGate } from "@/components/course/access-gate";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { loadLocaleContentCached } from "@/lib/i18n/load-locale-content";
-import { prisma } from "@/lib/db/prisma";
-import nextDynamic from "next/dynamic";
-
-const ChatModal = nextDynamic(() => import("@/components/chat/chat-modal").then(m => ({ default: m.ChatModal })));
+import { ContactCreatorButton } from "@/components/chat/contact-creator-button";
+import { getDmContext } from "@/lib/messaging/get-dm-context";
 
 export async function generateMetadata({
   params,
@@ -89,18 +87,12 @@ export default async function ProductPortalPage({
   const isAuthenticated = !!user?.email;
 
   // ── Trova il creator (admin) e il product ID per i DM ──
-  const [creator, product] = isAuthenticated && dbUser?.role !== "admin"
-    ? await Promise.all([
-        prisma.user.findFirst({
-          where: { role: "admin" },
-          select: { id: true, name: true },
-        }),
-        prisma.product.findUnique({
-          where: { slug: domain },
-          select: { id: true },
-        }),
-      ])
-    : [null, null];
+  // Fase 3.1: dedupato in getDmContext helper (single source of truth).
+  // Skip query quando viewer è admin o non autenticato (gate check-in).
+  const { creator, product } = await getDmContext(
+    domain,
+    isAuthenticated && dbUser?.role !== "admin",
+  );
 
   const currentLang = lang || course.defaultLanguage || "en";
   const content = course.languages[currentLang] || course.languages[course.defaultLanguage];
@@ -309,14 +301,16 @@ export default async function ProductPortalPage({
           </div>
 
           {/* DM: Scrivi al creator — visibile solo a studenti autenticati */}
-          {isAuthenticated && dbUser && creator && (
+          {/* Fase 3.1: sostituisce il vecchio ChatModal in-page con un
+              link diretto alla inbox unificata /dashboard/messages/[creatorId].
+              Lo studente atterra nella chat view canonica con productId
+              nell'URL (Fase 3.3 read-side guard). lessonId non serve qui. */}
+          {isAuthenticated && dbUser && creator && product?.id && (
             <div className="flex justify-center pt-4 border-t border-zinc-100">
-              <ChatModal
-                currentUserId={dbUser.id}
-                currentUserName={dbUser.name || "Studente"}
+              <ContactCreatorButton
                 creatorId={creator.id}
-                creatorName={creator.name || course.author}
-                productId={product?.id || undefined}
+                productId={product.id}
+                currentUserId={dbUser.id}
               />
             </div>
           )}
