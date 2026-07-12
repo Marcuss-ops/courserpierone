@@ -6,6 +6,7 @@ import { createHmac } from "crypto";
 import { prisma } from "./src/lib/db/prisma";
 import { messageBroker, NEW_MESSAGE, type NewMessageEvent } from "./src/lib/ws/broker";
 import { deliverNewMessage, deliverInboxUpdate } from "./src/lib/ws/broadcast";
+import { resolveMessagingPermission, MessagingDenyReason } from "./src/lib/messaging/resolve-message-permission";
 
 /**
  * Fase 5: tipo di WS che ha passato l'upgrade handler.
@@ -158,13 +159,18 @@ app.prepare().then(() => {
 
     const { userId } = verified;
 
-    // DB membership check.
+    // DB membership + resolver check (Fase 2.0 wire).
+    // 1. Look up Conversation per (userOneId, userTwoId, productId).
+    // 2. Membership precheck inline (fast-fail prima del resolver).
+    // 3. Delegate to resolveMessagingPermission per la policy canonica.
+    // Il resolver riapre le query Product + Order.completed — accettabile
+    // perché il WS è long-lived (1 round-trip per upgrade, non per poll).
     prisma.conversation
       .findUnique({
         where: { id: conversationId },
-        select: { userOneId: true, userTwoId: true },
+        select: { userOneId: true, userTwoId: true, productId: true },
       })
-      .then((conv) => {
+      .then(async (conv) => {
         if (!conv) {
           socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
           socket.destroy();
@@ -175,6 +181,26 @@ app.prepare().then(() => {
           console.log(
             `[ws] Upgrade refused: conversation membership (user=${userId}, conv=${conversationId})`,
           );
+          socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
+          socket.destroy();
+          return;
+        }
+
+        // ── Fase 2.0 (wire): delega al resolver single-source-of-truth ──
+        const partnerId =
+          conv.userOneId === userId ? conv.userTwoId : conv.userOneId;
+        const permission = await resolveMessagingPermission({
+          actorId: userId,
+          targetId: partnerId,
+          productId: conv.productId,
+        });
+        if (!permission.allowed) {
+          console.log(
+            `[ws] Upgrade refused: resolver deny (user=${userId}, conv=${conversationId}, reason=${permission.reason ?? MessagingDenyReason.NoCompletedOrderForStudent})`,
+          );
+          // 403 per deny canonico. ProductNotFound/NoCreatorForProduct
+          // sarebbero 404/409 nel path API ma la WS upgrade handshake
+          // usa solo 403 + socket close; i dettagli sono nel log.
           socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
           socket.destroy();
           return;
