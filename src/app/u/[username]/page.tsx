@@ -145,6 +145,7 @@ export default async function PublicProfilePage({
   const ONLINE_THRESHOLD = 5 * 60 * 1000; // 5 minutes
   const isOnline =
     profileUser.lastSeenAt != null &&
+    // eslint-disable-next-line react-hooks/purity -- server component, no React render lifecycle (no useState/Effect); Date.now() runs once per request
     Date.now() - profileUser.lastSeenAt.getTime() < ONLINE_THRESHOLD;
 
   // ── Course progress ──────────────────────────────────
