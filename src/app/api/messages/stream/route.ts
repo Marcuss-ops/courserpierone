@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { authorizeDmRequest } from "@/lib/messaging/api-authorize";
+import { getPartnerId } from "@/lib/messaging/get-partner-id";
 
 /**
  * GET /api/messages/stream?conversationId=<id>&since=<ISO timestamp>
@@ -75,10 +76,10 @@ export async function GET(request: NextRequest) {
   // corretto dal deny mapping di api-authorize (404 ProductNotFound,
   // 403 NoCompletedOrderForStudent, 409 NoCreatorForProduct, ecc.)
   // per propagarlo in avanti senza reimplementare la matrice.
-  const targetId =
-    conversation.userOneId === dbUser.id
-      ? conversation.userTwoId
-      : conversation.userOneId;
+  //
+  // Phase 2.0 V2: usa `getPartnerId` helper per DRY (la stessa
+  // logica lives in server.ts al WS upgrade handler — estratta).
+  const targetId = getPartnerId(conversation, dbUser.id);
 
   const auth = await authorizeDmRequest({
     actorId: dbUser.id,
@@ -89,10 +90,19 @@ export async function GET(request: NextRequest) {
     // Restituiamo lo status code dal NextResponse del resolver
     // (rango 400/403/404/409) come `Response` plain text. L'SSE non
     // parte: il client vede il reject immediato.
-    return new Response(
-      `Forbidden (Fase 2.0 resolver: ${auth.permission.reason ?? "DM_DENIED"})`,
-      { status: auth.response.status },
-    );
+    //
+    // Phase 2.0 V2: rimuoviamo il leak del `reason` interno (es.
+    // "no_completed_order_for_student"). Il reason è fingerprinting-
+    // prone e non deve mai uscire dal boundary API. Il client può
+    // discriminare 403 vs 404 vs 409 dallo status code, ma le
+    // stringhe interne sono mapping-only.
+    const denyText =
+      auth.response.status === 404
+        ? "Not found"
+        : auth.response.status === 409
+          ? "Conflict"
+          : "Forbidden";
+    return new Response(denyText, { status: auth.response.status });
   }
 
   const since = sinceRaw ? new Date(sinceRaw) : new Date(0);

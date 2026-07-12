@@ -7,6 +7,7 @@ import { prisma } from "./src/lib/db/prisma";
 import { messageBroker, NEW_MESSAGE, type NewMessageEvent } from "./src/lib/ws/broker";
 import { deliverNewMessage, deliverInboxUpdate } from "./src/lib/ws/broadcast";
 import { resolveMessagingPermission, MessagingDenyReason } from "./src/lib/messaging/resolve-message-permission";
+import { getPartnerId } from "./src/lib/messaging/get-partner-id";
 
 /**
  * Fase 5: tipo di WS che ha passato l'upgrade handler.
@@ -187,8 +188,11 @@ app.prepare().then(() => {
         }
 
         // ── Fase 2.0 (wire): delega al resolver single-source-of-truth ──
-        const partnerId =
-          conv.userOneId === userId ? conv.userTwoId : conv.userOneId;
+        // Phase 2.0 V2: usa `getPartnerId` helper per DRY (la stessa
+        // logica è in src/app/api/messages/stream/route.ts al SSE
+        // auth wiring — estratta per garantire che entrambi i path
+        // concordino sull'identità del partner canonical pair).
+        const partnerId = getPartnerId(conv, userId);
         const permission = await resolveMessagingPermission({
           actorId: userId,
           targetId: partnerId,

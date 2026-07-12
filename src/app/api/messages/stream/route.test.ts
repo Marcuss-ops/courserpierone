@@ -133,7 +133,7 @@ describe("GET /api/messages/stream", () => {
     expect(mockAuthorizeDmRequest).not.toHaveBeenCalled();
   });
 
-  it("returns 403 when resolver denies (NoCompletedOrderForStudent → status 403)", async () => {
+  it("returns 403 when resolver denies (NoCompletedOrderForStudent → status 403, NO reason leak)", async () => {
     setDefaultAuthorizeAllowed(PRODUCT, SELF, OTHER);
     mockAuthorizeDmRequest.mockResolvedValueOnce({
       allowed: false,
@@ -152,13 +152,19 @@ describe("GET /api/messages/stream", () => {
     const { GET } = await import("./route");
     const res = await GET(createRequest(`/api/messages/stream?conversationId=${CONV_ID}`));
     expect(res.status).toBe(403);
-    expect(await res.text()).toContain("no_completed_order_for_student");
+    // Phase 2.0 V2: il reason interno NON deve essere nel body (no
+    // fingerprinting). Solo "Forbidden" plain text + status code.
+    const body = await res.text();
+    expect(body).toBe("Forbidden");
+    expect(body).not.toContain("no_completed_order_for_student");
+    expect(body).not.toContain("Fase 2.0");
     expect(mockAuthorizeDmRequest).toHaveBeenCalledTimes(1);
   });
 
-  it("returns 404 when resolver denies (ProductNotFound → status 404 from api-authorize)", async () => {
+  it("returns 404 when resolver denies (ProductNotFound → status 404, body says 'Not found')", async () => {
     // L'api-authorize mapping per ProductNotFound → 404. Verifica che lo
-    // status code del deny venga propagato correttamente al client SSE.
+    // status code del deny venga propagato correttamente al client SSE,
+    // e che il body sia generico ("Not found") senza leak del reason.
     mockAuthorizeDmRequest.mockResolvedValueOnce({
       allowed: false,
       permission: {
@@ -174,7 +180,9 @@ describe("GET /api/messages/stream", () => {
     const { GET } = await import("./route");
     const res = await GET(createRequest(`/api/messages/stream?conversationId=${CONV_ID}`));
     expect(res.status).toBe(404);
-    expect(await res.text()).toContain("product_not_found");
+    const body = await res.text();
+    expect(body).toBe("Not found");
+    expect(body).not.toContain("product_not_found");
   });
 
   it("passes {actorId=me, targetId=partner, productId=conversation.productId} to authorizeDmRequest", async () => {
@@ -231,5 +239,52 @@ describe("GET /api/messages/stream", () => {
     expect(res.status).toBe(200);
     expect(res.headers.get("Content-Type")).toMatch(/text\/event-stream/);
     expect(res.headers.get("Cache-Control")).toMatch(/no-cache/);
+  });
+
+  // ─── Phase 2.0 V2: ?since parameter coverage ─────────────────
+  // NB: il `poll()` del SSE stream è schedulato via `setTimeout(poll, 500)`.
+  // I test usano `vi.useFakeTimers()` + `vi.advanceTimersByTimeAsync(500)`
+  // per triggereare il primo ciclo di poll sincronamente, così le
+  // assertions su `prisma.message.findMany` hanno materiale da
+  // verificare (altrimenti la risposta si chiude prima che il poll
+  // parta).
+  it("passes parsed `since` Date to message.findMany when ?since=<ISO> is provided", async () => {
+    vi.useFakeTimers();
+    const SINCE_ISO = "2024-06-15T12:00:00.000Z";
+    const expectedSince = new Date(SINCE_ISO);
+    try {
+      const { GET } = await import("./route");
+      const res = await GET(
+        createRequest(
+          `/api/messages/stream?conversationId=${CONV_ID}&since=${encodeURIComponent(SINCE_ISO)}`,
+        ),
+      );
+      expect(res.status).toBe(200);
+      // Triggera il primo poll (schedulato a 500ms post stream.start).
+      await vi.advanceTimersByTimeAsync(500);
+      expect(mockPrisma.message.findMany).toHaveBeenCalled();
+      const firstCall = mockPrisma.message.findMany.mock.calls[0][0];
+      expect(firstCall.where.conversationId).toBe(CONV_ID);
+      expect(firstCall.where.createdAt).toMatchObject({ gt: expectedSince });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("defaults `since` to epoch (Date(0)) when ?since is absent", async () => {
+    vi.useFakeTimers();
+    try {
+      const { GET } = await import("./route");
+      const res = await GET(createRequest(`/api/messages/stream?conversationId=${CONV_ID}`));
+      expect(res.status).toBe(200);
+      await vi.advanceTimersByTimeAsync(500);
+      expect(mockPrisma.message.findMany).toHaveBeenCalled();
+      const firstCall = mockPrisma.message.findMany.mock.calls[0][0];
+      // `gt: new Date(0)` = epoch 1970-01-01 — copertura totale per
+      // una SSE che si connette senza snapshot precedente.
+      expect(firstCall.where.createdAt).toMatchObject({ gt: new Date(0) });
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
