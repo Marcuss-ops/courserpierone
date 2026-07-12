@@ -46,9 +46,15 @@ The full map is in [content-source-map.md](../content-source-map.md) §1. Summar
 | `sync-local-config.ts` | W | — | — | R |
 | `sync-data-to-config.ts` | — | — | — | W |
 | `extract-locales.ts` | — | — | R | — |
-| **Totals** | **1 R, 2 W, 1 R+W** | **0** | **2 R, 2 W, 1 R+W** | **3 R, 2 W, 0 R+W** |
+| **Totals (consumer-interactions)** | **1 R, 2 W, 1 R+W** | **0** | **2 R, 2 W, 1 R+W** | **3 R, 2 W, 0 R+W** |
 
-*(Key: R = Read, W = Write. See narrative below for runtime limitations like Vercel read-only FS.)*
+*(Key: R = Read, W = Write, R+W = read + write at the same call site. See narrative below for runtime limitations like Vercel read-only FS.)*
+
+**Notes on scope and semantics:**
+
+- † The `R` cell for `generate-course-config.ts` on `ProductTranslation` is **transitive** — it's read via Prisma's `include: { translations: true }` on `product.findUnique` (line 53-57), not a direct `prisma.productTranslation.*` call. The cell is included to surface the data dependency, but removing the `translations` include would break the regeneration flow, not just the matrix.
+- ‡ **Excluded by user scope:** `Lesson` / `LessonTranslation` are the canonical source of `CourseConfig.lessons[].videos[locale]` (see [content-source-map.md](../content-source-map.md) §2.5 and §2.5 of this ADR). They are **not** in the 4 sources the user asked to audit; including them in a future audit is a V2 candidate.
+- **Totals row math:** each `R`/`W`/`R+W` cell is a **consumer-interaction** (a single cell at one call site). A consumer with both R and W at the same call site (e.g., `admin/products/[id]/page.tsx` for PT) appears in the `R+W` column only — not double-counted in `R` and `W`.
 
 ### 2.1 `LandingTranslation` (Prisma model, `schema.prisma:369-399`)
 
@@ -230,4 +236,5 @@ These are content bundles (not config) and they are **generated FROM the DB** by
 
 - `0009-this-commit` — Initial ADR. Establishes the 6-step sequence and the SSOT/cache/data split.
 - **Matrix addition** — Added §2.0 consumer × source matrix (consolidated view) to address the specific "matrice consumer → sorgente" request.
+- **Matrix clarity fixes** — Renamed totals row to "Totals (consumer-interactions)" with explicit math note; added † footnote flagging the transitive `ProductTranslation` read in `generate-course-config.ts`; added ‡ footnote noting `Lesson` / `LessonTranslation` are out-of-scope but feed `lessons[].videos[locale]`.
 - Future updates should be diff-verifiable: `grep -rn 'landingTranslation\|LandingTranslation' src/` (must stay 0) + `grep -rn 'public/courses' src/` (must stay 0 after Step 4) + `grep -rn 'prisma.courseConfigCache.upsert' src/ scripts/` (must stay in `generate-course-config.ts` + `regenerate-cache.ts` only).
