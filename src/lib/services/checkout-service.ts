@@ -1,9 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
-import { env } from "@/lib/env";
 import { CheckoutError } from "@/lib/errors";
 import { paymentProviderRegistry } from "@/lib/commerce/payments/registry";
 import { lemonSqueezyProvider } from "@/lib/commerce/payments/providers/lemonsqueezy";
-import { legacyStripeProvider } from "@/lib/commerce/payments/providers/legacy/stripe";
 import type {
   CheckoutSession,
   CreateCheckoutInput,
@@ -26,25 +24,26 @@ type ResolvedPricing = CreateCheckoutInput["pricing"];
 /**
  * Phase 1 of MCR — provider registration.
  *
- * Both providers are registered exactly once at module-load. The
+ * Only LemonSqueezy is registered for new-session creation. The
  * registry throws on duplicate slug if this file is ever imported
  * twice (e.g., HMR) — that's a programmer error, surfaced loudly.
  *
- * In production the only active new-session provider is LemonSqueezy;
- * `legacyStripeProvider` is registered too but refuses actual checkout
- * creation when `ENABLE_STRIPE_CHECKOUT` is not 'true' (V1.5 fallback).
+ * Phase 7 cleanup: the legacy Stripe provider is no longer registered
+ * for new sessions. The `legacy/stripe/index.ts` file is kept around
+ * for the legacy webhook (`/api/webhooks/stripe/route.ts`) which
+ * still processes pre-cutover refund/dispute events, but no new
+ * checkout session is ever created via Stripe.
  */
 paymentProviderRegistry.register(lemonSqueezyProvider);
-paymentProviderRegistry.register(legacyStripeProvider);
 
 /**
  * CheckoutService — orchestrator (NOT provider).
  *
- * Responsibility split (Phase 1 of MCR):
- *   • Provider module (src/lib/commerce/payments/providers/<slug>/):
- *       owns the network call to the upstream payment provider.
+ * Responsibility split (Phase 1 of MCR + Phase 7 cleanup):
+ *   • Provider module (src/lib/commerce/payments/providers/lemonsqueezy):
+ *       owns the network call to the upstream payment provider (LS).
  *   • Orchestrator (this class):
- *       decides which provider runs (priority rules), captures the
+ *       delegates to the LS provider via the registry, captures the
  *       `AbandonedCheckout` row AFTER the URL has been generated
  *       (so abandoned carts are recovered even when checkout creation
  *       succeeds but the redirect is never followed), and shapes the
@@ -57,10 +56,10 @@ paymentProviderRegistry.register(legacyStripeProvider);
  */
 export class CheckoutService {
   async createCheckout(input: CreateCheckoutInput): Promise<CheckoutSession> {
-    // ─── Priority 1: Lemon Squeezy (preferred, primary MoR) ───────────
-    // When a product carries a `lemonVariantId`, LS wins regardless of
-    // the Stripe gate. This preserves the V1.5 contract documented in
-    // src/app/api/checkout/route.ts.
+    // ─── Lemon Squeezy (primary MoR) ─────────────────────────────
+    // Single active new-session provider as of Phase 7. A product
+    // without a `lemonVariantId` cannot be checked out — that's the
+    // correct V1.5+ contract: every product ships with an LS variant.
     if (input.pricing.lemonVariantId) {
       const session = await paymentProviderRegistry
         .get("lemonsqueezy")
@@ -75,33 +74,10 @@ export class CheckoutService {
       return session;
     }
 
-    // ─── Priority 2: Legacy Stripe fallback (V1.5 gated) ─────────────
-    // Only active when ENABLE_STRIPE_CHECKOUT=true AND the product has
-    // a stripePriceId. The provider itself enforces the gate — the
-    // route also gates upstream for diagnostic clarity on the failure
-    // path (`No provider available` gets a more specific message).
-    if (
-      env.ENABLE_STRIPE_CHECKOUT === "true" &&
-      input.pricing.stripePriceId
-    ) {
-      const session = await paymentProviderRegistry
-        .get("stripe")
-        .createCheckout(input);
-      await this.saveAbandonedCheckout({
-        product: input.product,
-        locale: input.locale,
-        userEmail: input.userEmail,
-        url: session.url,
-        provider: "stripe",
-      });
-      return session;
-    }
-
     // ─── Fallthrough: no provider could be selected ──────────────────
     throw new CheckoutError(
       "Nessun metodo di pagamento disponibile per questo prodotto. " +
-        "Configura un Lemon Squeezy variant ID (consigliato) oppure, per " +
-        "il fallback legacy Stripe, imposta ENABLE_STRIPE_CHECKOUT=true.",
+        "Configura un Lemon Squeezy variant ID sul prodotto (V1.5: LS è l'unico MoR per le nuove sessioni).",
     );
   }
 
@@ -125,6 +101,11 @@ export class CheckoutService {
     url: string;
     provider: "lemonsqueezy" | "stripe";
   }): Promise<void> {
+    // Phase 7: provider arg is now effectively always "lemonsqueezy"
+    // (Stripe new-session is removed). Keeping the union type for
+    // backward compat with the cron worker that still reads
+    // AbandonedCheckout.paymentProvider as a free-form string.
+    void input.provider;
     if (!input.userEmail) return;
 
     try {

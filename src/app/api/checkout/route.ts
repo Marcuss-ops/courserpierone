@@ -6,8 +6,7 @@ import { getCurrencyFromLocale } from "@/lib/i18n/locale-resolver";
 import { withRateLimit } from "@/lib/utils/rate-limit";
 import { PricingService } from "@/lib/services/pricing-service";
 import { CheckoutService } from "@/lib/services/checkout-service";
-import { NotFoundError, CheckoutError, apiErrorResponse } from "@/lib/errors";
-import { env } from "@/lib/env";
+import { NotFoundError, apiErrorResponse } from "@/lib/errors";
 
 const pricingService = new PricingService();
 const checkoutService = new CheckoutService();
@@ -50,24 +49,18 @@ export const POST = withRateLimit(async function POST(request: NextRequest) {
 
     pricingService.validateProvider(pricing);
 
-    // ── V1.5 defense-in-depth — Stripe legacy gate ─────────────────────────
-    // LS è già preferenziale in `CheckoutService.createCheckout`; questo guard
-    // aggiuntivo intercetta PRIMA il caso "solo StripePriceId + flag off" con
-    // un messaggio più diagnostico del generic "no provider configured" che
-    // emergerebbe dal fallback finale di CheckoutService. Identico di semantica
-    // al gate interno della service: nessuna nuova sessione Stripe viene
-    // avviata mentre ENABLE_STRIPE_CHECKOUT=false.
-    if (
-      pricing.stripePriceId &&
-      !pricing.lemonVariantId &&
-      env.ENABLE_STRIPE_CHECKOUT !== "true"
-    ) {
-      throw new CheckoutError(
-        "Stripe checkout temporaneamente disabilitato (V1.5: LS primario). " +
-          "Configura un Lemon Squeezy variant ID sul prodotto oppure " +
-          "imposta ENABLE_STRIPE_CHECKOUT=true per ripristinare il fallback legacy."
-      );
-    }
+    // Phase 7 cleanup: the Stripe legacy gate is removed. LS is the
+    // sole new-session provider as of V1.5+. The legacy Stripe webhook
+    // at /api/webhooks/stripe/route.ts is kept for processing
+    // pre-cutover refund/dispute events. ENABLE_STRIPE_CHECKOUT is
+    // still defined in env.ts (the legacy provider class still
+    // references it as a defense-in-depth check) but no caller
+    // exercises the new-session path anymore.
+    //
+    // If pricing.lemonVariantId is missing, CheckoutService.createCheckout
+    // throws a CheckoutError with a diagnostic message ("Nessun
+    // metodo di pagamento disponibile...") -- no need for an extra
+    // route-level gate here.
 
     const userEmail = user?.email ?? body.email ?? "";
 
