@@ -54,6 +54,11 @@ model Product {
   abandonedCheckouts AbandonedCheckout[]
   conversations      Conversation[]
 
+  // MCR Phase 2: back-pointer su AccessGrant. La relazione viene
+  // usata dal provider di resolver AccessGrant e da eventuali future
+  // query "tutti i grant attivi su questo prodotto".
+  accessGrants    AccessGrant[]      @relation("ProductAccessGrants")
+
   // Compound index per inbox creator queries che filtrano pubblicati.
   // Query tipica: ``WHERE creatorId = X AND status = 'published'`` —
   // il compound permette un B-tree seek diretto invece di un filter
@@ -160,6 +165,12 @@ model User {
   // Phase 1.2: prodotti di cui l'utente è creator.
   createdProducts Product[] @relation("CreatorProducts")
   lessonProgresses    LessonProgress[]
+
+  // MCR Phase 2: access grants unificano acquisti, free enrollment,
+  // admin grant, bundle inclusion. Il back-pointer `accessGrants`
+  // permette query `WHERE userId = X AND status='active'` per il
+  // resolver `resolve-product-access` (PR 3 of MCR).
+  accessGrants    AccessGrant[]      @relation("UserAccessGrants")
 }
 
 // ─── Progresso Lezioni (ripristinato post-fix schema-corrupt) ──
@@ -439,4 +450,44 @@ model Message {
 
   @@index([conversationId, createdAt])
   @@index([senderId])
+}
+
+// ─── AccessGrant (MCR Phase 2) ─────────────────────────────────────
+//
+// Unified access domain: paid orders, free enrollments, admin grants,
+// bundle inclusions. Replaces direct `Order.status='completed'` reads
+// in `resolve-message-permission.ts` and (forward) the course portal,
+// ebook downloads, lesson progress, certificates, dashboard.
+//
+// Migration `20260712230000_add_access_grants` creates this table
+// idempotently. The resolver cutover is feature-flagged in PR 3 of MCR.
+//
+// Composizione della chiave unica `@@unique([sourceType, sourceId,
+// productId])`:
+//   - sourceType ∈ { "order", "free_enrollment", "admin", "bundle" }
+//   - sourceId   = Order.id | enrollment_request.id | grant_audit.id | bundle.id
+//   - productId  = Product.id
+// La tripletà dedupa naturalmente sia i dual-write idempotenti (Order +
+// backfill script) sia i multi-grant legittimi (uno per sourceType).
+//
+// `ON DELETE RESTRICT` su User + Product: cancellare un utente o un
+// prodotto non deve far scomparire silenziosamente gli accessi.
+// Richiede uno script esplicito (vedi `scripts/products/backfill-
+// primary-creator.ts` per il pattern di recovery).
+model AccessGrant {
+  id         String   @id @default(cuid())
+  userId     String
+  productId  String
+  sourceType String   // "order" | "free_enrollment" | "admin" | "bundle"
+  sourceId   String
+  status     String   @default("active") // active | revoked | expired
+  grantedAt  DateTime @default(now())
+  revokedAt  DateTime?
+  expiresAt  DateTime?
+
+  user    User    @relation("UserAccessGrants", fields: [userId], references: [id], onDelete: Restrict)
+  product Product @relation("ProductAccessGrants", fields: [productId], references: [id], onDelete: Restrict)
+
+  @@unique([sourceType, sourceId, productId])
+  @@index([userId, productId, status])
 }

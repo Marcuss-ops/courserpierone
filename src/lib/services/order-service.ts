@@ -66,13 +66,29 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
   // ── 1. Find or create user ──────────────────────────────────
   let user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
+    // Guest checkout (no Supabase account). L'utente viene creato qui
+    // per la prima volta — Phase 1.2 addendum: valorizziamo
+    // preferredLocale dal parametro `locale` dell'ordine in modo che
+    // la successiva sendPurchaseConfirmation (e eventuali future DM)
+    // parlino la lingua giusta fin dal primo acquisto.
+    //
+    // Convenzione: memorizziamo il LINGUAGE-ONLY code ("it", "en",
+    // "fr", ...) prendendo il primo segmento. Coerente con il
+    // @default("en") di User.preferredLocale e con la catena di
+    // fallback di src/lib/services/email.ts. `locale` è required
+    // in ProcessOrderInput (mai null), nessun fallback defensivo
+    // necessario qui.
+    const signupLang = locale.split("-")[0]?.toLowerCase();
     user = await prisma.user.create({
       data: {
         email,
         name: customerName ?? email.split("@")[0],
+        preferredLocale: signupLang,
       },
     });
   }
+  // Update branch: NON sovrascrivere preferredLocale (snapshot al
+  // primo purchase, congelato fino a future V2 settings page).
 
   // ── 2. Resolve product ──────────────────────────────────────
   let product = null;
@@ -128,7 +144,7 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
   }
 
   // ── 4. Create order ─────────────────────────────────────────
-  await prisma.order.create({
+  const order = await prisma.order.create({
     data: {
       userId: user.id,
       productId: product.id,
@@ -142,6 +158,49 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
       status: "completed",
     },
   });
+
+  // ── 4b. MCR Phase 2 — dual-write AccessGrant ───────────────────
+  // The grant is the new source of truth for "is this user authorized
+  // to access this product". The resolver cutover (PR 3 of MCR) will
+  // swap `Order.status='completed'` reads to `AccessGrant.active` reads
+  // behind a feature flag `USE_ACCESS_GRANT_RESOLVER`.
+  //
+  // Idempotency strategy: upsert + @@unique([sourceType, sourceId,
+  // productId]). Concurrent retries and the explicit backfill
+  // (`scripts/migrate-grants-from-orders.ts`) are safe by construction
+  // — no `$transaction` needed. The Order is still authoritative until
+  // PR 3 ships, so a missed grant does NOT block the user (graceful
+  // degradation via the existing Order fallback in
+  // resolve-message-permission.ts).
+  //
+  // Failure tolerance: matches the existing patterns for analytics
+  // and abandoned-checkout — log loudly, do NOT throw. The consumers
+  // are the course portal / DM / downloads UI, none of which can
+  // tolerate a 5xx because of an internal access-record glitch.
+  await prisma.accessGrant
+    .upsert({
+      where: {
+        sourceType_sourceId_productId: {
+          sourceType: "order",
+          sourceId: order.id,
+          productId: order.productId,
+        },
+      },
+      create: {
+        userId: order.userId,
+        productId: order.productId,
+        sourceType: "order",
+        sourceId: order.id,
+        status: "active",
+      },
+      update: {}, // no-op: idempotent re-runs are safe
+    })
+    .catch((err: unknown) => {
+      console.error(
+        `[OrderService] MCR Phase 2 — failed to dual-write AccessGrant for order ${order.id}:`,
+        err,
+      );
+    });
 
   // ── 5. Resolve ebook locale from country ────────────────────────
   // Use customer_country → COUNTRY_LOCALE mapping, fallback to locale param, then "en"

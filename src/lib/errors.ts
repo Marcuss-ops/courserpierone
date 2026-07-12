@@ -65,6 +65,29 @@ export class NotFoundError extends AppError {
   }
 }
 
+/**
+ * 501 Not Implemented — stub for capabilities explicitly deferred to
+ * a future MCR phase. Distinct from PaymentError (502) to keep
+ * alerting honest: a 502 implies upstream provider failure, a 501
+ * means "we haven't written this yet" — different ops response.
+ *
+ * The `code` suffix convention (`NOT_IMPLEMENTED_PHASE_2`,
+ * `NOT_IMPLEMENTED_PHASE_4`) is grep-friendly: a Phase PR can find
+ * the stubs it owns without grepping on Stripe-vs-LS code paths.
+ */
+export class NotImplementedError extends AppError {
+  constructor(
+    message: string,
+    options: { code?: string } = {},
+  ) {
+    super(message, {
+      statusCode: 501,
+      code: options.code ?? "NOT_IMPLEMENTED",
+    });
+    this.name = "NotImplementedError";
+  }
+}
+
 /** Validation errors (400) */
 export class ValidationError extends AppError {
   constructor(message: string) {
