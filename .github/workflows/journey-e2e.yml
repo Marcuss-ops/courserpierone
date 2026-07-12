@@ -1,0 +1,195 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# E2E Journey Suite — "main verde oppure niente deploy"
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Perché questo workflow esiste
+# -----------------------------
+# La Definition of Done (DoD) di Courser V1 richiede:
+#   "un utente deve poter cliccare un link sotto un video YouTube, arrivare nella
+#    lingua corretta, vedere landing + prezzo + contenuti localizzati,
+#    registrarsi/identificarsi, pagare realmente, ricevere automaticamente l'accesso,
+#    ricevere l'email di conferma, entrare nella dashboard, vedere il corso,
+#    le lezioni e i materiali, mantenere progressi e accesso anche dopo logout
+#    e nuovo login."
+#
+# `tests/e2e/journey.spec.ts` (committato su main) parametrizza questo flow per
+# 3 lingue (it-it, en-us, es-es). Se il journey test è rosso su `main`, nessun
+# deploy deve passare. Questo workflow esporta lo status check `e2e-journey (chrome)`:
+# GH branch protection su main deve richiedere questo check esplicitamente.
+#
+# Due modalità operative (skip-if-creds-missing coerente con il journey suite):
+#   1. Senza secrets Stripe/Supabase: i test vengono skipped → status = PASSED
+#      (Playwright conta "skipped" come non-failure). Gate OK anche su repo fork.
+#   2. Con secrets: i test eseguono il flow reale end-to-end. Verdetto basato
+#      su true/false assertions. Gate reale.
+#
+# ⚠️ SETUP PRIMA DEL PRIMO RUN CON SECRETS ⚠️
+# --------------------------------------
+# GitHub → Settings → Secrets and variables → Actions → New repository secret:
+#   DATABASE_URL             = postgresql://postgres:postgres@... (overriden by service in this workflow)
+#   NEXT_PUBLIC_SUPABASE_URL = https://<test-project>.supabase.co
+#   SUPABASE_SERVICE_ROLE_KEY     = <service-role-key> (test project)
+#   STRIPE_SECRET_KEY        = sk_test_...
+#   STRIPE_WEBHOOK_SECRET    = whsec_test_...
+#   TEST_STRIPE_PRICE_ID     = price_test_...
+#   LEMONSQUEEZY_API_KEY     = <ls-test-api-key> (optional, only if LS matrix blocks run later)
+#   LEMONSQUEEZY_WEBHOOK_SECRET = <ls-test-webhook-secret> (optional)
+#   LEMONSQUEEZY_STORE_ID    = <ls-test-store-id> (optional)
+#   TEST_LEMON_VARIANT_ID    = <ls-test-variant-id> (optional)
+#
+# Branch protection (manual setup from GitHub UI):
+#   Settings → Branches → main → Require status checks to pass before merging
+#     ☑ e2e-journey (chrome)
+#     ☑ CI / ci (typecheck + lint + Vitest)
+#     ☑ Prisma Migrate Deploy / migrate
+# ═══════════════════════════════════════════════════════════════════════════════
+
+name: E2E Journey Suite
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: journey-e2e-${{ github.ref }}
+  # Cancella PR vecchi, MAI cancella main run (clean history gate).
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  e2e-journey:
+    name: e2e-journey (chrome)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: courser_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        # Postgres in CI is ephemeral — no volume needed.
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      # ═══ Service-override defaults — services up sopra (5872, 6479) ═
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/courser_test
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/courser_test
+      REDIS_URL: redis://localhost:6379
+      KV_REST_API_URL: redis://localhost:6379
+      UPSTASH_REDIS_REST_URL: redis://localhost:6379
+
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+
+      # ═══ Stripe test-mode (required for journey) ════════════════
+      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+      STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+      TEST_STRIPE_PRICE_ID: ${{ secrets.TEST_STRIPE_PRICE_ID }}
+
+      # ═══ Supabase test-project (required for journey) ═══════════
+      SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      # ═══ Lemon Squeezy test (optional — only when matrix blocks 4-9 use it) ═
+      LEMONSQUEEZY_API_KEY: ${{ secrets.LEMONSQUEEZY_API_KEY }}
+      LEMONSQUEEZY_STORE_ID: ${{ secrets.LEMONSQUEEZY_STORE_ID }}
+      LEMONSQUEEZY_WEBHOOK_SECRET: ${{ secrets.LEMONSQUEEZY_WEBHOOK_SECRET }}
+      TEST_LEMON_VARIANT_ID: ${{ secrets.TEST_LEMON_VARIANT_ID }}
+
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+      NODE_ENV: test
+      CI: "true"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Setup Node.js + npm cache
+        uses: actions/setup-node@39370e3970a6d050c480008ad58aa19be4ef98bb # v4.1.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies (postinstall runs prisma generate + locale resolver)
+        run: npm ci --no-audit --no-fund
+
+      # ─── Cache Playwright browsers (~150MB, ripristino <20s) ──
+      - name: Cache Playwright browsers
+        id: cache-playwright
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright browsers
+        if: steps.cache-playwright.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Apply Prisma migrations to ephemeral Postgres
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/courser_test
+
+      - name: Build Next.js app (skips if already cached, but useful for catching prod-only bugs)
+        run: npm run build
+
+      - name: Run E2E journey suite
+        run: npm run test:e2e -- --project=chromium --reporter=line,html
+        env:
+          # Deterministic port for the app server (Playwright config picks this
+          # up via webServer.url).
+          PORT: "3000"
+
+      - name: Upload Playwright HTML report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Upload Playwright trace on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-trace
+          path: test-results/
+          retention-days: 7
+
+      - name: Workflow result
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "✅ E2E journey suite green — deploy gate passed."
+          else
+            echo "❌ E2E journey suite red — DO NOT MERGE to main."
+            echo ":::"
+            echo "Fix the failing journey assertion and re-trigger this workflow."
+            echo "If creds are missing, this job skips suites and reports green; once"
+            echo "real Stripe + Supabase test secrets are configured, this gate"
+            echo "exercises the full customer journey end-to-end."
+          fi
