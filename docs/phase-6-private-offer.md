@@ -150,20 +150,30 @@ model PrivateOffer {
   order         Order?        @relation(fields: [purchasedOrderId], references: [id], onDelete: SetNull)
   messages      Message[]     @relation("OfferMessages")  // back-pointer for Message.offerId
 
-  @@unique([conversationId, status])  // one offer per (conversation, status) — relaxed in V2 if needed
+  // Partial unique index (added in the migration, NOT a Prisma
+  // @@unique — see § 2.3): at most ONE active offer per conversation
+  // at any time. "Active" = status IN ('draft', 'sent', 'opened').
+  // Historical offers (purchased, expired, revoked) are NOT
+  // constrained — a conversation can have many historical offers
+  // but only one pending.
   @@index([creatorId, status])         // creator-side "my pending offers" query
   @@index([customerId, status])       // customer-side inbox badge
   @@index([status, expiresAt])         // cron worker: scan for expired offers
 }
 ```
 
-**Why `@@unique([conversationId, status])`:** a single conversation
-should have at most ONE offer per status. The same creator can
-have multiple historical offers (some purchased, some expired,
-some revoked), but only one `draft`/`sent`/`opened` offer at a
-time. This prevents "I'll spam the customer with 5 pending offers
-in the same chat" abuse. V2 may relax this if creators want to
-A/B test multiple live offers.
+**Why a partial unique index (not `@@unique([conversationId,
+status])`):** the user wants "one ACTIVE offer per conversation."
+A `@@unique([conversationId, status])` would allow 1×draft +
+1×sent + 1×opened + 1×purchased + 1×expired simultaneously on
+the same conversation — the wrong cardinality. The partial
+unique index is the correct PG construct:
+`CREATE UNIQUE INDEX ... ON "PrivateOffer" ("conversationId")
+WHERE status IN ('draft', 'sent', 'opened')`. Prisma's
+`@@unique` doesn't support partial indexes, so the index is
+added in the migration DDL (§ 2.3) rather than the schema.
+The migration is idempotent via `CREATE UNIQUE INDEX IF NOT
+EXISTS`.
 
 **Why `purchasedOrderId` is `@unique`:** an offer maps to at most
 one order. If the customer refunds and re-purchases (different
@@ -245,6 +255,15 @@ Idempotent DDL matching the PR 2 / Phase 2 / Phase 5 patterns:
 ```sql
 -- prisma/migrations/20260715XXXXXX_phase6_private_offer/migration.sql
 CREATE TABLE IF NOT EXISTS "PrivateOffer" ( ... );
+
+-- Partial unique index: at most ONE active offer per conversation.
+-- "Active" = status IN ('draft', 'sent', 'opened'). Historical
+-- offers (purchased, expired, revoked) are unconstrained. Prisma's
+-- @@unique doesn't support partial indexes, so this is a raw
+-- CREATE UNIQUE INDEX (idempotent via IF NOT EXISTS).
+CREATE UNIQUE INDEX IF NOT EXISTS "PrivateOffer_one_active_per_conversation"
+ON "PrivateOffer" ("conversationId")
+WHERE status IN ('draft', 'sent', 'opened');
 
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'PrivateOffer_conversationId_fkey') THEN
@@ -606,8 +625,13 @@ function CheckoutOverlay({
 }) {
   // Mark the offer as "opened" the first time the overlay is shown.
   // Fire-and-forget; the server-side handler in § 3.2 is the
-  // source of truth. (We also ping the server in case the iframe
-  // never loads — see below.)
+  // source of truth. The server endpoint is IDEMPOTENT — the
+  // status field itself is the dedupe key: the handler does
+  // `UPDATE PrivateOffer SET status='opened', openedAt=now()
+  // WHERE id=:id AND status='sent'`. A second invocation (the
+  // iframe reloads, the user double-clicks, etc.) finds no row
+  // matching the WHERE clause and is a no-op. openedAt is set
+  // only on the first transition.
   useEffect(() => {
     fetch(`/api/conversations/offers/${offerId}/opened`, { method: "POST" })
       .catch(() => {});  // fire-and-forget
@@ -630,7 +654,11 @@ function CheckoutOverlay({
 
   // Poll for the system message as a fallback (in case postMessage
   // isn't delivered, e.g. the LS iframe is blocked by the browser).
-  // Every 3s for up to 60s.
+  // Every 3s for up to 120s. The 120s window covers slow LS checkouts
+  // (card entry + 3DS + processing can exceed 60s; 120s is a safe
+  // upper bound without keeping the user waiting indefinitely).
+  // The interval stops on `purchased` (success) AND on `expired` /
+  // `revoked` (no point polling further — the offer is terminal).
   useEffect(() => {
     const interval = setInterval(async () => {
       const res = await fetch(`/api/conversations/offers/${offerId}/status`);
@@ -639,10 +667,17 @@ function CheckoutOverlay({
         if (status === "purchased") {
           onPurchaseComplete();
           clearInterval(interval);
+        } else if (status === "expired" || status === "revoked") {
+          // Terminal but-not-purchased: close the overlay cleanly.
+          clearInterval(interval);
         }
       }
     }, 3000);
-    return () => clearInterval(interval);
+    const stopAfter = setTimeout(() => clearInterval(interval), 120_000);
+    return () => {
+      clearInterval(interval);
+      clearTimeout(stopAfter);
+    };
   }, [offerId, onPurchaseComplete]);
 
   return (
@@ -851,24 +886,54 @@ export async function applyPaymentEvent(event: PaymentEvent): Promise<{ orderId:
         },
       });
 
-      // Create the system message.
+      // Create the system message. The content is viewer-aware:
+      // the SAME Message row renders to both the customer and
+      // the creator. The `metadata` carries the canonical data
+      // (event type, productId, amount, currency, discount, etc.)
+      // and the renderer localizes the visible text per viewer
+      // (customer sees "Hai acquistato", creator sees "Mario ha
+      // acquistato"). A naïve single-string `content` field
+      // would show "Hai acquistato" to both — wrong for the
+      // creator's view. Storing the canonical data in `metadata`
+      // + viewer-aware rendering is the right split.
+      //
+      // senderId is a special "system" sentinel: a stable user
+      // id (see SYSTEM_USER_ID constant) that's never a real
+      // human. This avoids polluting the customer's lastSeenAt
+      // (the offline-notification cooldown in
+      // createMessageAndNotify checks `message.type === 'system'`
+      // and skips the partner's lastSeenAt update). The chat
+      // composer's UI treats system messages as not-sent-by-anyone
+      // (centered, with a system icon).
       const coupon = offer.discountCode
         ? await tx.coupon.findUnique({ where: { code: offer.discountCode } })
         : null;
       const discountPct = coupon?.type === "percent" ? coupon.value : null;
+      const customer = await tx.user.findUnique({
+        where: { id: order.userId },
+        select: { name: true, email: true },
+      });
+      const customerDisplayName =
+        customer?.name || customer?.email?.split("@")[0] || "Il cliente";
       await tx.message.create({
         data: {
           conversationId: offer.conversationId,
-          senderId: order.userId,  // the customer "sent" the system message
-          content: `🛒 ${offer.customerId === order.userId ? "Hai" : "Il cliente ha"} acquistato ${productName} con offerta privata${discountPct ? ` (-${discountPct}%)` : ""}.`,
+          senderId: SYSTEM_USER_ID,  // sentinel: not a real human
+          content: "",  // renderer composes per-viewer from metadata
           type: "system",
           metadata: {
             event: "purchased",
             productId: order.productId,
+            productName: productName,
+            productSlug: productSlug,
             amount: order.amount,
             currency: order.currency,
             offerId: offer.id,
             discountPct,
+            // Viewer-localization helpers (renderer uses these to
+            // build the visible text per the viewer's role):
+            customerId: order.userId,
+            customerDisplayName,
           },
         },
       });
@@ -909,6 +974,38 @@ emit the system message" (outbox consumer) for cleaner
 separation. For V1.5, the inline transaction is simpler and
 the atomicity guarantee is worth the coupling.
 
+**`SYSTEM_USER_ID` constant:** the system message's `senderId`
+is a sentinel user id (e.g., a hardcoded `system-bot` User row
+created at migration time) rather than `order.userId`. This
+avoids two issues:
+  (a) The customer's `lastSeenAt` would update when they see
+      the system message, polluting the offline-notification
+      cooldown in `createMessageAndNotify` (which assumes the
+      partner is "human" and increments lastSeenAt on view).
+      The system message is a server-emitted event, not a
+      user-triggered interaction.
+  (b) The chat composer's UI treats system messages as
+      "not sent by anyone" (centered, system icon). A
+      `senderId = SYSTEM_USER_ID` makes the renderer code
+      explicit: `if (message.senderId === SYSTEM_USER_ID) render
+      as system`.
+
+The `SYSTEM_USER_ID` is created by the Phase 6 migration:
+`INSERT INTO "User" (id, email, name, role) VALUES
+('system_bot_000000000000000', 'system@internal', 'System',
+'system') ON CONFLICT (id) DO NOTHING`. V2 may add a nullable
+`senderId` to the Message schema (for a cleaner separation)
+but V1.5 uses the sentinel-user convention.
+
+**About the `senderId` schema convention:** the `Message.senderId`
+is currently `NOT NULL` (V1 schema). Phase 6 keeps the
+NOT NULL constraint and uses the sentinel user. A future
+schema change (V2) could make `senderId` nullable for
+`type='system'` messages, removing the need for the sentinel.
+For V1.5, the sentinel is the right tradeoff: no schema break,
+clear semantic meaning, easy to query (`WHERE senderId =
+SYSTEM_USER_ID` for all system messages).
+
 ---
 
 ## 6. Migration from existing data
@@ -948,7 +1045,9 @@ In order of dependency:
 5. **`POST /api/conversations/offers/:offerId/opened` and
    `GET /api/conversations/offers/:offerId/status` endpoints**
    for the `opened` state transition and the polling fallback
-   (§ 4.2).
+   (§ 4.2). The `POST /opened` endpoint is IDEMPOTENT via a
+   conditional `WHERE status='sent'` update — double-clicks and
+   iframe reloads are no-ops after the first transition.
 6. **Extend `CreateCheckoutInput` + LS `createCheckout` /
    `parseWebhook`** to carry `sourceType` / `sourceId` /
    `conversationId` / `privateOfferId` per § 5.1, § 5.2.
