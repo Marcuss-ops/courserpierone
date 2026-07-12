@@ -66,6 +66,28 @@ export async function POST(request: NextRequest) {
     const { lessonId, completed } = parsed.data;
     if (!lessonId) return NextResponse.json({ error: "Missing lessonId" }, { status: 400 });
 
+    // Verify the lesson exists and the user has access to its product
+    const lesson = await prisma.lesson.findUnique({
+      where: { id: lessonId },
+      select: { productId: true },
+    });
+    if (!lesson) {
+      return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
+    }
+
+    if (dbUser.role !== "admin") {
+      const order = await prisma.order.findFirst({
+        where: {
+          userId: dbUser.id,
+          productId: lesson.productId,
+          status: "completed",
+        },
+      });
+      if (!order) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    }
+
     const progress = await prisma.lessonProgress.upsert({
       where: { userId_lessonId: { userId: dbUser.id, lessonId } },
       update: {

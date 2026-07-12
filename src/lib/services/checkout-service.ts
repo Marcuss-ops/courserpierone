@@ -142,8 +142,8 @@ export class CheckoutService {
       customer_email: userEmail || undefined,
       locale: stripeLocale as any,
       allow_promotion_codes: true,
-      success_url: `${appUrl}/${locale}/${product.slug}/download?lang=${locale}`,
-      cancel_url: `${appUrl}/${product.slug}?canceled=1`,
+      success_url: `${appUrl}/${locale}/${product.slug}/download?lang=${locale}&order_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${appUrl}/${locale}/${product.slug}?canceled=1`,
       metadata: {
         userId: dbUser?.id ?? "guest",
         productId: product.id,

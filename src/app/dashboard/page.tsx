@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { LogOut, ArrowRight, User } from "lucide-react";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
@@ -40,7 +41,7 @@ export default async function DashboardPage() {
   }
 
   // ── Fetch orders (admin sees all published products as virtual orders) ──
-  let userOrders: DisplayOrder[] = [];
+  let userOrders: DisplayOrder[];
   if (dbUser.role === "admin") {
     const publishedProducts = await prisma.product.findMany({
       where: { status: "published" },
@@ -99,7 +100,7 @@ export default async function DashboardPage() {
 
   const [completedLessons, lastWatch, progressRecords] = await Promise.all([
     prisma.lessonProgress.count({
-      where: { userId: dbUser.id, completed: true },
+      where: { userId: dbUser.id, completed: true, lesson: { productId: { in: orderProductIds } } },
     }),
     prisma.lessonProgress.findFirst({
       where: { userId: dbUser.id, lastWatchedAt: { not: null } },
@@ -159,10 +160,10 @@ export default async function DashboardPage() {
     lastWatch?.lesson?.product?.defaultLanguage ??
     "it";
   const resumeSlug = lastWatch?.lesson?.product?.slug;
-  const resumePosition = lastWatch?.lesson?.position;
+  const resumeLessonId = lastWatch?.lesson?.id;
   const resumeHref =
-    resumeSlug && resumePosition
-      ? `/it/${resumeSlug}/curso/lesson-${resumePosition}`
+    resumeSlug && resumeLessonId
+      ? `/${resumeLocale}/${resumeSlug}/curso/${resumeLessonId}`
       : undefined;
   const resumeLabel = lastLessonTitle
     ? `Riprendi: ${lastLessonTitle}`
@@ -288,8 +289,7 @@ export default async function DashboardPage() {
             <div className="hidden sm:flex items-center gap-3 pl-4 pr-2 py-1.5 bg-cream-dark-surface/80 border border-cream-dark-border rounded-full">
               <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#FFF5E6] to-[#FFE4C4] flex items-center justify-center overflow-hidden">
                 {dbUser.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={dbUser.image} alt="" className="w-full h-full object-cover" />
+                  <Image src={dbUser.image} alt="" fill sizes="28px" className="object-cover" />
                 ) : (
                   <User className="w-3.5 h-3.5 text-cream-gold" />
                 )}

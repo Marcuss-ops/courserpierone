@@ -118,9 +118,11 @@ export async function PUT(
           .filter((id): id is string => Boolean(id));
 
         // Rimuovi le lezioni eliminate dall'admin
-        await tx.lesson.deleteMany({
-          where: { productId: id, id: { notIn: incomingIds.length > 0 ? incomingIds : [""] } },
-        });
+        const deleteWhere: Record<string, unknown> = { productId: id };
+        if (incomingIds.length > 0) {
+          deleteWhere.id = { notIn: incomingIds };
+        }
+        await tx.lesson.deleteMany({ where: deleteWhere });
 
         for (let i = 0; i < lessons.length; i++) {
           const lesson = lessons[i] as {
@@ -129,11 +131,17 @@ export async function PUT(
             assets?: { id?: string; type: string; locale: string; fileUrl: string; fileName?: string | null }[];
           };
 
-          const l = await tx.lesson.upsert({
-            where: { id: lesson.id || "temp" },
-            update: { position: i + 1 },
-            create: { productId: id, position: i + 1 },
-          });
+          let l;
+          if (lesson.id) {
+            l = await tx.lesson.update({
+              where: { id: lesson.id },
+              data: { position: i + 1 },
+            });
+          } else {
+            l = await tx.lesson.create({
+              data: { productId: id, position: i + 1 },
+            });
+          }
 
           // Aggiorna traduzioni della lezione
           if (lesson.translations && typeof lesson.translations === "object") {
@@ -162,28 +170,35 @@ export async function PUT(
             const assetIds = lesson.assets
               .map((a: { id?: string }) => a.id)
               .filter((id): id is string => Boolean(id));
-            await tx.lessonAsset.deleteMany({
-              where: { lessonId: l.id, id: { notIn: assetIds.length > 0 ? assetIds : [""] } },
-            });
+            const assetDeleteWhere: Record<string, unknown> = { lessonId: l.id };
+            if (assetIds.length > 0) {
+              assetDeleteWhere.id = { notIn: assetIds };
+            }
+            await tx.lessonAsset.deleteMany({ where: assetDeleteWhere });
 
             for (const asset of lesson.assets) {
               if (!asset.fileUrl) continue;
-              await tx.lessonAsset.upsert({
-                where: { id: asset.id || "temp" },
-                update: {
-                  type: asset.type,
-                  locale: asset.locale,
-                  fileUrl: asset.fileUrl,
-                  fileName: asset.fileName || null,
-                },
-                create: {
-                  lessonId: l.id,
-                  type: asset.type,
-                  locale: asset.locale,
-                  fileUrl: asset.fileUrl,
-                  fileName: asset.fileName || null,
-                },
-              });
+              if (asset.id) {
+                await tx.lessonAsset.update({
+                  where: { id: asset.id },
+                  data: {
+                    type: asset.type,
+                    locale: asset.locale,
+                    fileUrl: asset.fileUrl,
+                    fileName: asset.fileName || null,
+                  },
+                });
+              } else {
+                await tx.lessonAsset.create({
+                  data: {
+                    lessonId: l.id,
+                    type: asset.type,
+                    locale: asset.locale,
+                    fileUrl: asset.fileUrl,
+                    fileName: asset.fileName || null,
+                  },
+                });
+              }
             }
           }
         }

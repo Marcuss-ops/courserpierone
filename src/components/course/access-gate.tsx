@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { prisma } from "@/lib/db/prisma";
 import { Lock, ArrowRight, Sparkles } from "lucide-react";
+import { PendingOrderScreen } from "./pending-order-screen";
 
 interface AccessGateProps {
   productSlug: string;
@@ -66,19 +67,36 @@ export async function AccessGate({
   }
 
   // 3. Access via order_id query param (post-checkout immediate access)
+  let pendingOrderId: string | null = null;
   if (!hasAccess && orderId) {
     const order = await prisma.order.findFirst({
       where: {
         OR: [{ id: orderId }, { providerOrderId: orderId }, { stripeSessionId: orderId }],
         productId: product.id,
-        status: "completed",
       },
     });
-    if (order) hasAccess = true;
+    if (order?.status === "completed") {
+      hasAccess = true;
+    } else if (order?.status === "pending") {
+      // Only the order owner (or a guest who will log in) may see the
+      // verifying screen. Otherwise fall through to the paywall.
+      if (!user?.email || dbUser?.id === order.userId) {
+        pendingOrderId = order.id;
+      }
+    }
   }
 
   if (hasAccess) {
     return <>{children}</>;
+  }
+
+  // Pending order from checkout — show verifying screen with auto-refresh,
+  // or redirect unauthenticated users to login preserving the callback URL.
+  if (pendingOrderId) {
+    if (!user?.email) {
+      redirect(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
+    }
+    return <PendingOrderScreen orderId={pendingOrderId} locale={product.defaultLanguage ?? "it"} />;
   }
 
   // Not authenticated → redirect to login with callback URL

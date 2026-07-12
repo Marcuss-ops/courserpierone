@@ -6,17 +6,12 @@ import Link from "next/link";
 import { Loader2, Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { getAuthTranslations } from "@/lib/i18n/auth-translations";
+import { isSafeCallbackUrl } from "@/lib/utils/is-safe-callback-url";
 
 type AuthMode = "login" | "signup";
 
 interface AuthFormProps {
   lang: string;
-}
-
-function isSafeCallbackUrl(url: string): boolean {
-  // Only allow relative paths starting with a single slash to prevent
-  // open-redirect attacks to external domains.
-  return url.startsWith("/") && !url.startsWith("//");
 }
 
 export function AuthForm({ lang }: AuthFormProps) {

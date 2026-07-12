@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { isSafeCallbackUrl } from "@/lib/utils/is-safe-callback-url";
 
 /**
  * Supabase Auth Callback — gestisce il redirect dopo OAuth (Google).
@@ -17,7 +18,8 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/dashboard";
+  const rawNext = searchParams.get("next") ?? "/dashboard";
+  const next = isSafeCallbackUrl(rawNext) ? rawNext : "/dashboard";
 
   if (!code) {
     // Nessun code → torniamo al login (utente probabilmente ha cancellato i cookie)

@@ -17,10 +17,17 @@ const mockPrisma = {
   },
   lesson: {
     create: vi.fn(),
+    update: vi.fn(),
     deleteMany: vi.fn(),
   },
   lessonTranslation: {
     create: vi.fn(),
+    upsert: vi.fn(),
+  },
+  lessonAsset: {
+    create: vi.fn(),
+    update: vi.fn(),
+    deleteMany: vi.fn(),
   },
   analyticEvent: {
     count: vi.fn(),
@@ -297,7 +304,7 @@ describe("PUT /api/products/[id]", () => {
     );
   });
 
-  it("recreates lessons when provided", async () => {
+  it("creates lessons when provided", async () => {
     let lessonIndex = 0;
     mockPrisma.lesson.create.mockImplementation(() => {
       lessonIndex++;
@@ -318,7 +325,9 @@ describe("PUT /api/products/[id]", () => {
     const response = await PUT(req, { params });
 
     expect(response.status).toBe(200);
-    expect(mockPrisma.lesson.deleteMany).toHaveBeenCalledWith({ where: { productId: "p1" } });
+    expect(mockPrisma.lesson.deleteMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ productId: "p1" }) }),
+    );
     expect(mockPrisma.lesson.create).toHaveBeenCalledTimes(2);
   });
 

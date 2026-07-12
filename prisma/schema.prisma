@@ -110,6 +110,7 @@ model Order {
   @@index([stripeSubscriptionId])
   @@index([createdAt])
   @@index([userId, status])
+  @@index([userId, productId, status])
 }
 
 // ─── Utenti ─────────────────────────────────────────────────

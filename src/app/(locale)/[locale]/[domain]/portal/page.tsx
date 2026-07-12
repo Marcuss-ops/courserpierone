@@ -102,7 +102,7 @@ export default async function ProductPortalPage({
       ])
     : [null, null];
 
-  const currentLang = lang || (course.defaultLanguage as string) || "en";
+  const currentLang = lang || course.defaultLanguage || "en";
   const content = course.languages[currentLang] || course.languages[course.defaultLanguage];
 
   // Load locale content for translations (cached via Redis)
@@ -112,9 +112,9 @@ export default async function ProductPortalPage({
   // Warm accent from product config, fallback to amber #C9840D
   const accent = course.accentColor ?? "#C9840D";
   const isVideoComingSoon = domain === "amish-secrets";
-  const hasVideoLessons = (course.lessons ?? []).some((lesson) =>
-    Object.values(lesson.videos ?? {}).some((videoUrl) => Boolean(videoUrl && videoUrl.trim()))
-  );
+  const hasVideoLessons = course.lessons?.some((lesson) =>
+    Object.values(lesson.videos ?? {}).some((videoUrl) => Boolean(videoUrl?.trim()))
+  ) ?? false;
 
   const COMING_SOON_TRANSLATIONS: Record<string, string> = {
     it: "Prossimamente",
@@ -131,8 +131,14 @@ export default async function ProductPortalPage({
   // ID della prima lezione (per quick-start dopo acquisto)
   const firstLessonId = course.lessons?.[0]?.id ?? "lesson-1";
 
+  const activeOrderId = order_id || orderId;
+  const portalQs = new URLSearchParams();
+  portalQs.set("lang", currentLang);
+  if (onboarded) portalQs.set("onboarded", onboarded);
+  if (activeOrderId) portalQs.set("order_id", activeOrderId);
+
   return (
-    <AccessGate productSlug={domain} courseTitle={content.title} callbackUrl={`/${locale}/${domain}/portal?lang=${currentLang}`} orderId={order_id || orderId}>
+    <AccessGate productSlug={domain} courseTitle={content.title} callbackUrl={`/${locale}/${domain}/portal?${portalQs.toString()}`} orderId={activeOrderId}>
       <div className="min-h-screen bg-[#f5f5f7] text-[#1d1d1f] font-sans overflow-x-hidden relative">
         {/* Top Navigation */}
         <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-zinc-200/80">

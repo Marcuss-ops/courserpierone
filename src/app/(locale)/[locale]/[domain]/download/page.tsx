@@ -180,8 +180,13 @@ export default async function DownloadPage({
   const downloadUrl = staticBookUrl || `/api/ebook/${domain}/download?lang=${currentLang}&disposition=attachment${token ? `&token=${token}` : ""}`;
   const viewerUrl = staticBookUrl || `/api/ebook/${domain}/download?lang=${currentLang}&disposition=inline${token ? `&token=${token}` : ""}`;
 
+  const activeOrderId = order_id || orderId;
+  const downloadQs = new URLSearchParams();
+  downloadQs.set("lang", currentLang);
+  if (activeOrderId) downloadQs.set("order_id", activeOrderId);
+
   return (
-    <AccessGate productSlug={domain} courseTitle={ebookTitle} callbackUrl={`/${locale}/${domain}/download?lang=${currentLang}`} orderId={order_id || orderId}>
+    <AccessGate productSlug={domain} courseTitle={ebookTitle} callbackUrl={`/${locale}/${domain}/download?${downloadQs.toString()}`} orderId={activeOrderId}>
     <div className="min-h-screen bg-[#070709] text-zinc-100 font-sans relative overflow-x-hidden flex flex-col justify-between">
       <SaveAccess productSlug={domain} />
       {/* Background radial glows */}

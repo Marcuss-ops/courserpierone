@@ -95,7 +95,7 @@ export default async function CoursePage({
   const { user } = await getServerUser();
   const isAuthenticated = !!user?.email;
 
-  const currentLang = lang || (course.defaultLanguage as string) || "en";
+  const currentLang = lang || course.defaultLanguage || "en";
   const content = course.languages[currentLang] || course.languages[course.defaultLanguage] || Object.values(course.languages)[0];
   const currentLesson = course.lessons.find((l) => l.id === lessonId) || course.lessons[0];
   const basePath = `/${locale}/${domain}`;
@@ -107,8 +107,14 @@ export default async function CoursePage({
   const localeContent = loadLocaleContentSafe(domain, currentLang);
   const lc = localeContent.course;
 
+  const activeOrderId = order_id || orderId;
+  const lessonQs = new URLSearchParams();
+  lessonQs.set("lang", currentLang);
+  if (theme) lessonQs.set("theme", theme);
+  if (activeOrderId) lessonQs.set("order_id", activeOrderId);
+
   return (
-    <AccessGate productSlug={domain} courseTitle={content.title} callbackUrl={`/${locale}/${domain}/curso/${lessonId}?lang=${currentLang}`} orderId={order_id || orderId}>
+    <AccessGate productSlug={domain} courseTitle={content.title} callbackUrl={`/${locale}/${domain}/curso/${lessonId}?${lessonQs.toString()}`} orderId={activeOrderId}>
       <AnalyticsTracker productSlug={domain} />
       <TrackLessonView lessonId={currentLesson.id} isAuthenticated={isAuthenticated} />
       
