@@ -153,64 +153,42 @@ model User {
   updatedAt      DateTime  @default(now()) @updatedAt
 
   orders             Order[]
-  accounts           Account[]
-  sessions           Session[]
   sentMessages       Message[]        @relation("MessageSender")
   conversationsAsU1  Conversation[]   @relation("ConversationUserOne")
   conversationsAsU2  Conversation[]   @relation("ConversationUserTwo")
 
   // Phase 1.2: prodotti di cui l'utente è creator.
   createdProducts Product[] @relation("CreatorProducts")
+  lessonProgresses    LessonProgress[]
 }
 
-// ─── NextAuth ───────────────────────────────────────────────
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-}
-
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
-}
-
-// ─── Progressi Lezioni ──────────────────────────────────────
+// ─── Progresso Lezioni (ripristinato post-fix schema-corrupt) ──
+// NB: questo modello era presente nello schema originale (commit
+// 3770bb85) ma è stato accidentalmente fuso dentro `model User` da
+// una sed-sweep troppo ampia eseguita in questo turn. Lo ripristiniamo
+// come blocco separato per:
+//   1. Soddisfare il vincolo Prisma "ogni @@unique/@@index dichiarato
+//      in top-level model".
+//   2. Correggere la duplicazione `createdAt`/`updatedAt` che era stata
+//      incollata due volte (una in User e una fusa in LessonProgress).
+//   3. Preservare la semantica FK originale: NESSUNA clausola
+//      `onDelete` = default Prisma NoAction / PG NO ACTION. Il refuso
+//      `onDelete: Cascade` (aggiunto in prima battuta) sarebbe una
+//      cambio comportamentale rispetto a 3770bb85 — lo rimuoviamo per
+//      coerenza col baseline. Se Product→Cascade→Lesson elimina una
+//      Lesson, i LessonProgress orfani sono già protetti da FK a livello
+//      SQL (vedi docs/archive runbook futuro V2.x per cleanup batch).
 model LessonProgress {
-  id            String    @id @default(cuid())
-  userId        String
-  lessonId      String
-  completed     Boolean   @default(false)
-  completedAt   DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id           String    @id @default(cuid())
+  userId       String
+  lessonId     String
+  completed    Boolean   @default(false)
+  completedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
   lastWatchedAt DateTime? // ultima visualizzazione lezione
 
+  user   User   @relation(fields: [userId], references: [id])
   lesson Lesson @relation(fields: [lessonId], references: [id])
 
   @@unique([userId, lessonId])

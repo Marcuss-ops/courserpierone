@@ -46,7 +46,8 @@ EMAIL_FROM=noreply@courser.app
 ## Schema Prisma correlato
 
 ```prisma
-model User    { id, name, email, image, role, accounts, sessions, orders }
-model Account { provider, providerAccountId, ... }  # NextAuth adapter
-model Session { sessionToken, userId, expires }     # NextAuth adapter
+model User { id, name, email, image, role, orders }
+# NB: I modelli NextAuth (Account, Session, VerificationToken) sono
+# stati rimossi con la migration `20260712220000_drop_nextauth_models`
+# (post Supabase migration). Auth è 100% Supabase Auth.
 ```
