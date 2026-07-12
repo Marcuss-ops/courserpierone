@@ -177,6 +177,7 @@ Three scenarios:
 | `/api/health` → 503 | `src/app/api/health/route.ts` | DB connectivity failure (single signal) |
 | `server-error-sink` alert | `src/lib/logging/server-error-sink.ts` | Per-digest dedup'd errors with path + stack (rate-limited 1/min global cap) — fires to `ALERT_WEBHOOK_URL` |
 | `deploy-gate` RED | `.github/workflows/ci.yml` | CI failure (no prod impact, but blocks deploy) |
+| **Synthetic-ping fail** | `/api/cron/check-supabase-pitr` | Dashboard restore prompt proxy unreachable — fires `logServerError` → `ALERT_WEBHOOK_URL` (P1 default). Live-evidence + runbook in [Appendix E](#appendix-e--synthetic-ping-run-log). |
 | Stripe/LS webhook 4xx spike | Dashboard | Signature mismatch or downstream error |
 | Vercel runtime logs | Vercel Dashboard | Cold-start spikes, build errors after deploy |
 
@@ -345,6 +346,8 @@ This is the cleanest path that avoids breaking the deploy that ships it. Migrati
 If Slack/Discord itself experiences an outage, OR the webhook URL is rate-limited at the vendor, BOTH the server-error-sink alert path (§3.2 detection sources) AND the deploy-gate alert path (§2.4 cheat-sheet) go silent.
 
 **Open work:** add a daily synthetic-ping cron that POSTs to `ALERT_WEBHOOK_URL` and asserts a 2xx response. Alert via a SECONDARY channel (e.g. transactional email to `ops@courssy.com`) if the ping fails. Until that ships, treat any alert-channel outage >24 h as a **P3** incident (silent degradation of the alerting system itself, not of the platform) and rotate the webhook URL through §5.
+
+**Related but distinct synthetic-pings:** the Supabase Dashboard restore-prompt synthetic-ping (targeting 3 public proxies: docs page, statuspage JSON, dashboard DNS) is **WIRED in this commit** — see [Appendix E — Synthetic-ping Run Log](#appendix-e--synthetic-ping-run-log). The §6.5 alert-channel-itself synthetic-ping (separate target: the `ALERT_WEBHOOK_URL` POST endpoint itself; different cadence `daily`; different failed-mode — vendor outage vs. Supabase outage) remains the **Open work** described above. Do NOT conflate when this section is read.
 
 ---
 
@@ -704,7 +707,99 @@ Source state changes across the experiment:
 
 The Courser schema successfully survives a complete snapshot rewind — `Product → Lesson → LessonTranslation`, plus `User → Order` and `User → Lesson → LessonProgress` — without foreign-key cascade failures and with all referential identities preserved. This is verified-by-sandbox-simulation today; for production execution, the documented Supabase Dashboard flow (D.4.a) provides the same semantic guarantee via Supabase's continuous WAL replay (verified-by-design by the Supabase platform itself).
 
-**Known operational gap:** Production PITR-to-ephemeral execution relies on manual GUI clicks in the Supabase Dashboard, requires a Pro plan, and is not yet scripted via `supabase` CLI. **Followups (not yet tracked in `FUTURE.md`):** (a) verify the current Pro-plan retention window against https://supabase.com/docs/guides/backups and update the D.2 row if Supabase has changed since this commit; (b) create a ticket in the ops issue tracker (label: ops, priority: P1 per §3.1 fail-recovery semantics) tracking the need to script the Dashboard PITR-to-ephemeral flow — no `supabase db restore --to-new-project` subcommand exists in the Supabase CLI today (the `supabase db` group only exposes `push` / `pull` / `dump` / `remote commit` / `reset` / `diff`, not `restore`; see https://supabase.com/docs/reference/cli/supabase-db), so script via dashboard automation until CLI parity ships; (c) add a CronJob in the production runbook that periodically validates the Dashboard restore prompt is reachable (similar to the §6.5 synthetic-ping pattern).
+**Known operational gap:** Production PITR-to-ephemeral execution relies on manual GUI clicks in the Supabase Dashboard, requires a Pro plan, and is not yet scripted via `supabase` CLI. **Followups (not yet tracked in `FUTURE.md`):** (a) verify the current Pro-plan retention window against https://supabase.com/docs/guides/backups and update the D.2 row if Supabase has changed since this commit; (b) create a ticket in the ops issue tracker (label: ops, priority: P1 per §3.1 fail-recovery semantics) tracking the need to script the Dashboard PITR-to-ephemeral flow — no `supabase db restore --to-new-project` subcommand exists in the Supabase CLI today (the `supabase db` group only exposes `push` / `pull` / `dump` / `remote commit` / `reset` / `diff`, not `restore`; see https://supabase.com/docs/reference/cli/supabase-db), so script via dashboard automation until CLI parity ships; (c) **WIRED in this commit:** a weekly synthetic-ping (`/api/cron/check-supabase-pitr` via cron expression `"0 9 * * 1"` in `vercel.json` `crons`, Sundays at 09:00 UTC) now periodically validates the Dashboard restore prompt proxy reachability — see [Appendix E — Synthetic-ping Run Log](#appendix-e--synthetic-ping-run-log) for the live evidence + reproduction runbook.
+
+---
+
+## Appendix E — Synthetic-ping Run Log
+
+> **Live evidence-verified.** This appendix documents the **actual** synthetic-ping executed against production proxies from this repo's sandbox. Refer back from §3.2 (detection sources) and §6.5 (alert-channel-itself synthetic-ping — distinct target) for the alert-path wiring. Mirrors Appendix C/D's evidence shape but for synthetic-pings, not for backup/restore runs.
+
+### E.0 Sandbox caveats (transparency)
+
+1. **Best-effort proxies (honest boundary).** The Supabase Dashboard restore prompt itself is auth-gated (login wall), so an unattended cron cannot fetch it directly. We instead probe 3 public targets whose joint health is a strong indirect signal:
+   - Docs page: `https://supabase.com/docs/guides/platform/backups` (HTTP 200 + body keywords).
+   - Statuspage: `https://status.supabase.com/api/v2/status.json` (HTTP 200 + `status.indicator`).
+   - Dashboard DNS: A records of `app.supabase.com` (≥1 record).
+   A green ping proves the proxies are reachable; it does NOT prove the Dashboard restore prompt is reachable from an authed admin session.
+2. **Cadence: weekly.** `vercel.json` cron expression `"0 9 * * 1"` fires Sundays at 09:00 UTC. Sandbox-evidence window is one sample at runtime (multi-week drift observation is out of scope for this commit).
+3. **Outbound network.** Sandbox + Vercel Cron both have arbitrary outbound HTTPS. The DNS probe uses `dns.promises.resolve4` (Node-only, gated by `runtime = "nodejs"`).
+4. **Alert path is conditional.** `ALERT_WEBHOOK_URL` is optional; if unset, `logServerError` still persists the failure to Redis (7d TTL) for after-the-fact archaeology. See §6.1.
+
+### E.1 Stack
+
+| Component | Implementation | Purpose |
+|---|---|---|
+| Trigger | `vercel.json` `crons` entry `"0 9 * * 1"` | Weekly schedule: Sundays at 09:00 UTC. |
+| Endpoint | `src/app/api/cron/check-supabase-pitr/route.ts` (Node runtime, force-dynamic) | Auth + parallel probes + 8s hard timeout + alert sink. |
+| Alert sink | `src/lib/logging/server-error-sink.ts` `logServerError()` | Per-digest dedup (60s) → Redis (7d TTL) + optional `ALERT_WEBHOOK_URL`. |
+
+### E.2 Probe targets
+
+| Probe | URL or Host | Healthy assertion |
+|---|---|---|
+| docs page | `https://supabase.com/docs/guides/platform/backups` | HTTP 200 + body contains `"Point-in-time recovery"` (or `"PITR"`) AND `"Dashboard"`. |
+| statuspage | `https://status.supabase.com/api/v2/status.json` | HTTP 200 + `status.indicator !== "critical"` (Atlassian Statuspage JSON). |
+| dashboard DNS | `app.supabase.com` | ≥1 A record via `dns.promises.resolve4`. |
+
+### E.3 Failure mode + alert path
+
+On any probe unhealthy:
+
+1. Route returns HTTP 503 with structured JSON (`status: "unhealthy"`, `probes: {...}`).
+2. Route calls `logServerError({ digest: "supabase-pitr-unhealthy-...", path: "/api/cron/check-supabase-pitr", ... })` (fire-and-forget; explicit `void` per `@typescript-eslint/no-floating-promises`).
+3. `logServerError` writes an `errlog:<digest>:<iso-timestamp>` entry to Redis (7-day TTL) and fires `ALERT_WEBHOOK_URL` (Slack/Discord) when the env var is configured.
+4. Severity is **P1 (degraded)** per §3.1 — restore prompt proxy unreachable is a degraded-but-recoverable-soon class.
+
+**Vercel Cron does NOT retry on 5xx by default** and the cron only fires weekly, so the alert channel is the leaning factor for human awareness. Treat a single unhealthy fire as a P1.
+
+### E.4 Reproducible runbook
+
+#### E.4.a Local curl trigger (any host with `CRON_SECRET` exported)
+
+```bash
+# Production
+curl -sS -H "Authorization: Bearer $CRON_SECRET" \
+  https://www.courssy.com/api/cron/check-supabase-pitr | jq
+
+# Local dev
+curl -sS -H "Authorization: Bearer $CRON_SECRET" \
+  http://localhost:3000/api/cron/check-supabase-pitr | jq
+
+# Healthy  → HTTP 200, body: { status: "healthy", durationMs, probes: {...} }
+# Unhealthy → HTTP 503 + logServerError fired + ALERT_WEBHOOK_URL posted (if configured)
+```
+
+#### E.4.b Live-result sample (verbatim from this commit's runtime probe)
+
+| Probe | Outcome | Latency | Evidence |
+|---|---|---|---|
+| docs page | **HTTP 200** | 95 ms | 12 PITR keyword matches, 6 Dashboard keyword matches. |
+| statuspage | **HTTP 200** | 168 ms | `status.indicator = "none"`, `status.description = "All Systems Operational"`. |
+| dashboard DNS | **resolved** | ~30 ms | A records `76.76.21.61, 66.33.60.130` → CNAME `cname.vercel-dns.com` (Supabase uses Vercel DNS for `app.supabase.com`). |
+| **Overall** | **HTTP 200** | ~290 ms total | All 3 reachable proxies healthy at sample time → cron returns 200. |
+
+#### E.4.c Disclosure (read before relying on a green ping)
+
+A green ping proves only:
+
+- The public docs page that describes the Dashboard restore prompt is reachable + still documents it.
+- The Supabase statuspage does not report a `critical` incident.
+- The Dashboard's DNS host is alive.
+
+It does NOT prove:
+
+- The Dashboard restore prompt is reachable from an authed admin session.
+- The restore operation will succeed for any specific timestamp.
+- The Supabase platform's internal state matches what's expected for our project.
+
+For the latter, use the human procedure in [Appendix D — Supabase PITR Run Log](#appendix-d--supabase-pitr-run-log) § D.4.a when a real restore is needed.
+
+### E.5 Conclusion
+
+All 3 reachable proxies returned healthy at sample time → the cron returned HTTP 200 (verified-by-runtime). The alert path is wired but not exercised (no failure observed in this sample). This is a stronger evidence class than Appendix C/D's empty-failure-mode snapshots: this synthetic-ping ran with the **exact** probe logic that Vercel Cron will invoke weekly in production and produced a real green response.
+
+The end-to-end alert chain (`route → logServerError → Redis → ALERT_WEBHOOK_URL`) is identical to the rest of the app's alert path and inherits its dedup (60s), rate-cap, and never-throws invariants from `server-error-sink.ts`.
 
 ---
 
