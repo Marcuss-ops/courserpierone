@@ -77,6 +77,8 @@ export async function loadLocaleContentCached(slug: string, locale: string): Pro
   if (cached) return cached;
 
   const result = loadLocaleContentSafe(slug, locale);
-  await cacheSet(redisKey, result).catch(() => {});
+  await cacheSet(redisKey, result).catch((err) => {
+    console.warn(`[cache] fire-and-forget write failed for key ${redisKey}`, err);
+  });
   return result;
 }

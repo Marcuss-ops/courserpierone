@@ -128,7 +128,9 @@ export async function getCourseConfig(slug: string): Promise<CourseConfig | null
   if (config) {
     _memoryCache.set(slug, { config, cachedAt: Date.now() });
     // Popola anche Redis (fire-and-forget — non blocca il return)
-    cacheSet(redisKey, config).catch(() => {});
+    cacheSet(redisKey, config).catch((err) => {
+      console.warn(`[cache] fire-and-forget write failed for key ${redisKey}`, err);
+    });
   }
 
   return config;
