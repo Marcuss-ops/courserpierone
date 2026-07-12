@@ -30,6 +30,26 @@ The runtime resolution chain in `src/lib/config/white-label-data.ts:67-130` (`ge
 
 The full map is in [content-source-map.md](../content-source-map.md) §1. Summary:
 
+### 2.0 Consolidated consumer × source matrix
+
+| Consumer | `CourseConfigCache` (DB) | `LandingTranslation` (DB) | `ProductTranslation` (DB) | `config.json` (FS) |
+|---|:---:|:---:|:---:|:---:|
+| `white-label-data.ts` (get step 2) | — | — | — | R |
+| `white-label-data.ts` (get step 3) | R | — | — | — |
+| `generate-course-config.ts` (read) | — | — | — | R |
+| `generate-course-config.ts` (write) | W | — | R | W |
+| `admin/products/[id]/page.tsx` | — | — | R+W | — |
+| `admin/products/new/page.tsx` | — | — | R | — |
+| `api/products/route.ts` | — | — | W | — |
+| `api/products/[id]/route.ts` | — | — | W | — |
+| `fix-amish-template.ts` | R+W | — | — | — |
+| `sync-local-config.ts` | W | — | — | R |
+| `sync-data-to-config.ts` | — | — | — | W |
+| `extract-locales.ts` | — | — | R | — |
+| **Totals** | **1 R, 2 W, 1 R+W** | **0** | **2 R, 2 W, 1 R+W** | **3 R, 2 W, 0 R+W** |
+
+*(Key: R = Read, W = Write. See narrative below for runtime limitations like Vercel read-only FS.)*
+
 ### 2.1 `LandingTranslation` (Prisma model, `schema.prisma:369-399`)
 
 - Keyed by `(slug, locale)`. Flat fields: `heroTitle, heroSubtitle, heroDescription, problemText, storyText, ctaText, benefits, testimonials, faq, bonusLabel, guaranteeText`.
@@ -209,4 +229,5 @@ These are content bundles (not config) and they are **generated FROM the DB** by
 ## 8. Update log
 
 - `0009-this-commit` — Initial ADR. Establishes the 6-step sequence and the SSOT/cache/data split.
+- **Matrix addition** — Added §2.0 consumer × source matrix (consolidated view) to address the specific "matrice consumer → sorgente" request.
 - Future updates should be diff-verifiable: `grep -rn 'landingTranslation\|LandingTranslation' src/` (must stay 0) + `grep -rn 'public/courses' src/` (must stay 0 after Step 4) + `grep -rn 'prisma.courseConfigCache.upsert' src/ scripts/` (must stay in `generate-course-config.ts` + `regenerate-cache.ts` only).
