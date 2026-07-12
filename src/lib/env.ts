@@ -134,6 +134,14 @@ export const ENV_DEFINITIONS: EnvVarDef[] = [
     optional: true,
   },
   {
+    key: "USE_ACCESS_GRANT_RESOLVER",
+    category: "optional",
+    description:
+      "Feature flag (PR 3 of MCR) — se 'true', resolve-message-permission legge da AccessGrant.active invece di Order.status='completed'. Default 'false': Order.status resta l'autorità finché la rollout non è completa. Cadence di flip: 1d zero denies in staging → 7d monitoring in staging → flip prod → monitor 7d → rimuovere il legacy read.",
+    defaultValue: "false",
+    optional: true,
+  },
+  {
     key: "LEMONSQUEEZY_API_KEY",
     category: "required",
     description: "Lemon Squeezy API key",
@@ -292,7 +300,7 @@ export const env = new Proxy(
 
 // ─── Utility: formato leggibile ────────────────────────────
 
-export function formatEnvStatus(result: ValidationResult): string {
+function formatEnvStatus(result: ValidationResult): string {
   const lines: string[] = [];
 
   lines.push("═══════════════════════════════════════════");
@@ -329,7 +337,7 @@ export function formatEnvStatus(result: ValidationResult): string {
  * Stampa lo stato delle env vars su console.
  * Da chiamare all'avvio dell'app per debug.
  */
-export function printEnvStatus(): void {
+function printEnvStatus(): void {
   const result = validateEnv();
   console.log(formatEnvStatus(result));
 }

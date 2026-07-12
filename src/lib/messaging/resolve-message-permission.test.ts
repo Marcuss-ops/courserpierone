@@ -5,12 +5,22 @@
  * in un unico resolver semplifica enormemente la suite di test
  * (basta coprire questo file, non tutte le route).
  *
+ * PR 3 del piano DMs (MCR): aggiunge feature flag USE_ACCESS_GRANT_RESOLVER
+ * che swappa la lettura in Step 5 da Order.findFirst a AccessGrant.findFirst.
+ * - Flag OFF (default 'false'): legacy Order-based path. Deny reason =
+ *   `NoCompletedOrderForStudent`.
+ * - Flag ON: AccessGrant-based path. Deny reason = `NoValidAccessGrant`.
+ * - Coesistono durante il rollout (entrambi i deny reason sono mappati
+ *   in `api-authorize.ts` REASON_TO_STATUS).
+ *
  * Scenari coperti (post-fase 4 hardening — migration
  * `20260712210000_creator_id_required_restrict`):
- *   - studente con Order.completed → consentito
- *   - studente senza Order.completed → deny (no_completed_order_for_student)
+ *   - studente con Order.completed → consentito (legacy, flag OFF)
+ *   - studente con AccessGrant.status='active' → consentito (PR 3, flag ON)
+ *   - studente senza grant/ordine → deny (NoCompletedOrderForStudent legacy,
+ *     NoValidAccessGrant post-cutover)
  *   - studente verso un altro studente → deny (not_creator_student_pair)
- *   - creator verso un proprio cliente con Order → consentito
+ *   - creator verso un proprio cliente con grant/ordine → consentito
  *   - creator verso un cliente che ha comprato un altro prodotto → deny
  *   - self-message (actor == target) → deny (self_message_blocked)
  *   - prodotto inesistente → deny (product_not_found)
@@ -19,7 +29,7 @@
  *     irraggiungibile; sostituito da test di non-chiamata).
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // ─── Mocks ────────────────────────────────────────────────────
 const mockPrisma = {
@@ -30,6 +40,12 @@ const mockPrisma = {
     findFirst: vi.fn(),
   },
   order: {
+    findFirst: vi.fn(),
+  },
+  // PR 3 of MCR — added so the new AccessGrant-based path can be tested.
+  // Existing tests do NOT call this (flag is OFF by default), so it's
+  // present but unused unless explicitly enabled via USE_ACCESS_GRANT_RESOLVER.
+  accessGrant: {
     findFirst: vi.fn(),
   },
 };
@@ -48,6 +64,7 @@ const ANOTHER_STUDENT_ID = "student-2";
 const PRODUCT_ID = "prod-1";
 const ANOTHER_PRODUCT_ID = "prod-2";
 const ORDER_ID = "order-1";
+const GRANT_ID = "grant-1";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -57,10 +74,18 @@ beforeEach(() => {
     creatorId: CREATOR_ID,
   });
   mockPrisma.order.findFirst.mockResolvedValue({ id: ORDER_ID });
+  mockPrisma.accessGrant.findFirst.mockResolvedValue({ id: GRANT_ID });
 });
 
-// ─── Tests ────────────────────────────────────────────────────
-describe("resolveMessagingPermission", () => {
+afterEach(() => {
+  // Restore env to "not set" so the next test's defaultValue kicks in
+  // (i.e., "false" — the legacy path). Without this, vi.stubEnv from
+  // a previous test can leak into the next test.
+  vi.unstubAllEnvs();
+});
+
+// ─── Tests (existing — flag OFF / legacy) ───────────────────
+describe("resolveMessagingPermission (legacy Order read — flag OFF)", () => {
   it("denies self-messages (actor == target)", async () => {
     const res = await resolveMessagingPermission({
       actorId: STUDENT_ID,
@@ -288,5 +313,149 @@ describe("resolveMessagingPermission", () => {
         where: expect.objectContaining({ userId: STUDENT_ID }),
       })
     );
+  });
+});
+
+// ─── PR 3 — feature-flagged AccessGrant resolver ─────────────
+// See resolve-message-permission.ts JSDoc top-of-file for the
+// rollout runbook (1d staging zero denies → 7d staging monitor
+// → flip prod → 7d prod monitor → remove legacy read).
+describe("resolveMessagingPermission (PR 3 — USE_ACCESS_GRANT_RESOLVER)", () => {
+  describe("flag OFF (default — legacy Order read)", () => {
+    it("uses Order.findFirst when flag is unset (defaultValue 'false')", async () => {
+      // Don't stub env — the env module's defaultValue='false' is the
+      // production-default. Test that the default falls through to the
+      // legacy path without any env stubbing.
+      await resolveMessagingPermission({
+        actorId: STUDENT_ID,
+        targetId: CREATOR_ID,
+        productId: PRODUCT_ID,
+      });
+      expect(mockPrisma.order.findFirst).toHaveBeenCalledTimes(1);
+      expect(mockPrisma.accessGrant.findFirst).not.toHaveBeenCalled();
+    });
+
+    it("uses Order.findFirst when flag is explicitly 'false'", async () => {
+      vi.stubEnv("USE_ACCESS_GRANT_RESOLVER", "false");
+      await resolveMessagingPermission({
+        actorId: STUDENT_ID,
+        targetId: CREATOR_ID,
+        productId: PRODUCT_ID,
+      });
+      expect(mockPrisma.order.findFirst).toHaveBeenCalledTimes(1);
+      expect(mockPrisma.accessGrant.findFirst).not.toHaveBeenCalled();
+    });
+
+    it("denies with NoCompletedOrderForStudent (NOT NoValidAccessGrant) when Order missing", async () => {
+      mockPrisma.order.findFirst.mockResolvedValue(null);
+      const res = await resolveMessagingPermission({
+        actorId: STUDENT_ID,
+        targetId: CREATOR_ID,
+        productId: PRODUCT_ID,
+      });
+      expect(res.allowed).toBe(false);
+      expect(res.reason).toBe(MessagingDenyReason.NoCompletedOrderForStudent);
+    });
+
+    it("does NOT call AccessGrant.findFirst even when an active grant exists", async () => {
+      // Defense: the legacy path doesn't even peek at AccessGrant. If
+      // the dual-write in PR 2 wrote a grant but Order.status was
+      // somehow not 'completed' (race condition), the legacy path
+      // denies — which is the conservative behavior.
+      mockPrisma.accessGrant.findFirst.mockResolvedValue({ id: GRANT_ID });
+      mockPrisma.order.findFirst.mockResolvedValue(null);
+      const res = await resolveMessagingPermission({
+        actorId: STUDENT_ID,
+        targetId: CREATOR_ID,
+        productId: PRODUCT_ID,
+      });
+      expect(res.allowed).toBe(false);
+      expect(res.reason).toBe(MessagingDenyReason.NoCompletedOrderForStudent);
+      expect(mockPrisma.accessGrant.findFirst).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("flag ON (AccessGrant read — post-cutover canonical path)", () => {
+    beforeEach(() => {
+      vi.stubEnv("USE_ACCESS_GRANT_RESOLVER", "true");
+    });
+
+    it("uses AccessGrant.findFirst (NOT Order.findFirst) when flag is 'true'", async () => {
+      await resolveMessagingPermission({
+        actorId: STUDENT_ID,
+        targetId: CREATOR_ID,
+        productId: PRODUCT_ID,
+      });
+      expect(mockPrisma.accessGrant.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            userId: STUDENT_ID,
+            productId: PRODUCT_ID,
+            status: "active",
+          }),
+        }),
+      );
+      // The legacy path must NOT be called when the flag is on —
+      // otherwise we'd double-query and burn an index lookup.
+      expect(mockPrisma.order.findFirst).not.toHaveBeenCalled();
+    });
+
+    it("allows when grant is active", async () => {
+      mockPrisma.accessGrant.findFirst.mockResolvedValue({ id: GRANT_ID });
+      const res = await resolveMessagingPermission({
+        actorId: STUDENT_ID,
+        targetId: CREATOR_ID,
+        productId: PRODUCT_ID,
+      });
+      expect(res.allowed).toBe(true);
+      expect(res.creatorId).toBe(CREATOR_ID);
+      expect(res.customerId).toBe(STUDENT_ID);
+    });
+
+    it("denies with NoValidAccessGrant when grant missing", async () => {
+      mockPrisma.accessGrant.findFirst.mockResolvedValue(null);
+      const res = await resolveMessagingPermission({
+        actorId: STUDENT_ID,
+        targetId: CREATOR_ID,
+        productId: PRODUCT_ID,
+      });
+      expect(res.allowed).toBe(false);
+      expect(res.reason).toBe(MessagingDenyReason.NoValidAccessGrant);
+    });
+
+    it("filters strictly on status='active' (revoked grants are skipped)", async () => {
+      // If the schema returned a grant with status='revoked', the
+      // findFirst with status='active' filter would skip it. The
+      // assertion verifies the status filter is in the query args.
+      await resolveMessagingPermission({
+        actorId: STUDENT_ID,
+        targetId: CREATOR_ID,
+        productId: PRODUCT_ID,
+      });
+      expect(mockPrisma.accessGrant.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ status: "active" }),
+        }),
+      );
+    });
+
+    it("allows creator to write to a student who has an active grant (symmetric to legacy)", async () => {
+      // Mirror of the legacy "allows creator to write" test, exercised
+      // under the new path. Order of mock matters: product + grant
+      // are read; Order is NOT read.
+      mockPrisma.accessGrant.findFirst.mockResolvedValue({ id: GRANT_ID });
+      const res = await resolveMessagingPermission({
+        actorId: CREATOR_ID,
+        targetId: STUDENT_ID,
+        productId: PRODUCT_ID,
+      });
+      expect(res.allowed).toBe(true);
+      expect(mockPrisma.accessGrant.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ userId: STUDENT_ID }),
+        }),
+      );
+      expect(mockPrisma.order.findFirst).not.toHaveBeenCalled();
+    });
   });
 });

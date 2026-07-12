@@ -62,6 +62,16 @@ const REASON_TO_STATUS: Record<string, { status: number; error: string }> = {
     error:
       "DM non autorizzata: lo studente non ha un ordine completed per questo prodotto",
   },
+  // PR 3 of MCR — canonical post-cutover deny reason. Attivo quando
+  // USE_ACCESS_GRANT_RESOLVER=true. Convive con NoCompletedOrderForStudent
+  // per la durata del rollout (entrambi i path sono attivi finché il flag
+  // non è completamente rimosso in V2 cleanup). Vedi JSDoc in cima a
+  // src/lib/messaging/resolve-message-permission.ts.
+  [MessagingDenyReason.NoValidAccessGrant]: {
+    status: 403,
+    error:
+      "DM non autorizzata: l'utente non ha un grant attivo per questo prodotto",
+  },
 };
 
 /**
