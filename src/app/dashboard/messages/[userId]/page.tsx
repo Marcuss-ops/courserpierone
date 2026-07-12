@@ -5,6 +5,18 @@ import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { ChatView } from "@/components/chat/chat-view";
 
+/**
+ * Forza dynamic rendering sulla chat deep-link.
+ *
+ * Stessa motivazione di `/dashboard/messages/page.tsx` (vedi Fase 3.3):
+ * la pagina legge cookies via `getServerUser` ed esegue query Prisma
+ * in tempo reale. `force-dynamic` garantisce che un cambio di stato
+ * `Order.status: completed → refunded` abbia effetto immediato sul
+ * prossimo page-load (vedi read-side guard sopra) senza cache
+ * Vercel stale.
+ */
+export const dynamic = "force-dynamic";
+
 interface ChatPageProps {
   params: Promise<{ userId: string }>;
   searchParams: Promise<{ productId?: string }>;
@@ -25,11 +37,42 @@ export default async function ConversationPage({ params, searchParams }: ChatPag
     redirect("/dashboard/messages");
   }
 
-  // Fetch the other user
-  const otherUser = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { id: true, name: true, image: true, role: true },
+  // ── Fase 3.3 read-side guard ───────────────────────────────
+  // Difesa da URL-bypass: la sola inbox-list filtra i `productId`
+  // acquistati, ma uno studente potrebbe digitare direttamente
+  // /dashboard/messages/<creatorId>?productId=<mAIAcquistato>.
+  // Verifichiamo che:
+  //   (a) il prodotto esista ed abbia un `creatorId` valido pari a `userId`;
+  //   (b) lo studente corrente abbia un Order.completed per quel product.
+  // In assenza di (a) O (b) → redirect all'inbox (l'empty state
+  // differenziato si occuperà del resto della UX).
+  //
+  // [C2 micro-win] Product.findUnique è sequenziale (il check su
+  // creatorId dipende da questa query); Order.findFirst e
+  // User.findUnique sono invece indipendenti e le eseguiamo in
+  // parallelo via Promise.all per risparmiare ~10-20ms di round-trip.
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    select: { id: true, slug: true, creatorId: true },
   });
+  const isLegitimateCreator = product?.creatorId === userId;
+  if (!product || !isLegitimateCreator) {
+    redirect("/dashboard/messages");
+  }
+
+  const [hasCompletedOrder, otherUser] = await Promise.all([
+    prisma.order.findFirst({
+      where: { userId: dbUser.id, productId, status: "completed" },
+      select: { id: true },
+    }),
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, name: true, image: true, role: true },
+    }),
+  ]);
+  if (!hasCompletedOrder || !otherUser) {
+    redirect("/dashboard/messages");
+  }
 
   if (!otherUser) {
     return (
@@ -61,11 +104,9 @@ export default async function ConversationPage({ params, searchParams }: ChatPag
     select: { id: true, productId: true },
   });
 
-  // Fetch del prodotto per l'header (titolo visibile nella chat)
-  const product = await prisma.product.findUnique({
-    where: { id: productId },
-    select: { id: true, slug: true },
-  });
+  // Fetch del prodotto per l'header (titolo visibile nella chat) — già
+  // recuperato sopra nel read-side guard; riusa l'oggetto esistente.
+  const chatProduct = product;
 
   return (
     <div className="min-h-screen bg-cream-dark-bg text-cream-dark-text font-sans antialiased flex flex-col">
@@ -114,7 +155,7 @@ export default async function ConversationPage({ params, searchParams }: ChatPag
                   : otherUser.role === "creator"
                     ? "Creator"
                     : "Studente"}
-                {product?.slug ? ` • ${product.slug}` : ""}
+                {chatProduct?.slug ? ` • ${chatProduct.slug}` : ""}
               </p>
             </div>
           </div>
