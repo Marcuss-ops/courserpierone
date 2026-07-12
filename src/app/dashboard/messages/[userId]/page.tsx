@@ -7,14 +7,22 @@ import { ChatView } from "./chat-view";
 
 interface ChatPageProps {
   params: Promise<{ userId: string }>;
+  searchParams: Promise<{ productId?: string }>;
 }
 
-export default async function ConversationPage({ params }: ChatPageProps) {
+export default async function ConversationPage({ params, searchParams }: ChatPageProps) {
   const { userId } = await params;
+  const { productId } = await searchParams;
   const { user, dbUser } = await getServerUser();
 
   if (!user?.email || !dbUser) {
     redirect("/login");
+  }
+
+  // Phase 1.3: productId è obbligatorio per qualunque DM.
+  // Se manca, redirigiamo alla inbox generale che mostra i prodotti acquistati.
+  if (!productId) {
+    redirect("/dashboard/messages");
   }
 
   // Fetch the other user
@@ -39,11 +47,24 @@ export default async function ConversationPage({ params }: ChatPageProps) {
     );
   }
 
-  // Verify a conversation exists between the two users (or create one lazily — the chat view handles it)
+  // Verify a conversation exists between the two users for this product
+  // (or it will be lazily created by chat-view on the first message).
   const [minId, maxId] = [dbUser.id, otherUser.id].sort();
   const conversation = await prisma.conversation.findUnique({
-    where: { userOneId_userTwoId: { userOneId: minId, userTwoId: maxId } },
-    select: { id: true },
+    where: {
+      userOneId_userTwoId_productId: {
+        userOneId: minId,
+        userTwoId: maxId,
+        productId,
+      },
+    },
+    select: { id: true, productId: true },
+  });
+
+  // Fetch del prodotto per l'header (titolo visibile nella chat)
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    select: { id: true, slug: true },
   });
 
   return (
@@ -87,8 +108,13 @@ export default async function ConversationPage({ params }: ChatPageProps) {
               <h2 className="font-semibold text-sm text-cream-dark-text truncate">
                 {otherUser.name || "Utente"}
               </h2>
-              <p className="text-[10px] text-cream-dark-text-soft">
-                {otherUser.role === "admin" ? "Creator" : "Studente"}
+              <p className="text-[10px] text-cream-dark-text-soft truncate">
+                {otherUser.role === "admin"
+                  ? "Creator"
+                  : otherUser.role === "creator"
+                    ? "Creator"
+                    : "Studente"}
+                {product?.slug ? ` • ${product.slug}` : ""}
               </p>
             </div>
           </div>
@@ -98,6 +124,7 @@ export default async function ConversationPage({ params }: ChatPageProps) {
       {/* Chat area */}
       <ChatView
         conversationId={conversation?.id ?? null}
+        productId={productId}
         currentUserId={dbUser.id}
         currentUserName={dbUser.name || dbUser.email?.split("@")[0] || "Tu"}
         otherUser={otherUser}

@@ -11,6 +11,12 @@ const PREVIEW_MAX = 80;
 
 export interface ConversationPreview {
   id: string;
+  /**
+   * Phase 1.3: ogni conversazione è legata a un prodotto. Il client
+   * deve usare questo campo per costruire i link "Continua chat".
+   */
+  productId: string;
+  productLabel: string;
   otherUser: {
     id: string;
     name: string | null;
@@ -35,7 +41,7 @@ export default async function MessagesPage() {
   }
 
   // Fetch all conversations where the user is a participant,
-  // with the other user's info and the last message.
+  // with the other user's info, the last message and the product.
   const conversations = await prisma.conversation.findMany({
     where: {
       OR: [{ userOneId: dbUser.id }, { userTwoId: dbUser.id }],
@@ -43,6 +49,7 @@ export default async function MessagesPage() {
     include: {
       userOne: { select: { id: true, name: true, image: true, role: true } },
       userTwo: { select: { id: true, name: true, image: true, role: true } },
+      product: { select: { id: true, slug: true } },
       messages: {
         orderBy: { createdAt: "desc" },
         take: 1,
@@ -79,6 +86,8 @@ export default async function MessagesPage() {
 
     return {
       id: c.id,
+      productId: c.productId,
+      productLabel: c.product?.slug ?? "Prodotto",
       otherUser,
       lastMessage: lastMessage
         ? {

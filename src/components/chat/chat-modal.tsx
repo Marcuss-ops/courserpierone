@@ -73,6 +73,7 @@ export function ChatModal({
 
   const { connected, isOtherTyping, sendTyping, resetTypingTimer } = useRealtimeChat({
     otherUserId: creatorId,
+    productId, // Phase 1.3: propaga productId al WS/SSE/poll
     onMessages: handleRealtimeMessages,
     enabled: open,
   });

@@ -372,23 +372,37 @@ model LandingTranslation {
   @@unique([slug, locale])
 }
 
-// ─── Conversations (stanze per DM tra due utenti) ──────────
+// ─── Conversations (una stanza per coppia + prodotto) ────────
+// Phase 1.3 del piano DMs: ogni coppia (creator, cliente) ha una
+// conversazione distinta per ciascun prodotto acquistato.
+//   • Mario + creator: una chat per "Corso A", una per "Corso B"
+//   • Il campo productId è obbligatorio: viene garantito a monte
+//     dal permission resolver (Fase 1.5) e da Order conpleted.
+//
+// ⚠️ FK CASCADE su productId:
+//   Se un Product viene eliminato, TUTTE le Conversation (e i Message
+//   associati via Cascade) di quel prodotto vengono cancellati.
+//   Scelta consapevole per V1: una conversazione "orfana" di prodotto
+//   non ha più significato nel modello creator↔cliente↔prodotto.
+//   Per "soft archive" futuro del prodotto preservando la chat,
+//   valutare di migrare a ON DELETE RESTRICT + logic di archiviazione.
 model Conversation {
   id        String   @id @default(cuid())
   userOneId String   // uno dei due partecipanti
   userTwoId String   // l'altro partecipante
-  productId String?  // opzionale: scoping al corso da cui parte la conversazione
+  productId String   // prodotto che contestualizza questa DM
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   userOne  User      @relation("ConversationUserOne", fields: [userOneId], references: [id], onDelete: Cascade)
   userTwo  User      @relation("ConversationUserTwo", fields: [userTwoId], references: [id], onDelete: Cascade)
-  product  Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
+  product  Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   messages Message[]
 
-  @@unique([userOneId, userTwoId])
+  @@unique([userOneId, userTwoId, productId])
   @@index([userOneId, updatedAt])
   @@index([userTwoId, updatedAt])
+  @@index([productId, updatedAt])
 }
 
 // ─── Webhook Idempotency ──────────────────────────────────

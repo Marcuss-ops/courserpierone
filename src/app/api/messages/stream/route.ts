@@ -9,7 +9,7 @@ import { getServerUser } from "@/lib/supabase/get-user";
  *
  * Query params:
  *   - with:      ID dell'altro utente nella conversazione
- *   - productId: ID prodotto per scoping (opzionale)
+ *   - productId: ID prodotto per scoping (OBBLIGATORIO da Phase 1.3)
  *   - since:     ISO timestamp — riceve solo messaggi creati dopo questa data
  *
  * Il server polla il DB ogni 2 secondi e invia i nuovi messaggi tramite SSE.
@@ -29,18 +29,21 @@ export async function GET(request: NextRequest) {
   if (!withUserId) {
     return new Response("Missing 'with' parameter", { status: 400 });
   }
+  if (!productId) {
+    return new Response("Missing 'productId' parameter", { status: 400 });
+  }
 
   const since = sinceRaw ? new Date(sinceRaw) : new Date(0);
 
-  // Cerca la conversation tra i due utenti (ordinamento deterministico)
+  // Cerca la conversation tra i due utenti scope al prodotto (ordinamento deterministico)
   const [minId, maxId] = [dbUser.id, withUserId].sort();
   const conversation = await prisma.conversation.findFirst({
     where: {
+      productId,
       OR: [
         { userOneId: minId, userTwoId: maxId },
         { userOneId: maxId, userTwoId: minId },
       ],
-      ...(productId ? { productId } : {}),
     },
     select: { id: true },
   });
@@ -76,11 +79,11 @@ export async function GET(request: NextRequest) {
         if (!conversationId) {
           const found = await prisma.conversation.findFirst({
             where: {
+              productId,
               OR: [
                 { userOneId: minId, userTwoId: maxId },
                 { userOneId: maxId, userTwoId: minId },
               ],
-              ...(productId ? { productId } : {}),
             },
             select: { id: true },
           });

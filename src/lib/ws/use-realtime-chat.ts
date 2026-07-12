@@ -27,6 +27,12 @@ interface WsMessageEvent {
 interface UseRealtimeChatOptions {
   /** ID of the other user in the conversation. */
   otherUserId: string;
+  /**
+   * Phase 1.3: productId è obbligatorio per qualunque DM.
+   * Verrà propagato sia all'endpoint SSE che al polling HTTP.
+   * In Fase 4.1 diventerà conversationId (ancora più restrittivo).
+   */
+  productId?: string;
   /** Called when new messages arrive via WebSocket or SSE. */
   onMessages: (messages: MessageData[]) => void;
   /** Called when connection status changes. */
@@ -46,6 +52,7 @@ interface UseRealtimeChatOptions {
  */
 export function useRealtimeChat({
   otherUserId,
+  productId,
   onMessages,
   onConnectionChange,
   enabled = true,
@@ -84,6 +91,7 @@ export function useRealtimeChat({
       sendTyping(false);
     }, 4000);
   }, [sendTyping]);
+
   const cleanup = useCallback(() => {
     // Send stopTyping before closing
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && selfTypingRef.current) {
@@ -125,6 +133,7 @@ export function useRealtimeChat({
       if (!mountedRef.current) return;
       try {
         const p = new URLSearchParams({ with: otherUserId, limit: "50" });
+        if (productId) p.set("productId", productId);
         const res = await fetch(`/api/messages?${p.toString()}`);
         if (!res.ok) return;
         const data = await res.json();
@@ -140,7 +149,7 @@ export function useRealtimeChat({
 
     void poll();
     pollRef.current = setInterval(poll, 5_000);
-  }, [otherUserId, onMessages, cleanup]);
+  }, [otherUserId, productId, onMessages, cleanup]);
 
   // ── SSE fallback ──────────────────────────────────────────
   const connectSse = useCallback(() => {
@@ -149,6 +158,7 @@ export function useRealtimeChat({
     modeRef.current = "sse";
 
     const params = new URLSearchParams({ with: otherUserId });
+    if (productId) params.set("productId", productId);
     const esUrl = `/api/messages/stream?${params.toString()}`;
 
     try {
@@ -183,7 +193,7 @@ export function useRealtimeChat({
         startPolling();
       }
     }
-  }, [otherUserId, onMessages, cleanup, startPolling]);
+  }, [otherUserId, productId, onMessages, cleanup, startPolling]);
 
   // ── WebSocket connection ──────────────────────────────────
   const connectWs = useCallback(async () => {
@@ -199,7 +209,12 @@ export function useRealtimeChat({
 
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       const host = window.location.host;
-      const wsUrl = `${protocol}//${host}/ws?token=${encodeURIComponent(token)}&with=${encodeURIComponent(otherUserId)}`;
+      const qs = new URLSearchParams({
+        token,
+        with: otherUserId,
+      });
+      if (productId) qs.set("productId", productId);
+      const wsUrl = `${protocol}//${host}/ws?${qs.toString()}`;
 
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
@@ -249,7 +264,7 @@ export function useRealtimeChat({
         connectSse();
       }
     }
-  }, [otherUserId, onMessages, cleanup, connectSse]);
+  }, [otherUserId, productId, onMessages, cleanup, connectSse]);
 
   // ── Initialize / teardown based on enabled flag ────────────
   useEffect(() => {

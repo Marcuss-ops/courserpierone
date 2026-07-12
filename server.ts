@@ -62,6 +62,7 @@ app.prepare().then(() => {
 
     const token = query.token as string | undefined;
     const withUserId = query.with as string | undefined;
+    const withProductId = query.productId as string | undefined;
 
     if (!token || !withUserId) {
       socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
@@ -78,6 +79,37 @@ app.prepare().then(() => {
 
     const { userId } = verified;
 
+    // Phase 1.3: productId è ora richiesto dal client per ogni DM.
+    // Validiamo almeno che esista un Product reale — il controllo
+    // completo creator↔cliente↔prodotto arriverà dal
+    // resolveMessagingPermission (Fase 1.5) e dallo switch a
+    // conversationId (Fase 4.1). Per ora respingiamo solo i WS con
+    // productId inesistente per evitare subscription a contesti fake.
+    //
+    // TODO Fase 1.5: integrare resolveMessagingPermission anche qui
+    // (verifica ordine completed, ruoli, ownership prodotto).
+    if (withProductId) {
+      // Validazione best-effort: non blocchiamo l'upgrade ma
+      // logghiamo l'anomalia. Blocco stretto richiede async prima
+      // dell'upgrade, più invasivo.
+      prisma.product.findUnique({ where: { id: withProductId }, select: { id: true } })
+        .then((product) => {
+          if (!product) {
+            console.warn(
+              `[ws] Product ${withProductId} not found for user ${userId} (with=${withUserId}) — allowing upgrade but flagging`,
+            );
+          }
+        })
+        .catch((err) => console.error("[ws] productId validation error:", err));
+    } else {
+      // Nessun productId: nel modello conversazione-per-prodotto non
+      // dovremmo più accettare WS "generici". Logghiamo per debug e,
+      // in Fase 4.1, transformeremo in upgrade rifiutato.
+      console.warn(
+        `[ws] Legacy upgrade without productId from user=${userId} with=${withUserId} — will be rejected in 4.1`,
+      );
+    }
+
     // Close old connection for the same user, if any
     const existing = clients.get(userId);
     if (existing && existing.readyState === WebSocket.OPEN) {
@@ -86,9 +118,14 @@ app.prepare().then(() => {
 
     wss.handleUpgrade(request, socket, head, (ws) => {
       // Attach metadata
-      const meta = ws as WebSocket & { userId: string; withUserId: string };
+      const meta = ws as WebSocket & {
+        userId: string;
+        withUserId: string;
+        withProductId: string | null;
+      };
       meta.userId = userId;
       meta.withUserId = withUserId;
+      meta.withProductId = withProductId ?? null;
 
       wss.emit("connection", ws, request);
     });
@@ -168,27 +205,38 @@ app.prepare().then(() => {
 
   // ── Bridge: REST API → WebSocket ────────────────────────────
   messageBroker.on(NEW_MESSAGE, (event: NewMessageEvent) => {
-    const { conversationId, message } = event;
+    const { conversationId, productId: eventProductId, message } = event;
 
-    // Broadcast only to participants of this conversation
+    // Broadcast only to participants of this conversation.
+    // Phase 1.3: filtriamo anche per productId così un client sottoscritto
+    // a un WS con productId=A non riceve messaggi di conversazioni con
+    // productId=B che condividono lo stesso partecipante.
     for (const [clientId, clientWs] of clients) {
       // Skip the sender — they already have the message from the POST response
       if (clientId === message.senderId) continue;
 
       if (clientWs.readyState !== WebSocket.OPEN) continue;
 
+      // Phase 1.3: skip clients che non si sono sottoscritti a questo
+      // specifico prodotto. È una mitigazione pragmatica contro il
+      // data-leak cross-prodotto fino a quando Fase 4.1 non sostituirà
+      // `withUserId` con `conversationId` (check definitivo server-side).
+      const meta = clientWs as WebSocket & {
+        userId: string;
+        withUserId: string;
+        withProductId: string | null;
+      };
+      if (!meta.withProductId || meta.withProductId !== eventProductId) {
+        continue;
+      }
+
       // Check if this client is a participant in the conversation
       const convs = userConversations.get(clientId);
       if (!convs) continue;
 
       // The client needs to be viewing a conversation with the message sender
-      // or the message receiver (depending on who they are)
-      const isParticipant =
-        convs.has(message.senderId) || convs.has(message.senderId);
-
-      // Actually, we don't know the other participant from just the message.
-      // We know the sender. The other participant is anyone who has a conversation
-      // with the sender and is viewing that conversation.
+      // (la conversazione è (sender, withUserId) e conProductId=eventProductId,
+      // quindi basta matching sul sender).
       if (convs.has(message.senderId)) {
         try {
           clientWs.send(

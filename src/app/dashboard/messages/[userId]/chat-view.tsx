@@ -29,6 +29,11 @@ interface OtherUser {
 
 interface ChatViewProps {
   conversationId: string | null;
+  /**
+   * Phase 1.3: ogni DM è scoped a un prodotto. Il ChatView deve passarlo
+   * a GET /api/messages, POST /api/messages e al real-time hook.
+   */
+  productId: string;
   currentUserId: string;
   currentUserName: string;
   otherUser: OtherUser;
@@ -38,6 +43,7 @@ const PAGE_SIZE = 50;
 
 export function ChatView({
   conversationId: initialConversationId,
+  productId,
   currentUserId,
   currentUserName,
   otherUser,
@@ -77,6 +83,7 @@ export function ChatView({
 
   const { connected, isOtherTyping, sendTyping, resetTypingTimer } = useRealtimeChat({
     otherUserId,
+    productId, // Phase 1.3: anche WS subscribe è scoped per prodotto
     onMessages: handleRealtimeMessages,
     enabled: true,
   });
@@ -86,7 +93,11 @@ export function ChatView({
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams({ with: otherUserId, limit: String(PAGE_SIZE) });
+      const params = new URLSearchParams({
+        with: otherUserId,
+        productId, // Phase 1.3
+        limit: String(PAGE_SIZE),
+      });
       const res = await fetch(`/api/messages?${params.toString()}`);
 
       // If conversation doesn't exist yet (403), just show empty state
@@ -117,7 +128,7 @@ export function ChatView({
     } finally {
       setLoading(false);
     }
-  }, [otherUserId, conversationId, t]);
+  }, [otherUserId, productId, conversationId, t]);
 
   // Load older messages
   const loadOlderMessages = useCallback(async () => {
@@ -127,6 +138,7 @@ export function ChatView({
     try {
       const params = new URLSearchParams({
         with: otherUserId,
+        productId, // Phase 1.3
         cursor: nextCursorRef.current,
         limit: String(PAGE_SIZE),
       });
@@ -145,7 +157,7 @@ export function ChatView({
     } finally {
       setLoadingOlder(false);
     }
-  }, [otherUserId, loadingOlder, t]);
+  }, [otherUserId, productId, loadingOlder, t]);
 
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
@@ -199,6 +211,7 @@ export function ChatView({
         body: JSON.stringify({
           receiverId: otherUserId,
           content: trimmed,
+          productId, // Phase 1.3: productId obbligatorio
         }),
       });
       if (!res.ok) {

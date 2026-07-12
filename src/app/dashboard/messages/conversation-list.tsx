@@ -20,10 +20,14 @@ export function ConversationList({ previews, currentUserId }: ConversationListPr
             conv.lastMessage.senderId !== currentUserId &&
             !conv.lastMessage.read);
 
+        // Phase 1.3: ogni link passa productId per soddisfare il vincolo
+        // sulla ChatPage che ora richiede productId obbligatorio.
+        const href = `/dashboard/messages/${conv.otherUser.id}?productId=${encodeURIComponent(conv.productId)}`;
+
         return (
           <Link
             key={conv.id}
-            href={`/dashboard/messages/${conv.otherUser.id}`}
+            href={href}
             className={`group flex items-center gap-4 p-4 sm:p-5 rounded-2xl border transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream-dark-gold focus-visible:ring-offset-2 focus-visible:ring-offset-cream-dark-bg ${
               isUnread
                 ? "bg-cream-dark-gold/5 border-cream-dark-gold/20 shadow-sm hover:shadow-md hover:border-cream-dark-gold/40"
@@ -74,6 +78,13 @@ export function ConversationList({ previews, currentUserId }: ConversationListPr
                   </span>
                 )}
               </div>
+
+              {/* Product badge (Phase 1.3) */}
+              {conv.productLabel && (
+                <p className="text-[10px] text-cream-dark-gold/80 font-medium uppercase tracking-wide mt-1 truncate">
+                  • {conv.productLabel}
+                </p>
+              )}
             </div>
 
             <ChevronRight className="shrink-0 w-4 h-4 text-cream-dark-text-soft/40 group-hover:text-cream-dark-gold group-hover:translate-x-0.5 transition-all" />

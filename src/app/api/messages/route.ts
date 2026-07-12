@@ -8,20 +8,28 @@ import { messageBroker, NEW_MESSAGE } from "@/lib/ws/broker";
 import { sendDmNotificationEmail } from "@/lib/services/email";
 
 /**
- * Trova o crea una conversazione tra due utenti.
+ * Trova o crea una conversazione tra due utenti LEGATA A UN PRODOTTO.
  * L'ordinamento degli ID è deterministico (sort lessicografico) per garantire
- * che l'unique constraint su [userOneId, userTwoId] funzioni correttamente.
+ * che l'unique constraint su [userOneId, userTwoId, productId] funzioni
+ * correttamente a prescindere dall'ordine con cui vengono passati i due userId.
+ *
+ * Phase 1.3 del piano DMs: productId è OBBLIGATORIO — non esiste DM
+ * generico tra due utenti se non in relazione a un prodotto acquistato.
  */
 async function findOrCreateConversation(
   userId: string,
   otherUserId: string,
-  productId?: string,
+  productId: string,
 ) {
   const [minId, maxId] = [userId, otherUserId].sort();
 
   const existing = await prisma.conversation.findUnique({
     where: {
-      userOneId_userTwoId: { userOneId: minId, userTwoId: maxId },
+      userOneId_userTwoId_productId: {
+        userOneId: minId,
+        userTwoId: maxId,
+        productId,
+      },
     },
   });
 
@@ -31,28 +39,30 @@ async function findOrCreateConversation(
     data: {
       userOneId: minId,
       userTwoId: maxId,
-      productId: productId || null,
+      productId,
     },
   });
 }
 
 /**
- * Cerca una conversazione esistente tra due utenti.
+ * Cerca una conversazione esistente tra due utenti scope a un prodotto.
+ * L'ordine (userOneId, userTwoId) può essere either way — risolviamo
+ * con un OR pair.
  */
 async function findConversation(
   userId: string,
   otherUserId: string,
-  productId?: string,
+  productId: string,
 ) {
   const [minId, maxId] = [userId, otherUserId].sort();
 
   return prisma.conversation.findFirst({
     where: {
+      productId,
       OR: [
         { userOneId: minId, userTwoId: maxId },
         { userOneId: maxId, userTwoId: minId },
       ],
-      ...(productId ? { productId } : {}),
     },
   });
 }
@@ -60,7 +70,8 @@ async function findConversation(
 /**
  * GET /api/messages?with=<userId>&productId=<productId>&cursor=<id>&limit=50
  *
- * Cursor-based pagination per la conversazione tra due utenti.
+ * Cursor-based pagination per la conversazione tra due utenti, scoped a
+ * un prodotto (Phase 1.3). productId è obbligatorio.
  *
  * - Senza cursor: restituisce i messaggi più recenti (prima pagina)
  * - Con cursor: restituisce i messaggi più vecchi del cursor
@@ -68,7 +79,9 @@ async function findConversation(
  * - Risposta: { messages, nextCursor }
  *   nextCursor = id del messaggio più vecchio nella pagina, o null se non ce ne sono altri
  *
- * CONTROLLO DI ACCESSO: verifica che la Conversation esista e appartenga all'utente.
+ * CONTROLLO DI ACCESSO: verifica che la Conversation esista e appartenga
+ * all'utente. Fase 1.5 aggiungerà il resolveMessagingPermission per il check
+ * completo creator↔cliente↔prodotto.
  */
 export const GET = withRateLimit(async function GET(request: NextRequest) {
   try {
@@ -87,6 +100,13 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Parametro 'with' obbligatorio" }, { status: 400 });
     }
 
+    if (!productId) {
+      return NextResponse.json(
+        { error: "Parametro 'productId' obbligatorio" },
+        { status: 400 },
+      );
+    }
+
     if (withUserId === dbUser.id) {
       return NextResponse.json({ error: "Non puoi visualizzare una conversazione con te stesso" }, { status: 400 });
     }
@@ -103,7 +123,7 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
 
     if (!conversation) {
       return NextResponse.json(
-        { error: "Accesso negato — nessuna conversazione con questo utente" },
+        { error: "Accesso negato — nessuna conversazione con questo utente su questo prodotto" },
         { status: 403 },
       );
     }
@@ -137,10 +157,14 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
 /**
  * POST /api/messages
  * Invia un nuovo messaggio.
- * Body: { receiverId: string, content: string, productId?: string }
+ * Body: { receiverId: string, content: string, productId: string }
  *
+ * productId è OBBLIGATORIO (Phase 1.3): ogni DM è scoped a un prodotto.
  * Trova o crea una Conversation tra sender e receiver, poi crea il Message.
  * Il senderId è sempre l'utente autenticato.
+ *
+ * NOTA: il controllo autorizzativo completo (creator/cliente/ordine
+ * completed) arriverà dal resolveMessagingPermission (Fase 1.5).
  */
 export const POST = withRateLimit(async function POST(request: NextRequest) {
   try {
@@ -153,7 +177,11 @@ export const POST = withRateLimit(async function POST(request: NextRequest) {
     const { receiverId, content, productId } = body;
 
     if (!receiverId || !content || typeof content !== "string" || content.trim().length === 0) {
-      return NextResponse.json({ error: "receiverId e content sono obbligatori" }, { status: 400 });
+      return NextResponse.json({ error: "receiverId, content e productId sono obbligatori" }, { status: 400 });
+    }
+
+    if (!productId || typeof productId !== "string") {
+      return NextResponse.json({ error: "productId è obbligatorio" }, { status: 400 });
     }
 
     if (content.length > 5000) {
@@ -174,6 +202,15 @@ export const POST = withRateLimit(async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Destinatario non trovato" }, { status: 404 });
     }
 
+    // Verifica che il prodotto esista (FK cascade lo cattura, ma errore più chiaro)
+    const productExists = await prisma.product.findUnique({
+      where: { id: productId },
+      select: { id: true },
+    });
+    if (!productExists) {
+      return NextResponse.json({ error: "Prodotto non trovato" }, { status: 404 });
+    }
+
     // Trova o crea la conversazione (ordinamento deterministico)
     const conversation = await findOrCreateConversation(dbUser.id, receiverId, productId);
 
@@ -190,9 +227,13 @@ export const POST = withRateLimit(async function POST(request: NextRequest) {
       },
     });
 
-    // Emit to WebSocket broker for real-time delivery to connected clients
+    // Emit to WebSocket broker for real-time delivery to connected clients.
+    // Phase 1.3: includiamo productId così il bridge WS può filtrare i
+    // messaggi al solo participant della conversazione-prodotto (evita
+    // data-leak cross-prodotto tra partecipanti diversi).
     messageBroker.emit(NEW_MESSAGE, {
       conversationId: conversation.id,
+      productId,
       message: {
         ...message,
         createdAt: message.createdAt.toISOString(),
