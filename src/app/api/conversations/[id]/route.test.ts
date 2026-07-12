@@ -20,6 +20,20 @@ vi.mock("@/lib/ws/broker", () => ({
   THREAD_DELETED: "threadDeleted",
 }));
 
+// ─── Bypass rate-limit wrapper for this test suite ──────────────
+// `withRateLimit(handler, "MESSAGES")` is a module-level wrapper with
+// in-memory state (`hits` Map) that persists across tests in the
+// same Vitest process. With 11 DELETE tests in this file (and several
+// call DELETE twice), the MESSAGES tier (10 req/min) is exhausted by
+// the 10th call, causing 429s that mask the real DELETE-handler
+// behavior under test. Mock the module to a passthrough so the
+// inner DELETE handler runs unmolested — this test suite targets
+// the handler's logic, not the rate-limit integration (covered by
+// src/lib/utils/rate-limit.test.ts if/when added).
+vi.mock("@/lib/utils/rate-limit", () => ({
+  withRateLimit: <T>(handler: T) => handler,
+}));
+
 // ─── Helpers ─────────────────────────────────────────────────
 
 // ─── Imports under test ──────────────────────────────────────

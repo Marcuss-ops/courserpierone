@@ -66,12 +66,19 @@ describe("deliverNewMessage", () => {
   });
 
   it("cleans up closed sockets and prunes empty Map entries", () => {
+    // The test verifies the empty-Set→Map-prune invariant. We must
+    // NOT include the sender in the Set here: `deliverNewMessage`
+    // self-skips the sender (`continue`, no Set.delete), so the Set
+    // would still contain them after the loop, and the prune branch
+    // would never fire. The correct fixture is "only non-sender
+    // subscribers, exactly one of which is closed": after the throw
+    // and the Set.delete, the Set becomes empty, and the Map entry
+    // is pruned.
     const conv: SubscribedConversationsCache = new Map();
-    const sender = makeSocket("user-a");
     const closingWs = makeSocket("user-b", () => {
       throw new Error("WS closed");
     });
-    conv.set("conv-1", new Set([sender, closingWs]));
+    conv.set("conv-1", new Set([closingWs]));
 
     const result = deliverNewMessage(conv, BASE_MESSAGE);
     expect(result.closed).toBe(1);
