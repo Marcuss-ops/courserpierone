@@ -44,7 +44,6 @@ export function CourseCard({
     >
       <div className="aspect-[3/2] bg-gradient-to-br from-[#FFF9F0] to-[#F5E6D3] relative overflow-hidden">
         {coverUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={coverUrl}
             alt={title}

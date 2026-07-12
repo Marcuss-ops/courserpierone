@@ -188,7 +188,6 @@ export function CreatorInbox({
                     <div className="shrink-0 relative">
                       <div className="w-11 h-11 rounded-full bg-gradient-to-br from-[#FFF5E6] to-[#FFE4C4] flex items-center justify-center overflow-hidden shadow-sm ring-1 ring-cream-dark-border">
                         {conv.otherUser.image ? (
-                          // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={conv.otherUser.image}
                             alt=""

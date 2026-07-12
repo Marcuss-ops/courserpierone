@@ -154,7 +154,6 @@ export function NotificationsDropdown({
                     {/* Avatar */}
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FFF5E6] to-[#FFE4C4] flex items-center justify-center overflow-hidden shrink-0 shadow-sm ring-1 ring-cream-dark-border">
                       {conv.otherUserImage ? (
-                        // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={conv.otherUserImage}
                           alt=""

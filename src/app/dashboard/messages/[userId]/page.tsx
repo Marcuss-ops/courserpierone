@@ -139,7 +139,6 @@ export default async function ConversationPage({ params, searchParams }: ChatPag
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#FFF5E6] to-[#FFE4C4] flex items-center justify-center overflow-hidden shrink-0 shadow-sm ring-1 ring-cream-dark-border">
               {otherUser.image ? (
-                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={otherUser.image}
                   alt=""

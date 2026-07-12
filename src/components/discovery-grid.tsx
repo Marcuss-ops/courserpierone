@@ -163,7 +163,6 @@ export function DiscoveryGrid({ courses, categories, locale }: DiscoveryGridProp
                   {/* Cover image */}
                   <div className="aspect-[16/10] bg-gradient-to-br from-gray-100 to-gray-50 relative overflow-hidden">
                     {course.coverUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={course.coverUrl}
                         alt={course.title}

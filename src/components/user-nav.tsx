@@ -97,7 +97,6 @@ export function UserNav({ user }: UserNavProps) {
         aria-expanded={isOpen}
       >
         {user.image ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={user.image}
             alt={displayName}

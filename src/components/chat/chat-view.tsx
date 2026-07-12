@@ -338,7 +338,6 @@ export function ChatView({
           <div className="flex flex-col items-center justify-center h-full text-center gap-4 py-12">
             <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#FFF5E6] to-[#FFE4C4] flex items-center justify-center shadow-md">
               {otherUser.image ? (
-                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={otherUser.image}
                   alt=""

@@ -279,7 +279,6 @@ export default async function PublicProfilePage({
         {/* Cover image */}
         <div className="w-full h-56 md:h-80 bg-gradient-to-br from-[#3A2D1E] via-[#2C2214] to-[#1A1208] relative overflow-hidden">
           {profileUser.coverImageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={profileUser.coverImageUrl}
               alt=""
@@ -307,7 +306,6 @@ export default async function PublicProfilePage({
                 style={{ background: "linear-gradient(135deg, #FFE4C4 0%, #D4A574 100%)" }}
               >
                 {profileUser.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={profileUser.image}
                     alt={displayName}
@@ -485,7 +483,6 @@ export default async function PublicProfilePage({
                 >
                   <div className="aspect-[3/2] bg-gradient-to-br from-[#2A2218] to-[#1A1208] relative overflow-hidden">
                     {course.coverUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={course.coverUrl}
                         alt=""

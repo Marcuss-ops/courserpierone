@@ -47,7 +47,6 @@ export function ConversationList({ previews, currentUserId }: ConversationListPr
             <div className="shrink-0 relative">
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-[#FFF5E6] to-[#FFE4C4] flex items-center justify-center overflow-hidden shadow-md ring-2 ring-cream-dark-border">
                 {conv.otherUser.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={conv.otherUser.image}
                     alt=""
