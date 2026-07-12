@@ -1,21 +1,40 @@
 # ═══════════════════════════════════════════════════════════════════════════════
-# CI — Typecheck, Lint, and Test
+# CI — "main verde = deploy" gate
 # ═══════════════════════════════════════════════════════════════════════════════
 #
-# Runs on every push and PR to main. Catches type errors, lint violations,
-# and test failures before they reach production.
+# Four independent quality jobs + one aggregator that posts to ALERT_WEBHOOK_URL
+# when ANY job is red. This is the deploy-gate:
 #
-# Environment variables:
-#   Uses safe CI defaults for PUBLIC vars. No real credentials needed —
-#   tests use vi.mock(), typecheck only needs types, lint is static analysis.
-#   If integration tests are added later that need a real DB, add the
-#   DATABASE_URL secret in GitHub Settings → Secrets → Actions.
+#   ┌─ typecheck    ─┐
+#   ├─ lint         ─┤
+#   ├─ unit-tests   ─┼─► deploy-gate ─► ALERT_WEBHOOK_URL (if red)
+#   └─ e2e-journey  ─┘      (aggregator)
 #
-# Concurrency: only one run per branch at a time (cancel old ones for PRs,
-# but NEVER cancel the main branch run — we want a clean history).
+# Required-status-check setup (manual, one-time):
+#   GitHub → Settings → Branches → main → "Require status checks to pass
+#   before merging" → check `deploy-gate` in the dropdown list. The
+#   aggregator job name is the single user-facing gate name.
+#
+# Alert setup (manual, one-time):
+#   GitHub → Settings → Secrets and variables → Actions → New secret:
+#     ALERT_WEBHOOK_URL = <Slack Incoming Webhook OR Discord webhook URL>
+#   If absent, the alert step short-circuits with a notice — never fails the
+#   workflow (logging is best-effort).
+#
+# Idempotency + Concurrency:
+#   - `cancel-in-progress: false` on main — preserves a clean history even
+#     when multiple pushes race. Old PR runs CAN be cancelled.
+#   - All four quality jobs run in parallel; deploy-gate waits on all of them
+#     then aggregates via `needs.*.result`.
+#
+# Secrets removed from the legacy single-job ci.yml:
+#   - The e2e-journey job runs ONLY on forks when its required Stripe/Supabase
+#     secrets are absent (uses the same skip-if-creds-missing pattern as the
+#     former journey-e2e.yml: Playwright counts skipped tests as non-failure,
+#     so the gate stays green on forks/Open-source contributors).
 # ═══════════════════════════════════════════════════════════════════════════════
 
-name: CI — Typecheck, Lint, Test
+name: CI — deploy-gate
 
 on:
   push:
@@ -26,24 +45,23 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
+  # Cancel old runs only on PRs — main branch runs are NEVER cancelled, so the
+  # deploy history stays reproducible.
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  ci:
-    name: Typecheck + Lint + Test
+  # ════════════════════════════════════════════════════════════════════════
+  # Job 1 — Typecheck
+  # ════════════════════════════════════════════════════════════════════════
+  typecheck:
+    name: typecheck
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 8
     permissions:
       contents: read
 
-    # ─── CI-safe env vars (dummy/non-sensitive) ──────────────
-    # Critical vars: valori dummy per evitare errori di import
-    # Required vars: lasciati vuoti — le feature corrispondenti
-    #                vengono disabilitate con graceful fallback
-    # Secrets reali: aggiungili su GitHub Settings → Secrets → Actions
-    #                se servono test di integrazione
     env:
-      # Critical (con dummy values — non servono credenziali reali)
+      # Critical (dummy — non serve un DB reale per `tsc --noEmit`)
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/courser
       DIRECT_URL: postgresql://postgres:postgres@localhost:5432/courser
       SUPABASE_URL: https://ci-dummy.supabase.co
@@ -51,11 +69,6 @@ jobs:
       NEXT_PUBLIC_SUPABASE_URL: https://ci-dummy.supabase.co
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-dummy-anon-key
       NEXT_PUBLIC_APP_URL: http://localhost:3000
-
-      # Optional — lasciati vuoti (graceful fallback)
-      # Aggiungi valori reali come GitHub Secrets se servono per test integrazione
-
-      # Tell the app this is CI (skips env validation noise)
       NODE_ENV: test
 
     steps:
@@ -74,18 +87,332 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+  # ════════════════════════════════════════════════════════════════════════
+  # Job 2 — Lint
+  # ════════════════════════════════════════════════════════════════════════
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: read
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/courser
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/courser
+      SUPABASE_URL: https://ci-dummy.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: ci-dummy-service-role-key
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-dummy.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-dummy-anon-key
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NODE_ENV: test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@39370e3970a6d050c480008ad58aa19be4ef98bb # v4.1.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies (postinstall runs prisma generate + locale resolver)
+        run: npm ci --no-audit --no-fund
+
       - name: Lint
         run: npm run lint:eslint
-        continue-on-error: true  # lint warnings shouldn't block CI
+      # NOTE: unlike the legacy single-job ci.yml, lint warnings/errors now
+      # BLOCK the gate. Errors → red. Warnings still pass (eslint config
+      # downgrades most to warn), but the job itself fails only on errors.
 
-      - name: Run tests
-        run: npm run test
+  # ════════════════════════════════════════════════════════════════════════
+  # Job 3 — Unit Tests (vitest)
+  # ════════════════════════════════════════════════════════════════════════
+  unit-tests:
+    name: vitest
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
 
-      - name: CI result
-        if: always()
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/courser
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/courser
+      SUPABASE_URL: https://ci-dummy.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: ci-dummy-service-role-key
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-dummy.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-dummy-anon-key
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      VITEST: "true"
+      NODE_ENV: test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@39370e3970a6d050c480008ad58aa19be4ef98bb # v4.1.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies (postinstall runs prisma generate + locale resolver)
+        run: npm ci --no-audit --no-fund
+
+      - name: Vitest (unit tests)
+        run: npm run test -- --reporter=default
+
+  # ════════════════════════════════════════════════════════════════════════
+  # Job 4 — Playwright E2E Journey
+  # Mirrors the former journey-e2e.yml — same skip-if-creds-missing pattern.
+  # ════════════════════════════════════════════════════════════════════════
+  e2e-journey:
+    name: e2e-journey (chrome)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: courser_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      # Ephemeral Postgres + Redis service-override URLs
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/courser_test
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/courser_test
+      REDIS_URL: redis://localhost:6379
+      KV_REST_API_URL: redis://localhost:6379
+      UPSTASH_REDIS_REST_URL: redis://localhost:6379
+
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+
+      # Stripe test-mode (required for journey)
+      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+      STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+      TEST_STRIPE_PRICE_ID: ${{ secrets.TEST_STRIPE_PRICE_ID }}
+
+      # Supabase test-project (required for journey)
+      SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      # Lemon Squeezy test (optional — only when journey suite uses it)
+      LEMONSQUEEZY_API_KEY: ${{ secrets.LEMONSQUEEZY_API_KEY }}
+      LEMONSQUEEZY_STORE_ID: ${{ secrets.LEMONSQUEEZY_STORE_ID }}
+      LEMONSQUEEZY_WEBHOOK_SECRET: ${{ secrets.LEMONSQUEEZY_WEBHOOK_SECRET }}
+      TEST_LEMON_VARIANT_ID: ${{ secrets.TEST_LEMON_VARIANT_ID }}
+
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+      NODE_ENV: test
+      CI: "true"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Setup Node.js + npm cache
+        uses: actions/setup-node@39370e3970a6d050c480008ad58aa19be4ef98bb # v4.1.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies (postinstall runs prisma generate + locale resolver)
+        run: npm ci --no-audit --no-fund
+
+      # ─── Cache Playwright browsers (~150MB, restoration <20s) ───
+      - name: Cache Playwright browsers
+        id: cache-playwright
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright browsers
+        if: steps.cache-playwright.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Apply Prisma migrations to ephemeral Postgres
+        # Inherits job-level env: DATABASE_URL=postgresql://postgres:postgres@localhost:5432/courser_test.
+        # DO NOT shadow it with secrets.DATABASE_URL — that would accidentally
+        # migrate the production DB.
+        run: npx prisma migrate deploy
+
+      - name: Run E2E journey suite
+      # Playwright's webServer.command (see playwright.config.ts) runs
+      # `npm run build && npm run start` automatically when CI=1, so we do
+      # NOT add a separate `npm run build` step here (would double-build).
+        run: npm run test:e2e -- --project=chromium --reporter=line,html
+        env:
+          PORT: "3000"
+
+      - name: Upload Playwright HTML report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Upload Playwright trace on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-trace
+          path: test-results/
+          retention-days: 7
+
+  # ════════════════════════════════════════════════════════════════════════
+  # Job 5 — deploy-gate (aggregator)
+  # This is the SINGLE required status check name to mark in branch
+  # protection. Aggregates the 4 jobs above; alerts via ALERT_WEBHOOK_URL
+  # on any red.
+  # ════════════════════════════════════════════════════════════════════════
+  deploy-gate:
+    name: 🚦 deploy-gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    needs: [typecheck, lint, unit-tests, e2e-journey]
+    if: always()
+    permissions:
+      contents: read
+
+    steps:
+      # ── 1. Aggregate quality-job results ────────────────────────────
+      # MUST exit 0 here so subsequent steps (alert, notice) can run.
+      # We delegate the "make the deploy-gate red in branch protection"
+      # to a dedicated final step (gate-fail). This is the canonical
+      # GitHub Actions pattern: aggregator writes outputs + exits 0,
+      # then post-aggregation steps react to those outputs without being
+      # skipped by a failed intermediate step.
+      - name: Aggregate quality-job results
+        id: aggregate
+        env:
+          TC: ${{ needs.typecheck.result }}
+          LN: ${{ needs.lint.result }}
+          UT: ${{ needs.unit-tests.result }}
+          E2E: ${{ needs.e2e-journey.result }}
         run: |
-          if [ "${{ job.status }}" = "success" ]; then
-            echo "✅ CI passed — typecheck, lint, and tests all green."
+          echo "typecheck=$TC"
+          echo "lint=$LN"
+          echo "vitest=$UT"
+          echo "e2e=$E2E"
+          if [ "$TC" = "success" ] \
+            && [ "$LN" = "success" ] \
+            && [ "$UT" = "success" ] \
+            && [ "$E2E" = "success" ]; then
+            echo "gate=green" >> "$GITHUB_OUTPUT"
+            echo "✅ deploy-gate GREEN — all 4 jobs passed."
+            exit 0
           else
-            echo "❌ CI failed. Check logs above."
+            echo "gate=red" >> "$GITHUB_OUTPUT"
+            echo "❌ deploy-gate RED — one or more jobs failed. Branch protection must remain BLOCKED."
+            exit 0  # CRITICAL: do NOT propagate failure here. gate-fail handles it AFTER alerts run.
           fi
+
+      # ── 2. Alert Slack/Discord via ALERT_WEBHOOK_URL on red ──────────
+      # Runs only when gate=red AND the secret is configured.
+      # Payload built with `jq --arg` (zero whitespace problems,
+      # zero injection risk). Format is shared with Slack Incoming Webhook
+      # AND Discord Webhook — Slack consumes both `text` and `blocks`,
+      # Discord consumes `text` and ignores `blocks`.
+      - name: Alert Slack/Discord via ALERT_WEBHOOK_URL on red
+        if: steps.aggregate.outputs.gate == 'red' && env.ALERT_WEBHOOK_URL != ''
+        env:
+          ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
+          REF: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+          ACTOR: ${{ github.actor }}
+          TC: ${{ needs.typecheck.result }}
+          LN: ${{ needs.lint.result }}
+          UT: ${{ needs.unit-tests.result }}
+          E2E: ${{ needs.e2e-journey.result }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          # NOTE: bash substring slicing uses ${VAR:OFFSET:LENGTH}.
+          # `${VAR::LENGTH}` is zsh-only and silently returns empty in
+          # bash on GHA runners. We slice the short SHA via jq to keep
+          # shell-side escaping trivial.
+          SHORT_SHA="${SHA:0:7}"
+          jq -n \
+            --arg ref     "$REF" \
+            --arg sha     "$SHORT_SHA" \
+            --arg actor   "$ACTOR" \
+            --arg tc      "$TC" \
+            --arg ln      "$LN" \
+            --arg ut      "$UT" \
+            --arg e2e     "$E2E" \
+            --arg url     "$RUN_URL" \
+            '{
+              text: ("🚨 deploy-gate RED on *\($ref)* (" + $sha + ")"),
+              blocks: [
+                {
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: ("🚨 *deploy-gate RED on \($ref)*\n" +
+                           "• Commit: ` + $sha + ` by *\($actor)*\n" +
+                           "• typecheck: `\($tc)`\n" +
+                           "• lint: `\($ln)`\n" +
+                           "• vitest: `\($ut)`\n" +
+                           "• e2e-journey: `\($e2e)`\n" +
+                           "• Run: <\($url)|open in GitHub>")
+                  }
+                }
+              ]
+            }' > /tmp/alert-payload.json
+
+          http_code=$(curl -sS -o /tmp/alert-resp.json -w '%{http_code}' \
+            -H "Content-Type: application/json" \
+            -X POST "$ALERT_WEBHOOK_URL" \
+            --data-binary @/tmp/alert-payload.json || true)
+          echo "ALERT_WEBHOOK responded with HTTP $http_code"
+          if [ "$http_code" != "200" ] && [ "$http_code" != "204" ] && [ "$http_code" != "201" ]; then
+            echo "::warning::ALERT webhook returned non-2xx ($http_code) — alert delivery failed but gate remains red."
+            echo "Response body (truncated):"
+            head -c 500 /tmp/alert-resp.json
+          fi
+
+      # ── 3. Notice when ALERT_WEBHOOK_URL is unset ────────────────────
+      - name: Notice when ALERT_WEBHOOK_URL is unset
+        if: steps.aggregate.outputs.gate == 'red' && env.ALERT_WEBHOOK_URL == ''
+        run: |
+          echo "::warning::deploy-gate is RED, but ALERT_WEBHOOK_URL is not configured."
+          echo "::warning::Set it at: GitHub → Settings → Secrets and variables → Actions"
+          echo "::warning::to receive Slack/Discord alerts on future red gates."
+          echo "(Gate itself remains RED regardless — branch protection blocks the merge.)"
+
+      # ── 4. Fail-the-gate (LAST step so the deploy-gate job status is RED) ─
+      # This is what makes the deploy-gate status check red in branch
+      # protection. Runs only when gate=red. Separate from aggregate so
+      # alert step (above) actually executes before the job fails out.
+      - name: Fail the gate (set status RED)
+        if: steps.aggregate.outputs.gate == 'red'
+        run: |
+          echo "::error::deploy-gate is RED. Branch protection blocks merge/deploy."
+          echo "::error::Inspect the failed jobs above and re-run after fixes."
+          exit 1
