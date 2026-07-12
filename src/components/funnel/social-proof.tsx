@@ -90,7 +90,6 @@ export default function SocialProof({ productSlug, locale }: SocialProofProps) {
         setEvents(getFallbackEvents());
       }
     }
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises -- fetchEvents handles its own errors via internal try/catch + setEvents(getFallbackEvents()). `void` explicitly documents fire-and-forget intent.
     void fetchEvents();
   }, [productSlug, locale]);
 
