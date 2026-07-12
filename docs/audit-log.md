@@ -17,6 +17,13 @@
       [§ Staging runbook](#staging-runbook) below. To be filled in by
       the operator executing `scripts/migrate-grants-from-orders.ts`
       against `STAGING_DATABASE_URL`.
+- [ ] **2026-07-12 follow-up** — staging run attempted in an
+      automation environment without `STAGING_DATABASE_URL` exported.
+      The script + runbook are correct (verified in PR 2 code review
+      `afc288d`); the baseline capture needs an operator shell that
+      has the Vercel staging `DATABASE_URL` (with pgBouncer) set.
+      The runbook below is the canonical procedure — no edits needed;
+      just execute the 5 steps in the order shown.
 
 ---
 
