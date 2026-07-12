@@ -561,6 +561,40 @@ describe("POST /api/conversations", () => {
     });
   });
 
+  // ─── Fase 5: chat separate per due prodotti ────────────────
+  // Una coppia di utenti (SELF, OTHER_A) deve avere UNA conversazione
+  // diversa per ogni prodotto acquistato. La chiave composita
+  // userOneId_userTwoId_productId garantisce l'isolamento: cambiando
+  // productId, upsert crea (o trova) un Conversation distinto.
+  it("creates a NEW conversation when productId changes (chat separate per prodotto)", async () => {
+    mockAuth({ id: SELF, email: "self@test.com" });
+    mockPrisma.conversation.upsert
+      .mockResolvedValueOnce({ id: "conv-A" })
+      .mockResolvedValueOnce({ id: "conv-B" });
+
+    const { POST } = await import("./route");
+    const resA = await POST(
+      postJson("/api/conversations", { productId: PRODUCT_A, targetUserId: OTHER_A }),
+    );
+    const resB = await POST(
+      postJson("/api/conversations", { productId: PRODUCT_B, targetUserId: OTHER_A }),
+    );
+
+    const bodyA = await resA.json();
+    const bodyB = await resB.json();
+    expect(bodyA.conversationId).toBe("conv-A");
+    expect(bodyB.conversationId).toBe("conv-B");
+
+    // Le chiavi composte differiscono sul solo campo productId
+    const callA = mockPrisma.conversation.upsert.mock.calls[0][0];
+    const callB = mockPrisma.conversation.upsert.mock.calls[1][0];
+    expect(callA.where.userOneId_userTwoId_productId.productId).toBe(PRODUCT_A);
+    expect(callB.where.userOneId_userTwoId_productId.productId).toBe(PRODUCT_B);
+    // userOneId/userTwoId invece rimangono gli stessi
+    expect(callA.where.userOneId_userTwoId_productId.userOneId).toBe(callB.where.userOneId_userTwoId_productId.userOneId);
+    expect(callA.where.userOneId_userTwoId_productId.userTwoId).toBe(callB.where.userOneId_userTwoId_productId.userTwoId);
+  });
+
   it("is idempotent on existing conversation (upsert update-branch returns same id)", async () => {
     // Fase 2.2: l'endpoint è idempotente per definizione. Due POST
     // consecutivi sulla stessa coppia-prodotto devono restituire lo

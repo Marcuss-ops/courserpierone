@@ -5,6 +5,18 @@ import { WebSocketServer, WebSocket } from "ws";
 import { createHmac } from "crypto";
 import { prisma } from "./src/lib/db/prisma";
 import { messageBroker, NEW_MESSAGE, type NewMessageEvent } from "./src/lib/ws/broker";
+import { deliverNewMessage } from "./src/lib/ws/broadcast";
+
+/**
+ * Fase 5: tipo di WS che ha passato l'upgrade handler.
+ * `WebSocket & { userId, conversationId }` è strutturalmente compatibile
+ * con `BroadcastSocketLike` (subset di proprietà), quindi può alimentare
+ * `deliverNewMessage` direttamente senza `as unknown as`.
+ */
+type SubscribedSocket = WebSocket & {
+  userId: string;
+  conversationId: string;
+};
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
@@ -35,7 +47,7 @@ const clients = new Map<string, Set<WebSocket>>();
  * per una Conversation, lo si confronta con `subscribedConversations`
  * per filtrare i WS. È un Set di WS per conversationId.
  */
-const subscribedConversations = new Map<string, Set<WebSocket>>();
+const subscribedConversations = new Map<string, Set<SubscribedSocket>>();
 
 /**
  * Verify a WS token signed for a specific conversation.
@@ -147,10 +159,7 @@ app.prepare().then(() => {
 
         // ── Attach meta + complete upgrade ──────────────────────
         wss.handleUpgrade(request, socket, head, (ws) => {
-          const meta = ws as WebSocket & {
-            userId: string;
-            conversationId: string;
-          };
+          const meta = ws as SubscribedSocket;
           meta.userId = userId;
           meta.conversationId = conversationId;
 
@@ -165,7 +174,7 @@ app.prepare().then(() => {
   });
 
   wss.on("connection", (ws: WebSocket) => {
-    const meta = ws as WebSocket & { userId: string; conversationId: string };
+    const meta = ws as SubscribedSocket;
     const { userId, conversationId } = meta;
 
     // Aggiungi al Set per-user (Fase 4.2 multi-tab).
@@ -175,10 +184,12 @@ app.prepare().then(() => {
     clients.get(userId)!.add(ws);
 
     // Aggiungi al Set per-conversation (Fase 4.1 cache subscription).
+    // `meta` è il WS dopo il cast `as SubscribedSocket` — quindi
+    // tipi-sicuro per il Set<SubscribedSocket> senza re-cast.
     if (!subscribedConversations.has(conversationId)) {
       subscribedConversations.set(conversationId, new Set());
     }
-    subscribedConversations.get(conversationId)!.add(ws);
+    subscribedConversations.get(conversationId)!.add(meta);
 
     // Update lastSeenAt in DB (user is now online)
     prisma.user
@@ -201,7 +212,8 @@ app.prepare().then(() => {
     ws.on("close", () => {
       clearInterval(heartbeat);
 
-      // Cleanup per-tab (Fase 4.2).
+      // Cleanup per-tab (Fase 4.2). `clients` contiene plain WebSocket
+      // quindi `ws` va bene qui.
       const userSockets = clients.get(userId);
       if (userSockets) {
         userSockets.delete(ws);
@@ -210,10 +222,11 @@ app.prepare().then(() => {
         }
       }
 
-      // Cleanup per-conversation (Fase 4.1).
+      // Cleanup per-conversation (Fase 4.1). Set<SubscribedSocket>
+      // richiede il cast `meta` per essere type-safe.
       const convSockets = subscribedConversations.get(conversationId);
       if (convSockets) {
-        convSockets.delete(ws);
+        convSockets.delete(meta);
         if (convSockets.size === 0) {
           subscribedConversations.delete(conversationId);
         }
@@ -232,7 +245,10 @@ app.prepare().then(() => {
 
     ws.on("error", (err) => {
       console.error(`[ws] Error for ${userId}:`, err.message);
-      // Allinea la pulizia.
+      // Se l'error handler si attiva senza un successivo close (es. TCP
+      // RST, network drop), il heartbeat altrimenti leakerebbe fino al
+      // close. Pulizia speculare a quella del ws.on("close").
+      clearInterval(heartbeat);
       const userSockets = clients.get(userId);
       if (userSockets) {
         userSockets.delete(ws);
@@ -242,7 +258,7 @@ app.prepare().then(() => {
       }
       const convSockets = subscribedConversations.get(conversationId);
       if (convSockets) {
-        convSockets.delete(ws);
+        convSockets.delete(meta);
         if (convSockets.size === 0) {
           subscribedConversations.delete(conversationId);
         }
@@ -260,9 +276,11 @@ app.prepare().then(() => {
           const convSockets = subscribedConversations.get(conversationId);
           if (!convSockets) return;
           for (const otherWs of convSockets) {
-            // Non rimandare al sender stesso (no self-receive).
-            const otherMeta = otherWs as WebSocket & { userId: string };
-            if (otherMeta.userId === userId) continue;
+            // otherWs è SubscribedSocket (dal Set<SubscribedSocket>),
+            // quindi `otherWs.userId` è direttamente accessibile senza
+            // cast intermedio. Non rimandare al sender stesso (no
+            // self-receive).
+            if (otherWs.userId === userId) continue;
             if (otherWs.readyState === WebSocket.OPEN) {
               otherWs.send(
                 JSON.stringify({
@@ -281,48 +299,21 @@ app.prepare().then(() => {
   });
 
   // ── Bridge: REST API → WebSocket ────────────────────────────
-  // Fase 4.1: il filter diventa una singola equality check
-  // `meta.conversationId === event.conversationId`. La coppia sender
-  // / productId è sostituita da una sola chiave canonica. Niente più
-  // cross-tab/cross-product leak: il filter per-conversation è
-  // Ermetico.
+  // Fase 4.1: il filter è una singola equality check
+  // `subscribedConversations.has(event.conversationId)`. La coppia
+  // sender / productId è sostituita da una sola chiave canonica.
+  // Niente più cross-tab/cross-product leak: il filter per-conversation
+  // è ermetico.
+  //
+  // Fase 5: la logica di routing è estratta in `deliverNewMessage`
+  // (src/lib/ws/broadcast.ts) come funzione pura, così è coperta da
+  // unit test indipendenti dall'infrastruttura WS/HTTP.
+  //
+  // `SubscribedSocket` è strutturalmente compatibile con
+  // `BroadcastSocketLike` (ha userId + readyState + send), quindi il
+  // bridge passa la cache senza cast.
   messageBroker.on(NEW_MESSAGE, (event: NewMessageEvent) => {
-    const { conversationId, message } = event;
-
-    const convSockets = subscribedConversations.get(conversationId);
-    if (!convSockets) return;
-
-    // Snapshot per evitare mutazioni-during-iteration.
-    for (const ws of [...convSockets]) {
-      if (ws.readyState !== WebSocket.OPEN) continue;
-      const wsMeta = ws as WebSocket & { userId: string };
-      // Skip self (sender): il sender ha già il messaggio dal POST
-      // response, niente da re-inviare.
-      if (wsMeta.userId === message.senderId) continue;
-
-      try {
-        ws.send(
-          JSON.stringify({
-            type: "newMessage",
-            conversationId,
-            message,
-          }),
-        );
-      } catch {
-        // Cleanup per-tab + per-conversation.
-        convSockets.delete(ws);
-        if (convSockets.size === 0) {
-          subscribedConversations.delete(conversationId);
-        }
-        const userSockets = clients.get(wsMeta.userId);
-        if (userSockets) {
-          userSockets.delete(ws);
-          if (userSockets.size === 0) {
-            clients.delete(wsMeta.userId);
-          }
-        }
-      }
-    }
+    deliverNewMessage(subscribedConversations, event);
   });
 
   // ── Start server ────────────────────────────────────────────

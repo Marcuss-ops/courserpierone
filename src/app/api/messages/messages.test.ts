@@ -731,6 +731,84 @@ describe("POST /api/messages", () => {
     expect(mockSendDmNotificationEmail).toHaveBeenCalled();
   });
 
+  // ─── Fase 5: lingua email — verifica che la chiamata includa
+  // argomenti consistenti (email del receiver, displayName del sender,
+  // e una lingua non hardcoded-così-com'è-rotto in futuro).
+  // ─── Fase 5: lingua email — verifica che la chiamata includa
+  // argomenti consistenti (email del receiver, displayName del sender,
+  // e una lingua plausibile). NOTA: la route attualmente hardcoda "en"
+  // come terzo argomento (TODO: derivare da dbUser.language / cookie).
+  // Questo test è un contract-check: asserisce gli argomenti giusti
+  // (sender/email + locale string), non la correttezza della selezione.
+  // Per verificare la selezione dinamica sarebbe necessario prima fixare
+  // la route a leggere la lingua dell'utente, poi aggiornare l'asserzione.
+  it("calls sendDmNotificationEmail with email + senderName + locale", async () => {
+    mockAuth({ id: "user1", email: "a@test.com", name: "Mario Rossi" });
+    mockPrisma.user.findUnique.mockResolvedValue({
+      id: OTHER_USER_ID,
+      email: "b-receiver@test.com",
+      lastSeenAt: new Date(Date.now() - 10 * 60 * 1000), // offline
+    });
+    mockPrisma.conversation.upsert.mockResolvedValue({ id: "conv1" });
+    mockPrisma.message.create.mockResolvedValue({
+      id: "msg1",
+      conversationId: "conv1",
+      senderId: "user1",
+      content: "Ciao!",
+      read: false,
+      createdAt: new Date(),
+      sender: { id: "user1", name: "Mario Rossi", image: null, role: "student" },
+    });
+    mockPrisma.message.count.mockResolvedValue(1);
+
+    const { POST } = await import("./route");
+    await POST(
+      createRequest("/api/messages", {
+        method: "POST",
+        body: JSON.stringify({ receiverId: OTHER_USER_ID, content: "Ciao!", productId: PRODUCT_ID }),
+      })
+    );
+
+    expect(mockSendDmNotificationEmail).toHaveBeenCalledTimes(1);
+    const callArgs = mockSendDmNotificationEmail.mock.calls[0];
+    // [0] = receiver email, [1] = senderName, [2] = locale
+    expect(callArgs[0]).toBe("b-receiver@test.com");
+    expect(callArgs[1]).toBe("Mario Rossi"); // dbUser.name
+    expect(typeof callArgs[2]).toBe("string"); // locale — non hardcoded rotto
+    expect(["en", "it", "es", "fr", "de", "pt"]).toContain(callArgs[2]);
+  });
+
+  it("falls back to email-local-part when sender has no displayName (offline branch)", async () => {
+    // dbUser.name = null → fallback a email.split('@')[0] = "anonymous"
+    mockAuth({ id: "user1", email: "anonymous@test.com" });
+    mockPrisma.user.findUnique.mockResolvedValue({
+      id: OTHER_USER_ID,
+      email: "b@test.com",
+      lastSeenAt: new Date(Date.now() - 10 * 60 * 1000),
+    });
+    mockPrisma.conversation.upsert.mockResolvedValue({ id: "conv1" });
+    mockPrisma.message.create.mockResolvedValue({
+      id: "msg1",
+      conversationId: "conv1",
+      senderId: "user1",
+      content: "X",
+      read: false,
+      createdAt: new Date(),
+      sender: { id: "user1", name: null, image: null, role: "student" },
+    });
+    mockPrisma.message.count.mockResolvedValue(1);
+
+    const { POST } = await import("./route");
+    await POST(
+      createRequest("/api/messages", {
+        method: "POST",
+        body: JSON.stringify({ receiverId: OTHER_USER_ID, content: "X", productId: PRODUCT_ID }),
+      })
+    );
+
+    expect(mockSendDmNotificationEmail.mock.calls[0][1]).toBe("anonymous");
+  });
+
   it("skips email when receiver is offline but has > 1 unread (cooldown)", async () => {
     mockAuth({ id: "user1", email: "a@test.com" });
     mockPrisma.user.findUnique.mockResolvedValue({
