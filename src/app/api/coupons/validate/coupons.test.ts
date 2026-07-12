@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { NextRequest } from "next/server";
+import { createMockRequest } from "@/app/api/__test-helpers__/mock-request";
 
 // ─── Mock prisma BEFORE importing the route ─────────────────────
 // Pattern: inline the mock object inside the vi.mock factory to avoid
@@ -16,17 +16,6 @@ import { GET } from "./route";
 import { prisma } from "@/lib/db/prisma";
 
 // ─── Helpers ─────────────────────────────────────────────────────
-function createMockRequest(query: Record<string, string>): NextRequest {
-  const url = "http://localhost:3000/api/coupons/validate"
-    + "?" + new URLSearchParams(query).toString();
-  return {
-    url,
-    headers: new Map(),
-    json: () => Promise.resolve({}),
-    text: () => Promise.resolve(""),
-  } as unknown as NextRequest;
-}
-
 function buildCoupon(overrides: Partial<{
   id: string;
   code: string;
@@ -64,27 +53,27 @@ function buildCoupon(overrides: Partial<{
 beforeEach(() => {
   vi.clearAllMocks();
   // Default: a valid percent coupon is found
-  vi.mocked(prisma.coupon.findUnique).mockResolvedValue(buildCoupon() as never);
+  vi.mocked(prisma.coupon.findUnique).mockResolvedValue(buildCoupon());
 });
 
 // ─── Tests ───────────────────────────────────────────────────────
 describe("GET /api/coupons/validate — input validation", () => {
   it("returns 400 when code parameter is missing", async () => {
-    const response = await GET(createMockRequest({}));
+    const response = await GET(createMockRequest("/api/coupons/validate", { query: {} }));
     expect(response.status).toBe(400);
     const body = await response.json();
     expect(body.error).toMatch(/missing code/i);
   });
 
   it("passes the code to findUnique (after normalization)", async () => {
-    await GET(createMockRequest({ code: "summer 2026" }));
+    await GET(createMockRequest("/api/coupons/validate", { query: { code: "summer 2026" } }));
     expect(vi.mocked(prisma.coupon.findUnique)).toHaveBeenCalledWith({
       where: { code: "SUMMER2026" },
     });
   });
 
   it("normalizes code: lowercase + whitespace collapses", async () => {
-    await GET(createMockRequest({ code: "  summer   2026  " }));
+    await GET(createMockRequest("/api/coupons/validate", { query: { code: "  summer   2026  " } }));
     expect(vi.mocked(prisma.coupon.findUnique)).toHaveBeenCalledWith({
       where: { code: "SUMMER2026" },
     });
@@ -95,7 +84,7 @@ describe("GET /api/coupons/validate — rejection paths", () => {
   it("returns 404 valid:false when coupon does not exist", async () => {
     vi.mocked(prisma.coupon.findUnique).mockResolvedValueOnce(null);
 
-    const response = await GET(createMockRequest({ code: "GHOST" }));
+    const response = await GET(createMockRequest("/api/coupons/validate", { query: { code: "GHOST" } }));
     expect(response.status).toBe(404);
     const body = await response.json();
     expect(body.valid).toBe(false);
@@ -107,7 +96,7 @@ describe("GET /api/coupons/validate — rejection paths", () => {
       buildCoupon({ isActive: false })
     );
 
-    const response = await GET(createMockRequest({ code: "SUMMER2026" }));
+    const response = await GET(createMockRequest("/api/coupons/validate", { query: { code: "SUMMER2026" } }));
     expect(response.status).toBe(400);
     const body = await response.json();
     expect(body.valid).toBe(false);
@@ -119,7 +108,7 @@ describe("GET /api/coupons/validate — rejection paths", () => {
       buildCoupon({ expiresAt: new Date("2020-01-01") })
     );
 
-    const response = await GET(createMockRequest({ code: "SUMMER2026" }));
+    const response = await GET(createMockRequest("/api/coupons/validate", { query: { code: "SUMMER2026" } }));
     expect(response.status).toBe(400);
     const body = await response.json();
     expect(body.valid).toBe(false);
@@ -131,7 +120,7 @@ describe("GET /api/coupons/validate — rejection paths", () => {
       buildCoupon({ maxUses: 5, usedCount: 5 })
     );
 
-    const response = await GET(createMockRequest({ code: "SUMMER2026" }));
+    const response = await GET(createMockRequest("/api/coupons/validate", { query: { code: "SUMMER2026" } }));
     expect(response.status).toBe(400);
     const body = await response.json();
     expect(body.valid).toBe(false);
@@ -144,7 +133,7 @@ describe("GET /api/coupons/validate — rejection paths", () => {
     );
 
     const response = await GET(
-      createMockRequest({ code: "REMAINING", amount: "4900" })
+      createMockRequest("/api/coupons/validate", { query: { code: "REMAINING", amount: "4900" } })
     );
     expect(response.status).toBe(200);
     const body = await response.json();
@@ -161,10 +150,12 @@ describe("GET /api/coupons/validate — rejection paths", () => {
     );
 
     const response = await GET(
-      createMockRequest({
-        code: "COURSEA",
-        productId: "prod_other_course",
-        amount: "4900",
+      createMockRequest("/api/coupons/validate", {
+        query: {
+          code: "COURSEA",
+          productId: "prod_other_course",
+          amount: "4900",
+        },
       })
     );
     expect(response.status).toBe(400);
@@ -183,10 +174,12 @@ describe("GET /api/coupons/validate — rejection paths", () => {
     );
 
     const response = await GET(
-      createMockRequest({
-        code: "COURSEA",
-        productId: "prod_specific_course",
-        amount: "4900",
+      createMockRequest("/api/coupons/validate", {
+        query: {
+          code: "COURSEA",
+          productId: "prod_specific_course",
+          amount: "4900",
+        },
       })
     );
     expect(response.status).toBe(200);
@@ -201,7 +194,7 @@ describe("GET /api/coupons/validate — rejection paths", () => {
     );
 
     const response = await GET(
-      createMockRequest({ code: "BIGONLY", amount: "4900" })
+      createMockRequest("/api/coupons/validate", { query: { code: "BIGONLY", amount: "4900" } })
     );
     expect(response.status).toBe(400);
     const body = await response.json();
@@ -215,7 +208,7 @@ describe("GET /api/coupons/validate — rejection paths", () => {
     );
 
     const response = await GET(
-      createMockRequest({ code: "BIGONLY", amount: "4900" })
+      createMockRequest("/api/coupons/validate", { query: { code: "BIGONLY", amount: "4900" } })
     );
     expect(response.status).toBe(200);
     const body = await response.json();
@@ -230,7 +223,7 @@ describe("GET /api/coupons/validate — rejection paths", () => {
 
     // amount is below any hypothetical minAmount but check is null → should still validate
     const response = await GET(
-      createMockRequest({ code: "ANYAMOUNT", amount: "100" })
+      createMockRequest("/api/coupons/validate", { query: { code: "ANYAMOUNT", amount: "100" } })
     );
     expect(response.status).toBe(200);
     const body = await response.json();
@@ -242,7 +235,7 @@ describe("GET /api/coupons/validate — rejection paths", () => {
       buildCoupon({ minAmount: 5000, type: "percent", value: 20 })
     );
 
-    const response = await GET(createMockRequest({ code: "NOAMOUNT" }));
+    const response = await GET(createMockRequest("/api/coupons/validate", { query: { code: "NOAMOUNT" } }));
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.valid).toBe(true);
@@ -256,7 +249,7 @@ describe("GET /api/coupons/validate — discount math", () => {
     );
 
     const response = await GET(
-      createMockRequest({ code: "PCT20", amount: "4900" })
+      createMockRequest("/api/coupons/validate", { query: { code: "PCT20", amount: "4900" } })
     );
     expect(response.status).toBe(200);
     const body = await response.json();
@@ -270,7 +263,7 @@ describe("GET /api/coupons/validate — discount math", () => {
     );
 
     const response = await GET(
-      createMockRequest({ code: "WEIRD", amount: "1000" })
+      createMockRequest("/api/coupons/validate", { query: { code: "WEIRD", amount: "1000" } })
     );
     expect(response.status).toBe(200);
     const body = await response.json();
@@ -283,7 +276,7 @@ describe("GET /api/coupons/validate — discount math", () => {
     );
 
     const response = await GET(
-      createMockRequest({ code: "FLAT10", amount: "4900" })
+      createMockRequest("/api/coupons/validate", { query: { code: "FLAT10", amount: "4900" } })
     );
     expect(response.status).toBe(200);
     const body = await response.json();
@@ -296,7 +289,7 @@ describe("GET /api/coupons/validate — discount math", () => {
       buildCoupon({ type: "fixed", value: 500 })
     );
 
-    const response = await GET(createMockRequest({ code: "FLAT5" }));
+    const response = await GET(createMockRequest("/api/coupons/validate", { query: { code: "FLAT5" } }));
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.discountAmount).toBe(500);
@@ -307,7 +300,7 @@ describe("GET /api/coupons/validate — discount math", () => {
       buildCoupon({ type: "percent", value: 20 })
     );
 
-    const response = await GET(createMockRequest({ code: "PCTNEEDSAMT" }));
+    const response = await GET(createMockRequest("/api/coupons/validate", { query: { code: "PCTNEEDSAMT" } }));
     expect(response.status).toBe(200);
     const body = await response.json();
     // No amount → percent calculation cannot compute → 0
@@ -328,7 +321,7 @@ describe("GET /api/coupons/validate — response shape", () => {
     );
 
     const response = await GET(
-      createMockRequest({ code: "FULLMETA", amount: "9900" })
+      createMockRequest("/api/coupons/validate", { query: { code: "FULLMETA", amount: "9900" } })
     );
     expect(response.status).toBe(200);
     const body = await response.json();
@@ -354,7 +347,7 @@ describe("GET /api/coupons/validate — response shape", () => {
     );
 
     const response = await GET(
-      createMockRequest({ code: "CHECKLEAK", amount: "4900" })
+      createMockRequest("/api/coupons/validate", { query: { code: "CHECKLEAK", amount: "4900" } })
     );
     const body = await response.json();
     // usedCount and expiresAt are NOT internal-but-handled fields in the response

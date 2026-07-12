@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { revalidatePath } from "next/cache";
 import { getServerUser } from "@/lib/supabase/get-user";
-import type { NextRequest } from "next/server";
+import { createMockRequest } from "@/app/api/__test-helpers__/mock-request";
 
 // ─── Mock prisma ────────────────────────────────────────────
 const mockPrisma = {
@@ -61,21 +61,8 @@ vi.mock("next/cache", () => ({
 
 // ─── Mock rate limiting ─────────────────────────────────────
 vi.mock("@/lib/utils/rate-limit", () => ({
-  withRateLimit: (fn: Function) => fn,
+  withRateLimit: <T,>(fn: T) => fn,
 }));
-
-// ─── Helpers ─────────────────────────────────────────────────
-function createMockRequest(options: {
-  method?: string;
-  body?: unknown;
-  params?: Record<string, string>;
-}) {
-  return {
-    json: () => Promise.resolve(options.body ?? {}),
-    headers: new Map(),
-    text: () => Promise.resolve(JSON.stringify(options.body ?? {})),
-  } as unknown as NextRequest;
-}
 
 // ─── Tests ───────────────────────────────────────────────────
 describe("Auth guards", () => {
@@ -91,7 +78,7 @@ describe("Auth guards", () => {
     });
 
     const { GET } = await import("./route");
-    const response = await GET({} as NextRequest);
+    const response = await GET(createMockRequest("/api/products"));
 
     expect(response.status).toBe(401);
   });
@@ -104,7 +91,7 @@ describe("Auth guards", () => {
     } as unknown as Awaited<ReturnType<typeof getServerUser>>);
 
     const { GET } = await import("./route");
-    const response = await GET({} as NextRequest);
+    const response = await GET(createMockRequest("/api/products"));
 
     expect(response.status).toBe(403);
   });
@@ -136,7 +123,7 @@ describe("GET /api/products", () => {
     mockPrisma.analyticEvent.count.mockResolvedValue(10);
 
     const { GET } = await import("./route");
-    const response = await GET({} as NextRequest);
+    const response = await GET(createMockRequest("/api/products"));
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -155,7 +142,7 @@ describe("GET /api/products", () => {
     mockPrisma.product.findMany.mockRejectedValue(new Error("DB down"));
 
     const { GET } = await import("./route");
-    const response = await GET({} as NextRequest);
+    const response = await GET(createMockRequest("/api/products"));
 
     expect(response.status).toBe(500);
     const body = await response.json();
@@ -174,7 +161,7 @@ describe("POST /api/products", () => {
 
   it("creates a product with valid data", async () => {
     const { POST } = await import("./route");
-    const req = createMockRequest({
+    const req = createMockRequest("/api/products", {
       body: {
         slug: "new-course",
         price: 2900,
@@ -196,7 +183,7 @@ describe("POST /api/products", () => {
 
   it("returns 400 when slug is missing", async () => {
     const { POST } = await import("./route");
-    const req = createMockRequest({
+    const req = createMockRequest("/api/products", {
       body: { price: 2900, translations: {} },
     });
     const response = await POST(req);
@@ -208,7 +195,7 @@ describe("POST /api/products", () => {
 
   it("returns 400 when translations is missing", async () => {
     const { POST } = await import("./route");
-    const req = createMockRequest({
+    const req = createMockRequest("/api/products", {
       body: { slug: "test" },
     });
     const response = await POST(req);
@@ -218,7 +205,7 @@ describe("POST /api/products", () => {
 
   it("skips lessons without valid translations", async () => {
     const { POST } = await import("./route");
-    const req = createMockRequest({
+    const req = createMockRequest("/api/products", {
       body: {
         slug: "course-with-empty-lessons",
         translations: { titolo: "Test" },
@@ -243,7 +230,7 @@ describe("POST /api/products", () => {
     });
 
     const { POST } = await import("./route");
-    const req = createMockRequest({
+    const req = createMockRequest("/api/products", {
       body: {
         slug: "course-with-lessons",
         translations: { titolo: "Test" },
@@ -274,7 +261,7 @@ describe("POST /api/products", () => {
 
   it("creates AI translations when provided", async () => {
     const { POST } = await import("./route");
-    const req = createMockRequest({
+    const req = createMockRequest("/api/products", {
       body: {
         slug: "multi-lang",
         translations: { titolo: "Test" },
@@ -296,7 +283,7 @@ describe("POST /api/products", () => {
     mockPrisma.$transaction.mockRejectedValue(new Error("Transaction failed"));
 
     const { POST } = await import("./route");
-    const req = createMockRequest({
+    const req = createMockRequest("/api/products", {
       body: { slug: "test", translations: { titolo: "Test" } },
     });
     const response = await POST(req);
@@ -338,7 +325,7 @@ describe("GET /api/products/[id]", () => {
 
     const { GET } = await import("./[id]/route");
     const params = Promise.resolve({ id: "p1" });
-    const response = await GET({} as NextRequest, { params });
+    const response = await GET(createMockRequest("/api/products/p1"), { params });
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -352,7 +339,7 @@ describe("GET /api/products/[id]", () => {
 
     const { GET } = await import("./[id]/route");
     const params = Promise.resolve({ id: "nonexistent" });
-    const response = await GET({} as NextRequest, { params });
+    const response = await GET(createMockRequest("/api/products/nonexistent"), { params });
 
     expect(response.status).toBe(404);
     const body = await response.json();
@@ -371,7 +358,7 @@ describe("PUT /api/products/[id]", () => {
 
   it("updates product fields", async () => {
     const { PUT } = await import("./[id]/route");
-    const req = createMockRequest({
+    const req = createMockRequest("/api/products/p1", {
       body: { slug: "updated-slug", price: 9900, status: "published" },
     });
     const params = Promise.resolve({ id: "p1" });
@@ -396,7 +383,7 @@ describe("PUT /api/products/[id]", () => {
     });
 
     const { PUT } = await import("./[id]/route");
-    const req = createMockRequest({
+    const req = createMockRequest("/api/products/p1", {
       body: {
         slug: "test",
         sourceLocale: "it",
@@ -426,7 +413,7 @@ describe("PUT /api/products/[id]", () => {
 
   it("upserts translations", async () => {
     const { PUT } = await import("./[id]/route");
-    const req = createMockRequest({
+    const req = createMockRequest("/api/products/p1", {
       body: {
         slug: "test",
         translations: { titolo: "Updated Title" },
@@ -458,7 +445,7 @@ describe("DELETE /api/products/[id]", () => {
 
     const { DELETE } = await import("./[id]/route");
     const params = Promise.resolve({ id: "p1" });
-    const response = await DELETE({} as NextRequest, { params });
+    const response = await DELETE(createMockRequest("/api/products/p1"), { params });
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -471,7 +458,7 @@ describe("DELETE /api/products/[id]", () => {
 
     const { DELETE } = await import("./[id]/route");
     const params = Promise.resolve({ id: "p1" });
-    const response = await DELETE({} as NextRequest, { params });
+    const response = await DELETE(createMockRequest("/api/products/p1"), { params });
 
     expect(response.status).toBe(500);
     const body = await response.json();
