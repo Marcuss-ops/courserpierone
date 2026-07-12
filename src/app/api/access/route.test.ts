@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { NextRequest } from "next/server";
+import type { Order } from "@prisma/client";
 // ─── Mock helpers (SSOT seam) ──────────────────────────────
 const mockFindCompletedOrder = vi.fn();
 const mockFindCompletedOrderByOrderId = vi.fn();
