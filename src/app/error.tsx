@@ -3,6 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLogError } from "@/lib/logging/use-log-error";
+import { getUiTranslations } from "@/lib/i18n/ui-translations";
+import { localeToLanguage } from "@/lib/i18n/locale-resolver";
+import { useMemo } from "react";
+
+function getCookieLocale(): string | undefined {
+  if (typeof document === "undefined") return undefined;
+  const match = /(?:^|; )locale=([^;]*)/.exec(document.cookie);
+  return match?.[1];
+}
 
 export default function ErrorPage({
   error,
@@ -13,6 +22,13 @@ export default function ErrorPage({
 }) {
   const pathname = usePathname();
   useLogError(error, pathname);
+
+  const t = useMemo(() => {
+    const localeCookie = getCookieLocale();
+    const lang = localeCookie ? localeToLanguage(localeCookie) : "it";
+    return getUiTranslations(lang);
+  }, []);
+
   return (
     <div className="min-h-screen text-black font-sans flex items-center justify-center p-6 relative overflow-hidden" style={{ background: "linear-gradient(135deg, #FFF8F0 0%, #FFF5E6 30%, #FAFAF8 70%, #F5F0E8 100%)" }}>
       {/* Warm accent orb */}
@@ -22,9 +38,9 @@ export default function ErrorPage({
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto" style={{ background: "rgba(220, 60, 60, 0.08)", border: "1px solid rgba(220, 60, 60, 0.15)" }}>
           <span className="text-3xl">⚠️</span>
         </div>
-        <h2 className="text-xl font-semibold tracking-tight text-black">Qualcosa è andato storto</h2>
+        <h2 className="text-xl font-semibold tracking-tight text-black">{t.errorGenericTitle}</h2>
         <p className="text-[14px] text-black/45 font-light">
-          Si è verificato un errore imprevisto. Riprova tra qualche istante.
+          {t.errorGenericDesc}
         </p>
         <div className="flex flex-col gap-3 pt-2">
           <button
@@ -32,14 +48,14 @@ export default function ErrorPage({
             className="w-full py-3.5 text-white rounded-xl text-[14px] font-semibold shadow-md hover:shadow-lg hover:brightness-110 transition-all"
             style={{ background: "linear-gradient(135deg, #2a1800 0%, #5a3510 100%)" }}
           >
-            Riprova
+            {t.errorRetry}
           </button>
           <Link
             href="/"
             className="w-full py-3.5 rounded-xl text-[14px] font-medium text-black/60 hover:text-black transition-all"
             style={{ border: "1px solid rgba(200, 180, 150, 0.25)", background: "#FFFCF7" }}
           >
-            Torna alla Home
+            {t.errorBackHome}
           </Link>
         </div>
         {error.digest && (

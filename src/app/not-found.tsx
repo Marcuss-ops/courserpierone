@@ -1,6 +1,14 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { getUiTranslations } from "@/lib/i18n/ui-translations";
+import { localeToLanguage } from "@/lib/i18n/locale-resolver";
 
-export default function NotFoundPage() {
+export default async function NotFoundPage() {
+  const cookieStore = await cookies();
+  const localeCookie = cookieStore.get("locale")?.value;
+  const lang = localeCookie ? localeToLanguage(localeCookie) : "it";
+  const t = getUiTranslations(lang);
+
   return (
     <div className="min-h-screen text-black font-sans flex items-center justify-center p-6 relative overflow-hidden" style={{ background: "linear-gradient(135deg, #FFF8F0 0%, #FFF5E6 30%, #FAFAF8 70%, #F5F0E8 100%)" }}>
       {/* Warm accent orb */}
@@ -13,16 +21,16 @@ export default function NotFoundPage() {
         >
           404
         </div>
-        <h2 className="text-xl font-semibold tracking-tight text-black">Pagina non trovata</h2>
+        <h2 className="text-xl font-semibold tracking-tight text-black">{t.errorNotFoundTitle}</h2>
         <p className="text-[14px] text-black/45 font-light">
-          La pagina che stai cercando non esiste o è stata spostata.
+          {t.errorNotFoundDesc}
         </p>
         <Link
           href="/"
           className="inline-block w-full py-3.5 text-white rounded-xl text-[14px] font-semibold shadow-md hover:shadow-lg hover:brightness-110 transition-all"
           style={{ background: "linear-gradient(135deg, #2a1800 0%, #5a3510 100%)" }}
         >
-          Torna alla Home
+          {t.errorBackHome}
         </Link>
       </div>
     </div>
