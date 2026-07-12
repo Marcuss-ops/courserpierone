@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { apiErrorResponse } from "@/lib/errors";
+import { requireAdmin } from "@/lib/auth/require-admin";
 
 // GET — Lista tutti i prodotti
 export async function GET() {
   try {
+    const authError = await requireAdmin();
+    if (authError) return authError;
     const products = await prisma.product.findMany({
       include: {
         translations: { select: { locale: true } },
@@ -51,6 +54,8 @@ export async function GET() {
 // POST — Crea un nuovo prodotto
 export async function POST(request: NextRequest) {
   try {
+    const authError = await requireAdmin();
+    if (authError) return authError;
     const body = await request.json();
     const { slug, price, coverUrl, translations, lessons, sourceLocale, templateId, lemonVariantId, translationsByLocale, pricesByCurrency, countryOverrides } = body;
 

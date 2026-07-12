@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/db/supabase";
 import { apiErrorResponse } from "@/lib/errors";
+import { requireAdmin } from "@/lib/auth/require-admin";
 
 const ALLOWED_TYPES = [
   "image/jpeg",
@@ -21,6 +22,9 @@ const BUCKET_NAME = "covers";
 
 export async function POST(request: NextRequest) {
   try {
+    const authError = await requireAdmin();
+    if (authError) return authError;
+
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
 

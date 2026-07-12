@@ -1,17 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
-import { getServerUser } from "@/lib/supabase/get-user";
 import { apiErrorResponse } from "@/lib/errors";
+import { requireAdmin } from "@/lib/auth/require-admin";
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { dbUser } = await getServerUser();
-    if (dbUser?.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const authError = await requireAdmin();
+    if (authError) return authError;
 
     const { id } = await params;
 

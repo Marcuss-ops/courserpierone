@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { apiErrorResponse } from "@/lib/errors";
+import { requireAdmin } from "@/lib/auth/require-admin";
 
 // GET — Dettaglio singolo prodotto
 export async function GET(
@@ -10,6 +11,9 @@ export async function GET(
   const { id } = await params;
 
   try {
+    const authError = await requireAdmin();
+    if (authError) return authError;
+
     const product = await prisma.product.findUnique({
       where: { id },
       include: {
@@ -39,6 +43,9 @@ export async function PUT(
   const { id } = await params;
 
   try {
+    const authError = await requireAdmin();
+    if (authError) return authError;
+
     const body = await request.json();
     const { slug, price, coverUrl, status, templateId, lemonVariantId, translations, lessons, sourceLocale, translationsByLocale, pricesByCurrency, countryOverrides } = body;
 
@@ -229,6 +236,9 @@ export async function DELETE(
   const { id } = await params;
 
   try {
+    const authError = await requireAdmin();
+    if (authError) return authError;
+
     await prisma.product.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {
