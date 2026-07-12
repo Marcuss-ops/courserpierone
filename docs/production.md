@@ -84,7 +84,7 @@ GitHub → Settings → Branches → main → "Require status checks to pass bef
 |Failing job|Likely cause|Recovery|
 |---|---|---|
 |`typecheck`|New `.ts`/`.tsx` with a TS error|Run `npm run typecheck` locally, fix|
-|`lint`|New ESLint violation|Run `npm run lint:eslint --fix`|
+|`lint`|New ESLint violation|Run `npm run lint:fix --fix`|
 |`vitest`|New unit-test assertion fails|Run `npm run test`, fix the test or production code|
 |`e2e-journey`|Playwright/Vercel/Supabase env drift|Verify secrets in GH Settings still valid; check ephemeral Postgres logs|
 

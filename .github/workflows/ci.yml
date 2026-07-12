@@ -121,7 +121,7 @@ jobs:
         run: npm ci --no-audit --no-fund
 
       - name: Lint
-        run: npm run lint:eslint
+        run: npm run lint
       # NOTE: unlike the legacy single-job ci.yml, lint warnings/errors now
       # BLOCK the gate. Errors → red. Warnings still pass (eslint config
       # downgrades most to warn), but the job itself fails only on errors.
