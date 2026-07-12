@@ -201,7 +201,7 @@ _____
   connections. Operator's local shell must be dual-stack OR IPv6-capable
   (typical: works). Vercel build infrastructure is **IPv4-only** — a
   `postbuild: prisma migrate deploy` in `package.json` infinite-hangs;
-  apply migrations locally per [`staging-backfill.sh`](../../../scripts/ops/staging-backfill.sh)
+  apply migrations locally per [`staging-backfill.sh`](../../scripts/ops/staging-backfill.sh)
   instead.
 - **`PRIMARY_DATABASE_URL` mirror pattern**: the 4 Prisma-touching
   scripts in `scripts/` (backfill-primary-creator, migrate-grants-from-orders,
