@@ -100,6 +100,8 @@ export interface UiStrings {
   discLessonCountMany: string;
 
   // ─── Download page ──────────────────────────────────────
+  // camelCase (legacy, retained for back-compat with existing
+  // certificate/dashboard consumers).
   dlTitle: string;
   dlSubtitle: string;
   dlButton: string;
@@ -109,6 +111,20 @@ export interface UiStrings {
   dlOtherVersions: string;
   dlSuccess: string;
   dlBackToPortal: string;
+  // snake_case aliases — mirror LocaleContent.download in
+  // src/lib/i18n/locale-content.ts. Preferred convention since
+  // 2026-07: matches the JSON data shape loaded via
+  // loadLocaleContentSafe. 7 keys added (those used by
+  // src/app/(locale)/[locale]/[domain]/download/page.tsx);
+  // `your_language`/`other_languages` map to dlYourLanguage/
+  // dlOtherVersions and aren't accessed by the page yet.
+  title: string;
+  subtitle: string;
+  download_button: string;
+  view_online: string;
+  language_label: string;
+  success_message: string;
+  back_to_portal: string;
 
   // ─── Social proof (purchase / lesson toasts) ────────────
   socialPurchase: string;
@@ -219,6 +235,15 @@ const uiTranslations: Record<string, UiStrings> = {
     dlSuccess: "Acquisto completato! Il libro è tuo.",
     dlBackToPortal: "Torna al Portal",
 
+    // snake_case aliases (mirror LocaleContent.download).
+    title: "Scarica il tuo libro",
+    subtitle: "Il tuo eBook è pronto. Scaricalo in PDF o leggilo direttamente online.",
+    download_button: "Scarica PDF",
+    view_online: "Leggi Online",
+    language_label: "Lingua",
+    success_message: "Acquisto completato! Il libro è tuo.",
+    back_to_portal: "Torna al Portal",
+
     // Social proof
     socialPurchase: "{name} da {city} ha acquistato il corso",
     socialLesson: "{name} da {city} ha completato la lezione: {lessonTitle}",
@@ -327,6 +352,15 @@ const uiTranslations: Record<string, UiStrings> = {
     dlSuccess: "Purchase complete! The book is yours.",
     dlBackToPortal: "Back to Portal",
 
+    // snake_case aliases (mirror LocaleContent.download).
+    title: "Download your book",
+    subtitle: "Your eBook is ready. Download it as PDF or read it directly online.",
+    download_button: "Download PDF",
+    view_online: "Read Online",
+    language_label: "Language",
+    success_message: "Purchase complete! The book is yours.",
+    back_to_portal: "Back to Portal",
+
     // Social proof
     socialPurchase: "{name} from {city} purchased the course",
     socialLesson: "{name} from {city} completed the lesson: {lessonTitle}",
@@ -434,6 +468,15 @@ const uiTranslations: Record<string, UiStrings> = {
     dlOtherVersions: "Otras versiones disponibles",
     dlSuccess: "¡Compra completada! El libro es tuyo.",
     dlBackToPortal: "Volver al Portal",
+
+    // snake_case aliases (mirror LocaleContent.download).
+    title: "Descarga tu libro",
+    subtitle: "Tu eBook está listo. Descárgalo en PDF o léelo directamente en línea.",
+    download_button: "Descargar PDF",
+    view_online: "Leer en línea",
+    language_label: "Idioma",
+    success_message: "¡Compra completada! El libro es tuyo.",
+    back_to_portal: "Volver al Portal",
 
     // Social proof
     socialPurchase: "{name} de {city} compró el curso",

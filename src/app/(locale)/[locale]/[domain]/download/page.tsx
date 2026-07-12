@@ -77,8 +77,8 @@ export async function generateMetadata({
 
   const ebookTitle = content.ebookTitle || content.title;
   const t = getUiTranslations(lang);
-  const title = `${t.dlTitle} — ${ebookTitle}`;
-  const description = `${t.dlSubtitle} "${ebookTitle}"`;
+  const title = `${t.title} — ${ebookTitle}`;
+  const description = `${t.subtitle} "${ebookTitle}"`;
 
   return {
     title,
@@ -152,7 +152,7 @@ export default async function DownloadPage({
             className="flex items-center gap-2 text-zinc-500 hover:text-zinc-350 transition-colors text-xs font-black uppercase tracking-widest"
           >
             <ArrowLeft className="w-4 h-4" />
-            {lc.dlBackToPortal || t.dlBackToPortal}
+            {lc.back_to_portal || t.back_to_portal}
           </Link>
           <span className="text-xl font-black tracking-tighter text-white uppercase">
             {course.slug}.
@@ -187,16 +187,16 @@ export default async function DownloadPage({
               {/* Success Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-black uppercase tracking-wider">
                 <CheckCircle className="w-4 h-4 shrink-0" />
-                {lc.dlSuccess || t.dlSuccess}
+                {lc.success_message || t.success_message}
               </div>
 
               {/* Title & Description */}
               <div className="space-y-3">
                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-white text-contrast tracking-tight leading-none balance">
-                  {lc.dlTitle || t.dlTitle}
+                  {lc.title || t.title}
                 </h1>
                 <p className="text-zinc-400 text-sm md:text-base font-medium leading-relaxed max-w-xl">
-                  {lc.dlSubtitle || t.dlSubtitle}
+                  {lc.subtitle || t.subtitle}
                 </p>
               </div>
 
@@ -207,7 +207,7 @@ export default async function DownloadPage({
                   <span className="text-sm font-bold text-white truncate block">{course.author}</span>
                 </div>
                 <div className="p-4 rounded-2xl bg-white/[0.01] border border-white/5 space-y-1">
-                  <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest block">{t.dlLanguageLabel}</span>
+                  <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest block">{t.language_label}</span>
                   <span className="text-sm font-bold truncate block" style={{ color: accent }}>
                     {LANGUAGE_NAMES[currentLang] || currentLang.toUpperCase()}
                   </span>
@@ -217,7 +217,7 @@ export default async function DownloadPage({
               {/* Language Selector */}
               <div className="space-y-3">
                 <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block">
-                  {lc.dlLanguageLabel || t.dlLanguageLabel}
+                  {lc.language_label || t.language_label}
                 </span>
                 <div className="flex flex-wrap gap-2">
                   {availableLanguages.map((book) => {
@@ -252,7 +252,7 @@ export default async function DownloadPage({
                   }}
                 >
                   <Download className="w-4 h-4" />
-                  {lc.dlButton || t.dlButton}
+                  {lc.download_button || t.download_button}
                 </a>
 
                 <Link
@@ -260,7 +260,7 @@ export default async function DownloadPage({
                   className="w-full sm:w-auto px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest text-zinc-300 bg-white/[0.03] border border-white/5 hover:text-white hover:bg-white/[0.06] flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
                 >
                   <BookOpen className="w-4 h-4" />
-                  {lc.dlViewOnline || t.dlViewOnline}
+                  {lc.view_online || t.view_online}
                 </Link>
               </div>
 
