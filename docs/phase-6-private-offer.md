@@ -242,6 +242,73 @@ chat view's renderer reads the discriminator and casts to the
 appropriate shape. V2 may migrate to a typed `MessageMetadata`
 union, but V1.5 doesn't need it.
 
+### 4.1.1 Viewer-aware system message renderer
+
+The `type='system'` Message row is the SAME for both the customer
+and the creator. The renderer localizes the visible text per
+viewer (customer sees "Hai acquistato", creator sees "Mario ha
+acquistato"). A naïve single-string `content` field would show
+"Hai acquistato" to both — wrong for the creator's view. The
+canonical data lives in `metadata`; the visible text is composed
+in the renderer:
+
+```tsx
+// src/components/chat/message-bubble.tsx — viewer-aware branch
+function SystemMessageBubble({ message, currentUserId }: {
+  message: Message;
+  currentUserId: string;  // the viewer's dbUser.id
+}) {
+  if (message.metadata?.event === "purchased") {
+    const meta = message.metadata as {
+      productName: string;
+      productSlug: string;
+      amount: number;
+      currency: string;
+      discountPct: number | null;
+      customerId: string;
+      customerDisplayName: string;
+    };
+    // The viewer is either the customer (sees first-person) or the
+    // creator (sees third-person about the customer). The
+    // `customerId` in metadata is the canonical anchor.
+    const isCustomer = currentUserId === meta.customerId;
+    const productLabel = isCustomer
+      ? meta.productName  // "Hai acquistato Corso X"
+      : `${meta.customerDisplayName} ha acquistato ${meta.productName}`;  // "Mario ha acquistato Corso X"
+    const discountSuffix = meta.discountPct ? ` con sconto privato (-${meta.discountPct}%)` : "";
+    const amountLabel = formatMoney(meta.amount, meta.currency);
+    const text = isCustomer
+      ? `🛒 Hai acquistato ${meta.productName}${discountSuffix} per ${amountLabel}.`
+      : `🛒 ${productLabel}${discountSuffix} per ${amountLabel}.`;
+    return (
+      <div className="text-center text-xs text-cream-dark-text-soft/80 my-2">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-cream-dark-surface/60 border border-cream-dark-border">
+          {text}
+        </span>
+      </div>
+    );
+  }
+  // ... other system events (refund, access revoked, etc.) ...
+  return <GenericSystemMessage text={message.content} />;
+}
+```
+
+The renderer is invoked with `currentUserId` from the chat
+view's session context (`getServerUser()` in the page server
+component, or the WS-broadcast session in the realtime path).
+The same `metadata.customerId` is the discriminator; the
+senderId being `SYSTEM_USER_ID` (sentinel) is what tells the
+renderer "this is a system message, compose from metadata
+rather than display `content`."
+
+**Why a per-viewer renderer instead of two separate messages:**
+a system event has ONE truth — the offer was purchased at this
+moment, with this amount, in this currency. Sending two
+messages (one per viewer) would mean two `Message` rows, two
+WS broker emits, two reads, two `read` flags. The per-viewer
+renderer keeps the message count to 1 and the rendering logic
+explicit.
+
 **Why `offerId` is a separate column instead of embedded in
 `metadata`:** the offer relation needs to be queryable
 (`prisma.message.findMany({ where: { offerId: <id> } })`).
@@ -549,10 +616,6 @@ function MessageBubble({ message }: { message: Message }) {
 
 ### 4.1 `<CheckoutOfferCard>`
 
-The card shows the product, the discount, the expiry, and an
-"Acquista con sconto" button. The button opens a modal with an
-iframe pointing to the LS checkout URL.
-
 ```tsx
 // src/components/chat/checkout-offer-card.tsx
 function CheckoutOfferCard({ message }: { message: Message & { offer: PrivateOffer } }) {
@@ -603,12 +666,11 @@ function CheckoutOfferCard({ message }: { message: Message & { offer: PrivateOff
 }
 ```
 
-### 4.2 `<CheckoutOverlay>` (LS iframe modal)
+### 4.1 `<CheckoutOfferCard>`
 
-A simple modal that loads the LS checkout URL in an iframe. The
-modal listens for a postMessage from the LS iframe (LS sends a
-`?status=success` query param on the redirect URL when payment
-completes) and closes itself.
+The card shows the product, the discount, the expiry, and an
+"Acquista con sconto" button. The button opens a modal with an
+iframe pointing to the LS checkout URL.
 
 ```tsx
 // src/components/chat/checkout-overlay.tsx
@@ -659,13 +721,23 @@ function CheckoutOverlay({
   // upper bound without keeping the user waiting indefinitely).
   // The interval stops on `purchased` (success) AND on `expired` /
   // `revoked` (no point polling further — the offer is terminal).
+  //
+  // Race guard: if the WS broker emit arrives during the same tick
+  // as the poll (sub-50ms window), `onPurchaseComplete` may fire
+  // twice. The `completedRef` ensures exactly-once delivery.
+  const completedRef = useRef(false);
+  const handlePurchaseComplete = useCallback(() => {
+    if (completedRef.current) return;
+    completedRef.current = true;
+    onPurchaseComplete();
+  }, [onPurchaseComplete]);
   useEffect(() => {
     const interval = setInterval(async () => {
       const res = await fetch(`/api/conversations/offers/${offerId}/status`);
       if (res.ok) {
         const { status } = await res.json();
         if (status === "purchased") {
-          onPurchaseComplete();
+          handlePurchaseComplete();
           clearInterval(interval);
         } else if (status === "expired" || status === "revoked") {
           // Terminal but-not-purchased: close the overlay cleanly.
@@ -678,7 +750,7 @@ function CheckoutOverlay({
       clearInterval(interval);
       clearTimeout(stopAfter);
     };
-  }, [offerId, onPurchaseComplete]);
+  }, [offerId, handlePurchaseComplete]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
@@ -975,9 +1047,24 @@ separation. For V1.5, the inline transaction is simpler and
 the atomicity guarantee is worth the coupling.
 
 **`SYSTEM_USER_ID` constant:** the system message's `senderId`
-is a sentinel user id (e.g., a hardcoded `system-bot` User row
-created at migration time) rather than `order.userId`. This
-avoids two issues:
+is a sentinel user id (typed constant exported from
+`src/lib/constants/system.ts` as `export const SYSTEM_USER_ID =
+"system_bot_000000000000000"`) rather than `order.userId`. The
+constant is used by:
+  - the Phase 6 migration to seed the User row:
+    `INSERT INTO "User" (id, email, name, role) VALUES
+    ('system_bot_000000000000000', 'system@internal', 'System',
+    'system') ON CONFLICT (id) DO NOTHING`
+  - the renderer in § 4.1.1: `if (message.senderId === SYSTEM_USER_ID) { ... }`
+  - the offline-notification cooldown in `createMessageAndNotify`:
+    `if (message.senderId !== SYSTEM_USER_ID) updateLastSeenAt(...)`
+
+The typed constant prevents the renderer from typo'ing the
+sentinel (a hardcoded string in 3 files would drift). The
+constant lives in `src/lib/constants/system.ts` (new file)
+alongside future system-wide sentinels.
+
+This avoids two issues:
   (a) The customer's `lastSeenAt` would update when they see
       the system message, polluting the offline-notification
       cooldown in `createMessageAndNotify` (which assumes the
@@ -989,13 +1076,6 @@ avoids two issues:
       `senderId = SYSTEM_USER_ID` makes the renderer code
       explicit: `if (message.senderId === SYSTEM_USER_ID) render
       as system`.
-
-The `SYSTEM_USER_ID` is created by the Phase 6 migration:
-`INSERT INTO "User" (id, email, name, role) VALUES
-('system_bot_000000000000000', 'system@internal', 'System',
-'system') ON CONFLICT (id) DO NOTHING`. V2 may add a nullable
-`senderId` to the Message schema (for a cleaner separation)
-but V1.5 uses the sentinel-user convention.
 
 **About the `senderId` schema convention:** the `Message.senderId`
 is currently `NOT NULL` (V1 schema). Phase 6 keeps the
