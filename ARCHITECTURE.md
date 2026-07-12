@@ -1,5 +1,20 @@
 # Architettura del Progetto
 
+## Stack attuale (V1.x)
+
+Costruita su:
+
+- **Next.js 16** (App Router, React Server Components)
+- **React 19**
+- **Supabase** (Auth + Postgres + Storage + RLS)
+- **REST** API (Route Handlers in `src/app/api/*`)
+- **Lemon Squeezy** (Merchant of Record, unico payment provider)
+- **Tailwind CSS 4** (PostCSS via `@tailwindcss/postcss`)
+
+Stack di supporto: **PostgreSQL** + **Prisma 5**, **Upstash Redis** + **ioredis** per cache/presenza/rate-limit, **next-intl** per i18n, **nodemailer** per email transazionali, **jspdf** per certificati.
+
+> **SSOT runtime:** per versioni esatte e tree completo delle dipendenze, vedi `package.json` + `package-lock.json`. Questa sezione è uno snapshot a V1.x e può driftare; tenere allineato al PR che tocca `package.json`.
+
 ## Visione Generale
 
 ```
