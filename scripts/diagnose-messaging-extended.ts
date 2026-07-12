@@ -9,7 +9,7 @@
  * migrations or new routes that re-introduce scattered checks will be
  * caught BEFORE review.
  *
- * Two checks (both static, no DB, no HTTP):
+ * Three checks (all static, no DB, no HTTP):
  *
  *   CHECK 1 — DM-AUTH wiring.
  *     Every file under `src/app/api/messages/**` or
@@ -38,6 +38,18 @@
  *         `src/lib/{access,messaging}/` is treated as a SSOT helper by
  *         convention (see `getAutoDiscoveredSsotHelpers`). Files added
  *         to those dirs are silently allowlisted — keep that scope pure.
+ *
+ *   CHECK 3 — Legacy `/api/messages` route handler regression.
+ *     The legacy `/api/messages/*` REST routes were hard-deleted in commit
+ *     `chore(dm): cfb2d12` and replaced with canonical `/api/conversations/*`
+ *     endpoints (Fase 4.x migration). This check asserts that NO
+ *     `route.ts`/`route.tsx` exists under `src/app/api/messages/**` —
+ *     catching future RE-INTRODUCTION of the legacy endpoint surface
+ *     (e.g. stale-branch merges, accidental `git mv` from a pre-cfb2d12
+ *     snapshot, resurrect for "backward compat" that wasn't actually
+ *     needed). Test files (`*.test.ts`) are exempt since they may
+ *     legitimately reference deleted routes in mock fixtures during
+ *     migration periods.
  *
  * Output:
  *   - Pretty stdout with sections (matches the existing diagnose-
@@ -68,6 +80,12 @@
  *     helper, not a misfiled different-policy file (write-side,
  *     admin listing, search scoring), since those categories need
  *     the explicit `HAND_CURATED_ORDER_STATUS_RAW` entry with rationale.
+ *   - Re-introducing a `/api/messages/*` (or `/api/messages/stream`,
+ *     `/api/messages/read`, etc.) route handler?  Don't. Hard-deleted
+ *     in commit `chore(dm): cfb2d12`. If a request shape seems to need
+ *     the old endpoint, add it under `/api/conversations/[id]/**` (the
+ *     canonical surface) instead. CHECK 3 in this script will catch a
+ *     re-introduction immediately.
  *
  * Usage:
  *   npx tsx scripts/diagnose-messaging-extended.ts
@@ -78,7 +96,7 @@ import * as path from "path";
 
 // ─── Types ──────────────────────────────────────────────────────────
 
-type FindingType = "DM_AUTH_MISSING" | "ORDER_STATUS_RAW";
+type FindingType = "DM_AUTH_MISSING" | "ORDER_STATUS_RAW" | "LEGACY_MESSAGE_ROUTE";
 
 interface Finding {
   type: FindingType;
@@ -355,6 +373,57 @@ function check2OrderStatusRaw(): Finding[] {
   return findings;
 }
 
+// ─── CHECK 3 — Legacy /api/messages route handler regression ────────
+
+/**
+ * Asserts that NO route handler files exist under `src/app/api/messages/**`.
+ *
+ * Why this check: the legacy `/api/messages/*` REST routes were
+ * hard-deleted in commit `chore(dm): cfb2d12` (Fase 4.x canonical DM
+ * migration to `/api/conversations/*`). This is the ONE area of the
+ * codebase where re-introduction is binary-bad — it's not a policy drift
+ * but a structural violation of the canonical surface. A filesystem
+ * find is sufficient: no AST/permits needed.
+ *
+ * Detection: any `.ts`/`.tsx` file named exactly `route.ts` or `route.tsx`
+ * under the messages root. Helper, schema, type, spec, and mock files
+ * are NOT counted — this check is specifically about Next.js App Router
+ * HTTP handler surface area (the framework only treats files literally
+ * named `route.ts`/`route.tsx` as live HTTP handlers; anything else —
+ * `*.spec.ts`, `__mocks__/route.ts`, `route-helpers.ts`, etc. —
+ * contributes zero to runtime surface). Test files (`*.test.ts`) are
+ * also exempt since they may legitimately reference deleted routes in
+ * mock fixtures during migration periods (and would be orphaned/pruned
+ * separately).
+ *
+ * Empty-directory shortcut: if `src/app/api/messages/` does NOT exist
+ * (the post-cfb2d12 steady state), the check returns empty without
+ * even walking the tree — cheap O(1).
+ */
+function check3LegacyMessageRoutes(): Finding[] {
+  const root = projectRoot();
+  const messagesRoot = path.join(root, "src/app/api/messages");
+  if (!fs.existsSync(messagesRoot)) return []; // post-cfb2d12 steady state: clean
+
+  const findings: Finding[] = [];
+  for (const file of collectTsFiles(messagesRoot)) {
+    const base = path.basename(file);
+    if (base !== "route.ts" && base !== "route.tsx") continue;
+    findings.push({
+      type: "LEGACY_MESSAGE_ROUTE",
+      file: toPosix(path.relative(root, file)),
+      reason:
+        "Re-introduced `/api/messages` route handler. Routes under " +
+        "`src/app/api/messages/**` were hard-deleted in commit " +
+        "`chore(dm): cfb2d12` — the canonical DM surface is " +
+        "`/api/conversations/*` (see `docs/production.md` migration " +
+        "narrative). If this is a brand-new endpoint, move it under " +
+        "`/api/conversations/[id]/**` instead.",
+    });
+  }
+  return findings;
+}
+
 // ─── Main ───────────────────────────────────────────────────────────
 
 function main(): void {
@@ -362,7 +431,7 @@ function main(): void {
     "\n==== Messaging-Extended Static Diagnostic (Phase 2.x regression-guard) ====\n",
   );
   console.log(
-    "Static checks (no DB I/O): DM-AUTH wiring + Order.findFirst status='completed' SSOT.\n",
+    "Static checks (no DB I/O): DM-AUTH wiring + Order.findFirst status='completed' SSOT + legacy /api/messages routing.\n",
   );
 
   // Run both checks; collect all findings before printing — partial-fail
@@ -371,6 +440,7 @@ function main(): void {
   try {
     findings.push(...check1DmAuth());
     findings.push(...check2OrderStatusRaw());
+    findings.push(...check3LegacyMessageRoutes());
   } catch (err) {
     console.error("\n❌ Diagnostic threw an internal error:", err);
     process.exit(2); // distinct from "1 = findings"
@@ -384,7 +454,10 @@ function main(): void {
     console.log("");
     console.log("✅ CHECK 2 (Order.status='completed' SSOT): every caller is");
     console.log("   either routed through findCompletedOrder or explicitly");
-    console.log("   allow-listed with a different-policy rationale.\n");
+    console.log("   allow-listed with a different-policy rationale.");
+    console.log("");
+    console.log("✅ CHECK 3 (legacy /api/messages routing): no /api/messages/*");
+    console.log("   route handler files re-introduced since the cfb2d12 deletion.\n");
     console.log("==== Diagnostic complete — clean. ====\n");
     process.exit(0);
   }
