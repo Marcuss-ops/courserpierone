@@ -119,7 +119,7 @@ model User {
   email          String   @unique
   name           String?
   image          String?
-  role           String   @default("student") // admin | student
+  role           String   @default("student") // admin | creator | student
   username       String?  @unique // URL pubblico: /u/username
   bio            String?  @db.Text // Bio pubblica Markdown
   socialLinks    String?  // JSON: { "twitter": "...", "instagram": "...", "youtube": "...", "linkedin": "...", "website": "..." }

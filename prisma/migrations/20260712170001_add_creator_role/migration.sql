@@ -1,0 +1,22 @@
+-- ═══════════════════════════════════════════════════════════════
+-- Migration: introduzione del ruolo 'creator'
+-- ═══════════════════════════════════════════════════════════════
+-- Il campo User.role resta una String per non rompere il deploy
+-- esistente. Viene aggiunto 'creator' come valore semantico
+-- accanto a 'admin' e 'student'.
+--
+-- Nessuna modifica DDL è richiesta: tutti i valori sono già
+-- rappresentabili dalla colonna. Questa migration viene creata
+-- per marcare l'introduzione del ruolo nella storia git e per
+-- abilitare un futuro switch all'enum Prisma senza dover indovinare
+-- quando il valore è diventato canonico.
+--
+-- Valori canonici del campo User.role (da UserRole in src/lib/auth/roles.ts):
+--   - 'admin'    : può amministrare la piattaforma (prodotti, utenti, ordini)
+--   - 'creator'  : possiede uno o più prodotti e comunica con i propri clienti
+--   - 'student'  : utente finale, acquista prodotti, contatta il proprio creator
+-- ═══════════════════════════════════════════════════════════════
+
+-- Marker no-op (UPDATE vuoto): garantisce che Prisma rilevi la migration
+-- anche se il diff dello schema è solo documentale.
+SELECT 'role: creator accepted' AS "creator_role_enabled";
