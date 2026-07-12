@@ -45,7 +45,19 @@
  *     npx tsx scripts/audit-v1-readiness.ts --production
  */
 
-import { prisma } from "../src/lib/db/prisma";
+import { PrismaClient } from "@prisma/client";
+
+// Module-level PrismaClient slot. The script previously imported the
+// shared client from `src/lib/db/prisma`, but that client reads
+// DATABASE_URL from the schema datasource and does NOT honor
+// PRIMARY_DATABASE_URL — so exporting PRIMARY_DATABASE_URL=... was
+// silently ignored. We construct a fresh client here so that the URL
+// picked by `resolveConnectionSource()` is actually used at runtime.
+//
+// Declared as `let` (not `const`) so the top-level `.catch()` handler
+// can call `$disconnect()` even when main() exits early on the env-
+// missing guard (process.exit(2) before instantiation).
+let prisma: PrismaClient;
 
 // ─── Types ────────────────────────────────────────────────────────
 
@@ -118,6 +130,26 @@ async function safeTableCount(tableName: string): Promise<number> {
   }
 }
 
+/**
+ * Build a PrismaClient bound to the resolved DATABASE URL.
+ *
+ * Honors PRIMARY_DATABASE_URL when set (direct connection, full
+ * privilege — preferred for the audit script's "real DB" mode per its
+ * own CLI docs and the discovery step in `docs/v1-acceptance-test.md`).
+ * Falls back to DATABASE_URL when only the pooled env is set.
+ *
+ * The override is passed via Prisma 5.x's `datasources` override and is
+ * the only mechanism that bypasses the schema datasource block's
+ * `env("DATABASE_URL")` binding inside this single-file script.
+ */
+function buildPrismaClient(url: string): PrismaClient {
+  return new PrismaClient({
+    datasources: {
+      db: { url },
+    },
+  });
+}
+
 // ─── Main ─────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
@@ -134,6 +166,13 @@ async function main(): Promise<void> {
     );
     process.exit(2);
   }
+
+  // Build a PrismaClient bound to the resolved URL. Without this line,
+  // every subsequent `prisma.*` call would silently use the schema
+  // datasource's DATABASE_URL even when the operator exported
+  // PRIMARY_DATABASE_URL — defeating the script's whole purpose of
+  // accepting the override. This instantiation is the behavioral fix.
+  prisma = buildPrismaClient(url);
 
   console.log(
     `\n==== V1 Readiness Audit (read-only DRY-RUN) ====\n` +
