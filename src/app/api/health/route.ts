@@ -56,10 +56,9 @@ export async function GET() {
     await prisma.$queryRaw`SELECT 1`;
     dbLatency = Date.now() - startDb;
     dbStatus = "up";
-  } catch (err) {
-    console.error("[health] Database check failed:", err);
-    dbStatus = "down";
-  }
+  } catch (err) {      console.error("[health] Database check failed:", err);
+      // dbStatus rimane "down" (inizializzato sopra) — niente re-assignment.
+    }
 
   // ═══ Redis Check ═══
   let redisStatus = "down";
@@ -73,7 +72,7 @@ export async function GET() {
       redisStatus = "up";
     } catch (err) {
       console.error("[health] Redis check failed:", err);
-      redisStatus = "down";
+      // redisStatus rimane "down" (inizializzato sopra) — niente re-assignment.
     }
   } else {
     redisStatus = "not_configured";
