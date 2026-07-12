@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { apiErrorResponse } from "@/lib/errors";
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { revalidateProduct } from "@/lib/admin/revalidate-product";
 
 // GET — Lista tutti i prodotti
 export async function GET() {
@@ -124,26 +125,57 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Salva le lezioni
+      // Salva le lezioni con traduzioni e asset
       if (lessons && Array.isArray(lessons)) {
         for (let i = 0; i < lessons.length; i++) {
-          const lesson = lessons[i];
-          if (lesson.title) {
-            const l = await tx.lesson.create({
-              data: {
-                productId: p.id,
-                position: i + 1,
-              },
-            });
+          const lesson = lessons[i] as {
+            translations?: Record<string, { title?: string; videoUrl?: string; description?: string }>;
+            assets?: { type?: string; locale?: string; fileUrl?: string; fileName?: string | null }[];
+          };
 
-            await tx.lessonTranslation.create({
-              data: {
-                lessonId: l.id,
-                locale: sourceLocale ?? "it",
-                title: lesson.title,
-                videoUrl: lesson.videoUrl ?? null,
-              },
-            });
+          const hasContent =
+            lesson.translations &&
+            Object.values(lesson.translations).some((t) => t.title?.trim());
+
+          if (!hasContent) continue;
+
+          const l = await tx.lesson.create({
+            data: {
+              productId: p.id,
+              position: i + 1,
+            },
+          });
+
+          // Salva le traduzioni della lezione
+          if (lesson.translations && typeof lesson.translations === "object") {
+            for (const [locale, t] of Object.entries(lesson.translations)) {
+              if (!t.title?.trim()) continue;
+              await tx.lessonTranslation.create({
+                data: {
+                  lessonId: l.id,
+                  locale,
+                  title: t.title,
+                  videoUrl: t.videoUrl || null,
+                  description: t.description || null,
+                },
+              });
+            }
+          }
+
+          // Salva gli asset della lezione
+          if (lesson.assets && Array.isArray(lesson.assets)) {
+            for (const asset of lesson.assets) {
+              if (!asset.fileUrl || !asset.locale) continue;
+              await tx.lessonAsset.create({
+                data: {
+                  lessonId: l.id,
+                  type: asset.type || "resource",
+                  locale: asset.locale,
+                  fileUrl: asset.fileUrl,
+                  fileName: asset.fileName || null,
+                },
+              });
+            }
           }
         }
       }
@@ -158,6 +190,13 @@ export async function POST(request: NextRequest) {
     } catch (syncError) {
       console.error("[Auto-sync] Failed to generate config:", syncError);
     }
+
+    // Invalida la cache delle pagine pubbliche
+    const updatedLocales = [
+      sourceLocale ?? "it",
+      ...Object.keys(translationsByLocale ?? {}),
+    ];
+    revalidateProduct(slug, updatedLocales);
 
     return NextResponse.json({ success: true, product });
   } catch (error) {

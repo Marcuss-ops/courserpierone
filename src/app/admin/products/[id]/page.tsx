@@ -4,24 +4,23 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ImageUpload } from "@/components/admin/image-upload";
 import { CurrencyPricesSection } from "@/components/admin/currency-prices";
+import { LocaleTabs } from "@/components/admin/locale-tabs";
+import { LessonBuilder } from "@/components/admin/lesson-builder";
 import type { TemplateId } from "@/components/funnel";
 import type { ProductApiDetail, TranslateApiResponse } from "@/lib/utils/api-types";
+import { toFullLocale } from "@/lib/i18n/to-full-locale";
 import {
   ArrowLeft,
   Save,
   Image as ImageIcon,
-  Plus,
-  Trash2,
-  Globe,
   FileJson,
   Loader2,
   CreditCard,
   Languages,
   CheckCircle2,
   ExternalLink,
-  FileText,
-  Headphones,
-  X
+  Eye,
+  X,
 } from "lucide-react";
 
 const FUNNEL_SECTIONS = [
@@ -57,10 +56,12 @@ export default function EditProductPage() {
     }[]
   >([]);
   const [locale, setLocale] = useState("it");
+  const [showPreview, setShowPreview] = useState(false);
   const [toast, setToast] = useState("");
   const [isTranslating, setIsTranslating] = useState(false);
   const [translatedLocales, setTranslatedLocales] = useState<string[]>([]);
   const [translationsByLocale, setTranslationsByLocale] = useState<Record<string, Record<string, string>>>({});
+  const [allProductTranslations, setAllProductTranslations] = useState<Record<string, Record<string, string>>>({});
   const [pricesByCurrency, setPricesByCurrency] = useState<Record<string, { price: number; lemonVariantId?: string | null; stripePriceId?: string | null }>>({});
   const [countryOverrides, setCountryOverrides] = useState<Record<string, { currency: string; price: number; symbol?: string; lemonVariantId?: string | null; stripePriceId?: string | null }>>({});
 
@@ -93,15 +94,15 @@ export default function EditProductPage() {
       }
 
       // Build texts from translations
-      const txts: Record<string, string> = {};
+      const byLocale: Record<string, Record<string, string>> = {};
       if (data.translations) {
         for (const t of data.translations) {
-          if (t.locale === locale || (!txts[t.section] && t.locale === "it")) {
-            txts[t.section] = t.content;
-          }
+          if (!byLocale[t.locale]) byLocale[t.locale] = {};
+          byLocale[t.locale][t.section] = t.content;
         }
       }
-      setTexts(txts);
+      setAllProductTranslations(byLocale);
+      setTexts(byLocale[locale] ?? byLocale.it ?? {});
 
       if (data.lessons) {
         const les = data.lessons.map((l) => {
@@ -140,6 +141,18 @@ export default function EditProductPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  function handleLocaleChange(next: string) {
+    setAllProductTranslations((prev) => ({
+      ...prev,
+      [locale]: { ...(prev[locale] ?? {}), ...texts },
+    }));
+    setLocale(next);
+  }
+
+  useEffect(() => {
+    setTexts(allProductTranslations[locale] ?? allProductTranslations.it ?? {});
+  }, [locale, allProductTranslations]);
+
   async function handleSave() {
     setSaving(true);
     try {
@@ -164,7 +177,11 @@ export default function EditProductPage() {
       if (res.ok) {
         setToast("Salvato!");
         setTimeout(() => setToast(""), 3000);
-      }      } catch {
+        await fetchProduct();
+      } else {
+        alert("Errore nel salvataggio");
+      }
+    } catch {
       alert("Errore nel salvataggio");
     } finally {
       setSaving(false);
@@ -245,13 +262,24 @@ export default function EditProductPage() {
           </div>
         </div>
         <div className="flex gap-3">
+          <button
+            onClick={() => setShowPreview((p) => !p)}
+            className={`px-6 py-3 rounded-2xl text-sm font-bold border transition flex items-center gap-2 ${
+              showPreview
+                ? "bg-accent-primary text-white border-accent-primary"
+                : "bg-zinc-800 text-white border-zinc-700 hover:bg-zinc-700"
+            }`}
+          >
+            {showPreview ? <X className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            {showPreview ? "Chiudi" : "Anteprima"}
+          </button>
           <a
             href={`/${slug}`}
             target="_blank"
             rel="noreferrer"
             className="px-6 py-3 bg-zinc-800 text-white rounded-2xl text-sm font-bold border border-zinc-700 hover:bg-zinc-700 transition flex items-center gap-2"
           >
-            <ExternalLink className="w-4 h-4" /> Anteprima
+            <ExternalLink className="w-4 h-4" /> Apri
           </a>
           <button onClick={handleSave} disabled={saving}
             className="px-6 py-3 bg-accent-primary text-white rounded-2xl text-sm font-bold flex items-center gap-2 hover:brightness-110 transition disabled:opacity-50">
@@ -366,16 +394,11 @@ export default function EditProductPage() {
                   {translatedLocales.map(l => l.toUpperCase()).join(", ")}
                 </span>
               )}
-              <div className="flex items-center gap-2">
-                <Globe className="w-4 h-4 text-zinc-500" />
-                <select value={locale} onChange={(e) => { setLocale(e.target.value); }} className="bg-zinc-900/50 border border-zinc-800 rounded-xl px-3 py-1.5 text-xs text-white">
-                  <option value="it">IT</option>
-                  <option value="en">EN</option>
-                  <option value="es">ES</option>
-                  <option value="fr">FR</option>
-                  <option value="de">DE</option>
-                </select>
-              </div>
+              <LocaleTabs
+                locales={["it", "en", "es", "fr", "de", "pt"]}
+                active={locale}
+                onChange={handleLocaleChange}
+              />
             </div>
           </div>
           <div className="space-y-4">
@@ -395,127 +418,50 @@ export default function EditProductPage() {
 
         {/* Lezioni */}
         <section className="glass-card p-6 rounded-3xl border border-white/5">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-white font-semibold">Lezioni Video</span>
-            <button onClick={() => setLessons((p) => [...p, { translations: { [locale]: { title: "", videoUrl: "" } }, assets: [] }])} className="text-sm text-accent-primary flex items-center gap-1"><Plus className="w-4 h-4" /> Aggiungi</button>
-          </div>
-          <div className="space-y-4">
-            {lessons.map((lesson, i) => (
-              <div key={i} className="bg-zinc-900/30 p-4 rounded-2xl border border-zinc-800/50">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-white font-bold">Lezione {i + 1}</span>
-                  <button onClick={() => setLessons((p) => p.filter((_, idx) => idx !== i))} className="p-2 text-zinc-600 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                  <div>
-                    <label className="block text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-1">Titolo ({locale})</label>
-                    <input
-                      type="text"
-                      value={lesson.translations[locale]?.title || ""}
-                      onChange={(e) => setLessons((prev) => {
-                        const n = [...prev];
-                        n[i].translations[locale] = { ...n[i].translations[locale], title: e.target.value };
-                        return n;
-                      })}
-                      placeholder="Titolo lezione"
-                      className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-accent-primary"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-1">Video URL ({locale})</label>
-                    <input
-                      type="text"
-                      value={lesson.translations[locale]?.videoUrl || ""}
-                      onChange={(e) => setLessons((prev) => {
-                        const n = [...prev];
-                        n[i].translations[locale] = { ...n[i].translations[locale], videoUrl: e.target.value };
-                        return n;
-                      })}
-                      placeholder="URL YouTube"
-                      className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-accent-primary"
-                    />
-                  </div>
-                </div>
-
-                {/* Assets */}
-                <div className="mt-4 pt-4 border-t border-white/5">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-zinc-400 font-bold uppercase tracking-widest">Asset ({locale})</span>
-                    <span className="text-[10px] text-zinc-600">PDF, Audio o Risorse</span>
-                  </div>
-                  <div className="space-y-2">
-                    {lesson.assets.filter((a) => a.locale === locale).map((asset, aidx) => (
-                      <div key={aidx} className="flex items-center gap-3 bg-zinc-900/50 p-3 rounded-xl border border-zinc-800">
-                        {asset.type === "audio" ? <Headphones className="w-4 h-4 text-accent-secondary" /> : <FileText className="w-4 h-4 text-accent-tertiary" />}
-                        <span className="text-xs text-zinc-300 flex-1 truncate">{asset.fileName || asset.fileUrl}</span>
-                        <button onClick={() => setLessons((prev) => {
-                          const n = [...prev];
-                          n[i].assets = n[i].assets.filter((_, idx) => idx !== aidx);
-                          return n;
-                        })} className="p-1 text-zinc-600 hover:text-red-500"><X className="w-3 h-3" /></button>
-                      </div>
-                    ))}
-                  </div>
-                  <AssetUploader
-                    onUpload={(asset) => setLessons((prev) => {
-                      const n = [...prev];
-                      n[i].assets.push({ ...asset, locale });
-                      return n;
-                    })}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+          <LessonBuilder
+            locales={["it", "en", "es", "fr", "de", "pt"]}
+            lessons={lessons}
+            onChange={setLessons}
+          />
         </section>
       </div>
+
+      {/* Live Preview Drawer */}
+      {showPreview && (
+        <div className="fixed inset-y-0 right-0 w-full md:w-[50vw] lg:w-[45vw] bg-zinc-950 border-l border-white/10 shadow-2xl z-50 flex flex-col">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-zinc-900/50">
+            <div>
+              <h3 className="text-sm font-bold text-white">Anteprima Live</h3>
+              <p className="text-[10px] text-zinc-500">{locale}/{slug}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <a
+                href={`/${toFullLocale(locale)}/${slug}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs text-zinc-400 hover:text-white flex items-center gap-1"
+              >
+                <ExternalLink className="w-3 h-3" /> Apri in scheda
+              </a>
+              <button
+                onClick={() => setShowPreview(false)}
+                className="p-2 text-zinc-400 hover:text-white transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+          <div className="flex-1 relative">
+            <iframe
+              src={`/${toFullLocale(locale)}/${slug}`}
+              title="Anteprima prodotto"
+              className="absolute inset-0 w-full h-full bg-white"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function AssetUploader({ onUpload }: { onUpload: (asset: { type: "pdf" | "audio" | "resource"; fileUrl: string; fileName?: string | null }) => void }) {
-  const [uploading, setUploading] = useState(false);
-
-  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Upload fallito");
-
-      const type: "pdf" | "audio" | "resource" = file.type.startsWith("audio/") ? "audio" : "pdf";
-      onUpload({ type, fileUrl: data.url, fileName: file.name });
-    } catch (err) {
-      alert(err instanceof Error ? err.message : "Errore durante l'upload");
-    } finally {
-      setUploading(false);
-    }
-  }
-
-  return (
-    <label className="flex items-center gap-2 px-4 py-2 bg-zinc-800/50 border border-zinc-700 border-dashed rounded-xl text-xs text-zinc-400 hover:text-white hover:border-zinc-500 transition cursor-pointer mt-2">
-      {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
-      {uploading ? "Caricamento..." : "Aggiungi asset"}
-      <input type="file" accept=".pdf,.mp3,.wav,.m4a,.mp4" onChange={handleFileSelect} className="hidden" disabled={uploading} />
-    </label>
-  );
-}
-
-function Check({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-    </svg>
-  );
-}
 

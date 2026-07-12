@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toFullLocale } from "@/lib/i18n/to-full-locale";
 import TemplateSelector from "@/components/admin/template-selector";
 import { ImageUpload } from "@/components/admin/image-upload";
 import type { TemplateId } from "@/components/funnel";
@@ -14,11 +15,12 @@ import {
   Save, 
   Image as ImageIcon,
   Plus,
-  Trash2,
   CheckCircle2,
-  Loader2
+  Loader2,
+  Eye,
 } from "lucide-react";
 import { CurrencyPricesSection } from "@/components/admin/currency-prices";
+import { LessonBuilder, LessonFormItem } from "@/components/admin/lesson-builder";
 
 const FUNNEL_SECTIONS = [
   { key: "titolo", label: "Titolo del Prodotto", placeholder: "Es: Corso Completo di Fotografia" },
@@ -46,9 +48,10 @@ export default function NewProductPage() {
   const [texts, setTexts] = useState<Record<string, string>>(
     Object.fromEntries(FUNNEL_SECTIONS.map((s) => [s.key, ""]))
   );
-  const [lessons, setLessons] = useState<{ title: string; videoUrl: string }[]>([
-    { title: "", videoUrl: "" },
+  const [lessons, setLessons] = useState<LessonFormItem[]>([
+    { translations: { en: { title: "", videoUrl: "" } }, assets: [] },
   ]);
+  const [sourceLocale] = useState("en");
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiResult, setAiResult] = useState<string | null>(null);
 
@@ -68,8 +71,8 @@ export default function NewProductPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sourceLocale: "it",
-          targetLocales: ["it"],
+          sourceLocale,
+          targetLocales: [sourceLocale],
           sections: { custom: aiPrompt },
           mode: "rewrite",
           currentTexts: texts,
@@ -91,8 +94,8 @@ export default function NewProductPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sourceLocale: "it",
-          targetLocales: ["en", "es", "fr", "de", "pt"],
+          sourceLocale,
+          targetLocales: ["en", "es", "fr", "de", "pt"].filter(l => l !== sourceLocale),
           sections: texts,
         }),
       });
@@ -109,7 +112,7 @@ export default function NewProductPage() {
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (redirectToEdit = false): Promise<{ id: string; slug: string } | null> => {
     try {
       const res = await fetch("/api/products", {
         method: "POST",
@@ -123,16 +126,31 @@ export default function NewProductPage() {
           pricesByCurrency: Object.keys(pricesByCurrency).length > 0 ? pricesByCurrency : undefined,
           countryOverrides: Object.keys(countryOverrides).length > 0 ? countryOverrides : undefined,
           lessons,
-          sourceLocale: "it",
+          sourceLocale,
           templateId: selectedTemplate,
         }),
       });
-      if (res.ok) {
-        alert("Prodotto salvato!");
-        router.push("/admin/products");
+      if (!res.ok) {
+        alert("Errore nel salvataggio");
+        return null;
       }
+      const data = await res.json() as { product?: { id: string; slug: string } };
+      const product = data.product ?? null;
+      if (product && redirectToEdit) {
+        router.push(`/admin/products/${product.id}`);
+      }
+      return product;
     } catch {
       alert("Errore nel salvataggio");
+      return null;
+    }
+  };
+
+  const handleSaveAndPreview = async () => {
+    const product = await handleSave(false);
+    if (product) {
+      window.open(`/${toFullLocale(sourceLocale)}/${product.slug}`, "_blank");
+      router.push(`/admin/products/${product.id}`);
     }
   };
 
@@ -241,49 +259,15 @@ export default function NewProductPage() {
 
             {/* Lezioni */}
             <section className="glass-card p-8 rounded-3xl space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3 text-white font-semibold">
-                  <ArrowRight className="w-5 h-5 text-accent-blue" />
-                  <h2>Lezioni Video</h2>
-                </div>
-                <button
-                  onClick={() => setLessons((prev) => [...prev, { title: "", videoUrl: "" }])}
-                  className="text-sm text-accent-blue hover:underline flex items-center gap-1"
-                >
-                  <Plus className="w-4 h-4" /> Aggiungi lezione
-                </button>
+              <div className="flex items-center gap-3 text-white font-semibold">
+                <ArrowRight className="w-5 h-5 text-accent-blue" />
+                <h2>Lezioni Video & Asset</h2>
               </div>
-              <div className="space-y-4">
-                {lessons.map((lesson, i) => (
-                  <div key={i} className="flex gap-4 items-start bg-zinc-900/30 p-4 rounded-2xl border border-zinc-800/50">
-                    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-zinc-800 text-sm font-bold text-zinc-400 border border-zinc-700">
-                      {i + 1}
-                    </span>
-                    <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <input
-                        type="text"
-                        value={lesson.title}
-                        onChange={(e) => { const n = [...lessons]; n[i].title = e.target.value; setLessons(n); }}
-                        placeholder="Titolo lezione"
-                        className="bg-transparent border-b border-zinc-800 px-1 py-2 text-sm text-white focus:outline-none focus:border-accent-blue transition-colors"
-                      />
-                      <input
-                        type="text"
-                        value={lesson.videoUrl}
-                        onChange={(e) => { const n = [...lessons]; n[i].videoUrl = e.target.value; setLessons(n); }}
-                        placeholder="URL YouTube"
-                        className="bg-transparent border-b border-zinc-800 px-1 py-2 text-sm text-white focus:outline-none focus:border-accent-blue transition-colors"
-                      />
-                    </div>
-                    <button 
-                      onClick={() => setLessons(prev => prev.filter((_, idx) => idx !== i))}
-                      className="p-2 text-zinc-600 hover:text-red-500 transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
+              <LessonBuilder
+                locales={[sourceLocale]}
+                lessons={lessons}
+                onChange={setLessons}
+              />
             </section>
 
             {/* Prezzo */}
@@ -343,10 +327,16 @@ export default function NewProductPage() {
                   )}
                 </div>
                 <button
-                  onClick={handleSave}
+                  onClick={() => handleSave(true)}
                   className="px-6 py-4 bg-zinc-800 text-zinc-300 rounded-2xl text-sm font-semibold border border-zinc-700 hover:bg-zinc-700 transition-colors flex items-center gap-2"
                 >
                   <Save className="w-4 h-4" /> Salva Bozza
+                </button>
+                <button
+                  onClick={handleSaveAndPreview}
+                  className="px-6 py-4 bg-accent-primary text-white rounded-2xl text-sm font-semibold border border-accent-primary hover:brightness-110 transition-colors flex items-center gap-2"
+                >
+                  <Eye className="w-4 h-4" /> Salva & Anteprima
                 </button>
               </div>
             </div>
@@ -414,8 +404,8 @@ export default function NewProductPage() {
                   onClick={() => {
                     try {
                       const parsed = JSON.parse(aiResult);
-                      if (parsed.translations?.it) {
-                        setTexts((prev) => ({ ...prev, ...parsed.translations.it }));
+                      if (parsed.translations?.[sourceLocale]) {
+                        setTexts((prev) => ({ ...prev, ...parsed.translations[sourceLocale] }));
                       }
                       alert("Modifiche applicate con successo!");
                     } catch {
@@ -437,7 +427,13 @@ export default function NewProductPage() {
                 Torna ai Contenuti
               </button>
               <button
-                onClick={handleSave}
+                onClick={handleSaveAndPreview}
+                className="flex-1 bg-accent-primary text-white rounded-2xl py-4 text-sm font-bold shadow-xl flex items-center justify-center gap-2 hover:brightness-110 transition"
+              >
+                <Eye className="w-4 h-4" /> Salva & Anteprima
+              </button>
+              <button
+                onClick={() => handleSave(true)}
                 className="flex-1 gradient-btn rounded-2xl py-4 text-sm font-bold text-white shadow-xl"
               >
                 Pubblica Prodotto

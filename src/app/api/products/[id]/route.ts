@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { apiErrorResponse } from "@/lib/errors";
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { revalidateProduct } from "@/lib/admin/revalidate-product";
 
 // GET — Dettaglio singolo prodotto
 export async function GET(
@@ -221,6 +222,13 @@ export async function PUT(
     } catch (syncError) {
       console.error("[Auto-sync] Failed to generate config:", syncError);
     }
+
+    // Invalida la cache delle pagine pubbliche
+    const updatedLocales = [
+      sourceLocale ?? "it",
+      ...Object.keys(translationsByLocale ?? {}),
+    ];
+    revalidateProduct(product.slug, updatedLocales);
 
     return NextResponse.json({ success: true, product });
   } catch (error) {
