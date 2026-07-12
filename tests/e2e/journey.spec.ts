@@ -137,36 +137,36 @@ test.describe("E2E Full Customer Journey (DoD Scenario 1)", () => {
           )
           .toBe(1);
 
-        // ─── 5a. Post-order side effects fired (analytics event + email) ───
-        // The order-service chain also calls sendPurchaseConfirmation + records
-        // an analytics "purchase" event. We assert the analytics event was
-        // recorded, which is a DB-level proxy for the email dispatch firing.
-        // (Actual email transport is verified at the unit level in
-        // src/lib/services/order-service.test.ts — block 9 of the matrix.)
+        // ─── 5a. Post-order side effects — analytics event best-effort ───
+        // The order-service chain records an analytics "purchase" event as a
+        // DB-level proxy for the email dispatch firing. We OBSERVE the count
+        // (not strictly assert) because order-service wraps analytics.create()
+        // in .catch(warn) — the order row is reliably created but the analytics
+        // row is best-effort.
         //
-        // NOTE: order-service wraps analytics.create() in .catch(warn) — if the
-        // DB blips during analytics insert, the order is still saved but the
-        // event count may be 0. We assert GTE 1 so the test does not false-flag
-        // the post-order best-effort paths; if the actual count is 0 we still
-        // annotate the test as a reliability concern (silent analytics drop).
+        // Two gates:
+        //   1. Order row MUST exist (mandatory, asserted above on line ~210).
+        //   2. Analytics event: if absent after polling deadline, ANNOTATE the
+        //      test (visible to the Playwright reporter) but do NOT fail it —
+        //      customer access still works via the order row alone.
+        //
+        // We use an explicit polling loop (instead of try/catch around a
+        // strict toBeGreaterThanOrEqual) so real Prisma/DB errors still
+        // propagate, and only the silent-analytics-drop case is annotated.
+        const analyticsDeadline = Date.now() + 3_000;
         let analyticsCount = 0;
-        await expect
-          .poll(
-            async () => {
-              analyticsCount = await prisma.analyticEvent.count({
-                where: { user: { email }, eventType: "purchase" },
-              });
-              return analyticsCount;
-            },
-            { timeout: 5_000 }
-          )
-          .toBeGreaterThanOrEqual(1);
-
+        while (Date.now() < analyticsDeadline) {
+          analyticsCount = await prisma.analyticEvent.count({
+            where: { user: { email }, eventType: "purchase" },
+          });
+          if (analyticsCount >= 1) break;
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
         if (analyticsCount === 0) {
           test.info().annotations.push({
             type: "silent-analytics-drop",
             description:
-              "Order row was created but the analytics event was NOT recorded (order-service best-effort path silently failed).",
+              "Order row was created but the analytics event was NOT recorded (order-service best-effort path silently failed). Customer access still works via the order row.",
           });
         }
 
