@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/db/supabase";
 import { apiErrorResponse } from "@/lib/errors";
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { withRateLimit } from "@/lib/utils/rate-limit";
 
 const ALLOWED_TYPES = [
   "image/jpeg",
@@ -20,7 +21,7 @@ const ALLOWED_TYPES = [
 const MAX_SIZE = 50 * 1024 * 1024; // 50 MB
 const BUCKET_NAME = "covers";
 
-export async function POST(request: NextRequest) {
+export const POST = withRateLimit(async function POST(request: NextRequest) {
   try {
     const authError = await requireAdmin();
     if (authError) return authError;
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
     // Validazione dimensione
     if (file.size > MAX_SIZE) {
       return NextResponse.json(
-        { error: `File troppo grande (${(file.size / 1024 / 1024).toFixed(1)} MB). Massimo 5 MB.` },
+        { error: `File troppo grande (${(file.size / 1024 / 1024).toFixed(1)} MB). Massimo ${MAX_SIZE / 1024 / 1024} MB.` },
         { status: 400 }
       );
     }
@@ -127,4 +128,4 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return apiErrorResponse(error, "Errore interno nel upload");
   }
-}
+}, "AUTH");
