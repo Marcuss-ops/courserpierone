@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi, type Mock } from "vitest";
-import { NextRequest } from "next/server";
+import { createMockRequest } from "@/app/api/__test-helpers__/mock-request";
 
 // ─── Mocks (must come before route import) ───────────────────
 vi.mock("@/lib/db/prisma", () => ({
@@ -21,14 +21,6 @@ vi.mock("@/lib/ws/broker", () => ({
 }));
 
 // ─── Helpers ─────────────────────────────────────────────────
-// `NextRequest` estende `Request` arricchendolo di cookies/headers
-// next-specifici. Per i fini del test, wrappiamo un `Request` plain
-// in modo da soddisfare il typing del Route Handler (`NextRequest`).
-function createMockRequest(): NextRequest {
-  return new NextRequest(new Request("http://localhost/api/conversations/conv-123", {
-    method: "DELETE",
-  }));
-}
 
 // ─── Imports under test ──────────────────────────────────────
 import { prisma } from "@/lib/db/prisma";
@@ -52,7 +44,7 @@ const CONV_AB = {
 
 async function callDELETE() {
   const { DELETE } = await import("./route");
-  const req = createMockRequest();
+  const req = createMockRequest("/api/conversations/conv-123", { method: "DELETE" });
   return DELETE(req, { params: Promise.resolve({ id: "conv-123" }) });
 }
 

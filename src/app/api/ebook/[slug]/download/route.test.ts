@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { NextRequest } from "next/server";
 import { fakeOrder } from "@/app/api/__test-helpers__/fake-order";
+import { createMockRequest } from "@/app/api/__test-helpers__/mock-request";
 
 // ─── Mock SSOT helper ───────────────────────────────────────
 const mockFindCompletedOrder = vi.fn();
@@ -49,14 +49,6 @@ const SLUG = "test-course";
 const USER_ID = "cu-user-1";
 const ADMIN_ID = "cu-admin-1";
 
-function createMockRequest(query: Record<string, string> = {}) {
-  const url = new URL(`http://localhost:3000/api/ebook/${SLUG}/download`);
-  for (const [k, v] of Object.entries(query)) url.searchParams.set(k, v);
-  return {
-    headers: new Map(),
-    url: url.toString(),
-  } as unknown as NextRequest;
-}
 
 const params = Promise.resolve({ slug: SLUG });
 
@@ -92,7 +84,7 @@ describe("GET /api/ebook/[slug]/download — user-keyed access (NO admin bypass)
   it("anonymous: returns 401 Unauthorized", async () => {
     mockAnon();
     const { GET } = await import("./route");
-    const response = await GET(createMockRequest(), { params });
+    const response = await GET(createMockRequest(`/api/ebook/${SLUG}/download`), { params });
 
     expect(response.status).toBe(401);
     const body = await response.json();
@@ -107,7 +99,7 @@ describe("GET /api/ebook/[slug]/download — user-keyed access (NO admin bypass)
     mockAdmin();
     mockFindCompletedOrder.mockResolvedValueOnce(null);
     const { GET } = await import("./route");
-    const response = await GET(createMockRequest(), { params });
+    const response = await GET(createMockRequest(`/api/ebook/${SLUG}/download`), { params });
 
     expect(response.status).toBe(401);
     expect(mockFindCompletedOrder).toHaveBeenCalledWith({
@@ -121,7 +113,7 @@ describe("GET /api/ebook/[slug]/download — user-keyed access (NO admin bypass)
     mockCustomer();
     mockFindCompletedOrder.mockResolvedValueOnce(null);
     const { GET } = await import("./route");
-    const response = await GET(createMockRequest(), { params });
+    const response = await GET(createMockRequest(`/api/ebook/${SLUG}/download`), { params });
 
     expect(response.status).toBe(401);
   });
@@ -131,7 +123,7 @@ describe("GET /api/ebook/[slug]/download — user-keyed access (NO admin bypass)
     mockCustomer();
     mockFindCompletedOrder.mockResolvedValueOnce(null);
     const { GET } = await import("./route");
-    const response = await GET(createMockRequest(), { params });
+    const response = await GET(createMockRequest(`/api/ebook/${SLUG}/download`), { params });
 
     expect(response.status).toBe(401);
   });
@@ -143,7 +135,7 @@ describe("GET /api/ebook/[slug]/download — user-keyed access (NO admin bypass)
     mockGetCourseConfig.mockResolvedValueOnce(null);
 
     const { GET } = await import("./route");
-    const response = await GET(createMockRequest(), { params });
+    const response = await GET(createMockRequest(`/api/ebook/${SLUG}/download`), { params });
     const body = await response.json();
 
     expect(response.status).toBe(404);
@@ -167,7 +159,7 @@ describe("GET /api/ebook/[slug]/download — user-keyed access (NO admin bypass)
 
     const { GET } = await import("./route");
     const response = await GET(
-      createMockRequest({ lang: "en", disposition: "attachment" }),
+      createMockRequest(`/api/ebook/${SLUG}/download`, { query: { lang: "en", disposition: "attachment" } }),
       { params }
     );
 
@@ -194,7 +186,7 @@ describe("GET /api/ebook/[slug]/download — user-keyed access (NO admin bypass)
     mockReadFileSync.mockReturnValue(Buffer.from("%PDF-1.4\n%%EOF\n"));
 
     const { GET } = await import("./route");
-    const response = await GET(createMockRequest({ lang: "it" }), { params });
+    const response = await GET(createMockRequest(`/api/ebook/${SLUG}/download`, { query: { lang: "it" } }), { params });
 
     expect(response.status).toBe(200);
     expect(response.headers.get("Content-Type")).toBe("application/pdf");

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { NextRequest } from "next/server";
 import { fakeOrder } from "@/app/api/__test-helpers__/fake-order";
+import { createMockRequest } from "@/app/api/__test-helpers__/mock-request";
 
 // ─── Mock SSOT helper ───────────────────────────────────────
 const mockFindCompletedOrder = vi.fn();
@@ -43,16 +43,6 @@ const USER_ID = "cu-user-1";
 const ADMIN_ID = "cu-admin-1";
 const VIDEO_URL = "https://example.com/video.mp4";
 
-function createMockRequest(query: Record<string, string> = {}) {
-  const url = new URL("http://localhost:3000/api/videos/stream");
-  for (const [k, v] of Object.entries(query)) url.searchParams.set(k, v);
-  return {
-    headers: new Map(),
-    url: url.toString(),
-    nextUrl: { searchParams: url.searchParams },
-  } as unknown as NextRequest;
-}
-
 const mockAnon = () =>
   mockGetServerUser.mockResolvedValueOnce({ supabase: null, user: null, dbUser: null });
 
@@ -89,7 +79,7 @@ describe("GET /api/videos/stream — admin bypass + customer order check", () =>
     mockAnon();
     const { GET } = await import("./route");
     const response = await GET(
-      createMockRequest({ lessonId: LESSON_ID, productSlug: SLUG })
+      createMockRequest("/api/videos/stream", { query: { lessonId: LESSON_ID, productSlug: SLUG } })
     );
     const body = await response.json();
 
@@ -103,7 +93,7 @@ describe("GET /api/videos/stream — admin bypass + customer order check", () =>
   it("missing lessonId: returns 400", async () => {
     mockCustomer();
     const { GET } = await import("./route");
-    const response = await GET(createMockRequest({ productSlug: SLUG }));
+    const response = await GET(createMockRequest("/api/videos/stream", { query: { productSlug: SLUG } }));
 
     expect(response.status).toBe(400);
     const body = await response.json();
@@ -113,7 +103,7 @@ describe("GET /api/videos/stream — admin bypass + customer order check", () =>
   it("missing productSlug: returns 400", async () => {
     mockCustomer();
     const { GET } = await import("./route");
-    const response = await GET(createMockRequest({ lessonId: LESSON_ID }));
+    const response = await GET(createMockRequest("/api/videos/stream", { query: { lessonId: LESSON_ID } }));
 
     expect(response.status).toBe(400);
     const body = await response.json();
@@ -127,7 +117,7 @@ describe("GET /api/videos/stream — admin bypass + customer order check", () =>
 
     const { GET } = await import("./route");
     const response = await GET(
-      createMockRequest({ lessonId: LESSON_ID, productSlug: SLUG })
+      createMockRequest("/api/videos/stream", { query: { lessonId: LESSON_ID, productSlug: SLUG } })
     );
     expect(response.status).toBe(404);
     // findCompletedOrder is gated behind product found
@@ -142,7 +132,7 @@ describe("GET /api/videos/stream — admin bypass + customer order check", () =>
 
     const { GET } = await import("./route");
     const response = await GET(
-      createMockRequest({ lessonId: LESSON_ID, productSlug: SLUG })
+      createMockRequest("/api/videos/stream", { query: { lessonId: LESSON_ID, productSlug: SLUG } })
     );
     const body = await response.json();
 
@@ -161,7 +151,7 @@ describe("GET /api/videos/stream — admin bypass + customer order check", () =>
 
     const { GET } = await import("./route");
     const response = await GET(
-      createMockRequest({ lessonId: LESSON_ID, productSlug: SLUG })
+      createMockRequest("/api/videos/stream", { query: { lessonId: LESSON_ID, productSlug: SLUG } })
     );
     const body = await response.json();
 
@@ -181,7 +171,7 @@ describe("GET /api/videos/stream — admin bypass + customer order check", () =>
 
     const { GET } = await import("./route");
     const response = await GET(
-      createMockRequest({ lessonId: LESSON_ID, productSlug: SLUG })
+      createMockRequest("/api/videos/stream", { query: { lessonId: LESSON_ID, productSlug: SLUG } })
     );
     const body = await response.json();
 
@@ -197,7 +187,7 @@ describe("GET /api/videos/stream — admin bypass + customer order check", () =>
 
     const { GET } = await import("./route");
     const response = await GET(
-      createMockRequest({ lessonId: LESSON_ID, productSlug: SLUG })
+      createMockRequest("/api/videos/stream", { query: { lessonId: LESSON_ID, productSlug: SLUG } })
     );
     expect(response.status).toBe(403);
   });
@@ -215,7 +205,7 @@ describe("GET /api/videos/stream — admin bypass + customer order check", () =>
 
     const { GET } = await import("./route");
     const response = await GET(
-      createMockRequest({ lessonId: LESSON_ID, productSlug: SLUG })
+      createMockRequest("/api/videos/stream", { query: { lessonId: LESSON_ID, productSlug: SLUG } })
     );
     const body = await response.json();
 
@@ -235,7 +225,7 @@ describe("GET /api/videos/stream — admin bypass + customer order check", () =>
 
     const { GET } = await import("./route");
     const response = await GET(
-      createMockRequest({ lessonId: LESSON_ID, productSlug: SLUG, lang: "it" })
+      createMockRequest("/api/videos/stream", { query: { lessonId: LESSON_ID, productSlug: SLUG, lang: "it" } })
     );
     const body = await response.json();
 
