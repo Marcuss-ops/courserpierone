@@ -436,7 +436,7 @@ export default function NewProductPage() {
                 onClick={() => handleSave(true)}
                 className="flex-1 gradient-btn rounded-2xl py-4 text-sm font-bold text-white shadow-xl"
               >
-                Pubblica Prodotto
+                Salva Prodotto
               </button>
             </div>
           </div>

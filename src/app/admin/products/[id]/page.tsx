@@ -167,7 +167,16 @@ export default function EditProductPage() {
           templateId,
           lemonVariantId,
           translations: texts,
-          translationsByLocale,
+          // CRITICAL: merge all accumulated manual translations across all
+          // locale tabs (they live in `allProductTranslations`). Without this,
+          // any edits the user made on inactive tabs are silently dropped on
+          // save. AI-produced translations stay live too; in-memory `texts`
+          // for the active locale wins last.
+          translationsByLocale: {
+            ...translationsByLocale,
+            ...allProductTranslations,
+            [locale]: texts,
+          },
           pricesByCurrency: Object.keys(pricesByCurrency).length > 0 ? pricesByCurrency : undefined,
           countryOverrides: Object.keys(countryOverrides).length > 0 ? countryOverrides : undefined,
           lessons,
