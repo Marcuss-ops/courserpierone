@@ -27,10 +27,10 @@ Stack di supporto: **PostgreSQL** + **Prisma 5**, **Upstash Redis** + **ioredis*
 └────────────────────┬────────────────────────────────────┘
                      │
 ┌────────────────────▼────────────────────────────────────┐
-│                    API LAYER (tRPC / REST)              │
+│                    API LAYER (REST)                    │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
 │  │ Auth &   │  │ Payments │  │ Content  │              │
-│  │ Users    │  │ (Stripe) │  │ Delivery │              │
+│  │ Users    │  │   (LS)   │  │ Delivery │              │
 │  └──────────┘  └──────────┘  └──────────┘              │
 └────────────────────┬────────────────────────────────────┘
                      │
@@ -38,7 +38,7 @@ Stack di supporto: **PostgreSQL** + **Prisma 5**, **Upstash Redis** + **ioredis*
 │                   DATABASE (PostgreSQL)                  │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
 │  │ Products │  │  Orders  │  │  Users   │              │
-│  │ & i18n   │  │ & Stripe │  │ & Access │              │
+│  │ & i18n   │  │   (LS)   │  │ & Access │              │
 │  └──────────┘  └──────────┘  └──────────┘              │
 └─────────────────────────────────────────────────────────┘
 ```
@@ -51,34 +51,31 @@ Stack di supporto: **PostgreSQL** + **Prisma 5**, **Upstash Redis** + **ioredis*
 - **Routing**: Prefisso URL per lingua (`/it/corso`, `/en/course`, `/es/curso`)
 - **Content delivery**: API restituisce la versione nella lingua richiesta
 - **Fallback**: Se una traduzione non esiste, mostra la lingua primaria
+- **Cataloghi i18n**: `src/lib/i18n/` espone `getUiTranslations`, `localeToLanguage`, `loadLocaleContentSafe/Cached`. Vedi `docs/i18n-coverage.md` per la matrice di copertura per lingua.
 
 ### 2. Gestione Prodotti Digitali
 
-- **Asset principale**: Video hosted (YouTube/Vimeo embed o player custom)
+- **Asset principale**: Video hosted (YouTube unlisted URLs via `LessonTranslation.videoUrl`)
 - **Tracce audio**: File MP3 collegati alla lezione, selezionabili per lingua
-- **PDF localizzati**: Un file per lingua, generato o caricato manualmente
+- **PDF localizzati**: Un file per lingua, generato o caricato manualmente (`LessonAsset` table)
 - **Metadata**: Titolo, descrizione, tags — tutti tradotti
+- **Content source of truth**: `ProductTranslation` (DB) + `data/<slug>/<locale>.json` (derived build artifact via `extract-locales.ts`). Vedi `docs/content-source-map.md` per la matrice completa e `docs/adr/0009-content-source-canonical.md` per il design canonical.
 
-### 3. Checkout & Pagamenti
+### 3. Checkout & Pagamenti (LS-only)
 
-- **Stripe Checkout**: Pagina di pagamento hosted da Stripe
-- **Valuta dinamica**: Rilevamento automatico dal browser/posizione utente
-- **Tasse**: Stripe Tax gestisce automatically VAT/sales tax
-- **Consegna automatica**: Webhook Stripe → verifica pagamento → accesso al contenuto
+- **Lemon Squeezy**: Merchant of Record unico. Gestisce checkout hosted, valuta, tasse (VAT/sales tax) e fatturazione.
+- **Webhook → Order**: `src/app/api/webhooks/lemonsqueezy/route.ts` riceve `order_created` + `subscription_*` events, scrive `Order` row + `AccessGrant` row (MCR Phase 2).
+- **Variant ID**: `Product.lemonVariantId` è il campo canonico (legacy `Product.stripePriceId` è marcato come legacy e scheduled for Fase 8 removal).
+- **Valuta dinamica**: Rilevamento automatico dal browser/posizione utente (`src/lib/i18n/locale-resolver.ts`) → `Product.pricesByCurrency` lookup → override per paese (`Product.countryOverrides`).
+- **Consegna automatica**: Webhook LS → `processOrder` happy path → `AccessGrant.status='active'` → `AccessGate` autorizza accesso al contenuto.
 
 ### 4. Accesso & Utenti
 
-- **Auth**: Supabase Auth (Google OAuth)
-- **Ruoli**: Admin, Creator, Student
+- **Auth**: Supabase Auth (Google OAuth + Magic Link). Vedi `docs/OAUTH-SETUP.md` per il setup.
+- **Ruoli**: `admin`, `creator`, `student` (string columns, check inline in route handlers).
+- **MCR Phase 2 (canonical)**: `AccessGrant` table è la single source of truth per "l'utente X ha accesso al prodotto Y". Sostituisce i direct reads su `Order.status='completed'` (legacy path, gated by `USE_ACCESS_GRANT_RESOLVER` env flag).
 - **Dashboard utente**: Lista acquisti, download PDF, progresso corsi
-- **Area admin**: Gestione prodotti, ordini, analytics
-
-### 5. Analytics & Tracking
-
-- **Eventi**: Pageview, acquisto, completamento lezione, download
-- **Source tracking**: Parametri URL da YouTube (`?utm_source=youtube&utm_campaign=nome_canale`)
-- **Dashboard**: Revenue per lingua, conversioni per canale, top prodotti
-- **Integrazione**: PostHog self-hosted o Umami per privacy
+- **Area admin**: Gestione prodotti, ordini, utenti (in `src/app/admin/*`)
 
 ## Flusso Utente (Funnel)
 
@@ -89,44 +86,43 @@ YouTube Video (link in descrizione)
 Landing Page (i18n) ──── Prezzo localizzato
     │
     ▼
-Stripe Checkout ──── Valuta + Tasse automatiche
+LS Checkout ──── Valuta + Tasse automatiche (MoR)
     │
     ▼
-Webhook Confirmation
+Webhook LS → processOrder
     │
     ▼
-Email Benvenuto + Credenziali
+Email Benvenuto + Credenziali Supabase
     │
     ▼
-Dashboard Utente ──── Accesso corsi, PDF, download
+AccessGate (AccessGrant check) ──── Accesso corsi, PDF, download
 ```
 
 ## Flusso Contenuto (Creator)
 
 ```
-Carica Video (YouTube/Vimeo URL)
+Crea Product (template picker: lumio | h612 | horizon | book-claude | amish; "default" è il fallback dell'orchestratore quando `data.template` non è riconosciuto)
     │
     ▼
-Aggiungi Tracce Audio (per lingua)
+Aggiungi Lesson + LessonTranslation (per lingua)
     │
     ▼
-Carica PDF (per lingua)
+Carica PDF/Audio (per lingua) → LessonAsset
     │
     ▼
-Compila Metadata (titolo, descrizione — per lingua)
+Compila ProductTranslation (titolo, storia, problema, cta, recensioni, ui_all)
     │
     ▼
-Pubblica ──── Auto-genera pagine in tutte le lingue
+extract-locales.ts → data/<slug>/<locale>.json (build artifact)
+    │
+    ▼
+Pubblica ──── generateCourseConfig(slug) → CourseConfigCache DB row
+                              ↓
+                     Pagina pubblica renderizzata dal template selezionato
 ```
 
-## Scalabilità
+## Note operative
 
-| Componente | Strategia |
-|---|---|
-| Video streaming | YouTube/Vimeo embed (MVP) → player custom (fase 3+) |
-| Database | PostgreSQL + connection pooling |
-| File storage | Cloudflare R2 / S3 per PDF e audio |
-| CDN | Cloudflare per asset statici |
-| Pagamenti | Stripe (gestisce tutto) |
-| Email | Resend / SendGrid (transactional) |
-| Hosting | Vercel (Next.js) o self-hosted Docker |
+- **Dev server paralleli**: `npm run dev` (Next.js) + `npm run dev:ws` (`server.ts` per il WS bridge dei DM). Vedi `docs/production.md` per la topologia di produzione.
+- **Typecheck + lint**: `npm run check` (typecheck + eslint + vitest). Vedi `docs/roadmap-current.md` §1.5 per il baseline degli errori pre-esistenti.
+- **DB locale**: `docker compose up -d db redis` (Postgres 16 + Redis). Lo stack include `pgbackups` per i backup automatici (PITR per Supabase prod).
