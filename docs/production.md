@@ -1,180 +1,410 @@
-# Production Readiness
+# Operations Playbook
 
-This document describes how the platform is prepared for production.
+> **Playbook Version:** `f8e58c5` (HEAD of `main` at write-time, includes the deploy-gate CI workflow).
+> **Code this doc documents:** same commit — playbook is **versioned with the deployment** because they share the same Git history.
+>
+> **Update policy:** every change to the deploy pipeline, alert paths, RBAC model, or secret inventory MUST update this playbook in the same PR. A "Documented for commit `X`" stamp at the top of each section anchors reader expectations.
 
-## Environment Separation
+---
 
-We follow the standard Next.js / Vercel pattern:
+## TL;DR — One-page Decision Matrix
 
-- `.env.example` — safe template, committed to git, no secrets.
-- `.env.local` — local development secrets, never committed.
-- Vercel Dashboard — production and preview environment variables.
-- GitHub Actions — CI-safe dummy values in `.github/workflows/ci.yml`.
+| If you see… | Do this NOW | Then |
+|---|---|---|
+| `deploy-gate` RED on a push to `main` | Read the failing job logs. Most common: typecheck or Playwright upstream. | Fix and re-push. Never force-merge. |
+| `prisma migrate deploy` fails | DO NOT rerun. Identify the migration. Either forward-fix OR `prisma migrate resolve --rolled-back <name>` + manual SQL cleanup, then PITR-restore in worst case. | Postmortem the migration. |
+| Vercel deploy fails after a green gate | Vercel-side issue. `vercel rollback` to previous deploy. | Inspect Vercel build logs. |
+| Stripe / LS webhook 5xx spike | Likely our app is down or webhook secret rotated. Check `ALERT_WEBHOOK_URL`. | If secret mismatch → rotate per §5; if app down → rollback. |
+| `/api/health` returns 503 | Database connection issue. Check Supabase dashboard. | If down >5 min: P0 incident (see §3). |
+| Redis down | Rate limiter falls back to in-memory (logged elsewhere). Errors persist for 7-day TTL window. | Self-heals when Redis returns. |
+| Slack/Discord alert stops arriving | Verify webhook URL still valid in Vercel env. | Recreate webhook in vendor, update Vercel, redeploy. |
+| Student payment succeeded but no access | `prisma.order.findUnique({ where: { stripeSessionId } })` first. | If status=`pending` → webhook missed → `stripe events resend <event_id>`. |
 
-### Rules
+---
 
-1. Never commit `.env`, `.env.local`, or any file containing real secrets.
-2. Use `src/lib/env.ts` to validate required variables at startup.
-3. Keep `NEXT_PUBLIC_*` variables public by design; never prefix secrets with `NEXT_PUBLIC_`.
+## §1 — Deploy Runbook
 
-## Secrets Exposure Prevention
+### 1.1 Pipeline overview
 
-- **gitleaks** runs on every push and PR via `.github/workflows/secrets-scan.yml`.
-- `.gitignore` ignores `.env*`, `*.pem`, and other sensitive files.
-- Run locally before committing:
-  ```bash
-  npx gitleaks detect --source . --verbose
-  ```
+```
+PR merged to main
+   ↓
+[1] .github/workflows/ci.yml
+   └─ 4 parallel: typecheck + lint + vitest + e2e-journey
+   └─ Aggregator: deploy-gate (status check name for branch protection)
+   └─ On red → POST to ALERT_WEBHOOK_URL (Slack/Discord)
+   ↓
+[2] .github/workflows/prisma-migrate.yml (only if prisma/** changed)
+   └─ prisma migrate deploy against Supabase via IPv6 GH runner
+   └─ Detects no-op (Already up to date) → skips Vercel deploy hook
+   └─ New migrations → triggers VERCEL_DEPLOY_HOOK_URL
+   ↓
+[3] Vercel builds production (auto after step [2] OR promoted by hand)
+   ↓
+[4] Post-deploy verification (1.3 below)
+```
 
-## Database Backups
+### 1.2 Manual deploy (skip CI gate)
 
-### Local Development (docker-compose)
-
-The `pgbackups` service in `docker-compose.yml` creates a daily logical dump of the Postgres database:
+Reserved for hotfixes when CI infra itself is broken. Bypasses deploy-gate by definition — manual review of CI logs is mandatory.
 
 ```bash
-docker compose up -d pgbackups
-# Dumps are written to ./backups/
+# Deploy latest main HEAD
+vercel --prod --yes
+
+# Verify
+curl -sS https://www.courssy.com/api/health | jq
 ```
 
-Retention: 7 daily, 4 weekly, 3 monthly backups.
-
-### Production (Supabase)
-
-For Supabase production projects:
-
-1. Enable **Point-in-Time Recovery (PITR)** in the Supabase Dashboard (Pro plan).
-2. Schedule automated daily backups.
-3. Optionally configure a GitHub Actions cron to run `pg_dump` to a secure storage bucket.
-
-## Centralized Logging & Error Alerts
-
-### Server Errors
-
-- `src/instrumentation.ts` captures server-side errors.
-- `src/lib/logging/server-error-sink.ts` writes errors to Redis with a 7-day TTL.
-- If `ALERT_WEBHOOK_URL` is set, a Slack/Discord notification is sent for each unique error.
-
-### Client Errors
-
-- `src/lib/logging/use-log-error.ts` reports client errors to `/api/log-error`.
-- `src/app/api/log-error/route.ts` persists them to Redis with rate limiting.
-
-### Setup
-
-1. Create a Slack Incoming Webhook or Discord webhook.
-2. Set `ALERT_WEBHOOK_URL` in production environment variables.
-3. Ensure `LOG_ERROR_SECRET` and `NEXT_PUBLIC_LOG_ERROR_SECRET` match.
-
-## Uptime Monitoring
-
-The health endpoint is ready for external monitors:
-
-```
-GET https://<your-domain>/api/health
-```
-
-Response:
-
-- `200` — healthy
-- `503` — unhealthy (database down)
-
-### Recommended Services
-
-- **Better Stack (Better Uptime)** — monitor `/api/health`, alert via email/SMS/Slack.
-- **UptimeRobot** — free tier, ping the health endpoint every 5 minutes.
-- **Vercel Analytics / Cron** — use a Vercel cron to hit `/api/health` periodically.
-
-### Vercel Cron (optional)
-
-Add to `vercel.json`:
-
-```json
-{
-  "crons": [
-    {
-      "path": "/api/health",
-      "schedule": "*/5 * * * *"
-    }
-  ]
-}
-```
-
-## Rate Limiting
-
-Rate limiting is implemented in `src/lib/utils/rate-limit.ts`:
-
-- `PUBLIC` — 100 req/min for public APIs.
-- `AUTH` — 30 req/min for auth/sensitive endpoints.
-- `MESSAGES` — 10 req/min for DM sending.
-- `WEBHOOK` — 200 req/min for Stripe/Lemon Squeezy webhooks.
-
-Redis-backed when `KV_REST_API_URL` / `UPSTASH_REDIS_REST_URL` is configured; in-memory fallback otherwise.
-
-Critical API routes should wrap handlers with `withRateLimit(handler, tier)`.
-
-## Deployment Gate — E2E Journey Suite
-
-The Definition of Done requires: *"un utente deve poter cliccare un link sotto un video YouTube, arrivare nella lingua corretta, vedere landing + prezzo + contenuti localizzati, registrarsi, pagare realmente, ricevere accesso ed email di conferma, entrare nella dashboard, vedere le lezioni, mantenere progressi dopo logout / nuovo login."*
-
-`tests/e2e/journey.spec.ts` parametrizes this exact flow for the 3 V1 locales (`it-it`, `en-us`, `es-es`). The `.github/workflows/journey-e2e.yml` workflow runs:
-
-- `pull_request` toward `main`
-- `push` on `main`
-- `workflow_dispatch` (manual trigger)
-
-…and exports the GH status check **`e2e-journey (chrome)`**. Branch protection on `main` **MUST** require this check (alongside `CI / ci` and `Prisma Migrate Deploy / migrate`) so any red journey run blocks merge.
-
-### Two-mode behaviour
-
-| Mode | State |
-|------|-------|
-| Without Stripe + Supabase test secrets | Journey spec calls `test.skip()` → Playwright reports "skipped" → job = PASSED. Gate OK (still surfaces suite coverage as not yet exercised). |
-| With secrets configured (Stripe test-mode + Supabase test-project) | Journey executes the full flow sign-up → paywall → webhook → portal → lesson → progress → sign-out → re-login → progress persists. Gate is real. |
-
-### Required GitHub Secrets (for the gate to be real)
-
-Settings → Secrets and variables → Actions → New repository secret:
-
-| Secret | Purpose |
-|--------|---------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase test-project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role (for `signUpTestUser` admin API) |
-| `STRIPE_SECRET_KEY` | Stripe test-mode `sk_test_...` |
-| `STRIPE_WEBHOOK_SECRET` | Stripe test webhook signing secret `whsec_...` |
-| `TEST_STRIPE_PRICE_ID` | Stripe test-mode price ID (`price_...`) |
-| `LEMONSQUEEZY_API_KEY` *(optional)* | Lemon Squeezy test API for the future matrices |
-| `LEMONSQUEEZY_WEBHOOK_SECRET` *(optional)* | Lemon Squeezy test webhook secret |
-| `LEMONSQUEEZY_STORE_ID` *(optional)* | Lemon Squeezy test store |
-| `TEST_LEMON_VARIANT_ID` *(optional)* | Lemon Squeezy test variant |
-
-Without secrets the gate still passes — Playwright counts skipped tests as non-failures. To exercise the **real** reliability matrix, configure these secrets in GH Settings before merging the journey gate to production.
-
-### Local reproduction of the gate
+### 1.3 Post-deploy verification (5 minutes, run after every green gate merge)
 
 ```bash
-# Standalone Postgres + Redis for the journey
-docker compose up -d db redis
+# 1) Health endpoint
+curl -sS https://www.courssy.com/api/health | jq '.ok'    # expect: true
 
-# Set test-mode secrets in .env.local
-echo "STRIPE_SECRET_KEY=sk_test_..." >> .env.local
-echo "STRIPE_WEBHOOK_SECRET=whsec_..." >> .env.local
-echo "TEST_STRIPE_PRICE_ID=price_..." >> .env.local
-echo "NEXT_PUBLIC_SUPABASE_URL=https://<test>.supabase.co" >> .env.local
-echo "SUPABASE_SERVICE_ROLE_KEY=eyJ..." >> .env.local
+# 2) Sanity check the auth-required diagnostic (gated, needs CRON_SECRET)
+curl -sS -H "Authorization: Bearer $CRON_SECRET" \
+  https://www.courssy.com/api/diagnose-oauth | jq
 
-npm run dev          # in another terminal
-npm run test:e2e     # exercises the journey suite
+# 3) Tail the alert channel for any new server-error-sink firings
+# (manual eyeball — no CLI for Slack archaeology; use the vendor web UI)
+
+# 4) One end-to-end checkout in Stripe TEST mode (optional, only on Friday deploys)
+# Use the same Stripe test cards documented in OAUTH-SETUP.md §5.
 ```
 
-## Security Checklist Before Going Live
+If any check fails: roll back per §2. Don't debug in prod.
 
-- [ ] All production env vars are set in Vercel Dashboard.
-- [ ] `LOG_ERROR_SECRET` and `NEXT_PUBLIC_LOG_ERROR_SECRET` match and are strong.
-- [ ] `CRON_SECRET` is set and strong.
-- [ ] `NODE_ENV=production` in Vercel.
-- [ ] Supabase PITR / automated backups enabled.
-- [ ] Uptime monitor configured for `/api/health`.
-- [ ] Slack/Discord alert webhook tested.
-- [ ] gitleaks CI passing on `main`.
+### 1.4 Deploy-gate cheat-sheet
+
+The aggregator job `deploy-gate` in `.github/workflows/ci.yml` is the **single required status check** for branch protection. To mark it once:
+
+GitHub → Settings → Branches → main → "Require status checks to pass before merging" → check `deploy-gate` → Save.
+
+|Failing job|Likely cause|Recovery|
+|---|---|---|
+|`typecheck`|New `.ts`/`.tsx` with a TS error|Run `npm run typecheck` locally, fix|
+|`lint`|New ESLint violation|Run `npm run lint:eslint --fix`|
+|`vitest`|New unit-test assertion fails|Run `npm run test`, fix the test or production code|
+|`e2e-journey`|Playwright/Vercel/Supabase env drift|Verify secrets in GH Settings still valid; check ephemeral Postgres logs|
+
+---
+
+## §2 — Rollback Procedure
+
+### 2.1 Decision tree
+
+```
+Prod is broken
+   │
+   ├─ UI/route-only bug? (no DB schema change)
+   │  └─ ✅ Vercel Rollback (instant, ~30s)
+   │
+   ├─ DB schema was changed in last deploy?
+   │  └─ ⚠️ Forward-fix preferred (rollback DB migration is destructive)
+   │
+   └─ DB corruption / data loss?
+      └─ 🆘 Supabase PITR-restore (slow, ~30 min, destructive)
+```
+
+### 2.2 Vercel Rollback (App code only — NO DB changes)
+
+```bash
+# Method A: CLI
+vercel rollback --yes
+
+# Method B: Dashboard
+# Vercel → Project → Deployments → click the previous healthy deploy
+# → "Promote to Production" → Confirm
+
+# Verify
+curl -sS https://www.courssy.com/api/health | jq
+```
+
+Vercel keeps N=20 previous deploys by default. If you need older, contact Vercel support.
+
+### 2.3 Database migration rollback
+
+**NEVER rerun** a failed `prisma migrate deploy`. It can leave the migration in PARTIAL state.
+
+Three scenarios:
+
+**a) Migration FAILED before COMMIT** (Prisma's transaction rolled back automatically):
+- Status: Postgres is clean, `_prisma_migrations` has a `failed` row for the migration.
+- Action: `npx prisma migrate resolve --rolled-back <migration_name>` then a `git revert` of the migration file. Re-run `prisma migrate deploy`.
+
+**b) Migration SUCCEEDED but app breaks at runtime** (schema is OK, app code isn't):
+- Action: do NOT rollback the DB. Vercel-rollback the app (2.2).
+
+**c) Migration ran but dropped/transformed columns needed by older app code**:
+- Action: Vercel-rollback the app FIRST (2.2), THEN plan a forward-fix migration that restores the data (cite the original commit SHA). DO NOT PITR.
+
+**d) Catastrophic data loss** (deleted rows, corrupt cascade):
+- Supabase Dashboard → Database → Backups → PITR → pick a restore point → Restore.
+- After restore: redeploy the app at the matching commit SHA. Audit any orders created between the bad commit and the PITR point.
+
+**e) Code-and-schema interlock** — code deployed in the same commit requires a column added by that commit's migration (typical pattern: `prisma.X.update({ data: { newCol } })` on the new app code):
+- **DO NOT Vercel-rollback alone:** the rolled-back code may crash on the now-present column (e.g., Prisma client expects non-null field with no default). Reverse-symmetric break.
+- Options in order of preference:
+  1. **Forward-fix PR:** ship a new commit that adds backward compat on the new column (nullable + graceful default) AND keeps the app working. No downtime.
+  2. **Combined PITR + Vercel rollback:** Supabase PITR-restore to the pre-deploy snapshot, then Vercel-rollback to matching pre-deploy SHA. **Both must move together.** Downtime: ~10–30 min.
+  3. **Avoid:** rerunning the failed migration. NEVER `prisma migrate deploy` again on a failed migration — see §2.3(a).
+
+### 2.4 Rollback hygiene
+
+- Every rollback MUST be followed by a postmortem commit (or follow-up PR) so the failure mode doesn't recur.
+- Update this playbook if the rollback took longer than 30 min or required unavailable context.
+
+---
+
+## §3 — Incident Response
+
+### 3.1 Severity matrix
+
+| Sev | Definition | Examples | Detect via | Ack SLA | Resolve SLA | Comms required? | Postmortem |
+|---|---|---|---|---|---|---|---|
+| **P0** | Revenue-blocking. Core flows down | Stripe webhook down, login impossible, Supabase DB unreachable | Uptime monitor + user reports | **15 min** | **4 h** | ✅ Public status + Twitter/IG | Mandatory within 48h |
+| **P1** | Feature degraded | DMs queue lag, slow checkout, broken admin tools | `server-error-sink` Slack alert + Vercel runtime logs | **1 h** | **24 h** | ✅ Status page only | Mandatory within 7 days |
+| **P2** | Cosmetic / non-critical | Wrong timezone stamp, missing CSS, console warning | Manual report or CI gate | **24 h** | **next sprint** | ❌ Internal Slack | High-level summary |
+| **P3** | Informational | Third-party retry succeeded, deprecation warning | Slack | — | — | ❌ | None |
+
+### 3.2 Detection sources
+
+| Signal | File | What you get |
+|---|---|---|
+| `/api/health` → 503 | `src/app/api/health/route.ts` | DB connectivity failure (single signal) |
+| `server-error-sink` alert | `src/lib/logging/server-error-sink.ts` | Per-digest dedup'd errors with path + stack (rate-limited 1/min global cap) — fires to `ALERT_WEBHOOK_URL` |
+| `deploy-gate` RED | `.github/workflows/ci.yml` | CI failure (no prod impact, but blocks deploy) |
+| Stripe/LS webhook 4xx spike | Dashboard | Signature mismatch or downstream error |
+| Vercel runtime logs | Vercel Dashboard | Cold-start spikes, build errors after deploy |
+
+### 3.3 Comms templates
+
+**P0 — public status**
+```
+We are investigating an issue preventing [logins | checkouts | course access].
+We have identified the cause and are deploying a fix. ETA: [time].
+Updates: <status-page-url>     ← open ticket: status.courssy.com infra (currently no status page in vercel.json — just `"crons": []`)
+```
+
+**P1 — status page only**
+```
+Some users are experiencing [slow load times | DM send failures] starting at [time].
+We are investigating. Customers needing immediate access: support@courssy.com.
+```
+
+### 3.4 On-call rotation
+
+> **V1.0 status: no formal on-call rotation is configured.** Alert ack SLAs (§3.1) are met on a best-effort basis by whoever sees the Slack notification during business hours (Mon–Fri 09:00–18:00 Europe/Rome). Outside business hours, recovery work begins on the next workday.
+>
+> When ops-lead signs off, replace this paragraph with a populated Mon–Sun × Primary + Backup table. Until then, P0/P1 SLA misses overnight are an accepted risk and must be reported in the next-day incident review.
+
+**Specifically, for incident P0/P1 acks during business hours:**
+- Whoever owns the deploy that triggered the incident ACKs within SLA. If no owner in 5 minutes, escalate to the next person in the deploy's PR reviewers list.
+- Out-of-hours P0: PagerDuty-equivalent rotation **TBD**. Today: best-effort, accept the SLA miss.
+
+---
+
+## §4 — Admin RBAC
+
+### 4.1 Capability matrix
+
+| Capability | Admin | Creator | Student |
+|---|---|---|---|
+| Browse published courses | ✅ | ✅ | ✅ |
+| Access purchased course content | ✅ | ✅ | ✅ |
+| Send/receive DMs (with creator of purchased product) | ✅ (any DM) | ✅ (own product's students) | ✅ (to creator of own purchase) |
+| Create / edit / publish **own** product | ✅ (any) | ⚠️ (gap) | ❌ |
+| Delete **any** product | ✅ | ❌ | ❌ |
+| View all orders / global analytics | ✅ | ❌ | ❌ |
+| Refund an order | ✅ (admin) | ❌ | ❌ |
+| Change product pricing | ✅ | ❌ | ❌ |
+| Access `/api/admin/*` routes | ✅ | ❌ | ❌ |
+| Manage users / change roles | ✅ | ❌ | ❌ |
+| Read server-error Redis keyspace | ✅ | ❌ | ❌ |
+
+> ⚠️ **Known gap**: `creator` row in matrix is mostly theoretical today — there is no DB-level guard that limits a creator to "their own" products. Treat creators as admins-of-their-own-content only **after** the `Product.creatorId` (Prisma relation) is enforced in service-layer queries. See SECURITY.md "Gap Noti — Ridurre superficie creator".
+
+### 4.2 How to grant/revoke admin (currently MANUAL)
+
+```typescript
+// Grant
+import { prisma } from "@/lib/db/prisma";
+await prisma.user.update({
+  where: { email: "ops@courssy.com" },
+  data: { role: "admin" },
+});
+
+// Revoke
+await prisma.user.update({
+  where: { email: "ops@courssy.com" },
+  data: { role: "student" },
+});
+```
+
+**No CLI script exists yet.** Promote manually via the snippet above — one-off via `npx tsx -e '...'` inline or through Prisma Studio UI. When time allows, extract the snippet into `scripts/admin-promote.ts <email> <role>`.
+
+**Audit trail:** there is no `AuditEvent` table yet (open ticket — see `SECURITY.md` § Gap Noti, "Logging strutturato"). Every role change is invisible to security after-the-fact. **Immediate action item:** add a manual Slack log convention — every time you run the snippet above, manually post in `#security`: `"Admin granted to <email> by <you> at <ISO-timestamp>"`.
+
+> Long-term: add an `AuditEvent` table (open ticket — see SECURITY.md "Gap Noti" — Strutturare logging).
+
+### 4.3 Guard rails
+
+- Every `/api/admin/*`, `/api/products/[id]/*`, `/api/products/[id]/duplicate` route calls `requireAdmin()`. Server-side. **Never trusts** user metadata, only the DB `User.role`.
+- `requireAdmin()` is the **only** way to gate admin endpoints. Bypassing it = security incident (log immediately).
+- Role check is **after** auth check. Fail closed on either.
+
+---
+
+## §5 — Secret Rotation
+
+### 5.1 Inventory (per `src/lib/env.ts`)
+
+| Tier | Secrets | Detection window | Cadence | Recovery time | Backup |
+|---|---|---|---|---|---|
+| **Critical** | `DATABASE_URL`, `DIRECT_URL`, `SUPABASE_SERVICE_ROLE_KEY` | Immediate via gitleaks PR block | **180 d** or on compromise | **15 min** (rotate + redeploy) | Vercel env history + 1Password vault |
+| **Required (payments)** | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `LEMONSQUEEZY_API_KEY`, `LEMONSQUEEZY_WEBHOOK_SECRET` | Immediate via gitleaks PR block | **365 d** or on compromise | **30 min** (roll key in vendor + Vercel + redeploy) | Vendor dashboards + 1Password |
+| **Required (auth)** | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `EMAIL_SERVER_PASSWORD`, `LOG_ERROR_SECRET`, `CRON_SECRET` | Immediate via gitleaks PR block | **365 d** or on compromise | **30 min** (vendor + Vercel + redeploy) | Vendor dashboards + 1Password |
+| **Optional** | `OPENAI_API_KEY`, `ALERT_WEBHOOK_URL`, `NEXT_PUBLIC_APP_URL` | < 24 h (alert slack = noise) | **annually** | **15 min** (Vercel replacement) | Vendor + 1Password |
+
+> "Detection window" assumes gitleaks CI is green on main AND `npm audit` is run weekly. Both already on the deploy-gate.
+
+### 5.2 Rotation procedure (Critical tier — `SUPABASE_SERVICE_ROLE_KEY`)
+
+> ⚠️ **Vercel has no native "rotate in place" field** — each env var has exactly one `name=value` binding. The dual-key path below requires BOTH a code change (so the app reads the new env name with fallback to the old) AND a Vercel config update (add the new key alongside the old).
+
+```bash
+# 1) Generate new key in Supabase Dashboard → Settings → API → "Generate new Service Role Key"
+# 2) Add the new key to Vercel under a DIFFERENT env name (e.g. SUPABASE_SERVICE_ROLE_KEY_V2)
+
+# 3) Code change (shipped in the same release or in a fast-forward PR):
+#    in src/lib/db/supabase.ts, read both keys, prefer V2, fall back to V1. Then redeploy.
+
+# 4) Verify prod on V2 (smoke-test: signup, login, prisma write).
+
+# 5) Revoke the OLD key in Supabase Dashboard. V1 env can stay (unused, safe to prune later).
+
+# 6) (Follow-up commit) Rename SUPABASE_SERVICE_ROLE_KEY_V2 → SUPABASE_SERVICE_ROLE_KEY; delete V1 fallback code path.
+```
+
+For other tiers, the same dual-key-then-revoke approach is recommended. **Never** rotate a single key in-place during peak traffic — forced roll-back from a half-broken state is worse than the brief overlap window.
+
+### 5.3 What to do on a confirmed leak
+
+1. **Treat as P0 incident** (see §3.1).
+2. **Revoke the leaked secret** in the vendor dashboard immediately.
+3. **Issue replacement key**, dual-key approach (§5.2) where supported, single-replacement where not.
+4. **Audit usage logs** in vendor dashboard for any usage of the leaked credential between t=leak and t=detect. Look for unauthorized orders or admin actions.
+5. **Postmortem within 7 days**: how did it leak (gitleaks bypassed? env var accidentally in a screenshot?), how to prevent recurrence.
+6. **Update this playbook** if the recovery procedure needs adjustment.
+
+---
+
+## §6 — Alert Escalation
+
+### 6.1 Source map (what fires `ALERT_WEBHOOK_URL` today)
+
+| Source | Severity default | File | Payload shape |
+|---|---|---|---|
+| Server error (digest dedup'd, rate-capped 1/min globally) | **P1** | `src/lib/logging/server-error-sink.ts` | `{ text, blocks[] }` — Slack-safe |
+| `deploy-gate` RED | **P2** | `.github/workflows/ci.yml` → `jq -n --arg` payload | `{ text, blocks[] }` — Slack + Discord safe |
+
+> Both fire to **the same** `ALERT_WEBHOOK_URL` today. See §6.4 for the migration path to per-severity channels.
+
+### 6.2 Routing matrix
+
+| Severity | Where it lands (CURRENT) | Where it should land (FUTURE) | First responder |
+|---|---|---|---|
+| P0 (catastrophic, prod-down) | ALERT_WEBHOOK_URL (anyone-watching) | `#eng-incidents` Slack channel + PagerDuty | Primary on-call |
+| P1 (degraded, recoverable soon) | ALERT_WEBHOOK_URL | `#eng-active` Slack channel (no PagerDuty) | Primary on-call |
+| P2 (deployment blocked / cosmetic) | ALERT_WEBHOOK_URL | `#eng-ci` Slack channel | PR author (CI gate) |
+| P3 (informational) | not alerted | log only | Triage weekly |
+
+### 6.3 Manual intervention
+
+If an alert is a single event (transaction processing edge case) and not a regression:
+- **Acknowledge in Slack thread** so others know it's seen.
+- **No action needed** if the digest drops below 1/min.
+- **Escalate to P1** if the same digest repeats 5+ times within 24h.
+
+### 6.4 Migration to per-severity channels
+
+Currently one URL. To split:
+
+1. **Vercel env**: rename to `ALERT_WEBHOOK_P0`, `ALERT_WEBHOOK_P1`, `ALERT_WEBHOOK_P2` (additive, non-breaking).
+2. **`src/lib/logging/server-error-sink.ts`**: classify per-digest by severity heuristic (e.g., if `path.startsWith('/api/webhooks')` → P0; else P1). Add a classification pass.
+3. **`.github/workflows/ci.yml`**: alert step reads `secrets.ALERT_WEBHOOK_P2`.
+4. **Backwards-compat**: if a per-severity env var is unset, fall back to old `ALERT_WEBHOOK_URL` (warning only).
+
+This is the cleanest path that avoids breaking the deploy that ships it. Migration is open work — no ETA.
+
+### 6.5 `ALERT_WEBHOOK_URL` is a single point of failure (V1.0 caveat)
+
+If Slack/Discord itself experiences an outage, OR the webhook URL is rate-limited at the vendor, BOTH the server-error-sink alert path (§3.2 detection sources) AND the deploy-gate alert path (§2.4 cheat-sheet) go silent.
+
+**Open work:** add a daily synthetic-ping cron that POSTs to `ALERT_WEBHOOK_URL` and asserts a 2xx response. Alert via a SECONDARY channel (e.g. transactional email to `ops@courssy.com`) if the ping fails. Until that ships, treat any alert-channel outage >24 h as a **P3** incident (silent degradation of the alerting system itself, not of the platform) and rotate the webhook URL through §5.
+
+---
+
+## Appendix A — Quick-reference CLI
+
+```bash
+# ─── Diagnostics ────────────────────────────────────────────────────
+# OAuth layers (THREE must agree)
+npx tsx scripts/diagnose-oauth.ts
+
+# Health
+curl -sS https://www.courssy.com/api/health | jq
+
+# Vercel
+npx vercel ls                                 # list deploys
+npx vercel env ls                             # list env vars
+npx vercel rollback --yes                     # rollback to previous
+npx vercel --prod --yes                       # manual deploy
+
+# GitHub
+gh workflow run prisma-migrate.yml           # re-run migrations
+gh workflow run ci.yml                        # re-run deploy-gate
+gh run list --limit 5                         # last 5 runs
+
+# Database
+npx prisma studio                            # web DB explorer
+npx prisma migrate status                     # pending migrations
+npx prisma migrate resolve --rolled-back X    # mark failed migration rolled back
+
+# ─── Redis / error sink ─────────────────────────────────────────────
+# Tail the latest 20 server errors (requires REDIS_URL)
+redis-cli -u "$REDIS_URL" --no-auth-warning \
+  --scan --pattern 'errlog:*' | head -20
+
+# ─── Secrets rotation ───────────────────────────────────────────────
+openssl rand -base64 32                       # generate CRON_SECRET / LOG_ERROR_SECRET
+npx vercel env add CRON_SECRET production     # add to Vercel
+```
+
+---
+
+## Appendix B — Cross-references
+
+This playbook is one of four docs. Do not duplicate — link instead.
+
+| Topic | See |
+|---|---|
+| **Threat model / known security gaps** | [`../SECURITY.md`](../SECURITY.md) |
+| **OAuth / Google sign-in setup & diagnosis** | [`OAUTH-SETUP.md`](./OAUTH-SETUP.md) |
+| **System architecture & data flow** | [`../ARCHITECTURE.md`](../ARCHITECTURE.md) |
+| **Mission, principles, success metrics** | [`../MISSION.md`](../MISSION.md) |
+| **Phase plan / what ships when** | [`../ROADMAP.md`](../ROADMAP.md) |
+| **Backlogs & future features** | [`../FUTURE.md`](../FUTURE.md) |
+| **CI/CD workflow files this playbook references** | `.github/workflows/ci.yml` (deploy-gate), `prisma-migrate.yml`, `secrets-scan.yml` |
+
+---
+
+## Document control
+
+| Field | Value |
+|---|---|
+| First written | f8e58c5 era (this rewrite) |
+| Last deploy-gate reviewed | f8e58c5 (deploy-gate shipped in same commit family) |
+| Maintainer | ops-lead (TBD) |
+| Review cadence | monthly, or any time a CI/alert path changes |
