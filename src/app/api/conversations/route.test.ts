@@ -35,7 +35,7 @@ const mockGetServerUser = vi.fn();
 vi.mock("@/lib/supabase/get-user", () => ({ getServerUser: mockGetServerUser }));
 
 vi.mock("@/lib/utils/rate-limit", () => ({
-  withRateLimit: (fn: Function) => fn,
+  withRateLimit: (fn: (...args: unknown[]) => unknown) => fn,
 }));
 
 // ─── Phase 2.2: mock authorizeDmRequest ─────────────────────────

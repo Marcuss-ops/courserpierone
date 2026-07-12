@@ -35,7 +35,7 @@ vi.mock("@/lib/supabase/get-user", () => ({ getServerUser: mockGetServerUser }))
 
 vi.mock("@/lib/utils/rate-limit", () => ({
   // AUTH tier (GET) e MESSAGES tier (POST) entrambi no-op nei test.
-  withRateLimit: (fn: Function) => fn,
+  withRateLimit: (fn: (...args: unknown[]) => unknown) => fn,
 }));
 
 vi.mock("@/lib/utils/sanitize", () => ({
