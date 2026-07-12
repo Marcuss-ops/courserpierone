@@ -5,13 +5,13 @@ import { WebSocketServer, WebSocket } from "ws";
 import { createHmac } from "crypto";
 import { prisma } from "./src/lib/db/prisma";
 import { messageBroker, NEW_MESSAGE, type NewMessageEvent } from "./src/lib/ws/broker";
-import { deliverNewMessage } from "./src/lib/ws/broadcast";
+import { deliverNewMessage, deliverInboxUpdate } from "./src/lib/ws/broadcast";
 
 /**
  * Fase 5: tipo di WS che ha passato l'upgrade handler.
  * `WebSocket & { userId, conversationId }` è strutturalmente compatibile
  * con `BroadcastSocketLike` (subset di proprietà), quindi può alimentare
- * `deliverNewMessage` direttamente senza `as unknown as`.
+ * `deliverNewMessage` direttamente senza cast loose.
  */
 type SubscribedSocket = WebSocket & {
   userId: string;
@@ -30,9 +30,7 @@ const handle = app.getRequestHandler();
  *
  * Fase 4.2 (multi-tab/multi-device friendly): un utente può avere più
  * WS aperti contemporaneamente. Fase 4.1 (protocollo conversationId):
- * ogni WS è scoped a UNA Conversation — la `withUserId + withProductId`
- * coppia è sostituita da un singolo `conversationId`. Il filter del
- * bridge diventa `meta.conversationId === event.conversationId`.
+ * ogni WS è scoped a UNA Conversation.
  */
 const clients = new Map<string, Set<WebSocket>>();
 
@@ -41,38 +39,46 @@ const clients = new Map<string, Set<WebSocket>>();
  * membership: lookup O(1) invece di N round-trip al DB. Aggiornato
  * durante l'upgrade handler e rimosso quando l'ultimo WS di una
  * Conversation si chiude.
- *
- * NB: questa cache è una scorciatoia; la membership-canonica rimane
- * la riga Conversation su Postgres. Quando si riceve un nuovo messaggio
- * per una Conversation, lo si confronta con `subscribedConversations`
- * per filtrare i WS. È un Set di WS per conversationId.
  */
 const subscribedConversations = new Map<string, Set<SubscribedSocket>>();
 
 /**
- * Verify a WS token signed for a specific conversation.
- *
- * Token format (Fase 4.1): `userId:conversationId:timestamp:signature`
- * HMAC-SHA256(secret, `${userId}:${conversationId}:${timestamp}`) hex[0:16]
- * Expires 5 minutes after timestamp.
- *
- * Lato issuer (`/api/auth/ws-token`) verifica DB membership PRIMA
- * di firmare; qui ri-verifichiamo la membership solo dopo che la
- * HMAC è valida (defense-in-depth: un attacker non può costruire
- * un token senza WS_SECRET).
+ * Fase 4.3: WS user-scoped subscribed all'inbox personale dell'utente.
+ * Quando un client apre `ws://...?token=...&scope=inbox`, questa cache
+ * viene popolata. Il bridge `NEW_MESSAGE` fan-out anche a
+ * `inboxClients[event.receiverId]` con `{type:"inboxUpdate"}` per
+ * aggiornare i badge "non letti" senza refresh della pagina.
  */
-function verifyToken(token: string): { userId: string; conversationId: string } | null {
+const inboxClients = new Map<string, Set<SubscribedSocket>>();
+
+/**
+ * Verify a WS token.
+ *
+ * Token format (Fase 4.1 + Fase 4.3): `userId:<scope>:timestamp:signature`
+ *
+ * Scope possibilities per la `[1]` slot:
+ *   - conversationId reale → subscript per-conversation. WS upgrade
+ *     handler fa DB membership check prima di accettare.
+ *   - literal `"inbox"` → subscript user-scoped per l'inbox
+ *     personale (Fase 4.3). Nessun DB membership check richiesto.
+ *
+ * HMAC-SHA256(secret, `${userId}:<scope>:${timestamp}`) hex[0:16]
+ * Expires 5 minutes after timestamp.
+ */
+function verifyToken(
+  token: string,
+): { userId: string; conversationId: string | null; inbox: boolean } | null {
   const parts = token.split(":");
   if (parts.length !== 4) return null;
 
-  const [userId, conversationId, timestampStr, signature] = parts;
+  const [userId, scopeMarker, timestampStr, signature] = parts;
   const timestamp = parseInt(timestampStr, 10);
   const now = Date.now();
 
   if (isNaN(timestamp) || now - timestamp > 5 * 60 * 1000) return null;
 
   const secret = process.env.WS_SECRET ?? "dev-secret-change-in-production";
-  const payload = `${userId}:${conversationId}:${timestamp}`;
+  const payload = `${userId}:${scopeMarker}:${timestamp}`;
   const expectedSig = createHmac("sha256", secret)
     .update(payload)
     .digest("hex")
@@ -80,7 +86,11 @@ function verifyToken(token: string): { userId: string; conversationId: string } 
 
   if (signature !== expectedSig) return null;
 
-  return { userId, conversationId };
+  if (scopeMarker === "inbox") {
+    return { userId, conversationId: null, inbox: true };
+  }
+
+  return { userId, conversationId: scopeMarker, inbox: false };
 }
 
 app.prepare().then(() => {
@@ -89,7 +99,7 @@ app.prepare().then(() => {
     handle(req, res, parsedUrl);
   });
 
-  // ── WebSocket server ────────────────────────────────────────
+  // WebSocket server
   const wss = new WebSocketServer({ noServer: true });
 
   server.on("upgrade", (request: IncomingMessage, socket, head) => {
@@ -102,8 +112,16 @@ app.prepare().then(() => {
 
     const token = query.token as string | undefined;
     const conversationId = query.conversationId as string | undefined;
+    const scope = query.scope as string | undefined;
 
-    if (!token || !conversationId) {
+    if (!token) {
+      socket.write("HTTP/1.1 400 Bad Request\r\n\r\n");
+      socket.destroy();
+      return;
+    }
+
+    // Fase 4.3: scope=inbox richiede solo il token, niente conversationId.
+    if (scope !== "inbox" && !conversationId) {
       socket.write("HTTP/1.1 400 Bad Request\r\n\r\n");
       socket.destroy();
       return;
@@ -111,21 +129,28 @@ app.prepare().then(() => {
 
     const verified = verifyToken(token);
     if (!verified) {
-      // Token non valido (bad HMAC, scaduto, o malformato).
-      // NB: 401 vs 403: token invalido = 401; token valido ma
-      // membership OK negata = 403 (vedi sotto).
       socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
       socket.destroy();
       return;
     }
 
-    // ── Conversation check (Fase 4.1) ──────────────────────
-    // Doppia verifica: il token dice `conversationId` ma l'URL query
-    // passa una `conversationId` separata. Le due devono coincidere O
-    // respingiamo l'upgrade: impedisce a un attacker di sostituire la
-    // conversation target dopo aver ottenuto un token valido per
-    // un'altra Conversation.
-    if (verified.conversationId !== conversationId) {
+    // Fase 4.3: inbox scope, skip DB membership check.
+    if (verified.inbox) {
+      wss.handleUpgrade(request, socket, head, (ws) => {
+        const meta = ws as SubscribedSocket;
+        meta.userId = verified.userId;
+        // Sentinel typed `conversationId === "inbox"`. Mai collision
+        // con conversationId reali (cuid/uuid), l'inboxClients Map è
+        // separata da subscribedConversations.
+        meta.conversationId = "inbox";
+
+        wss.emit("connection", ws, request);
+      });
+      return;
+    }
+
+    // Conversation scope (Fase 4.1): doppia verifica token vs URL.
+    if (!conversationId || verified.conversationId !== conversationId) {
       socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
       socket.destroy();
       return;
@@ -133,9 +158,7 @@ app.prepare().then(() => {
 
     const { userId } = verified;
 
-    // ── DB membership check ────────────────────────────────
-    // La Conversation row deve esistere E l'utente deve esserne
-    // userOneId oppure userTwoId. Una O(1) lookup unique.
+    // DB membership check.
     prisma.conversation
       .findUnique({
         where: { id: conversationId },
@@ -157,7 +180,6 @@ app.prepare().then(() => {
           return;
         }
 
-        // ── Attach meta + complete upgrade ──────────────────────
         wss.handleUpgrade(request, socket, head, (ws) => {
           const meta = ws as SubscribedSocket;
           meta.userId = userId;
@@ -176,22 +198,30 @@ app.prepare().then(() => {
   wss.on("connection", (ws: WebSocket) => {
     const meta = ws as SubscribedSocket;
     const { userId, conversationId } = meta;
+    // Fase 4.3: discriminatore typed `conversationId === "inbox"`.
+    const inboxScope = conversationId === "inbox";
 
-    // Aggiungi al Set per-user (Fase 4.2 multi-tab).
+    // Per-tab (Fase 4.2).
     if (!clients.has(userId)) {
       clients.set(userId, new Set());
     }
     clients.get(userId)!.add(ws);
 
-    // Aggiungi al Set per-conversation (Fase 4.1 cache subscription).
-    // `meta` è il WS dopo il cast `as SubscribedSocket` — quindi
-    // tipi-sicuro per il Set<SubscribedSocket> senza re-cast.
-    if (!subscribedConversations.has(conversationId)) {
-      subscribedConversations.set(conversationId, new Set());
+    if (inboxScope) {
+      // Fase 4.3: route inbox.
+      if (!inboxClients.has(userId)) {
+        inboxClients.set(userId, new Set());
+      }
+      inboxClients.get(userId)!.add(meta);
+      console.log(`[ws] Inbox subscribed: ${userId}`);
+    } else {
+      // Per-conversation (Fase 4.1).
+      if (!subscribedConversations.has(conversationId)) {
+        subscribedConversations.set(conversationId, new Set());
+      }
+      subscribedConversations.get(conversationId)!.add(meta);
     }
-    subscribedConversations.get(conversationId)!.add(meta);
 
-    // Update lastSeenAt in DB (user is now online)
     prisma.user
       .update({ where: { id: userId }, data: { lastSeenAt: new Date() } })
       .catch((err) =>
@@ -202,7 +232,7 @@ app.prepare().then(() => {
       `[ws] Client connected: ${userId} on conversation ${conversationId}`,
     );
 
-    // Heartbeat every 30s
+    // Heartbeat every 30s.
     const heartbeat = setInterval(() => {
       if (ws.readyState === WebSocket.OPEN) {
         ws.ping();
@@ -212,8 +242,6 @@ app.prepare().then(() => {
     ws.on("close", () => {
       clearInterval(heartbeat);
 
-      // Cleanup per-tab (Fase 4.2). `clients` contiene plain WebSocket
-      // quindi `ws` va bene qui.
       const userSockets = clients.get(userId);
       if (userSockets) {
         userSockets.delete(ws);
@@ -222,13 +250,22 @@ app.prepare().then(() => {
         }
       }
 
-      // Cleanup per-conversation (Fase 4.1). Set<SubscribedSocket>
-      // richiede il cast `meta` per essere type-safe.
-      const convSockets = subscribedConversations.get(conversationId);
-      if (convSockets) {
-        convSockets.delete(meta);
-        if (convSockets.size === 0) {
-          subscribedConversations.delete(conversationId);
+      if (inboxScope) {
+        const inboxSockets = inboxClients.get(userId);
+        if (inboxSockets) {
+          inboxSockets.delete(meta);
+          if (inboxSockets.size === 0) {
+            inboxClients.delete(userId);
+          }
+        }
+        console.log(`[ws] Inbox disconnected: ${userId}`);
+      } else {
+        const convSockets = subscribedConversations.get(conversationId);
+        if (convSockets) {
+          convSockets.delete(meta);
+          if (convSockets.size === 0) {
+            subscribedConversations.delete(conversationId);
+          }
         }
       }
 
@@ -256,19 +293,26 @@ app.prepare().then(() => {
           clients.delete(userId);
         }
       }
-      const convSockets = subscribedConversations.get(conversationId);
-      if (convSockets) {
-        convSockets.delete(meta);
-        if (convSockets.size === 0) {
-          subscribedConversations.delete(conversationId);
+      if (inboxScope) {
+        const inboxSockets = inboxClients.get(userId);
+        if (inboxSockets) {
+          inboxSockets.delete(meta);
+          if (inboxSockets.size === 0) {
+            inboxClients.delete(userId);
+          }
+        }
+      } else {
+        const convSockets = subscribedConversations.get(conversationId);
+        if (convSockets) {
+          convSockets.delete(meta);
+          if (convSockets.size === 0) {
+            subscribedConversations.delete(conversationId);
+          }
         }
       }
     });
 
-    // ── Handle client messages (typing indicators) ─────────
-    // Fase 4.1: ogni WS è scoped a UNA Conversation. Il typing
-    // indicator del sender va a TUTTI gli altri WS subscribed alla
-    // stessa Conversation. Cache O(1) via `subscribedConversations`.
+    // Typing indicator relay (WS → WS subscribed alla stessa conv).
     ws.on("message", (raw) => {
       try {
         const data = JSON.parse(raw.toString());
@@ -276,10 +320,6 @@ app.prepare().then(() => {
           const convSockets = subscribedConversations.get(conversationId);
           if (!convSockets) return;
           for (const otherWs of convSockets) {
-            // otherWs è SubscribedSocket (dal Set<SubscribedSocket>),
-            // quindi `otherWs.userId` è direttamente accessibile senza
-            // cast intermedio. Non rimandare al sender stesso (no
-            // self-receive).
             if (otherWs.userId === userId) continue;
             if (otherWs.readyState === WebSocket.OPEN) {
               otherWs.send(
@@ -293,30 +333,22 @@ app.prepare().then(() => {
           }
         }
       } catch {
-        // Ignore malformed messages
+        /* malformed JSON: ignore */
       }
     });
   });
 
-  // ── Bridge: REST API → WebSocket ────────────────────────────
-  // Fase 4.1: il filter è una singola equality check
-  // `subscribedConversations.has(event.conversationId)`. La coppia
-  // sender / productId è sostituita da una sola chiave canonica.
-  // Niente più cross-tab/cross-product leak: il filter per-conversation
-  // è ermetico.
-  //
-  // Fase 5: la logica di routing è estratta in `deliverNewMessage`
-  // (src/lib/ws/broadcast.ts) come funzione pura, così è coperta da
-  // unit test indipendenti dall'infrastruttura WS/HTTP.
-  //
-  // `SubscribedSocket` è strutturalmente compatibile con
-  // `BroadcastSocketLike` (ha userId + readyState + send), quindi il
-  // bridge passa la cache senza cast.
+  // Bridge REST → WS.
   messageBroker.on(NEW_MESSAGE, (event: NewMessageEvent) => {
+    // 1) Per-conversation fan-out (Fase 4.1) → WS subscribed a quella
+    //    conversation, SKIP self.
     deliverNewMessage(subscribedConversations, event);
+
+    // 2) Inbox fan-out (Fase 4.3) → WS subscribed all'inbox del PARTNER
+    //    (NON del sender — skip self implicito perché receiverId !== senderId).
+    deliverInboxUpdate(inboxClients, event.receiverId, event);
   });
 
-  // ── Start server ────────────────────────────────────────────
   server.listen(port, () => {
     console.log(
       `> Server ready on http://${hostname}:${port} (${dev ? "development" : "production"})`,

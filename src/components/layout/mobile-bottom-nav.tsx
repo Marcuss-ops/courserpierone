@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, BookOpen } from "lucide-react";
+import { useInbox } from "@/components/layout/inbox-provider";
 
 interface Tab {
   label: string;
@@ -12,7 +13,12 @@ interface Tab {
 }
 
 interface MobileBottomNavProps {
-  /** Number of unread messages to show as badge on the Dashboard tab. */
+  /**
+   * SSR initial value (letto dal server-rendered dashboard).
+   * Usato come fallback quando il componente è montato FUORI
+   * da <InboxProvider>. Quando il provider è attivo, usa il
+   * valore realtime dal WS (Fase 4.3).
+   */
   unreadCount?: number;
 }
 
@@ -20,7 +26,11 @@ interface MobileBottomNavProps {
  * MobileBottomNav — Bottom tab navigation visibile solo su mobile (< 768px).
  * Essential tabs: Home, Corsi (Dashboard).
  */
-export function MobileBottomNav({ unreadCount = 0 }: MobileBottomNavProps) {
+export function MobileBottomNav({ unreadCount: ssrUnreadCount = 0 }: MobileBottomNavProps) {
+  // Fase 4.3: se wrappato in InboxProvider, badge realtime dal WS;
+  // altrimenti fallback al SSR prop.
+  const inbox = useInbox();
+  const unreadCount = inbox ? inbox.totalUnread : ssrUnreadCount;
   const pathname = usePathname();
 
   const tabs: Tab[] = [

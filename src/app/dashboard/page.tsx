@@ -13,6 +13,7 @@ import { CertificatesShowcase } from "@/components/dashboard/certificates-showca
 import { NotificationsDropdown, type UnreadConversation } from "@/components/dashboard/notifications-dropdown";
 import { PWAInstallBanner } from "@/components/pwa-install-banner";
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
+import { InboxProvider } from "@/components/layout/inbox-provider";
 
 /**
  * Read the user's active 2-letter lang from the `locale` cookie so all
@@ -263,6 +264,7 @@ export default async function DashboardPage() {
     .map((p) => ({ productId: p.productId, slug: p.slug }));
 
   return (
+    <InboxProvider initialTotalUnread={unreadMessages}>
     <div className="min-h-screen bg-cream-dark-bg text-cream-dark-text font-sans antialiased relative overflow-x-hidden">
       {/* Subtle warm glow overlay across the whole page */}
       <div
@@ -398,5 +400,6 @@ export default async function DashboardPage() {
       <PWAInstallBanner />
       <MobileBottomNav unreadCount={unreadMessages} />
     </div>
+    </InboxProvider>
   );
 }

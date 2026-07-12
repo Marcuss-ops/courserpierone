@@ -1,14 +1,16 @@
 import { describe, it, expect } from "vitest";
 import {
   deliverNewMessage,
+  deliverInboxUpdate,
   type BroadcastSocketLike,
   type SubscribedConversationsCache,
+  type InboxClientsCache,
 } from "./broadcast";
 import type { NewMessageEvent } from "./broker";
 
 // ─── Test harness ───────────────────────────────────────────
-// Build a fake WS that records `send` calls. `readyState` defaults to
-// 1 (OPEN). `throwOnSend` simulates a dead socket.
+// Build a fake WS che registra `send` calls. `readyState` default 1 (OPEN).
+// `throwOnSend` simula un dead socket.
 function makeWs(opts: {
   userId: string;
   readyState?: number;
@@ -26,15 +28,24 @@ function makeWs(opts: {
   };
 }
 
-// Helper per popolare la cache: converte un array di ws in una Map
-// keyed per `conversationId`. I ws creati con `makeWs` non hanno
-// `.conversationId` — è il mock server.ts a popolare la cache per-conv.
+// Helper: popola la cache conversazioni da un Record keyed per convId.
 function makeCache(
   conversations: Record<string, BroadcastSocketLike[]>,
 ): SubscribedConversationsCache {
   const cache: SubscribedConversationsCache = new Map();
   for (const [convId, sockets] of Object.entries(conversations)) {
     cache.set(convId, new Set(sockets));
+  }
+  return cache;
+}
+
+// Helper: popola la cache inbox da un Record keyed per userId.
+function makeInboxCache(
+  inboxes: Record<string, BroadcastSocketLike[]>,
+): InboxClientsCache {
+  const cache: InboxClientsCache = new Map();
+  for (const [userId, sockets] of Object.entries(inboxes)) {
+    cache.set(userId, new Set(sockets));
   }
   return cache;
 }
@@ -58,6 +69,7 @@ function makeEvent(overrides: Partial<NewMessageEvent> = {}): NewMessageEvent {
   return {
     conversationId: "conv-A",
     productId: "prod-1",
+    receiverId: "user-B",
     message: { ...baseMessage, ...(overrides.message ?? {}) },
     ...overrides,
   };
@@ -89,32 +101,30 @@ describe("deliverNewMessage — contract: solo i due partecipanti ricevono", () 
     });
   });
 
-  // Nota: il test precedente "delivers to BOTH participants" aveva
-  // titolo misleading e count inconsistente (`delivered === 1` ma due
-  // wsA1/wsA2 ricevevano). Sostituito con uno scenario più chiaro
-  // sotto ("delivers to a receiver across their own tabs"). Questo
-  // scenario è già coperto; rimuoviamo il duplicato.
-  it("delivers to BOTH participants on separate sockets (no self-skip)", () => {
-    const wsA = makeWs({ userId: "user-A" });
+  it("delivers to receiver across multiple sender tabs (sender skip strict)", () => {
+    // Setup: B è il sender del messaggio. A è receiver con 2 tab
+    // (desktop + mobile). Il bridge deve raggiungere ENTRAMBI i tab di A
+    // (= 2 deliver totali) e skippare B (sender).
+    const wsA1 = makeWs({ userId: "user-A" });
+    const wsA2 = makeWs({ userId: "user-A" });
     const wsB = makeWs({ userId: "user-B" });
-    const cache = makeCache({ "conv-A": [wsA, wsB] });
+    const cache = makeCache({ "conv-A": [wsA1, wsA2, wsB] });
 
-    // B è sender, A è receiver (single tab). Verifica il path
-    // fondamentale: 1 delivery a A, 0 a B (sender-skip).
     const result = deliverNewMessage(
       cache,
       makeEvent({ message: { ...baseMessage, senderId: "user-B" } }),
     );
 
-    expect(result.delivered).toBe(1);
-    expect(wsA.sent).toHaveLength(1); // tab di A (receiver) riceve
-    expect(wsB.sent).toEqual([]); // sender (B) skip
+    expect(result.delivered).toBe(2);
+    expect(wsA1.sent).toHaveLength(1);
+    expect(wsA2.sent).toHaveLength(1);
+    expect(wsB.sent).toEqual([]);
   });
 
   it("delivers to both tabs of the receiver when sender has one tab", () => {
     const wsA = makeWs({ userId: "user-A" });
-    const wsB1 = makeWs({ userId: "user-B" }); // desktop
-    const wsB2 = makeWs({ userId: "user-B" }); // mobile
+    const wsB1 = makeWs({ userId: "user-B" });
+    const wsB2 = makeWs({ userId: "user-B" });
     const cache = makeCache({ "conv-A": [wsA, wsB1, wsB2] });
 
     const result = deliverNewMessage(cache, makeEvent());
@@ -128,7 +138,6 @@ describe("deliverNewMessage — contract: solo i due partecipanti ricevono", () 
   it("does NOT deliver across conversations (cross-conv isolation)", () => {
     const wsAinConvA = makeWs({ userId: "user-A" });
     const wsBinConvA = makeWs({ userId: "user-B" });
-    // B è anche su conv-B (chat con user-C) — non deve ricevere msg di conv-A.
     const wsCinConvB = makeWs({ userId: "user-C" });
     const wsBinConvB = makeWs({ userId: "user-B" });
 
@@ -142,7 +151,7 @@ describe("deliverNewMessage — contract: solo i due partecipanti ricevono", () 
 
     expect(wsAinConvA.sent).toEqual([]);
     expect(wsBinConvA.sent).toHaveLength(1);
-    expect(wsBinConvB.sent).toEqual([]); // B's tab on conv-B: NO leak
+    expect(wsBinConvB.sent).toEqual([]);
     expect(wsCinConvB.sent).toEqual([]);
   });
 });
@@ -150,7 +159,7 @@ describe("deliverNewMessage — contract: solo i due partecipanti ricevono", () 
 describe("deliverNewMessage — closed & broken sockets", () => {
   it("skips a WS whose readyState is not OPEN", () => {
     const wsA = makeWs({ userId: "user-A" });
-    const wsBclosed = makeWs({ userId: "user-B", readyState: 3 }); // CLOSED
+    const wsBclosed = makeWs({ userId: "user-B", readyState: 3 });
     const wsBopen = makeWs({ userId: "user-B", readyState: 1 });
     const cache = makeCache({ "conv-A": [wsA, wsBclosed, wsBopen] });
 
@@ -178,11 +187,6 @@ describe("deliverNewMessage — closed & broken sockets", () => {
   });
 
   it("prunes the conversation key when the last WS is removed", () => {
-    // Setup che verifica effettivamente la caduta della Map key: tutti
-    // i subscribers broken (sender NON è subscribed qui — es. è già
-    // disconnesso o è il lato REST dell'emit). Dopo l'iter, ogni ws è
-    // rimosso nel catch, il Set si svuota, e cache.delete libera la
-    // Map entry.
     const wsB1broken = makeWs({
       userId: "user-B",
       throwOnSend: new Error("reset"),
@@ -212,8 +216,8 @@ describe("deliverNewMessage — closed & broken sockets", () => {
 
     const result = deliverNewMessage(cache, makeEvent());
 
-    expect(result.delivered).toBe(1); // wsB2
-    expect(result.closed).toBe(1); // wsB1Broken
+    expect(result.delivered).toBe(1);
+    expect(result.closed).toBe(1);
     expect(wsB2.sent).toHaveLength(1);
   });
 });
@@ -240,8 +244,7 @@ describe("deliverNewMessage — payload integrity", () => {
     expect(JSON.parse(wsB.sent[0]).message.id).toBe("msg-42");
   });
 
-  it("self-skip is strct by senderId, not by socket identity", () => {
-    // Tre ws dello stesso user (sender): tutti skippano.
+  it("self-skip is strict by senderId, not by socket identity", () => {
     const wsA1 = makeWs({ userId: "user-A" });
     const wsA2 = makeWs({ userId: "user-A" });
     const wsA3 = makeWs({ userId: "user-A" });
@@ -254,5 +257,141 @@ describe("deliverNewMessage — payload integrity", () => {
     expect(wsA2.sent).toEqual([]);
     expect(wsA3.sent).toEqual([]);
     expect(wsB.sent).toHaveLength(1);
+  });
+});
+
+// ═════════════════════════════════════════════════════════════════
+// Fase 4.3: deliverInboxUpdate — fan-out all'inbox del receiverId
+// (client user-scoped WS subscribed via ?scope=inbox).
+//
+// Contract:
+//   1. Solo WS in `inboxClients.get(receiverId)` raggiunti.
+//   2. NO self-skip (il server garantisce che receiverId !== senderId).
+//   3. WS con `readyState !== OPEN` skippato + cleanup speculare.
+//   4. Payload: `{type:"inboxUpdate", conversationId, message}`.
+//   5. Memory-safe: snapshot `[...]`, closed=count, Map pruning.
+// ═════════════════════════════════════════════════════════════════
+describe("deliverInboxUpdate — receiver's inbox", () => {
+  it("returns zero deliveries when nobody is subscribed to inbox", () => {
+    const cache = makeInboxCache({});
+    const result = deliverInboxUpdate(cache, "user-B", makeEvent());
+    expect(result).toEqual({ delivered: 0, closed: 0 });
+  });
+
+  it("delivers to receiver's inbox WS (single tab, single delivery)", () => {
+    const wsA = makeWs({ userId: "user-A" });
+    const wsB = makeWs({ userId: "user-B" });
+    const cache = makeInboxCache({ "user-B": [wsB] });
+
+    const result = deliverInboxUpdate(cache, "user-B", makeEvent());
+
+    expect(result.delivered).toBe(1);
+    expect(wsA.sent).toEqual([]); // A non è nel target inbox
+    expect(wsB.sent).toHaveLength(1);
+
+    const payload = JSON.parse(wsB.sent[0]);
+    expect(payload).toMatchObject({
+      type: "inboxUpdate",
+      conversationId: "conv-A",
+      message: { id: "msg-1", senderId: "user-A" },
+    });
+  });
+
+  it("delivers to ALL inbox tabs of receiver (multi-tab)", () => {
+    const wsB1 = makeWs({ userId: "user-B" });
+    const wsB2 = makeWs({ userId: "user-B" });
+    const wsB3 = makeWs({ userId: "user-B" });
+    const cache = makeInboxCache({ "user-B": [wsB1, wsB2, wsB3] });
+
+    const result = deliverInboxUpdate(cache, "user-B", makeEvent());
+
+    expect(result.delivered).toBe(3);
+    expect(wsB1.sent).toHaveLength(1);
+    expect(wsB2.sent).toHaveLength(1);
+    expect(wsB3.sent).toHaveLength(1);
+  });
+
+  it("does NOT deliver to other users' inbox (multi-user isolation)", () => {
+    const wsA = makeWs({ userId: "user-A" });
+    const wsBinbox = makeWs({ userId: "user-B" });
+    const wsCinbox = makeWs({ userId: "user-C" });
+    const cache = makeInboxCache({
+      "user-A": [wsA],
+      "user-B": [wsBinbox],
+      "user-C": [wsCinbox],
+    });
+
+    // receiverId = user-B → solo wsBinbox riceve.
+    const result = deliverInboxUpdate(cache, "user-B", makeEvent());
+    expect(result.delivered).toBe(1);
+
+    expect(wsA.sent).toEqual([]);
+    expect(wsBinbox.sent).toHaveLength(1);
+    expect(wsCinbox.sent).toEqual([]);
+  });
+
+  it("skips a closed WS and prunes when last is removed", () => {
+    const wsBclosed = makeWs({ userId: "user-B", readyState: 3 });
+    const cache = makeInboxCache({ "user-B": [wsBclosed] });
+
+    const result = deliverInboxUpdate(cache, "user-B", makeEvent());
+    expect(result.delivered).toBe(0);
+    expect(wsBclosed.sent).toEqual([]);
+    // WS closed ma non genera delete (è già filtrato dal readyState check)
+    expect(cache.has("user-B")).toBe(true); // non rimosso perché non ho inviato
+  });
+
+  it("removes a WS whose send() throws + prunes empty inbox", () => {
+    const wsBbroken = makeWs({
+      userId: "user-B",
+      throwOnSend: new Error("reset"),
+    });
+    const cache = makeInboxCache({ "user-B": [wsBbroken] });
+
+    const result = deliverInboxUpdate(cache, "user-B", makeEvent());
+
+    expect(result.delivered).toBe(0);
+    expect(result.closed).toBe(1);
+    expect(cache.has("user-B")).toBe(false);
+  });
+
+  it("continues delivering to other inbox WS after one throws", () => {
+    const wsB1Broken = makeWs({
+      userId: "user-B",
+      throwOnSend: new Error("reset"),
+    });
+    const wsB2 = makeWs({ userId: "user-B" });
+    const cache = makeInboxCache({ "user-B": [wsB1Broken, wsB2] });
+
+    const result = deliverInboxUpdate(cache, "user-B", makeEvent());
+
+    expect(result.delivered).toBe(1);
+    expect(result.closed).toBe(1);
+    expect(wsB2.sent).toHaveLength(1);
+  });
+
+  it("payload includes conversationId but NOT receiverId / productId (privacy)", () => {
+    const wsB = makeWs({ userId: "user-B" });
+    const cache = makeInboxCache({ "user-B": [wsB] });
+
+    deliverInboxUpdate(
+      cache,
+      "user-B",
+      makeEvent({
+        conversationId: "conv-X",
+        productId: "prod-secret",
+        receiverId: "user-B",
+      }),
+    );
+
+    const payload = JSON.parse(wsB.sent[0]);
+    expect(payload.type).toBe("inboxUpdate");
+    expect(payload.conversationId).toBe("conv-X");
+    expect(payload.message).toBeDefined();
+    expect(payload.message.id).toBe("msg-1");
+    // Privacy: il client user-scope non deve sapere productId esplicito
+    // (lo recupera via /api/conversations/[id] solo se ne ha bisogno).
+    expect(payload.productId).toBeUndefined();
+    expect(payload.receiverId).toBeUndefined();
   });
 });

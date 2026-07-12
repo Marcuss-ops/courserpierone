@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { ConversationList } from "./conversation-list";
 import { UserSearchBar } from "@/components/chat/user-search-bar";
+import { InboxProvider } from "@/components/layout/inbox-provider";
 
 /** Maximum chars to show for the last-message preview. */
 const PREVIEW_MAX = 80;
@@ -107,6 +108,12 @@ export default async function MessagesPage() {
   });
 
   return (
+    <InboxProvider
+      initialTotalUnread={previews.reduce((sum, p) => sum + p.unreadCount, 0)}
+      initialByConversation={Object.fromEntries(
+        previews.map((p) => [p.id, p.unreadCount]),
+      )}
+    >
     <div className="min-h-screen bg-cream-dark-bg text-cream-dark-text font-sans antialiased relative overflow-x-hidden">
       {/* Subtle warm glow overlay */}
       <div
@@ -200,5 +207,6 @@ export default async function MessagesPage() {
         )}
       </main>
     </div>
+    </InboxProvider>
   );
 }

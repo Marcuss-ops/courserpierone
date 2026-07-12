@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { User, Clock, ChevronRight } from "lucide-react";
 import { timeAgo } from "@/lib/utils/time-ago";
+import { useInbox } from "@/components/layout/inbox-provider";
 import type { ConversationPreview } from "./page";
 
 interface ConversationListProps {
@@ -11,11 +12,19 @@ interface ConversationListProps {
 }
 
 export function ConversationList({ previews, currentUserId }: ConversationListProps) {
+  // Fase 4.3: se wrappato in InboxProvider, usa i counts realtime dal
+  // WS sovrapposti agli SSR (byConversation[convId]). Altrimenti
+  // fallback ai prop SSR (conv.unreadCount).
+  const inbox = useInbox();
+  const realtimeByConversation = inbox?.byConversation ?? null;
+
   return (
     <div className="space-y-3">
       {previews.map((conv) => {
+        const realtimeDelta = realtimeByConversation?.[conv.id] ?? 0;
+        const unreadCount = conv.unreadCount + realtimeDelta;
         const isUnread =
-          conv.unreadCount > 0 ||
+          unreadCount > 0 ||
           (conv.lastMessage !== null &&
             conv.lastMessage.senderId !== currentUserId &&
             !conv.lastMessage.read);
@@ -72,9 +81,9 @@ export function ConversationList({ previews, currentUserId }: ConversationListPr
                 <p className="text-xs sm:text-sm text-cream-dark-text-soft/70 truncate max-w-[280px]">
                   {conv.lastMessage ? conv.lastMessage.content : "Nessun messaggio"}
                 </p>
-                {conv.unreadCount > 0 && (
+                {unreadCount > 0 && (
                   <span className="shrink-0 inline-flex items-center justify-center min-w-[22px] h-[22px] rounded-full bg-red-500 text-white text-[10px] font-bold px-1.5 shadow-md">
-                    {conv.unreadCount > 99 ? "99+" : conv.unreadCount}
+                    {unreadCount > 99 ? "99+" : unreadCount}
                   </span>
                 )}
               </div>

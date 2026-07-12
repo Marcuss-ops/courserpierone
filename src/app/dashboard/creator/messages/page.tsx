@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { CreatorInbox } from "./creator-inbox";
+import { InboxProvider } from "@/components/layout/inbox-provider";
 
 /** Max chars per last-message preview. */
 const PREVIEW_MAX = 80;
@@ -183,10 +184,12 @@ export default async function CreatorMessagesPage({ searchParams }: PageProps) {
       : null;
 
   return (
-    // <Suspense> required: <CreatorInbox> uses useSearchParams for in-app
-    // navigation. Next.js 14+ requires a Suspense boundary around any
-    // client component that calls useSearchParams during static
-    // prerender, otherwise the static export fails to build.
+    <InboxProvider
+      initialTotalUnread={totalUnread}
+      initialByConversation={Object.fromEntries(
+        previews.map((p) => [p.id, p.unreadCount]),
+      )}
+    >
     <Suspense fallback={null}>
       <CreatorInbox
         previews={previews}
@@ -200,5 +203,6 @@ export default async function CreatorMessagesPage({ searchParams }: PageProps) {
         totalUnread={totalUnread}
       />
     </Suspense>
+    </InboxProvider>
   );
 }

@@ -198,9 +198,25 @@ export const POST = withRateLimit(async function POST(request: NextRequest) {
     // Phase 1.3: includiamo productId così il bridge WS può filtrare i
     // messaggi al solo participant della conversazione-prodotto (evita
     // data-leak cross-prodotto tra partecipanti diversi).
+    //
+    // Fase 4.3: includiamo anche `receiverId` (= l'altro partecipante,
+    // NON il sender). Questo permette al bridge di fan-out
+    // `inboxUpdate` verso tutti gli WS subscribed all'inbox del
+    // receiver (multi-tab della dashboard, sidebar nav, conversation-
+    // list, notifications-dropdown) — utile per aggiornare il badge
+    // "non letti" senza page refresh.
+    //
+    // Per conversation uno-a-uno, receiverId = partner. Per future
+    // chat di gruppo è il logical "primary recipient" da decidere.
+    const partnerId =
+      conversation.userOneId === dbUser.id
+        ? conversation.userTwoId
+        : conversation.userOneId;
+
     messageBroker.emit(NEW_MESSAGE, {
       conversationId: conversation.id,
       productId,
+      receiverId: partnerId,
       message: {
         ...message,
         createdAt: message.createdAt.toISOString(),

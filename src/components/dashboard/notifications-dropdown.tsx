@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { Mail, User, Clock, X } from "lucide-react";
 import { timeAgo } from "@/lib/utils/time-ago";
+import { useInbox } from "@/components/layout/inbox-provider";
 
 export interface UnreadConversation {
   conversationId: string;
@@ -16,16 +17,28 @@ export interface UnreadConversation {
 }
 
 interface NotificationsDropdownProps {
-  conversations: UnreadConversation[];
-  totalUnread: number;
+  /**
+   * SSR initial value (server-fetched). Usato come fallback
+   * quando il componente è montato FUORI da <InboxProvider>.
+   * Quando è dentro il provider, il valore realtime del WS ha
+   * la precedenza.
+   */
+  conversations?: UnreadConversation[];
+  totalUnread?: number;
 }
 
-interface NotificationsDropdownProps {
-  conversations: UnreadConversation[];
-  totalUnread: number;
-}
-
-export function NotificationsDropdown({ conversations, totalUnread }: NotificationsDropdownProps) {
+export function NotificationsDropdown({
+  conversations: initialConversations = [],
+  totalUnread: initialTotalUnread = 0,
+}: NotificationsDropdownProps) {
+  // Fase 4.3: se InboxProvider è wrappato in pagina, usa i valori
+  // realtime dal WS. Altrimenti fallback ai prop SSR.
+  const inbox = useInbox();
+  const totalUnread = inbox ? inbox.totalUnread : initialTotalUnread;
+  // NB: le conversations restano SSR-side (lista di 5 conversazioni con
+  //   preview dell'ultimo msg). L'inbox WS aggiorna solo il count, non
+  //   il preview-content — quello richiede un fetch aggiuntivo che per V1
+  //   resta fuori scope.
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -93,7 +106,7 @@ export function NotificationsDropdown({ conversations, totalUnread }: Notificati
                 )}
               </div>
               <div className="flex items-center gap-1">
-                {conversations.length > 0 && (
+                {initialConversations.length > 0 && (
                   <Link
                     href="/dashboard/messages"
                     onClick={() => setOpen(false)}
@@ -113,7 +126,7 @@ export function NotificationsDropdown({ conversations, totalUnread }: Notificati
             </div>
 
             {/* Conversations list */}
-            {conversations.length === 0 ? (
+            {initialConversations.length === 0 ? (
               <div className="px-5 py-10 text-center">
                 <div className="w-12 h-12 rounded-full bg-cream-dark-surface border border-cream-dark-border flex items-center justify-center mx-auto mb-3">
                   <Mail className="w-5 h-5 text-cream-dark-text-soft/40" />
@@ -131,7 +144,7 @@ export function NotificationsDropdown({ conversations, totalUnread }: Notificati
               </div>
             ) : (
               <div className="max-h-[360px] overflow-y-auto">
-                {conversations.map((conv) => (
+                {initialConversations.map((conv) => (
                   <Link
                     key={conv.conversationId}
                     href={`/dashboard/messages/${conv.otherUserId}`}
@@ -180,7 +193,7 @@ export function NotificationsDropdown({ conversations, totalUnread }: Notificati
             )}
 
             {/* Footer — link to full inbox */}
-            {conversations.length > 0 && (
+            {initialConversations.length > 0 && (
               <div className="px-5 py-3 border-t border-cream-dark-border bg-cream-dark-surface/30">
                 <Link
                   href="/dashboard/messages"

@@ -4,23 +4,33 @@ import { createHmac } from "crypto";
 import { prisma } from "@/lib/db/prisma";
 
 /**
- * GET /api/auth/ws-token?conversationId=<conversationId>
+ * GET /api/auth/ws-token
  *
- * Fase 4.1 del piano DMs: il token è SCOPED a una specifica Conversation.
- * Verifica membership dell'utente sulla Conversation PRIMA di firmare
- * (defense-in-depth: il token firmato è utilizzabile solo per la stessa
- * Conversation; spoofing di un conversationId altrui è bloccato sia
- * dalla firma HMAC sia dal check DB del WS upgrade handler).
+ * Due scope supportati (Fase 4.1 + Fase 4.3):
  *
- * Format token: `userId:conversationId:timestamp:signature`
- * HMAC-SHA256 di `userId:conversationId:timestamp` con WS_SECRET.
+ *   1. **Conversation scope** (?conversationId=<id>)
+ *      Token firmato sulla tripla `userId:conversationId:timestamp`.
+ *      WS upgrade handler usa questo token per aprire una sottoscrizione
+ *      alla Conversation specifica (con DB membership check).
+ *
+ *   2. **Inbox scope** (?scope=inbox)
+ *      Token firmato su `userId:inbox:timestamp`.
+ *      WS upgrade handler usa questo token per aprire una sottoscrizione
+ *      IMPLICITA a TUTTE le conversation di cui l'utente è membro.
+ *      Il client riceve `inboxUpdate` events quando QUALSIASI sua
+ *      conversation riceve un nuovo messaggio, permettendo di aggiornare
+ *      i badge "non letti" senza page refresh.
+ *
+ * Format token: `userId:<scope_marker>:timestamp:signature` (4-part).
+ * HMAC-SHA256 di `userId:<scope_marker>:timestamp` con WS_SECRET.
  * Expires after 5 minutes.
  *
  * Verifica lato WS upgrade (server.ts):
- * 1. timestamp entro 5 minuti
- * 2. firma HMAC corrisponde
- * 3. Conversation.id matcha `?conversationId` URL query
- * 4. Conversation.userOneId OR userTwoId == userId (DB membership)
+ *   1. timestamp entro 5 minuti
+ *   2. firma HMAC corrisponde
+ *   3. scope_marker matcha `?conversationId` o `?scope=inbox`
+ *   4. per conversation scope: DB membership (userOneId OR userTwoId)
+ *      per inbox scope: nessun check extra (l'utente firma per sé stesso)
  */
 export async function GET(request: NextRequest) {
   const { user, dbUser } = await getServerUser();
@@ -30,14 +40,43 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const conversationId = searchParams.get("conversationId");
+  const scope = searchParams.get("scope");
+
+  // ── Case 1: Inbox scope (Fase 4.3) ─────────────────────────
+  // Firmato su userId:inbox:timestamp. Nessuna DB lookup: il client
+  // sta chiedendo di ascoltare la propria inbox personale, non una
+  // conversation specifica. Il WS upgrade handler (server.ts) skippa
+  // il membership check sulla Conversation e usa `inboxClients` cache.
+  if (scope === "inbox") {
+    const secret = process.env.WS_SECRET ?? "dev-secret-change-in-production";
+    const timestamp = Date.now();
+    const payload = `${dbUser.id}:inbox:${timestamp}`;
+    const signature = createHmac("sha256", secret)
+      .update(payload)
+      .digest("hex")
+      .slice(0, 16);
+    const token = `${dbUser.id}:inbox:${timestamp}:${signature}`;
+
+    return NextResponse.json({
+      token,
+      userId: dbUser.id,
+      scope: "inbox",
+      expiresAt: timestamp + 5 * 60 * 1000,
+    });
+  }
+
+  // ── Case 2: Conversation scope (Fase 4.1) ──────────────────
   if (!conversationId) {
     return NextResponse.json(
-      { error: "conversationId è obbligatorio (Fase 4.1)" },
+      {
+        error:
+          "specifica `conversationId` (subscript per-conv) oppure `scope=inbox` (Fase 4.3)",
+      },
       { status: 400 },
     );
   }
 
-  // ── Membership check DB-side (pre-firma) ─────────────────
+  // ── Membership check DB-side (pre-firma) ──────────────────
   // Fail-fast: se l'utente non è membro della Conversation, non
   // generiamo il token. Così un client malevolo non ottiene nemmeno
   // un token firmato da provare sull'WS upgrade.
@@ -63,7 +102,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // ── Firme HMAC con conversationId nel payload ────────────
+  // ── Firme HMAC con conversationId nel payload ────────────────
   const secret = process.env.WS_SECRET ?? "dev-secret-change-in-production";
   const timestamp = Date.now();
   const payload = `${dbUser.id}:${conversationId}:${timestamp}`;

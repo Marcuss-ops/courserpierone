@@ -12,19 +12,22 @@ export interface BroadcastSocketLike {
 }
 
 /**
- * Subscribed-conversations cache: maps `conversationId` → Set of WS
- * currently subscribed to that conversation. The server (server.ts)
- * populates this on WS upgrade and removes from it on ws close.
- *
- * NB: this is a routing cache, not the canonical authority on
- * membership — that remains the `conversation` row. Filtering WS by
- * `conversationId` here is correct because each WS entered this Map
- * only after passing the DB membership check at upgrade time.
+ * Subscribed-conversations cache (Fase 4.1): maps `conversationId` →
+ * Set of WS currently subscribed to that conversation. Each WS entered
+ * this Map only after passing the DB membership check at upgrade time.
  */
 export type SubscribedConversationsCache = Map<
   string,
   Set<BroadcastSocketLike>
 >;
+
+/**
+ * Fase 4.3: subscribes-user-to-inbox cache. Maps `userId` → Set of WS
+ * subscribed to that user's personal inbox (via `?scope=inbox` token).
+ * Used to fan-out `inboxUpdate` events to the partner (NOT the sender)
+ * unabhängig della specifica Conversation che hanno aperto in WS.
+ */
+export type InboxClientsCache = Map<string, Set<BroadcastSocketLike>>;
 
 export type BroadcastResult = {
   delivered: number;
@@ -37,20 +40,17 @@ const OPEN = 1;
  * Deliver a `newMessage` event to every WebSocket subscribed to the
  * event's conversation, EXCEPT the sender.
  *
- * Why "except sender": the REST handler in `src/app/api/messages/route.ts`
- * already returns the persisted message in the POST response, so the
- * sender has it client-side. Re-sending would risk a duplicate render.
+ * Reasoning: il REST handler in `src/app/api/messages/route.ts` already
+ * restituisce il messaggio persistito nella POST response, quindi il
+ * sender ce l'ha già client-side. Re-inviare rischia un render duplicato.
  *
- * Routing rules (these are the contracts the unit tests assert):
- *   1. Only WS in `subscribedConversations.get(conversationId)` are reached.
- *   2. WS whose `userId === message.senderId` are skipped (no self-receive).
- *   3. WS whose `readyState !== OPEN` are skipped (closed sockets fall
- *      out of the Set and `closed++` is incremented; the Set is pruned
- *      when its last member is removed).
- *   4. Other participants receive exactly one `newMessage` payload.
+ * Contract (coperto dai unit test):
+ *   1. Solo WS in `subscribedConversations.get(conversationId)` raggiunti.
+ *   2. WS con `userId === message.senderId` sono skippato (no self-receive).
+ *   3. WS con `readyState !== OPEN` skippato + cleanup (Set→Map prune).
+ *   4. Gli altri partecipanti ricevono esattamente 1 payload.
  *
- * The function is pure: it mutates only the supplied cache and the
- * sockets in it. No DB, no HTTP, no other globals.
+ * Pura: mutates solo la cache e i sockets dentro. Niente DB / HTTP.
  */
 export function deliverNewMessage(
   subscribedConversations: SubscribedConversationsCache,
@@ -64,8 +64,7 @@ export function deliverNewMessage(
   let delivered = 0;
   let closed = 0;
 
-  // Snapshot to a new array because we may mutate `convSockets` mid-loop
-  // (when a `send` throws on a dead socket we delete it).
+  // Snapshot: possiamo mutare `convSockets` mid-loop (cleanup su send throws).
   for (const ws of [...convSockets]) {
     if (ws.readyState !== OPEN) continue;
     if (ws.userId === message.senderId) continue;
@@ -83,6 +82,67 @@ export function deliverNewMessage(
       convSockets.delete(ws);
       if (convSockets.size === 0) {
         subscribedConversations.delete(conversationId);
+      }
+      closed++;
+    }
+  }
+
+  return { delivered, closed };
+}
+
+/**
+ * Fase 4.3: deliver an `inboxUpdate` event to every WebSocket subscribed
+ * to the RECEIVER's inbox, UNCONDITIONALLY.
+ *
+ * Rationale: lato server, il bridge new message ha già determinato
+ * `event.receiverId` = il partner (NON il sender). Il sender NON ha
+ * inbox WS subscribed (o se ne ha, è la sua inbox — non deve ricevere
+ * un update di un msg che ha appena inviato). La funzione è idempotente
+ * per `receiverId`.
+ *
+ * Contract (coperto dai unit test):
+ *   1. Solo WS in `inboxClients.get(receiverId)` raggiunti.
+ *   2. NO self-skip perché il chiamante (server.ts) ha già determinato
+ *      `receiverId !== senderId` (a meno di self-messaging, bloccato dal
+ *      resolver upstream).
+ *   3. WS con `readyState !== OPEN` skippato + cleanup speculare a
+ *      deliverNewMessage.
+ *   4. Tutti i WS subscribed all'inbox ricevono 1 payload
+ *      `{type:"inboxUpdate", conversationId, message}`.
+ *
+ * Memory-safe: snapshot `[...inboxSockets]`, cleanup on throws, delete-
+ * if-empty Map pruning.
+ *
+ * Pura: stesso principio di deliverNewMessage.
+ */
+export function deliverInboxUpdate(
+  inboxClients: InboxClientsCache,
+  receiverId: string,
+  event: NewMessageEvent,
+): BroadcastResult {
+  const { conversationId, message } = event;
+
+  const inboxSockets = inboxClients.get(receiverId);
+  if (!inboxSockets) return { delivered: 0, closed: 0 };
+
+  const inboxPayload = JSON.stringify({
+    type: "inboxUpdate",
+    conversationId,
+    message,
+  });
+
+  let delivered = 0;
+  let closed = 0;
+
+  for (const ws of [...inboxSockets]) {
+    if (ws.readyState !== OPEN) continue;
+    try {
+      ws.send(inboxPayload);
+      delivered++;
+    } catch {
+      inboxSockets.delete(ws);
+      if (inboxSockets.size === 0) {
+        inboxClients.delete(receiverId);
       }
       closed++;
     }
