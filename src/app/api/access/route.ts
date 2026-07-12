@@ -4,6 +4,7 @@ import { getServerUser } from "@/lib/supabase/get-user";
 import { apiErrorResponse } from "@/lib/errors";
 import { withRateLimit } from "@/lib/utils/rate-limit";
 import { findCompletedOrder } from "@/lib/access/find-completed-order";
+import { findCompletedOrderByOrderId } from "@/lib/access/find-completed-order-by-order-id";
 
 export const GET = withRateLimit(async function GET(request: NextRequest) {
   try {
@@ -45,16 +46,15 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
     }
 
     // Check order ID directly (useful for immediate redirect access from checkouts)
+    // V3.1 DRY: migrato al sibling SSO `findCompletedOrderByOrderId` per
+    // chiudere l'ultimo scattered variant. La query interna rimane
+    // semanticamente identica (OR su `id`/providerOrderId, productId
+    // scope check, status="completed") ma è ora testata e documentata
+    // in `src/lib/access/find-completed-order-by-order-id.test.ts`.
     if (orderId) {
-      const order = await prisma.order.findFirst({
-        where: {
-          OR: [
-            { providerOrderId: orderId },
-            { id: orderId }
-          ],
-          productId: dbProductId,
-          status: "completed"
-        }
+      const order = await findCompletedOrderByOrderId({
+        orderId,
+        productId: dbProductId,
       });
       if (order) {
         return NextResponse.json({ hasAccess: true });

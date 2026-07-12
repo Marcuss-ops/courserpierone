@@ -131,22 +131,11 @@ const ALLOWLIST_ORDER_STATUS_RAW: readonly { file: string; rationale: string }[]
   { file: "src/lib/messaging/load-authorized-conversation.ts", rationale: "DM-AUTH convId-keyed variant (the implementation)." },
   { file: "src/lib/messaging/create-message.ts", rationale: "DM message composer (calls WS broker; doesn't query Order directly)." },
   { file: "src/lib/messaging/find-or-create-conversation.ts", rationale: "DM Conversation upsert (doesn't query Order)." },
-  { file: "src/lib/access/find-completed-order.ts", rationale: "AccessGate SSOT helper (the implementation)." },
+  { file: "src/lib/access/find-completed-order.ts", rationale: "AccessGate SSOT helper for userId-keyed access (the implementation)." },
+  { file: "src/lib/access/find-completed-order-by-order-id.ts", rationale: "AccessGate SSOT SIBLING helper for orderId-keyed (guest) access — V3.1 follow-up (the implementation)." },
 
   // ── (b) Write-side: order creation from payment provider ──
   { file: "src/lib/services/order-service.ts", rationale: "WRITES Order.status='completed' from Stripe/LemonSqueezy webhook payload (write-side; opposite direction of the SSOT reader)." },
-
-  // ── (b') AccessGate exception: Pattern B (guest-by-orderId) ──
-  // Per Phase 2 DRY design matrix (thinker verdict): the userId-keyed
-  // SSO (`findCompletedOrder`) cannot accommodate the orderId-keyed
-  // guest verification path used here to grant access immediately
-  // after checkout (no Supabase session yet). Pattern B (guest) stays
-  // inline as a deliberate carve-out; Pattern A (signed-in user)
-  // was migrated to `findCompletedOrder` at line 38 of this file.
-  // V2 cleanup path tracked: a sibling SSO `findGuestOrderForProduct({
-  // orderId, productId })` could absorb Pattern B in a follow-up;
-  // for V1, Pattern B is the documented remaining carve-out.
-  { file: "src/app/api/access/route.ts", rationale: "AccessGate Pattern B (guest-by-orderId) keeps inline raw query per Phase 2 DRY sign-off: orderId-keyed verification (no userId available) cannot route through findCompletedOrder. Pattern A (line 38) IS migrated to the SSO; Pattern B is the explicit remaining carve-out with a tracked V2 cleanup (sibling findGuestOrderForProduct helper)." },
 
   // ── (c) Refund handlers (write-side) ──
   { file: "src/app/api/webhooks/stripe/route.ts", rationale: "Stripe webhook — DOWNgrades an Order to refunded (write-side, payment-provider state machine)." },
