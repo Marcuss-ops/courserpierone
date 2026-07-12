@@ -11,6 +11,29 @@ import type { NextRequest } from "next/server";
  * per-file factory + `as unknown as NextRequest` cast duplication with a
  * single import.
  *
+ * ADOPTION STATUS (authoritative source: this commit's body and the
+ * subsequent V3.3.3.c.b body — do not trust the per-line counts below
+ * for anything more granular than "this PR adds an atomic batch"):
+ *   - V3.3.3 (commit a5bcf43): helper extracted at this path. No
+ *     route.test.ts files migrated in that commit (the per-PR
+ *     cumulative count starts at zero).
+ *   - V3.3.3.b (commit 37061e3): first batch — Pattern-A migration
+ *     of 3 route.test.ts files (videos/stream,
+ *     ebook/[slug]/download, conversations/[id]).
+ *   - V3.3.3.c-partial (this commit): second batch — 4 route.test.ts
+ *     files migrated (certificate/[productId], progress, and the two
+ *     search-{customers,creators} users endpoints).
+ *   - V3.3.3.c.b (pending): third batch — 6 remaining route.test.ts
+ *     files (access, analytics, conversations/route, and the three
+ *     conversations/[id]/{messages,read,stream} siblings). See the
+ *     V3.3.3.c.b commit body (when shipped) for per-file blocker
+ *     rationale (walker edge cases, body-unwrap fragility,
+ *     orphan-factory fixups, etc.).
+ *   Target total: 15 route.test.ts files (9 Pattern-A + 6 Pattern-B
+ *   per the migration-scope inventory taken when the helper was first
+ *   introduced). Run `git log --grep V3.3.3 -- src/app/api/` for an
+ *   authoritative per-PR file list.
+ *
  * Scope: use this helper ONLY in API Route unit tests where a `NextRequest`
  * object is required. DO NOT use for e2e tests, React component tests, or
  * anything that needs a real network `Request` (e.g., Service Worker tests).

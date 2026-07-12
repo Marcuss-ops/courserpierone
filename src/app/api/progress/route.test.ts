@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { NextRequest } from "next/server";
+import { createMockRequest } from "@/app/api/__test-helpers__/mock-request";
 import { fakeOrder } from "@/app/api/__test-helpers__/fake-order";
 
 // ─── Mock SSOT helper ───────────────────────────────────────
@@ -42,22 +42,6 @@ const LESSON_ID = "cl-lesson-1";
 const USER_ID = "cu-user-1";
 const ADMIN_ID = "cu-admin-1";
 
-function createMockRequest(options: {
-  method?: "GET" | "POST";
-  query?: Record<string, string>;
-  body?: unknown;
-} = {}) {
-  const { method = "GET", query = {}, body } = options;
-  const url = new URL("http://localhost:3000/api/progress");
-  for (const [k, v] of Object.entries(query)) url.searchParams.set(k, v);
-  return {
-    method,
-    headers: new Map(),
-    url: url.toString(),
-    nextUrl: { searchParams: url.searchParams },
-    json: () => Promise.resolve(body ?? {}),
-  } as unknown as NextRequest;
-}
 
 const mockAnon = () =>
   mockGetServerUser.mockResolvedValueOnce({ supabase: null, user: null, dbUser: null });
@@ -92,7 +76,7 @@ describe("GET /api/progress — auth-only (no access gate)", () => {
   it("anonymous: returns 401 Unauthorized", async () => {
     mockAnon();
     const { GET } = await import("./route");
-    const response = await GET(createMockRequest({ query: { productId: PRODUCT_ID } }));
+    const response = await GET(createMockRequest("/api/progress", { query: { productId: PRODUCT_ID } }));
 
     expect(response.status).toBe(401);
     const body = await response.json();
@@ -110,7 +94,7 @@ describe("GET /api/progress — auth-only (no access gate)", () => {
     ]);
 
     const { GET } = await import("./route");
-    const response = await GET(createMockRequest({ query: { productId: PRODUCT_ID } }));
+    const response = await GET(createMockRequest("/api/progress", { query: { productId: PRODUCT_ID } }));
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -127,7 +111,7 @@ describe("GET /api/progress — auth-only (no access gate)", () => {
     mockPrisma.lesson.findMany.mockResolvedValueOnce([]);
 
     const { GET } = await import("./route");
-    const response = await GET(createMockRequest({ query: { productSlug: SLUG } }));
+    const response = await GET(createMockRequest("/api/progress", { query: { productSlug: SLUG } }));
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -144,7 +128,7 @@ describe("GET /api/progress — auth-only (no access gate)", () => {
 
     const { GET } = await import("./route");
     const response = await GET(
-      createMockRequest({ query: { productSlug: "unknown-product" } })
+      createMockRequest("/api/progress", { query: { productSlug: "unknown-product" } })
     );
     const body = await response.json();
 
@@ -164,7 +148,7 @@ describe("GET /api/progress — auth-only (no access gate)", () => {
     mockPrisma.lesson.findMany.mockResolvedValueOnce([]);
 
     const { GET } = await import("./route");
-    const response = await GET(createMockRequest({ query: { productId: PRODUCT_ID } }));
+    const response = await GET(createMockRequest("/api/progress", { query: { productId: PRODUCT_ID } }));
     expect(response.status).toBe(200);
     // GET has no access gate — verified independently of role.
     expect(mockFindCompletedOrder).not.toHaveBeenCalled();
@@ -181,7 +165,7 @@ describe("POST /api/progress — admin bypass + customer access gate", () => {
     mockAnon();
     const { POST } = await import("./route");
     const response = await POST(
-      createMockRequest({ method: "POST", body: { lessonId: LESSON_ID, completed: true } })
+      createMockRequest("/api/progress", { method: "POST", body: { lessonId: LESSON_ID, completed: true } })
     );
 
     expect(response.status).toBe(401);
@@ -194,7 +178,7 @@ describe("POST /api/progress — admin bypass + customer access gate", () => {
     mockCustomer();
     const { POST } = await import("./route");
     const response = await POST(
-      createMockRequest({ method: "POST", body: { wrongField: "x" } })
+      createMockRequest("/api/progress", { method: "POST", body: { wrongField: "x" } })
     );
 
     expect(response.status).toBe(400);
@@ -213,7 +197,7 @@ describe("POST /api/progress — admin bypass + customer access gate", () => {
     // but still have undefined lessonId — practically only the schema path is reachable.
     // Verify the schema path catches it.
     const response = await POST(
-      createMockRequest({ method: "POST", body: { completed: true } })
+      createMockRequest("/api/progress", { method: "POST", body: { completed: true } })
     );
 
     expect(response.status).toBe(400);
@@ -225,7 +209,7 @@ describe("POST /api/progress — admin bypass + customer access gate", () => {
     mockPrisma.lesson.findUnique.mockResolvedValueOnce(null);
     const { POST } = await import("./route");
     const response = await POST(
-      createMockRequest({ method: "POST", body: { lessonId: "ghost-lesson", completed: true } })
+      createMockRequest("/api/progress", { method: "POST", body: { lessonId: "ghost-lesson", completed: true } })
     );
 
     expect(response.status).toBe(404);
@@ -242,7 +226,7 @@ describe("POST /api/progress — admin bypass + customer access gate", () => {
     mockFindCompletedOrder.mockResolvedValueOnce(null);
     const { POST } = await import("./route");
     const response = await POST(
-      createMockRequest({ method: "POST", body: { lessonId: LESSON_ID, completed: true } })
+      createMockRequest("/api/progress", { method: "POST", body: { lessonId: LESSON_ID, completed: true } })
     );
 
     expect(response.status).toBe(403);
@@ -263,7 +247,7 @@ describe("POST /api/progress — admin bypass + customer access gate", () => {
     mockFindCompletedOrder.mockResolvedValueOnce(null);
     const { POST } = await import("./route");
     const response = await POST(
-      createMockRequest({ method: "POST", body: { lessonId: LESSON_ID, completed: true } })
+      createMockRequest("/api/progress", { method: "POST", body: { lessonId: LESSON_ID, completed: true } })
     );
 
     expect(response.status).toBe(403);
@@ -278,7 +262,7 @@ describe("POST /api/progress — admin bypass + customer access gate", () => {
     });
     const { POST } = await import("./route");
     const response = await POST(
-      createMockRequest({ method: "POST", body: { lessonId: LESSON_ID, completed: true } })
+      createMockRequest("/api/progress", { method: "POST", body: { lessonId: LESSON_ID, completed: true } })
     );
     const body = await response.json();
 
@@ -299,7 +283,7 @@ describe("POST /api/progress — admin bypass + customer access gate", () => {
     });
     const { POST } = await import("./route");
     const response = await POST(
-      createMockRequest({ method: "POST", body: { lessonId: LESSON_ID, completed: true } })
+      createMockRequest("/api/progress", { method: "POST", body: { lessonId: LESSON_ID, completed: true } })
     );
     const body = await response.json();
 

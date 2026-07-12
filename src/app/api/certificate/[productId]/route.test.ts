@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { NextRequest } from "next/server";
+import { createMockRequest } from "@/app/api/__test-helpers__/mock-request";
 import { fakeOrder } from "@/app/api/__test-helpers__/fake-order";
 
 // ─── Mock SSOT helper ───────────────────────────────────────
@@ -60,20 +60,6 @@ const PRODUCT_SLUG = "test-course";
 const USER_ID = "cu-user-1";
 const ADMIN_ID = "cu-admin-1";
 
-function createMockRequest(options: {
-  acceptLanguage?: string;
-} = {}) {
-  const headers = new Map<string, string>();
-  if (options.acceptLanguage) {
-    headers.set("accept-language", options.acceptLanguage);
-  }
-  return {
-    headers: {
-      get: (key: string) => (headers.get(key.toLowerCase()) ?? null),
-    },
-    url: "http://localhost:3000/api/certificate/" + PRODUCT_ID,
-  } as unknown as NextRequest;
-}
 
 const params = Promise.resolve({ productId: PRODUCT_ID });
 
@@ -107,7 +93,7 @@ describe("GET /api/certificate/[productId] — auth + completion-gate", () => {
   it("anonymous: returns 401 Unauthorized", async () => {
     mockAnon();
     const { GET } = await import("./route");
-    const response = await GET(createMockRequest(), { params });
+    const response = await GET(createMockRequest("/api/certificate/" + PRODUCT_ID), { params });
 
     expect(response.status).toBe(401);
     const body = await response.json();
@@ -120,7 +106,7 @@ describe("GET /api/certificate/[productId] — auth + completion-gate", () => {
     mockAdmin();
     mockFindCompletedOrder.mockResolvedValueOnce(null);
     const { GET } = await import("./route");
-    const response = await GET(createMockRequest(), { params });
+    const response = await GET(createMockRequest("/api/certificate/" + PRODUCT_ID), { params });
 
     expect(response.status).toBe(403);
     const body = await response.json();
@@ -133,7 +119,7 @@ describe("GET /api/certificate/[productId] — auth + completion-gate", () => {
     mockFindCompletedOrder.mockResolvedValueOnce(null);
     const { GET } = await import("./route");
     const response = await GET(
-      createMockRequest({ acceptLanguage: "it-IT" }),
+      createMockRequest("/api/certificate/" + PRODUCT_ID, { headers: { "accept-language": "it-IT" } }),
       { params }
     );
     const body = await response.json();
@@ -148,7 +134,7 @@ describe("GET /api/certificate/[productId] — auth + completion-gate", () => {
     mockFindCompletedOrder.mockResolvedValueOnce(null);
     const { GET } = await import("./route");
     const response = await GET(
-      createMockRequest({ acceptLanguage: "en-US,en;q=0.9" }),
+      createMockRequest("/api/certificate/" + PRODUCT_ID, { headers: { "accept-language": "en-US,en;q=0.9" } }),
       { params }
     );
     const body = await response.json();
@@ -163,7 +149,7 @@ describe("GET /api/certificate/[productId] — auth + completion-gate", () => {
     mockCustomer();
     mockFindCompletedOrder.mockResolvedValueOnce(null);
     const { GET } = await import("./route");
-    const response = await GET(createMockRequest(), { params });
+    const response = await GET(createMockRequest("/api/certificate/" + PRODUCT_ID), { params });
     expect(response.status).toBe(403);
   });
 
@@ -173,7 +159,7 @@ describe("GET /api/certificate/[productId] — auth + completion-gate", () => {
     mockFindCompletedOrder.mockResolvedValueOnce(fakeOrder());
     mockPrisma.product.findUnique.mockResolvedValueOnce(null);
     const { GET } = await import("./route");
-    const response = await GET(createMockRequest(), { params });
+    const response = await GET(createMockRequest("/api/certificate/" + PRODUCT_ID), { params });
     const body = await response.json();
 
     expect(response.status).toBe(404);
@@ -193,7 +179,7 @@ describe("GET /api/certificate/[productId] — auth + completion-gate", () => {
     mockPrisma.lessonProgress.count.mockResolvedValueOnce(0);
 
     const { GET } = await import("./route");
-    const response = await GET(createMockRequest(), { params });
+    const response = await GET(createMockRequest("/api/certificate/" + PRODUCT_ID), { params });
     const body = await response.json();
 
     expect(response.status).toBe(400);
@@ -212,7 +198,7 @@ describe("GET /api/certificate/[productId] — auth + completion-gate", () => {
     });
     mockPrisma.lessonProgress.count.mockResolvedValueOnce(1); // only 1 of 3 completed
     const { GET } = await import("./route");
-    const response = await GET(createMockRequest(), { params });
+    const response = await GET(createMockRequest("/api/certificate/" + PRODUCT_ID), { params });
     const body = await response.json();
 
     expect(response.status).toBe(400);
@@ -233,7 +219,7 @@ describe("GET /api/certificate/[productId] — auth + completion-gate", () => {
     mockPrisma.lessonProgress.count.mockResolvedValueOnce(1);
 
     const { GET } = await import("./route");
-    const response = await GET(createMockRequest(), { params });
+    const response = await GET(createMockRequest("/api/certificate/" + PRODUCT_ID), { params });
 
     expect(response.status).toBe(200);
     expect(response.headers.get("Content-Type")).toBe("application/pdf");

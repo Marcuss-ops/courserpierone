@@ -21,7 +21,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { NextRequest } from "next/server";
+import { createMockRequest } from "@/app/api/__test-helpers__/mock-request";
 
 // ─── Mocks ────────────────────────────────────────────────────
 const mockPrisma = {
@@ -47,8 +47,6 @@ const mockAuth = (dbUser: { id: string; email: string; role?: string }) => {
   });
 };
 
-const createRequest = (url: string): NextRequest =>
-  new Request(`http://localhost${url}`) as unknown as NextRequest;
 
 // ─── Tests ────────────────────────────────────────────────────
 describe("GET /api/users/search-creators", () => {
@@ -60,7 +58,7 @@ describe("GET /api/users/search-creators", () => {
   it("returns 401 when not authenticated", async () => {
     mockGetServerUser.mockResolvedValue({ user: null, dbUser: null });
     const { GET } = await import("./route");
-    const res = await GET(createRequest("/api/users/search-creators?q=mario"));
+    const res = await GET(createMockRequest("/api/users/search-creators?q=mario"));
     expect(res.status).toBe(401);
   });
 
@@ -68,7 +66,7 @@ describe("GET /api/users/search-creators", () => {
   it("returns empty users array when query is < 2 chars", async () => {
     mockAuth({ id: "student1", email: "student@test.com", role: "student" });
     const { GET } = await import("./route");
-    const res = await GET(createRequest("/api/users/search-creators?q=a"));
+    const res = await GET(createMockRequest("/api/users/search-creators?q=a"));
     const body = await res.json();
     expect(res.status).toBe(200);
     expect(body.users).toEqual([]);
@@ -78,7 +76,7 @@ describe("GET /api/users/search-creators", () => {
   it("returns empty users array when query is empty string", async () => {
     mockAuth({ id: "student1", email: "student@test.com", role: "student" });
     const { GET } = await import("./route");
-    const res = await GET(createRequest("/api/users/search-creators?q="));
+    const res = await GET(createMockRequest("/api/users/search-creators?q="));
     const body = await res.json();
     expect(res.status).toBe(200);
     expect(body.users).toEqual([]);
@@ -87,7 +85,7 @@ describe("GET /api/users/search-creators", () => {
   it("returns empty users array when query is only whitespace", async () => {
     mockAuth({ id: "student1", email: "student@test.com", role: "student" });
     const { GET } = await import("./route");
-    const res = await GET(createRequest("/api/users/search-creators?q=   "));
+    const res = await GET(createMockRequest("/api/users/search-creators?q=   "));
     const body = await res.json();
     expect(res.status).toBe(200);
     expect(body.users).toEqual([]);
@@ -96,7 +94,7 @@ describe("GET /api/users/search-creators", () => {
   it("returns empty users array when q parameter is missing", async () => {
     mockAuth({ id: "student1", email: "student@test.com", role: "student" });
     const { GET } = await import("./route");
-    const res = await GET(createRequest("/api/users/search-creators"));
+    const res = await GET(createMockRequest("/api/users/search-creators"));
     const body = await res.json();
     expect(res.status).toBe(200);
     expect(body.users).toEqual([]);
@@ -110,7 +108,7 @@ describe("GET /api/users/search-creators", () => {
     ]);
 
     const { GET } = await import("./route");
-    await GET(createRequest("/api/users/search-creators?q=creator"));
+    await GET(createMockRequest("/api/users/search-creators?q=creator"));
 
     expect(mockPrisma.user.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -137,7 +135,7 @@ describe("GET /api/users/search-creators", () => {
     mockPrisma.user.findMany.mockResolvedValue([]);
 
     const { GET } = await import("./route");
-    await GET(createRequest("/api/users/search-creators?q=mario"));
+    await GET(createMockRequest("/api/users/search-creators?q=mario"));
 
     // Verify role filter is enforced
     expect(mockPrisma.user.findMany).toHaveBeenCalledWith(
@@ -160,7 +158,7 @@ describe("GET /api/users/search-creators", () => {
     mockPrisma.user.findMany.mockResolvedValue([]);
 
     const { GET } = await import("./route");
-    const res = await GET(createRequest("/api/users/search-creators?q=creator"));
+    const res = await GET(createMockRequest("/api/users/search-creators?q=creator"));
     const body = await res.json();
 
     expect(res.status).toBe(200);
@@ -173,7 +171,7 @@ describe("GET /api/users/search-creators", () => {
     mockPrisma.user.findMany.mockResolvedValue([]);
 
     const { GET } = await import("./route");
-    await GET(createRequest("/api/users/search-creators?q=student"));
+    await GET(createMockRequest("/api/users/search-creators?q=student"));
 
     expect(mockPrisma.user.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -190,7 +188,7 @@ describe("GET /api/users/search-creators", () => {
     mockPrisma.user.findMany.mockResolvedValue([]);
 
     const { GET } = await import("./route");
-    await GET(createRequest("/api/users/search-creators?q=mar"));
+    await GET(createMockRequest("/api/users/search-creators?q=mar"));
 
     expect(mockPrisma.user.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -210,7 +208,7 @@ describe("GET /api/users/search-creators", () => {
     mockPrisma.user.findMany.mockResolvedValue([]);
 
     const { GET } = await import("./route");
-    await GET(createRequest("/api/users/search-creators?q=test@"));
+    await GET(createMockRequest("/api/users/search-creators?q=test@"));
 
     expect(mockPrisma.user.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -231,7 +229,7 @@ describe("GET /api/users/search-creators", () => {
     ]);
 
     const { GET } = await import("./route");
-    const res = await GET(createRequest("/api/users/search-creators?q=mario"));
+    const res = await GET(createMockRequest("/api/users/search-creators?q=mario"));
     const body = await res.json();
     const user = body.users[0];
 
@@ -250,7 +248,7 @@ describe("GET /api/users/search-creators", () => {
     mockPrisma.user.findMany.mockResolvedValue([]);
 
     const { GET } = await import("./route");
-    await GET(createRequest("/api/users/search-creators?q=test&limit=5"));
+    await GET(createMockRequest("/api/users/search-creators?q=test&limit=5"));
 
     expect(mockPrisma.user.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ take: 5 })
@@ -262,7 +260,7 @@ describe("GET /api/users/search-creators", () => {
     mockPrisma.user.findMany.mockResolvedValue([]);
 
     const { GET } = await import("./route");
-    await GET(createRequest("/api/users/search-creators?q=test&limit=100"));
+    await GET(createMockRequest("/api/users/search-creators?q=test&limit=100"));
 
     expect(mockPrisma.user.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ take: 20 })
@@ -274,7 +272,7 @@ describe("GET /api/users/search-creators", () => {
     mockPrisma.user.findMany.mockResolvedValue([]);
 
     const { GET } = await import("./route");
-    await GET(createRequest("/api/users/search-creators?q=test"));
+    await GET(createMockRequest("/api/users/search-creators?q=test"));
 
     expect(mockPrisma.user.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ take: 10 })
@@ -286,7 +284,7 @@ describe("GET /api/users/search-creators", () => {
     mockPrisma.user.findMany.mockResolvedValue([]);
 
     const { GET } = await import("./route");
-    await GET(createRequest("/api/users/search-creators?q=test&limit=abc"));
+    await GET(createMockRequest("/api/users/search-creators?q=test&limit=abc"));
 
     expect(mockPrisma.user.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ take: 10 })
@@ -299,7 +297,7 @@ describe("GET /api/users/search-creators", () => {
     mockPrisma.user.findMany.mockResolvedValue([]);
 
     const { GET } = await import("./route");
-    await GET(createRequest("/api/users/search-creators?q=test"));
+    await GET(createMockRequest("/api/users/search-creators?q=test"));
 
     expect(mockPrisma.user.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ orderBy: { name: "asc" } })
@@ -312,7 +310,7 @@ describe("GET /api/users/search-creators", () => {
     mockPrisma.user.findMany.mockResolvedValue([]);
 
     const { GET } = await import("./route");
-    const res = await GET(createRequest("/api/users/search-creators?q=zzzzz"));
+    const res = await GET(createMockRequest("/api/users/search-creators?q=zzzzz"));
     const body = await res.json();
 
     expect(res.status).toBe(200);
@@ -324,7 +322,7 @@ describe("GET /api/users/search-creators", () => {
     mockPrisma.user.findMany.mockResolvedValue([]);
 
     const { GET } = await import("./route");
-    const res = await GET(createRequest("/api/users/search-creators?q=mario"));
+    const res = await GET(createMockRequest("/api/users/search-creators?q=mario"));
     const body = await res.json();
 
     expect(res.status).toBe(200);
@@ -337,7 +335,7 @@ describe("GET /api/users/search-creators", () => {
     mockPrisma.user.findMany.mockRejectedValue(new Error("DB connection lost"));
 
     const { GET } = await import("./route");
-    const res = await GET(createRequest("/api/users/search-creators?q=mario"));
+    const res = await GET(createMockRequest("/api/users/search-creators?q=mario"));
 
     expect(res.status).toBe(500);
   });
@@ -347,7 +345,7 @@ describe("GET /api/users/search-creators", () => {
     mockPrisma.user.findMany.mockResolvedValue([]);
 
     const { GET } = await import("./route");
-    const res = await GET(createRequest("/api/users/search-creators?q=%3Cscript%3E"));
+    const res = await GET(createMockRequest("/api/users/search-creators?q=%3Cscript%3E"));
 
     expect(res.status).toBe(200);
     const body = await res.json();
