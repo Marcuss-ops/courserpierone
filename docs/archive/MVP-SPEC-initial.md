@@ -1,3 +1,5 @@
+Archiviato: contiene il boot legacy pre-Supabase, post-V1.
+
 # Specifica MVP — Fase 1
 
 ## Panoramica

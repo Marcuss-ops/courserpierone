@@ -46,6 +46,28 @@ export default tseslint.config(
       "react-hooks/set-state-in-effect": "warn",
       "react-hooks/immutability": "warn",
       "no-empty": ["warn", { "allowEmptyCatch": true }],
+
+      // V3.5 — Lock V3.4 barrel migration: prevent new direct submodule
+      // imports in favor of the canonical `@/lib/access` barrel.
+      // Pure code-only blocking — first violation fires this rule.
+      // The barrel itself (`src/lib/access/index.ts`) is exempted below.
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@/lib/access/find-completed-order",
+              message:
+                "V3.4 migration: use `import { findCompletedOrder } from \"@/lib/access\"` (canonical barrel) instead of the submodule path.",
+            },
+            {
+              name: "@/lib/access/find-completed-order-by-order-id",
+              message:
+                "V3.4 migration: use `import { findCompletedOrderByOrderId } from \"@/lib/access\"` (canonical barrel) instead of the submodule path.",
+            },
+          ],
+        },
+      ],
     },
   },
 
@@ -65,6 +87,17 @@ export default tseslint.config(
     files: ["*.{cjs,mjs}"],
     rules: {
       "@typescript-eslint/no-require-imports": "off",
+    },
+  },
+
+  // V3.5 — Exempt the barrel itself from `no-restricted-imports`: it
+  // legitimately re-exports the submodule helpers to the rest of the
+  // codebase. Without this override, the barrel's own re-exports would
+  // trigger the rule on every lint pass.
+  {
+    files: ["src/lib/access/index.ts"],
+    rules: {
+      "no-restricted-imports": "off",
     },
   },
 );

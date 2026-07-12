@@ -49,13 +49,18 @@ Tutte le variabili sono documentate in `.env.example`. Ecco un riepilogo:
 
 | Variabile | Obbligatoria | Descrizione |
 |---|---|---|
-| `DATABASE_URL` | ✅ | URL di connessione PostgreSQL |
-| `NEXTAUTH_SECRET` | ✅ | Segreto per firma sessioni (genera con `openssl rand -base64 32`) |
-| `NEXTAUTH_URL` | ✅ | URL base dell'app (es. `http://localhost:3000`) |
-| `NEXT_PUBLIC_APP_URL` | ✅ | URL pubblico per link assoluti |
-| `STRIPE_SECRET_KEY` | ✅ | Chiave segreta Stripe |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | ✅ | Chiave pubblicabile Stripe |
-| `STRIPE_WEBHOOK_SECRET` | ✅ | Segreto webhook Stripe |
+| `DATABASE_URL` | ✅ | URL di connessione PostgreSQL (pgBouncer-pooled, port 6543) |
+| `DIRECT_URL` | ✅ | URL di connessione **direct** (port 5432, no pooler) per `prisma migrate deploy` |
+| `NEXT_PUBLIC_SUPABASE_URL` | ✅ | URL Supabase (Project Settings → API) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | Anon key Supabase — esposta al client |
+| `SUPABASE_SERVICE_ROLE_KEY` | ✅ | Service role Supabase — full privilege, server-only |
+| `NEXT_PUBLIC_APP_URL` | ✅ | URL pubblico per link assoluti email/redirect |
+| `LEMONSQUEEZY_API_KEY` | ✅ | Chiave API Lemon Squeezy (provider pagamenti primario) |
+| `LEMONSQUEEZY_STORE_ID` | ✅ | Store ID Lemon Squeezy |
+| `LEMONSQUEEZY_WEBHOOK_SECRET` | ✅ | Segreto webhook Lemon Squeezy |
+| `STRIPE_SECRET_KEY` | ❌ | Chiave segreta Stripe (legacy — solo per ordini storici da drainare) |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | ❌ | Chiave pubblicabile Stripe (legacy) |
+| `STRIPE_WEBHOOK_SECRET` | ❌ | Segreto webhook Stripe (legacy) |
 | `OPENAI_API_KEY` | ❌ | Solo per traduzioni automatiche |
 | `GOOGLE_CLIENT_ID` | ❌ | Solo per login con Google |
 | `GOOGLE_CLIENT_SECRET` | ❌ | Solo per login con Google |
@@ -94,21 +99,25 @@ nel tuo `.env`.
 
 ---
 
-## Stripe (Pagamenti)
+## Pagamenti (Lemon Squeezy primario, Stripe legacy)
 
-1. Crea un account su [stripe.com](https://stripe.com)
-2. Vai su Dashboard → Developers → API keys e copia le chiavi
-3. Per i webhook in locale:
+Il sistema supporta **due provider**, con **Lemon Squeezy come primario** in V1.x e **Stripe come legacy** solo per ordini storici da drainare. Vedi `scripts/audit-v1-readiness.ts` per il gate `activeStripeOrders`.
 
-```bash
-# Installa Stripe CLI: https://stripe.com/docs/stripe-cli
-stripe listen --forward-to localhost:3000/api/webhooks/stripe
+### Lemon Squeezy (primario)
 
-# Copia il whsec_... che appare nel terminale in STRIPE_WEBHOOK_SECRET
-```
+1. Crea un account su [lemonsqueezy.com](https://lemonsqueezy.com)
+2. Settings → API → copia `LEMONSQUEEZY_API_KEY`
+3. Settings → Stores → copia lo `LEMONSQUEEZY_STORE_ID` del tuo store
+4. Settings → Webhooks → crea un endpoint su `https://your-domain.com/api/webhooks/lemonsqueezy`, copia `LEMONSQUEEZY_WEBHOOK_SECRET`
+5. Per ogni prodotto, crea una variante su Lemon Squeezy Dashboard e usa:
+   - `lemonVariantId` (variante standard, multi-store derivata dallo store di default)
+   - `lemonStoreId` opzionale per override (es. `countryOverrides` regionali)
 
-4. Crea un prodotto su Stripe Dashboard e usa il suo `price_id`
-   nel config.json del corso.
+### Stripe (legacy / dismissione pianificata)
+
+Solo per ordini storici. La nuova pipeline di checkout **non genera più ordini Stripe** — il vecchio endpoint `/api/webhooks/stripe` resta attivo solo per processare pagamenti pre-migrazione.
+
+Per il drain: refunda ordini attivi o migrali manualmente a Lemon Squeezy, poi rimuovi il codice dual-provider (Post-V1 V1.1).
 
 ---
 
@@ -125,14 +134,24 @@ ma l'app funziona comunque.
 
 ---
 
-## Google OAuth (Login Social)
+## Google OAuth (Login Social — via Supabase Auth)
+
+L'OAuth Google è gestito interamente da **Supabase Auth** (non più NextAuth). La configurazione è in **2 posti**:
+
+### 1. Google Cloud Console (chi sei)
 
 1. Vai su [console.cloud.google.com/apis/credentials](https://console.cloud.google.com/apis/credentials)
-2. Crea un nuovo progetto → Abilita "Google OAuth 2.0"
-3. Configura l'URI di redirect: `http://localhost:3000/api/auth/callback/google`
-4. Copia Client ID e Client Secret nel `.env`
+2. Crea OAuth Client ID (Web application)
+3. **Authorized redirect URI**: `https://<your-project-ref>.supabase.co/auth/v1/callback` (NON più `/api/auth/callback/google`)
+4. Copia Client ID + Client Secret
 
-Se non configurato, l'invio delle email transazionali viene loggato nei log del terminale.
+### 2. Supabase Dashboard (provider handover)
+
+1. Authentication → Providers → Google → Enable
+2. Incolla Client ID + Client Secret
+3. Salva
+
+Le env vars corrispondenti (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`) vanno comunque nel `.env` per flessibilità di test locale; il client (browser) non le usa mai direttamente — passa sempre tramite Supabase come intermediario. Maggiori info in `.env.example` → sezione `─── Google OAuth ───`.
 
 ---
 
@@ -177,7 +196,7 @@ Courser/
 │   │   └── funnel/          # Template landing (lumio, h612, horizon)
 │   ├── hooks/               # React hooks
 │   └── lib/                 # Utility, Stripe, Auth, DB
-└── _refs/                   # Riferimenti di design
+└── docs/                   # Documentazione corrente + archivio historical
 ```
 
 ---
@@ -200,21 +219,22 @@ Courser/
 
 - [MISSION.md](MISSION.md) — Bussola strategica del progetto
 - [ARCHITECTURE.md](ARCHITECTURE.md) — Architettura tecnica
-- [ROADMAP.md](ROADMAP.md) — Piano di sviluppo per fasi
-- [TECH-STACK.md](TECH-STACK.md) — Scelte tecnologiche
-- [MVP-SPEC.md](MVP-SPEC.md) — Specifica dettagliata del MVP
+- [docs/roadmap-current.md](docs/roadmap-current.md) — Roadmap: V1 blockers + Post-V1 + Tech debt + Out-of-scope
+- [docs/archive/MVP-SPEC-initial.md](docs/archive/MVP-SPEC-initial.md) — Specifica MVP legacy (archiviato, pre-Supabase + post-V1)
+- [docs/production.md](docs/production.md) — Deployment + audit + cron runbook
 
 ---
 
 ## Creare il Primo Corso
 
-### 1. Crea un prodotto su Stripe
+### 1. Crea un prodotto su Lemon Squeezy (provider primario)
 
-```bash
-# Vai su https://dashboard.stripe.com/products → "Aggiungi prodotto"
-# Compila: nome, prezzo (es. 29.00 EUR), frequenza "Pagamento unico"
-# Salva e copia il Price ID (es. price_1234567890abc)
-```
+1. Vai su [app.lemonsqueezy.com](https://app.lemonsqueezy.com) → Stores → Products → "New product"
+2. Compila: nome, prezzo (es. 29.00 EUR), tipo "One-time payment"
+3. Salva e copia il **Variant ID** (es. `123456`)
+4. (Opzionale se multi-store) copia anche lo Store ID per override
+
+> **Stripe legacy**: per drenare ordini storici, vedi [docs/audit-v1-readiness.md](docs/production.md#audit) — `scripts/audit-v1-readiness.ts` riporta `activeStripeOrders > 0` da migrare prima del V1 GA.
 
 ### 2. Crea il corso dal pannello Admin
 
@@ -472,7 +492,7 @@ npx vercel --prod
 
 - [MISSION.md](MISSION.md) — Bussola strategica del progetto
 - [ARCHITECTURE.md](ARCHITECTURE.md) — Architettura tecnica
-- [ROADMAP.md](ROADMAP.md) — Piano di sviluppo per fasi
-- [TECH-STACK.md](TECH-STACK.md) — Scelte tecnologiche
-- [MVP-SPEC.md](MVP-SPEC.md) — Specifica dettagliata del MVP
+- [docs/roadmap-current.md](docs/roadmap-current.md) — Roadmap canonica (V1 blockers + Post-V1 + Tech debt + Out-of-scope)
+- [docs/archive/MVP-SPEC-initial.md](docs/archive/MVP-SPEC-initial.md) — Specifica MVP legacy (archiviato)
+- [docs/production.md](docs/production.md) — Deployment + audit + cron runbook
 

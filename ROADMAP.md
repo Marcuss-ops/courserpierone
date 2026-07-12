@@ -1,3 +1,7 @@
+> ⚠️ **DEPRECATED — usa [docs/roadmap-current.md](docs/roadmap-current.md) invece.**
+>
+> Questo file è conservato per git history ma non riflette più lo stato del progetto. Le info su **V1 blockers**, **Post-V1** (V1.1, V2), **Tech debt** e **Esplicitamente fuori scope** vivono nel file canonico a `docs/roadmap-current.md`. Per la specifica MVP legacy vedi anche `docs/archive/MVP-SPEC-initial.md`.
+
 # Roadmap di Sviluppo
 
 ## Fase 1 — MVP (Settimane 1-4)

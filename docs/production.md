@@ -399,7 +399,7 @@ This playbook is one of four docs. Do not duplicate — link instead.
 | **OAuth / Google sign-in setup & diagnosis** | [`OAUTH-SETUP.md`](./OAUTH-SETUP.md) |
 | **System architecture & data flow** | [`../ARCHITECTURE.md`](../ARCHITECTURE.md) |
 | **Mission, principles, success metrics** | [`../MISSION.md`](../MISSION.md) |
-| **Phase plan / what ships when** | [`../ROADMAP.md`](../ROADMAP.md) |
+| **Phase plan / what ships when** | [`roadmap-current.md`](roadmap-current.md) |
 | **Backlogs & future features** | [`../FUTURE.md`](../FUTURE.md) |
 | **CI/CD workflow files this playbook references** | `.github/workflows/ci.yml` (deploy-gate), `prisma-migrate.yml`, `secrets-scan.yml` |
 
