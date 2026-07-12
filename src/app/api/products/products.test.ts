@@ -59,6 +59,11 @@ vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
+// ─── Mock rate limiting ─────────────────────────────────────
+vi.mock("@/lib/utils/rate-limit", () => ({
+  withRateLimit: (fn: Function) => fn,
+}));
+
 // ─── Helpers ─────────────────────────────────────────────────
 function createMockRequest(options: {
   method?: string;
@@ -86,7 +91,7 @@ describe("Auth guards", () => {
     });
 
     const { GET } = await import("./route");
-    const response = await GET();
+    const response = await GET({} as NextRequest);
 
     expect(response.status).toBe(401);
   });
@@ -99,7 +104,7 @@ describe("Auth guards", () => {
     } as unknown as Awaited<ReturnType<typeof getServerUser>>);
 
     const { GET } = await import("./route");
-    const response = await GET();
+    const response = await GET({} as NextRequest);
 
     expect(response.status).toBe(403);
   });
@@ -131,7 +136,7 @@ describe("GET /api/products", () => {
     mockPrisma.analyticEvent.count.mockResolvedValue(10);
 
     const { GET } = await import("./route");
-    const response = await GET();
+    const response = await GET({} as NextRequest);
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -150,7 +155,7 @@ describe("GET /api/products", () => {
     mockPrisma.product.findMany.mockRejectedValue(new Error("DB down"));
 
     const { GET } = await import("./route");
-    const response = await GET();
+    const response = await GET({} as NextRequest);
 
     expect(response.status).toBe(500);
     const body = await response.json();
