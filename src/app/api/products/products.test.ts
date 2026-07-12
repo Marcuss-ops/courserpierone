@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { revalidatePath } from "next/cache";
+import { getServerUser } from "@/lib/supabase/get-user";
 import type { NextRequest } from "next/server";
 
 // ─── Mock prisma ────────────────────────────────────────────
@@ -44,6 +46,19 @@ vi.mock("@/lib/config/generate-course-config", () => ({
   generateCourseConfig: vi.fn().mockResolvedValue(undefined),
 }));
 
+// ─── Mock admin auth ─────────────────────────────────────────
+vi.mock("@/lib/supabase/get-user", () => ({
+  getServerUser: vi.fn().mockResolvedValue({
+    user: { email: "admin@test.com" },
+    dbUser: { role: "admin" },
+  }),
+}));
+
+// ─── Mock Next.js cache revalidation ─────────────────────────
+vi.mock("next/cache", () => ({
+  revalidatePath: vi.fn(),
+}));
+
 // ─── Helpers ─────────────────────────────────────────────────
 function createMockRequest(options: {
   method?: string;
@@ -58,6 +73,38 @@ function createMockRequest(options: {
 }
 
 // ─── Tests ───────────────────────────────────────────────────
+describe("Auth guards", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns 401 when user is unauthenticated", async () => {
+    vi.mocked(getServerUser).mockResolvedValueOnce({
+      supabase: null,
+      user: null,
+      dbUser: null,
+    });
+
+    const { GET } = await import("./route");
+    const response = await GET();
+
+    expect(response.status).toBe(401);
+  });
+
+  it("returns 403 when user is not an admin", async () => {
+    vi.mocked(getServerUser).mockResolvedValueOnce({
+      supabase: null,
+      user: { email: "student@test.com" },
+      dbUser: { role: "student" },
+    } as unknown as Awaited<ReturnType<typeof getServerUser>>);
+
+    const { GET } = await import("./route");
+    const response = await GET();
+
+    expect(response.status).toBe(403);
+  });
+});
+
 describe("GET /api/products", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -139,6 +186,7 @@ describe("POST /api/products", () => {
     expect(body.product.id).toBe("new-p1");
     expect(mockPrisma.product.create).toHaveBeenCalledOnce();
     expect(mockPrisma.productTranslation.create).toHaveBeenCalledTimes(2);
+    expect(revalidatePath).toHaveBeenCalledWith("/it-it/new-course", "page");
   });
 
   it("returns 400 when slug is missing", async () => {
@@ -163,7 +211,26 @@ describe("POST /api/products", () => {
     expect(response.status).toBe(400);
   });
 
-  it("creates lessons when provided", async () => {
+  it("skips lessons without valid translations", async () => {
+    const { POST } = await import("./route");
+    const req = createMockRequest({
+      body: {
+        slug: "course-with-empty-lessons",
+        translations: { titolo: "Test" },
+        sourceLocale: "it",
+        lessons: [
+          { translations: { it: { title: "", videoUrl: "" } }, assets: [] },
+          { translations: {}, assets: [] },
+        ],
+      },
+    });
+    const response = await POST(req);
+
+    expect(response.status).toBe(200);
+    expect(mockPrisma.lesson.create).not.toHaveBeenCalled();
+  });
+
+  it("creates lessons with translations and assets", async () => {
     let lessonIndex = 0;
     mockPrisma.lesson.create.mockImplementation(() => {
       lessonIndex++;
@@ -175,9 +242,20 @@ describe("POST /api/products", () => {
       body: {
         slug: "course-with-lessons",
         translations: { titolo: "Test" },
+        sourceLocale: "it",
         lessons: [
-          { title: "Intro", videoUrl: "https://youtube.com/1" },
-          { title: "Advanced", videoUrl: "https://youtube.com/2" },
+          {
+            translations: {
+              it: { title: "Intro", videoUrl: "https://youtube.com/1" },
+            },
+            assets: [{ type: "pdf", locale: "it", fileUrl: "https://example.com/file.pdf", fileName: "file.pdf" }],
+          },
+          {
+            translations: {
+              it: { title: "Advanced", videoUrl: "https://youtube.com/2" },
+            },
+            assets: [],
+          },
         ],
       },
     });
@@ -186,6 +264,7 @@ describe("POST /api/products", () => {
     expect(response.status).toBe(200);
     expect(mockPrisma.lesson.create).toHaveBeenCalledTimes(2);
     expect(mockPrisma.lessonTranslation.create).toHaveBeenCalledTimes(2);
+    expect(mockPrisma.lessonAsset.create).toHaveBeenCalledTimes(1);
   });
 
   it("creates AI translations when provided", async () => {
@@ -282,7 +361,7 @@ describe("PUT /api/products/[id]", () => {
     mockPrisma.$transaction.mockImplementation(<T>(fn: (tx: typeof mockPrisma) => Promise<T>) =>
       fn(mockPrisma),
     );
-    mockPrisma.product.update.mockResolvedValue({ id: "p1", slug: "updated" });
+    mockPrisma.product.update.mockResolvedValue({ id: "p1", slug: "test" });
   });
 
   it("updates product fields", async () => {
@@ -304,7 +383,7 @@ describe("PUT /api/products/[id]", () => {
     );
   });
 
-  it("creates lessons when provided", async () => {
+  it("creates lessons with translations and assets", async () => {
     let lessonIndex = 0;
     mockPrisma.lesson.create.mockImplementation(() => {
       lessonIndex++;
@@ -315,9 +394,16 @@ describe("PUT /api/products/[id]", () => {
     const req = createMockRequest({
       body: {
         slug: "test",
+        sourceLocale: "it",
         lessons: [
-          { title: "New Lesson 1", videoUrl: "" },
-          { title: "New Lesson 2", videoUrl: "" },
+          {
+            translations: { it: { title: "New Lesson 1", videoUrl: "" } },
+            assets: [{ type: "pdf", locale: "it", fileUrl: "https://example.com/file.pdf", fileName: "file.pdf" }],
+          },
+          {
+            translations: { it: { title: "New Lesson 2", videoUrl: "" } },
+            assets: [],
+          },
         ],
       },
     });
@@ -329,6 +415,8 @@ describe("PUT /api/products/[id]", () => {
       expect.objectContaining({ where: expect.objectContaining({ productId: "p1" }) }),
     );
     expect(mockPrisma.lesson.create).toHaveBeenCalledTimes(2);
+    expect(mockPrisma.lessonAsset.create).toHaveBeenCalledTimes(1);
+    expect(revalidatePath).toHaveBeenCalledWith("/it-it/test", "page");
   });
 
   it("upserts translations", async () => {
