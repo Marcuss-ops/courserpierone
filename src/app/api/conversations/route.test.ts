@@ -55,7 +55,7 @@ function setDefaultAuthorizeAllowed() {
     permission: {
       allowed: true,
       creatorId: "creator-1",
-      studentId: SELF,
+      customerId: SELF,
       productId: PRODUCT_A,
     },
   });
@@ -442,7 +442,7 @@ describe("POST /api/conversations", () => {
         productId: PRODUCT_A,
         reason: "no_completed_order_for_student",
         creatorId: "creator-1",
-        studentId: OTHER_A,
+        customerId: OTHER_A,
       },
       response: NextResponse.json(
         { error: "DM non autorizzata", reason: "no_completed_order_for_student" },
@@ -528,7 +528,7 @@ describe("POST /api/conversations", () => {
       callOrder.push("resolver");
       return {
         allowed: true,
-        permission: { allowed: true, productId: PRODUCT_A, creatorId: "creator-1", studentId: SELF },
+        permission: { allowed: true, productId: PRODUCT_A, creatorId: "creator-1", customerId: SELF },
       };
     });
     mockPrisma.conversation.upsert.mockImplementation(async () => {

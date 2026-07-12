@@ -109,7 +109,7 @@ describe("resolveMessagingPermission", () => {
     });
     expect(res.allowed).toBe(true);
     expect(res.creatorId).toBe(ADMIN_ID);
-    expect(res.studentId).toBe(STUDENT_ID);
+    expect(res.customerId).toBe(STUDENT_ID);
   });
 
   it("denies student whose only order has status refunded (status filter is strict)", async () => {
@@ -176,7 +176,7 @@ describe("resolveMessagingPermission", () => {
     });
     expect(res.allowed).toBe(false);
     expect(res.reason).toBe(MessagingDenyReason.NoCompletedOrderForStudent);
-    expect(res.studentId).toBe(STUDENT_ID);
+    expect(res.customerId).toBe(STUDENT_ID);
     expect(res.creatorId).toBe(CREATOR_ID);
   });
 
@@ -188,7 +188,7 @@ describe("resolveMessagingPermission", () => {
     });
     expect(res.allowed).toBe(true);
     expect(res.creatorId).toBe(CREATOR_ID);
-    expect(res.studentId).toBe(STUDENT_ID);
+    expect(res.customerId).toBe(STUDENT_ID);
     expect(res.reason).toBeUndefined();
   });
 
@@ -200,7 +200,7 @@ describe("resolveMessagingPermission", () => {
     });
     expect(res.allowed).toBe(true);
     expect(res.creatorId).toBe(CREATOR_ID);
-    expect(res.studentId).toBe(STUDENT_ID);
+    expect(res.customerId).toBe(STUDENT_ID);
   });
 
   it("denies when student only completed an order for a DIFFERENT product", async () => {

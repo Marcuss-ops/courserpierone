@@ -59,7 +59,7 @@ import {
 
 interface IncompatiblePair {
   orderId: string;
-  studentId: string;
+  customerId: string;
   studentEmail: string;
   productId: string;
   productSlug: string;
@@ -150,7 +150,7 @@ async function main(): Promise<void> {
     if (!creatorIdOrAdmin) {
       incompatible.push({
         orderId: o.id,
-        studentId: o.userId,
+        customerId: o.userId,
         studentEmail: o.user.email,
         productId: o.productId,
         productSlug: o.product.slug,
@@ -172,7 +172,7 @@ async function main(): Promise<void> {
     if (o.product.creatorId === null) {
       incompatible.push({
         orderId: o.id,
-        studentId: o.userId,
+        customerId: o.userId,
         studentEmail: o.user.email,
         productId: o.productId,
         productSlug: o.product.slug,
@@ -205,7 +205,7 @@ async function main(): Promise<void> {
       const truncated = msg.slice(0, 80);
       incompatible.push({
         orderId: o.id,
-        studentId: o.userId,
+        customerId: o.userId,
         studentEmail: o.user.email,
         productId: o.productId,
         productSlug: o.product.slug,
@@ -224,7 +224,7 @@ async function main(): Promise<void> {
     if (!resolverResult.allowed) {
       incompatible.push({
         orderId: o.id,
-        studentId: o.userId,
+        customerId: o.userId,
         studentEmail: o.user.email,
         productId: o.productId,
         productSlug: o.product.slug,

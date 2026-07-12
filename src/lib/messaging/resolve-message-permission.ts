@@ -46,14 +46,14 @@ import { prisma } from "@/lib/db/prisma";
  * - `allowed: true`  → la DM è autorizzata tra actor e target su quel prodotto
  * - `allowed: false` → la DM è negata; consultare `reason` per capire perché
  *
- * `creatorId` e `studentId` sono valorizzati in entrambi i casi (tranne
- * `studentId` quando il pair non è ancora identificabile) — sono utili
+ * `creatorId` e `customerId` sono valorizzati in entrambi i casi (tranne
+ * `customerId` quando il pair non è ancora identificabile) — sono utili
  * al chiamante per non dover rieseguire il lookup.
  */
 export type MessagingPermission = {
   allowed: boolean;
   creatorId?: string;
-  studentId?: string;
+  customerId?: string;
   productId: string;
   reason?: string;
 };
@@ -183,14 +183,14 @@ export async function resolveMessagingPermission(
   }
 
   // ── 4. Identifica lo student effettivo nel pair ──────────────
-  const studentId = actorIsCreator ? targetId : actorId;
+  const customerId = actorIsCreator ? targetId : actorId;
 
   // ── 5. Lo student deve avere un Order.completed sul prodotto ──
   // Query ottimizzata: usa l'indice composito esistente
   // @@index([userId, productId, status]) su Order (vedi schema.prisma).
   const completedOrder = await prisma.order.findFirst({
     where: {
-      userId: studentId,
+      userId: customerId,
       productId,
       status: "completed",
     },
@@ -200,7 +200,7 @@ export async function resolveMessagingPermission(
     return {
       allowed: false,
       creatorId: creatorId ?? undefined,
-      studentId,
+      customerId,
       productId,
       reason: MessagingDenyReason.NoCompletedOrderForStudent,
     };
@@ -210,7 +210,7 @@ export async function resolveMessagingPermission(
   return {
     allowed: true,
     creatorId: creatorId ?? undefined,
-    studentId,
+    customerId,
     productId,
   };
 }

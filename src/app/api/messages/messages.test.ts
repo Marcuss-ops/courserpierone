@@ -109,7 +109,7 @@ function setDefaultAuthorizeAllowed() {
     permission: {
       allowed: true,
       creatorId: "creator-1",
-      studentId: "user1",
+      customerId: "user1",
       productId: PRODUCT_ID,
     },
   });
@@ -1084,7 +1084,7 @@ describe("PATCH /api/messages/read", () => {
         productId: PRODUCT_ID,
         reason: "no_completed_order_for_student",
         creatorId: "creator-1",
-        studentId: "user1",
+        customerId: "user1",
       },
       response: NextResponse.json(
         { error: "DM non autorizzata", reason: "no_completed_order_for_student" },
