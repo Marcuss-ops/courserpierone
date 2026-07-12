@@ -6,7 +6,7 @@ import { Package, Plus, Search, Filter, Edit, Eye, ChevronDown, Globe, Calendar,
 import type { ProductApiItem } from "@/lib/utils/api-types";
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<{ id: string; slug: string; title: string; template: string; status: string; locales: string[]; sales: number; revenue: number; conversion: string }[]>([]);
+  const [products, setProducts] = useState<{ id: string; slug: string; title: string; template: string; status: string; locales: string[]; sales: number; revenue: number; conversion: string; createdAt?: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionMenuId, setActionMenuId] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -24,6 +24,7 @@ export default function ProductsPage() {
             template: p.templateId ?? "lumio",
             status: p.status ?? "draft",
             locales: p.locales || [],
+            createdAt: p.createdAt,
             sales: 0,
             revenue: 0,
             conversion: "0%",
@@ -166,7 +167,11 @@ export default function ProductsPage() {
                             <div className="text-base font-bold text-white text-contrast group-hover:text-accent-primary transition-colors">{product.title}</div>
                             <div className="flex items-center gap-2 mt-1">
                                <Calendar className="w-3 h-3 text-zinc-600" />
-                               <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Creato: Giu 2026</span>
+                               <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
+                                 Creato: {product.createdAt
+                                   ? new Date(product.createdAt).toLocaleDateString("it-IT", { month: "short", year: "numeric" })
+                                   : "N/A"}
+                               </span>
                             </div>
                           </div>
                         </div>
@@ -179,11 +184,13 @@ export default function ProductsPage() {
                       </td>
                       <td className="px-8 py-6">
                         <span className={`px-3 py-1 text-[9px] font-black rounded-lg uppercase tracking-widest shadow-lg ${
-                          product.status === 'published' 
-                            ? 'bg-accent-tertiary text-black' 
+                          product.status === 'published'
+                            ? 'bg-accent-tertiary text-black'
+                            : product.status === 'archived'
+                            ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                             : 'bg-zinc-700 text-zinc-300'
                         }`}>
-                          {product.status === 'published' ? 'Online' : 'Draft'}
+                          {product.status === 'published' ? 'Online' : product.status === 'archived' ? 'Archiviato' : 'Draft'}
                         </span>
                       </td>
                       <td className="px-8 py-6">
