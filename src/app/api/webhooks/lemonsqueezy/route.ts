@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processOrder } from "@/lib/services/order-service";
-import { withRateLimit } from "@/lib/utils/rate-limit";
+import { NotFoundError, ValidationError } from "@/lib/errors";
 import { prisma } from "@/lib/db/prisma";
 import { Prisma } from "@prisma/client";
 import crypto from "crypto";
@@ -54,23 +54,11 @@ async function POST_IMPL(request: NextRequest) {
   // composite of data.id + event_name as the unique key.
   const deliveryId = `LS-${data.id}-${eventName}`;
 
-  try {
-    await prisma.processedWebhook.create({
-      data: {
-        provider: "lemonsqueezy",
-        deliveryId,
-        eventType: eventName,
-      },
-    });
-  } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2002"
-    ) {
-      // Already processed — ack silently
-      return NextResponse.json({ received: true });
-    }
-    throw error;
+  const alreadyProcessed = await prisma.processedWebhook.findUnique({
+    where: { deliveryId },
+  });
+  if (alreadyProcessed) {
+    return NextResponse.json({ received: true });
   }
 
   // ─── Process the event ──────────────────────────────────────
@@ -204,19 +192,44 @@ async function POST_IMPL(request: NextRequest) {
       }
     }
   } catch (error) {
-    // Processing failed — delete the idempotency record so LS
-    // can retry the webhook.
-    await prisma.processedWebhook
-      .delete({ where: { deliveryId } })
-      .catch(() => {
-        // Silently ignore — record might have been cleaned up already
-      });
+    const msg = error instanceof Error ? error.message : String(error);
+    const isTransient = msg.includes("ECONNREFUSED") || msg.includes("timeout") || msg.includes("rate limit");
+    console.error(`[LS Webhook] Failed to process event (${isTransient ? "retryable" : "permanent"}):`, error);
+    if (isTransient) {
+      return NextResponse.json({ error: "Temporary failure" }, { status: 503 });
+    }
+    // Deterministic business errors (e.g., product not found, invalid metadata)
+    // are acknowledged so the provider stops retrying. Transient/upstream
+    // errors (including PaymentError) are left to retry.
+    if (error instanceof NotFoundError || error instanceof ValidationError) {
+      return NextResponse.json({ error: error.message, code: error.code }, { status: 200 });
+    }
+    return NextResponse.json({ error: "Processing failed" }, { status: 500 });
+  }
 
-    console.error("Failed to process LS webhook:", error);
-    return NextResponse.json({ error: "Temporary failure" }, { status: 503 });
+  // Record successful processing. Concurrent requests for the same event
+  // may race here; P2002 is ignored because the order itself is protected
+  // by unique constraints (@@unique([paymentProvider, providerOrderId])).
+  try {
+    await prisma.processedWebhook.create({
+      data: {
+        provider: "lemonsqueezy",
+        deliveryId,
+        eventType: eventName,
+      },
+    });
+  } catch (err) {
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === "P2002"
+    ) {
+      // Already recorded by a concurrent request — safe to ack.
+    } else {
+      console.error("[LS Webhook] Failed to record processed webhook:", err);
+    }
   }
 
   return NextResponse.json({ received: true });
 }
 
-export const POST = withRateLimit(POST_IMPL, "WEBHOOK");
+export const POST = POST_IMPL;

@@ -77,10 +77,10 @@ export default async function ProductPortalPage({
   searchParams,
 }: {
   params: Promise<{ locale: string; domain: string }>;
-  searchParams: Promise<{ lang?: string; onboarded?: string }>;
+  searchParams: Promise<{ lang?: string; onboarded?: string; order_id?: string; orderId?: string }>;
 }) {
   const { domain, locale } = await params;
-  const { lang, onboarded } = await searchParams;
+  const { lang, onboarded, order_id, orderId } = await searchParams;
   
   const course = await getCourseConfig(domain);
   if (!course) return notFound();
@@ -132,7 +132,7 @@ export default async function ProductPortalPage({
   const firstLessonId = course.lessons?.[0]?.id ?? "lesson-1";
 
   return (
-    <AccessGate productSlug={domain} courseTitle={content.title}>
+    <AccessGate productSlug={domain} courseTitle={content.title} callbackUrl={`/${locale}/${domain}/portal?lang=${currentLang}`} orderId={order_id || orderId}>
       <div className="min-h-screen bg-[#f5f5f7] text-[#1d1d1f] font-sans overflow-x-hidden relative">
         {/* Top Navigation */}
         <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-zinc-200/80">

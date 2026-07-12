@@ -96,10 +96,10 @@ export default async function DownloadPage({
   searchParams,
 }: {
   params: Promise<{ locale: string; domain: string }>;
-  searchParams: Promise<{ lang?: string; token?: string }>;
+  searchParams: Promise<{ lang?: string; token?: string; order_id?: string; orderId?: string }>;
 }) {
   const { domain, locale } = await params;
-  const { lang, token } = await searchParams;
+  const { lang, token, order_id, orderId } = await searchParams;
 
   const course = await getCourseConfig(domain);
   if (!course) return notFound();
@@ -181,6 +181,7 @@ export default async function DownloadPage({
   const viewerUrl = staticBookUrl || `/api/ebook/${domain}/download?lang=${currentLang}&disposition=inline${token ? `&token=${token}` : ""}`;
 
   return (
+    <AccessGate productSlug={domain} courseTitle={ebookTitle} callbackUrl={`/${locale}/${domain}/download?lang=${currentLang}`} orderId={order_id || orderId}>
     <div className="min-h-screen bg-[#070709] text-zinc-100 font-sans relative overflow-x-hidden flex flex-col justify-between">
       <SaveAccess productSlug={domain} />
       {/* Background radial glows */}
@@ -324,5 +325,6 @@ export default async function DownloadPage({
         © {new Date().getFullYear()} Courssy. All rights reserved. supporto@courssy.it
       </footer>
     </div>
+    </AccessGate>
   );
 }

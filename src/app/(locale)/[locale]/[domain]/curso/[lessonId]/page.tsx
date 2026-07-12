@@ -82,10 +82,10 @@ export default async function CoursePage({
   searchParams,
 }: {
   params: Promise<{ locale: string; domain: string; lessonId: string }>;
-  searchParams: Promise<{ lang?: string; token?: string; theme?: string }>;
+  searchParams: Promise<{ lang?: string; token?: string; theme?: string; order_id?: string; orderId?: string }>;
 }) {
   const { locale, domain, lessonId } = await params;
-  const { lang, theme } = await searchParams;
+  const { lang, theme, order_id, orderId } = await searchParams;
   const isDark = theme === "dark";
   const isLight = !isDark;
   const course = await getCourseConfig(domain);
@@ -108,7 +108,7 @@ export default async function CoursePage({
   const lc = localeContent.course;
 
   return (
-    <AccessGate productSlug={domain} courseTitle={content.title}>
+    <AccessGate productSlug={domain} courseTitle={content.title} callbackUrl={`/${locale}/${domain}/curso/${lessonId}?lang=${currentLang}`} orderId={order_id || orderId}>
       <AnalyticsTracker productSlug={domain} />
       <TrackLessonView lessonId={currentLesson.id} isAuthenticated={isAuthenticated} />
       

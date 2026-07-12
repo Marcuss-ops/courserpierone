@@ -1,10 +1,10 @@
 /**
- * Rate limiter a finestra scorrevole (sliding window) — dual-mode Redis + in-memory.
+ * Rate limiter a finestra fissa (fixed window) — dual-mode Redis + in-memory.
  *
  * Design:
- *   - Redis mode:    Atomic sliding window via INCR + EXPIRE (scalabile su multi-istanza Vercel)
+ *   - Redis mode:    Atomic fixed window via INCR + EXPIRE (scalabile su multi-istanza Vercel)
  *   - In-memory mode: Fallback automatico quando Redis non è configurato
- *   - Finestra scorrevole: il contatore resetta dopo windowMs dall'ultimo reset
+ *   - Finestra fissa: il contatore resetta dopo windowMs dal primo incremento
  *
  * Tiers predefiniti:
  *   - PUBLIC:    100 req/min  (API pubbliche: prodotti, config, analytics)
@@ -108,9 +108,12 @@ export async function rateLimitAsync(
   try {
     const count = await r.incr(redisKey);
 
-    // Sempre imposta EXPIRE: idempotente, evita memory leak se il processo
-    // crasha tra INCR e EXPIRE, e funziona come sliding window.
-    await r.expire(redisKey, windowSeconds);
+    // Imposta EXPIRE solo al primo incremento. Se lo chiamassimo ad ogni
+    // richiesta il timer verrebbe resettato continuamente e un utente/bot
+    // che mantiene traffico costante rimarrebbe bloccato per sempre.
+    if (count === 1) {
+      await r.expire(redisKey, windowSeconds);
+    }
 
     // Recupera il TTL per calcolare resetIn
     const ttl = await r.ttl(redisKey);

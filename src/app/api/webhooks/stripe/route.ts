@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/payment/stripe";
 import { processOrder } from "@/lib/services/order-service";
-import { withRateLimit } from "@/lib/utils/rate-limit";
+import { NotFoundError, ValidationError } from "@/lib/errors";
 import { prisma } from "@/lib/db/prisma";
 import { Prisma } from "@prisma/client";
 import Stripe from "stripe";
@@ -31,29 +31,18 @@ async function POST_IMPL(request: NextRequest) {
   }
 
   // ─── Idempotency guard ──────────────────────────────────────
-  // Stripe guarantees event.id is unique per event. We insert a
-  // ProcessedWebhook record BEFORE processing. If the insert fails
-  // with a unique constraint violation (P2002), the webhook was
-  // already processed — ack immediately to prevent duplicate orders.
+  // Stripe guarantees event.id is unique per event. We check whether
+  // this delivery was already processed; if so, ack immediately.
+  // The record is created only after successful processing so that a
+  // Vercel timeout does not leave a stale "processed" marker and block
+  // legitimate retries.
   const deliveryId = event.id;
 
-  try {
-    await prisma.processedWebhook.create({
-      data: {
-        provider: "stripe",
-        deliveryId,
-        eventType: event.type,
-      },
-    });
-  } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2002"
-    ) {
-      // Already processed — ack silently
-      return NextResponse.json({ received: true });
-    }
-    throw error;
+  const alreadyProcessed = await prisma.processedWebhook.findUnique({
+    where: { deliveryId },
+  });
+  if (alreadyProcessed) {
+    return NextResponse.json({ received: true });
   }
 
   // ─── Process the event ──────────────────────────────────────
@@ -216,23 +205,44 @@ async function POST_IMPL(request: NextRequest) {
       }
     }
   } catch (error) {
-    // Processing failed — delete the idempotency record so Stripe
-    // can retry the webhook. Only delete if we created it above.
-    await prisma.processedWebhook
-      .delete({ where: { deliveryId } })
-      .catch(() => {
-        // Silently ignore — record might have been cleaned up already
-      });
-
     const msg = error instanceof Error ? error.message : String(error);
     const isTransient = msg.includes("ECONNREFUSED") || msg.includes("timeout") || msg.includes("rate limit");
     console.error(`[Stripe] Failed to process order (${isTransient ? "retryable" : "permanent"}):`, error);
     if (isTransient) {
       return NextResponse.json({ error: "Temporary failure" }, { status: 503 });
     }
+    // Deterministic business errors (e.g., product not found, invalid metadata)
+    // are acknowledged so the provider stops retrying. Transient/upstream
+    // errors (including PaymentError) are left to retry.
+    if (error instanceof NotFoundError || error instanceof ValidationError) {
+      return NextResponse.json({ error: error.message, code: error.code }, { status: 200 });
+    }
+    return NextResponse.json({ error: "Processing failed" }, { status: 500 });
+  }
+
+  // Record successful processing. Concurrent requests for the same event
+  // may race here; P2002 is ignored because the order itself is protected
+  // by unique constraints (stripeSessionId / providerOrderId).
+  try {
+    await prisma.processedWebhook.create({
+      data: {
+        provider: "stripe",
+        deliveryId,
+        eventType: event.type,
+      },
+    });
+  } catch (err) {
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === "P2002"
+    ) {
+      // Already recorded by a concurrent request — safe to ack.
+    } else {
+      console.error("[Stripe] Failed to record processed webhook:", err);
+    }
   }
 
   return NextResponse.json({ received: true });
 }
 
-export const POST = withRateLimit(POST_IMPL, "WEBHOOK");
+export const POST = POST_IMPL;

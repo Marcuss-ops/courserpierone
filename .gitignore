@@ -27,3 +27,4 @@ scripts/translate/__pycache__/
 /prisma/migrations/dev.db-journal
 coverage/
 yarn-error.log*
+.env.test

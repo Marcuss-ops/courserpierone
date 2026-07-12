@@ -18,6 +18,8 @@
     "db:generate": "npx prisma generate",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "postinstall": "prisma generate && npx tsx scripts/generate/generate-locale-resolver.ts"
   },
   "dependencies": {
@@ -55,6 +57,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.61.1",
     "@types/dompurify": "^3.0.5",
     "@types/jsdom": "^28.0.3",
     "@types/nodemailer": "^8.0.0",
