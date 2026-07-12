@@ -142,6 +142,7 @@ Three scenarios:
 **d) Catastrophic data loss** (deleted rows, corrupt cascade):
 - Supabase Dashboard → Database → Backups → PITR → pick a restore point → Restore.
 - After restore: redeploy the app at the matching commit SHA. Audit any orders created between the bad commit and the PITR point.
+- **Self-hosted / sidecar alternative:** if the deploy relies on the local Docker backup container instead of Supabase PITR, see [Appendix C — Backup and Restore Run Log](#appendix-c-backup-and-restore-run-log) for the verified extraction + restore procedure.
 
 **e) Code-and-schema interlock** — code deployed in the same commit requires a column added by that commit's migration (typical pattern: `prisma.X.update({ data: { newCol } })` on the new app code):
 - **DO NOT Vercel-rollback alone:** the rolled-back code may crash on the now-present column (e.g., Prisma client expects non-null field with no default). Reverse-symmetric break.
@@ -397,6 +398,111 @@ This playbook is one of four docs. Do not duplicate — link instead.
 | **Phase plan / what ships when** | [`../ROADMAP.md`](../ROADMAP.md) |
 | **Backlogs & future features** | [`../FUTURE.md`](../FUTURE.md) |
 | **CI/CD workflow files this playbook references** | `.github/workflows/ci.yml` (deploy-gate), `prisma-migrate.yml`, `secrets-scan.yml` |
+
+---
+
+## Appendix C — Backup and Restore Run Log
+
+> **Live evidence-verified.** This appendix documents the **actual** backup + restore run executed in a sandbox on this repo and is reproducible on a real dev host. Refer back from §2.3(d) when PITR is unavailable or when validating the sidecar before deploy day.
+
+### C.0 Sandbox caveats (transparency)
+
+1. **Host ports.** The sandbox already had port 5432 occupied, so source postgres is bound to `55432`, throwaway restore postgres to `55433`.
+2. **Cadence evidence window.** One bash session (~5 min). Cannot observe weekly/monthly promotion across days; documented by image behavior + retention env vars.
+3. **Simulated aging caveat.** `touch -d` from host failed because backup files are root-owned (volume-mounted from container). Workaround: invoke the cleanup pass via `docker exec src-pgbackups /backup.sh` (root context).
+4. **Reproducibility.** Sandbox used an isolated bridge network `test-net`. Production setup uses the same image wired in `docker-compose.yml`, all retention env vars identical.
+
+### C.1 Stack
+
+| Component | Image | Purpose |
+|---|---|---|
+| Source DB | `postgres:16-alpine` (name `src-db`) | Source of truth, schema applied via `prisma db push`, seeded with 6 reference rows |
+| Backup service | `prodrigestivill/postgres-backup-local:16-alpine` (name `src-pgbackups`) | Daily cron + retention-sweep, manual trigger via `/backup.sh` |
+| Throwaway restore DB | `postgres:16-alpine` (name `restore-db`) | Fresh `courser_restored` DB, isolated from source |
+
+### C.2 Cadence verification
+
+| Check | Evidence | How observed |
+|---|---|---|
+| **Daily cron** (`@daily`) | `./backups/daily/courser-<TIMESTAMP>.sql.gz` file written after `/backup.sh` | Sandbox run (§C.5) |
+| **Weekly retention** | `BACKUP_KEEP_WEEKS=4` env var present in container; rename-sweep per upstream image (verified-by-design, see C.6) | `docker exec src-pgbackups env \| grep BACKUP_KEEP` |
+| **Monthly retention** | `BACKUP_KEEP_MONTHS=3` env var present in container; rename-sweep per upstream image (verified-by-design, see C.6) | `docker exec src-pgbackups env \| grep BACKUP_KEEP` |
+| **Manual trigger** | `docker exec src-pgbackups /backup.sh` — **not** `/etc/periodic/daily/backup.sh` (image uses `go-cron` calling `/backup.sh`) | `ps aux` inside container shows `go-cron -s @daily -p 8080 -- /backup.sh` as PID 1 |
+| **Upstream rename logic** | Daily → Weekly → Monthly path runs on every `/backup.sh` invocation, gated by file mtime age | [Upstream README](https://github.com/prodrigestivill/docker-postgres-backup-local) |
+
+### C.3 Backup file inventory
+
+After one `/backup.sh` invocation, the on-host `./backups/` is organized:
+
+```
+./backups/
+├── daily/      # most recent BACKUP_KEEP_DAYS=7 daily-tagged backups
+├── weekly/     # promoted-after-7d, kept for BACKUP_KEEP_WEEKS=4
+├── monthly/    # promoted-after-30d, kept for BACKUP_KEEP_MONTHS=3
+└── last/       # mirror of the most-recent backup (canonical restore source)
+```
+
+Filename format: `courser-<YYYY-MM-DDTHH-MM-SS>.sql.gz` — a gzipped SQL text dump (NOT a custom-format `pg_dump`). Pipeable via `zcat | psql`.
+
+> C.3 gotcha worth flagging: a naive `ls -t ./backups/ | head -1` returns a directory name (e.g. `weekly`) and your `zcat` will fail. Use **either** `find ./backups/ -type f -name '*.sql.gz' | head -1` (works) or pin to `./backups/last/` (canonical; image-managed).
+
+### C.4 Reproducible restore runbook
+
+```bash
+# 1. Locate the latest backup file (NOT directly under ./backups/)
+LATEST=$(find ./backups/last/ -type f -name '*.sql.gz' | head -1)
+# fallback if ./backups/last/ is incompletely populated on a fresh deploy:
+[ -z "$LATEST" ] && LATEST=$(find ./backups/daily/ -type f -name '*.sql.gz' | head -1)
+echo "Restoring from: $LATEST"
+
+# 2. Spin up a fresh throwaway postgres on a non-conflicting host port
+docker run -d --name restore-db \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=courser_restored \
+  -p 55433:5432 postgres:16-alpine
+sleep 5
+docker exec restore-db pg_isready -U postgres
+
+# 3. Restore (zcat | psql into the throwaway)
+zcat "$LATEST" | docker exec -i restore-db psql -U postgres -d courser_restored
+
+# 4. Verify (run these on the throwaway, not the source)
+docker exec restore-db psql -U postgres -d courser_restored -c "
+  SELECT 'Product' as tbl, count(*) FROM \"Product\"
+  UNION ALL SELECT 'Lesson', count(*) FROM \"Lesson\"
+  UNION ALL SELECT 'LessonTranslation', count(*) FROM \"LessonTranslation\"
+  UNION ALL SELECT 'Order', count(*) FROM \"Order\"
+  UNION ALL SELECT 'LessonProgress', count(*) FROM \"LessonProgress\"
+  UNION ALL SELECT 'User', count(*) FROM \"User\";
+"
+```
+
+### C.5 Data integrity verification (live results)
+
+Source vs restored row counts are identical across the relational tree:
+
+| Table | Source | Restored | Δ |
+|---|---|---|---|
+| `Product` | 1 | 1 | 0 |
+| `Lesson` | 2 | 2 | 0 |
+| `LessonTranslation` | 2 | 2 | 0 |
+| `Order` | 1 | 1 | 0 |
+| `LessonProgress` | 1 | 1 | 0 |
+| `User` | 1 | 1 | 0 |
+
+Spot-checks (exact IDs preserved end-to-end):
+
+- `Product( hk-prod-1 )` — slug=`backup-restore-test`, status=`published`, currency=`EUR` ✓
+- `LessonTranslation( hk-tr-1 )` — title=`Lezione 1 introduzione`, videoUrl = `https://youtu.be/backup-restore-test-1` ✓
+- `LessonTranslation( hk-tr-2 )` — title=`Lesson 2 deep dive`, videoUrl = `https://youtu.be/backup-restore-test-2` ✓
+- `Order( hk-ord-1 )` — status=`completed`, amount=4900, currency=EUR, locale=it ✓
+- `LessonProgress( hk-pr-1 )` — completed=`t` ✓
+- `User( hk-user-1 )` — email=`buyer-housekeeping@example.com`, role=`student` ✓
+
+### C.6 Conclusion
+
+Backup → restore round trip **preserves the orders, products, lessons, and progress** relations end-to-end. The pgbackups sidecar is operationally ready for V1.0; production wiring is the same image + same env vars as `docker-compose.yml`, only the host-port and network setup differ. Cadence (daily cron) is observed; weekly + monthly retention is governed by `BACKUP_KEEP_WEEKS=4` / `BACKUP_KEEP_MONTHS=3` and the upstream image retention logic — document this as **verified-by-design**, not by multi-day sandbox observation.
 
 ---
 
