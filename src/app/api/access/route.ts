@@ -3,8 +3,7 @@ import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { apiErrorResponse } from "@/lib/errors";
 import { withRateLimit } from "@/lib/utils/rate-limit";
-import { findCompletedOrder } from "@/lib/access/find-completed-order";
-import { findCompletedOrderByOrderId } from "@/lib/access/find-completed-order-by-order-id";
+import { findCompletedOrder, findCompletedOrderByOrderId } from "@/lib/access";
 
 export const GET = withRateLimit(async function GET(request: NextRequest) {
   try {

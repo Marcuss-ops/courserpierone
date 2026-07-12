@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 // ─── Mock SSOT helper ───────────────────────────────────────
 const mockFindCompletedOrder = vi.fn();
 
-vi.mock("@/lib/access/find-completed-order", () => ({
+vi.mock("@/lib/access", () => ({
   findCompletedOrder: mockFindCompletedOrder,
 }));
 

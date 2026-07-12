@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db/prisma";
 import { apiErrorResponse } from "@/lib/errors";
 import { getCertificateTranslations } from "@/lib/i18n/certificate-translations";
 import { getUiTranslations, interpolate } from "@/lib/i18n/ui-translations";
-import { findCompletedOrder } from "@/lib/access/find-completed-order";
+import { findCompletedOrder } from "@/lib/access";
 
 export async function GET(
   request: NextRequest,

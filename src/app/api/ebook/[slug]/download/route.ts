@@ -4,7 +4,7 @@ import { getCourseConfig } from "@/lib/config/white-label-data";
 import { getServerUser } from "@/lib/supabase/get-user";
 import fs from "fs";
 import path from "path";
-import { findCompletedOrder } from "@/lib/access/find-completed-order";
+import { findCompletedOrder } from "@/lib/access";
 
 export async function GET(
   request: NextRequest,

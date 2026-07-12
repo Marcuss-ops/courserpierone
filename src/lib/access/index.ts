@@ -30,21 +30,20 @@
  *   - NO default export: TS preferisce esplicito named re-export per
  *     barrel SSOT.
  *
- * Migration policy (ADDITIVE — deliberate lighter scope):
- *   Le 6 routes esistenti (`access`, `certificate/[productId]`,
- *   `ebook/[slug]/download`, `videos/stream`, `progress`) continuano
- *   a importare dai direct paths (`@/lib/access/find-completed-order`,
- *   `@/lib/access/find-completed-order-by-order-id`) perché FUNZIONANO.
- *   Refactorare questi 6+ call-site in questo PR sarebbe scope-creep
- *   (nessun behavior change, solo churn di import). Il barrel è
- *   canonico per FUTURE writes — V4+ nuovi AccessGate routes useranno
- *   `import { ... } from "@/lib/access"` come standard convention.
+ * Migration policy (V3.4 CANONICAL — direct paths DEPRECATED):
+ *   All 6 AccessGate API routes (`access`, `certificate/[productId]`,
+ *   `ebook/[slug]/download`, `videos/stream`, `progress`, plus
+ *   `access` consuming both helpers) now import strictly via this
+ *   barrel. The barrel IS the SSOT for AccessGate module discovery.
  *
- *   Deprecation dei direct paths: TBD in V4+. Se V4+ decidiamo di
- *   adottare il barrel come standard unico, refactorare i 6+ consumer
- *   in un singolo PR con automazione (codemod / `replace-string`
- *   mass). Per V3.2 il barrel coesiste con i direct paths — entrambi
- *   validi.
+ *   The pre-V3.4 direct submodule imports
+ *   (`@/lib/access/find-completed-order`,
+ *   `@/lib/access/find-completed-order-by-order-id`) have been REMOVED
+ *   from all 5 production routes + their 5 test mocks (atomic migration).
+ *
+ *   V4+ deprecation enforcement: future ESLint config may add
+ *   `no-restricted-imports` rules blocking new direct-path
+ *   consumers (migration is locked, no new scatters allowed).
  *
  * Discoverability vs drift defense:
  *   - `npm run check:messaging` (regression-guard) NON è impattato:

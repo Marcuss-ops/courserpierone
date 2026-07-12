@@ -4,7 +4,7 @@ import { getServerUser } from "@/lib/supabase/get-user";
 import { progressSchema } from "@/lib/utils/validations";
 import { apiErrorResponse } from "@/lib/errors";
 import type { Prisma } from "@prisma/client";
-import { findCompletedOrder } from "@/lib/access/find-completed-order";
+import { findCompletedOrder } from "@/lib/access";
 
 export async function GET(request: NextRequest) {
   try {

@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { withRateLimit } from "@/lib/utils/rate-limit";
 import { apiErrorResponse } from "@/lib/errors";
-import { findCompletedOrder } from "@/lib/access/find-completed-order";
+import { findCompletedOrder } from "@/lib/access";
 
 /**
  * GET /api/videos/stream?lessonId=xxx&productSlug=xxx&lang=it

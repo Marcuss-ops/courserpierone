@@ -4,11 +4,8 @@ import type { NextRequest } from "next/server";
 const mockFindCompletedOrder = vi.fn();
 const mockFindCompletedOrderByOrderId = vi.fn();
 
-vi.mock("@/lib/access/find-completed-order", () => ({
+vi.mock("@/lib/access", () => ({
   findCompletedOrder: mockFindCompletedOrder,
-}));
-
-vi.mock("@/lib/access/find-completed-order-by-order-id", () => ({
   findCompletedOrderByOrderId: mockFindCompletedOrderByOrderId,
 }));
 
