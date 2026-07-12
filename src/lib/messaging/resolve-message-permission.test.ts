@@ -112,6 +112,32 @@ describe("resolveMessagingPermission", () => {
     expect(res.studentId).toBe(STUDENT_ID);
   });
 
+  it("denies student whose only order has status refunded (status filter is strict)", async () => {
+    // Verifica che la query Order filtri strettamente su status="completed".
+    // Un Order refunded (status="refunded") NON deve bastare per autorizzare
+    // la DM. Phase 2 del piano vuole che il refund blocchi retroattivamente
+    // l'accesso al canale creator↔cliente.
+    mockPrisma.product.findUnique.mockResolvedValue({
+      id: PRODUCT_ID,
+      creatorId: CREATOR_ID,
+    });
+    mockPrisma.order.findFirst.mockResolvedValue(null); // refunded → null
+    const res = await resolveMessagingPermission({
+      actorId: STUDENT_ID,
+      targetId: CREATOR_ID,
+      productId: PRODUCT_ID,
+    });
+    expect(res.allowed).toBe(false);
+    expect(res.reason).toBe(MessagingDenyReason.NoCompletedOrderForStudent);
+    // Assert esplicito del filtro status: la query non guarda
+    // "pending" o "refunded", solo "completed".
+    expect(mockPrisma.order.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ status: "completed" }),
+      })
+    );
+  });
+
   it("denies pair with neither participant being THIS product's creator", async () => {
     // Caso reale e non ridondante: actor è il creator di un ALTRO
     // prodotto (Product.creatorId = ACTOR_OTHER_CREATOR) e target è un

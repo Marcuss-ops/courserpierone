@@ -136,6 +136,13 @@ export async function resolveMessagingPermission(
   // prodotto legacy senza creatorId possa ancora avere studenti
   // che contattano l'admin principale (comportamento storico
   // precedente la Fase 1.2).
+  //
+  // Nota di audit (Phase 1.5 → Phase 4 hardening): ogni volta che
+  // entriamo nel path fallback logghiamo un warning persistente
+  // così che un operatore possa individuare prodotti legacy non
+  // ancora backfillati dallo script Fase 1.4 e migrare il DB.
+  // Il path è best-effort (non transazionale con l'updateMany
+  // successivo) ma sufficiente per V1.
   let creatorId: string | null = product.creatorId;
   if (!creatorId) {
     const fallback = await prisma.user.findFirst({
@@ -151,6 +158,12 @@ export async function resolveMessagingPermission(
       };
     }
     creatorId = fallback.id;
+    // Audit: prodotto legacy senza creatorId ha usato il fallback
+    // admin. Consigliato eseguire scripts/products/backfill-primary-creator.ts
+    // per migrare Product.creatorId prima di mettere in produzione V2.
+    console.warn(
+      `[messaging.fallback-creator] Product ${productId} has no creatorId — resolving to admin ${creatorId} (oldest). Run scripts/products/backfill-primary-creator.ts to migrate.`,
+    );
   }
 
   // ── 3. Identifica chi è creator e chi è student nel pair ─────
