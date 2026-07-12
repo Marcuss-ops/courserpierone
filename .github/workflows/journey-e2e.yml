@@ -150,18 +150,18 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Apply Prisma migrations to ephemeral Postgres
+        # Inherits job-level env: DATABASE_URL=postgresql://postgres:postgres@localhost:5432/courser_test.
+        # Do NOT add a step-level env here with secrets.DATABASE_URL — it would
+        # shadow the ephemeral URL and accidentally migrate the production DB.
         run: npx prisma migrate deploy
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/courser_test
-
-      - name: Build Next.js app (skips if already cached, but useful for catching prod-only bugs)
-        run: npm run build
 
       - name: Run E2E journey suite
+      # Playwright's webServer.command (see playwright.config.ts) runs
+      # `npm run build && npm run start` automatically when CI=1, so we do
+      # NOT add a separate `npm run build` step here (would double-build).
         run: npm run test:e2e -- --project=chromium --reporter=line,html
         env:
-          # Deterministic port for the app server (Playwright config picks this
-          # up via webServer.url).
+          # Deterministic port for the app server (webServer.url picks it up).
           PORT: "3000"
 
       - name: Upload Playwright HTML report on failure
