@@ -199,9 +199,12 @@ app.prepare().then(() => {
 
         // ── Fase 2.0 (wire): delega al resolver single-source-of-truth ──
         // Phase 2.0 V2: usa `getPartnerId` helper per DRY (la stessa
-        // logica è in src/app/api/messages/stream/route.ts al SSE
-        // auth wiring — estratta per garantire che entrambi i path
-        // concordino sull'identità del partner canonical pair).
+        // logica è in src/app/api/conversations/[id]/stream/route.ts
+        // al SSE auth wiring — estratta per garantire che entrambi i
+        // path concordino sull'identità del partner canonical pair).
+        // NB: src/app/api/messages/stream/route.ts era il legacy ed è
+        // stato rimosso in commit `chore(dm): delete legacy
+        // /api/messages routes + shim`.
         const partnerId = getPartnerId(conv, userId);
         const permission = await resolveMessagingPermission({
           actorId: userId,

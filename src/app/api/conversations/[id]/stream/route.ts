@@ -8,10 +8,11 @@ import { getPartnerId } from "@/lib/messaging/get-partner-id";
  * GET /api/conversations/[id]/stream?since=<ISO timestamp>
  *
  * Canonical SSE (Server-Sent Events) endpoint, Fase 4.x del piano DMs.
- * Coesiste con la versione legacy `/api/messages/stream?conversationId=…`
- * ma è la destinazione canonica per il ChatView dopo la migrazione UI:
- * tutto il path è keyato sulla Conversation.id (URL path segment), non
- * più su una coppia (otherUserId, productId) o su un query param.
+ * Status: L'UNICA route SSE per-conversation canonica. La versione legacy
+ * `/api/messages/stream?conversationId=…` è stata rimossa in commit
+ * `chore(dm): delete legacy /api/messages routes + shim`. Tutto il path
+ * è keyato sulla Conversation.id (URL path segment), non più su una
+ * coppia (otherUserId, productId) o su un query param.
  *
  * Differenze rispetto a `/api/messages/stream/route.ts`:
  *   - `conversationId` viene dall'`URL path params` (Next.js dynamic
@@ -36,11 +37,11 @@ import { getPartnerId } from "@/lib/messaging/get-partner-id";
  *   - `Cache-Control: no-cache, no-transform`, `Connection: keep-alive`,
  *     `X-Accel-Buffering: no` (Vercel/NGINX friendly).
  *
- * Coesistenza con legacy: questo endpoint NON sostituisce
- * `/api/messages/stream` (entrambi attivi in V1). I client non ancora
- * migrati continuano a funzionare. La cleanup del legacy è demandata
- * a un follow-up separato (post-migrazione completa del ChatView +
- * inbox SSE).
+ * Status: SOSTITUISCE `/api/messages/stream` (legacy rimosso — vedi commit
+ * titolo sopra). Originariamente coesistente durante la finestra di
+ * migrazione client; ora è l'unica route SSE canonica. Per i client che
+ * ancora aprono SSE col vecchio URL: il fallback graceful diventa un
+ * 404 esplicito, non un silent misroute.
  *
  * Rate limit: NON wrappato da withRateLimit qui. SSE è long-lived e
  * il tier "MESSAGES" (10/min) sarebbe troppo stretto per una

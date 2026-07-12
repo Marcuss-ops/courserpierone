@@ -24,9 +24,9 @@ import { createMessageAndNotify } from "@/lib/messaging/create-message";
  *   3. cursor-based query: `prisma.message.findMany` con limit+1 per
  *      determinare `hasMore`.
  *
- * Coexistenza con legacy /api/messages GET: questo endpoint NON sostituisce
- * quello, entrambi sono attivi in V1. Il nuovo è il candidato canonico
- * per le future pagine chat (Fase 5.x).
+ * Status: L'UNICA route messages GET canonica. Il legacy `/api/messages`
+ * GET è stato rimosso in commit `chore(dm): delete legacy /api/messages
+ * routes + shim`, consolidate su `/api/conversations`.
  *
  * Rate limit tier "AUTH" (lettura, OK alta freq). Non usare MESSAGES
  * (tier scrittura, troppo stretto per scroll/polling frequenti).
