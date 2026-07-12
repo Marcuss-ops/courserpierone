@@ -31,6 +31,9 @@ export async function cleanupTestUser(email: string) {
 
   await prisma.$transaction([
     prisma.analyticEvent.deleteMany({ where: { userId: user.id } }),
+    // LessonProgress may be present from journey E2E tests
+    prisma.lessonProgress.deleteMany({ where: { userId: user.id } }),
+    prisma.lessonNote.deleteMany({ where: { userId: user.id } }),
     // I deliveryId dei webhook non sono direttamente collegati agli ordini;
     // in un DB di test serializzato possiamo rimuovere tutti i record.
     prisma.processedWebhook.deleteMany(),
@@ -48,30 +51,76 @@ export async function seedTestProduct() {
     where: { slug: "test-course-e2e" },
   });
 
+  let product = existing;
+
   if (existing) {
     if (
       existing.stripePriceId !== stripePriceId ||
       existing.lemonVariantId !== lemonVariantId
     ) {
-      return prisma.product.update({
+      product = await prisma.product.update({
         where: { slug: "test-course-e2e" },
         data: { stripePriceId, lemonVariantId },
       });
     }
-    return existing;
+  } else {
+    product = await prisma.product.create({
+      data: {
+        slug: "test-course-e2e",
+        status: "published",
+        price: 4900,
+        currency: "eur",
+        defaultLanguage: "en",
+        stripePriceId,
+        lemonVariantId,
+      },
+    });
   }
 
-  return prisma.product.create({
-    data: {
-      slug: "test-course-e2e",
-      status: "published",
-      price: 4900,
-      currency: "eur",
-      defaultLanguage: "en",
-      stripePriceId,
-      lemonVariantId,
-    },
+  if (!product) {
+    throw new Error("seedTestProduct: failed to resolve product");
+  }
+
+  // Ensure the test product has at least one Lesson + LessonTranslation per locale.
+  // Without this, the journey E2E test cannot find a `a[href*="/curso/"]` link
+  // on the portal page. We use a known public YouTube video (Rick Astley) that
+  // exists in test mode without authentication.
+  const existingLessons = await prisma.lesson.count({
+    where: { productId: product.id },
   });
+
+  if (existingLessons === 0) {
+    await prisma.lesson.create({
+      data: {
+        productId: product.id,
+        position: 1,
+        translations: {
+          create: [
+            {
+              locale: "en-us",
+              title: "Lesson 1 — Welcome",
+              videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+              description: "E2E test lesson (English).",
+            },
+            {
+              locale: "it-it",
+              title: "Lezione 1 — Benvenuto",
+              videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+              description: "Lezione di test E2E (italiano).",
+            },
+            {
+              locale: "es-es",
+              title: "Lecci\u00f3n 1 — Bienvenida",
+              videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+              description: "Lecci\u00f3n de prueba E2E (espa\u00f1ol).",
+            },
+          ],
+        },
+      },
+    });
+  }
+
+  return product;
 }
 
 export async function getTestUser(email: string) {
