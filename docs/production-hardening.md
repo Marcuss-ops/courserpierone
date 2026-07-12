@@ -337,6 +337,8 @@ curl -s https://[prod]/api/health | jq
 
 > **See also:** for the live sandbox-verified backup + restore path (sidecar pgbackups `prodrigestivill/postgres-backup-local` end-to-end), see [`docs/production.md` Appendix C — Backup and Restore Run Log](./production.md#appendix-c--backup-and-restore-run-log). Covers adjacent backup infrastructure (cron retention, file layout, restore integrity) that complements the uptime check above.
 
+> **See also (production path):** for the Supabase PITR-to-ephemeral restore workflow — see [`docs/production.md` Appendix D — Supabase PITR Run Log](./production.md#appendix-d--supabase-pitr-run-log). Sandbox-simulated end-to-end `pg_dump -Fc` + `pg_restore` proves the \"restore to a known timestamp\" semantic for our schema (post-T1 mutations absent in restored target). Pairs with §C: §C is the sidecar path used when Supabase PITR is unavailable; §D is the canonical production PITR path with sandbox-verified integrity evidence (replaces the §C reference when on Supabase Pro).
+
 ---
 
 ### 8. Rollback procedure documented ✅

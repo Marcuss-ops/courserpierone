@@ -103,6 +103,8 @@ docker compose logs pgbackups | tail -10
 
 > **See also:** for the self-hosted / sidecar backup alternative (Docker pgbackups `prodrigestivill/postgres-backup-local` running `@daily` cron, `./backups/{daily,weekly,monthly,last}/` layout, `zcat | psql` restore verified end-to-end with 6/6 table counts matching), see [`docs/production.md` Appendix C — Backup and Restore Run Log](./production.md#appendix-c--backup-and-restore-run-log). Use it when Supabase PITR is unavailable OR as an at-deploy-time sanity check before relying on this ATC.
 
+> **See also (primary production path):** for Supabase PITR-to-ephemeral — the canonical V1.0 restore mechanism when on Supabase Pro — see [`docs/production.md` Appendix D — Supabase PITR Run Log](./production.md#appendix-d--supabase-pitr-run-log). Proves the \"restore to a known timestamp\" semantic for our schema via sandbox-simulated `pg_dump -Fc` + `pg_restore` (6/6 row counts preserved end-to-end; post-T1 mutations absent in restored target). Pairing: §C validates the sidecar fallback path; §D validates the Supabase PITR path. Together the two references cover both ATC-3 verify paths.
+
 ### ATC-4 Cross-Browser (criterion 7)
 **Today this is BLOCKED by playwright.config.ts missing `firefox` + `webkit` projects.**
 
