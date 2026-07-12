@@ -29,6 +29,7 @@ npx tsx scripts/translate/argos-bridge.ts it en fr de es
 # V1 readiness audit (read-only, no mutations)
 npx tsx scripts/audit-v1-readiness.ts
 PRIMARY_DATABASE_URL='postgres://...' npx tsx scripts/audit-v1-readiness.ts
+PRIMARY_DATABASE_URL='postgres://...' npx tsx scripts/audit-v1-readiness.ts --production
 ```
 
 ## Variabili d'ambiente
@@ -38,13 +39,29 @@ Per traduzioni AI: `OPENAI_API_KEY` (OpenAI) o `pip install argostranslate` (loc
 
 ## Audit
 
-Lo script `audit-v1-readiness.ts` (read-only, no mutations) misura **i 3 counter che gating il cleanup DB di V1**:
+Lo script `scripts/audit-v1-readiness.ts` (read-only, no mutations) misura **i 3 counter che bloccano / hanno bloccato i cleanup DB di V1**:
 
-1. ~~**`Product.creatorId IS NULL`**~~ → post-fase 4 hardening (`20260712210000_creator_id_required_restrict`): `Product.creatorId` è ora REQUIRED + FK Restrict a livello DB. La query `count({ where: { creatorId: null } })` non è più legalmente esprimibile in TypeScript. L'invariant vive nel constraint di schema. Recovery legacy pre-migration: `scripts/products/backfill-primary-creator.ts` (versione mutante disponibile via git log pre-fase 4).
-2. **`Order.paymentProvider = 'stripe' AND status IN ('pending','completed')`** → ordini Stripe ancora attivi: devono essere drained (refund o migrazione a Lemon Squeezy) prima di collassare il dual-provider.
-3. **`Account + Session + VerificationToken` row counts** → residui del vecchio NextAuth: una purge mirata dovrebbe precedere `DROP TABLE` di quei tre modelli Prisma (Phase di cleanup già pianificata).
+1. **`Product.creatorId IS NULL`** → contatore che gating la migration
+   `20260712210000_creator_id_required_restrict`. Deve essere `0` prima di
+   applicare il NOT NULL + Restrict FK sul creator. Recovery legacy pre-migration:
+   `scripts/products/backfill-primary-creator.ts`.
 
-Oltre ai 3 counter emette sanity baselines (`Total products`, `Total orders`, `Total users`) e un gate decision (`GREEN` se tutti zero, `YELLOW/RED` con lista blockers altrimenti). Output finale include riga JSON machine-readable per pipeline.
+2. **`Order.paymentProvider = 'stripe' AND status IN ('pending','completed')`**
+   → ordini Stripe ancora attivi: devono essere drained (refund o migrazione
+   a Lemon Squeezy) prima di collassare il dual-provider.
+
+3. **`Account + Session + VerificationToken` row counts** → residui del vecchio
+   NextAuth: una purge mirata dovrebbe precedere `DROP TABLE` di quei tre
+   modelli Prisma (migration `20260712220000_drop_nextauth_models`).
+   Implementato via raw SQL (`prisma.$queryRaw`) per forward-compat: dopo
+   che la migration è stata applicata, i modelli spariscono dal typed Prisma
+   client e lo script restituisce `-1` (sentinel = tabella assente) per ogni
+   tabella, che è un segnale GREEN (tabella post-cleanup = ✓).
+
+Oltre ai 3 gate counter, emette sanity baselines (`Total products`,
+`Total orders`, `Total users`) e un gate decision (`GREEN` se tutti i
+blocker sono zero o post-cleanup, `YELLOW/RED` con lista blockers altrimenti).
+Output finale include riga JSON machine-readable per pipeline.
 
 ### Usage
 
@@ -63,9 +80,28 @@ PRIMARY_DATABASE_URL='postgres://user:pwd@host:5432/db' \
   npx tsx scripts/audit-v1-readiness.ts --production
 ```
 
+### Output format
+
+Lo script emette in ordine:
+
+1. **Header** — source env, timestamp, mode (production vs dev).
+2. **V1 BLOCKER COUNTERS** — i 3 gate con count, descrizione del gate, recovery script.
+3. **SANITY BASELINES** — totali (non sono blockers, solo sanity check).
+4. **DBS-EMPTY SANITY (production only)** — warning se totals sono tutti zero
+   in production (possibile misconfig del DATABASE_URL).
+5. **GATE DECISION** — GREEN se tutti i blocker sono zero, altrimenti YELLOW/RED
+   con l elenco delle cause.
+6. **JSON machine-readable** — una riga JSON con tutti i counter, i baselines
+   e i blockers (per pipeline CI/CD).
+
 ### Safety
 
-- **Mai `prisma.X.create/update/delete`** nello script — solo `.count()`.
-- **Mai stampare la URL** in chiaro — solo il label `PRIMARY_DATABASE_URL` / `DATABASE_URL`.
+- **Mai `prisma.X.create/update/delete`** nello script — solo `.count()` + raw
+  `SELECT COUNT(*)` per le 3 tabelle NextAuth residual (forward-compat).
+- **Mai stampare la URL** in chiaro — solo il label `PRIMARY_DATABASE_URL` /
+  `DATABASE_URL`.
 - **Mai committare secrets.** `.env` e `.env.local` sono in `.gitignore`.
+- **Mai accettare argomenti dinamici** in `safeTableCount` — solo i 3 nomi
+  tabella NextAuth sono allowlisted (previene SQL-injection nei raw query).
 - **Exit codes**: 0 (success), 1 (runtime error), 2 (missing env).
+- **Sempre `prisma.$disconnect()`** anche sull'error path.
