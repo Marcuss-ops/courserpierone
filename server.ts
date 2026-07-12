@@ -4,8 +4,18 @@ import next from "next";
 import { WebSocketServer, WebSocket } from "ws";
 import { createHmac } from "crypto";
 import { prisma } from "./src/lib/db/prisma";
-import { messageBroker, NEW_MESSAGE, type NewMessageEvent } from "./src/lib/ws/broker";
-import { deliverNewMessage, deliverInboxUpdate } from "./src/lib/ws/broadcast";
+import {
+  messageBroker,
+  NEW_MESSAGE,
+  THREAD_DELETED,
+  type NewMessageEvent,
+  type ThreadDeletedEvent,
+} from "./src/lib/ws/broker";
+import {
+  deliverNewMessage,
+  deliverInboxUpdate,
+  deliverThreadDeleted,
+} from "./src/lib/ws/broadcast";
 import { resolveMessagingPermission, MessagingDenyReason } from "./src/lib/messaging/resolve-message-permission";
 import { getPartnerId } from "./src/lib/messaging/get-partner-id";
 
@@ -377,6 +387,17 @@ app.prepare().then(() => {
     // 2) Inbox fan-out (Fase 4.3) → WS subscribed all'inbox del PARTNER
     //    (NON del sender — skip self implicito perché receiverId !== senderId).
     deliverInboxUpdate(inboxClients, event.receiverId, event);
+  });
+
+  // Phase 2.3: bridge per la cancellazione di una Conversation via
+  // DELETE /api/conversations/[id]. Entrambi i partecipanti storici
+  // (userOneId + userTwoId) devono ricevere immediatamente il sealed
+  // event sulla loro vista chat E inbox subscription, così la UI
+  // client può chiudere il thread in tempo reale senza refresh.
+  // Vedi JSDoc di deliverThreadDeleted per il rationale del "no
+  // self-skip" (entrambi i partecipanti, deleter incluso, ricevono).
+  messageBroker.on(THREAD_DELETED, (event: ThreadDeletedEvent) => {
+    deliverThreadDeleted(subscribedConversations, inboxClients, event);
   });
 
   server.listen(port, () => {

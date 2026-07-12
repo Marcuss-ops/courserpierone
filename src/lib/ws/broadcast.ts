@@ -1,4 +1,4 @@
-import type { NewMessageEvent } from "./broker";
+import type { NewMessageEvent, ThreadDeletedEvent } from "./broker";
 
 /**
  * Minimal interface required by the broadcast functions. Lets us unit-test
@@ -145,6 +145,105 @@ export function deliverInboxUpdate(
         inboxClients.delete(receiverId);
       }
       closed++;
+    }
+  }
+
+  return { delivered, closed };
+}
+
+/**
+ * Phase 2.3: deliver a `threadDeleted` event to BOTH participants.
+ *
+ * La firma differisce dalle altre broadcast functions perché qui NON c'è
+ * un singolo destinatario immediato: dopo una DELETE /api/conversations/[id]
+ * che ha prodotto CASCADE-delete della Conversation + Messages, il partner
+ * (se online E subscribed via `?scope=inbox` o `?conversation=<id>`) deve
+ * sapere immediatamente di non avere più quel thread nel suo inbox /
+ * vista chat. Anche il deleter stesso riceve l'evento: utile se era
+ * collegato via SSE/WS alla Conversation e vuole chiudere la UI lato
+ * client in modo atomico.
+ *
+ * Fan-out su TRE cache:
+ *   1. `subscribedConversations.get(conversationId)` — entrambi i WS
+ *      subscribed a quella conversation chat. Nessuno skip self: la
+ *      DELETE è una conferma "definitiva", entrambi i WS devono
+ *      chiudere la UI di quel thread.
+ *   2. `inboxClients.get(userOneId)` — la inbox subscription
+ *      dell'utente uno (se partner era qui subscribed, gli arriva
+ *      `type:"threadDeleted"` per rimuovere la riga inbox).
+ *   3. `inboxClients.get(userTwoId)` — speculare.
+ *
+ * Contract (coperto dai unit test Fase 2.3):
+ *   - Idempotente per `conversationId + (userOneId, userTwoId)`.
+ *   - Se la Conversation era già stata cancellata da una DELETE
+ *     precedente, i subscribed WS potrebbero già essere stati
+ *     auto-puliti dal bridge WS (`/ws upgrade` non esiste più →
+ *     `subscribedConversations.delete(convId)`). In quel caso
+ *     `delivered = 0` ed è OK.
+ *   - Memory-safe: stessi pattern di cleanup di `deliverNewMessage`
+ *     (snapshot, readyState check, throw cleanup, delete-if-empty).
+ *
+ * Pura: stesso principio di deliverNewMessage/deliverInboxUpdate.
+ */
+export function deliverThreadDeleted(
+  subscribedConversations: SubscribedConversationsCache,
+  inboxClients: InboxClientsCache,
+  event: ThreadDeletedEvent,
+): BroadcastResult {
+  const { conversationId, userOneId, userTwoId } = event;
+
+  const payload = JSON.stringify({
+    type: "threadDeleted",
+    conversationId,
+  });
+
+  let delivered = 0;
+  let closed = 0;
+
+  // ── 1. Fan-out alla vista chat della conversation cancellata ──
+  const convSockets = subscribedConversations.get(conversationId);
+  if (convSockets) {
+    for (const ws of [...convSockets]) {
+      if (ws.readyState !== OPEN) continue;
+      try {
+        ws.send(payload);
+        delivered++;
+      } catch {
+        convSockets.delete(ws);
+        if (convSockets.size === 0) {
+          subscribedConversations.delete(conversationId);
+        }
+        closed++;
+      }
+    }
+  }
+
+  // ── 2. Fan-out alla inbox subscription di userOne + userTwo ──
+  // Spec: entrambi i partecipanti devono sapere che la Conversation è
+  // cancellata dal loro inbox, indipendentemente da chi ha iniziato
+  // l'azione. Vedi JSDoc sopra per il rationale del "no self-skip".
+  //
+  // Cleanup pattern matching `deliverInboxUpdate`: non-open WS sono
+  // semplicemente skippati (lasciati nel Set); la rimozione effettiva
+  // avviene solo quando `ws.send` throws (driven dal connection state
+  // runtime, non da una speculazione su readyState). Vedi
+  // `deliverInboxUpdate` per il rationale (consistente con i WS readyState
+  // semantics di Node ws lib).
+  for (const userId of [userOneId, userTwoId]) {
+    const inboxSockets = inboxClients.get(userId);
+    if (!inboxSockets) continue;
+    for (const ws of [...inboxSockets]) {
+      if (ws.readyState !== OPEN) continue;
+      try {
+        ws.send(payload);
+        delivered++;
+      } catch {
+        inboxSockets.delete(ws);
+        if (inboxSockets.size === 0) {
+          inboxClients.delete(userId);
+        }
+        closed++;
+      }
     }
   }
 

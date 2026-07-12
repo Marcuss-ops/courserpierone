@@ -46,6 +46,33 @@ export interface NewMessageEvent {
 }
 
 /**
+ * Payload emitted when a conversation is hard-deleted via DELETE
+ * `/api/conversations/[id]` (Phase 2.3).
+ *
+ * Contratto:
+ *   - `conversationId` = ID della Conversation appena cancellata.
+ *   - `userOneId` / `userTwoId` = i due partecipanti storici della
+ *     Conversation. Servono al bridge WS per fare fan-out a ENTRAMBI
+ *     i canali inbox subscription (non auto-skip: anche il deleter deve
+ *     ricevere il `threadDeleted` per chiudere la propria UI se sta
+ *     guardando il thread via SSE/WS). Per ragioni di membership
+ *     storica continuiamo a includerli qui anche se la Conversation
+ *     non esiste più — sono i "precedenti partecipanti noti al server".
+ *
+ * Policy di re-OPEN: dopo hard-delete, la successiva POST
+ * `/api/conversations` (Fase 2.2) per la stessa coppia+prodotto crea
+ * una NUOVA row (l'unique `@@unique([userOneId, userTwoId, productId])`
+ * non matcha row assenti). Questo è un side-channel: il WS event qui
+ * aiuta il client a ripulire lo stato locale, ma il "resurrection"
+ * è puramente DB-driven tramite upsert.
+ */
+export interface ThreadDeletedEvent {
+  conversationId: string;
+  userOneId: string;
+  userTwoId: string;
+}
+
+/**
  * Singleton EventEmitter shared between the REST API (POST /api/messages)
  * and the WebSocket server (server.ts). Allows real-time message broadcasting
  * without polling the database.
@@ -54,3 +81,20 @@ export const messageBroker = new EventEmitter();
 
 /** Event name for new messages. */
 export const NEW_MESSAGE = "newMessage";
+
+/**
+ * Event name for thread deletion (Phase 2.3).
+ *
+ * Emesso da `DELETE /api/conversations/[id]` dopo che la row Conversation
+ * è stata eliminata (CASCADE: anche tutti i Message associati). Il bridge
+ * in `server.ts` lo cattura ed esegue fan-out a:
+ *   1. WS subscribed a `subscribedConversations[conversationId]`
+ *      (la vista chat attiva) — entrambi i partecipanti.
+ *   2. WS subscribed a `inboxClients[userOneId]` UNION
+ *      `inboxClients[userTwoId]` (la vista inbox dell'altro partecipante).
+ *
+ * NB: NON chiamiamo `authorizeDmRequest` sul DELETE — l'utente che chiude
+ * è per definizione membro della Conversation, quindi la membership check
+ * è sufficiente. Vedi JSDoc di `src/app/api/conversations/[id]/route.ts`.
+ */
+export const THREAD_DELETED = "threadDeleted";
