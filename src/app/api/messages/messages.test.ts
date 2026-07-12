@@ -26,11 +26,16 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { NextRequest } from "next/server";
 
 // ─── Mocks ────────────────────────────────────────────────────
+// Fase 2.2: /api/messages/route.ts usa `findOrCreateConversation` da
+// `@/lib/messaging/find-or-create-conversation`, che internamente usa
+// `prisma.conversation.upsert(...)` invece di findUnique + create.
+// I mock sotto riflettono la nuova path: upsert al posto di findUnique/create.
 const mockPrisma = {
   conversation: {
-    findUnique: vi.fn(),
+    // GET route: findConversation usa findFirst (la query OR per coppia-prodotto)
     findFirst: vi.fn(),
-    create: vi.fn(),
+    // POST route: findOrCreateConversation usa upsert (race-safe)
+    upsert: vi.fn(),
   },
   message: {
     findMany: vi.fn(),
@@ -462,12 +467,11 @@ describe("POST /api/messages", () => {
     expect(body.reason).toBe("product_not_found");
   });
 
-  it("creates a new conversation if none exists (with productId)", async () => {
+  it("creates a new conversation if none exists (with productId, upsert path)", async () => {
     mockAuth({ id: "user1", email: "a@test.com" });
     mockPrisma.user.findUnique.mockResolvedValue({ id: OTHER_USER_ID, email: "b@test.com", lastSeenAt: new Date() });
-    // No existing conversation
-    mockPrisma.conversation.findUnique.mockResolvedValue(null);
-    mockPrisma.conversation.create.mockResolvedValue({ id: "newConv", productId: PRODUCT_ID });
+    // Fase 2.2: upsert restituisce il Conversation (create o no-op update).
+    mockPrisma.conversation.upsert.mockResolvedValue({ id: "newConv", productId: PRODUCT_ID });
     mockPrisma.message.create.mockResolvedValue({
       id: "msg1",
       conversationId: "newConv",
@@ -488,19 +492,27 @@ describe("POST /api/messages", () => {
     );
 
     expect(res.status).toBe(201);
-    expect(mockPrisma.conversation.create).toHaveBeenCalledWith(
+    // Fase 2.2: l'helper usa upsert con chiave composita canonica.
+    expect(mockPrisma.conversation.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({
-          productId: PRODUCT_ID,
-        }),
+        where: {
+          userOneId_userTwoId_productId: {
+            userOneId: "user1",
+            userTwoId: OTHER_USER_ID,
+            productId: PRODUCT_ID,
+          },
+        },
+        create: expect.objectContaining({ productId: PRODUCT_ID }),
       })
     );
+    // Sanity: i vecchi metodi findUnique + create NON devono più essere chiamati.
+    expect(mockPrisma.conversation.upsert).toHaveBeenCalledTimes(1);
   });
 
-  it("uses composite key [userOneId, userTwoId, productId] for findUnique", async () => {
+  it("uses composite key [userOneId, userTwoId, productId] for upsert", async () => {
     mockAuth({ id: "user1", email: "a@test.com" });
     mockPrisma.user.findUnique.mockResolvedValue({ id: OTHER_USER_ID, email: "b@test.com", lastSeenAt: new Date() });
-    mockPrisma.conversation.findUnique.mockResolvedValue({ id: "conv1" });
+    mockPrisma.conversation.upsert.mockResolvedValue({ id: "conv1" });
     mockPrisma.message.create.mockResolvedValue({
       id: "msg1",
       conversationId: "conv1",
@@ -520,7 +532,7 @@ describe("POST /api/messages", () => {
       })
     );
 
-    expect(mockPrisma.conversation.findUnique).toHaveBeenCalledWith({
+    expect(mockPrisma.conversation.upsert).toHaveBeenCalledWith({
       where: {
         userOneId_userTwoId_productId: {
           userOneId: "user1",
@@ -528,10 +540,16 @@ describe("POST /api/messages", () => {
           productId: PRODUCT_ID,
         },
       },
+      create: expect.objectContaining({
+        userOneId: "user1",
+        userTwoId: OTHER_USER_ID,
+        productId: PRODUCT_ID,
+      }),
+      update: {},
     });
   });
 
-  it("finds conversation regardless of which user is userOneId vs userTwoId (deterministic sort)", async () => {
+  it("upserts conversation regardless of which user is userOneId vs userTwoId (deterministic sort)", async () => {
     // Phase 1.3: ID ordinamento lessicografico (minId, maxId) per garantire
     // che la chiave composita funzioni indipendentemente dall'ordine di
     // passaggio dei due userId.
@@ -543,9 +561,13 @@ describe("POST /api/messages", () => {
     // o User cambia ID gen a UUID v4 random, perché l'ordinamento
     // lessicografico non sarebbe più un proxy dell'ordine cronologico.
     // Mantenere CUID è quindi parte del contratto di Fase 1.3.
+    //
+    // Fase 2.2: la verifica passa da `findUnique` a `upsert` (helper
+    // condiviso in lib/messaging). Il sort è lo stesso, ma il path è
+    // `INSERT ... ON CONFLICT DO UPDATE` invece di findUnique + create.
     mockAuth({ id: "user1", email: "a@test.com" });
     mockPrisma.user.findUnique.mockResolvedValue({ id: OTHER_USER_ID, email: "b@test.com", lastSeenAt: new Date() });
-    mockPrisma.conversation.findUnique.mockResolvedValue({ id: "conv1" });
+    mockPrisma.conversation.upsert.mockResolvedValue({ id: "conv1" });
     mockPrisma.message.create.mockResolvedValue({
       id: "msg1",
       conversationId: "conv1",
@@ -566,7 +588,7 @@ describe("POST /api/messages", () => {
       })
     );
 
-    expect(mockPrisma.conversation.findUnique).toHaveBeenCalledWith({
+    expect(mockPrisma.conversation.upsert).toHaveBeenCalledWith({
       where: {
         userOneId_userTwoId_productId: {
           userOneId: "user1",
@@ -574,12 +596,14 @@ describe("POST /api/messages", () => {
           productId: PRODUCT_ID,
         },
       },
+      create: expect.any(Object),
+      update: {},
     });
 
     vi.clearAllMocks();
     mockAuth({ id: "z_high_id", email: "z@test.com" }); // z* > user2 → sort inverte
     mockPrisma.user.findUnique.mockResolvedValue({ id: OTHER_USER_ID, email: "b@test.com", lastSeenAt: new Date() });
-    mockPrisma.conversation.findUnique.mockResolvedValue({ id: "conv1" });
+    mockPrisma.conversation.upsert.mockResolvedValue({ id: "conv1" });
     mockPrisma.message.create.mockResolvedValue({
       id: "msg2",
       conversationId: "conv1",
@@ -600,7 +624,7 @@ describe("POST /api/messages", () => {
       })
     );
 
-    expect(mockPrisma.conversation.findUnique).toHaveBeenCalledWith({
+    expect(mockPrisma.conversation.upsert).toHaveBeenCalledWith({
       where: {
         userOneId_userTwoId_productId: {
           userOneId: OTHER_USER_ID, // min(user2, z*)
@@ -608,13 +632,15 @@ describe("POST /api/messages", () => {
           productId: PRODUCT_ID,
         },
       },
+      create: expect.any(Object),
+      update: {},
     });
   });
 
   it("creates message and returns it with sender info", async () => {
     mockAuth({ id: "user1", email: "a@test.com" });
     mockPrisma.user.findUnique.mockResolvedValue({ id: OTHER_USER_ID, email: "b@test.com", lastSeenAt: new Date() });
-    mockPrisma.conversation.findUnique.mockResolvedValue({ id: "conv1", productId: PRODUCT_ID });
+    mockPrisma.conversation.upsert.mockResolvedValue({ id: "conv1", productId: PRODUCT_ID });
 
     const createdMsg = {
       id: "msg1",
@@ -650,7 +676,7 @@ describe("POST /api/messages", () => {
       email: "b@test.com",
       lastSeenAt: new Date(), // just now → online
     });
-    mockPrisma.conversation.findUnique.mockResolvedValue({ id: "conv1" });
+    mockPrisma.conversation.upsert.mockResolvedValue({ id: "conv1" });
     mockPrisma.message.create.mockResolvedValue({
       id: "msg1",
       conversationId: "conv1",
@@ -680,7 +706,7 @@ describe("POST /api/messages", () => {
       email: "b@test.com",
       lastSeenAt: new Date(Date.now() - 10 * 60 * 1000), // 10 min ago → offline
     });
-    mockPrisma.conversation.findUnique.mockResolvedValue({ id: "conv1" });
+    mockPrisma.conversation.upsert.mockResolvedValue({ id: "conv1" });
     mockPrisma.message.create.mockResolvedValue({
       id: "msg1",
       conversationId: "conv1",
@@ -712,7 +738,7 @@ describe("POST /api/messages", () => {
       email: "b@test.com",
       lastSeenAt: new Date(Date.now() - 10 * 60 * 1000), // offline
     });
-    mockPrisma.conversation.findUnique.mockResolvedValue({ id: "conv1" });
+    mockPrisma.conversation.upsert.mockResolvedValue({ id: "conv1" });
     mockPrisma.message.create.mockResolvedValue({
       id: "msg1",
       conversationId: "conv1",
@@ -744,7 +770,7 @@ describe("POST /api/messages", () => {
       email: null,
       lastSeenAt: new Date(Date.now() - 10 * 60 * 1000),
     });
-    mockPrisma.conversation.findUnique.mockResolvedValue({ id: "conv1" });
+    mockPrisma.conversation.upsert.mockResolvedValue({ id: "conv1" });
     mockPrisma.message.create.mockResolvedValue({
       id: "msg1",
       conversationId: "conv1",
@@ -799,7 +825,7 @@ describe("POST /api/messages", () => {
     // Verifica che la route NON abbia proseguito con user.findUnique,
     // conversation.findUnique, message.create, né emesso NEW_MESSAGE.
     expect(mockPrisma.user.findUnique).not.toHaveBeenCalled();
-    expect(mockPrisma.conversation.findUnique).not.toHaveBeenCalled();
+    expect(mockPrisma.conversation.upsert).not.toHaveBeenCalled();
     expect(mockPrisma.message.create).not.toHaveBeenCalled();
   });
 

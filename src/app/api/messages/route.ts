@@ -7,67 +7,17 @@ import { apiErrorResponse } from "@/lib/errors";
 import { messageBroker, NEW_MESSAGE } from "@/lib/ws/broker";
 import { sendDmNotificationEmail } from "@/lib/services/email";
 import { authorizeDmRequest } from "@/lib/messaging/api-authorize";
+import {
+  findConversation,
+  findOrCreateConversation,
+} from "@/lib/messaging/find-or-create-conversation";
 
-/**
- * Trova o crea una conversazione tra due utenti LEGATA A UN PRODOTTO.
- * L'ordinamento degli ID è deterministico (sort lessicografico) per garantire
- * che l'unique constraint su [userOneId, userTwoId, productId] funzioni
- * correttamente a prescindere dall'ordine con cui vengono passati i due userId.
- *
- * Phase 1.3 del piano DMs: productId è OBBLIGATORIO.
- * Phase 1.6: il chiamante deve già aver passato il resolver; qui entriamo
- * solo con `allowed: true` quindi è OK creare la Conversation.
- */
-async function findOrCreateConversation(
-  userId: string,
-  otherUserId: string,
-  productId: string,
-) {
-  const [minId, maxId] = [userId, otherUserId].sort();
-
-  const existing = await prisma.conversation.findUnique({
-    where: {
-      userOneId_userTwoId_productId: {
-        userOneId: minId,
-        userTwoId: maxId,
-        productId,
-      },
-    },
-  });
-
-  if (existing) return existing;
-
-  return prisma.conversation.create({
-    data: {
-      userOneId: minId,
-      userTwoId: maxId,
-      productId,
-    },
-  });
-}
-
-/**
- * Cerca una conversazione esistente tra due utenti scope a un prodotto.
- * L'ordine (userOneId, userTwoId) può essere either way — risolviamo
- * con un OR pair.
- */
-async function findConversation(
-  userId: string,
-  otherUserId: string,
-  productId: string,
-) {
-  const [minId, maxId] = [userId, otherUserId].sort();
-
-  return prisma.conversation.findFirst({
-    where: {
-      productId,
-      OR: [
-        { userOneId: minId, userTwoId: maxId },
-        { userOneId: maxId, userTwoId: minId },
-      ],
-    },
-  });
-}
+// NB: l'helper condiviso `findConversation` / `findOrCreateConversation` è in
+// `@/lib/messaging/find-or-create-conversation` (Fase 2.2). Usa `upsert` per
+// race-safety (Postgres `INSERT ... ON CONFLICT DO UPDATE`) invece della
+// vecchia sequenza findUnique + create, che aveva una race condition nota.
+// Questo file contiene solo la logica di business (POST/GET/PATCH sui
+// messaggi); l'helper di persistenza è isolato e testato separatamente.
 
 /**
  * GET /api/messages?with=<userId>&productId=<productId>&cursor=<id>&limit=50

@@ -20,6 +20,7 @@ import type { NextRequest } from "next/server";
 const mockPrisma = {
   conversation: {
     findMany: vi.fn(),
+    upsert: vi.fn(),
   },
   message: {
     groupBy: vi.fn(),
@@ -37,6 +38,33 @@ vi.mock("@/lib/utils/rate-limit", () => ({
   withRateLimit: (fn: Function) => fn,
 }));
 
+// ─── Phase 2.2: mock authorizeDmRequest ─────────────────────────
+// La route chiama authorizeDmRequest(...). Per default allowed=true
+// (i test storici del GET continuano a passare). I test del deny
+// usano mockAuthorizeDmRequest.mockResolvedValueOnce(...).
+const { mockAuthorizeDmRequest } = vi.hoisted(() => ({
+  mockAuthorizeDmRequest: vi.fn(),
+}));
+vi.mock("@/lib/messaging/api-authorize", () => ({
+  authorizeDmRequest: mockAuthorizeDmRequest,
+}));
+function setDefaultAuthorizeAllowed() {
+  mockAuthorizeDmRequest.mockReset();
+  mockAuthorizeDmRequest.mockResolvedValue({
+    allowed: true,
+    permission: {
+      allowed: true,
+      creatorId: "creator-1",
+      studentId: SELF,
+      productId: PRODUCT_A,
+    },
+  });
+}
+// NB: la chiamata module-level è rimossa: SELF/PRODUCT_A sono dichiarati
+// più sotto (TDZ). La default mock-setup è dentro i `beforeEach` delle
+// describe che ne hanno bisogno (POST). Il GET describe non consulta
+// authorizeDmRequest, quindi non ne ha bisogno.
+
 // ─── Helpers ──────────────────────────────────────────────────
 const mockAuth = (dbUser: { id: string; email: string; name?: string | null }) => {
   mockGetServerUser.mockResolvedValue({
@@ -51,8 +79,15 @@ const OTHER_B = "other-b";
 const PRODUCT_A = "prod-A";
 const PRODUCT_B = "prod-B";
 
-const createRequest = (url: string): NextRequest =>
-  new Request(`http://localhost${url}`) as unknown as NextRequest;
+const createRequest = (url: string, init?: RequestInit): NextRequest =>
+  new Request(`http://localhost${url}`, init) as unknown as NextRequest;
+
+const postJson = (url: string, body: unknown): NextRequest =>
+  createRequest(url, {
+    method: "POST",
+    body: JSON.stringify(body),
+    headers: { "Content-Type": "application/json" },
+  });
 
 // ─── Tests ────────────────────────────────────────────────────
 describe("GET /api/conversations", () => {
@@ -293,5 +328,275 @@ describe("GET /api/conversations", () => {
     expect(body.conversations).toHaveLength(1);
     expect(body.conversations[0].lastMessage).toBeNull();
     expect(body.conversations[0].unreadCount).toBe(0);
+  });
+});
+
+// ─── POST /api/conversations tests (Phase 2.2) ─────────────────
+// Endpoint idempotente: trova o crea la Conversation per la coppia
+// (me, targetUserId) su `productId`. Il check autorizzativo passa
+// dal resolver centrale (authorizeDmRequest).
+describe("POST /api/conversations", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    setDefaultAuthorizeAllowed();
+    // default upsert: ritorna una conversation fittizia
+    mockPrisma.conversation.upsert.mockResolvedValue({ id: "newConvId" });
+  });
+
+  it("returns 401 when not authenticated", async () => {
+    mockGetServerUser.mockResolvedValue({ user: null, dbUser: null });
+    const { POST } = await import("./route");
+    const res = await POST(
+      postJson("/api/conversations", { productId: PRODUCT_A, targetUserId: OTHER_A }),
+    );
+    expect(res.status).toBe(401);
+  });
+
+  it("returns 400 when productId is missing", async () => {
+    mockAuth({ id: SELF, email: "self@test.com" });
+    const { POST } = await import("./route");
+    const res = await POST(
+      postJson("/api/conversations", { targetUserId: OTHER_A }),
+    );
+    const body = await res.json();
+    expect(res.status).toBe(400);
+    expect(body.error).toContain("productId");
+  });
+
+  it("returns 400 when targetUserId is missing", async () => {
+    mockAuth({ id: SELF, email: "self@test.com" });
+    const { POST } = await import("./route");
+    const res = await POST(
+      postJson("/api/conversations", { productId: PRODUCT_A }),
+    );
+    const body = await res.json();
+    expect(res.status).toBe(400);
+    expect(body.error).toContain("targetUserId");
+  });
+
+  it("returns 400 when targetUserId equals the caller (inline self-check)", async () => {
+    // Defense-in-depth: il inline self-check cattura il caso prima del DB.
+    // Il resolver farebbe lo stesso con status 400, ma qui risparmiamo
+    // il round-trip al resolver per il caso più ovvio.
+    mockAuth({ id: SELF, email: "self@test.com" });
+    const { POST } = await import("./route");
+    const res = await POST(
+      postJson("/api/conversations", { productId: PRODUCT_A, targetUserId: SELF }),
+    );
+    expect(res.status).toBe(400);
+    // L'inline check NON consulta il resolver né il DB:
+    expect(mockAuthorizeDmRequest).not.toHaveBeenCalled();
+    expect(mockPrisma.conversation.upsert).not.toHaveBeenCalled();
+  });
+
+  it("returns 404 when resolver denies (product_not_found)", async () => {
+    mockAuth({ id: SELF, email: "self@test.com" });
+    const { NextResponse } = await import("next/server");
+    mockAuthorizeDmRequest.mockResolvedValueOnce({
+      allowed: false,
+      permission: { allowed: false, productId: PRODUCT_A, reason: "product_not_found" },
+      response: NextResponse.json(
+        { error: "Prodotto non trovato", reason: "product_not_found" },
+        { status: 404 },
+      ),
+    });
+
+    const { POST } = await import("./route");
+    const res = await POST(
+      postJson("/api/conversations", { productId: PRODUCT_A, targetUserId: OTHER_A }),
+    );
+    const body = await res.json();
+    expect(res.status).toBe(404);
+    expect(body.reason).toBe("product_not_found");
+    // Wiring: il deny blocca PRIMA dell'upsert.
+    expect(mockPrisma.conversation.upsert).not.toHaveBeenCalled();
+  });
+
+  it("returns 403 when resolver denies (not_creator_student_pair)", async () => {
+    mockAuth({ id: SELF, email: "self@test.com" });
+    const { NextResponse } = await import("next/server");
+    mockAuthorizeDmRequest.mockResolvedValueOnce({
+      allowed: false,
+      permission: { allowed: false, productId: PRODUCT_A, reason: "not_creator_student_pair" },
+      response: NextResponse.json(
+        { error: "DM non autorizzata", reason: "not_creator_student_pair" },
+        { status: 403 },
+      ),
+    });
+
+    const { POST } = await import("./route");
+    const res = await POST(
+      postJson("/api/conversations", { productId: PRODUCT_A, targetUserId: OTHER_A }),
+    );
+    expect(res.status).toBe(403);
+    expect(mockPrisma.conversation.upsert).not.toHaveBeenCalled();
+  });
+
+  it("returns 403 when resolver denies (no_completed_order_for_student)", async () => {
+    mockAuth({ id: SELF, email: "self@test.com" });
+    const { NextResponse } = await import("next/server");
+    mockAuthorizeDmRequest.mockResolvedValueOnce({
+      allowed: false,
+      permission: {
+        allowed: false,
+        productId: PRODUCT_A,
+        reason: "no_completed_order_for_student",
+        creatorId: "creator-1",
+        studentId: OTHER_A,
+      },
+      response: NextResponse.json(
+        { error: "DM non autorizzata", reason: "no_completed_order_for_student" },
+        { status: 403 },
+      ),
+    });
+
+    const { POST } = await import("./route");
+    const res = await POST(
+      postJson("/api/conversations", { productId: PRODUCT_A, targetUserId: OTHER_A }),
+    );
+    expect(res.status).toBe(403);
+    expect(mockPrisma.conversation.upsert).not.toHaveBeenCalled();
+  });
+
+  it("returns 200 with {conversationId} on success (canonical order: OTHER_A < SELF)", async () => {
+    // "other-a" < "self-1" lessicograficamente ('o' = 111 < 's' = 115).
+    // sort([SELF, OTHER_A]) = [OTHER_A, SELF] → upsert chiamato con
+    // userOneId = OTHER_A (min) e userTwoId = SELF (max).
+    mockAuth({ id: SELF, email: "self@test.com" });
+    mockPrisma.conversation.upsert.mockResolvedValue({ id: "conv-self-other" });
+
+    const { POST } = await import("./route");
+    const res = await POST(
+      postJson("/api/conversations", { productId: PRODUCT_A, targetUserId: OTHER_A }),
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body).toEqual({ conversationId: "conv-self-other" });
+    // L'helper è chiamato con la canonizzazione corretta
+    // (userOneId = min, userTwoId = max).
+    expect(mockPrisma.conversation.upsert).toHaveBeenCalledWith({
+      where: {
+        userOneId_userTwoId_productId: {
+          userOneId: OTHER_A,
+          userTwoId: SELF,
+          productId: PRODUCT_A,
+        },
+      },
+      create: expect.objectContaining({
+        userOneId: OTHER_A,
+        userTwoId: SELF,
+        productId: PRODUCT_A,
+      }),
+      update: {},
+    });
+  });
+
+  it("canonicalizes pair order when targetUserId < SELF (sort inverts)", async () => {
+    // other-a < self-1 lessicograficamente? No, 'o' > 's'. Per testare
+    // l'inversione uso un id che sta lessicograficamente prima di SELF.
+    // SELF = "self-1", uso l'id pre-sort "aaa_target" (es: nuovo utente
+    // con id inferiore).
+    mockAuth({ id: SELF, email: "self@test.com" });
+
+    const { POST } = await import("./route");
+    await POST(
+      postJson("/api/conversations", { productId: PRODUCT_A, targetUserId: "aaa_target" }),
+    );
+
+    expect(mockPrisma.conversation.upsert).toHaveBeenCalledWith({
+      where: {
+        userOneId_userTwoId_productId: {
+          userOneId: "aaa_target", // min
+          userTwoId: SELF,         // max
+          productId: PRODUCT_A,
+        },
+      },
+      create: expect.any(Object),
+      update: {},
+    });
+  });
+
+  it("calls the resolver BEFORE the upsert (wiring-order invariant)", async () => {
+    // L'autorizzazione è SEMPRE prima della persistenza: anche se
+    // l'upsert è idempotente, bloccare a monte evita di scrivere righe
+    // Conversation per coppie non autorizzate (es. prodotto inesistente
+    // o coppia non creator↔studente).
+    mockAuth({ id: SELF, email: "self@test.com" });
+    const callOrder: string[] = [];
+    mockAuthorizeDmRequest.mockImplementation(async () => {
+      callOrder.push("resolver");
+      return {
+        allowed: true,
+        permission: { allowed: true, productId: PRODUCT_A, creatorId: "creator-1", studentId: SELF },
+      };
+    });
+    mockPrisma.conversation.upsert.mockImplementation(async () => {
+      callOrder.push("upsert");
+      return { id: "conv-callorder" };
+    });
+
+    const { POST } = await import("./route");
+    const res = await POST(
+      postJson("/api/conversations", { productId: PRODUCT_A, targetUserId: OTHER_A }),
+    );
+
+    expect(res.status).toBe(200);
+    expect(callOrder).toEqual(["resolver", "upsert"]);
+  });
+
+  it("passes {actorId=me, targetId=targetUserId, productId} to authorizeDmRequest", async () => {
+    mockAuth({ id: SELF, email: "self@test.com" });
+    mockPrisma.conversation.upsert.mockResolvedValue({ id: "conv-w" });
+
+    const { POST } = await import("./route");
+    await POST(
+      postJson("/api/conversations", { productId: PRODUCT_B, targetUserId: OTHER_B }),
+    );
+
+    expect(mockAuthorizeDmRequest).toHaveBeenCalledWith({
+      actorId: SELF,
+      targetId: OTHER_B,
+      productId: PRODUCT_B,
+    });
+  });
+
+  it("is idempotent on existing conversation (upsert update-branch returns same id)", async () => {
+    // Fase 2.2: l'endpoint è idempotente per definizione. Due POST
+    // consecutivi sulla stessa coppia-prodotto devono restituire lo
+    // stesso `conversationId`. Il path Prisma è upsert con `update: {}`
+    // (no-op): la Conversation esistente viene semplicemente
+    // restituita senza modifiche.
+    mockAuth({ id: SELF, email: "self@test.com" });
+    // 1a chiamata: DB restituisce {id:"conv-existing"} come row esistente.
+    // 2a chiamata: stesso ritorno perché Prisma upsert è idempotente.
+    mockPrisma.conversation.upsert.mockResolvedValue({ id: "conv-existing" });
+
+    const { POST } = await import("./route");
+    const res1 = await POST(
+      postJson("/api/conversations", { productId: PRODUCT_A, targetUserId: OTHER_A }),
+    );
+    const res2 = await POST(
+      postJson("/api/conversations", { productId: PRODUCT_A, targetUserId: OTHER_A }),
+    );
+    const body1 = await res1.json();
+    const body2 = await res2.json();
+
+    expect(res1.status).toBe(200);
+    expect(res2.status).toBe(200);
+    expect(body1).toEqual({ conversationId: "conv-existing" });
+    expect(body2).toEqual({ conversationId: "conv-existing" });
+    // Entrambe le chiamate hanno usato `update: {}` (no-op) invece che
+    // creare una nuova riga — questo è il contratto di race-safety
+    // documentato nella Fase 2.2.
+    expect(mockPrisma.conversation.upsert).toHaveBeenCalledTimes(2);
+    expect(mockPrisma.conversation.upsert).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ update: {} }),
+    );
+    expect(mockPrisma.conversation.upsert).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ update: {} }),
+    );
   });
 });
