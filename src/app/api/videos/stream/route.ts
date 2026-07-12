@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { withRateLimit } from "@/lib/utils/rate-limit";
 import { apiErrorResponse } from "@/lib/errors";
+import { findCompletedOrder } from "@/lib/access/find-completed-order";
 
 /**
  * GET /api/videos/stream?lessonId=xxx&productSlug=xxx&lang=it
@@ -51,17 +52,14 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Prodotto non trovato" }, { status: 404 });
     }
 
-    // Check access: admin or completed order
+    // Check access: admin or completed order (V2 DRY: helper consolidato,
+    // admin bypass resta inline).
     let hasAccess = dbUser.role === "admin";
 
     if (!hasAccess) {
-      const order = await prisma.order.findFirst({
-        where: {
-          userId: dbUser.id,
-          productId: product.id,
-          status: "completed",
-        },
-        select: { id: true },
+      const order = await findCompletedOrder({
+        userId: dbUser.id,
+        productId: product.id,
       });
       hasAccess = !!order;
     }

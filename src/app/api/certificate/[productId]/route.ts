@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db/prisma";
 import { apiErrorResponse } from "@/lib/errors";
 import { getCertificateTranslations } from "@/lib/i18n/certificate-translations";
 import { getUiTranslations, interpolate } from "@/lib/i18n/ui-translations";
+import { findCompletedOrder } from "@/lib/access/find-completed-order";
 
 export async function GET(
   request: NextRequest,
@@ -23,9 +24,10 @@ export async function GET(
     const acceptLang = request.headers.get("accept-language") ?? "en";
     const errLang = acceptLang.split(",")[0]?.split("-")[0]?.toLowerCase() ?? "en";
 
-    // Verify the user has purchased the product
-    const order = await prisma.order.findFirst({
-      where: { userId: dbUser.id, productId, status: "completed" },
+    // Verify the user has purchased the product (V2 DRY: helper consolidato)
+    const order = await findCompletedOrder({
+      userId: dbUser.id,
+      productId,
     });
     if (!order) {
       // Localized "you haven't purchased yet" error. Falls back to English

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { apiErrorResponse } from "@/lib/errors";
 import { withRateLimit } from "@/lib/utils/rate-limit";
+import { findCompletedOrder } from "@/lib/access/find-completed-order";
 
 export const GET = withRateLimit(async function GET(request: NextRequest) {
   try {
@@ -32,8 +33,11 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
       if (dbUser.role === "admin") {
         return NextResponse.json({ hasAccess: true, userId: dbUser.id });
       }
-      const hasOrder = await prisma.order.findFirst({
-        where: { userId: dbUser.id, productId: dbProductId, status: "completed" },
+      // V2 DRY: helper consolidato. Admin bypass inline (pattern admin
+      // del route è diverso dalle altre route: ritorna shape con userId).
+      const hasOrder = await findCompletedOrder({
+        userId: dbUser.id,
+        productId: dbProductId,
       });
       if (hasOrder) {
         return NextResponse.json({ hasAccess: true, userId: dbUser.id });

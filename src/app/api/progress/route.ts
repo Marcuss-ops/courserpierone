@@ -4,6 +4,7 @@ import { getServerUser } from "@/lib/supabase/get-user";
 import { progressSchema } from "@/lib/utils/validations";
 import { apiErrorResponse } from "@/lib/errors";
 import type { Prisma } from "@prisma/client";
+import { findCompletedOrder } from "@/lib/access/find-completed-order";
 
 export async function GET(request: NextRequest) {
   try {
@@ -76,12 +77,9 @@ export async function POST(request: NextRequest) {
     }
 
     if (dbUser.role !== "admin") {
-      const order = await prisma.order.findFirst({
-        where: {
-          userId: dbUser.id,
-          productId: lesson.productId,
-          status: "completed",
-        },
+      const order = await findCompletedOrder({
+        userId: dbUser.id,
+        productId: lesson.productId,
       });
       if (!order) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });

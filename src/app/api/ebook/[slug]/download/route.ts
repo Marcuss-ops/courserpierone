@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { jsPDF } from "jspdf";
 import { getCourseConfig } from "@/lib/config/white-label-data";
 import { getServerUser } from "@/lib/supabase/get-user";
-import { prisma } from "@/lib/db/prisma";
 import fs from "fs";
 import path from "path";
+import { findCompletedOrder } from "@/lib/access/find-completed-order";
 
 export async function GET(
   request: NextRequest,
@@ -19,12 +19,11 @@ export async function GET(
   let hasAccess = false;
 
   if (user?.email && dbUser) {
-    const hasOrder = await prisma.order.findFirst({
-      where: {
-        userId: dbUser.id,
-        product: { slug },
-        status: "completed",
-      },
+    // V2 DRY: helper consolidato (slug variant via relation filter).
+    // 1 round-trip. Mantiene la shape booleana del check.
+    const hasOrder = await findCompletedOrder({
+      userId: dbUser.id,
+      productSlug: slug,
     });
     if (hasOrder) {
       hasAccess = true;
