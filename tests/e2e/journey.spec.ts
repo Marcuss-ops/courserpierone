@@ -1,21 +1,28 @@
 import { test, expect, type Page } from "@playwright/test";
 import { prisma, cleanupTestUser, seedTestProduct } from "./fixtures/db";
 import {
-  createStripeCheckoutSession,
-  generateStripeWebhookPayload,
-  signStripeWebhookPayload,
-} from "./fixtures/stripe-helpers";
+  createLemonCheckout,
+  generateLemonWebhookPayload,
+  signLemonWebhookPayload,
+} from "./fixtures/ls-helpers";
 import { signUpTestUser, deleteSupabaseUserById } from "./fixtures/supabase-auth";
 
 /**
- * E2E Full Customer Journey (DoD Scenario 1)
+ * E2E Full Customer Journey (DoD Scenario 1) — V1.5 LS-primary
+ *
+ * The journey exercises the user-facing flow with LemonSqueezy as the
+ * primary payment provider. The legacy-Stripe-regression test
+ * (signed webhook only, no real Stripe session creation) lives in
+ * checkout.stripe.spec.ts and is gated by ENABLE_STRIPE_CHECKOUT for
+ * explicit legacy activation. V1.5 mandate: the primary customer
+ * journey MUST NOT depend on Stripe creds.
  *
  * Flow per locale (it-it, en-us, es-es):
  *   1. Sign up test user via Supabase admin (email_confirm: true)
  *   2. Login via UI (/login)
  *   3. Visit localized landing page
  *   4. Visit portal — expect paywall (no order yet)
- *   5. Simulate Stripe webhook (signed payload) → order created in DB
+ *   5. Simulate LS checkout + signed webhook → order created in DB
  *   6. Re-visit portal — expect lessons visible (AccessGate grants access)
  *   7. Click first lesson, expect lesson page rendering
  *   8. Click "Mark Complete" → assert LessonProgress.completed=true in DB
@@ -23,7 +30,7 @@ import { signUpTestUser, deleteSupabaseUserById } from "./fixtures/supabase-auth
  *  10. Login again
  *  11. Verify LessonProgress still completed=true (persistence across sessions)
  *
- * Skip-pattern: requires real Supabase project, Stripe test account,
+ * Skip-pattern: requires real Supabase project, LemonSqueezy test account,
  * running dev server, and seeded test product.
  */
 
@@ -31,19 +38,16 @@ const LOCALES = ["it-it", "en-us", "es-es"] as const;
 const PRODUCT_SLUG = "test-course-e2e";
 
 const hasAllCreds =
-  !!process.env.STRIPE_SECRET_KEY &&
-  !!process.env.STRIPE_WEBHOOK_SECRET &&
-  !!process.env.TEST_STRIPE_PRICE_ID &&
+  !!process.env.LEMONSQUEEZY_API_KEY &&
+  !!process.env.LEMONSQUEEZY_WEBHOOK_SECRET &&
+  !!process.env.LEMONSQUEEZY_STORE_ID &&
+  !!process.env.TEST_LEMON_VARIANT_ID &&
   !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
   !!process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-test.skip(!hasAllCreds, "Missing Supabase/Stripe test credentials for E2E journey");
-// V1.5: la simulazione checkout del journey usa Stripe legacy. Spegnere
-// ENABLE_STRIPE_CHECKOUT in CI salta l'intero file — il coverage end-to-end è
-// coperto dai test LS che asseriscono lo stesso flow con provider LS.
 test.skip(
-  process.env.ENABLE_STRIPE_CHECKOUT !== "true",
-  "ENABLE_STRIPE_CHECKOUT is false (V1.5: LS primary, journey uses legacy Stripe)"
+  !hasAllCreds,
+  "Missing Supabase/LS test credentials for E2E journey (LEMONSQUEEZY_* + TEST_LEMON_VARIANT_ID + NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY)"
 );
 
 // ─── Per-locale UI text expectations (anchored regex for locale safety) ─────
@@ -71,7 +75,7 @@ async function signInViaUi(page: Page, email: string, password: string) {
   await page.waitForURL((url) => !url.pathname.startsWith("/login"), { timeout: 15_000 });
 }
 
-async function simulateStripeCheckout(
+async function simulateLsCheckout(
   page: Page,
   request: import("@playwright/test").APIRequestContext,
   email: string,
@@ -80,32 +84,43 @@ async function simulateStripeCheckout(
   const product = await prisma.product.findUnique({
     where: { slug: PRODUCT_SLUG },
   });
-  if (!product?.stripePriceId) {
-    throw new Error(`Test product ${PRODUCT_SLUG} missing stripePriceId`);
+  if (!product?.lemonVariantId) {
+    throw new Error(`Test product ${PRODUCT_SLUG} missing lemonVariantId`);
   }
 
-  const session = await createStripeCheckoutSession(product.stripePriceId, {
-    userId: "guest",
-    productId: product.id,
+  const orderId = `ls-order-journey-${Date.now()}`;
+  const customData = {
+    courseSlug: product.slug,
     locale,
-    customer_country: "US",
+    variantId: product.lemonVariantId,
+  };
+
+  // Real LS checkout creation — mirrors checkout.ls.spec.ts. The checkout
+  // object URL isn't navigated in this test (we drive the webhook directly)
+  // but the API call still validates our LS creds and exercises the
+  // checkout-creation code path end-to-end (which is the LS provider's
+  // primary surface in production post-Phase-7).
+  const checkout = await createLemonCheckout(product.lemonVariantId, customData);
+  expect(checkout?.data?.attributes?.url).toBeTruthy();
+
+  // Build + sign a synthetic order_created webhook payload.
+  const payload = generateLemonWebhookPayload(orderId, {
+    ...customData,
     email,
   });
+  const { signature, body } = signLemonWebhookPayload(payload);
 
-  const payload = generateStripeWebhookPayload(session);
-  const { signature, body } = signStripeWebhookPayload(payload);
-
-  const webhookResponse = await request.post("/api/webhooks/stripe", {
-    headers: { "stripe-signature": signature },
+  const webhookResponse = await request.post("/api/webhooks/lemonsqueezy", {
+    headers: { "x-signature": signature },
     data: body,
   });
 
   expect(webhookResponse.status()).toBe(200);
 }
 
-test.describe("E2E Full Customer Journey (DoD Scenario 1)", () => {
+test.describe("E2E Full Customer Journey (DoD Scenario 1, LS primary)", () => {
   test.beforeEach(async () => {
-    // Ensure test product is seeded with current Stripe price ID
+    // Ensure test product is seeded with current LS variant ID
     await seedTestProduct();
   });
 
@@ -133,8 +148,8 @@ test.describe("E2E Full Customer Journey (DoD Scenario 1)", () => {
         await page.goto(`/${locale}/${PRODUCT_SLUG}/portal`);
         await expect(page.locator("body")).toContainText(landingButton);
 
-        // ─── 5. Simulate Stripe webhook payment ───
-        await simulateStripeCheckout(page, request, email, locale);
+        // ─── 5. Simulate LS checkout + webhook payment ───
+        await simulateLsCheckout(page, request, email, locale);
 
         // Wait for order to be created in DB
         await expect
@@ -152,7 +167,7 @@ test.describe("E2E Full Customer Journey (DoD Scenario 1)", () => {
         // row is best-effort.
         //
         // Two gates:
-        //   1. Order row MUST exist (mandatory, asserted above on line ~210).
+        //   1. Order row MUST exist (mandatory, asserted above).
         //   2. Analytics event: if absent after polling deadline, ANNOTATE the
         //      test (visible to the Playwright reporter) but do NOT fail it —
         //      customer access still works via the order row alone.
