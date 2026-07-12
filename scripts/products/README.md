@@ -64,3 +64,5 @@ npx tsx scripts/products/backfill-primary-creator.ts --dry-run
 **Quando eseguirlo:** dopo aver deployato la migration `20260712170003_add_product_creator_id` su un DB che aveva prodotti esistenti senza creator, o dopo aver promosso manualmente un admin a creator principale.
 
 **Sicurezza:** lo script non elimina mai dati; l'unica scrittura è su `User.role` (se non già admin/creator) e `Product.creatorId` (solo per NULL). Usare `--dry-run` per ispezionare le modifiche prima di applicarle.
+
+**Multi-admin guard (fail-fast):** se esistono **più di 1 account admin** nella tabella `User` e `PRIMARY_CREATOR_EMAIL` non è impostato, lo script **rifiuta di procedere** (exit 1) e stampa la lista formattata di tutti gli admin con `id`, `email`, `createdAt`. Il guard resta attivo anche in `--dry-run`, per garantire che la scelta del creator primario sia sempre intenzionale e mai "il primo admin per createdAt" di default con più opzioni possibili. Rilanciare con `PRIMARY_CREATOR_EMAIL=<email-desiderata> npx tsx scripts/products/backfill-primary-creator.ts` per procedere.
