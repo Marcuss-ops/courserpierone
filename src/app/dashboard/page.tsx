@@ -20,8 +20,9 @@ import { InboxProvider } from "@/components/layout/inbox-provider";
  * child components can render their strings via getUiTranslations(lang).
  * Falls back to "it" (default brand locale).
  */
-function dashboardLang(): string {
-  return cookies().get("locale")?.value?.toLowerCase().split("-")[0] ?? "it";
+async function dashboardLang(): Promise<string> {
+  const cookieStore = await cookies();
+  return cookieStore.get("locale")?.value?.toLowerCase().split("-")[0] ?? "it";
 }
 
 interface ProductProgress {
@@ -51,7 +52,7 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const lang = dashboardLang();
+  const lang = await dashboardLang();
 
   // ── Fetch orders (admin sees all published products as virtual orders) ──
   let userOrders: DisplayOrder[];
