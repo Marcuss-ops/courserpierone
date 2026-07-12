@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { Globe, ChevronDown, Check, Search } from "lucide-react";
+import { getUiTranslations } from "@/lib/i18n/ui-translations";
 
 // ─── Flag emoji from country code ──────────────
 function countryToFlag(countryCode: string | undefined): string {
@@ -333,6 +334,9 @@ export default function LanguageSelector({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
+  const lang = currentLocale.split("-")[0]?.toLowerCase() ?? "en";
+  const t = getUiTranslations(lang);
+
   // Close on outside click + ESC
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -414,7 +418,7 @@ export default function LanguageSelector({
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider text-gray-400 hover:text-gray-900 hover:bg-gray-100/80 transition-all"
-        aria-label="Select language"
+        aria-label={t.langSelect}
       >
         <Globe className="w-3.5 h-3.5" />
         <span>{activeLocale?.flag ?? "🌐"}</span>
@@ -435,7 +439,7 @@ export default function LanguageSelector({
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Cerca lingua..."
+                  placeholder={t.langSearchPlaceholder}
                   className="w-full bg-transparent text-xs font-medium text-gray-700 placeholder:text-gray-400 outline-none"
                 />
               </div>
@@ -494,7 +498,7 @@ export default function LanguageSelector({
                 })
               ) : (
                 <div className="px-4 py-6 text-center text-xs text-gray-400 font-medium">
-                  Nessun risultato per &ldquo;{search}&rdquo;
+                  {t.langNoResults} &ldquo;{search}&rdquo;
                 </div>
               )
             ) : showAll ? (
@@ -574,9 +578,9 @@ export default function LanguageSelector({
               className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-[11px] font-bold text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
             >
               {showAll ? (
-                <>↑ Mostra compatto</>
+                <>↑ {t.langShowCompact}</>
               ) : (
-                <>↓ {filteredGroups.length > 0 ? `Tutte le ${filteredGroups.reduce((acc, g) => acc + g.total, 0)} varianti` : 'Tutte le lingue'}</>
+                <>↓ {filteredGroups.length > 0 ? t.langAllVariants.replace("{count}", String(filteredGroups.reduce((acc, g) => acc + g.total, 0))) : t.langShowAll}</>
               )}
             </button>
           </div>

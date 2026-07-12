@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { getUiTranslations } from "@/lib/i18n/ui-translations";
+import { localeToLanguage } from "@/lib/i18n/locale-resolver";
 
 /**
  * Global footer shown on the public website.
@@ -36,6 +38,9 @@ export function Footer({ currentLocale: cookieLocale }: FooterProps = {}) {
   const isAppRoute = HIDE_ON_PREFIXES.some((p) => pathname.startsWith(p));
   if (isAppRoute) return null;
 
+  const lang = getCurrentLang(pathname, cookieLocale);
+  const t = getUiTranslations(lang);
+
   return (
     <footer className="border-t border-black/[0.06] bg-gradient-to-b from-[#FAFAF8] to-[#F5F4F0]">
       <div className="max-w-7xl mx-auto px-6 py-12">
@@ -50,37 +55,37 @@ export function Footer({ currentLocale: cookieLocale }: FooterProps = {}) {
               courssy
             </Link>
             <p className="mt-3 text-[13px] text-black/45 leading-relaxed max-w-[180px]">
-              Discover courses that change your life.
+              {t.footerTagline}
             </p>
           </div>
 
           {/* Explore */}
           <div>
             <h4 className="text-[12px] font-semibold uppercase tracking-wider text-black/35 mb-3">
-              Explore
+              {t.footerExplore}
             </h4>
             <ul className="space-y-2">
-              <FooterLinkItem href="/" label="Home" currentPath={pathname} />
-              <FooterLinkItem href="/login" label="Sign in" currentPath={pathname} />
+              <FooterLinkItem href="/" label={t.footerHome} currentPath={pathname} />
+              <FooterLinkItem href="/login" label={t.footerSignIn} currentPath={pathname} />
             </ul>
           </div>
 
           {/* Legal */}
           <div>
             <h4 className="text-[12px] font-semibold uppercase tracking-wider text-black/35 mb-3">
-              Legal
+              {t.footerLegal}
             </h4>
             <ul className="space-y-2">
-              <FooterLinkItem href="/privacy" label="Privacy Policy" currentPath={pathname} />
-              <FooterLinkItem href="/terms" label="Terms of Service" currentPath={pathname} />
-              <FooterLinkItem href="/refund" label="Refund Policy" currentPath={pathname} />
+              <FooterLinkItem href="/privacy" label={t.footerPrivacy} currentPath={pathname} />
+              <FooterLinkItem href="/terms" label={t.footerTerms} currentPath={pathname} />
+              <FooterLinkItem href="/refund" label={t.footerRefund} currentPath={pathname} />
             </ul>
           </div>
 
           {/* Language */}
           <div className="col-span-2 sm:col-span-1">
             <h4 className="text-[12px] font-semibold uppercase tracking-wider text-black/35 mb-3">
-              Language
+              {t.footerLanguage}
             </h4>
             <LanguageSwitcher cookieLocale={cookieLocale} />
           </div>
@@ -88,12 +93,24 @@ export function Footer({ currentLocale: cookieLocale }: FooterProps = {}) {
 
         {/* Bottom bar */}
         <div className="mt-10 pt-5 border-t border-black/[0.05] flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] text-black/35">
-          <span>© 2026 Courssy. All rights reserved.</span>
+          <span>© 2026 Courssy. {t.footerRights}</span>
 
         </div>
       </div>
     </footer>
   );
+}
+
+function getCurrentLang(pathname: string, cookieLocale?: string): string {
+  const firstSegment = pathname.split("/")[1]?.toLowerCase() ?? "";
+  if (firstSegment && KNOWN_LOCALES.has(firstSegment)) {
+    return localeToLanguage(firstSegment);
+  }
+  const normalizedCookie = cookieLocale?.toLowerCase();
+  if (normalizedCookie && KNOWN_LOCALES.has(normalizedCookie)) {
+    return localeToLanguage(normalizedCookie);
+  }
+  return "it";
 }
 
 function FooterLinkItem({
