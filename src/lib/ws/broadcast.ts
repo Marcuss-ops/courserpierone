@@ -40,7 +40,7 @@ const OPEN = 1;
  * Deliver a `newMessage` event to every WebSocket subscribed to the
  * event's conversation, EXCEPT the sender.
  *
- * Reasoning: il REST handler in `src/app/api/messages/route.ts` already
+ * Reasoning: il REST handler in `src/app/api/messages/route.ts` already (legacy removed in chore(dm): cfb2d12)
  * restituisce il messaggio persistito nella POST response, quindi il
  * sender ce l'ha già client-side. Re-inviare rischia un render duplicato.
  *

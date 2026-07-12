@@ -73,7 +73,7 @@ export interface ThreadDeletedEvent {
 }
 
 /**
- * Singleton EventEmitter shared between the REST API (POST /api/messages)
+ * Singleton EventEmitter shared between the REST API (POST /api/messages) (legacy removed in chore(dm): cfb2d12)
  * and the WebSocket server (server.ts). Allows real-time message broadcasting
  * without polling the database.
  */

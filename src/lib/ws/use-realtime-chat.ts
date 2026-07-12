@@ -61,7 +61,7 @@ interface UseRealtimeChatOptions {
  * → token; 3) apri WS / SSE con conversationId.
  *
  * - Connects to ws://host/ws con ?token=<>&conversationId=<>
- * - Falls back to EventSource (SSE) su /api/messages/stream?conversationId=<>
+ * - Falls back to EventSource (SSE) su /api/messages/stream?conversationId=<> (legacy removed in chore(dm): cfb2d12)
  * - Falls back to HTTP polling se SSE fallisce
  * - Reconnect automatico su disconnect
  * - Rispetta `enabled` per non connettere quando la chat è chiusa

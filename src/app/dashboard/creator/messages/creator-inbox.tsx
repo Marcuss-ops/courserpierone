@@ -41,7 +41,7 @@ interface CreatorInboxProps {
  *   - unread-only toggle.
  * Right column: chat view inline. When a conversation is selected via
  * `?c=<conversationId>` URL query, ChatView re-mounts (key) and re-fetches
- * initial messages from `/api/messages?with=...&productId=...`. PATCH
+ * initial messages from `/api/messages?with=...&productId=...`. PATCH (legacy removed in chore(dm): cfb2d12)
  * unread → mark-as-read gestito da ChatView stesso.
  *
  * Selection state è URL-driven per consentire deep linking e bookmark.

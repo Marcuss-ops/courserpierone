@@ -5,10 +5,10 @@
  * esistente con side-effects coordinati (WS broker emit + offline
  * email notification).
  *
- * Fase 2.3: estratto da `/api/messages POST` per essere riusato da
+ * Fase 2.3: estratto da `/api/messages POST` per essere riusato da (legacy removed in chore(dm): cfb2d12)
  * `/api/conversations/[id]/messages POST`. Separa "persistenza +
  * orchestrazione" dalle route handlers sottili. La logica è
- * IDENTICA a quella già presente in `/api/messages POST` Fase 1.6:
+ * IDENTICA a quella già presente in `/api/messages POST` Fase 1.6: (legacy removed in chore(dm): cfb2d12)
  *   1. sanitizeHtml(content.trim()) — XSS-safe prima del persist.
  *   2. prisma.message.create with sender join
  *   3. messageBroker.emit(NEW_MESSAGE, { conversationId, productId,
@@ -155,7 +155,10 @@ async function maybeNotifyOfflinePartner({
 }): Promise<void> {
   const partner = await prisma.user.findUnique({
     where: { id: partnerId },
-    select: { email: true, lastSeenAt: true },
+    // Phase 1.2 addendum: include preferredLocale per le email di DM
+    // notification localizzate. Fallback a "en" se null (shouldn't
+    // happen post-migration @default("en"), ma difensivo).
+    select: { email: true, lastSeenAt: true, preferredLocale: true },
   });
   if (!partner) return; // sanity; non dovrebbe accadere dopo il membership precheck
 
@@ -180,7 +183,14 @@ async function maybeNotifyOfflinePartner({
   // Cooldown: solo il PRIMO unread della conversation genera una
   // email. Le successive sarebbero spam.
   if (unreadCount <= 1) {
-    sendDmNotificationEmail(partner.email, senderName, "en").catch((err) =>
+    sendDmNotificationEmail(
+      partner.email,
+      senderName,
+      // Phase 1.2 addendum: usa receiver.preferredLocale invece
+      // dell'hardcoded "en". Fallback "en" per backward compat con
+      // account legacy null (shouldn't happen post-migration).
+      partner.preferredLocale ?? "en",
+    ).catch((err) =>
       console.error("[dm-email] Failed to send:", err),
     );
   }

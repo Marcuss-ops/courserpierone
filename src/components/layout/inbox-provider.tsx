@@ -25,7 +25,7 @@ import {
  *   4. Espone `markRead(convId)` che decrementa localmente + manda
  *      via BroadcastChannel "messagesRead" event per sincronizzare
  *      eventuali altre tab aperte (in modo che un'azione di PATCH
- *      /api/messages/read in una tab non lasci le altre stale).
+ *      /api/messages/read in una tab non lasci le altre stale). (legacy removed in chore(dm): cfb2d12)
  *
  * Architettura (ssegue Fase 4.3 = Option A del thinker):
  *   - Server: `inboxClients: Map<userId, Set<WebSocket>>` in server.ts.

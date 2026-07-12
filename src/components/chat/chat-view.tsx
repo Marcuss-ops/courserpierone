@@ -67,7 +67,7 @@ const PAGE_SIZE = 50;
 /**
  * ChatView — shared component for rendering a single conversation thread.
  *
- * Fase 4.x canonical migration (POST /api/messages → /api/conversations):
+ * Fase 4.x canonical migration (POST /api/messages → /api/conversations) (legacy removed in chore(dm): cfb2d12):
  *   - fetchInitialMessages → GET /api/conversations/[id]/messages
  *   - loadOlderMessages    → GET /api/conversations/[id]/messages?cursor=…
  *   - mark-as-read         → PATCH /api/conversations/[id]/read (no body)

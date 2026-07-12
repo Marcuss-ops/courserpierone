@@ -3,7 +3,7 @@
  *
  * Helper per la creazione idempotente delle Conversation del piano DMs.
  *
- * Fase 2.2: estratto da `/api/messages/route.ts` (Fase 1.6) per essere
+ * Fase 2.2: estratto da `/api/messages/route.ts` (Fase 1.6) per essere (legacy removed in chore(dm): cfb2d12)
  * riusato anche da `/api/conversations/route.ts`. La duplicazione
  * dell'helper inline era un debito segnalato dal reviewer: la logica
  * di canonicalizzazione dell'ordinamento [userOneId, userTwoId] è
