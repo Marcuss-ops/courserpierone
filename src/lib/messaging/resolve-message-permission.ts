@@ -17,10 +17,7 @@
  *   Negare il DM quando:
  *     • actor == target (auto-messaggio)
  *     • il prodotto non esiste
- *     • il prodotto non ha un creator (Product.creatorId = NULL) E non
- *       esiste un admin di fallback (legacy pre-1.4)
  *     • entrambi i partecipanti sono creator (nessuno studente nel pair)
- *     • entrambi i partecipanti sono studenti (nessun creator nel pair)
  *     • lo studente non ha Order.status = 'completed' per quel prodotto
  *     • il target user non esiste (best-effort: il check esatto
  *       viene fatto dal chiamante via prisma.user.findUnique; qui
@@ -36,6 +33,17 @@
  * `allowed: boolean` con diagnostica (`reason`) per consentire al
  * chiamante di tradurre in HTTP 403 / WS subscription refused / UI
  * feedback coerenti.
+ *
+ * Fase 4 hardening (migration `20260712210000_creator_id_required_restrict`):
+ *   Il deny-reason storico `NoCreatorForProduct` non è più raggiungibile
+ *   runtime (la colonna `Product.creatorId` è REQUIRED + FK Restrict a
+ *   livello DB). Tuttavia il constant rimane ESPORTATO con tag
+ *   `@deprecated` per compatibilità con i consumer già in produzione
+ *   (server.ts WS bridge + SSE stream handler + route WS upgrade).
+ *   Questi consumer si traducono in "messaggio impossibile" via la
+ *   tabella REASON_TO_STATUS in `api-authorize.ts`. Future V2 cleanup:
+ *   migrare i consumer ad un deny-reason canonico (es. ProductNotFound
+ *   condizionale) e rimuovere il constant.
  */
 
 import { prisma } from "@/lib/db/prisma";
@@ -73,8 +81,19 @@ export const MessagingDenyReason = {
   /** productId non esiste (404 upstream) */
   ProductNotFound: "product_not_found",
   /**
-   * Prodotto legacy con creatorId NULL che non ha admin di fallback
-   * — scenario di pre-Fase-1.4; non dovrebbe accadere dopo il bootstrap.
+   * @deprecated Post-fase 4 hardening (migration
+   * `20260712210000_creator_id_required_restrict`): `Product.creatorId`
+   * è ora REQUIRED + FK Restrict a livello DB, di conseguenza questo
+   * deny-reason non è più raggiungibile dal resolver. Il constant è
+   * mantenuto ESPORTATO per compatibilità con i consumer già in
+   * produzione (server.ts WS bridge + src/app/api/conversations/[id]/stream/route.ts
+   * SSE handler + src/lib/messaging/api-authorize.ts HTTP error mapper).
+   * Poiché il resolver non lo restituisce mai più, le route lo
+   * traducono in stato "irragiungibile" come safety net.
+   *
+   * Future V2 cleanup: migrare i consumer ad un deny-reason canonico
+   * (es. un nuovo `ProductIntegrityViolation` per audit purposes) e
+   * rimuovere questo constant.
    */
   NoCreatorForProduct: "no_creator_for_product",
   /**
@@ -94,13 +113,13 @@ export type MessagingDenyReasonValue =
  * Risolve i permessi di una DM creator↔studente su un prodotto specifico.
  *
  * Pattern "creator/student":
- *   - creator = User.id === Product.creatorId (con fallback al primo admin
- *     legacy se Product.creatorId è NULL, mantenuto per transizione V1→V2)
+ *   - creator = User.id === Product.creatorId (REQUIRED post-fase 4 hardening,
+ *     enforciato dalla migration `20260712210000_creator_id_required_restrict`)
  *   - student = l'altro partecipante, che DEVE avere un Order.completed
  *     per quel prodotto
  *
- * Casi particolari (auto-invio, prodotto inesistente, prodotto senza
- * creator) sono gestiti con `allowed: false` + `reason` valorizzato.
+ * Casi particolari (auto-invio, prodotto inesistente) sono gestiti con
+ * `allowed: false` + `reason` valorizzato.
  */
 export async function resolveMessagingPermission(
   input: ResolveMessagingPermissionInput,
@@ -116,7 +135,7 @@ export async function resolveMessagingPermission(
     };
   }
 
-  // ── 1. Product esiste? ──────────────────────────────────────
+  // ── 1. Product esiste? ─────────────────────────────────────
   const product = await prisma.product.findUnique({
     where: { id: productId },
     select: { id: true, creatorId: true },
@@ -129,44 +148,17 @@ export async function resolveMessagingPermission(
     };
   }
 
-  // ── 2. Resolve the creator ──────────────────────────────────
-  // Product.creatorId è nullable in V1 (legacy pre-Fase 1.4).
-  // Fallback: il primo admin per createdAt ascendente agisce come
-  // "creator primario" implicitamente. Questo garantisce che un
-  // prodotto legacy senza creatorId possa ancora avere studenti
-  // che contattano l'admin principale (comportamento storico
-  // precedente la Fase 1.2).
-  //
-  // Nota di audit (Phase 1.5 → Phase 4 hardening): ogni volta che
-  // entriamo nel path fallback logghiamo un warning persistente
-  // così che un operatore possa individuare prodotti legacy non
-  // ancora backfillati dallo script Fase 1.4 e migrare il DB.
-  // Il path è best-effort (non transazionale con l'updateMany
-  // successivo) ma sufficiente per V1.
-  let creatorId: string | null = product.creatorId;
-  if (!creatorId) {
-    const fallback = await prisma.user.findFirst({
-      where: { role: "admin" },
-      orderBy: { createdAt: "asc" },
-      select: { id: true },
-    });
-    if (!fallback) {
-      return {
-        allowed: false,
-        productId,
-        reason: MessagingDenyReason.NoCreatorForProduct,
-      };
-    }
-    creatorId = fallback.id;
-    // Audit: prodotto legacy senza creatorId ha usato il fallback
-    // admin. Consigliato eseguire scripts/products/backfill-primary-creator.ts
-    // per migrare Product.creatorId prima di mettere in produzione V2.
-    console.warn(
-      `[messaging.fallback-creator] Product ${productId} has no creatorId — resolving to admin ${creatorId} (oldest). Run scripts/products/backfill-primary-creator.ts to migrate.`,
-    );
-  }
+  // ── 2. Resolve the creator ─────────────────────────────────
+  // Post-fase 4 hardening: `Product.creatorId` è REQUIRED (NOT NULL +
+  // FK Restrict, migration `20260712210000_creator_id_required_restrict`).
+  // Il legacy fallback al "primo admin" per prodotti senza creator è
+  // stato rimosso. Se il lookup tornasse un valore nullo qui sarebbe un
+  // problema di integrità DB (intervento manuale richiesto, eseguire
+  // `npx tsx scripts/products/backfill-primary-creator.ts` come recovery
+  // se si tratta di un DB legacy pre-migration).
+  const creatorId = product.creatorId;
 
-  // ── 3. Identifica chi è creator e chi è student nel pair ─────
+  // ── 3. Identifica chi è creator e chi è student nel pair ───
   const actorIsCreator = actorId === creatorId;
   const targetIsCreator = targetId === creatorId;
 
@@ -176,13 +168,13 @@ export async function resolveMessagingPermission(
   if (actorIsCreator === targetIsCreator) {
     return {
       allowed: false,
-      creatorId: creatorId ?? undefined,
+      creatorId,
       productId,
       reason: MessagingDenyReason.NotCreatorStudentPair,
     };
   }
 
-  // ── 4. Identifica lo student effettivo nel pair ──────────────
+  // ── 4. Identifica lo student effettivo nel pair ────────────
   const customerId = actorIsCreator ? targetId : actorId;
 
   // ── 5. Lo student deve avere un Order.completed sul prodotto ──
@@ -199,7 +191,7 @@ export async function resolveMessagingPermission(
   if (!completedOrder) {
     return {
       allowed: false,
-      creatorId: creatorId ?? undefined,
+      creatorId,
       customerId,
       productId,
       reason: MessagingDenyReason.NoCompletedOrderForStudent,
@@ -209,7 +201,7 @@ export async function resolveMessagingPermission(
   // ── Tutto verde — la DM è autorizzata ────────────────────────
   return {
     allowed: true,
-    creatorId: creatorId ?? undefined,
+    creatorId,
     customerId,
     productId,
   };

@@ -5,7 +5,8 @@
  * in un unico resolver semplifica enormemente la suite di test
  * (basta coprire questo file, non tutte le route).
  *
- * Scenari coperti (corrispondono alle specifiche del piano):
+ * Scenari coperti (post-fase 4 hardening — migration
+ * `20260712210000_creator_id_required_restrict`):
  *   - studente con Order.completed → consentito
  *   - studente senza Order.completed → deny (no_completed_order_for_student)
  *   - studente verso un altro studente → deny (not_creator_student_pair)
@@ -13,8 +14,9 @@
  *   - creator verso un cliente che ha comprato un altro prodotto → deny
  *   - self-message (actor == target) → deny (self_message_blocked)
  *   - prodotto inesistente → deny (product_not_found)
- *   - prodotto legacy con creatorId NULL e nessun admin → deny
- *     (no_creator_for_product). Con admin fallback → consentito.
+ *   - invariante schema: `Product.creatorId` è REQUIRED, nessun fallback
+ *     admin (era il deny `no_creator_for_product` pre-fase 4, ora
+ *     irraggiungibile; sostituito da test di non-chiamata).
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
@@ -80,36 +82,32 @@ describe("resolveMessagingPermission", () => {
     expect(res.reason).toBe(MessagingDenyReason.ProductNotFound);
   });
 
-  it("denies when product has no creatorId AND no fallback admin", async () => {
+  // NB: `denies when product has no creatorId AND no fallback admin` +
+  // `uses first admin as fallback creator for legacy products` rimossi
+  // post-fase 4 hardening (migration
+  // `20260712210000_creator_id_required_restrict`): `Product.creatorId`
+  // è REQUIRED + ON DELETE RESTRICT a livello DB. Vedi nuova
+  // invariante sotto.
+  it("rejects when creatorId would be null (post-fase 4 schema invariant)", async () => {
+    // Post-migration: `product.creatorId` è non-nullable. Qualsiasi mock
+    // che restituisse `creatorId: null` sarebbe impossibile senza cast
+    // non-sicuri (verifica a livello Prisma client static type).
+    //
+    // Questo test verifica l'invariante RUNTIME: il resolver NON esegue
+    // più la query legacy `prisma.user.findFirst({ where: { role: "admin" } })`
+    // — il fallback admin è stato rimosso. L'assenza di fall-through al
+    // admin-fallback è la prova che la pulizia è completa.
     mockPrisma.product.findUnique.mockResolvedValue({
       id: PRODUCT_ID,
-      creatorId: null,
+      creatorId: CREATOR_ID, // post-migration: mai null
     });
-    mockPrisma.user.findFirst.mockResolvedValue(null); // nessun admin
-    const res = await resolveMessagingPermission({
+    mockPrisma.order.findFirst.mockResolvedValue({ id: ORDER_ID });
+    await resolveMessagingPermission({
       actorId: STUDENT_ID,
-      targetId: "any-user-id",
+      targetId: CREATOR_ID,
       productId: PRODUCT_ID,
     });
-    expect(res.allowed).toBe(false);
-    expect(res.reason).toBe(MessagingDenyReason.NoCreatorForProduct);
-  });
-
-  it("uses first admin as fallback creator for legacy products", async () => {
-    mockPrisma.product.findUnique.mockResolvedValue({
-      id: PRODUCT_ID,
-      creatorId: null, // legacy pre-Fase 1.4
-    });
-    const ADMIN_ID = "admin-fallback-1";
-    mockPrisma.user.findFirst.mockResolvedValue({ id: ADMIN_ID });
-    const res = await resolveMessagingPermission({
-      actorId: STUDENT_ID,
-      targetId: ADMIN_ID,
-      productId: PRODUCT_ID,
-    });
-    expect(res.allowed).toBe(true);
-    expect(res.creatorId).toBe(ADMIN_ID);
-    expect(res.customerId).toBe(STUDENT_ID);
+    expect(mockPrisma.user.findFirst).not.toHaveBeenCalled();
   });
 
   it("denies student whose only order has status refunded (status filter is strict)", async () => {
@@ -237,7 +235,7 @@ describe("resolveMessagingPermission", () => {
     );
   });
 
-  it("queries product, creator-fallback and order (in that order)", async () => {
+  it("queries only product and order (no admin-fallback post-fase 4)", async () => {
     const callOrder: string[] = [];
     mockPrisma.product.findUnique.mockImplementation(async () => {
       callOrder.push("product");
@@ -247,17 +245,17 @@ describe("resolveMessagingPermission", () => {
       callOrder.push("order");
       return { id: ORDER_ID };
     });
-    mockPrisma.user.findFirst.mockImplementation(async () => {
-      callOrder.push("admin-fallback");
-      return { id: "fallback" };
-    });
     await resolveMessagingPermission({
       actorId: STUDENT_ID,
       targetId: CREATOR_ID,
       productId: PRODUCT_ID,
     });
-    // admin-fallback NON deve essere chiamato quando product.creatorId c'è
+    // Post-fase 4 hardening: creatorId non è mai più risolto via fallback
+    // admin (la colonna è REQUIRED). Confermiamo che la query legacy
+    // `prisma.user.findFirst({ where: { role: "admin" } })` è completamente
+    // rimossa dal call sequence.
     expect(callOrder).toEqual(["product", "order"]);
+    expect(mockPrisma.user.findFirst).not.toHaveBeenCalled();
   });
 
   it("does NOT require an order when querying as the creator (creator side)", async () => {

@@ -53,6 +53,8 @@ export async function POST(
         pricesByCurrency: original.pricesByCurrency,
         countryOverrides: original.countryOverrides,
         defaultLanguage: original.defaultLanguage,
+        // Phase 4 hardening: preserva l'identità del creator originale.
+        creatorId: original.creatorId,
         translations: {
           create: original.translations.map((t) => ({
             locale: t.locale,

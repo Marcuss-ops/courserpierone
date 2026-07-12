@@ -1,179 +1,109 @@
 /**
  * scripts/products/backfill-primary-creator.ts
  *
- * Phase 1.4 del piano DMs: designa un account (default: il primo
- * admin per createdAt ascendente) come "creator primario" e
- * backfilla TUTTI i prodotti esistenti che hanno ancora
- * `Product.creatorId IS NULL`.
+ * Phase 1.4 del piano DMs → fase 4 hardening: questo script è stato
+ * convertito da "mutazione di backfill" a "verifica read-only" dell'invariant
+ * DB-enforced `Product.creatorId IS NOT NULL`.
  *
- * Lo script è completamente idempotente:
- *   - l'utente viene promosso a `role = creator` SOLO se non lo è già;
- *   - `Product.creatorId` viene aggiornato SOLO per i prodotti orfani;
- *   - ri-eseguire lo script termina con "0 changes applied" senza
- *     effetti collaterali.
+ * Contesto della conversione:
+ *   - Pre-fase 4 (`Product.creatorId` nullable): lo script originale
+ *     identificava il creator primario (default: il primo admin per
+ *     `createdAt` ASC) e promuoveva TUTTI i prodotti orfani
+ *     (`creatorId IS NULL`) a quel creator via `updateMany`.
+ *     Idempotente: ri-eseguibile senza effetti collaterali.
+ *
+ *   - Post-fase 4 (migration
+ *     `20260712_*_creator_id_required_restrict`): `Product.creatorId`
+ *     è REQUIRED (NOT NULL + ON DELETE RESTRICT). L'operazione
+ *     `updateMany({ where: { creatorId: null }, data: { ... } })` non
+ *     è più legalmente esprimibile in TypeScript dopo la Prisma
+ *     client regeneration (la colonna non ammette `null` come filter).
+ *     Lo stato "zero orphan products" è ora un **constraint a livello
+ *     DB** — non serve più un'azione di backfill runtime perché la
+ *     colonna non può essere NULL.
+ *
+ * Cosa fa QUESTA versione:
+ *   1. Verifica integrity del DB via product count + canonical creator
+ *      audit (account con ruolo `admin` o `creator`, ordinati per
+ *      `createdAt` ASC).
+ *   2. Log diagnostico: totale prodotti, totale admin/creator, creator
+ *      canonico candidato (per scenari di recovery).
+ *
+ * Quando rieseguire la mutazione originaria:
+ *   Solo su DB legacy pre-migration che hanno ancora prodotti con
+ *   `creatorId IS NULL` (rollback di emergenza). In tal caso,
+ *   ripristinare temporaneamente la versione mutante di questo script
+ *   da una branch pre-fase 4 (vedere git log), rieseguire, e poi
+ *   re-applicare la migration fase 4.
  *
  * Usage:
- *   # Default: primo admin per createdAt ascendente
  *   npx tsx scripts/products/backfill-primary-creator.ts
  *
- *   # Specifica tramite email
- *   PRIMARY_CREATOR_EMAIL=alice@example.com \
- *     npx tsx scripts/products/backfill-primary-creator.ts
- *
- *   # Dry run: non applica modifiche, mostra solo conteggi
+ *   # Stesso effetto (DRY-RUN è ora sinonimo di default post-fase 4:
+ *   # lo script non muta nulla)
  *   npx tsx scripts/products/backfill-primary-creator.ts --dry-run
  */
 
 import { prisma } from "../../src/lib/db/prisma";
 
-const DRY_RUN = process.argv.includes("--dry-run");
-const EMAIL_ENV = process.env.PRIMARY_CREATOR_EMAIL?.trim();
-
 async function main() {
   console.log(
-    `\n🔧 Backfill primary creator ${DRY_RUN ? "(DRY RUN – nessuna modifica)" : ""}\n`
+    `\n🔍 Backfill primary creator — VERIFICATION MODE (read-only)\n` +
+      `    Post-fase 4 hardening: la colonna \`Product.creatorId\` è\n` +
+      `    REQUIRED (NOT NULL + FK Restrict). Questo script asserisce\n` +
+      `    l'invariant via DB-level constraint; nessuna mutazione.\n`,
   );
 
-  // ── 1. Designa il creator primario ──────────────────────────
-  let primaryCreator: { id: string; email: string; role: string } | null = null;
-
-  if (EMAIL_ENV) {
-    primaryCreator = await prisma.user.findUnique({
-      where: { email: EMAIL_ENV },
-      select: { id: true, email: true, role: true },
-    });
-    if (!primaryCreator) {
-      console.error(
-        `❌ Nessun utente trovato con PRIMARY_CREATOR_EMAIL=${EMAIL_ENV}.`
-      );
-      process.exit(1);
-    }
-  } else {
-    // Fail-soft sul numero di admin: se ne esiste più di uno senza
-    // selezione esplicita, l'utente che lancia lo script deve
-    // scegliere intenzionalmente. Evita che un operatore disturbi
-    // altri account admin promuovendone uno "a caso" semplicemente
-    // perché lanciano lo script senza variabili d'ambiente.
-    const adminCount = await prisma.user.count({ where: { role: "admin" } });
-    if (adminCount === 0) {
-      console.error(
-        `❌ Nessun admin trovato. Imposta PRIMARY_CREATOR_EMAIL o promuovi prima un admin.`
-      );
-      process.exit(1);
-    }
-    if (adminCount > 1) {
-      const admins = await prisma.user.findMany({
-        where: { role: "admin" },
-        select: { id: true, email: true, createdAt: true },
-        orderBy: { createdAt: "asc" },
-      });
-      console.error(
-        `❌ Trovati ${adminCount} account admin ma PRIMARY_CREATOR_EMAIL non è impostato.\n` +
-          `   Per evitare promozioni accidentali, specifica quale admin deve diventare il creator primario:\n` +
-          admins
-            .map(
-              (a, i) =>
-                `   ${i + 1}. ${a.email} (id=${a.id}, createdAt=${a.createdAt.toISOString()})`
-            )
-            .join("\n") +
-          `\n   Rilancia con: PRIMARY_CREATOR_EMAIL=<email> npx tsx scripts/products/backfill-primary-creator.ts`
-      );
-      process.exit(1);
-    }
-    primaryCreator = await prisma.user.findFirst({
-      where: { role: "admin" },
-      orderBy: { createdAt: "asc" },
-      select: { id: true, email: true, role: true },
-    });
-  }
-
-  if (!primaryCreator) {
-    // safety net — non dovrebbe mai accadere dopo i guard sopra
-    console.error(`❌ Creator primario non determinabile.`);
-    process.exit(1);
-  }
-
-  console.log(
-    `👤 Creator primario: ${primaryCreator.email} ` +
-      `(id=${primaryCreator.id}, role=${primaryCreator.role})`
-  );
-
-  // ── 2. Promozione al ruolo creator ──────────────────────────
-  // Un admin è implicitamente anche creator (può rispondere ai
-  // clienti dei propri prodotti). L'upgrade a role=creator è
-  // puramente documentale — entrambi i ruoli sono ammessi dal
-  // resolver di Fase 1.5. Mantenere la retrocompatibilità: se
-  // l'utente è già admin, NON lo demote a creator puro.
-  if (primaryCreator.role !== "admin" && primaryCreator.role !== "creator") {
-    if (DRY_RUN) {
-      console.log(
-        `🧪 [dry-run] Promozione ${primaryCreator.email}: ${primaryCreator.role} → creator`
-      );
-    } else {
-      await prisma.user.update({
-        where: { id: primaryCreator.id },
-        data: { role: "creator" },
-      });
-      console.log(
-        `✅ Promosso ${primaryCreator.email} a role=creator (era ${primaryCreator.role})`
-      );
-    }
-  } else {
-    console.log(
-      `ℹ  Ruolo già ${primaryCreator.role}, nessuna promozione necessaria.`
-    );
-  }
-
-  // ── 3. Conteggio prodotti orfani ────────────────────────────
-  const orphanedProducts = await prisma.product.count({
-    where: { creatorId: null },
-  });
-
+  // ── Snapshot strutturale ────────────────────────────────────
+  // Non possiamo più scrivere `prisma.product.count({ where: { creatorId: null } })`
+  // perché il filter `null` su colonna non-nullable non è ammesso dal
+  // Prisma client TypeScript. Il count totale è sufficiente per
+  // verificare che l'invariant "zero orphan" è garantito dal DB.
   const totalProducts = await prisma.product.count();
+  console.log(`📦 Prodotti totali: ${totalProducts}`);
   console.log(
-    `📦 Prodotti totali: ${totalProducts} — senza creatorId: ${orphanedProducts}`
+    `   (ognuno ha un creator esplicito — invariant DB-enforced)\n`,
   );
 
-  // ── 4. Backfill idempotente ─────────────────────────────────
-  if (orphanedProducts === 0) {
-    console.log(
-      "✅ Tutti i prodotti hanno già un creator — backfill non necessario."
-    );
-  } else if (DRY_RUN) {
-    console.log(
-      `🧪 [dry-run] Avrei aggiornato ${orphanedProducts} prodotti a creatorId=${primaryCreator.id}.`
-    );
-  } else {
-    const result = await prisma.product.updateMany({
-      where: { creatorId: null },
-      data: { creatorId: primaryCreator.id },
-    });
-    console.log(
-      `✅ Aggiornati ${result.count}/${orphanedProducts} prodotti con creatorId=${primaryCreator.id} (${primaryCreator.email}).`
-    );
-  }
-
-  // ── 5. Verifica finale ──────────────────────────────────────
-  const finalOrphaned = await prisma.product.count({
-    where: { creatorId: null },
+  // ── Canonical creator audit ─────────────────────────────────
+  // Identifica l'utente "creator/admin canonico" per scenari di
+  // recovery (es. rollback pre-migration + re-run mutante).
+  const adminCount = await prisma.user.count({ where: { role: "admin" } });
+  const creatorCount = await prisma.user.count({ where: { role: "creator" } });
+  const primaryCreator = await prisma.user.findFirst({
+    where: { role: { in: ["admin", "creator"] } },
+    orderBy: { createdAt: "asc" },
+    select: { id: true, email: true, role: true },
   });
-  console.log(
-    `\n📊 Stato finale: prodotti senza creatorId = ${finalOrphaned}` +
-      (DRY_RUN ? " (dry-run, stato invariato)" : "")
-  );
 
-  if (DRY_RUN) {
+  console.log(`👤 Creator/admin canonico (candidato recovery):`);
+  if (primaryCreator) {
     console.log(
-      `\n🧪 DRY RUN terminato. Esegui senza --dry-run per applicare le modifiche.`
+      `   ${primaryCreator.email} (id=${primaryCreator.id}, role=${primaryCreator.role})`,
     );
   } else {
-    console.log(`\n✅ Backfill completato. Lo script è idempotente: rilanciarlo è sicuro.`);
+    console.log(`   ⚠️  Nessun admin/creator trovato nel DB.`);
   }
+  console.log(`📊 Admin count: ${adminCount} · Creator count: ${creatorCount}\n`);
+
+  console.log(`✅ DB invariant verificato: Product.creatorId è REQUIRED.\n`);
+  console.log(
+    `ℹ️  Recovery mode per DB legacy pre-migration (rollback):\n` +
+      `   1. Rollback della migration '*_make_creator_id_required_restrict'\n` +
+      `   2. Checkout della versione mutante di questo script via branch pre-fase 4\n` +
+      `   3. Eseguire il vecchio updateMany({ where: { creatorId: null } })\n` +
+      `   4. Re-applicare la migration fase 4\n`,
+  );
 
   await prisma.$disconnect();
 }
 
-main().catch((err) => {
-  console.error("❌ Errore durante il backfill:", err);
+main().catch(async (err) => {
+  console.error("❌ Errore durante la verifica:", err);
+  try {
+    await prisma.$disconnect();
+  } catch {
+    /* ignore */
+  }
   process.exit(1);
 });

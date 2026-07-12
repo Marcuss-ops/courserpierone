@@ -27,6 +27,17 @@
  *     è il primo admin). NB: in V2 quando avremo User.role="creator"
  *     dedicato, sarà sufficiente aggiornare questa query senza toccare i
  *     call site.
+ *   - POST-FASE 4 HARDENING (`20260712210000_creator_id_required_restrict`):
+ *     la query `prisma.user.findFirst({ where: { role: "admin" } })` è
+ *     semanticamente **DEAD** — ogni prodotto ha ora un `creatorId` esplicito
+ *     (REQUIRED + FK Restrict), di conseguenza il vecchio pattern "first
+ *     admin = creator canonico" è sostituito dalla join naturale
+ *     `product.creator`. I call site `/portal/page.tsx` e
+ *     `/curso/[lessonId]/page.tsx` continuano a funzionare (il bottone
+ *     "Contatta il creator" usa questo helper), ma per V2.x considerare
+ *     la riscrittura in `prisma.product.findUnique({ where: { slug },
+ *     select: { creator: { select: { id, name } } } })`. Deferito a V2.x
+ *     perché non blocca build/test/runtime.
  *   - select: { id, name } per creator (alcuni caller future vorranno il
  *     nome del creator come avatar/header; V1 lo ignorano).
  *   - select: { id } per product (l'unico dato che serve a ChatButton è

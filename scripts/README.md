@@ -40,7 +40,7 @@ Per traduzioni AI: `OPENAI_API_KEY` (OpenAI) o `pip install argostranslate` (loc
 
 Lo script `audit-v1-readiness.ts` (read-only, no mutations) misura **i 3 counter che gating il cleanup DB di V1**:
 
-1. **`Product.creatorId IS NULL`** → quanti prodotti orfani: deve essere 0 prima di rendere `creatorId` obbligatorio + Restrict FK. Fix: `scripts/products/backfill-primary-creator.ts`.
+1. ~~**`Product.creatorId IS NULL`**~~ → post-fase 4 hardening (`20260712210000_creator_id_required_restrict`): `Product.creatorId` è ora REQUIRED + FK Restrict a livello DB. La query `count({ where: { creatorId: null } })` non è più legalmente esprimibile in TypeScript. L'invariant vive nel constraint di schema. Recovery legacy pre-migration: `scripts/products/backfill-primary-creator.ts` (versione mutante disponibile via git log pre-fase 4).
 2. **`Order.paymentProvider = 'stripe' AND status IN ('pending','completed')`** → ordini Stripe ancora attivi: devono essere drained (refund o migrazione a Lemon Squeezy) prima di collassare il dual-provider.
 3. **`Account + Session + VerificationToken` row counts** → residui del vecchio NextAuth: una purge mirata dovrebbe precedere `DROP TABLE` di quei tre modelli Prisma (Phase di cleanup già pianificata).
 

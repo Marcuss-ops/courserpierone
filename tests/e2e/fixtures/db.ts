@@ -47,6 +47,25 @@ export async function seedTestProduct() {
   const stripePriceId = process.env.TEST_STRIPE_PRICE_ID ?? null;
   const lemonVariantId = process.env.TEST_LEMON_VARIANT_ID ?? null;
 
+  // Phase 4 hardening: Product.creatorId è REQUIRED + FK Restrict. Il
+  // creator canonico del prodotto di test è il primo admin/creator per
+  // createdAt ascendente (criterio storico del removed
+  // backfill-primary-creator.ts). Se nessun admin/creator esiste nel
+  // DB di test, l'operazione fallisce loudmente — il test setup deve
+  // includere un admin seeded prima dell'esecuzione della suite.
+  const canonicalCreator = await prisma.user.findFirst({
+    where: { role: { in: ["admin", "creator"] } },
+    orderBy: { createdAt: "asc" },
+    select: { id: true },
+  });
+  if (!canonicalCreator) {
+    throw new Error(
+      "seedTestProduct: nessun admin/creator trovato nel DB di test. " +
+        "L'invariant Phase 4 richiede Product.creatorId NOT NULL — " +
+        "seedare un account admin prima di eseguire i test E2E.",
+    );
+  }
+
   const existing = await prisma.product.findUnique({
     where: { slug: "test-course-e2e" },
   });
@@ -73,6 +92,7 @@ export async function seedTestProduct() {
         defaultLanguage: "en",
         stripePriceId,
         lemonVariantId,
+        creatorId: canonicalCreator.id,
       },
     });
   }

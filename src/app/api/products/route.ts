@@ -3,60 +3,73 @@ import { prisma } from "@/lib/db/prisma";
 import { apiErrorResponse } from "@/lib/errors";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { revalidateProduct } from "@/lib/admin/revalidate-product";
+import { withRateLimit } from "@/lib/utils/rate-limit";
+import { getServerUser } from "@/lib/supabase/get-user";
 
 // GET — Lista tutti i prodotti
-export async function GET() {
-  try {
-    const authError = await requireAdmin();
-    if (authError) return authError;
-    const products = await prisma.product.findMany({
-      include: {
-        translations: { select: { locale: true } },
-        _count: { select: { lessons: true } },
-        orders: { where: { status: "completed" } },
-      },
-      orderBy: { createdAt: "desc" },
-    });
+export const GET = withRateLimit(
+  async function GET() {
+    try {
+      const authError = await requireAdmin();
+      if (authError) return authError;
+      const products = await prisma.product.findMany({
+        include: {
+          translations: { select: { locale: true } },
+          _count: { select: { lessons: true } },
+          orders: { where: { status: "completed" } },
+        },
+        orderBy: { createdAt: "desc" },
+      });
 
-    // Formatta per la response
-    const formatted = await Promise.all(
-      products.map(async (p) => {
-        const pageviews = await prisma.analyticEvent.count({
-          where: { productId: p.slug, eventType: "pageview" },
-        });
-        const purchases = p.orders.length;
-        const conversion = pageviews > 0 ? ((purchases / pageviews) * 100).toFixed(1) + "%" : "0%";
-        const productRevenue = p.orders.reduce((sum, o) => sum + o.amount, 0) / 100;
+      // Formatta per la response
+      const formatted = await Promise.all(
+        products.map(async (p) => {
+          const pageviews = await prisma.analyticEvent.count({
+            where: { productId: p.slug, eventType: "pageview" },
+          });
+          const purchases = p.orders.length;
+          const conversion = pageviews > 0 ? ((purchases / pageviews) * 100).toFixed(1) + "%" : "0%";
+          const productRevenue = p.orders.reduce((sum, o) => sum + o.amount, 0) / 100;
 
-        return {
-          id: p.id,
-          slug: p.slug,
-          price: p.price,
-          currency: p.currency,
-          pricesByCurrency: p.pricesByCurrency,
-          status: p.status,
-          coverUrl: p.coverUrl,
-          templateId: p.templateId,
-          lessonsCount: p._count.lessons,
-          locales: Array.from(new Set(p.translations.map((t: { locale: string }) => t.locale))),
-          createdAt: p.createdAt,
-          revenue: productRevenue,
-          conversion,
-        };
-      })
-    );
+          return {
+            id: p.id,
+            slug: p.slug,
+            price: p.price,
+            currency: p.currency,
+            pricesByCurrency: p.pricesByCurrency,
+            status: p.status,
+            coverUrl: p.coverUrl,
+            templateId: p.templateId,
+            lessonsCount: p._count.lessons,
+            locales: Array.from(new Set(p.translations.map((t: { locale: string }) => t.locale))),
+            createdAt: p.createdAt,
+            revenue: productRevenue,
+            conversion,
+          };
+        })
+      );
 
-    return NextResponse.json(formatted);
-  } catch (error) {
-    return apiErrorResponse(error, "Failed to fetch products");
-  }
-}
+      return NextResponse.json(formatted);
+    } catch (error) {
+      return apiErrorResponse(error, "Failed to fetch products");
+    }
+  },
+  "AUTH"
+);
 
 // POST — Crea un nuovo prodotto
-export async function POST(request: NextRequest) {
+export const POST = withRateLimit(async function POST(request: NextRequest) {
   try {
     const authError = await requireAdmin();
     if (authError) return authError;
+    // Phase 4 hardening: `Product.creatorId` è REQUIRED (NOT NULL +
+    // FK Restrict). L'admin autenticato diventa il creator canonico
+    // del nuovo prodotto. Richiamiamo getServerUser separatamente
+    // perché requireAdmin non espone `dbUser` al caller.
+    const { dbUser } = await getServerUser();
+    if (!dbUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const body = await request.json();
     const { slug, price, coverUrl, translations, lessons, sourceLocale, templateId, lemonVariantId, translationsByLocale, pricesByCurrency, countryOverrides } = body;
 
@@ -79,6 +92,9 @@ export async function POST(request: NextRequest) {
           lemonVariantId: lemonVariantId ?? null,
           pricesByCurrency: pricesByCurrency ? JSON.stringify(pricesByCurrency) : null,
           countryOverrides: countryOverrides ? JSON.stringify(countryOverrides) : null,
+          // Phase 4: creatorId è REQUIRED. L'admin che crea il prodotto
+          // è il creator canonico — coerente con il pattern "creator = owner del prodotto".
+          creatorId: dbUser.id,
         },
       });
 
@@ -202,4 +218,4 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return apiErrorResponse(error, "Failed to create product");
   }
-}
+}, "AUTH");

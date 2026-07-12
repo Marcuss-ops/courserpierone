@@ -7,12 +7,13 @@
  * data state, would FAIL `resolveMessagingPermission()` and therefore
  * cannot use the creator↔student DM channel.
  *
- * Why: we're transitioning pre-Fase 1.4 (Product.creatorId nullable, no
- * explicit creator) to the strict creator↔student model (creatorId
- * canonical, no admin fallback). Before running any backfill migration
- * we want a complete list of incompatible rows so the operator can
- * triage them: orphan products (no creator), pairs with refunded-status
- * orders, etc.
+ * Why: post-fase 4 hardening `Product.creatorId` è REQUIRED (NOT NULL +
+ * Restrict FK) e il fallback al "primo admin" legacy è stato rimosso dal
+ * resolver. Di conseguenza gli scenari "orphan product / null creator /
+ * admin fallback" non sono più possibili né a livello DB né a livello
+ * resolver. Questo script diagnostica solo i casi che restano realistic
+ * post-fase 4 (studenti con order refunded, coppie non-creator/student,
+ * ecc.).
  *
  * SCOPE NOTE — buyer-side only (V1):
  *   This script tests pairs derived exclusively from `Order.status =
@@ -26,13 +27,8 @@
  *   (creatorId, Product) as actor for symmetry.
  *
  * Output:
- *   1. System stats overview (orders / products / null-creator count)
+ *   1. System stats overview (orders / products)
  *   2. Per-pair compatibility verdict, grouped by reason
- *   3. Standalone list of products with `creatorId = null` (the primary
- *      backfill candidate set, surfaced even when the resolver would
- *      have allowed via the legacy admin fallback path — so the
- *      operator knows which product slugs need an explicit creator
- *      assignment before legacy fallback is removed in V2).
  *
  * Defensive note:
  *   Each per-pair `resolveMessagingPermission` call is wrapped in a
@@ -63,9 +59,9 @@ interface IncompatiblePair {
   studentEmail: string;
   productId: string;
   productSlug: string;
-  productCreatorId: string | null;
+  productCreatorId: string;
   actorId: string;
-  targetId: string | null;
+  targetId: string;
   /** `null` ⇒ WARN category (logical soft inconsistency, not a hard deny). */
   reason: string | null;
   notes: string;
@@ -74,39 +70,39 @@ interface IncompatiblePair {
 // ─── Main ─────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
-  console.log(
-    "\n==== Messaging Diagnostic (DRY-RUN, read-only) ====",
-  );
+  console.log("\n==== Messaging Diagnostic (DRY-RUN, read-only) ====");
   console.log(
     "Surfacing (user, product) pairs incompatible with the\n" +
       "creator↔student DM model (Fase 1.5 resolver as SSOT).\n",
   );
 
-  // ─── Phase 1: stats overview ────────────────────────────────
+  // ─── Phase 1: stats overview ─────────────────────────────────
+  // NB: `nullCreatorProducts` rimosso post-fase 4 hardening: la
+  // colonna `Product.creatorId` è REQUIRED + FK Restrict, di
+  // conseguenza il count `where: { creatorId: null }` non è più
+  // legalmente esprimibile in TypeScript. Lo stato "0 orphan" è un
+  // invariant DB-enforced.
   const [
     totalOrders,
     completedOrders,
     totalProducts,
-    nullCreatorProducts,
-    adminCount,
     totalUsers,
   ] = await Promise.all([
     prisma.order.count(),
     prisma.order.count({ where: { status: "completed" } }),
     prisma.product.count(),
-    prisma.product.count({ where: { creatorId: null } }),
-    prisma.user.count({ where: { role: "admin" } }),
     prisma.user.count(),
   ]);
 
   console.log(`📊 System stats`);
-  console.log(`   • Completed orders:           ${completedOrders}/${totalOrders}`);
-  console.log(`   • Total products:             ${totalProducts}`);
-  console.log(`   • Products with NULL creator: ${nullCreatorProducts} (need backfill)`);
-  console.log(`   • Admin users (legacy fallback): ${adminCount}`);
-  console.log(`   • Total users:                ${totalUsers}\n`);
+  console.log(`   • Completed orders:    ${completedOrders}/${totalOrders}`);
+  console.log(`   • Total products:      ${totalProducts}`);
+  console.log(`   • Total users:         ${totalUsers}`);
+  console.log(
+    `   • Orphan products:     enforced at DB level (NOT NULL + Restrict FK)\n`,
+  );
 
-  // ─── Phase 2: fetch completed orders ────────────────────────
+  // ─── Phase 2: fetch completed orders ─────────────────────────
   // We could also scan every order (including refunded) but
   // `resolveMessagingPermission` only checks for completed orders; a
   // refunded pair is "deny by design" (semantics, not data corruption).
@@ -125,69 +121,17 @@ async function main(): Promise<void> {
   });
   console.log(`   • ${orders.length} completed orders loaded\n`);
 
-  // Cache fallback admin (legacy Fase 1.4 audit path) once.
-  let fallbackAdminId: string | null = null;
-  if (adminCount > 0) {
-    const admin = await prisma.user.findFirst({
-      where: { role: "admin" },
-      orderBy: { createdAt: "asc" },
-      select: { id: true },
-    });
-    fallbackAdminId = admin?.id ?? null;
-  }
-
   // ─── Phase 3: test each pair via the SSOT resolver ───────────
+  // NB: post-fase 4 hardening il branch "Edge case A / Edge case B"
+  // (creatorId null + admin fallback) è stato rimosso perché ora
+  // irraggiungibile: `Product.creatorId` non può essere null, e il
+  // resolver non cade più mai in admin fallback.
   const incompatible: IncompatiblePair[] = [];
 
   let scanned = 0;
   for (const o of orders) {
     scanned++;
-    const creatorIdOrAdmin = o.product.creatorId ?? fallbackAdminId;
-
-    // Edge case A: NO creator AND NO admin fallback.
-    // DM impossible until either Product.creatorId is set, or an admin
-    // exists. This is the only "hard deny" we know pre-resolver.
-    if (!creatorIdOrAdmin) {
-      incompatible.push({
-        orderId: o.id,
-        customerId: o.userId,
-        studentEmail: o.user.email,
-        productId: o.productId,
-        productSlug: o.product.slug,
-        productCreatorId: o.product.creatorId,
-        actorId: o.userId,
-        targetId: null,
-        reason: MessagingDenyReason.NoCreatorForProduct,
-        notes:
-          "Product.creatorId is NULL AND no admin user exists to inherit " +
-          "the legacy fallback role. DM is impossible until a creator is assigned.",
-      });
-      continue;
-    }
-
-    // Edge case B: Product.creatorId IS NULL but admin fallback exists.
-    // The resolver will allow via the legacy admin fallback, but we
-    // flag it so the operator backfills the explicit creator before
-    // the fallback is removed in V2.
-    if (o.product.creatorId === null) {
-      incompatible.push({
-        orderId: o.id,
-        customerId: o.userId,
-        studentEmail: o.user.email,
-        productId: o.productId,
-        productSlug: o.product.slug,
-        productCreatorId: null,
-        actorId: o.userId,
-        targetId: creatorIdOrAdmin,
-        // Soft warning, NOT a deny reason.
-        reason: null,
-        notes:
-          `Product.creatorId is NULL. Resolver currently falls back to admin ` +
-          `${creatorIdOrAdmin} (legacy Fase 1.4 audit path). Operator should ` +
-          "backfill explicit creator via scripts/products/backfill-primary-creator.ts.",
-      });
-      continue;
-    }
+    const creatorId = o.product.creatorId;
 
     // Standard case: explicit creator, so we test the resolver.
     // Wrap in try/catch — a single transient Prisma error should NOT
@@ -197,7 +141,7 @@ async function main(): Promise<void> {
     try {
       resolverResult = await resolveMessagingPermission({
         actorId: o.userId,
-        targetId: creatorIdOrAdmin,
+        targetId: creatorId,
         productId: o.productId,
       });
     } catch (caught) {
@@ -209,9 +153,9 @@ async function main(): Promise<void> {
         studentEmail: o.user.email,
         productId: o.productId,
         productSlug: o.product.slug,
-        productCreatorId: o.product.creatorId,
+        productCreatorId: creatorId,
         actorId: o.userId,
-        targetId: creatorIdOrAdmin,
+        targetId: creatorId,
         reason: `RESOLVER_THREW:${truncated}`,
         notes:
           `Resolver threw during scan: ${msg.slice(0, 200)}. ` +
@@ -228,9 +172,9 @@ async function main(): Promise<void> {
         studentEmail: o.user.email,
         productId: o.productId,
         productSlug: o.product.slug,
-        productCreatorId: o.product.creatorId,
+        productCreatorId: creatorId,
         actorId: o.userId,
-        targetId: creatorIdOrAdmin,
+        targetId: creatorId,
         reason: resolverResult.reason ?? "unknown",
         notes: `Resolver denied: ${resolverResult.reason ?? "no reason"}`,
       });
@@ -248,7 +192,7 @@ async function main(): Promise<void> {
   } else {
     const byReason = new Map<string, number>();
     for (const p of incompatible) {
-      const key = p.reason ?? "WARN_NULL_CREATOR_WITH_ADMIN_FALLBACK";
+      const key = p.reason ?? "UNKNOWN";
       byReason.set(key, (byReason.get(key) ?? 0) + 1);
     }
 
@@ -262,10 +206,10 @@ async function main(): Promise<void> {
       `\n   Detailed pair list (first ${HARD_CAP}, truncated thereafter):`,
     );
     for (const p of incompatible.slice(0, HARD_CAP)) {
-      const tag = p.reason ?? "WARN_NULL_CREATOR";
+      const tag = p.reason ?? "UNKNOWN";
       console.log(
         `     - order=${p.orderId}  student=${p.studentEmail}\n` +
-          `       product=${p.productSlug} (creatorId=${p.productCreatorId ?? "NULL"})\n` +
+          `       product=${p.productSlug} (creatorId=${p.productCreatorId})\n` +
           `       reason=${tag}\n` +
           `       notes: ${p.notes}`,
       );
@@ -275,35 +219,6 @@ async function main(): Promise<void> {
         `     … and ${incompatible.length - HARD_CAP} more (rerun with full DB export to see all).`,
       );
     }
-  }
-
-  // ─── Phase 5: separate backfill-candidate list ─────────────
-  // Even outside the resolved-pairs scan, surface every product with
-  // `creatorId = null` so the operator has the canonical list to feed
-  // into the bootstrap backfill script.
-  const nullCreatorList = await prisma.product.findMany({
-    where: { creatorId: null },
-    select: { id: true, slug: true, status: true, createdAt: true },
-  });
-  console.log(
-    `\n⚠️  Products with creatorId IS NULL (${nullCreatorList.length}) — primary backfill set:`,
-  );
-  if (nullCreatorList.length === 0) {
-    console.log("   ✅ None — every product has an explicit creator assigned.");
-  } else {
-    const HARD_CAP = 10;
-    for (const p of nullCreatorList.slice(0, HARD_CAP)) {
-      console.log(
-        `   - ${p.slug} (id=${p.id}, status=${p.status}, created=${p.createdAt.toISOString().slice(0, 10)})`,
-      );
-    }
-    if (nullCreatorList.length > HARD_CAP) {
-      console.log(`   … and ${nullCreatorList.length - HARD_CAP} more`);
-    }
-    console.log(
-      `\n   Suggested next step:\n` +
-        `     tsx scripts/products/backfill-primary-creator.ts --dry-run`,
-    );
   }
 
   console.log("\n==== Diagnostic complete (no mutations applied) ====\n");

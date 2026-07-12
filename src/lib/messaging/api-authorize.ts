@@ -15,6 +15,12 @@
  *
  * Phase 1.6 del piano DMs: tutte le route messages passano da qui invece di
  * reinventare i check sparsi.
+ *
+ * Fase 4 hardening (`20260712210000_creator_id_required_restrict`):
+ * la colonna `Product.creatorId` è REQUIRED + FK Restrict a livello DB.
+ * Di conseguenza il deny-reason `NoCreatorForProduct` non è più
+ * raggiungibile dal resolver ed è stato rimosso anche da questa mappa
+ * REASON_TO_STATUS (vedi nota inline più sotto).
  */
 
 import { NextResponse } from "next/server";
@@ -38,6 +44,13 @@ export type AuthorizeDmDecision =
       response: NextResponse;
     };
 
+// NB post-fase 4 hardening: `MessagingDenyReason.NoCreatorForProduct` è
+// stato rimosso dal resolver perché la colonna `Product.creatorId` è ora
+// REQUIRED + FK Restrict a livello DB. L'eventuale presenza di un creator
+// mancante nel DB è ora un problema di integrità DB (recovery via
+// migration `*_creator_id_required_restrict` + scripts/products/backfill-
+// primary-creator.ts versione mutante pre-fase 4, oppure psql manuale),
+// non un errore di permesso runtime che la route possa tradurre in 4xx.
 const REASON_TO_STATUS: Record<string, { status: number; error: string }> = {
   [MessagingDenyReason.SelfMessage]: {
     status: 400,
@@ -46,11 +59,6 @@ const REASON_TO_STATUS: Record<string, { status: number; error: string }> = {
   [MessagingDenyReason.ProductNotFound]: {
     status: 404,
     error: "Prodotto non trovato",
-  },
-  [MessagingDenyReason.NoCreatorForProduct]: {
-    status: 409,
-    error:
-      "Prodotto non ancora associato a un creator. Esegui scripts/products/backfill-primary-creator.ts per migrare.",
   },
   [MessagingDenyReason.NotCreatorStudentPair]: {
     status: 403,

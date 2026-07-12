@@ -9,7 +9,7 @@
 | `read-product.ts` | Mostra dettaglio completo di un prodotto |
 | `add-currency-prices.ts` | Aggiunge prezzi in valute multiple a un prodotto (param: <slug>) |
 | `check-prices.ts` | Verifica i prezzi configurati per un prodotto (param: <slug>) |
-| `backfill-primary-creator.ts` | (Phase 1.4) Backfill `Product.creatorId` per tutti i prodotti che sono NULL, promuovendo un admin come creator primario |
+| `backfill-primary-creator.ts` | (Post-fase 4 — verification-only) Assertion read-only dell'invariant `Product.creatorId IS NOT NULL` DB-enforced dalla migration `*_creator_id_required_restrict`. Storicamente mutante pre-fase 4 (backfill NULL → primary admin); oggi logga conteggi + canonical creator audit. |
 
 ## `generate.ts`
 
@@ -45,24 +45,20 @@ npx tsx scripts/products/check-prices.ts <slug>
 
 Verifica e stampa tutti i prezzi configurati per un prodotto (EUR, USD, GBP, JPY, ecc.).
 
-## `backfill-primary-creator.ts` (Phase 1.4 del piano DMs)
+## `backfill-primary-creator.ts` (Phase 1.4 — post-fase 4 verification)
 
 ```bash
-# Default: primo admin per createdAt ascendente
+# Default: read-only (non muta)
 npx tsx scripts/products/backfill-primary-creator.ts
 
-# Specifica tramite email (opzionale)
-PRIMARY_CREATOR_EMAIL=alice@example.com \
-  npx tsx scripts/products/backfill-primary-creator.ts
-
-# Dry run: mostra solo cosa farebbe, senza scrivere
+# Stesso effetto — --dry-run è ora sinonimo del default
 npx tsx scripts/products/backfill-primary-creator.ts --dry-run
 ```
 
-**Cosa fa:** designa un account (default: primo admin per createdAt) come creator **primario** del sistema e popola `Product.creatorId` per ogni prodotto che ne è privo. Lo script è **idempotente** — rilanciarlo termina con `0 changes applied`.
+**Stato post-fase 4 hardening:** la colonna `Product.creatorId` è ora REQUIRED (NOT NULL + FK Restrict) per via della migration `*_creator_id_required_restrict`. Lo script **non muta più** il DB: asserisce l'invariant "zero orphan products" via conteggio + audit del creator canonico (primo admin/creator per `createdAt` ASC).
 
-**Quando eseguirlo:** dopo aver deployato la migration `20260712170003_add_product_creator_id` su un DB che aveva prodotti esistenti senza creator, o dopo aver promosso manualmente un admin a creator principale.
+**Storicamente: cosa faceva.** Pre-fase 4 designava un account (default: primo admin per `createdAt`) come creator **primario** del sistema e popolava `Product.creatorId` per ogni prodotto NULL. Era idempotente — rilanciarlo terminava con `0 changes applied`.
 
-**Sicurezza:** lo script non elimina mai dati; l'unica scrittura è su `User.role` (se non già admin/creator) e `Product.creatorId` (solo per NULL). Usare `--dry-run` per ispezionare le modifiche prima di applicarle.
+**Recovery mode per DB legacy pre-migration** (rollback di emergenza): se serve rieseguire la mutazione originaria (es. DB legacy con prodotti NULL), seguire la procedura documentata inline nello script (4 step). Il branch main **non** mantiene più la versione mutante — per recovery andrebbe ripristinata via git log pre-fase 4 (`feat(db): make Product.creatorId required…` e precedenti).
 
-**Multi-admin guard (fail-fast):** se esistono **più di 1 account admin** nella tabella `User` e `PRIMARY_CREATOR_EMAIL` non è impostato, lo script **rifiuta di procedere** (exit 1) e stampa la lista formattata di tutti gli admin con `id`, `email`, `createdAt`. Il guard resta attivo anche in `--dry-run`, per garantire che la scelta del creator primario sia sempre intenzionale e mai "il primo admin per createdAt" di default con più opzioni possibili. Rilanciare con `PRIMARY_CREATOR_EMAIL=<email-desiderata> npx tsx scripts/products/backfill-primary-creator.ts` per procedere.
+**Multi-admin guard (fail-fast):** presente nella versione mutante storica; rimosso nella versione verification-only perché l'invariant è ora DB-enforced — la fase di selezione del primary creator non avviene più runtime.

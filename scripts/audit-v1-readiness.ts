@@ -4,12 +4,18 @@
  * DRY-RUN audit — purely read-only Prisma queries, no mutations.
  *
  * Goal: emit a single-page readiness report that gates the V1 database
- * cleanups. Three counters are the actual V1 blockers:
+ * cleanups. Two counters remain as V1 blockers (post-fase 4 hardening,
+ * il blocker (1) sugli "orphan products" è stato enforciato come DB
+ * invariant dalla migration
+ * `20260712210000_creator_id_required_restrict` — la colonna
+ * `Product.creatorId` è ora NOT NULL + ON DELETE RESTRICT, di conseguenza
+ * la query `count({ where: { creatorId: null } })` non è più legalmente
+ * esprimibile a livello TypeScript):
  *
- *   (1) `Product.creatorId IS NULL`
- *         → before we can make `creatorId` required + add `Restrict` FK,
- *           every orphan must be backfilled via
- *           scripts/products/backfill-primary-creator.ts.
+ *   (1) ~~`Product.creatorId IS NULL`~~ — DB-enforced via migration
+ *         `20260712210000_creator_id_required_restrict`. Per recovery
+ *         pre-migration vedere scripts/products/backfill-primary-creator.ts
+ *         (versione mutante pre-fase 4 via git log).
  *
  *   (2) `Order.paymentProvider = 'stripe' AND status IN ('pending','completed')`
  *         → number of Stripe orders still in-flight or honored. Before
@@ -52,8 +58,7 @@ import { prisma } from "../src/lib/db/prisma";
 interface AuditReport {
   source: "PRIMARY_DATABASE_URL" | "DATABASE_URL";
   timestamp: string;
-  // The 3 V1 blocker counters (per user spec):
-  orphanProducts: number;
+  // The 2 remaining V1 blocker counters (post-fase 4 hardening):
   activeStripeOrders: number;
   // NextAuth residual counts for the 3 tables (per user spec):
   accountCount: number;
@@ -108,10 +113,15 @@ async function main(): Promise<void> {
       `Mode:     ${IS_PRODUCTION ? "production (DBS-empty guard active)" : "dev/preview (DBS-empty guard silent)"}\n`,
   );
 
-  // ─── Run the 3 blocker queries + 3 sanity baselines in parallel ──
-  // All 6 are independent SELECTs — no transactionality needed.
+  // ─── Run the 2 blocker queries + 3 sanity baselines in parallel ──
+  // All 5 are independent SELECTs — no transactionality needed.
+  //
+  // NB: il blocker (1) `Product.creatorId IS NULL` è stato rimosso perché
+  // ora un'operazione illegale in TypeScript (la colonna è REQUIRED post
+  // `20260712210000_creator_id_required_restrict`) e impossibile a
+  // livello DB (NOT NULL + FK Restrict). L'invariant vive nel vincolo
+  // di schema.
   const [
-    orphanProducts,
     activeStripeOrders,
     totalProducts,
     totalOrders,
@@ -120,8 +130,6 @@ async function main(): Promise<void> {
     sessionCount,
     verificationTokenCount,
   ] = await Promise.all([
-    // Blocker 1
-    prisma.product.count({ where: { creatorId: null } }),
     // Blocker 2
     prisma.order.count({
       where: {
@@ -143,11 +151,11 @@ async function main(): Promise<void> {
   console.log(`\n📊 V1 BLOCKER INDICATORS (these gate the DB cleanups)\n`);
 
   console.log(
-    `   🛑  ORPHAN PRODUCTS (Product.creatorId IS NULL)\n` +
-      `        count: ${orphanProducts}\n` +
-      `        gate:  must be 0 before ` +
-      `Product.creatorId is made required + Restrict FK.\n` +
-      `        fix:   scripts/products/backfill-primary-creator.ts\n`,
+    `   ✅  ORPHAN PRODUCTS (Product.creatorId IS NULL)\n` +
+      `        count: enforced at DB level (NOT NULL + FK Restrict)\n` +
+      `        gate:  post-migration \`20260712210000_creator_id_required_restrict\`,\n` +
+      `              l'invariant è uno stato impossibile del DB.\n` +
+      `        recovery (pre-migration): scripts/products/backfill-primary-creator.ts\n`,
   );
 
   console.log(
@@ -197,14 +205,14 @@ async function main(): Promise<void> {
   }
 
   // ─── Gate decision ────────────────────────────────────────────
+  // NB: il gate `orphanProducts > 0` è stato rimosso post-fase 4
+  // hardening perché l'invariant è ora un constraint a livello DB
+  // (NOT NULL + Restrict FK a migration
+  // `20260712210000_creator_id_required_restrict`). Per recovery su DB
+  // legacy pre-migration (rollback), rieseguire manualmente
+  // scripts/products/backfill-primary-creator.ts e successivamente
+  // ri-roll-back la migration.
   const blockers: string[] = [];
-  if (orphanProducts > 0) {
-    blockers.push(
-      `${orphanProducts} orphan product(s) (creatorId NULL). ` +
-        `Run scripts/products/backfill-primary-creator.ts before ` +
-        `making creatorId required.`,
-    );
-  }
   if (activeStripeOrders > 0) {
     blockers.push(
       `${activeStripeOrders} active Stripe order(s) (pending or completed). ` +
@@ -225,7 +233,7 @@ async function main(): Promise<void> {
   }
 
   if (blockers.length === 0) {
-    console.log(`✅ V1 readiness: GREEN — all 3 blocker counters are zero.\n`);
+    console.log(`✅ V1 readiness: GREEN — both blocker counters are zero.\n`);
   } else {
     console.log(`🚧 V1 readiness: YELLOW/RED — ${blockers.length} blocker(s):\n`);
     for (const b of blockers) {
@@ -238,7 +246,6 @@ async function main(): Promise<void> {
   const report: AuditReport = {
     source: label,
     timestamp: new Date().toISOString(),
-    orphanProducts,
     activeStripeOrders,
     accountCount,
     sessionCount,

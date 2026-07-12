@@ -18,18 +18,22 @@ datasource db {
 
 // ─── Prodotti (Libri / Corsi) ───────────────────────────────
 // Phase 1.2 del piano DMs: ogni prodotto è associato a un creator
-// (User.creatorId). Nullable in V1: tutti i prodotti esistenti
-// verranno backfillati al creator primario nella migration di
-// bootstrap (Fase 1.4). Le Permission della messaggistica
-// (Fase 1.5) useranno questa FK per identificare il creator lato
-// server senza hard-code.
+// (User.creatorId). Post-fase 4 hardening `creatorId` è REQUIRED e
+// la FK è `ON DELETE RESTRICT` — il fallback al "primo admin" in
+// resolve-message-permission è stato rimosso insieme al deny-reason
+// `no_creator_for_product`. La migration
+// `20260712210000_creator_id_required_restrict` enforcia l'invariant a
+// livello DB (ALTER COLUMN SET NOT NULL + DROP/ADD CONSTRAINT).
+//
+// Le Permission della messaggistica (Fase 1.5) usano direttamente
+// questa FK per identificare il creator lato server senza hard-code.
 model Product {
   id               String   @id @default(cuid())
   slug             String   @unique
   coverUrl         String? // URL immagine copertina PNG
 
-  creatorId        String?  // Phase 1.2: owner del prodotto (User)
-  creator          User?    @relation("CreatorProducts", fields: [creatorId], references: [id], onDelete: SetNull)
+  creatorId        String   // Owner del prodotto (User) — REQUIRED post-fase 4 hardening.
+  creator          User     @relation("CreatorProducts", fields: [creatorId], references: [id], onDelete: Restrict)
 
   templateId       String   @default("lumio") // lumio | h612 | horizon
   stripePriceId    String? // ID prezzo Stripe (legacy)
