@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getOpenAI, type Locale, translateContent } from "@/lib/openai";
 import { apiErrorResponse } from "@/lib/errors";
+import { requireAdmin } from "@/lib/auth/require-admin";
+import { withRateLimit } from "@/lib/utils/rate-limit";
 
 /**
  * POST /api/translate
@@ -10,8 +12,11 @@ import { apiErrorResponse } from "@/lib/errors";
  *
  * Per traduzioni di singoli testi, usa direttamente translateContent() da @/lib/openai.
  */
-export async function POST(request: NextRequest) {
+export const POST = withRateLimit(async function POST(request: NextRequest) {
   try {
+    const authError = await requireAdmin();
+    if (authError) return authError;
+
     const body = await request.json();
     const { sourceLocale, targetLocales, sections } = body as {
       sourceLocale: Locale;
@@ -84,4 +89,4 @@ Rispondi con un JSON con questa struttura:
   } catch (error) {
     return apiErrorResponse(error, "Translation failed");
   }
-}
+}, "AUTH");
