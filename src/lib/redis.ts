@@ -78,7 +78,7 @@ function createIORedisAdapter(redisUrl: string): RedisAdapter | null {
       },
       async mget(...keys: string[]): Promise<(string | null)[]> {
         const vals = await io.mget(...keys);
-        return vals as (string | null)[];
+        return vals;
       },
       async ping(): Promise<string> {
         return io.ping();

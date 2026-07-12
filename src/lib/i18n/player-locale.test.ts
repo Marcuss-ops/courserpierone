@@ -4,31 +4,31 @@ import { t, playerLocale } from "./player-locale";
 // ─── playerLocale data ──────────────────────────────────────
 describe("playerLocale", () => {
   it("has IT translations", () => {
-    expect(playerLocale["it"]).toBeDefined();
-    expect(playerLocale["it"]["preview"]).toBe("Anteprima");
-    expect(playerLocale["it"]["buyNow"]).toBe("Acquista Ora");
+    expect(playerLocale.it).toBeDefined();
+    expect(playerLocale.it.preview).toBe("Anteprima");
+    expect(playerLocale.it.buyNow).toBe("Acquista Ora");
   });
 
   it("has EN translations", () => {
-    expect(playerLocale["en"]).toBeDefined();
-    expect(playerLocale["en"]["preview"]).toBe("Preview");
-    expect(playerLocale["en"]["buyNow"]).toBe("Buy Now");
+    expect(playerLocale.en).toBeDefined();
+    expect(playerLocale.en.preview).toBe("Preview");
+    expect(playerLocale.en.buyNow).toBe("Buy Now");
   });
 
   it("has ES translations", () => {
-    expect(playerLocale["es"]).toBeDefined();
-    expect(playerLocale["es"]["preview"]).toBe("Vista Previa");
-    expect(playerLocale["es"]["buyNow"]).toBe("Comprar Ahora");
+    expect(playerLocale.es).toBeDefined();
+    expect(playerLocale.es.preview).toBe("Vista Previa");
+    expect(playerLocale.es.buyNow).toBe("Comprar Ahora");
   });
 
   it("IT translations contain template placeholder {minutes}", () => {
-    expect(playerLocale["it"]["previewDesc"]).toContain("{minutes}");
-    expect(playerLocale["it"]["previewDesc"]).toContain("{title}");
+    expect(playerLocale.it.previewDesc).toContain("{minutes}");
+    expect(playerLocale.it.previewDesc).toContain("{title}");
   });
 
   it("EN translations contain template placeholder {minutes}", () => {
-    expect(playerLocale["en"]["previewDesc"]).toContain("{minutes}");
-    expect(playerLocale["en"]["previewDesc"]).toContain("{title}");
+    expect(playerLocale.en.previewDesc).toContain("{minutes}");
+    expect(playerLocale.en.previewDesc).toContain("{title}");
   });
 
   it("has all expected keys in each locale", () => {
@@ -44,8 +44,8 @@ describe("playerLocale", () => {
       "lessons", "module", "watched",
     ];
     for (const key of expectedKeys) {
-      expect(playerLocale["it"][key], `IT missing: ${key}`).toBeDefined();
-      expect(playerLocale["en"][key], `EN missing: ${key}`).toBeDefined();
+      expect(playerLocale.it[key], `IT missing: ${key}`).toBeDefined();
+      expect(playerLocale.en[key], `EN missing: ${key}`).toBeDefined();
     }
   });
 });

@@ -1,11 +1,11 @@
 import fs from "fs";
 import path from "path";
 
-export type EbookBook = {
+export interface EbookBook {
   code: string;
   label: string;
   fileName: string;
-};
+}
 
 const BOOK_LABELS: Record<string, string> = {
   it: "Italiano",

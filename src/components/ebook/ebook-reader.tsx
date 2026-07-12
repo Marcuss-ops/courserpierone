@@ -204,7 +204,7 @@ export function EbookReader({
             <nav className={`flex-1 overflow-y-auto custom-scrollbar p-4 bg-white ${!course.ebookChapters || course.ebookChapters.length === 0 ? "flex flex-col justify-center" : "space-y-1"}`}>
               {course.ebookChapters && course.ebookChapters.length > 0 ? (
                 course.ebookChapters.map((chapter, idx) => {
-                  const chTitle = (chapter as any)[currentLang] || (chapter as any)["en"] || "";
+                  const chTitle = (chapter as any)[currentLang] || (chapter as any).en || "";
                   const active = currentPage >= chapter.page && (idx === course.ebookChapters.length - 1 || currentPage < course.ebookChapters[idx + 1].page);
                   return (
                     <button 

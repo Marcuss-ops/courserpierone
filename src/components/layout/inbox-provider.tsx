@@ -41,10 +41,7 @@ import {
  * non serve filtrare ulteriormente.
  */
 
-interface InboxConversationState {
-  /** conversationId → # unread per quella conversation */
-  [conversationId: string]: number;
-}
+type InboxConversationState = Record<string, number>;
 
 interface InboxContextValue {
   totalUnread: number;

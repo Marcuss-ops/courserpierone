@@ -6,7 +6,7 @@ import { apiErrorResponse } from "@/lib/errors";
 // GET — list all coupons
 export async function GET() {
   const { user, dbUser } = await getServerUser();
-  if (!user || !dbUser || dbUser.role !== "admin") {
+  if (!user || dbUser?.role !== "admin") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -17,7 +17,7 @@ export async function GET() {
 // POST — create a new coupon
 export async function POST(request: NextRequest) {
   const { user: user2, dbUser: dbUser2 } = await getServerUser();
-  if (!user2 || !dbUser2 || dbUser2.role !== "admin") {
+  if (!user2 || dbUser2?.role !== "admin") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

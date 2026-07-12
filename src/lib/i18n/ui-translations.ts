@@ -511,7 +511,7 @@ export function interpolate(template: string, params?: Record<string, string | n
  *   uiT(t, "dashCourseCardLessonCount", { n: 8 }) → "8 lezioni"
  */
 export function uiT(t: UiStrings, key: keyof UiStrings, params?: Record<string, string | number>): string {
-  return interpolate(t[key] as string, params);
+  return interpolate(t[key], params);
 }
 
 /**

@@ -64,7 +64,7 @@ export function resolveProductTitle(
   }
   return (
     LOCALE_TITLE_MAP[lang] ??
-    LOCALE_TITLE_MAP["en"] ??
+    LOCALE_TITLE_MAP.en ??
     fallbackTitle ??
     ""
   );

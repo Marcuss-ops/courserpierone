@@ -12,9 +12,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // ─── Fake Redis client ──────────────────────────────────────
-interface FakeRedisStore {
-  [key: string]: string | null;
-}
+type FakeRedisStore = Record<string, string | null>;
 
 function createFakeRedis(initialStore: FakeRedisStore = {}) {
   const store: FakeRedisStore = { ...initialStore };

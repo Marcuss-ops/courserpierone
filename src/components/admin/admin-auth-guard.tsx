@@ -13,7 +13,7 @@ export default async function AdminAuthGuard({
 }) {
   const { user, dbUser } = await getServerUser();
 
-  if (!user?.email || !dbUser || dbUser.role !== "admin") {
+  if (!user?.email || dbUser?.role !== "admin") {
     redirect("/login");
   }
 

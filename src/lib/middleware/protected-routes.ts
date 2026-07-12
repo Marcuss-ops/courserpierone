@@ -56,9 +56,7 @@ export function checkProtectedAccess(
   }
 
   // ── Admin routes (with locale prefix) ──
-  const adminLocaleMatch = pathname.match(
-    /^\/([a-z]{2,5}(-[a-z]{2,5})?)\/admin(\/.*)?$/,
-  );
+  const adminLocaleMatch = /^\/([a-z]{2,5}(-[a-z]{2,5})?)\/admin(\/.*)?$/.exec(pathname);
   if (adminLocaleMatch && !hasSession) {
     return redirectToLogin(request);
   }

@@ -68,7 +68,7 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title }: PremiumVide
       } else if (isVimeo) {
         let videoId = "";
         // Extract Vimeo ID
-        const match = url.match(/(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/);
+        const match = /(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/.exec(url);
         if (match) {
           videoId = match[1];
         }
@@ -95,7 +95,7 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title }: PremiumVide
       }
 
       const checkYT = setInterval(() => {
-        if ((window as any).YT && (window as any).YT.Player && iframeRef.current) {
+        if ((window as any).YT?.Player && iframeRef.current) {
           clearInterval(checkYT);
           
           playerRef.current = new (window as any).YT.Player(iframeRef.current, {
@@ -158,7 +158,7 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title }: PremiumVide
       }
 
       const checkVimeo = setInterval(() => {
-        if ((window as any).Vimeo && (window as any).Vimeo.Player && iframeRef.current) {
+        if ((window as any).Vimeo?.Player && iframeRef.current) {
           clearInterval(checkVimeo);
 
           const player = new (window as any).Vimeo.Player(iframeRef.current);

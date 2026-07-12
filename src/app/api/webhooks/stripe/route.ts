@@ -87,7 +87,7 @@ async function POST_IMPL(request: NextRequest) {
 
     // ── checkout.session.expired → mark order as failed ───────
     if (event.type === "checkout.session.expired") {
-      const session = event.data.object as Stripe.Checkout.Session;
+      const session = event.data.object;
 
       if (!session.id) {
         return NextResponse.json({ received: true });
@@ -110,7 +110,7 @@ async function POST_IMPL(request: NextRequest) {
 
     // ── invoice.payment_failed → revoke access for subscription orders ──
     if (event.type === "invoice.payment_failed") {
-      const invoice = event.data.object as Stripe.Invoice;
+      const invoice = event.data.object;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const sub = (invoice as any).subscription;
       const subscriptionId = typeof sub === "string" ? sub : undefined;
@@ -143,7 +143,7 @@ async function POST_IMPL(request: NextRequest) {
     // ── charge.refunded → mark order as refunded (auto-revoke access) ──
     // Only revoke on FULL refunds — partial refunds should not block access.
     if (event.type === "charge.refunded") {
-      const charge = event.data.object as Stripe.Charge;
+      const charge = event.data.object;
 
       // charge.refunded (the boolean field) is true only when FULLY refunded
       if (!charge.refunded) {
@@ -187,7 +187,7 @@ async function POST_IMPL(request: NextRequest) {
 
     // ── customer.subscription.deleted → revoke access for subscription ──
     if (event.type === "customer.subscription.deleted") {
-      const subscription = event.data.object as Stripe.Subscription;
+      const subscription = event.data.object;
       const subscriptionId = subscription.id;
 
       const updated = await prisma.order.updateMany({

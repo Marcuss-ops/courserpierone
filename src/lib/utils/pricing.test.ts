@@ -39,27 +39,27 @@ describe("parseCountryOverrides", () => {
   it("parses a valid JSON string into structured overrides", () => {
     const result = parseCountryOverrides(MOCK_COUNTRY_OVERRIDES_JSON);
     expect(result).not.toBeNull();
-    expect(result!["BR"]).toBeDefined();
-    expect(result!["BR"].currency).toBe("BRL");
-    expect(result!["BR"].price).toBe(9900);
-    expect(result!["BR"].symbol).toBe("R$");
-    expect(result!["BR"].amount).toBe(99); // price / 100
-    expect(result!["BR"].lemonVariantId).toBe("123");
-    expect(result!["BR"].stripePriceId).toBe("price_br");
+    expect(result!.BR).toBeDefined();
+    expect(result!.BR.currency).toBe("BRL");
+    expect(result!.BR.price).toBe(9900);
+    expect(result!.BR.symbol).toBe("R$");
+    expect(result!.BR.amount).toBe(99); // price / 100
+    expect(result!.BR.lemonVariantId).toBe("123");
+    expect(result!.BR.stripePriceId).toBe("price_br");
   });
 
   it("parses a pre-parsed object directly", () => {
     const result = parseCountryOverrides(MOCK_COUNTRY_OVERRIDES_OBJECT);
     expect(result).not.toBeNull();
-    expect(result!["IN"].currency).toBe("INR");
-    expect(result!["IN"].amount).toBe(2999); // 299900 / 100
-    expect(result!["IN"].symbol).toBe("₹");
+    expect(result!.IN.currency).toBe("INR");
+    expect(result!.IN.amount).toBe(2999); // 299900 / 100
+    expect(result!.IN.symbol).toBe("₹");
   });
 
   it("falls back to currency code for unknown symbol", () => {
     const overrides = { XX: { currency: "XYZ", price: 1000 } };
     const result = parseCountryOverrides(overrides);
-    expect(result!["XX"].symbol).toBe("XYZ"); // fallback to currency code
+    expect(result!.XX.symbol).toBe("XYZ"); // fallback to currency code
   });
 
   it("returns null for null input", () => {
@@ -77,14 +77,14 @@ describe("parseCountryOverrides", () => {
   it("uses built-in currency symbols when symbol is not provided", () => {
     const overrides = { FR: { currency: "EUR", price: 4900 } };
     const result = parseCountryOverrides(overrides);
-    expect(result!["FR"].symbol).toBe("€");
+    expect(result!.FR.symbol).toBe("€");
   });
 
   it("handles lemonVariantId and stripePriceId when null", () => {
     const overrides = { US: { currency: "USD", price: 5400, lemonVariantId: null, stripePriceId: null } };
     const result = parseCountryOverrides(overrides);
-    expect(result!["US"].lemonVariantId).toBeNull();
-    expect(result!["US"].stripePriceId).toBeNull();
+    expect(result!.US.lemonVariantId).toBeNull();
+    expect(result!.US.stripePriceId).toBeNull();
   });
 
   it("handles multiple countries", () => {

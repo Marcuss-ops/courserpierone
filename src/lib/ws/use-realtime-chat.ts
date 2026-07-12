@@ -95,7 +95,7 @@ export function useRealtimeChat({
     if (selfTypingRef.current === isTyping) return; // No change
     selfTypingRef.current = isTyping;
 
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({ type: isTyping ? "typing" : "stopTyping" }));
     }
   }, []);
@@ -110,7 +110,7 @@ export function useRealtimeChat({
 
   const cleanup = useCallback(() => {
     // Send stopTyping before closing
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && selfTypingRef.current) {
+    if (wsRef.current?.readyState === WebSocket.OPEN && selfTypingRef.current) {
       try { wsRef.current.send(JSON.stringify({ type: "stopTyping" })); } catch { /* ignore */ }
       selfTypingRef.current = false;
     }

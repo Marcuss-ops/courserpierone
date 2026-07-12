@@ -120,7 +120,7 @@ export function SharedAuthor({
             )}
             {hasBio && (
               <div className="space-y-4 text-gray-600 text-base leading-relaxed">
-                {bioParagraphs!.filter(Boolean).map((bio, i) => (
+                {bioParagraphs.filter(Boolean).map((bio, i) => (
                   <p key={i}>{bio}</p>
                 ))}
               </div>

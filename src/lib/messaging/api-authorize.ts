@@ -29,11 +29,11 @@ import {
   MessagingDenyReason,
 } from "@/lib/messaging/resolve-message-permission";
 
-export type AuthorizeDmInput = {
+export interface AuthorizeDmInput {
   actorId: string;
   targetId: string;
   productId: string;
-};
+}
 
 export type AuthorizeDmDecision =
   | { allowed: true; permission: MessagingPermission; response?: never }

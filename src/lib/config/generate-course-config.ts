@@ -87,7 +87,7 @@ export async function generateCourseConfig(slug: string) {
     for (const locale of locales) {
       const t = translationsByLocale[locale] || {};
       // UI fallback: se la lingua non ha ui_all, usa quella inglese
-      const ui = safeParseUi(t.ui_all) ?? safeParseUi(translationsByLocale["en"]?.ui_all) ?? undefined;
+      const ui = safeParseUi(t.ui_all) ?? safeParseUi(translationsByLocale.en?.ui_all) ?? undefined;
 
       // SEO metadata: usa sezioni dedicate se presenti, altrimenti costruiscile dal contenuto
       const seoTitle = t.seo_title || `${t.titolo ?? product.slug} — Courser`;

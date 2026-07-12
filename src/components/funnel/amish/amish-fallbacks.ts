@@ -50,6 +50,6 @@ export function getFallbackLabel(
   key: string,
 ): string {
   const langKey = lang.split("-")[0]?.toLowerCase() || "en";
-  const defaultLabels = FALLBACKS[langKey] ?? FALLBACKS["en"];
+  const defaultLabels = FALLBACKS[langKey] ?? FALLBACKS.en;
   return defaultLabels?.[key] ?? "";
 }

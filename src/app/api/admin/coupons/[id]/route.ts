@@ -9,7 +9,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { user, dbUser } = await getServerUser();
-  if (!user || !dbUser || dbUser.role !== "admin") {
+  if (!user || dbUser?.role !== "admin") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -44,7 +44,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { user, dbUser } = await getServerUser();
-  if (!user || !dbUser || dbUser.role !== "admin") {
+  if (!user || dbUser?.role !== "admin") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

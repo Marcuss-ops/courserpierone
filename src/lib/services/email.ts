@@ -398,7 +398,7 @@ function buildTextEmail(bodyLines: string[], buttonText: string, buttonUrl: stri
 
 function resolveTemplate<T extends EmailContent>(locale: string, templates: Record<string, T>): T {
   const lang = extractLang(locale);
-  return templates[locale] ?? templates[lang] ?? templates["en"] ?? templates["it"] ?? templates[Object.keys(templates)[0]];
+  return templates[locale] ?? templates[lang] ?? templates.en ?? templates.it ?? templates[Object.keys(templates)[0]];
 }
 
 function fillTemplate(tpl: EmailContent, product: string): EmailContent {
@@ -629,7 +629,7 @@ export async function sendPurchaseConfirmation(
   };
 
   const ebookLang = extractLang(locale);
-  const ebookLines = EBOOK_LINES[ebookLang] ?? EBOOK_LINES["en"];
+  const ebookLines = EBOOK_LINES[ebookLang] ?? EBOOK_LINES.en;
 
   // Add ebook download link to body if available
   const bodyWithEbook = ebookDownloadUrl

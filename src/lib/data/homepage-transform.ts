@@ -44,8 +44,8 @@ export function transformToDiscoveryCourses(
         translationsByLocale[t.locale] = {};
       translationsByLocale[t.locale][t.section] = t.content;
     }
-    const it = translationsByLocale["it"] || {};
-    const en = translationsByLocale["en"] || {};
+    const it = translationsByLocale.it || {};
+    const en = translationsByLocale.en || {};
     const title =
       it.titolo || en.titolo || product.slug.replace(/-/g, " ");
     const subtitle =

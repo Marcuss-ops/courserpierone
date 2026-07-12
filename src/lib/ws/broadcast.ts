@@ -29,10 +29,10 @@ export type SubscribedConversationsCache = Map<
  */
 export type InboxClientsCache = Map<string, Set<BroadcastSocketLike>>;
 
-export type BroadcastResult = {
+export interface BroadcastResult {
   delivered: number;
   closed: number;
-};
+}
 
 const OPEN = 1;
 

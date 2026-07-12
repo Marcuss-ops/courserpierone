@@ -6,7 +6,7 @@ import { apiErrorResponse } from "@/lib/errors";
 export async function GET() {
   try {
     const { user, dbUser } = await getServerUser();
-    if (!user || !dbUser || dbUser.role !== "admin") {
+    if (!user || dbUser?.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

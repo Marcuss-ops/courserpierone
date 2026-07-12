@@ -106,13 +106,13 @@ const ALLOWED_FALLBACK_PATTERNS: string[] = [
  */
 function hasLocaleRefBefore(line: string, position: number): boolean {
   const before = line.slice(0, position);
-  return /lc\?\./.test(before) || /data\.localeContent\?\./.test(before) || /t\(/.test(before);
+  return before.includes('lc?.') || before.includes('data.localeContent?.') || before.includes('t(');
 }
 
 /** Check if a line has a `||` operator before the given position. */
 function hasOrBefore(line: string, position: number): boolean {
   const before = line.slice(0, position);
-  return /\|\|/.test(before);
+  return before.includes('||');
 }
 
 /** Check if the line is a comment line. */

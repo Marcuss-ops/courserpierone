@@ -114,19 +114,19 @@ import { env } from "@/lib/env";
  * `customerId` quando il pair non è ancora identificabile) — sono utili
  * al chiamante per non dover rieseguire il lookup.
  */
-export type MessagingPermission = {
+export interface MessagingPermission {
   allowed: boolean;
   creatorId?: string;
   customerId?: string;
   productId: string;
   reason?: string;
-};
+}
 
-export type ResolveMessagingPermissionInput = {
+export interface ResolveMessagingPermissionInput {
   actorId: string;
   targetId: string;
   productId: string;
-};
+}
 
 /**
  * Motivi di deny — stringhe stabili che le API / UI possono consumare.

@@ -6,8 +6,8 @@ import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
 
 // Server-side: DOMPurify needs a window object. Create a minimal JSDOM window.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const purify = DOMPurify(new JSDOM("").window as any);
+ 
+const purify = DOMPurify(new JSDOM("").window);
 
 // Force security attributes on all links: rel="noopener noreferrer" everywhere,
 // target="_blank" only on http/https (not mailto/tel which would open empty tabs).

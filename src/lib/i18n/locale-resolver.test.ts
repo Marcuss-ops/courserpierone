@@ -322,25 +322,25 @@ describe("DEFAULT_LOCALE", () => {
 // ─── LANG_TO_DEFAULT_LOCALE constant ───────────────────────
 describe("LANG_TO_DEFAULT_LOCALE", () => {
   it("contains common languages", () => {
-    expect(LANG_TO_DEFAULT_LOCALE["en"]).toBe("en-us");
-    expect(LANG_TO_DEFAULT_LOCALE["it"]).toBe("it-it");
-    expect(LANG_TO_DEFAULT_LOCALE["fr"]).toBe("fr-fr");
-    expect(LANG_TO_DEFAULT_LOCALE["de"]).toBe("de-de");
+    expect(LANG_TO_DEFAULT_LOCALE.en).toBe("en-us");
+    expect(LANG_TO_DEFAULT_LOCALE.it).toBe("it-it");
+    expect(LANG_TO_DEFAULT_LOCALE.fr).toBe("fr-fr");
+    expect(LANG_TO_DEFAULT_LOCALE.de).toBe("de-de");
   });
 
   it("maps ja to ja-jp", () => {
-    expect(LANG_TO_DEFAULT_LOCALE["ja"]).toBe("ja-jp");
+    expect(LANG_TO_DEFAULT_LOCALE.ja).toBe("ja-jp");
   });
 
   it("maps zh to zh-cn", () => {
-    expect(LANG_TO_DEFAULT_LOCALE["zh"]).toBe("zh-cn");
+    expect(LANG_TO_DEFAULT_LOCALE.zh).toBe("zh-cn");
   });
 
   it("maps pt to pt-pt (not pt-br)", () => {
-    expect(LANG_TO_DEFAULT_LOCALE["pt"]).toBe("pt-pt");
+    expect(LANG_TO_DEFAULT_LOCALE.pt).toBe("pt-pt");
   });
 
   it("does not have an entry for xx", () => {
-    expect(LANG_TO_DEFAULT_LOCALE["xx"]).toBeUndefined();
+    expect(LANG_TO_DEFAULT_LOCALE.xx).toBeUndefined();
   });
 });

@@ -157,7 +157,7 @@ export async function loadAuthorizedConversation(
     // response.json(), è una re-serializzazione). Se nel futuro dovesse
     // servire preservare l'EXACT body, basterebbe clonare il buffer.
     const status = auth.response.status;
-    const body = await auth.response.json().catch(() => ({} as { error?: string; reason?: string }));
+    const body = await auth.response.json().catch(() => ({}));
     throw new AppError(body.error ?? "DM non autorizzata", {
       statusCode: status,
       code: body.reason ?? "DM_DENIED",

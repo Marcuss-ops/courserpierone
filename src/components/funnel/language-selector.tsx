@@ -6,7 +6,7 @@ import { getUiTranslations } from "@/lib/i18n/ui-translations";
 
 // ─── Flag emoji from country code ──────────────
 function countryToFlag(countryCode: string | undefined): string {
-  if (!countryCode || countryCode.length !== 2) return "🌐";
+  if (countryCode?.length !== 2) return "🌐";
   const codePoints = countryCode
     .toUpperCase()
     .split("")
@@ -36,12 +36,12 @@ function makeLocale(localeCode: string, countryCode: string, nativeName: string)
 }
 
 // Grouped by language for compact display: language → [variants]
-type LocaleGroup = {
+interface LocaleGroup {
   lang: string;
   languageName: string;
   locales: LocaleMeta[];
   total: number;
-};
+}
 
 const LOCALE_GROUPS: LocaleGroup[] = [
   // ── Top 6 major languages (shown directly) ──
