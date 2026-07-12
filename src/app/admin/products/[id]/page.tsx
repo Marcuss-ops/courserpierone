@@ -17,7 +17,11 @@ import {
   Loader2,
   CreditCard,
   Languages,
-  CheckCircle2
+  CheckCircle2,
+  ExternalLink,
+  FileText,
+  Headphones,
+  X
 } from "lucide-react";
 
 const FUNNEL_SECTIONS = [
@@ -45,7 +49,13 @@ export default function EditProductPage() {
   const [lemonVariantId, setLemonVariantId] = useState("");
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [texts, setTexts] = useState<Record<string, string>>({});
-  const [lessons, setLessons] = useState<{ id?: string; title: string; videoUrl: string }[]>([]);
+  const [lessons, setLessons] = useState<
+    {
+      id?: string;
+      translations: Record<string, { title: string; videoUrl: string; description?: string }>;
+      assets: { id?: string; type: "pdf" | "audio" | "resource"; locale: string; fileUrl: string; fileName?: string | null }[];
+    }[]
+  >([]);
   const [locale, setLocale] = useState("it");
   const [toast, setToast] = useState("");
   const [isTranslating, setIsTranslating] = useState(false);
@@ -94,11 +104,28 @@ export default function EditProductPage() {
       setTexts(txts);
 
       if (data.lessons) {
-        const les = data.lessons.map((l) => ({
-          id: l.id,
-          title: l.translations?.[0]?.title ?? "",
-          videoUrl: l.translations?.[0]?.videoUrl ?? "",
-        }));
+        const les = data.lessons.map((l) => {
+          const translations: Record<string, { title: string; videoUrl: string; description?: string }> = {};
+          l.translations?.forEach((t) => {
+            translations[t.locale] = {
+              title: t.title,
+              videoUrl: t.videoUrl ?? "",
+              description: t.description ?? undefined,
+            };
+          });
+
+          return {
+            id: l.id,
+            translations,
+            assets: (l.assets || []).map((a: { id: string; type: string; locale: string; fileUrl: string; fileName: string | null }) => ({
+              id: a.id,
+              type: a.type as "pdf" | "audio" | "resource",
+              locale: a.locale,
+              fileUrl: a.fileUrl,
+              fileName: a.fileName,
+            })),
+          };
+        });
         setLessons(les);
       }
     } catch {
@@ -218,6 +245,14 @@ export default function EditProductPage() {
           </div>
         </div>
         <div className="flex gap-3">
+          <a
+            href={`/${slug}`}
+            target="_blank"
+            rel="noreferrer"
+            className="px-6 py-3 bg-zinc-800 text-white rounded-2xl text-sm font-bold border border-zinc-700 hover:bg-zinc-700 transition flex items-center gap-2"
+          >
+            <ExternalLink className="w-4 h-4" /> Anteprima
+          </a>
           <button onClick={handleSave} disabled={saving}
             className="px-6 py-3 bg-accent-primary text-white rounded-2xl text-sm font-bold flex items-center gap-2 hover:brightness-110 transition disabled:opacity-50">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
@@ -362,23 +397,125 @@ export default function EditProductPage() {
         <section className="glass-card p-6 rounded-3xl border border-white/5">
           <div className="flex items-center justify-between mb-4">
             <span className="text-white font-semibold">Lezioni Video</span>
-            <button onClick={() => setLessons((p) => [...p, { title: "", videoUrl: "" }])} className="text-sm text-accent-primary flex items-center gap-1"><Plus className="w-4 h-4" /> Aggiungi</button>
+            <button onClick={() => setLessons((p) => [...p, { translations: { [locale]: { title: "", videoUrl: "" } }, assets: [] }])} className="text-sm text-accent-primary flex items-center gap-1"><Plus className="w-4 h-4" /> Aggiungi</button>
           </div>
-          <div className="space-y-3">
-            {lessons.map((l, i) => (
-              <div key={i} className="flex items-start gap-3 bg-zinc-900/30 p-4 rounded-2xl">
-                <span className="w-8 h-8 rounded-xl bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-400">{i + 1}</span>
-                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <input type="text" value={l.title} onChange={(e) => { const n = [...lessons]; n[i].title = e.target.value; setLessons(n); }} placeholder="Titolo lezione" className="bg-transparent border-b border-zinc-800 px-1 py-2 text-sm text-white focus:outline-none focus:border-accent-primary" />
-                  <input type="text" value={l.videoUrl} onChange={(e) => { const n = [...lessons]; n[i].videoUrl = e.target.value; setLessons(n); }} placeholder="URL YouTube" className="bg-transparent border-b border-zinc-800 px-1 py-2 text-sm text-white focus:outline-none focus:border-accent-primary" />
+          <div className="space-y-4">
+            {lessons.map((lesson, i) => (
+              <div key={i} className="bg-zinc-900/30 p-4 rounded-2xl border border-zinc-800/50">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-white font-bold">Lezione {i + 1}</span>
+                  <button onClick={() => setLessons((p) => p.filter((_, idx) => idx !== i))} className="p-2 text-zinc-600 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
                 </div>
-                <button onClick={() => setLessons((p) => p.filter((_, idx) => idx !== i))} className="p-2 text-zinc-600 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                  <div>
+                    <label className="block text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-1">Titolo ({locale})</label>
+                    <input
+                      type="text"
+                      value={lesson.translations[locale]?.title || ""}
+                      onChange={(e) => setLessons((prev) => {
+                        const n = [...prev];
+                        n[i].translations[locale] = { ...n[i].translations[locale], title: e.target.value };
+                        return n;
+                      })}
+                      placeholder="Titolo lezione"
+                      className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-accent-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-1">Video URL ({locale})</label>
+                    <input
+                      type="text"
+                      value={lesson.translations[locale]?.videoUrl || ""}
+                      onChange={(e) => setLessons((prev) => {
+                        const n = [...prev];
+                        n[i].translations[locale] = { ...n[i].translations[locale], videoUrl: e.target.value };
+                        return n;
+                      })}
+                      placeholder="URL YouTube"
+                      className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-accent-primary"
+                    />
+                  </div>
+                </div>
+
+                {/* Assets */}
+                <div className="mt-4 pt-4 border-t border-white/5">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-zinc-400 font-bold uppercase tracking-widest">Asset ({locale})</span>
+                    <span className="text-[10px] text-zinc-600">PDF, Audio o Risorse</span>
+                  </div>
+                  <div className="space-y-2">
+                    {lesson.assets.filter((a) => a.locale === locale).map((asset, aidx) => (
+                      <div key={aidx} className="flex items-center gap-3 bg-zinc-900/50 p-3 rounded-xl border border-zinc-800">
+                        {asset.type === "audio" ? <Headphones className="w-4 h-4 text-accent-secondary" /> : <FileText className="w-4 h-4 text-accent-tertiary" />}
+                        <span className="text-xs text-zinc-300 flex-1 truncate">{asset.fileName || asset.fileUrl}</span>
+                        <button onClick={() => setLessons((prev) => {
+                          const n = [...prev];
+                          n[i].assets = n[i].assets.filter((_, idx) => idx !== aidx);
+                          return n;
+                        })} className="p-1 text-zinc-600 hover:text-red-500"><X className="w-3 h-3" /></button>
+                      </div>
+                    ))}
+                  </div>
+                  <AssetUploader
+                    onUpload={(asset) => setLessons((prev) => {
+                      const n = [...prev];
+                      n[i].assets.push({ ...asset, locale });
+                      return n;
+                    })}
+                  />
+                </div>
               </div>
             ))}
           </div>
         </section>
       </div>
     </div>
+  );
+}
+
+function AssetUploader({ onUpload }: { onUpload: (asset: { type: "pdf" | "audio" | "resource"; fileUrl: string; fileName?: string | null }) => void }) {
+  const [uploading, setUploading] = useState(false);
+
+  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Upload fallito");
+
+      const type: "pdf" | "audio" | "resource" = file.type.startsWith("audio/") ? "audio" : "pdf";
+      onUpload({ type, fileUrl: data.url, fileName: file.name });
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Errore durante l'upload");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  return (
+    <label className="flex items-center gap-2 px-4 py-2 bg-zinc-800/50 border border-zinc-700 border-dashed rounded-xl text-xs text-zinc-400 hover:text-white hover:border-zinc-500 transition cursor-pointer mt-2">
+      {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
+      {uploading ? "Caricamento..." : "Aggiungi asset"}
+      <input type="file" accept=".pdf,.mp3,.wav,.m4a,.mp4" onChange={handleFileSelect} className="hidden" disabled={uploading} />
+    </label>
+  );
+}
+
+function Check({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+    </svg>
   );
 }
 

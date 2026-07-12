@@ -13,6 +13,12 @@ interface AuthFormProps {
   lang: string;
 }
 
+function isSafeCallbackUrl(url: string): boolean {
+  // Only allow relative paths starting with a single slash to prevent
+  // open-redirect attacks to external domains.
+  return url.startsWith("/") && !url.startsWith("//");
+}
+
 export function AuthForm({ lang }: AuthFormProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -66,9 +72,13 @@ export function AuthForm({ lang }: AuthFormProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const redirectTarget =
-    callbackUrl ||
-    (productId ? `/${lang}/${productId}/download` : "/dashboard");
+  const decodedCallbackUrl = callbackUrl ? decodeURIComponent(callbackUrl) : null;
+
+  const redirectTarget = decodedCallbackUrl && isSafeCallbackUrl(decodedCallbackUrl)
+    ? decodedCallbackUrl
+    : productId
+      ? `/${lang}/${productId}/download`
+      : "/dashboard";
 
   // Handle redirect after auth
   useEffect(() => {
@@ -123,7 +133,7 @@ export function AuthForm({ lang }: AuthFormProps) {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=${redirectTarget}`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTarget)}`,
         },
       });
       if (authError) {
@@ -144,7 +154,7 @@ export function AuthForm({ lang }: AuthFormProps) {
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${redirectTarget}`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTarget)}`,
         queryParams: { access_type: "offline", prompt: "consent" },
       },
     });

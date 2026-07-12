@@ -26,6 +26,7 @@ interface DisplayOrder {
     id: string;
     slug: string;
     coverUrl: string | null;
+    defaultLanguage: string;
     _count: { lessons: number };
   };
   createdAt: Date;
@@ -47,6 +48,7 @@ export default async function DashboardPage() {
         id: true,
         slug: true,
         coverUrl: true,
+        defaultLanguage: true,
         _count: { select: { lessons: true } },
       },
     });
@@ -67,6 +69,7 @@ export default async function DashboardPage() {
                 id: true,
                 slug: true,
                 coverUrl: true,
+                defaultLanguage: true,
                 _count: { select: { lessons: true } },
               },
             },
@@ -369,7 +372,7 @@ export default async function DashboardPage() {
                     lessonCount={order.product._count.lessons}
                     completedLessons={progress?.completed ?? 0}
                     purchasedAt={order.createdAt}
-                    href={`/it/${order.product.slug}/portal`}
+                    href={`/${order.product.defaultLanguage ?? "it"}/${order.product.slug}/portal`}
                   />
                 );
               })}

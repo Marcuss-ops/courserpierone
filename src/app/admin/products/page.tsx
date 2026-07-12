@@ -2,14 +2,17 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Package, Plus, Search, Filter, Edit, Eye, ChevronDown, Globe, Calendar, Loader2 } from "lucide-react";
+import { Package, Plus, Search, Filter, Edit, Eye, ChevronDown, Globe, Calendar, Loader2, MoreVertical, Copy, Archive, Trash2, CheckCircle, ExternalLink } from "lucide-react";
 import type { ProductApiItem } from "@/lib/utils/api-types";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<{ id: string; slug: string; title: string; template: string; status: string; locales: string[]; sales: number; revenue: number; conversion: string }[]>([]);
   const [loading, setLoading] = useState(true);
+  const [actionMenuId, setActionMenuId] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
+    setLoading(true);
     fetch("/api/products")
       .then((r) => r.json() as Promise<ProductApiItem[]>)
       .then((data) => {
@@ -32,6 +35,54 @@ export default function ProductsPage() {
         })
       .finally(() => setLoading(false));
   }, []);
+
+  async function handleStatusChange(id: string, status: string) {
+    setActionLoading(id);
+    try {
+      const res = await fetch(`/api/products/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (res.ok) {
+        setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, status } : p)));
+      }
+    } finally {
+      setActionLoading(null);
+      setActionMenuId(null);
+    }
+  }
+
+  async function handleDuplicate(id: string) {
+    setActionLoading(id);
+    try {
+      const res = await fetch(`/api/products/${id}/duplicate`, { method: "POST" });
+      if (res.ok) {
+        window.location.reload();
+      } else {
+        alert("Errore nella duplicazione del prodotto");
+      }
+    } finally {
+      setActionLoading(null);
+      setActionMenuId(null);
+    }
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm("Sei sicuro di voler eliminare questo prodotto? Questa azione è irreversibile.")) return;
+    setActionLoading(id);
+    try {
+      const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setProducts((prev) => prev.filter((p) => p.id !== id));
+      } else {
+        alert("Errore nell'eliminazione del prodotto");
+      }
+    } finally {
+      setActionLoading(null);
+      setActionMenuId(null);
+    }
+  }
 
   return (
     <div className="flex flex-col h-full overflow-hidden bg-dashboard-bg font-hanken">
@@ -161,6 +212,58 @@ export default function ProductsPage() {
                           >
                             <Eye className="w-4 h-4" />
                           </a>
+                          <div className="relative">
+                            <button
+                              onClick={() => setActionMenuId(actionMenuId === product.id ? null : product.id)}
+                              disabled={actionLoading === product.id}
+                              className="p-3 premium-glass rounded-xl text-zinc-400 hover:text-white border border-white/5 transition-all hover:scale-105 disabled:opacity-50"
+                              title="Azioni"
+                            >
+                              {actionLoading === product.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <MoreVertical className="w-4 h-4" />
+                              )}
+                            </button>
+                            {actionMenuId === product.id && (
+                              <>
+                                <div className="fixed inset-0 z-10" onClick={() => setActionMenuId(null)} />
+                                <div className="absolute right-0 mt-2 w-48 premium-glass rounded-2xl overflow-hidden z-20 shadow-2xl border border-white/10 py-2 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+                                  <button
+                                    onClick={() => handleDuplicate(product.id)}
+                                    className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-zinc-300 hover:text-white hover:bg-white/10 transition-colors"
+                                  >
+                                    <Copy className="w-4 h-4 text-accent-secondary" /> Duplica
+                                  </button>
+                                  <button
+                                    onClick={() => handleStatusChange(product.id, product.status === "published" ? "archived" : "published")}
+                                    className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-zinc-300 hover:text-white hover:bg-white/10 transition-colors"
+                                  >
+                                    {product.status === "published" ? (
+                                      <><Archive className="w-4 h-4 text-amber-400" /> Archivia</>
+                                    ) : (
+                                      <><CheckCircle className="w-4 h-4 text-accent-tertiary" /> Pubblica</>
+                                    )}
+                                  </button>
+                                  <a
+                                    href={`/${product.slug}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-zinc-300 hover:text-white hover:bg-white/10 transition-colors"
+                                  >
+                                    <ExternalLink className="w-4 h-4 text-accent-primary" /> Anteprima Live
+                                  </a>
+                                  <div className="h-px bg-white/5 my-1 mx-4" />
+                                  <button
+                                    onClick={() => handleDelete(product.id)}
+                                    className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-red-400 hover:bg-red-500/10 transition-colors"
+                                  >
+                                    <Trash2 className="w-4 h-4" /> Elimina
+                                  </button>
+                                </div>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </td>
                     </tr>

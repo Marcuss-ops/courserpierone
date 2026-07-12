@@ -16,7 +16,7 @@ export async function GET(
         translations: true,
         lessons: {
           orderBy: { position: "asc" },
-          include: { translations: true },
+          include: { translations: true, assets: true },
         },
       },
     });
@@ -111,29 +111,80 @@ export async function PUT(
         }
       }
 
-      // Aggiorna lezioni
+      // Aggiorna lezioni preservando ID ed evitando di perdere progressi
       if (lessons && Array.isArray(lessons)) {
-        // Elimina lezioni esistenti e ricrea
-        await tx.lesson.deleteMany({ where: { productId: id } });
+        const incomingIds = lessons
+          .map((l: { id?: string }) => l.id)
+          .filter((id): id is string => Boolean(id));
+
+        // Rimuovi le lezioni eliminate dall'admin
+        await tx.lesson.deleteMany({
+          where: { productId: id, id: { notIn: incomingIds.length > 0 ? incomingIds : [""] } },
+        });
 
         for (let i = 0; i < lessons.length; i++) {
-          const lesson = lessons[i];
-          if (lesson.title) {
-            const l = await tx.lesson.create({
-              data: {
-                productId: id,
-                position: i + 1,
-              },
+          const lesson = lessons[i] as {
+            id?: string;
+            translations?: Record<string, { title?: string; videoUrl?: string; description?: string }>;
+            assets?: { id?: string; type: string; locale: string; fileUrl: string; fileName?: string | null }[];
+          };
+
+          const l = await tx.lesson.upsert({
+            where: { id: lesson.id || "temp" },
+            update: { position: i + 1 },
+            create: { productId: id, position: i + 1 },
+          });
+
+          // Aggiorna traduzioni della lezione
+          if (lesson.translations && typeof lesson.translations === "object") {
+            for (const [locale, t] of Object.entries(lesson.translations)) {
+              if (!t.title?.trim()) continue;
+              await tx.lessonTranslation.upsert({
+                where: { lessonId_locale: { lessonId: l.id, locale } },
+                update: {
+                  title: t.title,
+                  videoUrl: t.videoUrl || null,
+                  description: t.description || null,
+                },
+                create: {
+                  lessonId: l.id,
+                  locale,
+                  title: t.title,
+                  videoUrl: t.videoUrl || null,
+                  description: t.description || null,
+                },
+              });
+            }
+          }
+
+          // Aggiorna asset della lezione
+          if (lesson.assets && Array.isArray(lesson.assets)) {
+            const assetIds = lesson.assets
+              .map((a: { id?: string }) => a.id)
+              .filter((id): id is string => Boolean(id));
+            await tx.lessonAsset.deleteMany({
+              where: { lessonId: l.id, id: { notIn: assetIds.length > 0 ? assetIds : [""] } },
             });
 
-            await tx.lessonTranslation.create({
-              data: {
-                lessonId: l.id,
-                locale: sourceLocale || "it",
-                title: lesson.title,
-                videoUrl: lesson.videoUrl || null,
-              },
-            });
+            for (const asset of lesson.assets) {
+              if (!asset.fileUrl) continue;
+              await tx.lessonAsset.upsert({
+                where: { id: asset.id || "temp" },
+                update: {
+                  type: asset.type,
+                  locale: asset.locale,
+                  fileUrl: asset.fileUrl,
+                  fileName: asset.fileName || null,
+                },
+                create: {
+                  lessonId: l.id,
+                  type: asset.type,
+                  locale: asset.locale,
+                  fileUrl: asset.fileUrl,
+                  fileName: asset.fileName || null,
+                },
+              });
+            }
           }
         }
       }

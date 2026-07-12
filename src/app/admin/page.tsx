@@ -19,12 +19,15 @@ import {
   Search,
   Bell,
   CheckCircle,
-  Eye,
   Edit,
   Archive,
   BarChart2,
   MoreVertical,
-  Filter
+  Filter,
+  Copy,
+  Trash2,
+  ExternalLink,
+  Loader2
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -34,6 +37,7 @@ export default function AdminDashboard() {
   const [analytics, setAnalytics] = useState<DashboardApiResponse | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"overview" | "funnel">("overview");
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -87,6 +91,57 @@ export default function AdminDashboard() {
     setShowSelector(false);
     router.push(`/admin/products/new?template=${templateId}&slug=${domain}`);
   };
+
+  async function handleStatusChange(id: string, status: string) {
+    setActionLoading(id);
+    try {
+      const res = await fetch(`/api/products/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (res.ok) {
+        setData((prev) => ({
+          ...prev,
+          products: prev.products.map((p) => (p.id === id ? { ...p, status: status as "published" | "draft" | "archived" } : p)),
+        }));
+      }
+    } finally {
+      setActionLoading(null);
+      setOpenMenuId(null);
+    }
+  }
+
+  async function handleDuplicate(id: string) {
+    setActionLoading(id);
+    try {
+      const res = await fetch(`/api/products/${id}/duplicate`, { method: "POST" });
+      if (res.ok) {
+        window.location.reload();
+      } else {
+        alert("Errore nella duplicazione del prodotto");
+      }
+    } finally {
+      setActionLoading(null);
+      setOpenMenuId(null);
+    }
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm("Sei sicuro di voler eliminare questo prodotto? Questa azione è irreversibile.")) return;
+    setActionLoading(id);
+    try {
+      const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setData((prev) => ({ ...prev, products: prev.products.filter((p) => p.id !== id) }));
+      } else {
+        alert("Errore nell'eliminazione del prodotto");
+      }
+    } finally {
+      setActionLoading(null);
+      setOpenMenuId(null);
+    }
+  }
 
   return (
     <div className="flex flex-col h-full overflow-hidden bg-dashboard-bg font-hanken">
@@ -311,7 +366,7 @@ export default function AdminDashboard() {
                                     target="_blank"
                                     className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-zinc-300 hover:text-white hover:bg-white/10 transition-colors"
                                   >
-                                    <Eye className="w-4 h-4 text-accent-tertiary" /> Preview Page
+                                    <ExternalLink className="w-4 h-4 text-accent-tertiary" /> Preview Page
                                   </Link>
                                   <Link 
                                     href={`/admin/products/${product.id}`}
@@ -319,12 +374,28 @@ export default function AdminDashboard() {
                                   >
                                     <Edit className="w-4 h-4 text-accent-secondary" /> Edit Product
                                   </Link>
-                                  <button className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-accent-primary hover:bg-accent-primary/10 transition-colors">
-                                    <BarChart2 className="w-4 h-4" /> View Analytics
+                                  <button 
+                                    onClick={() => handleDuplicate(product.id)}
+                                    className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-zinc-300 hover:text-white hover:bg-white/10 transition-colors"
+                                  >
+                                    <Copy className="w-4 h-4 text-accent-primary" /> Duplicate
+                                  </button>
+                                  <button 
+                                    onClick={() => handleStatusChange(product.id, product.status === "published" ? "archived" : "published")}
+                                    className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-zinc-300 hover:text-white hover:bg-white/10 transition-colors"
+                                  >
+                                    {product.status === "published" ? (
+                                      <><Archive className="w-4 h-4 text-amber-400" /> Archive</>
+                                    ) : (
+                                      <><CheckCircle className="w-4 h-4 text-accent-tertiary" /> Publish</>
+                                    )}
                                   </button>
                                   <div className="h-px bg-white/5 my-1 mx-4"></div>
-                                  <button className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-red-400 hover:bg-red-500/10 transition-colors">
-                                    <Archive className="w-4 h-4" /> Archive
+                                  <button 
+                                    onClick={() => handleDelete(product.id)}
+                                    className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-red-400 hover:bg-red-500/10 transition-colors"
+                                  >
+                                    <Trash2 className="w-4 h-4" /> Delete
                                   </button>
                                 </div>
                               </>

@@ -2,8 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/db/supabase";
 import { apiErrorResponse } from "@/lib/errors";
 
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
-const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
+const ALLOWED_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/avif",
+  "application/pdf",
+  "audio/mpeg",
+  "audio/wav",
+  "audio/x-wav",
+  "audio/mp4",
+  "audio/aac",
+  "audio/ogg",
+  "video/mp4",
+];
+const MAX_SIZE = 50 * 1024 * 1024; // 50 MB
 const BUCKET_NAME = "covers";
 
 export async function POST(request: NextRequest) {
@@ -18,7 +31,7 @@ export async function POST(request: NextRequest) {
     // Validazione tipo
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
-        { error: `Tipo file non supportato: ${file.type}. Usa JPEG, PNG, WebP o AVIF.` },
+        { error: `Tipo file non supportato: ${file.type}. Usa JPEG, PNG, WebP, AVIF, PDF, MP3, WAV, M4A o MP4.` },
         { status: 400 }
       );
     }
@@ -40,9 +53,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Genera nome file univoco
-    const ext = file.name.split(".").pop() ?? "jpg";
+    const ext = file.name.split(".").pop() ?? "bin";
+    const folder = file.type.startsWith("image/") ? "products" : "assets";
     const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    const filePath = `products/${fileName}`;
+    const filePath = `${folder}/${fileName}`;
 
     // Converti File in ArrayBuffer
     const bytes = await file.arrayBuffer();

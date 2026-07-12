@@ -25,7 +25,7 @@ export function LessonProgressButton({
 
   const fetchProgress = useCallback(async () => {
     try {
-      const res = await fetch(`/api/progress?productId=${productSlug}`);
+      const res = await fetch(`/api/progress?productSlug=${productSlug}`);
       if (res.ok) {
         const data = await res.json();
         const lessonIds = data.progress.map((p: { lessonId: string; completed: boolean }) => p.lessonId);
@@ -141,7 +141,7 @@ export function ProgressBar({
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    fetch(`/api/progress?productId=${productSlug}`)
+    fetch(`/api/progress?productSlug=${productSlug}`)
       .then((r) => r.json())
       .then((data) => {
         const completed = data.progress.filter((p: { completed: boolean }) => p.completed).length;

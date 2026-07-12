@@ -292,7 +292,7 @@ export default async function CoursePage({
                     {user.email?.split("@")[0]}
                   </Link>
                 ) : (
-                  <Link href={`/login?productId=${domain}`} className={`p-3 rounded-xl transition-colors border ${
+                  <Link href={`/login?callbackUrl=${encodeURIComponent(`${basePath}/curso/${lessonId}?lang=${currentLang}`)}`} className={`p-3 rounded-xl transition-colors border ${
                     isLight 
                       ? "bg-zinc-100 text-zinc-600 hover:text-zinc-900 border-zinc-200" 
                       : "premium-glass text-zinc-400 hover:text-white border-white/5"

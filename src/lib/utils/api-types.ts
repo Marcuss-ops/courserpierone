@@ -52,6 +52,14 @@ export interface ProductApiLesson {
     videoUrl: string | null;
     description: string | null;
   }[];
+  assets: {
+    id: string;
+    lessonId: string;
+    type: string;
+    locale: string;
+    fileUrl: string;
+    fileName: string | null;
+  }[];
 }
 
 /** Full product detail from GET /api/products/[id] */

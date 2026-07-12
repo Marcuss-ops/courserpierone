@@ -14,9 +14,28 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = request.nextUrl;
     const productId = searchParams.get("productId");
+    const productSlug = searchParams.get("productSlug");
+
+    let resolvedProductId: string | undefined;
+
+    if (productId) {
+      resolvedProductId = productId;
+    } else if (productSlug) {
+      const product = await prisma.product.findUnique({
+        where: { slug: productSlug },
+        select: { id: true },
+      });
+      if (product) {
+        resolvedProductId = product.id;
+      } else {
+        // Unknown product slug — return empty progress instead of leaking
+        // progress data for other products.
+        return NextResponse.json({ progress: [], lessons: [] });
+      }
+    }
 
     const where: Prisma.LessonProgressWhereInput = { userId: dbUser.id };
-    if (productId) where.lesson = { productId };
+    if (resolvedProductId) where.lesson = { productId: resolvedProductId };
 
     const progress = await prisma.lessonProgress.findMany({ where });
 
