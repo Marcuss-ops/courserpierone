@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
-import { ChatView } from "./chat-view";
+import { ChatView } from "@/components/chat/chat-view";
 
 interface ChatPageProps {
   params: Promise<{ userId: string }>;
