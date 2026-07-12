@@ -14,11 +14,16 @@ const port = parseInt(process.env.PORT ?? "3000", 10);
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
-/** Maps userId → WebSocket connection. */
-const clients = new Map<string, WebSocket>();
-
-/** Maps userId → set of conversation IDs the user is currently viewing. */
-const userConversations = new Map<string, Set<string>>();
+/**
+ * Maps userId → Set of WebSocket connections. Phase 4.2:
+ * multi-tab/multi-device friendly — un utente può avere più WS aperti
+ * contemporaneamente (browser desktop + mobile + admin tab + ecc.).
+ *
+ * Iterazione broadcast: si itera su `Map.values()` per ogni userId, poi
+ * `forEach` sul Set. Filter per-tab (withUserId + withProductId) è il
+ * discriminante per il routing dei messaggi.
+ */
+const clients = new Map<string, Set<WebSocket>>();
 
 function verifyToken(token: string): { userId: string } | null {
   const parts = token.split(":");
@@ -108,11 +113,9 @@ app.prepare().then(() => {
         }
 
         // ── Attach meta + complete upgrade ──────────────────────
-        const existing = clients.get(userId);
-        if (existing && existing.readyState === WebSocket.OPEN) {
-          existing.close(1000, "Replaced by newer connection");
-        }
-
+        // Phase 4.2: nessun force-close del socket precedente.
+        // Multi-tab / multi-device sono ora cittadini di prima classe;
+        // ogni WS è un Set member indipendente con i propri meta.
         wss.handleUpgrade(request, socket, head, (ws) => {
           const meta = ws as WebSocket & {
             userId: string;
@@ -139,17 +142,15 @@ app.prepare().then(() => {
     const meta = ws as WebSocket & { userId: string; withUserId: string };
     const { userId, withUserId } = meta;
 
-    clients.set(userId, ws);
+    // Aggiungi al Set: il primo tab crea il Set, gli altri entrano nello stesso.
+    if (!clients.has(userId)) {
+      clients.set(userId, new Set());
+    }
+    clients.get(userId)!.add(ws);
 
     // Update lastSeenAt in DB (user is now online)
     prisma.user.update({ where: { id: userId }, data: { lastSeenAt: new Date() } })
       .catch((err) => console.error("[ws] Failed to update lastSeenAt on connect:", err));
-
-    // Track which conversation this user is viewing
-    if (!userConversations.has(userId)) {
-      userConversations.set(userId, new Set());
-    }
-    userConversations.get(userId)!.add(withUserId);
 
     console.log(`[ws] Client connected: ${userId} (chat with ${withUserId})`);
 
@@ -162,16 +163,19 @@ app.prepare().then(() => {
 
     ws.on("close", () => {
       clearInterval(heartbeat);
-      // Only delete if this exact connection is still stored
-      if (clients.get(userId) === ws) {
-        clients.delete(userId);
+
+      // Phase 4.2: cleanup per-tab. Rimuovi solo lo specifico ws dal Set;
+      // l'eventuale presenza di altri tab (Set non vuoto) tiene vivo il
+      // mapping userId → Set. Quando l'ultimo tab si chiude, il Set
+      // diventa vuoto → cancelliamo la key dal map per evitare memory leak.
+      const userSockets = clients.get(userId);
+      if (userSockets) {
+        userSockets.delete(ws);
+        if (userSockets.size === 0) {
+          clients.delete(userId);
+        }
       }
-      // Clean up conversation tracking
-      const convs = userConversations.get(userId);
-      if (convs) {
-        convs.delete(withUserId);
-        if (convs.size === 0) userConversations.delete(userId);
-      }
+
       // Update lastSeenAt on disconnect (last known activity)
       prisma.user.update({ where: { id: userId }, data: { lastSeenAt: new Date() } })
         .catch((err) => console.error("[ws] Failed to update lastSeenAt on disconnect:", err));
@@ -180,24 +184,52 @@ app.prepare().then(() => {
 
     ws.on("error", (err) => {
       console.error(`[ws] Error for ${userId}:`, err.message);
-      if (clients.get(userId) === ws) {
-        clients.delete(userId);
+      // Allinea la pulizia: rimuovi questo socket dal Set (non altri tab).
+      const userSockets = clients.get(userId);
+      if (userSockets) {
+        userSockets.delete(ws);
+        if (userSockets.size === 0) {
+          clients.delete(userId);
+        }
       }
     });
 
     // ── Handle client messages (typing indicators) ─────────
+    // Phase 4.2: itera TUTTI i socket del partner (multi-tab friendly),
+    // ma filtra PER-TAB per evitare il cross-tab data leak. Esempio:
+    // U sta scrivendo "typing" sulla chat con W (prod X). W ha tab1 con U
+    // (prod X) e tab2 con Q (prod Y). Senza il filtro, tab2 riceverebbe
+    // il typing indicator destinato alla chat con U. Filtro speculare
+    // a quello del NEW_MESSAGE bridge: solo le WS del partner la cui
+    // `withUserId === userId` (sender del typing) E `withProductId ===
+    // self.withProductId` (stesso contesto prodotto) ricevono il typing.
     ws.on("message", (raw) => {
       try {
         const data = JSON.parse(raw.toString());
         if (data.type === "typing" || data.type === "stopTyping") {
-          // Relay typing status to the other participant
-          const otherWs = clients.get(withUserId);
-          if (otherWs && otherWs.readyState === WebSocket.OPEN) {
+          const otherSockets = clients.get(withUserId);
+          if (!otherSockets) return;
+          const selfMeta = ws as WebSocket & {
+            userId: string;
+            withUserId: string;
+            withProductId: string | null;
+          };
+          for (const otherWs of otherSockets) {
+            if (otherWs.readyState !== WebSocket.OPEN) continue;
+            const otherMeta = otherWs as WebSocket & {
+              userId: string;
+              withUserId: string;
+              withProductId: string | null;
+            };
+            // Cross-tab fix: solo i tab del partner che stanno
+            // visualizzando QUESTA chat (sender = userId, prodotto = self).
+            if (otherMeta.withUserId !== userId) continue;
+            if (otherMeta.withProductId !== selfMeta.withProductId) continue;
             otherWs.send(
               JSON.stringify({
                 type: data.type,
                 userId,
-              })
+              }),
             );
           }
         }
@@ -211,47 +243,66 @@ app.prepare().then(() => {
   messageBroker.on(NEW_MESSAGE, (event: NewMessageEvent) => {
     const { conversationId, productId: eventProductId, message } = event;
 
-    // Broadcast only to participants of this conversation.
-    // Phase 1.3: filtriamo anche per productId così un client sottoscritto
-    // a un WS con productId=A non riceve messaggi di conversazioni con
-    // productId=B che condividono lo stesso partecipante.
-    for (const [clientId, clientWs] of clients) {
+    // Broadcast solo ai partecipanti della conversazione, su tutti i loro
+    // device aperti (multi-tab friendly).
+    //
+    // Phase 4.2 (fix bug Fase 1.3): il filtro di partecipazione è ORA
+    // PER-TAB. Prima della Fase 4.2 esisteva una mappa ausiliaria
+    // userConversations: Map<userId, Set<withUserId>> che aggregava lo
+    // stato di subscription a livello UTENTE. Questo causava un
+    // cross-tab data leak: un utente B che apriva tab1 con A e tab2
+    // con C vedeva arrivare sulla tab2 i messaggi destinati alla
+    // chat con A (perché userConversations[B].has(A) era true).
+    // Rimosso del tutto: ogni WS ha già i propri meta (withUserId,
+    // withProductId) per-tab, che sono la source of truth canonica.
+    for (const [clientId, clientSockets] of clients) {
       // Skip the sender — they already have the message from the POST response
       if (clientId === message.senderId) continue;
 
-      if (clientWs.readyState !== WebSocket.OPEN) continue;
+      for (const clientWs of clientSockets) {
+        if (clientWs.readyState !== WebSocket.OPEN) continue;
 
-      // Phase 1.3: skip clients che non si sono sottoscritti a questo
-      // specifico prodotto. È una mitigazione pragmatica contro il
-      // data-leak cross-prodotto fino a quando Fase 4.1 non sostituirà
-      // `withUserId` con `conversationId` (check definitivo server-side).
-      const meta = clientWs as WebSocket & {
-        userId: string;
-        withUserId: string;
-        withProductId: string | null;
-      };
-      if (!meta.withProductId || meta.withProductId !== eventProductId) {
-        continue;
-      }
+        const meta = clientWs as WebSocket & {
+          userId: string;
+          withUserId: string;
+          withProductId: string | null;
+        };
 
-      // Check if this client is a participant in the conversation
-      const convs = userConversations.get(clientId);
-      if (!convs) continue;
+        // Phase 1.3: skip WS che non si sono sottoscritti a questo
+        // specifico prodotto. Mitigazione pragmatica contro il
+        // data-leak cross-prodotto fino a quando Fase 4.1 non
+        // sostituirà `withUserId` con `conversationId` (check
+        // definitivo server-side).
+        if (!meta.withProductId || meta.withProductId !== eventProductId) {
+          continue;
+        }
 
-      // The client needs to be viewing a conversation with the message sender
-      // (la conversazione è (sender, withUserId) e conProductId=eventProductId,
-      // quindi basta matching sul sender).
-      if (convs.has(message.senderId)) {
+        // Phase 4.2 (cross-tab leak fix): il tab del recipient deve
+        // essere ESPLICITAMENTE in chat con il sender. Filtro
+        // PER-TAB (la singola WS), non user-level aggregato.
+        // Esempio: B ha tab1 con A (withUserId=A) e tab2 con C
+        // (withUserId=C). Un msg da A deve raggiungere SOLO tab1 di B,
+        // non tab2 — `meta.withUserId === message.senderId` blocca
+        // tab2 che ha withUserId=C !== A.
+        if (meta.withUserId !== message.senderId) {
+          continue;
+        }
+
         try {
           clientWs.send(
             JSON.stringify({
               type: "newMessage",
               conversationId,
               message,
-            })
+            }),
           );
         } catch {
-          clients.delete(clientId);
+          // Phase 4.2: rimuovi dal Set (non dal Map direttamente)
+          // e svuota la key se questo era l'ultimo socket del user.
+          clientSockets.delete(clientWs);
+          if (clientSockets.size === 0) {
+            clients.delete(clientId);
+          }
         }
       }
     }
@@ -260,7 +311,7 @@ app.prepare().then(() => {
   // ── Start server ────────────────────────────────────────────
   server.listen(port, () => {
     console.log(
-      `> Server ready on http://${hostname}:${port} (${dev ? "development" : "production"})`
+      `> Server ready on http://${hostname}:${port} (${dev ? "development" : "production"})`,
     );
     console.log(`> WebSocket server ready on ws://${hostname}:${port}/ws`);
   });
