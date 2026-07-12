@@ -8,11 +8,6 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// ═══ CI/CD Pipeline Test ══════════════════════════════════
-// Test: prisma-migrate.yml workflow — verifica migrate deploy + deploy hook
-// Commit innocuo: nessuna modifica allo schema, solo commento.
-// Risultato atteso: workflow rileva "Already up to date", salta deploy Vercel.
-// ═══════════════════════════════════════════════════════════
 
 // ═══ Connection Pooling ═══════════════════════════════════
 // DATABASE_URL = Pooled connection (pgBouncer, port 6543)
@@ -146,6 +141,13 @@ model User {
   socialLinks    String?  // JSON: { "twitter": "...", "instagram": "...", "youtube": "...", "linkedin": "...", "website": "..." }
   coverImageUrl  String?  // URL immagine copertina profilo
   lastSeenAt    DateTime? // ultima attività (WebSocket connect/disconnect)
+  // User.preferredLocale: lingua preferita dell'utente per le email di
+  // notifica (DM e altre). Backup-fillato al signup con il Accept-Language
+  // del browser (vedi getServerUser.ts). Default 'en' per nuovi account
+  // senza Accept-Language (es. retry/pagina di manutenzione). Mai null in
+  // quanto @default valorizza sempre la colonna; il nullable è solo per
+  // retrocompatibilità con row legacy pre-migration.
+  preferredLocale String? @default("en")
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @default(now()) @updatedAt
 
