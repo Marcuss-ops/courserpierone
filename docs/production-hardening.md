@@ -335,6 +335,8 @@ curl -s https://[prod]/api/health | jq
 2. Alert channel: same `ALERT_WEBHOOK_URL` Slack/Discord from §6. OR PagerDuty if escalation is desired.
 3. SLA: 3 failures in 5 minutes → page on-call.
 
+> **See also:** for the live sandbox-verified backup + restore path (sidecar pgbackups `prodrigestivill/postgres-backup-local` end-to-end), see [`docs/production.md` Appendix C — Backup and Restore Run Log](./production.md#appendix-c--backup-and-restore-run-log). Covers adjacent backup infrastructure (cron retention, file layout, restore integrity) that complements the uptime check above.
+
 ---
 
 ### 8. Rollback procedure documented ✅

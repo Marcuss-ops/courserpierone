@@ -142,7 +142,7 @@ Three scenarios:
 **d) Catastrophic data loss** (deleted rows, corrupt cascade):
 - Supabase Dashboard → Database → Backups → PITR → pick a restore point → Restore.
 - After restore: redeploy the app at the matching commit SHA. Audit any orders created between the bad commit and the PITR point.
-- **Self-hosted / sidecar alternative:** if the deploy relies on the local Docker backup container instead of Supabase PITR, see [Appendix C — Backup and Restore Run Log](#appendix-c-backup-and-restore-run-log) for the verified extraction + restore procedure.
+- **Self-hosted / sidecar alternative:** if the deploy relies on the local Docker backup container instead of Supabase PITR, see [Appendix C — Backup and Restore Run Log](#appendix-c--backup-and-restore-run-log) for the verified extraction + restore procedure.
 
 **e) Code-and-schema interlock** — code deployed in the same commit requires a column added by that commit's migration (typical pattern: `prisma.X.update({ data: { newCol } })` on the new app code):
 - **DO NOT Vercel-rollback alone:** the rolled-back code may crash on the now-present column (e.g., Prisma client expects non-null field with no default). Reverse-symmetric break.

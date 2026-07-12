@@ -101,6 +101,8 @@ docker compose logs pgbackups | tail -10
 3. **Do NOT actually restore in prod.** Instead: spawn a `db-restore-test` ephemeral Supabase project (Pro feature) and PITR-restore to that target timestamp. Verify the test project has the expected schema + sample rows.
 4. `REQUIRES VERIFICATION`: restore operation completes ≤30 min; rows count matches expected; forward-only migrations re-applied cleanly.
 
+> **See also:** for the self-hosted / sidecar backup alternative (Docker pgbackups `prodrigestivill/postgres-backup-local` running `@daily` cron, `./backups/{daily,weekly,monthly,last}/` layout, `zcat | psql` restore verified end-to-end with 6/6 table counts matching), see [`docs/production.md` Appendix C — Backup and Restore Run Log](./production.md#appendix-c--backup-and-restore-run-log). Use it when Supabase PITR is unavailable OR as an at-deploy-time sanity check before relying on this ATC.
+
 ### ATC-4 Cross-Browser (criterion 7)
 **Today this is BLOCKED by playwright.config.ts missing `firefox` + `webkit` projects.**
 
