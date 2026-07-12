@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { NextRequest } from "next/server";
 
@@ -75,6 +74,15 @@ const mockProductFound = () =>
 
 const mockVideoFound = () =>
   mockPrisma.lessonTranslation.findFirst.mockResolvedValueOnce({ videoUrl: VIDEO_URL });
+
+// ─── Typed fakeOrder factory (replaces inline untyped literal casts) ─────
+type FakeOrder = Awaited<ReturnType<typeof mockFindCompletedOrder>>;
+const fakeOrder = (overrides: Partial<FakeOrder> = {}) => ({
+  id: "ck-order-1",
+  userId: USER_ID,
+  productId: PRODUCT_ID,
+  ...overrides,
+} as unknown as FakeOrder);
 
 // ─── Tests ───────────────────────────────────────────────────
 describe("GET /api/videos/stream — admin bypass + customer order check", () => {
@@ -154,7 +162,7 @@ describe("GET /api/videos/stream — admin bypass + customer order check", () =>
   it("customer with completed order: returns 200 {videoUrl}", async () => {
     mockCustomer();
     mockProductFound();
-    mockFindCompletedOrder.mockResolvedValueOnce({ id: "ck-order-1" } as any);
+    mockFindCompletedOrder.mockResolvedValueOnce(fakeOrder());
     mockVideoFound();
 
     const { GET } = await import("./route");
@@ -204,7 +212,7 @@ describe("GET /api/videos/stream — admin bypass + customer order check", () =>
   it("valid customer but no video URL: returns 404", async () => {
     mockCustomer();
     mockProductFound();
-    mockFindCompletedOrder.mockResolvedValueOnce({ id: "ck-order-1" } as any);
+    mockFindCompletedOrder.mockResolvedValueOnce(fakeOrder());
     // Locale-specific try: null
     // Locale-fallback try: null
     mockPrisma.lessonTranslation.findFirst
@@ -225,7 +233,7 @@ describe("GET /api/videos/stream — admin bypass + customer order check", () =>
   it("locale-specific translation missing, fallback locale returns videoUrl: 200", async () => {
     mockCustomer();
     mockProductFound();
-    mockFindCompletedOrder.mockResolvedValueOnce({ id: "ck-order-1" } as any);
+    mockFindCompletedOrder.mockResolvedValueOnce(fakeOrder());
     // Locale-specific (it) miss → fallback (any locale) hit
     mockPrisma.lessonTranslation.findFirst
       .mockResolvedValueOnce(null)

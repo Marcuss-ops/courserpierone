@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { NextRequest } from "next/server";
 
@@ -75,6 +74,15 @@ const mockCustomer = () =>
     user: { email: "cust@test.com" },
     dbUser: { id: USER_ID, role: "student" },
   });
+
+// ─── Typed fakeOrder factory (replaces inline untyped literal casts) ─────
+type FakeOrder = Awaited<ReturnType<typeof mockFindCompletedOrder>>;
+const fakeOrder = (overrides: Partial<FakeOrder> = {}) => ({
+  id: "ck-order-1",
+  userId: USER_ID,
+  productId: PRODUCT_ID,
+  ...overrides,
+} as unknown as FakeOrder);
 
 // ─── Tests ───────────────────────────────────────────────────
 //
@@ -291,7 +299,7 @@ describe("POST /api/progress — admin bypass + customer access gate", () => {
   it("customer with completed order: returns 200 success", async () => {
     mockCustomer();
     mockPrisma.lesson.findUnique.mockResolvedValueOnce({ productId: PRODUCT_ID });
-    mockFindCompletedOrder.mockResolvedValueOnce({ id: "ck-order-1" } as any);
+    mockFindCompletedOrder.mockResolvedValueOnce(fakeOrder());
     mockPrisma.lessonProgress.upsert.mockResolvedValueOnce({
       id: "lp1", userId: USER_ID, lessonId: LESSON_ID, completed: true,
     });

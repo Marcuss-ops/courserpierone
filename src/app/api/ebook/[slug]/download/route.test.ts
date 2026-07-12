@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { NextRequest } from "next/server";
 
@@ -77,6 +76,14 @@ const mockCustomer = () =>
     dbUser: { id: USER_ID, role: "student" },
   });
 
+// ─── Typed fakeOrder factory (replaces inline untyped literal casts) ─────
+type FakeOrder = Awaited<ReturnType<typeof mockFindCompletedOrder>>;
+const fakeOrder = (overrides: Partial<FakeOrder> = {}) => ({
+  id: "ck-order-1",
+  userId: USER_ID,
+  ...overrides,
+} as unknown as FakeOrder);
+
 // ─── Tests ───────────────────────────────────────────────────
 describe("GET /api/ebook/[slug]/download — user-keyed access (NO admin bypass)", () => {
   beforeEach(() => {
@@ -137,7 +144,7 @@ describe("GET /api/ebook/[slug]/download — user-keyed access (NO admin bypass)
   // ── Customer completed: BUT course config not found ─────
   it("customer completed but course config NOT found: returns 404", async () => {
     mockCustomer();
-    mockFindCompletedOrder.mockResolvedValueOnce({ id: "ck-order-1" } as any);
+    mockFindCompletedOrder.mockResolvedValueOnce(fakeOrder());
     mockGetCourseConfig.mockResolvedValueOnce(null);
 
     const { GET } = await import("./route");
@@ -151,7 +158,7 @@ describe("GET /api/ebook/[slug]/download — user-keyed access (NO admin bypass)
   // ── disposition=attachment honors the query param ────────
   it("customer completed with disposition=attachment: returns attachment-form", async () => {
     mockCustomer();
-    mockFindCompletedOrder.mockResolvedValueOnce({ id: "ck-order-1" } as any);
+    mockFindCompletedOrder.mockResolvedValueOnce(fakeOrder());
     mockGetCourseConfig.mockResolvedValueOnce({
       slug: SLUG,
       author: "Author",
@@ -177,7 +184,7 @@ describe("GET /api/ebook/[slug]/download — user-keyed access (NO admin bypass)
   // ── Happy path: customer completed + static PDF present ──
   it("customer completed with static PDF present: returns 200 application/pdf", async () => {
     mockCustomer();
-    mockFindCompletedOrder.mockResolvedValueOnce({ id: "ck-order-1" } as any);
+    mockFindCompletedOrder.mockResolvedValueOnce(fakeOrder());
     mockGetCourseConfig.mockResolvedValueOnce({
       slug: SLUG,
       author: "Author",

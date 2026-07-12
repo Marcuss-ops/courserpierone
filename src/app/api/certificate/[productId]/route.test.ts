@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { NextRequest } from "next/server";
 
@@ -95,6 +94,15 @@ const mockCustomer = (id = USER_ID) =>
     dbUser: { id, role: "student", name: "Customer" },
   });
 
+// ─── Typed fakeOrder factory (replaces inline untyped literal casts) ─────
+type FakeOrder = Awaited<ReturnType<typeof mockFindCompletedOrder>>;
+const fakeOrder = (overrides: Partial<FakeOrder> = {}) => ({
+  id: "ck-order-1",
+  userId: USER_ID,
+  locale: "it",
+  ...overrides,
+} as unknown as FakeOrder);
+
 // ─── Tests ───────────────────────────────────────────────────
 describe("GET /api/certificate/[productId] — auth + completion-gate", () => {
   beforeEach(() => {
@@ -168,7 +176,7 @@ describe("GET /api/certificate/[productId] — auth + completion-gate", () => {
   // ── Customer completed, but product NOT found in DB ─────
   it("customer completed order but product UUID missing: returns 404", async () => {
     mockCustomer();
-    mockFindCompletedOrder.mockResolvedValueOnce({ id: "ck-order-1", locale: "it" } as any);
+    mockFindCompletedOrder.mockResolvedValueOnce(fakeOrder());
     mockPrisma.product.findUnique.mockResolvedValueOnce(null);
     const { GET } = await import("./route");
     const response = await GET(createMockRequest(), { params });
@@ -181,7 +189,7 @@ describe("GET /api/certificate/[productId] — auth + completion-gate", () => {
   // ── Customer completed, NO lessons attached to product ──
   it("customer completed but product has zero lessons: returns 400 with localized message", async () => {
     mockCustomer();
-    mockFindCompletedOrder.mockResolvedValueOnce({ id: "ck-order-1", locale: "it" } as any);
+    mockFindCompletedOrder.mockResolvedValueOnce(fakeOrder());
     mockPrisma.product.findUnique.mockResolvedValueOnce({
       id: PRODUCT_ID,
       slug: PRODUCT_SLUG,
@@ -201,7 +209,7 @@ describe("GET /api/certificate/[productId] — auth + completion-gate", () => {
   // ── Customer completed, lessons INCOMPLETE → 400 with X/Y ──
   it("customer completed but lessons incomplete: returns 400 with {completed}/{total}", async () => {
     mockCustomer();
-    mockFindCompletedOrder.mockResolvedValueOnce({ id: "ck-order-1", locale: "it" } as any);
+    mockFindCompletedOrder.mockResolvedValueOnce(fakeOrder());
     mockPrisma.product.findUnique.mockResolvedValueOnce({
       id: PRODUCT_ID,
       slug: PRODUCT_SLUG,
@@ -221,7 +229,7 @@ describe("GET /api/certificate/[productId] — auth + completion-gate", () => {
   // ── Customer completed, ALL lessons done → 200 PDF ───────
   it("customer completed with all lessons done: returns 200 with PDF", async () => {
     mockCustomer();
-    mockFindCompletedOrder.mockResolvedValueOnce({ id: "ck-order-1", locale: "it" } as any);
+    mockFindCompletedOrder.mockResolvedValueOnce(fakeOrder());
     mockPrisma.product.findUnique.mockResolvedValueOnce({
       id: PRODUCT_ID,
       slug: PRODUCT_SLUG,
