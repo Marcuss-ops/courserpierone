@@ -56,13 +56,31 @@ returns the union of `Conversation` (the inbox) and `CustomerProductInsight`
 
 ## 2. Schema
 
-### 2.1 `CustomerProductInsight`
+### 2.1 `CustomerProductInsight` + `RefundInsightLedger`
 
 A denormalized per-(user, product) record. One row per
 `@@unique([userId, productId])`. The fields are derived from
 aggregates across `AccessGrant` (current access state),
 `LessonProgress` (engagement), `Order` (LTV), and
 `AnalyticEvent` (channel attribution).
+
+```prisma
+// Refund idempotency for the LTV decrement in § 4.4. One row per
+// refunded order; the `@@unique([orderId])` constraint makes the
+// decrement atomic — a second consumer invocation for the same
+// orderId hits a P2002 violation and is skipped. Same pattern as
+// the existing `ProcessedWebhook` table in Phase 2.
+model RefundInsightLedger {
+  id                 String   @id @default(cuid())
+  orderId            String   @unique  // one ledger row per refund
+  userId             String
+  productId          String
+  refundAmountCents  Int
+  appliedAt          DateTime @default(now())
+
+  @@index([userId, productId])
+}
+```
 
 ```prisma
 model CustomerProductInsight {
@@ -182,7 +200,12 @@ insights CustomerProductInsight[] @relation("ProductInsights")
 customerInsights CustomerProductInsight[]
 // On Lesson: add back-relation
 customerInsights CustomerProductInsight[]
+// On Order: add back-relation
+refundLedgerEntries RefundInsightLedger[]
 ```
+
+The migration is idempotent and creates BOTH `CustomerProductInsight`
+and `RefundInsightLedger` in a single transaction:
 
 The migration is idempotent CREATE TABLE IF NOT EXISTS + DO $$
 FK guards, matching the PR 2 and Phase 2 patterns:
@@ -190,6 +213,7 @@ FK guards, matching the PR 2 and Phase 2 patterns:
 ```sql
 -- prisma/migrations/20260714XXXXXX_phase5_customer_insight/migration.sql
 CREATE TABLE IF NOT EXISTS "CustomerProductInsight" ( ... );
+CREATE TABLE IF NOT EXISTS "RefundInsightLedger" ( ... );
 
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'CustomerProductInsight_userId_fkey') THEN
@@ -199,6 +223,13 @@ DO $$ BEGIN
   END IF;
 END $$;
 -- (repeat for productId, sourceChannelId, lastLessonId)
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'RefundInsightLedger_orderId_key') THEN
+    ALTER TABLE "RefundInsightLedger"
+      ADD CONSTRAINT "RefundInsightLedger_orderId_key" UNIQUE ("orderId");
+  END IF;
+END $$;
 ```
 
 ---
@@ -572,6 +603,10 @@ Phase 2) writes the insight:
 registerConsumer("order.completed", async (event) => {
   const { orderId, userId, productId, channelId } = event.payload;
 
+  // Step 1: ensure the row exists. The upsert below uses an empty
+  // `update` to avoid overwriting fields we don't own here
+  // (lifetimeValueCents is set by § 4.1 processOrder; engagement by
+  // § 4.2 /api/progress; we only manage sourceChannelId).
   await prisma.customerProductInsight.upsert({
     where: { userId_productId: { userId, productId } },
     create: {
@@ -580,12 +615,29 @@ registerConsumer("order.completed", async (event) => {
       sourceChannelId: channelId ?? null,  // from AnalyticEvent
       // lifetimeValueCents was set by § 4.1 (processOrder) already.
     },
-    update: channelId
-      ? { sourceChannelId: channelId }  // first-write-wins for channel
-      : {},
+    update: {},  // no-op: only manage sourceChannelId below
   }).catch((err) => {
-    console.error(`[Phase5] Failed to set sourceChannelId for order ${orderId}:`, err);
+    console.error(`[Phase5] Failed to upsert CustomerProductInsight for order ${orderId}:`, err);
+    return;  // bail on the conditional update if the row doesn't exist yet
   });
+
+  // Step 2: first-write-wins for sourceChannelId. The conditional
+  // `where: { sourceChannelId: null }` ensures we ONLY overwrite if
+  // the current value is null. A previous consumer run that set the
+  // channel blocks the overwrite, so the "first touch" channel
+  // sticks. (A naïve `update: { sourceChannelId: channelId }` would
+  // be last-write-wins, flipping on every subsequent purchase.)
+  if (channelId) {
+    const result = await prisma.customerProductInsight.updateMany({
+      where: { userId_productId: { userId, productId }, sourceChannelId: null },
+      data: { sourceChannelId: channelId },
+    });
+    if (result.count === 0) {
+      // Either the row doesn't exist (the upsert above already logged
+      // an error) or the channel was already set by a prior purchase.
+      // Both are expected; no further action.
+    }
+  }
 });
 ```
 
@@ -598,14 +650,24 @@ event carries `channelId` in the payload (populated by
 immediately known at order creation, so it doesn't need the
 outbox hop.
 
+**V2 addendum (not blocking):** the reviewer flagged that
+`channelId` is actually available inline in the LS webhook
+handler at `applyPaymentEvent` time (same as LTV), so the
+async outbox hop is technically unnecessary. Phase 5 ships the
+outbox consumer for symmetry with § 4.4 (refund) and for
+deferring the channel write to after order creation succeeds
+(transactional ordering). V2 can inline the channel write in
+`processOrder` if the render-window-of-no-provenance becomes
+a UX issue.
+
 **Why `first-write-wins` for `sourceChannelId`:** a customer
 may buy the same product through different channels over time
 (`channelId` flips as the customer discovers the creator via
 a new YouTube video). The "first touch" channel is the
 provenance — the channel that drove the customer to the
-product initially. The `update: channelId ? { sourceChannelId:
-channelId } : {}` only overwrites if the current value is
-null; if it's already set, we keep the first one.
+product initially. The `updateMany WHERE sourceChannelId IS
+NULL` ensures we only set the channel if it hasn't been set
+yet, preserving the first touch.
 
 ### 4.4 `order.refunded` (Phase 2 outbox) — LTV decrement
 
@@ -614,14 +676,40 @@ null; if it's already set, we keep the first one.
 registerConsumer("order.refunded", async (event) => {
   const { orderId, userId, productId, refundAmountCents } = event.payload;
 
-  await prisma.customerProductInsight.update({
-    where: { userId_productId: { userId, productId } },
-    data: {
-      lifetimeValueCents: { decrement: refundAmountCents },
-    },
-  }).catch((err) => {
-    console.error(`[Phase5] Failed to decrement LTV for refund ${orderId}:`, err);
-  });
+  // Idempotency via the RefundInsightLedger table (added in § 2.1):
+  // try to record this refund's application. The `@@unique([orderId])`
+  // on the ledger makes the `create` atomic — a second consumer
+  // invocation for the same orderId hits a P2002 unique-constraint
+  // violation, which we catch and treat as "already applied."
+  // This is more robust than a `lastOrderId` guard (which would
+  // miss the case where a NEW order arrived between the original
+  // refund and the replay — the guard would see lastOrderId pointing
+  // to the new order and incorrectly skip the decrement).
+  try {
+    await prisma.refundInsightLedger.create({
+      data: { orderId, userId, productId, refundAmountCents },
+    });
+  } catch (err: unknown) {
+    // P2002 = unique constraint violation on orderId. We've already
+    // applied this refund's LTV decrement — skip the update.
+    if ((err as { code?: string }).code === "P2002") {
+      console.log(`[Phase5] Refund ${orderId} already applied to LTV (ledger hit), skipping`);
+      return;
+    }
+    throw err;  // unexpected error — let the outbox worker retry
+  }
+
+  // First-time application: decrement LTV. The ledger is the
+  // idempotency boundary, so this update is safe to run exactly once
+  // per (orderId, userId, productId).
+  await prisma.customerProductInsight
+    .update({
+      where: { userId_productId: { userId, productId } },
+      data: { lifetimeValueCents: { decrement: refundAmountCents } },
+    })
+    .catch((err: unknown) => {
+      console.error(`[Phase5] Failed to decrement LTV for refund ${orderId}:`, err);
+    });
 });
 ```
 
@@ -632,19 +720,35 @@ handles refunds the same way as new orders. A refund can
 arrive minutes or days after the original purchase. The
 outbox hop is the right pattern for this latency tolerance.
 
-**Idempotency on refund re-runs:** if the outbox event is
-re-processed (worker retry, manual replay via
-`/api/admin/payments/reconciliations`), the decrement happens
-twice. The `CustomerProductInsight.lifetimeValueCents` would
-go negative. To prevent this, the consumer reads the
-`Order.status` before decrementing: only decrement if
-`status='refunded'` AND the LTV was previously incremented
-for this order. The `lastOrderId` field tracks the most
-recent order that changed LTV — if the refund's `orderId`
-matches `lastOrderId`, the LTV was bumped by this order
-and the decrement is correct. For partial refunds (V2
-addendum), the consumer skips and lets a future Phase 5.1
-job handle the partial refund math.
+**Idempotency via `RefundInsightLedger`:** the outbox event
+can be re-processed (worker retry, manual replay via
+`/api/admin/payments/reconciliations`, dead-letter recovery).
+A naïve `decrement` would drive LTV negative on replay. The
+ledger records each applied refund with a `@@unique([orderId])`
+constraint, so the second invocation hits a unique-constraint
+violation and is skipped. This is the same pattern as
+`ProcessedWebhook` (the existing Phase 2 webhook idempotency
+table) — a small audit table keyed by the external event id.
+
+**Why not a `lastOrderId` guard:** the `lastOrderId` field
+tracks the most recent order that changed LTV. A guard that
+checks `lastOrderId === orderId` would work for the common
+case (refund the most recent order) but break in two scenarios:
+(a) a NEW order arrives between the original refund and the
+replay → `lastOrderId` points to the new order → the
+replay's decrement is incorrectly skipped; (b) a partial
+refund of an older order → `lastOrderId` points to a
+different, newer order → the refund's decrement is incorrectly
+skipped. The ledger is order-scoped, not last-write-scoped,
+and avoids both.
+
+**For partial refunds (V2 addendum):** the consumer assumes
+`refundAmountCents` is the full order amount. For partial
+refunds, the decrement amount differs from the increment
+amount and LTV math gets more complex. V2 may add a
+`refundLines` table on `Order` and rework the ledger to
+`refundLineId`-keyed. Phase 5's ledger is the V1.5
+minimum.
 
 ---
 
