@@ -177,9 +177,6 @@ export const MessagingDenyReason = {
   NoValidAccessGrant: "no_valid_access_grant",
 } as const;
 
-export type MessagingDenyReasonValue =
-  (typeof MessagingDenyReason)[keyof typeof MessagingDenyReason];
-
 /**
  * Risolve i permessi di una DM creator↔studente su un prodotto specifico.
  *

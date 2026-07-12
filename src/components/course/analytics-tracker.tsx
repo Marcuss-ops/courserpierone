@@ -29,7 +29,7 @@ function sendEvent(eventType: string, productSlug: string, extra?: Record<string
   }).catch((e) => console.warn("[Analytics] sendEvent failed:", e));
 }
 
-export function usePageViewTracking(productSlug: string) {
+function usePageViewTracking(productSlug: string) {
   const tracked = useRef(false);
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export function usePageViewTracking(productSlug: string) {
   }, [productSlug]);
 }
 
-export function useScrollTracking(productSlug: string) {
+function useScrollTracking(productSlug: string) {
   const milestones = useRef(new Set<string>());
 
   useEffect(() => {
@@ -63,7 +63,7 @@ export function useScrollTracking(productSlug: string) {
   }, [productSlug]);
 }
 
-export function trackClickBuy(productSlug: string, extra?: Record<string, unknown>) {
+function trackClickBuy(productSlug: string, extra?: Record<string, unknown>) {
   sendEvent("click_buy", productSlug, extra);
 }
 
@@ -71,15 +71,15 @@ export function trackCheckoutOpen(productSlug: string, extra?: Record<string, un
   sendEvent("checkout_open", productSlug, extra);
 }
 
-export function trackCheckoutComplete(productSlug: string, extra?: Record<string, unknown>) {
+function trackCheckoutComplete(productSlug: string, extra?: Record<string, unknown>) {
   sendEvent("checkout_complete", productSlug, extra);
 }
 
-export function trackLessonStart(productSlug: string, lessonId: string) {
+function trackLessonStart(productSlug: string, lessonId: string) {
   sendEvent("lesson_start", productSlug, { lessonId });
 }
 
-export function trackLessonComplete(productSlug: string, lessonId: string) {
+function trackLessonComplete(productSlug: string, lessonId: string) {
   sendEvent("lesson_complete", productSlug, { lessonId });
 }
 

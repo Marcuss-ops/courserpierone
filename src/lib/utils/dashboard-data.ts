@@ -1,4 +1,4 @@
-import { TemplateId } from "@/components/funnel";
+import type { TemplateId } from "@/components/funnel/types";
 
 export interface ProductMetric {
   id: string;
@@ -12,7 +12,7 @@ export interface ProductMetric {
   conversion: string;
 }
 
-export interface DashboardStats {
+interface DashboardStats {
   totalRevenue: number;
   totalRevenueTrend: string;
   netSales: number;

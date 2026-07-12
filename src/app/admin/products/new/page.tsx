@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toFullLocale } from "@/lib/i18n/to-full-locale";
 import TemplateSelector from "@/components/admin/template-selector";
 import { ImageUpload } from "@/components/admin/image-upload";
-import type { TemplateId } from "@/components/funnel";
+import type { TemplateId } from "@/components/funnel/types";
 import type { TranslateApiResponse } from "@/lib/utils/api-types";
 import { 
   ArrowLeft, 

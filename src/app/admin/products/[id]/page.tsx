@@ -6,7 +6,7 @@ import { ImageUpload } from "@/components/admin/image-upload";
 import { CurrencyPricesSection } from "@/components/admin/currency-prices";
 import { LocaleTabs } from "@/components/admin/locale-tabs";
 import { LessonBuilder } from "@/components/admin/lesson-builder";
-import type { TemplateId } from "@/components/funnel";
+import type { TemplateId } from "@/components/funnel/types";
 import type { ProductApiDetail, TranslateApiResponse } from "@/lib/utils/api-types";
 import { toFullLocale } from "@/lib/i18n/to-full-locale";
 import {

@@ -89,6 +89,30 @@ export async function logServerError(payload: ServerErrorPayload): Promise<void>
     // ── 3. Write the structured payload ──
     const key = `errlog:${payload.digest || "no-digest"}:${payload.timestamp}`;
     await r.set(key, JSON.stringify(payload), { ex: SEVEN_DAYS_SECONDS });
+
+    // ── 4. Optional real-time alert (Slack/Discord webhook) ──
+    // Fire-and-forget: logging must never block the request or propagate.
+    const alertUrl = process.env.ALERT_WEBHOOK_URL;
+    if (alertUrl) {
+      fetch(alertUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: `🚨 *Server error on ${payload.path || "unknown"}*`,
+          blocks: [
+            {
+              type: "section",
+              text: {
+                type: "mrkdwn",
+                text: `🚨 *Server error* \n• Path: \`${payload.path || "unknown"}\` \n• Digest: \`${payload.digest || "no-digest"}\` \n• Message: \`${payload.message.slice(0, 200)}\``,
+              },
+            },
+          ],
+        }),
+      }).catch(() => {
+        // Alert delivery failure is non-critical; already persisted in Redis.
+      });
+    }
   } catch (err) {
     // Sink failure is NEVER allowed to propagate. We log to console (which
     // Vercel captures in runtime logs) and move on.

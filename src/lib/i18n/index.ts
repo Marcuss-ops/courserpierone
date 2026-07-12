@@ -10,7 +10,11 @@ export * from "./locale-resolver";
 export * from "./player-locale";
 export * from "./visitor-session";
 export * from "./ui-translations";
-export * from "./legal-translations";
+// NB: `./legal-translations` è ora content-only (la funzione
+// `getLegalTranslations` + le 3 interfaces sono state rimosse nel
+// Fase 7.2 knip cleanup). Il modulo rimane per il future privacy/
+// terms rewrite ma non ha una API surface da re-esportare. Re-add
+// `export * from "./legal-translations"` quando il rewrite atterra.
 export * from "./chat-translations";
 export * from "./auth-translations";
 export * from "./seo-metadata";

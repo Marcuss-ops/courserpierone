@@ -5,7 +5,7 @@ import Link from "next/link";
 import { BookOpen, Users, Play, Search, X, ArrowRight } from "lucide-react";
 import { getUiTranslations, uiT } from "@/lib/i18n";
 
-export interface DiscoveryCourse {
+interface DiscoveryCourse {
   id: string;
   slug: string;
   title: string;

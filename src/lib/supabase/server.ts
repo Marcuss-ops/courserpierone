@@ -43,7 +43,7 @@ export async function createClient() {
  *   const { user } = await getCurrentUser();
  *   if (!user) redirect("/login");
  */
-export async function getCurrentUser() {
+async function getCurrentUser() {
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) return { supabase, user: null };

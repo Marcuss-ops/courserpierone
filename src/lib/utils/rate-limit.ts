@@ -131,16 +131,19 @@ export async function rateLimitAsync(
 }
 
 // ─── Wrapper per Next.js Route Handlers ────────────────────
-type RouteHandler = (req: NextRequest, ...args: unknown[]) => Promise<Response>;
+type RouteHandler<TArgs extends unknown[] = unknown[]> = (
+  req: NextRequest,
+  ...args: TArgs
+) => Promise<Response>;
 
-export function withRateLimit(
-  handler: RouteHandler,
+export function withRateLimit<TArgs extends unknown[]>(
+  handler: RouteHandler<TArgs>,
   tier: RateTier = "PUBLIC",
   keyFn?: (req: NextRequest) => string
-): RouteHandler {
+): RouteHandler<TArgs> {
   const { max, windowMs } = RATE_TIERS[tier];
 
-  return async (req: NextRequest, ...args: unknown[]) => {
+  return async (req: NextRequest, ...args: TArgs) => {
     // Determina la chiave: IP + eventuale userId
     const identifier = keyFn
       ? keyFn(req)
@@ -184,7 +187,6 @@ export function withRateLimit(
  * Re-export per retrocompatibilità — rateLimit sincrono
  * (usato internamente come fallback in-memory).
  */
-export { rateLimit as rateLimitSync };
 
 // ─── Compatibilità legacy ──────────────────────────────────
 export function rateLimitResponse(resetIn: number) {

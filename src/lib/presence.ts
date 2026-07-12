@@ -24,7 +24,7 @@
 import { getRedis } from "@/lib/redis";
 
 export const PRESENCE_PREFIX = "presence:";
-export const HEARTBEAT_TTL = 60; // secondi
+const HEARTBEAT_TTL = 60; // secondi
 
 /**
  * Registra un heartbeat per l'utente.

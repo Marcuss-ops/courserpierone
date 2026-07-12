@@ -91,8 +91,9 @@ describe("paymentProviderRegistry", () => {
 // These tests verify the NOT_IMPLEMENTED contracts so that callers
 // predicting "Phase 2 / Phase 4 will fill these in" are not surprised
 // by runtime crashes mid-transition. Uses NotImplementedError (501),
-// distinct from PaymentError (502) so monitors don't conflate
-// "feature not yet built" with "provider upstream down".
+// `NotImplementedError` è 501 (feature deferred to a future MCR phase),
+// distinct from 502 (upstream provider failure) so monitors don't
+// conflate "feature not yet built" with "provider upstream down".
 
 describe("payment providers — stub methods (Phase 2/4 follow-up)", () => {
   beforeEach(() => {

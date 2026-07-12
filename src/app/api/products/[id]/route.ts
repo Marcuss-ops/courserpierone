@@ -3,9 +3,10 @@ import { prisma } from "@/lib/db/prisma";
 import { apiErrorResponse } from "@/lib/errors";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { revalidateProduct } from "@/lib/admin/revalidate-product";
+import { withRateLimit } from "@/lib/utils/rate-limit";
 
 // GET — Dettaglio singolo prodotto
-export async function GET(
+export const GET = withRateLimit(async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -34,10 +35,10 @@ export async function GET(
   } catch (error) {
     return apiErrorResponse(error, "Failed to fetch product");
   }
-}
+}, "AUTH");
 
 // PUT — Aggiorna un prodotto
-export async function PUT(
+export const PUT = withRateLimit(async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -234,10 +235,10 @@ export async function PUT(
   } catch (error) {
     return apiErrorResponse(error, "Failed to update product");
   }
-}
+}, "AUTH");
 
 // DELETE — Elimina un prodotto
-export async function DELETE(
+export const DELETE = withRateLimit(async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -252,4 +253,4 @@ export async function DELETE(
   } catch (error) {
     return apiErrorResponse(error, "Failed to delete product");
   }
-}
+}, "AUTH");

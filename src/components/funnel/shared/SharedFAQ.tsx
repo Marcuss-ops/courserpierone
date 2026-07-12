@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-export interface FAQItem {
+interface FAQItem {
   q: string;
   a: string;
 }

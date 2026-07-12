@@ -4,7 +4,7 @@
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 
-export interface ModuleItem {
+interface ModuleItem {
   title: string;
   desc: string;
   icon?: LucideIcon;

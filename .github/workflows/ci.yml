@@ -84,8 +84,30 @@ jobs:
       - name: Install dependencies (postinstall runs prisma generate + locale resolver)
         run: npm ci --no-audit --no-fund
 
-      - name: Typecheck
-        run: npm run typecheck
+      # ── Cache Next.js build cache (speeds up the wrapper's `next build`) ──
+      # Cache `.next/cache/` keyed on (OS, package-lock.json, all .ts/.tsx
+      # source + next.config.mjs + tsconfig.json) — invalidates when source
+      # files or dependencies change. Restore-keys provides a fallback hash
+      # for partial cache hits when source changes but deps don't.
+      - name: Cache Next.js build cache
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**/*.ts', 'src/**/*.tsx', 'next.config.mjs', 'tsconfig.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-
+
+      # ── Typecheck (guarded against App Router type staleness) ──
+      # Runs `next build` (regenerates `.next/types/validator.ts`) BEFORE
+      # `tsc --noEmit`. Without the build step, `tsconfig.json`'s include
+      # of `.next/types/**/*.ts` (line 37) lets a stale validator.ts cause
+      # TS2307 false positives for any deleted route. The wrapper purges
+      # `.next/types/` and runs bare `npx next build` (no prisma/locale
+      # prefix — `npm ci' already did those via postinstall) so the
+      # validator.ts is fresh on every CI run. See
+      # `scripts/ci/typecheck-with-build.sh` for full rationale.
+      - name: Typecheck (with App Router type generation)
+        run: bash scripts/ci/typecheck-with-build.sh
 
   # ════════════════════════════════════════════════════════════════════════
   # Job 2 — Lint

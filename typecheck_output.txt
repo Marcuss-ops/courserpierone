@@ -1,0 +1,8 @@
+
+> courser@0.1.0 typecheck
+> tsc --noEmit
+
+.next/types/validator.ts(494,39): error TS2307: Cannot find module '../../src/app/api/messages/read/route.js' or its corresponding type declarations.
+.next/types/validator.ts(503,39): error TS2307: Cannot find module '../../src/app/api/messages/route.js' or its corresponding type declarations.
+.next/types/validator.ts(512,39): error TS2307: Cannot find module '../../src/app/api/messages/stream/route.js' or its corresponding type declarations.
+src/app/api/access/route.test.ts(54,39): error TS2304: Cannot find name 'Order'.

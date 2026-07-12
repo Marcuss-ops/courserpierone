@@ -43,7 +43,7 @@ import { prisma } from "@/lib/db/prisma";
  * Usato da GET /api/messages per verificare se esiste già una
  * conversazione tra me e il partner su quel prodotto.
  */
-export async function findConversation(
+async function findConversation(
   userId: string,
   otherUserId: string,
   productId: string,

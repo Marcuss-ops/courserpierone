@@ -14,15 +14,12 @@ export function getOpenAI(): OpenAI {
 }
 
 // ─── Lingue supportate dal Cervellone ────────────────────────
-export const SUPPORTED_LOCALES = [
-  "it", "en", "es", "fr", "de", "pt", "nl", "pl",
-  "ru", "ja", "ko", "zh", "ar", "hi", "tr", "vi",
-  "th", "id", "sv", "da",
-] as const;
-
-export type Locale = (typeof SUPPORTED_LOCALES)[number];
-
-export const DEFAULT_LOCALE: Locale = "it";
+// (Inlined type — non più esposto come const perché knip l'ha
+// flaggato come unused. Il set di locales è hardcoded qui sotto.)
+export type Locale =
+  | "it" | "en" | "es" | "fr" | "de" | "pt" | "nl" | "pl"
+  | "ru" | "ja" | "ko" | "zh" | "ar" | "hi" | "tr" | "vi"
+  | "th" | "id" | "sv" | "da";
 
 // ─── Traduzione automatica via GPT ──────────────────────────
 export async function translateContent(

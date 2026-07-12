@@ -31,7 +31,7 @@ export interface DashboardApiResponse {
 }
 
 /** Translation record from the Product model */
-export interface ProductApiTranslation {
+interface ProductApiTranslation {
   id: string;
   productId: string;
   locale: string;
@@ -40,7 +40,7 @@ export interface ProductApiTranslation {
 }
 
 /** Lesson from GET /api/products/[id] detail endpoint */
-export interface ProductApiLesson {
+interface ProductApiLesson {
   id: string;
   productId: string;
   position: number;

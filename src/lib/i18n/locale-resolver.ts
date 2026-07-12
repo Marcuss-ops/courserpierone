@@ -31,7 +31,7 @@ import { getCurrencyFromLocale } from "./currency-map";
 
 export { getCurrencyFromLocale };
 
-export interface LocaleInfo {
+interface LocaleInfo {
   code: string;            // "fr-fr"
   languageCode: string;    // "fr"
   countryCode: string;     // "FR"

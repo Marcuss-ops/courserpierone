@@ -21,7 +21,7 @@ export type CheckoutProduct = CreateCheckoutInput["product"];
  * Pricing risolta dal PricingService — mantiene la shape usata dai
  * provider per determinare il `variantId` / `priceId` da invocare.
  */
-export type ResolvedPricing = CreateCheckoutInput["pricing"];
+type ResolvedPricing = CreateCheckoutInput["pricing"];
 
 /**
  * Phase 1 of MCR — provider registration.

@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 // ─── Known non-landing paths (skip locale handling) ────────
-export const KNOWN_PREFIXES = [
+const KNOWN_PREFIXES = [
   "/_next",
   "/api",
   "/admin",
@@ -28,7 +28,7 @@ export function isKnownPath(pathname: string): boolean {
 // ─── Product sub-paths (without locale prefix) ─────────────
 const PRODUCT_SUB_PATHS = ["/portal", "/download", "/curso"];
 
-export function isProductSubPath(pathname: string): boolean {
+function isProductSubPath(pathname: string): boolean {
   return PRODUCT_SUB_PATHS.some((p) => pathname.endsWith(p));
 }
 

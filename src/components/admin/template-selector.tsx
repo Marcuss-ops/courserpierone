@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { TEMPLATES, type TemplateId } from "@/components/funnel";
+import { TEMPLATES, type TemplateId } from "@/components/funnel/types";
 import { X, Check, Globe, Sparkles } from "lucide-react";
 
 interface TemplateSelectorProps {

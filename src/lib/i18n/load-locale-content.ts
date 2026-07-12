@@ -34,8 +34,9 @@ const LOCALE_FALLBACK_CHAIN: Record<string, string[]> = {
 
 /**
  * Carica il LocaleContent per un prodotto e lingua.
+ * (Interno — esposto solo a `loadLocaleContentSafe` / `loadLocaleContentCached`.)
  */
-export function loadLocaleContent(slug: string, locale: string): LocaleContent | null {
+function loadLocaleContent(slug: string, locale: string): LocaleContent | null {
   const productDir = resolve(DATA_DIR, slug);
   if (!existsSync(productDir)) return null;
 

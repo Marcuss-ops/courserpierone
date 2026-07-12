@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import TemplateSelector from "@/components/admin/template-selector";
 import FunnelVisualization from "@/components/admin/funnel-visualization";
-import type { TemplateId } from "@/components/funnel";
+import type { TemplateId } from "@/components/funnel/types";
 import { DASHBOARD_DATA } from "@/lib/utils/dashboard-data";
 import type { ProductApiItem, DashboardApiResponse } from "@/lib/utils/api-types";
 import { 

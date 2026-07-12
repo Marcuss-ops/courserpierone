@@ -194,7 +194,7 @@ export async function cacheSet(key: string, value: unknown, ttlSeconds: number =
 /**
  * Elimina una chiave dalla cache Redis.
  */
-export async function cacheDel(key: string): Promise<void> {
+async function cacheDel(key: string): Promise<void> {
   const r = getRedis();
   if (!r) return;
   try {
@@ -212,7 +212,7 @@ export async function cacheDel(key: string): Promise<void> {
  *   e lo restituisce.
  * - Se Redis non è configurato, chiama `fn()` direttamente (no-op cache).
  */
-export async function cacheWrap<T>(
+async function cacheWrap<T>(
   key: string,
   fn: () => Promise<T>,
   ttlSeconds: number = FIVE_MINUTES

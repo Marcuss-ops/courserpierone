@@ -2,7 +2,7 @@
  * Tipi del database Supabase (generati automaticamente).
  * Aggiornato con i nuovi campi profilo utente pubblico.
  */
-export interface UserRow {
+interface UserRow {
   id: string;
   email: string;
   name: string | null;

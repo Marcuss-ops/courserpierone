@@ -143,11 +143,11 @@ export async function seedTestProduct() {
   return product;
 }
 
-export async function getTestUser(email: string) {
+async function getTestUser(email: string) {
   return prisma.user.findUnique({ where: { email } });
 }
 
-export async function getTestOrder(email: string) {
+async function getTestOrder(email: string) {
   const user = await getTestUser(email);
   if (!user) return null;
   return prisma.order.findFirst({

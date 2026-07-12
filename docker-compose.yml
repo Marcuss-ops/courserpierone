@@ -37,6 +37,23 @@ services:
       - "1025:1025"
       - "8025:8025"
 
+  pgbackups:
+    image: prodrigestivill/postgres-backup-local:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: courser
+      SCHEDULE: "@daily"
+      BACKUP_KEEP_DAYS: "7"
+      BACKUP_KEEP_WEEKS: "4"
+      BACKUP_KEEP_MONTHS: "3"
+    volumes:
+      - ./backups:/backups
+    depends_on:
+      - db
+
 volumes:
   pgdata:
   redisdata:

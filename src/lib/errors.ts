@@ -43,20 +43,6 @@ export class CheckoutError extends AppError {
   }
 }
 
-/** Payment provider errors (upstream Stripe/LemonSqueezy failure) */
-export class PaymentError extends AppError {
-  constructor(
-    message: string,
-    options: { code?: string; statusCode?: number } = {},
-  ) {
-    super(message, {
-      statusCode: options.statusCode ?? 502,
-      code: options.code ?? "PAYMENT_PROVIDER_ERROR",
-    });
-    this.name = "PaymentError";
-  }
-}
-
 /** Not found errors (404) */
 export class NotFoundError extends AppError {
   constructor(message = "Resource not found") {
@@ -67,9 +53,8 @@ export class NotFoundError extends AppError {
 
 /**
  * 501 Not Implemented — stub for capabilities explicitly deferred to
- * a future MCR phase. Distinct from PaymentError (502) to keep
- * alerting honest: a 502 implies upstream provider failure, a 501
- * means "we haven't written this yet" — different ops response.
+ * a future MCR phase. A 501 means "we haven't written this yet" —
+ * different ops response from a 502 (upstream provider failure).
  *
  * The `code` suffix convention (`NOT_IMPLEMENTED_PHASE_2`,
  * `NOT_IMPLEMENTED_PHASE_4`) is grep-friendly: a Phase PR can find

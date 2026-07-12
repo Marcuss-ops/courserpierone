@@ -11,10 +11,15 @@
 -- abilitare un futuro switch all'enum Prisma senza dover indovinare
 -- quando il valore è diventato canonico.
 --
--- Valori canonici del campo User.role (da UserRole in src/lib/auth/roles.ts):
+-- Valori canonici del campo User.role (role checks sono inline in route handlers;
 --   - 'admin'    : può amministrare la piattaforma (prodotti, utenti, ordini)
 --   - 'creator'  : possiede uno o più prodotti e comunica con i propri clienti
 --   - 'student'  : utente finale, acquista prodotti, contatta il proprio creator
+--
+-- NB: `src/lib/auth/roles.ts` (riferimento storico del commento originale) è
+-- stato rimosso nella Fase 7.2 knip cleanup. I check autorizzativi sono ora
+-- inline nelle route handlers (es. `src/lib/auth/require-admin.ts`). Vedi ADR
+-- post-Fase 7.2 e `docs/roadmap-current.md` §3 (Tech debt P1) per il contesto.
 -- ═══════════════════════════════════════════════════════════════
 
 -- Marker no-op (UPDATE vuoto): garantisce che Prisma rilevi la migration
