@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { NextRequest } from "next/server";
-import type { Order } from "@prisma/client";
+import { fakeOrder } from "@/app/api/__test-helpers__/fake-order";
 // ─── Mock helpers (SSOT seam) ──────────────────────────────
 const mockFindCompletedOrder = vi.fn();
 const mockFindCompletedOrderByOrderId = vi.fn();
@@ -37,7 +37,6 @@ vi.mock("@/lib/utils/rate-limit", () => ({
 const FAKE_PRODUCT_ID = "cp-product-1";
 const FAKE_PRODUCT_SLUG = "test-course";
 const FAKE_USER_ID = "cu-user-1";
-const FAKE_ORDER_ID = "ck-order-1";
 const FAKE_PROVIDER_ORDER_ID = "cs_test_aBc123";
 
 function createMockRequest(query: Record<string, string> = {}) {
@@ -52,15 +51,7 @@ function createMockRequest(query: Record<string, string> = {}) {
   } as unknown as NextRequest;
 }
 
-const fakeOrder = (overrides: Partial<Order> = {}) =>
-  ({
-    id: FAKE_ORDER_ID,
-    userId: FAKE_USER_ID,
-    productId: FAKE_PRODUCT_ID,
-    providerOrderId: FAKE_PROVIDER_ORDER_ID,
-    locale: "it",
-    ...overrides,
-  } as unknown as Awaited<ReturnType<typeof mockFindCompletedOrder>>);
+// ─── fakeOrder factory → @/app/api/__test-helpers__/fake-order (V3.3.2) ─────
 
 const mockAdmin = () =>
   mockGetServerUser.mockResolvedValueOnce({
@@ -140,7 +131,13 @@ describe("GET /api/access — auth semantics probe", () => {
   it("anonymous with valid orderId (Pattern B): returns hasAccess:true", async () => {
     mockAnonymous();
     mockProductFound();
-    mockFindCompletedOrderByOrderId.mockResolvedValueOnce(fakeOrder());
+    // V3.3.5 — helper's DEFAULTS don't include `providerOrderId`; Pattern B
+    // semantically references the provider-session id (query `orderId` =
+    // order's `providerOrderId`), so restore the field here for parity
+    // with the previous local factory.
+    mockFindCompletedOrderByOrderId.mockResolvedValueOnce(
+      fakeOrder({ providerOrderId: FAKE_PROVIDER_ORDER_ID }),
+    );
 
     const { GET } = await import("./route");
     const response = await GET(
