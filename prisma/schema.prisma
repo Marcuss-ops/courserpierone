@@ -239,8 +239,11 @@ model AnalyticEvent {
   id        String   @id @default(cuid())
   sessionId String? // ID unico del visitatore (cookie-based)
   productId String?
-  eventType String // pageview | scroll_deep | click_buy | checkout_open | checkout_complete | purchase | lesson_start | lesson_complete
-  metadata  String? // JSON string with extra data
+  eventType    String // pageview | scroll_deep | click_buy | checkout_open | checkout_complete | purchase | refund | checkout_abandoned | lesson_start | lesson_complete
+  channelId    String? // YouTubeChannel.id (channel attribution)
+  locale       String? // "it" | "en-us" | locale seen at event time
+  revenueCents Int? // signed: +amount on purchase, -amount on refund
+  metadata     String? // JSON string with extra data
   userId    String?
   ip        String?
   userAgent String?
