@@ -1,0 +1,21 @@
+-- ═══ Provenance ═══════════════════════════════════════════════════════════
+-- Hand-authored: `npx prisma migrate dev --create-only` failed locally
+-- (host→container pg_hba.conf blocked auth even after password reset;
+-- offline `prisma migrate diff` was also blocked because it requires a
+-- shadow-database-url for diffing against the migrations directory).
+--
+-- Content matches Prisma's default `DROP INDEX "X";` emit with IF EXISTS
+-- added for safe re-run. Schema is consistent with this file — no
+-- further migration expected from `migrate dev`. If you regenerate the
+-- SQL via Prisma, the only diff you should see is the absence of IF EXISTS.
+-- ═══════════════════════════════════════════════════════════════════════════
+
+-- DropIndex
+-- @@index([creatorId]) was redundant; PostgreSQL's leftmost-prefix rule
+-- already covers any query that filters only on creatorId via the
+-- remaining compound @@index([creatorId, status]). Removing this
+-- single-column index trims write amplification on Product
+-- inserts/updates without losing any read-path index coverage.
+--
+-- IF EXISTS makes this migration safe to re-run (idempotent).
+DROP INDEX IF EXISTS "Product_creatorId_idx";
