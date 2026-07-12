@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { NextRequest } from "next/server";
+import { fakeOrder } from "@/app/api/__test-helpers__/fake-order";
 
 // ─── Mock SSOT helper ───────────────────────────────────────
 const mockFindCompletedOrder = vi.fn();
@@ -75,14 +76,7 @@ const mockProductFound = () =>
 const mockVideoFound = () =>
   mockPrisma.lessonTranslation.findFirst.mockResolvedValueOnce({ videoUrl: VIDEO_URL });
 
-// ─── Typed fakeOrder factory (replaces inline untyped literal casts) ─────
-type FakeOrder = Awaited<ReturnType<typeof mockFindCompletedOrder>>;
-const fakeOrder = (overrides: Partial<FakeOrder> = {}) => ({
-  id: "ck-order-1",
-  userId: USER_ID,
-  productId: PRODUCT_ID,
-  ...overrides,
-} as unknown as FakeOrder);
+// ─── fakeOrder factory → @/app/api/__test-helpers__/fake-order (V3.3.2) ─────
 
 // ─── Tests ───────────────────────────────────────────────────
 describe("GET /api/videos/stream — admin bypass + customer order check", () => {

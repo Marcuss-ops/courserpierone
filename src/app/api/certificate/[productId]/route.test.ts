@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { NextRequest } from "next/server";
+import { fakeOrder } from "@/app/api/__test-helpers__/fake-order";
 
 // ─── Mock SSOT helper ───────────────────────────────────────
 const mockFindCompletedOrder = vi.fn();
@@ -94,14 +95,7 @@ const mockCustomer = (id = USER_ID) =>
     dbUser: { id, role: "student", name: "Customer" },
   });
 
-// ─── Typed fakeOrder factory (replaces inline untyped literal casts) ─────
-type FakeOrder = Awaited<ReturnType<typeof mockFindCompletedOrder>>;
-const fakeOrder = (overrides: Partial<FakeOrder> = {}) => ({
-  id: "ck-order-1",
-  userId: USER_ID,
-  locale: "it",
-  ...overrides,
-} as unknown as FakeOrder);
+// ─── fakeOrder factory → @/app/api/__test-helpers__/fake-order (V3.3.2) ─────
 
 // ─── Tests ───────────────────────────────────────────────────
 describe("GET /api/certificate/[productId] — auth + completion-gate", () => {
