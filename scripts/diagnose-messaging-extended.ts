@@ -30,10 +30,14 @@
  *       - a literal `status: "completed"` predicate
  *     MUST either:
  *       - delegate through `findCompletedOrder({ userId, productId|productSlug })`,
- *       - or be explicitly listed in `ALLOWLIST_ORDER_STATUS_RAW` with the
+ *       - or be explicitly listed in `HAND_CURATED_ORDER_STATUS_RAW` with the
  *         documented NON-DM / NON-AccessGate rationale (write-side
  *         webhook → completed, admin listing, search scoring,
- *         products-with-revenue, social-proof testimonials, etc).
+ *         products-with-revenue, social-proof testimonials, etc),
+ *       - **OR be auto-discovered**: any non-test file under
+ *         `src/lib/{access,messaging}/` is treated as a SSOT helper by
+ *         convention (see `getAutoDiscoveredSsotHelpers`). Files added
+ *         to those dirs are silently allowlisted — keep that scope pure.
  *
  * Output:
  *   - Pretty stdout with sections (matches the existing diagnose-
@@ -56,8 +60,14 @@
  *   - New `prisma.order.{findFirst,findUnique,findMany}` with `status:
  *     "completed"` for USER-DATA rendering?  Migrate to
  *     `findCompletedOrder` (the SSO). Don't add to
- *     ALLOWLIST_ORDER_STATUS_RAW unless you have a documented
+ *     `HAND_CURATED_ORDER_STATUS_RAW` unless you have a documented
  *     different-policy (write-side, admin listing, search scoring).
+ *   - New SSOT helper in `src/lib/access/` or `src/lib/messaging/`?
+ *     Auto-allowlisted via `getAutoDiscoveredSsotHelpers()`. No manual
+ *     allowlist entry needed — but verify it's a legitimate SSOT
+ *     helper, not a misfiled different-policy file (write-side,
+ *     admin listing, search scoring), since those categories need
+ *     the explicit `HAND_CURATED_ORDER_STATUS_RAW` entry with rationale.
  *
  * Usage:
  *   npx tsx scripts/diagnose-messaging-extended.ts
@@ -124,16 +134,12 @@ const ALLOWLIST_DM_AUTH_BYPASS: readonly { file: string; rationale: string }[] =
  * If your answer is "different policy domain" (write/admin/social-proof/
  * search-scoring), the entry is justified.
  */
-const ALLOWLIST_ORDER_STATUS_RAW: readonly { file: string; rationale: string }[] = [
-  // ── (a) SSOT resolver/helper implementations themselves ──
-  { file: "src/lib/messaging/api-authorize.ts", rationale: "DM-AUTH SSOT wrapper (the implementation)." },
-  { file: "src/lib/messaging/resolve-message-permission.ts", rationale: "DM-AUTH SSOT resolver (the implementation)." },
-  { file: "src/lib/messaging/load-authorized-conversation.ts", rationale: "DM-AUTH convId-keyed variant (the implementation)." },
-  { file: "src/lib/messaging/create-message.ts", rationale: "DM message composer (calls WS broker; doesn't query Order directly)." },
-  { file: "src/lib/messaging/find-or-create-conversation.ts", rationale: "DM Conversation upsert (doesn't query Order)." },
-  { file: "src/lib/access/find-completed-order.ts", rationale: "AccessGate SSOT helper for userId-keyed access (the implementation)." },
-  { file: "src/lib/access/find-completed-order-by-order-id.ts", rationale: "AccessGate SSOT SIBLING helper for orderId-keyed (guest) access — V3.1 follow-up (the implementation)." },
-
+// V3.6 — Category (a) "SSOT resolver/helper implementations themselves"
+// is now AUTO-DISCOVERED at runtime via `getAutoDiscoveredSsotHelpers()`
+// below. Hand-curated entries here cover ONLY the non-helper
+// different-policy bypasses (write-side, refund, admin, social-proof,
+// creator discovery) and preserve the rationale annotation metadata.
+const HAND_CURATED_ORDER_STATUS_RAW: readonly { file: string; rationale: string }[] = [
   // ── (b) Write-side: order creation from payment provider ──
   { file: "src/lib/services/order-service.ts", rationale: "WRITES Order.status='completed' from Stripe/LemonSqueezy webhook payload (write-side; opposite direction of the SSOT reader)." },
 
@@ -216,6 +222,35 @@ function collectTsFiles(
   return out;
 }
 
+/**
+ * V3.6 — Auto-discover the SSOT resolver/helper implementation files
+ * under `src/lib/{access,messaging}/` (excluding tests).
+ *
+ * Rationale: when a submodule file (e.g. `find-completed-order.ts`) is
+ * later inlined into the barrel (`@/lib/access`) or renamed, the
+ * hand-curated allowlist would reference a dead path. Auto-discovery
+ * keeps the regression guard honest without manual upkeep on every
+ * helper refactor.
+ *
+ * Failure mode: if a directory is absent, `collectTsFiles` returns an
+ * empty array silently (its internal try/catch swallows `ENOENT`) so
+ * the script never crashes on directory-shape changes; the
+ * `mergedAllowlist` simply lacks those entries.
+ */
+function getAutoDiscoveredSsotHelpers(root: string): readonly string[] {
+  const helpers = [
+    ...collectTsFiles(path.join(root, "src/lib/access"), { includeTests: false }),
+    ...collectTsFiles(path.join(root, "src/lib/messaging"), { includeTests: false }),
+  ];
+  // Filter out the access barrel itself: it's a re-export shim, not a
+  // helper implementation. Without this filter, it would inherit the
+  // "SSOT helper (auto-discovered)" synthetic rationale — misleading
+  // since the barrel has no executable raw-query logic.
+  return helpers
+    .map((p) => toPosix(path.relative(root, p)))
+    .filter((rel) => rel !== "src/lib/access/index.ts");
+}
+
 // ─── CHECK 1 — DM-AUTH wiring ───────────────────────────────────────
 
 /**
@@ -281,7 +316,16 @@ const RE_STATUS_COMPLETED = /\bstatus:\s*["']completed["']/;
 function check2OrderStatusRaw(): Finding[] {
   const root = projectRoot();
   const candidates = collectTsFiles(path.join(root, "src"), { includeTests: false });
-  const allowSet = new Set(ALLOWLIST_ORDER_STATUS_RAW.map((a) => a.file));
+  // V3.6 — Merge auto-discovered SSOT-helpers with hand-curated
+  // non-helper bypasses. The merge preserves rationale metadata for
+  // the hand-curated half while eliminating the maintenance burden of
+  // keeping helper paths in sync with submodule renames/inlines.
+  const autoHelpers = getAutoDiscoveredSsotHelpers(root);
+  const mergedAllowlist: readonly { file: string; rationale: string }[] = [
+    ...autoHelpers.map((file) => ({ file, rationale: "SSOT helper (auto-discovered)" })),
+    ...HAND_CURATED_ORDER_STATUS_RAW,
+  ];
+  const allowSet = new Set(mergedAllowlist.map((a) => a.file));
 
   const findings: Finding[] = [];
   for (const file of candidates) {
