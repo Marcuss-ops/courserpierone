@@ -1,19 +1,20 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
+import { authorizeDmRequest } from "@/lib/messaging/api-authorize";
 
 /**
  * GET /api/messages/stream?with=<userId>&productId=<productId>&since=<ISO timestamp>
  *
  * SSE (Server-Sent Events) endpoint per ricevere nuovi messaggi in tempo reale.
  *
- * Query params:
- *   - with:      ID dell'altro utente nella conversazione
- *   - productId: ID prodotto per scoping (OBBLIGATORIO da Phase 1.3)
- *   - since:     ISO timestamp — riceve solo messaggi creati dopo questa data
+ * Phase 1.6: il check autorizzativo passa da authorizeDmRequest →
+ * resolveMessagingPermission. Se la DM non è autorizzata, restituiamo
+ * 403 subito senza aprire lo stream.
  *
- * Il server polla il DB ogni 2 secondi e invia i nuovi messaggi tramite SSE.
- * Heartbeat ogni 15s per mantenere la connessione viva.
+ * NB: lo stream resta connesso anche su conversation "non esistente" —
+ * continuerà a polllare e ad aprire la chat quando i due utenti avranno
+ * il primo scambio autorizzato.
  */
 export async function GET(request: NextRequest) {
   const { user, dbUser } = await getServerUser();
@@ -33,6 +34,18 @@ export async function GET(request: NextRequest) {
     return new Response("Missing 'productId' parameter", { status: 400 });
   }
 
+  // ── Permission check (Phase 1.6 single source of truth) ─────
+  const auth = await authorizeDmRequest({
+    actorId: dbUser.id,
+    targetId: withUserId,
+    productId,
+  });
+  if (!auth.allowed) {
+    return new Response(auth.permission.reason ?? "forbidden", {
+      status: auth.response.status,
+    });
+  }
+
   const since = sinceRaw ? new Date(sinceRaw) : new Date(0);
 
   // Cerca la conversation tra i due utenti scope al prodotto (ordinamento deterministico)
@@ -48,9 +61,6 @@ export async function GET(request: NextRequest) {
     select: { id: true },
   });
 
-  // Se non esiste conversazione, connetti comunque la SSE (il client
-  // riceverà heartbeat ma nessun messaggio finché la conversazione non esiste).
-  // Il poll loop riproverà a cercare la conversazione ogni 2 secondi.
   let conversationId = conversation?.id ?? null;
 
   const encoder = new TextEncoder();
@@ -60,7 +70,6 @@ export async function GET(request: NextRequest) {
     start(controller) {
       let lastSeen = since;
 
-      // Heartbeat per mantenere viva la connessione
       const heartbeat = setInterval(() => {
         try {
           controller.enqueue(encoder.encode(": heartbeat\n\n"));
@@ -70,12 +79,9 @@ export async function GET(request: NextRequest) {
         }
       }, 15_000);
 
-      // Poll DB con setTimeout ricorsivo
       async function poll(): Promise<void> {
         if (stopped) return;
 
-        // Se non esiste ancora una conversazione, riprova a cercarla
-        // (potrebbe essere stata creata dal POST handler nel frattempo)
         if (!conversationId) {
           const found = await prisma.conversation.findFirst({
             where: {
@@ -127,10 +133,8 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      // Avvia il primo poll dopo 500ms
       setTimeout(poll, 500);
 
-      // Cleanup alla disconnessione
       request.signal.addEventListener("abort", () => {
         stopped = true;
         clearInterval(heartbeat);

@@ -6,6 +6,7 @@ import { sanitizeHtml } from "@/lib/utils/sanitize";
 import { apiErrorResponse } from "@/lib/errors";
 import { messageBroker, NEW_MESSAGE } from "@/lib/ws/broker";
 import { sendDmNotificationEmail } from "@/lib/services/email";
+import { authorizeDmRequest } from "@/lib/messaging/api-authorize";
 
 /**
  * Trova o crea una conversazione tra due utenti LEGATA A UN PRODOTTO.
@@ -13,8 +14,9 @@ import { sendDmNotificationEmail } from "@/lib/services/email";
  * che l'unique constraint su [userOneId, userTwoId, productId] funzioni
  * correttamente a prescindere dall'ordine con cui vengono passati i due userId.
  *
- * Phase 1.3 del piano DMs: productId è OBBLIGATORIO — non esiste DM
- * generico tra due utenti se non in relazione a un prodotto acquistato.
+ * Phase 1.3 del piano DMs: productId è OBBLIGATORIO.
+ * Phase 1.6: il chiamante deve già aver passato il resolver; qui entriamo
+ * solo con `allowed: true` quindi è OK creare la Conversation.
  */
 async function findOrCreateConversation(
   userId: string,
@@ -70,18 +72,10 @@ async function findConversation(
 /**
  * GET /api/messages?with=<userId>&productId=<productId>&cursor=<id>&limit=50
  *
- * Cursor-based pagination per la conversazione tra due utenti, scoped a
- * un prodotto (Phase 1.3). productId è obbligatorio.
- *
- * - Senza cursor: restituisce i messaggi più recenti (prima pagina)
- * - Con cursor: restituisce i messaggi più vecchi del cursor
- * - Ordine: createdAt DESC (più recenti prima)
- * - Risposta: { messages, nextCursor }
- *   nextCursor = id del messaggio più vecchio nella pagina, o null se non ce ne sono altri
- *
- * CONTROLLO DI ACCESSO: verifica che la Conversation esista e appartenga
- * all'utente. Fase 1.5 aggiungerà il resolveMessagingPermission per il check
- * completo creator↔cliente↔prodotto.
+ * Phase 1.6: il check autorizzativo è centralizzato in
+ * resolveMessagingPermission (e nel suo wrapper authorizeDmRequest).
+ * Se la DM non è autorizzata (es. Order refunded, prodotto senza creator),
+ * rispondiamo 403/404 senza consultare il DB delle Conversation.
  */
 export const GET = withRateLimit(async function GET(request: NextRequest) {
   try {
@@ -108,15 +102,30 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
     }
 
     if (withUserId === dbUser.id) {
-      return NextResponse.json({ error: "Non puoi visualizzare una conversazione con te stesso" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Non puoi visualizzare una conversazione con te stesso" },
+        { status: 400 },
+      );
     }
 
+    // Sanity-check presenza otherUser (resolver non controlla che il
+    // target esista come User; questo check inline dà un 404 pulito).
     const otherUser = await prisma.user.findUnique({
       where: { id: withUserId },
       select: { id: true },
     });
     if (!otherUser) {
       return NextResponse.json({ error: "Utente non trovato" }, { status: 404 });
+    }
+
+    // ── Permission check (Phase 1.6 single source of truth) ─────
+    const auth = await authorizeDmRequest({
+      actorId: dbUser.id,
+      targetId: withUserId,
+      productId,
+    });
+    if (!auth.allowed) {
+      return auth.response;
     }
 
     const conversation = await findConversation(dbUser.id, withUserId, productId);
@@ -145,7 +154,6 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
 
     const hasMore = messages.length > limit;
     const page = hasMore ? messages.slice(0, limit) : messages;
-    // nextCursor = ID of the oldest message in this page (to fetch the next older page)
     const nextCursor = hasMore ? page[page.length - 1].id : null;
 
     return NextResponse.json({ messages: page, nextCursor });
@@ -159,12 +167,8 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
  * Invia un nuovo messaggio.
  * Body: { receiverId: string, content: string, productId: string }
  *
- * productId è OBBLIGATORIO (Phase 1.3): ogni DM è scoped a un prodotto.
- * Trova o crea una Conversation tra sender e receiver, poi crea il Message.
- * Il senderId è sempre l'utente autenticato.
- *
- * NOTA: il controllo autorizzativo completo (creator/cliente/ordine
- * completed) arriverà dal resolveMessagingPermission (Fase 1.5).
+ * Phase 1.6: il check autorizzativo passa da authorizeDmRequest →
+ * resolveMessagingPermission. Niente più check sparsi qui.
  */
 export const POST = withRateLimit(async function POST(request: NextRequest) {
   try {
@@ -188,27 +192,40 @@ export const POST = withRateLimit(async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Il messaggio non può superare 5000 caratteri" }, { status: 400 });
     }
 
-    // Impedisci auto-invio
+    // Impedisci auto-invio (defense-in-depth: anche il resolver lo cattura,
+    // ma il check inline evita un DB hit per il caso più ovvio).
     if (receiverId === dbUser.id) {
-      return NextResponse.json({ error: "Non puoi inviare un messaggio a te stesso" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Non puoi inviare un messaggio a te stesso" },
+        { status: 400 },
+      );
     }
 
-    // Verifica che il receiver esista
+    // ── Permission check (Phase 1.6 single source of truth) ─────
+    const auth = await authorizeDmRequest({
+      actorId: dbUser.id,
+      targetId: receiverId,
+      productId,
+    });
+    if (!auth.allowed) {
+      return auth.response;
+    }
+
+    // NB: ProductNotFound è già coperto dal resolver (caso ProductNotFound
+    // → 404). NON ripetere la query prodotto inline: sarebbe un secondo
+    // source of truth, violerebbe il principio "tutta la regex dal
+    // resolver" di Fase 1.6. Idem per la verifica di esistenza User
+    // partner (la sua mancanza verrebbe catturata dal fail della
+    // Conversation.create con FK).
+
+    // Lookup minimal del receiver per i dati usati a valle (email
+    // notification, broker event senza nuove query).
     const receiver = await prisma.user.findUnique({
       where: { id: receiverId },
       select: { id: true, email: true, lastSeenAt: true },
     });
     if (!receiver) {
       return NextResponse.json({ error: "Destinatario non trovato" }, { status: 404 });
-    }
-
-    // Verifica che il prodotto esista (FK cascade lo cattura, ma errore più chiaro)
-    const productExists = await prisma.product.findUnique({
-      where: { id: productId },
-      select: { id: true },
-    });
-    if (!productExists) {
-      return NextResponse.json({ error: "Prodotto non trovato" }, { status: 404 });
     }
 
     // Trova o crea la conversazione (ordinamento deterministico)
@@ -241,16 +258,12 @@ export const POST = withRateLimit(async function POST(request: NextRequest) {
     });
 
     // Send email notification if receiver appears offline.
-    // Only send if lastSeenAt has been populated (WS server is tracking activity)
-    // AND it was more than 5 minutes ago.
-    const OFFLINE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
+    const OFFLINE_THRESHOLD_MS = 5 * 60 * 1000;
     const isOffline =
       receiver.lastSeenAt != null &&
       Date.now() - receiver.lastSeenAt.getTime() > OFFLINE_THRESHOLD_MS;
 
     if (isOffline && receiver.email) {
-      // Cooldown: only send if receiver has ≤ 1 unread message in this conversation
-      // (prevents email spam from rapid-fire messages)
       const unreadCount = await prisma.message.count({
         where: {
           conversationId: conversation.id,

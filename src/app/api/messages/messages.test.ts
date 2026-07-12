@@ -4,14 +4,22 @@
  * Phase 1.3 update: ogni DM è ora scoped a un prodotto. Tutti i test
  * passano productId nei body POST e nei query params GET.
  *
+ * Phase 1.6 update: tutte le route passano per authorizeDmRequest(...)
+ * → resolveMessagingPermission(...). Il mock di api-authorize qui sotto
+ * controlla l'esito autorizzativo per ogni test (default: allowed=true).
+ * I test che esercitano il deny usano mockAuthorizeDmRequest.mockResolvedValueOnce(...).
+ *
  * Covers:
  *   GET   - auth required, missing param, self-chat blocked, 403 no conversation,
- *           cursor pagination, limit enforcement, productId obbligatorio
+ *           cursor pagination, limit enforcement, productId obbligatorio,
+ *           wiring del resolver (deny → 403 con reason)
  *   POST  - auth required, validation, auto-invio blocked,
  *           conversation creation with productId, message creation with sanitization,
- *           offline email notification logic
+ *           offline email notification logic,
+ *           wiring del resolver
  *   PATCH - auth required, missing conversationId, 403 access denied,
- *           successful mark-as-read, only marks others' messages
+ *           successful mark-as-read, only marks others' messages,
+ *           wiring del resolver (lookup Conversation → derive productId → resolver)
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
@@ -74,6 +82,34 @@ const OTHER_USER_ID = "user2";
 
 const createRequest = (url: string, init?: RequestInit): NextRequest =>
   new Request(`http://localhost${url}`, init) as unknown as NextRequest;
+
+// ─── Phase 1.6: mock authorizeDmRequest ────────────────────────
+// Le route messages chiamano authorizeDmRequest(...) che internamente
+// usa resolveMessagingPermission. Per evitare di propagare tutti i
+// mock prisma nei test, mockiamo direttamente authorizeDmRequest.
+// Default: allowed=true (i test storici continuano a funzionare con
+// le asserzioni pre-fase-1.6). I test specifici del deny usano
+// mockAuthorizeDmRequest.mockResolvedValueOnce(...).
+const { mockAuthorizeDmRequest } = vi.hoisted(() => ({
+  mockAuthorizeDmRequest: vi.fn(),
+}));
+vi.mock("@/lib/messaging/api-authorize", () => ({
+  authorizeDmRequest: mockAuthorizeDmRequest,
+}));
+// Default: allowed=true con productId valorizzato (idempotente nei test)
+function setDefaultAuthorizeAllowed() {
+  mockAuthorizeDmRequest.mockReset();
+  mockAuthorizeDmRequest.mockResolvedValue({
+    allowed: true,
+    permission: {
+      allowed: true,
+      creatorId: "creator-1",
+      studentId: "user1",
+      productId: PRODUCT_ID,
+    },
+  });
+}
+setDefaultAuthorizeAllowed();
 
 // ─── Tests ────────────────────────────────────────────────────
 describe("GET /api/messages", () => {
@@ -246,6 +282,56 @@ describe("GET /api/messages", () => {
       })
     );
   });
+
+  // ─── Phase 1.6: wiring del resolver su GET ──────────────────
+  it("returns 403 when resolver denies (no_completed_order_for_student)", async () => {
+    mockAuth({ id: "user1", email: "a@test.com" });
+    const { NextResponse } = await import("next/server");
+    mockAuthorizeDmRequest.mockResolvedValueOnce({
+      allowed: false,
+      permission: {
+        allowed: false,
+        productId: PRODUCT_ID,
+        reason: "no_completed_order_for_student",
+      },
+      response: NextResponse.json(
+        { error: "DM non autorizzata: ordine non completed", reason: "no_completed_order_for_student" },
+        { status: 403 },
+      ),
+    });
+
+    const { GET } = await import("./route");
+    const res = await GET(createRequest(`/api/messages?with=${OTHER_USER_ID}&productId=${PRODUCT_ID}`));
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.reason).toBe("no_completed_order_for_student");
+    // La route NON deve aver proseguito verso la Conversation.findFirst
+    // perché il wiring blocca a monte.
+    expect(mockPrisma.conversation.findFirst).not.toHaveBeenCalled();
+  });
+
+  it("returns 403 when resolver denies (not_creator_student_pair)", async () => {
+    mockAuth({ id: "user1", email: "a@test.com" });
+    const { NextResponse } = await import("next/server");
+    mockAuthorizeDmRequest.mockResolvedValueOnce({
+      allowed: false,
+      permission: {
+        allowed: false,
+        productId: PRODUCT_ID,
+        reason: "not_creator_student_pair",
+      },
+      response: NextResponse.json(
+        { error: "DM non autorizzata", reason: "not_creator_student_pair" },
+        { status: 403 },
+      ),
+    });
+
+    const { GET } = await import("./route");
+    const res = await GET(createRequest(`/api/messages?with=${OTHER_USER_ID}&productId=${PRODUCT_ID}`));
+    expect(res.status).toBe(403);
+    expect(mockPrisma.conversation.findFirst).not.toHaveBeenCalled();
+  });
 });
 
 describe("POST /api/messages", () => {
@@ -342,10 +428,28 @@ describe("POST /api/messages", () => {
     expect(res.status).toBe(404);
   });
 
-  it("returns 404 when product does not exist", async () => {
+  it("returns 404 when product does not exist (via resolver)", async () => {
     mockAuth({ id: "user1", email: "a@test.com" });
     mockPrisma.user.findUnique.mockResolvedValue({ id: OTHER_USER_ID, email: "b@test.com", lastSeenAt: null });
     mockPrisma.product.findUnique.mockResolvedValue(null);
+
+    // Phase 1.6: il check "product esiste?" passa dal resolver.
+    // Aggiornato il test per riflettere che api-authorize → resolveMessagingPermission
+    // → ProductNotFound → 404 è il path canonico (nessun inline product.findUnique).
+    const { NextResponse } = await import("next/server");
+    mockAuthorizeDmRequest.mockResolvedValueOnce({
+      allowed: false,
+      permission: {
+        allowed: false,
+        productId: "ghost-prod",
+        reason: "product_not_found",
+      },
+      response: NextResponse.json(
+        { error: "Prodotto non trovato", reason: "product_not_found" },
+        { status: 404 },
+      ),
+    });
+
     const { POST } = await import("./route");
     const res = await POST(
       createRequest("/api/messages", {
@@ -354,6 +458,8 @@ describe("POST /api/messages", () => {
       })
     );
     expect(res.status).toBe(404);
+    const body = await res.json();
+    expect(body.reason).toBe("product_not_found");
   });
 
   it("creates a new conversation if none exists (with productId)", async () => {
@@ -661,6 +767,69 @@ describe("POST /api/messages", () => {
     // No email should be sent when receiver has no email address
     expect(mockSendDmNotificationEmail).not.toHaveBeenCalled();
   });
+
+  // ─── Phase 1.6: wiring del resolver su POST ──────────────────
+  it("returns 403 when resolver denies POST (no_completed_order_for_student)", async () => {
+    mockAuth({ id: "user1", email: "a@test.com" });
+    const { NextResponse } = await import("next/server");
+    mockAuthorizeDmRequest.mockResolvedValueOnce({
+      allowed: false,
+      permission: {
+        allowed: false,
+        productId: PRODUCT_ID,
+        reason: "no_completed_order_for_student",
+      },
+      response: NextResponse.json(
+        { error: "DM non autorizzata", reason: "no_completed_order_for_student" },
+        { status: 403 },
+      ),
+    });
+
+    const { POST } = await import("./route");
+    const res = await POST(
+      createRequest("/api/messages", {
+        method: "POST",
+        body: JSON.stringify({ receiverId: OTHER_USER_ID, content: "Hi", productId: PRODUCT_ID }),
+      })
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.reason).toBe("no_completed_order_for_student");
+    // Verifica che la route NON abbia proseguito con user.findUnique,
+    // conversation.findUnique, message.create, né emesso NEW_MESSAGE.
+    expect(mockPrisma.user.findUnique).not.toHaveBeenCalled();
+    expect(mockPrisma.conversation.findUnique).not.toHaveBeenCalled();
+    expect(mockPrisma.message.create).not.toHaveBeenCalled();
+  });
+
+  it("returns 403 when resolver denies POST (self_message_blocked)", async () => {
+    mockAuth({ id: "user1", email: "a@test.com" });
+    const { NextResponse } = await import("next/server");
+    mockAuthorizeDmRequest.mockResolvedValueOnce({
+      allowed: false,
+      permission: {
+        allowed: false,
+        productId: PRODUCT_ID,
+        reason: "self_message_blocked",
+      },
+      response: NextResponse.json(
+        { error: "Non puoi inviare un messaggio a te stesso", reason: "self_message_blocked" },
+        { status: 400 },
+      ),
+    });
+
+    const { POST } = await import("./route");
+    const res = await POST(
+      createRequest("/api/messages", {
+        method: "POST",
+        body: JSON.stringify({ receiverId: OTHER_USER_ID, content: "Hi", productId: PRODUCT_ID }),
+      })
+    );
+    // Importante: la status viene dal wrapper di api-authorize (400 per self),
+    // non 403/200 hardcoded.
+    expect(res.status).toBe(400);
+  });
 });
 
 // ── PATCH /api/messages/read tests ───────────────────────────
@@ -765,5 +934,76 @@ describe("PATCH /api/messages/read", () => {
     const body = await res.json();
     expect(res.status).toBe(200);
     expect(body.count).toBe(0);
+  });
+
+  // ─── Phase 1.6: wiring del resolver su /api/messages/read ─────
+  it("derives productId + partner from Conversation and consults resolver", async () => {
+    mockAuth({ id: "user1", email: "a@test.com" });
+    mockPrisma.conversation.findFirst.mockResolvedValue({
+      id: "conv1",
+      userOneId: "user1",
+      userTwoId: OTHER_USER_ID,
+      productId: PRODUCT_ID,
+    });
+    mockPrisma.message.updateMany.mockResolvedValue({ count: 5 });
+
+    const { PATCH } = await import("./read/route");
+    await PATCH(
+      createRequest("/api/messages/read", {
+        method: "PATCH",
+        body: JSON.stringify({ conversationId: "conv1" }),
+      })
+    );
+
+    // Quando user1 == conversation.userOneId, il partner è userTwoId.
+    expect(mockAuthorizeDmRequest).toHaveBeenCalledWith({
+      actorId: "user1",
+      targetId: OTHER_USER_ID,
+      productId: PRODUCT_ID,
+    });
+    expect(mockPrisma.message.updateMany).toHaveBeenCalled();
+  });
+
+  it("returns 403 when resolver denies /api/messages/read (no_completed_order_for_student)", async () => {
+    mockAuth({ id: "user1", email: "a@test.com" });
+    mockPrisma.conversation.findFirst.mockResolvedValue({
+      id: "conv1",
+      userOneId: OTHER_USER_ID, // user1 è userTwo (partner è userOne)
+      userTwoId: "user1",
+      productId: PRODUCT_ID,
+    });
+    const { NextResponse } = await import("next/server");
+    mockAuthorizeDmRequest.mockResolvedValueOnce({
+      allowed: false,
+      permission: {
+        allowed: false,
+        productId: PRODUCT_ID,
+        reason: "no_completed_order_for_student",
+        creatorId: "creator-1",
+        studentId: "user1",
+      },
+      response: NextResponse.json(
+        { error: "DM non autorizzata", reason: "no_completed_order_for_student" },
+        { status: 403 },
+      ),
+    });
+
+    const { PATCH } = await import("./read/route");
+    const res = await PATCH(
+      createRequest("/api/messages/read", {
+        method: "PATCH",
+        body: JSON.stringify({ conversationId: "conv1" }),
+      })
+    );
+
+    expect(res.status).toBe(403);
+    // Partner correttamente derivato (user1=userTwoId, partner=userOneId=OTHER_USER_ID).
+    expect(mockAuthorizeDmRequest).toHaveBeenCalledWith({
+      actorId: "user1",
+      targetId: OTHER_USER_ID,
+      productId: PRODUCT_ID,
+    });
+    // updateMany NON deve essere chiamato se il resolver blocca.
+    expect(mockPrisma.message.updateMany).not.toHaveBeenCalled();
   });
 });

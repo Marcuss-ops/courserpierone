@@ -5,6 +5,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { createHmac } from "crypto";
 import { prisma } from "./src/lib/db/prisma";
 import { messageBroker, NEW_MESSAGE, type NewMessageEvent } from "./src/lib/ws/broker";
+import { resolveMessagingPermission } from "./src/lib/messaging/resolve-message-permission";
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
@@ -79,56 +80,59 @@ app.prepare().then(() => {
 
     const { userId } = verified;
 
-    // Phase 1.3: productId è ora richiesto dal client per ogni DM.
-    // Validiamo almeno che esista un Product reale — il controllo
-    // completo creator↔cliente↔prodotto arriverà dal
-    // resolveMessagingPermission (Fase 1.5) e dallo switch a
-    // conversationId (Fase 4.1). Per ora respingiamo solo i WS con
-    // productId inesistente per evitare subscription a contesti fake.
-    //
-    // TODO Fase 1.5: integrare resolveMessagingPermission anche qui
-    // (verifica ordine completed, ruoli, ownership prodotto).
-    if (withProductId) {
-      // Validazione best-effort: non blocchiamo l'upgrade ma
-      // logghiamo l'anomalia. Blocco stretto richiede async prima
-      // dell'upgrade, più invasivo.
-      prisma.product.findUnique({ where: { id: withProductId }, select: { id: true } })
-        .then((product) => {
-          if (!product) {
-            console.warn(
-              `[ws] Product ${withProductId} not found for user ${userId} (with=${withUserId}) — allowing upgrade but flagging`,
-            );
-          }
-        })
-        .catch((err) => console.error("[ws] productId validation error:", err));
-    } else {
-      // Nessun productId: nel modello conversazione-per-prodotto non
-      // dovremmo più accettare WS "generici". Logghiamo per debug e,
-      // in Fase 4.1, transformeremo in upgrade rifiutato.
-      console.warn(
-        `[ws] Legacy upgrade without productId from user=${userId} with=${withUserId} — will be rejected in 4.1`,
-      );
+    // Phase 1.6: il WS upgrade passa per resolveMessagingPermission.
+    // Se la DM non è autorizzata (self, prodotto inesistente, coppia
+    // non creator↔cliente, studente senza Order.completed) l'upgrade
+    // viene rifiutato con 403. Il client riceverà un close code 1008
+    // (policy violation) e può mostrare "subscription ended" o simile.
+    if (!withProductId) {
+      // productId obbligatorio post-Phase 1.3
+      socket.write("HTTP/1.1 400 Bad Request\r\n\r\n");
+      socket.destroy();
+      return;
     }
 
-    // Close old connection for the same user, if any
-    const existing = clients.get(userId);
-    if (existing && existing.readyState === WebSocket.OPEN) {
-      existing.close(1000, "Replaced by newer connection");
-    }
+    resolveMessagingPermission({
+      actorId: userId,
+      targetId: withUserId,
+      productId: withProductId,
+    })
+      .then((permission) => {
+        if (!permission.allowed) {
+          console.log(
+            `[ws] Upgrade refused: ${permission.reason} (user=${userId}, with=${withUserId}, product=${withProductId})`,
+          );
+          socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
+          socket.destroy();
+          return;
+        }
 
-    wss.handleUpgrade(request, socket, head, (ws) => {
-      // Attach metadata
-      const meta = ws as WebSocket & {
-        userId: string;
-        withUserId: string;
-        withProductId: string | null;
-      };
-      meta.userId = userId;
-      meta.withUserId = withUserId;
-      meta.withProductId = withProductId ?? null;
+        // ── Attach meta + complete upgrade ──────────────────────
+        const existing = clients.get(userId);
+        if (existing && existing.readyState === WebSocket.OPEN) {
+          existing.close(1000, "Replaced by newer connection");
+        }
 
-      wss.emit("connection", ws, request);
-    });
+        wss.handleUpgrade(request, socket, head, (ws) => {
+          const meta = ws as WebSocket & {
+            userId: string;
+            withUserId: string;
+            withProductId: string | null;
+          };
+          meta.userId = userId;
+          meta.withUserId = withUserId;
+          meta.withProductId = withProductId ?? null;
+
+          wss.emit("connection", ws, request);
+        });
+      })
+      .catch((err) => {
+        console.error("[ws] permission resolution error:", err);
+        socket.write("HTTP/1.1 500 Internal Server Error\r\n\r\n");
+        socket.destroy();
+      });
+    // Tutta la gestione dell'upgrade è dentro il .then()/.catch()
+    // async sopra (Phase 1.6). Nessun codice ulteriore qui.
   });
 
   wss.on("connection", (ws: WebSocket) => {
