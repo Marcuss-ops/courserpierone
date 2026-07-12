@@ -15,6 +15,13 @@ const hasStripeCreds =
   !!process.env.TEST_STRIPE_PRICE_ID;
 
 test.skip(!hasStripeCreds, "Stripe test credentials not configured");
+// V1.5: Stripe legacy checkout è gated da ENABLE_STRIPE_CHECKOUT. Quando il
+// flag è off, i test E2E Stripe sono skippati automaticamente — la copertura
+// end-to-end del provider primario si sposta sui test LS equivalents.
+test.skip(
+  process.env.ENABLE_STRIPE_CHECKOUT !== "true",
+  "ENABLE_STRIPE_CHECKOUT is false (V1.5: LS primary, Stripe checkout gated)"
+);
 
 test.beforeEach(async () => {
   await cleanupTestUser(TEST_EMAIL);

@@ -126,6 +126,14 @@ export const ENV_DEFINITIONS: EnvVarDef[] = [
     optional: true,
   },
   {
+    key: "ENABLE_STRIPE_CHECKOUT",
+    category: "optional",
+    description:
+      "Feature flag (V1.5) — se 'true', abilita la creazione di nuove sessioni Stripe checkout quando lemonVariantId non è configurato su un prodotto. Default 'false': LS è il primary provider e Stripe è solo webhook-compatibile per ordini legacy.",
+    defaultValue: "false",
+    optional: true,
+  },
+  {
     key: "LEMONSQUEEZY_API_KEY",
     category: "required",
     description: "Lemon Squeezy API key",
@@ -153,6 +161,12 @@ export const ENV_DEFINITIONS: EnvVarDef[] = [
     key: "CRON_SECRET",
     category: "required",
     description: "Secret per proteggere gli endpoint cron",
+    optional: true,
+  },
+  {
+    key: "ALERT_WEBHOOK_URL",
+    category: "optional",
+    description: "Webhook URL (Slack/Discord) per alert errori di produzione",
     optional: true,
   },
 

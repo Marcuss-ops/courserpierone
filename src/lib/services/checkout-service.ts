@@ -36,21 +36,35 @@ export interface CreateCheckoutInput {
  * CheckoutService creates payment sessions and tracks abandoned checkouts.
  *
  * Priority:
- * 1. Lemon Squeezy (if lemonVariantId is resolved)
- * 2. Stripe (fallback if only stripePriceId is resolved)
+ * 1. Lemon Squeezy (if lemonVariantId is resolved — preferred, primary)
+ * 2. Stripe (legacy fallback if only stripePriceId is resolved — V1.5:
+ *    gated by ENABLE_STRIPE_CHECKOUT, default OFF; i webhook legacy
+ *    continuano a onorare gli ordini pre-spegnimento).
  */
 export class CheckoutService {
   async createCheckout(input: CreateCheckoutInput): Promise<CheckoutSession> {
+    // LS è preferenziale: quando un prodotto ha variantId configurato, LS va
+    // sempre — il flag Stripe è ininfluente.
     if (input.pricing.lemonVariantId) {
       return this.createLemonSqueezyCheckout(input);
     }
 
-    if (input.pricing.stripePriceId) {
+    // Stripe legacy fallback GATED (V1.5). Default `false` → niente nuove
+    // sessioni Stripe; webhook `/api/webhooks/stripe` resta attivo per gli
+    // ordini legacy già pending.
+    if (
+      env.ENABLE_STRIPE_CHECKOUT === "true" &&
+      input.pricing.stripePriceId
+    ) {
       return this.createStripeCheckout(input);
     }
 
+    // Nessun provider attivo per questo prodotto: errore informativo che
+    // guida admin e developer verso le due opzioni di sblocco.
     throw new CheckoutError(
-      "Nessun metodo di pagamento configurato per questo prodotto."
+      "Nessun metodo di pagamento disponibile per questo prodotto. " +
+        "Configura un Lemon Squeezy variant ID (consigliato) oppure, per " +
+        "il fallback legacy Stripe, imposta ENABLE_STRIPE_CHECKOUT=true."
     );
   }
 

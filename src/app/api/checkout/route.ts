@@ -6,7 +6,8 @@ import { getCurrencyFromLocale } from "@/lib/i18n/locale-resolver";
 import { withRateLimit } from "@/lib/utils/rate-limit";
 import { PricingService } from "@/lib/services/pricing-service";
 import { CheckoutService } from "@/lib/services/checkout-service";
-import { NotFoundError, apiErrorResponse } from "@/lib/errors";
+import { NotFoundError, CheckoutError, apiErrorResponse } from "@/lib/errors";
+import { env } from "@/lib/env";
 
 const pricingService = new PricingService();
 const checkoutService = new CheckoutService();
@@ -48,6 +49,25 @@ export const POST = withRateLimit(async function POST(request: NextRequest) {
     });
 
     pricingService.validateProvider(pricing);
+
+    // ── V1.5 defense-in-depth — Stripe legacy gate ─────────────────────────
+    // LS è già preferenziale in `CheckoutService.createCheckout`; questo guard
+    // aggiuntivo intercetta PRIMA il caso "solo StripePriceId + flag off" con
+    // un messaggio più diagnostico del generic "no provider configured" che
+    // emergerebbe dal fallback finale di CheckoutService. Identico di semantica
+    // al gate interno della service: nessuna nuova sessione Stripe viene
+    // avviata mentre ENABLE_STRIPE_CHECKOUT=false.
+    if (
+      pricing.stripePriceId &&
+      !pricing.lemonVariantId &&
+      env.ENABLE_STRIPE_CHECKOUT !== "true"
+    ) {
+      throw new CheckoutError(
+        "Stripe checkout temporaneamente disabilitato (V1.5: LS primario). " +
+          "Configura un Lemon Squeezy variant ID sul prodotto oppure " +
+          "imposta ENABLE_STRIPE_CHECKOUT=true per ripristinare il fallback legacy."
+      );
+    }
 
     const userEmail = user?.email ?? body.email ?? "";
 

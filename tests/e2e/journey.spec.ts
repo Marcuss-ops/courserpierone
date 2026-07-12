@@ -38,6 +38,13 @@ const hasAllCreds =
   !!process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 test.skip(!hasAllCreds, "Missing Supabase/Stripe test credentials for E2E journey");
+// V1.5: la simulazione checkout del journey usa Stripe legacy. Spegnere
+// ENABLE_STRIPE_CHECKOUT in CI salta l'intero file — il coverage end-to-end è
+// coperto dai test LS che asseriscono lo stesso flow con provider LS.
+test.skip(
+  process.env.ENABLE_STRIPE_CHECKOUT !== "true",
+  "ENABLE_STRIPE_CHECKOUT is false (V1.5: LS primary, journey uses legacy Stripe)"
+);
 
 // ─── Per-locale UI text expectations (anchored regex for locale safety) ─────
 const LOCALIZED_BUTTON_PATTERNS: Record<string, RegExp> = {
