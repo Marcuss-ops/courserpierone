@@ -1,19 +1,25 @@
 # Courser
 
+> **V1.x status:** Pre-GA. Vedi [docs/roadmap-current.md](docs/roadmap-current.md) per V1 blockers + post-V1 + tech debt.
+
 Piattaforma globale per la vendita di corsi e libri digitali multilingua.
 Trasforma il traffico YouTube in prodotti digitali localizzati con template,
 analytics, protezione accessi e gestione progressi.
+
+**Stack V1.x:** Next.js 16 · React 19 · Supabase · REST · Lemon Squeezy · Tailwind 4. Dettagli in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ---
 
 ## Requisiti
 
-- Node.js 18+ (consigliato 20 LTS)
-- npm, pnpm, o bun
-- Database PostgreSQL (locale via Docker o remoto Supabase/Neon)
-- Stripe account (per pagamenti)
-- OpenAI API key (opzionale, per traduzioni automatiche)
-- Google OAuth credentials (opzionale, per login con Google)
+- **Node.js 20 LTS**
+- **PostgreSQL 15+** (Supabase, Neon, o locale via Docker)
+- **Account Supabase** (Auth + Postgres + Storage)
+- **Account Lemon Squeezy** (provider pagamenti unico in V1.x)
+- **OpenAI API key** (opzionale, per traduzioni automatiche)
+- **Account SMTP** (opzionale, per email transazionali)
+
+> ⚠️ **V1.x in transizione a LS-only.** Stripe ancora presente (`stripe@^22.2.0` in package.json, webhook `src/app/api/webhooks/stripe/`, campi Prisma, e2e test, 5+ lingue di legal i18n) ma in rimozione pianificata (Fase 8, vedi [roadmap §1.2](docs/roadmap-current.md)). Drain `activeStripeOrders === 0` è V1 blocker. Le env `STRIPE_*` esistono e vanno drainate ma NON servono per nuovi ordini.
 
 ---
 
@@ -21,182 +27,178 @@ analytics, protezione accessi e gestione progressi.
 
 ```bash
 # 1. Clona il repository
-cd Courser
+git clone <repo-url> courser && cd courser
 
 # 2. Installa le dipendenze
 npm install
 
-# 3. Copia le variabili d'ambiente e configurale
+# 3. Copia e configura le env
 cp .env.example .env
-# Ora modifica .env con i tuoi valori (vedi sezione sotto)
+# Modifica .env con i tuoi valori (sezione sotto)
 
-# 4. Crea il database e le tabelle
-npx prisma db push
-# Oppure per generare il client Prisma senza push:
-# npx prisma generate
+# 4. Applica le migration al DB
+npx prisma migrate deploy
 
-# 5. Avvia il server di sviluppo
+# 5. Avvia il dev server
 npm run dev
-
-# 6. Apri http://localhost:3000 nel browser
+# → http://localhost:3000
 ```
 
 ---
 
 ## Variabili d'Ambiente
 
-Tutte le variabili sono documentate in `.env.example`. Ecco un riepilogo:
+Riepilogo (`.env.example` contiene i default completi):
 
 | Variabile | Obbligatoria | Descrizione |
 |---|---|---|
-| `DATABASE_URL` | ✅ | URL di connessione PostgreSQL (pgBouncer-pooled, port 6543) |
-| `DIRECT_URL` | ✅ | URL di connessione **direct** (port 5432, no pooler) per `prisma migrate deploy` |
-| `NEXT_PUBLIC_SUPABASE_URL` | ✅ | URL Supabase (Project Settings → API) |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | Anon key Supabase — esposta al client |
-| `SUPABASE_SERVICE_ROLE_KEY` | ✅ | Service role Supabase — full privilege, server-only |
-| `NEXT_PUBLIC_APP_URL` | ✅ | URL pubblico per link assoluti email/redirect |
-| `LEMONSQUEEZY_API_KEY` | ✅ | Chiave API Lemon Squeezy (provider pagamenti primario) |
-| `LEMONSQUEEZY_STORE_ID` | ✅ | Store ID Lemon Squeezy |
-| `LEMONSQUEEZY_WEBHOOK_SECRET` | ✅ | Segreto webhook Lemon Squeezy |
-| `STRIPE_SECRET_KEY` | ❌ | Chiave segreta Stripe (legacy — solo per ordini storici da drainare) |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | ❌ | Chiave pubblicabile Stripe (legacy) |
-| `STRIPE_WEBHOOK_SECRET` | ❌ | Segreto webhook Stripe (legacy) |
-| `OPENAI_API_KEY` | ❌ | Solo per traduzioni automatiche |
-| `GOOGLE_CLIENT_ID` | ❌ | Solo per login con Google |
-| `GOOGLE_CLIENT_SECRET` | ❌ | Solo per login con Google |
-| `EMAIL_SERVER_HOST` | ❌ | SMTP host (email transazionali) |
-| `EMAIL_SERVER_PORT` | ❌ | SMTP port |
-| `EMAIL_SERVER_USER` | ❌ | SMTP username |
-| `EMAIL_SERVER_PASSWORD` | ❌ | SMTP password |
-| `EMAIL_FROM` | ❌ | Indirizzo mittente email |
-| `SUPABASE_URL` | ❌ | Solo per Supabase storage |
-| `SUPABASE_ANON_KEY` | ❌ | Solo per Supabase storage |
-| `SUPABASE_SERVICE_ROLE_KEY` | ❌ | Solo per Supabase storage |
+| `DATABASE_URL` | ✅ | PostgreSQL pooled (Supabase pgBouncer, port 6543) |
+| `DIRECT_URL` | ✅ | PostgreSQL direct (port 5432, per `prisma migrate deploy`) |
+| `NEXT_PUBLIC_SUPABASE_URL` | ✅ | URL progetto Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | Anon key Supabase (client-safe) |
+| `SUPABASE_SERVICE_ROLE_KEY` | ✅ | Service role key (server-only, full privilege) |
+| `NEXT_PUBLIC_APP_URL` | ✅ | URL pubblico per link email/redirect assoluti |
+| `LEMONSQUEEZY_API_KEY` | ✅ | Lemon Squeezy API key |
+| `LEMONSQUEEZY_STORE_ID` | ✅ | Lemon Squeezy Store ID |
+| `LEMONSQUEEZY_WEBHOOK_SECRET` | ✅ | Webhook secret LS |
+| `OPENAI_API_KEY` | ❌ | Traduzioni automatiche (opzionale) |
+| `EMAIL_SERVER_HOST` / `EMAIL_SERVER_PORT` / `EMAIL_SERVER_USER` / `EMAIL_SERVER_PASSWORD` / `EMAIL_FROM` | ❌ | SMTP per email transazionali |
 
-> **Nota**: Le variabili contrassegnate con ❌ sono opzionali.
-> Se non configurate, le funzionalità corrispondenti vengono disabilitate
-> senza crash (OpenAI, Google OAuth, Supabase, email).
+Senza Stripe env (V1.x rimuove): `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`. Senza NextAuth env: nessuna (Supabase Auth non le richiede).
 
 ---
 
 ## Database
 
-### Locale con Docker
+### Supabase (consigliato per produzione)
+
+1. Crea progetto su [supabase.com](https://supabase.com)
+2. Project Settings → Database → copia `Connection string` (pooled, port 6543) e `Direct connection` (port 5432)
+3. Imposta `DATABASE_URL` (pooled) e `DIRECT_URL` (direct) in `.env`
+4. `npx prisma migrate deploy`
+
+### Docker locale (dev)
 
 ```bash
 docker run --name courser-db -e POSTGRES_PASSWORD=postgres \
   -e POSTGRES_DB=courser -p 5432:5432 -d postgres:16-alpine
 ```
 
-Poi imposta `DATABASE_URL=postgresql://postgres:postgres@localhost:5432/courser`
-nel tuo `.env`.
-
-### Remoto (Supabase / Neon)
-
-1. Crea un account su [supabase.com](https://supabase.com) o [neon.tech](https://neon.tech)
-2. Crea un nuovo progetto e copia la connection string
-3. Aggiorna `DATABASE_URL` nel `.env`
+Poi `DATABASE_URL=postgresql://postgres:postgres@localhost:5432/courser` in `.env`.
 
 ---
 
-## Pagamenti (Lemon Squeezy primario, Stripe legacy)
+## Auth (Supabase)
 
-Il sistema supporta **due provider**, con **Lemon Squeezy come primario** in V1.x e **Stripe come legacy** solo per ordini storici da drainare. Vedi `scripts/audit-v1-readiness.ts` per il gate `activeStripeOrders`.
+Auth gestita interamente da **Supabase Auth**. Niente NextAuth.
 
-### Lemon Squeezy (primario)
+- **Magic Link** — funziona out-of-the-box, nessuna config
+- **Google OAuth** (opzionale) — vedi sezione sotto
 
-1. Crea un account su [lemonsqueezy.com](https://lemonsqueezy.com)
+### Google OAuth setup
+
+1. **Google Cloud Console** — [console.cloud.google.com/apis/credentials](https://console.cloud.google.com/apis/credentials)
+   - Crea OAuth Client ID (Web application)
+   - **Authorized redirect URI**: `https://<your-project-ref>.supabase.co/auth/v1/callback`
+     ⚠️ NON `/api/auth/callback/google` (è il pattern NextAuth, non più usato)
+2. **Supabase Dashboard** — Authentication → Providers → Google → Enable
+   - Incolla Client ID + Client Secret da Google Cloud Console
+   - Salva
+3. Le env `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` non servono lato client (passano solo via Supabase) ma è utile tenerle per riferimento.
+
+---
+
+## Pagamenti (Lemon Squeezy)
+
+**Canonical V1.x:** Lemon Squeezy come Merchant of Record (target: unico provider, gestisce pagamenti + tasse + fatture). **Legacy da drainare:** Stripe (`stripe@^22.2.0` ancora in package.json, webhook route, campi Prisma, e2e test, 5+ lingue di legal i18n). Vedi Fase 8 in [roadmap §1.2](docs/roadmap-current.md) per il piano di rimozione completa.
+
+1. Crea account su [lemonsqueezy.com](https://lemonsqueezy.com)
 2. Settings → API → copia `LEMONSQUEEZY_API_KEY`
-3. Settings → Stores → copia lo `LEMONSQUEEZY_STORE_ID` del tuo store
-4. Settings → Webhooks → crea un endpoint su `https://your-domain.com/api/webhooks/lemonsqueezy`, copia `LEMONSQUEEZY_WEBHOOK_SECRET`
-5. Per ogni prodotto, crea una variante su Lemon Squeezy Dashboard e usa:
-   - `lemonVariantId` (variante standard, multi-store derivata dallo store di default)
-   - `lemonStoreId` opzionale per override (es. `countryOverrides` regionali)
-
-### Stripe (legacy / dismissione pianificata)
-
-Solo per ordini storici. La nuova pipeline di checkout **non genera più ordini Stripe** — il vecchio endpoint `/api/webhooks/stripe` resta attivo solo per processare pagamenti pre-migrazione.
-
-Per il drain: refunda ordini attivi o migrali manualmente a Lemon Squeezy, poi rimuovi il codice dual-provider (Post-V1 V1.1).
-
----
-
-## OpenAI (Traduzioni)
-
-Se vuoi usare le traduzioni automatiche:
-
-1. Vai su [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
-2. Crea una API key e impostala in `OPENAI_API_KEY`
-3. Usa l'endpoint `/api/translate` dal pannello admin
-
-Se non configurata, la funzionalità di traduzione non sarà disponibile
-ma l'app funziona comunque.
-
----
-
-## Google OAuth (Login Social — via Supabase Auth)
-
-L'OAuth Google è gestito interamente da **Supabase Auth** (non più NextAuth). La configurazione è in **2 posti**:
-
-### 1. Google Cloud Console (chi sei)
-
-1. Vai su [console.cloud.google.com/apis/credentials](https://console.cloud.google.com/apis/credentials)
-2. Crea OAuth Client ID (Web application)
-3. **Authorized redirect URI**: `https://<your-project-ref>.supabase.co/auth/v1/callback` (NON più `/api/auth/callback/google`)
-4. Copia Client ID + Client Secret
-
-### 2. Supabase Dashboard (provider handover)
-
-1. Authentication → Providers → Google → Enable
-2. Incolla Client ID + Client Secret
-3. Salva
-
-Le env vars corrispondenti (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`) vanno comunque nel `.env` per flessibilità di test locale; il client (browser) non le usa mai direttamente — passa sempre tramite Supabase come intermediario. Maggiori info in `.env.example` → sezione `─── Google OAuth ───`.
+3. Settings → Stores → copia `LEMONSQUEEZY_STORE_ID`
+4. Settings → Webhooks → crea endpoint `https://your-domain.com/api/webhooks/lemonsqueezy`, copia `LEMONSQUEEZY_WEBHOOK_SECRET`
+5. Per ogni prodotto: crea una variante su LS Dashboard e copia il `Variant ID` nel campo `Product.lemonVariantId` (vedi admin panel)
 
 ---
 
 ## Email (Transazionali)
 
-Il sistema email transazionale usa SMTP.
-Se non configuri SMTP, le email vengono loggate nei log del terminale (utile in dev).
-
-Provider consigliati:
+SMTP via Nodemailer. Provider consigliati:
 
 | Provider | Host | Port |
 |---|---|---|
-| **Gmail SMTP** | `smtp.gmail.com` | 587 |
-| **SendGrid** | `smtp.sendgrid.net` | 587 |
-| **Mailgun** | `smtp.mailgun.org` | 587 |
-| **Resend** | `smtp.resend.com` | 587 |
+| Gmail SMTP | `smtp.gmail.com` | 587 |
+| Resend | `smtp.resend.com` | 587 |
+| SendGrid | `smtp.sendgrid.net` | 587 |
+| Mailgun | `smtp.mailgun.org` | 587 |
+
+Senza SMTP configurato: le email vengono loggate in stdout (utile in dev).
 
 ---
 
-## Architettura del Progetto
+## OpenAI (Traduzioni, opzionale)
+
+Se vuoi le traduzioni automatiche:
+
+1. Crea API key su [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+2. Imposta in `OPENAI_API_KEY`
+3. Usa `/api/translate` dal pannello admin
+
+Senza: la traduzione manuale funziona comunque (upload JSON per lingua).
+
+---
+
+## Architettura
+
+Dettaglio completo in [ARCHITECTURE.md](ARCHITECTURE.md). Stack V1.x: Next.js 16 + React 19 + Supabase + REST + Lemon Squeezy + Tailwind 4.
 
 ```
-Courser/
-├── prisma/                  # Schema DB e migration
-│   └── schema.prisma
-├── public/
-│   └── courses/             # Config JSON dei corsi
-│       └── [slug]/
-│           └── config.json
+courser/
+├── prisma/
+│   ├── schema.prisma
+│   └── migrations/         # versionate (migrate dev → migrate deploy)
 ├── src/
 │   ├── app/
-│   │   ├── admin/           # Dashboard admin
-│   │   │   ├── page.tsx     # Statistiche e overview
-│   │   │   └── products/    # Gestione prodotti
-│   │   ├── api/             # API route handlers
-│   │   ├── login/           # Pagine di login
-│   │   └── [domain]/        # Landing page pubblico
+│   │   ├── admin/                 # dashboard admin (prodotti, ordini, utenti)
+│   │   ├── api/                   # REST (Next.js Route Handlers)
+│   │   │   ├── conversations/     # DM canonici (POST/GET/PATCH/stream)
+│   │   │   ├── webhooks/lemonsqueezy/  # solo LS (Stripe rimosso)
+│   │   │   ├── checkout/
+│   │   │   ├── progress/
+│   │   │   └── ...
+│   │   ├── dashboard/             # area utente (studenti + creator)
+│   │   │   ├── messages/          # inbox studente
+│   │   │   └── creator/messages/  # inbox creator
+│   │   ├── login/                 # Supabase Auth UI
+│   │   └── privacy/               # legal pages
 │   ├── components/
-│   │   ├── access/          # Access gate component
-│   │   ├── admin/           # Admin UI components
-│   │   ├── course/          # Analytics, progress, CTA
-│   │   └── funnel/          # Template landing (lumio, h612, horizon)
-│   ├── hooks/               # React hooks
-│   └── lib/                 # Utility, Stripe, Auth, DB
-└── docs/                   # Documentazione corrente + archivio historical
+│   │   ├── chat/                  # ChatView canonico (conversationId-based)
+│   │   ├── layout/                # InboxProvider, ecc.
+│   │   ├── course/                # access-gate, player wrapper
+│   │   └── ...
+│   ├── lib/
+│   │   ├── db/                    # Prisma client singleton
+│   │   ├── messaging/             # permission resolver, find-or-create conversation
+│   │   ├── payment/               # Lemon Squeezy client
+│   │   ├── supabase/              # server client, get-user
+│   │   ├── ws/                    # WS broker + SSE fallback
+│   │   └── i18n/                  # use-chat-t, locale resolver
+│   └── ...
+├── public/
+│   └── courses/                   # solo assets statici (no config.json in V1.x)
+├── docs/
+│   ├── roadmap-current.md         # V1 blockers + post-V1 + tech debt
+│   ├── production.md              # runbook (deploy, audit, cron, PITR)
+│   └── archive/                   # historical docs
+├── scripts/
+│   ├── audit-v1-readiness.ts      # gate V1 blockers
+│   ├── diagnose-messaging-extended.ts
+│   ├── products/                  # backfill-primary-creator, sync, generate
+│   ├── translate/                 # Argos translation pipeline
+│   ├── validate/                  # validate-locales
+│   └── generate/                  # generate-locale-resolver
+├── tests/
+│   └── e2e/                       # playwright (unit/integration vitest sono colocati in src/**/*.test.ts)
+└── ARCHITECTURE.md                # architettura canonica
 ```
 
 ---
@@ -205,162 +207,79 @@ Courser/
 
 | Comando | Descrizione |
 |---|---|
-| `npm run dev` | Avvia il server di sviluppo |
-| `npm run build` | Build di produzione |
-| `npm start` | Avvia il server di produzione |
-| `npx prisma db push` | Sincronizza lo schema col DB |
-| `npx prisma studio` | Apri il browser per i dati del DB |
-| `npx prisma generate` | Rigenera il client Prisma |
-| `npx prisma migrate dev` | Crea una migration |
+| `npm run dev` | Dev server (Next.js 16) |
+| `npm run dev:ws` | Dev server + WS broker (`server.ts`) |
+| `npm run build` | Build produzione (prisma generate + validate:locales + generate:locales + next build) |
+| `npm start` | Server produzione (Next.js) |
+| `npm run start:ws` | Server produzione + WS broker |
+| `npm run typecheck` | TypeScript check (`tsc --noEmit`) |
+| `npm run lint` | ESLint (read-only) |
+| `npm run lint:fix` | ESLint con autofix |
+| `npm run test` | Vitest unit + integration |
+| `npm run test:e2e` | Playwright E2E |
+| `npm run check` | typecheck + lint + test (quality gate) |
+| `npm run check:messaging` | Diagnostica DMs (`scripts/diagnose-messaging-extended.ts`) |
+| `npm run validate:locales` | Validazione i18n JSON |
+| `npm run generate:locales` | Rigenera locale resolver statico |
+| `npx prisma migrate dev --name <n>` | Crea migration (locale) |
+| `npx prisma migrate deploy` | Applica migration (DB prod) |
+| `npx prisma studio` | GUI ispezione DB |
+| `npx tsx scripts/audit-v1-readiness.ts` | Verifica V1 blockers |
 
 ---
 
 ## Documentazione
 
 - [MISSION.md](MISSION.md) — Bussola strategica del progetto
-- [ARCHITECTURE.md](ARCHITECTURE.md) — Architettura tecnica
-- [docs/roadmap-current.md](docs/roadmap-current.md) — Roadmap: V1 blockers + Post-V1 + Tech debt + Out-of-scope
-- [docs/archive/MVP-SPEC-initial.md](docs/archive/MVP-SPEC-initial.md) — Specifica MVP legacy (archiviato, pre-Supabase + post-V1)
-- [docs/production.md](docs/production.md) — Deployment + audit + cron runbook
+- [ARCHITECTURE.md](ARCHITECTURE.md) — Architettura tecnica + V1 stack
+- [docs/roadmap-current.md](docs/roadmap-current.md) — V1 blockers + post-V1 + tech debt + out-of-scope
+- [docs/production.md](docs/production.md) — Runbook: deploy, audit, cron, PITR
+- [docs/i18n-coverage.md](docs/i18n-coverage.md) — Copertura i18n per corso
+- [docs/content-source-map.md](docs/content-source-map.md) — Mappa sorgenti contenuti (Fase 9)
+- [docs/v1-acceptance-test.md](docs/v1-acceptance-test.md) — Acceptance test V1
+- [docs/archive/MVP-SPEC-initial.md](docs/archive/MVP-SPEC-initial.md) — Specifica MVP legacy (archiviata, pre-Supabase)
 
 ---
 
 ## Creare il Primo Corso
 
-### 1. Crea un prodotto su Lemon Squeezy (provider primario)
+1. **Crea una variante su Lemon Squeezy** (vedi sezione Pagamenti sopra). Copia il `Variant ID`.
+2. **Vai su `/admin/products/new`** e compila:
+   - Slug (URL pubblico, es. `fotografia-pro`)
+   - Nome, prezzo, valuta
+   - Cover URL (Supabase Storage, Unsplash, o URL pubblico)
+   - Template (`lumio`, `h612`, `horizon`)
+3. **Incolla il `lemonVariantId`** dalla variante LS
+4. **Aggiungi le lezioni** dalla pagina di modifica (titolo per lingua, video YouTube embed)
+5. **Pubblica**: lo status passa a `published` e la landing è raggiungibile su `/{locale}/{slug}`
 
-1. Vai su [app.lemonsqueezy.com](https://app.lemonsqueezy.com) → Stores → Products → "New product"
-2. Compila: nome, prezzo (es. 29.00 EUR), tipo "One-time payment"
-3. Salva e copia il **Variant ID** (es. `123456`)
-4. (Opzionale se multi-store) copia anche lo Store ID per override
-
-> **Stripe legacy**: per drenare ordini storici, vedi [docs/audit-v1-readiness.md](docs/production.md#audit) — `scripts/audit-v1-readiness.ts` riporta `activeStripeOrders > 0` da migrare prima del V1 GA.
-
-### 2. Crea il corso dal pannello Admin
-
-1. Vai su **`/admin/products/new`**
-2. Compila i campi:
-   - **Slug** — identificatore unico (es. `fotografia-pro`). Diventerà l'URL del corso
-   - **Nome / Prezzo / Valuta**
-   - **Cover URL** — immagine di copertina (Unsplash, Supabase, o URL pubblico)
-   - **Template** — scegli il layout della landing page (`lumio`, `h612`, `horizon`)
-3. Clicca **Salva**
-
-### 3. Aggiungi le lezioni
-
-Nella pagina di modifica del corso:
-
-1. **Titolo / Sottotitolo / CTA** — testi della landing page
-2. **Problema / Storia / Recensioni** — sezioni persuasive
-3. **Lezioni** — per ogni lezione:
-   - Titolo (IT e EN)
-   - Descrizione
-   - Link YouTube (embed URL, es. `https://www.youtube.com/embed/...`)
-   - Durata (es. `12:30`)
-
-### 4. Genera il config.json
-
-Clicca **"Genera config.json"** nella pagina di modifica.
-Il file viene creato in `public/courses/[slug]/config.json` e letto automaticamente
-alla landing page.
-
-### 5. Testa il corso
-
-Apri `http://localhost:3000/[slug]` — vedrai la landing page completa con
-il template selezionato, le lezioni e il pulsante di acquisto.
-
-> **Hands-free**: Puoi anche creare il `config.json` a mano in
-> `public/courses/[slug]/config.json`. Vedi `public/courses/fotografia-pro/config.json`
-> come esempio.
+Le traduzioni si gestiscono via:
+- **Manuale**: JSON file in `data/<slug>/<locale>.json` (template-driven)
+- **Automatica**: `python scripts/translate/translate-argos.py <slug> all`
 
 ---
 
-## Prisma: db push vs Migrations
+## Prisma: workflow migrations
 
-| Comando | Quando usarlo |
-|---|---|
-| `npx prisma db push` | Sviluppo rapido — sincronizza lo schema direttamente col DB senza creare migration files |
-| `npx prisma migrate dev` | Produzione — crea file di migration versionati in `prisma/migrations/` |
-| `npx prisma migrate deploy` | Deploy — applica le migration in produzione |
-
-**Regola pratica:**
-- In locale per sviluppo veloce → `db push`
-- Quando collabori in team o fai deploy → `migrate dev` + `migrate deploy`
-- Dopo aver modificato `schema.prisma`, rigenera sempre il client:
-  `npx prisma generate`
-
----
-
-## ⚠️ Database Migrations (Vercel + Supabase)
-
-**Regola critica**: NON aggiungere `"postbuild": "prisma migrate deploy"` in `package.json`.
-
-Se lo fai, ogni build su Vercel resterà **infinite in "Building"** senza errori e senza log.
-Poi dovrai cancellare il deploy stuck con `vercel rm <full-url> --yes` e ritriggerare.
-
-### Perché
-
-Vercel esegue i build su infrastruttura **IPv4-only**. Supabase ha disabilitato
-IPv4 sulle connessioni dirette free-tier — l'host che Prisma usa di default
-è ora IPv6. Quando `prisma migrate deploy` parte in `postbuild`, il TCP
-handshake verso Supabase viene scartato silenziosamente → **TCP hang →
-build apparentemente attivo per ore senza progresso**.
-
-### Workflow corretto
-
-**Prima di ogni push che include modifiche a `prisma/schema.prisma`:**
-
-1. **Localmente** (la tua macchina ha sia IPv4 che IPv6 → funziona):
-   ```bash
-   npx prisma migrate dev --name <nome_descrittivo>
-   # crea prisma/migrations/<timestamp>_<nome>/migration.sql
-   npx prisma migrate deploy
-   # applica al DB production usando il tuo DATABASE_URL locale
-   ```
-2. **Poi** committa e pusha normalmente:
-   ```bash
-   git add prisma/
-   git commit -m "feat(db): <descrizione>"
-   git push
-   ```
-3. Vercel triggera il deploy **senza** applicare migrations
-   (`postbuild` non esiste più in `package.json`).
-
-### Alternativa (futuro): GitHub Actions
-
-Per automatizzare le migrations in CI:
-
-- Crea `.github/workflows/db-migrate.yml`
-- I runner GitHub Actions hanno IPv6 → possono raggiungere Supabase
-- Step: `npx prisma migrate deploy` con `DATABASE_URL` da GitHub Secrets
-
-### ⚠️ Pro tip: `DATABASE_URL` deve puntare al DB di produzione
-
-Per applicare le migrations al DB di **produzione**, il `DATABASE_URL` nel
-tuo `.env` locale deve puntare al DB remoto (Supabase / Neon / altro)
-**e non a localhost**. Altrimenti `migrate deploy` applica al DB sbagliato.
-
-Usa la string di connessione **direct** (porta `5432`) con un URL
-IPv4-capable dal progetto Supabase. I **pooler (porta `6543`)** non
-supportano `migrate deploy` — Prisma ha bisogno di lock e session
-features che PgBouncer in transaction-mode non espone.
-
-### TL;DR
+V1.x richiede **migration versionate** (no `db push` per audit trail).
 
 | Step | Comando |
 |---|---|
 | Modifica schema | edit `prisma/schema.prisma` |
-| Crea migration | localmente: `npx prisma migrate dev --name <name>` |
-| Applica a prod | localmente: `npx prisma migrate deploy` |
+| Crea migration (locale) | `npx prisma migrate dev --name <name>` |
+| Applica a prod (manualmente) | `npx prisma migrate deploy` (con `DIRECT_URL` del DB prod) |
 | Push codice | `git add . && git commit && git push` |
-| Build Vercel | solo build (no migrations) |
+| Build Vercel | solo build, **MAI** `migrate deploy` in `postbuild` |
+
+### ⚠️ Vercel + Supabase: IPv4 vs IPv6
+
+Vercel build infrastructure è **IPv4-only**. Supabase ha disabilitato IPv4 sulle connessioni dirette free-tier. Se aggiungi `"postbuild": "prisma migrate deploy"`, ogni build su Vercel resterà **infinite in "Building"** senza errori e senza log. Workaround: applica le migration **localmente** prima del push (Vedi workflow sopra). Dettagli in [docs/production.md](docs/production.md).
 
 ---
 
 ## Next.js Image Domains
 
-Le immagini remote caricate con il componente `next/image`
-devono essere autorizzate in `next.config.mjs`:
+Le immagini remote caricate con `next/image` vanno autorizzate in `next.config.mjs`:
 
 ```js
 // next.config.mjs
@@ -369,130 +288,115 @@ const nextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "**.supabase.co" },
       { protocol: "https", hostname: "images.unsplash.com" },
-      // Aggiungi qui il tuo CDN:
-      // { protocol: "https", hostname: "mio-cdn.com" },
+      // Aggiungi qui il tuo CDN
     ],
   },
 };
 ```
 
-Se vedi errori `hostname not configured` nel browser,
-aggiungi il dominio mancante in `remotePatterns`.
-
 ---
 
-## Troubleshooting
+## Troubleshooting V1.x
 
-### "PrismaClientInitializationError: PrismaClient is not configured"
+### `npm run typecheck` fallisce con errori pre-esistenti
 
-```bash
-# Rigenera il client Prisma
-npx prisma generate
-# E/o sincronizza lo schema col DB
-npx prisma db push
-```
+Vedi `docs/roadmap-current.md` §1.5 — backlog di errori typecheck da drenare per V1 GA.
 
-### "Stripe is not defined" / "OpenAI is not defined"
+### `prisma migrate deploy` non si connette a Supabase da Vercel
 
-Probabilmente le env non sono impostate. Entrambe usano ora **lazy initialization**
-— se la chiave è assente, la funzione `getStripe()` o `getOpenAI()` restituisce `null`
-invece di crashare. Ma se serve la funzionalità, imposta le variabili.
+Vedi sezione "Vercel + Supabase" sopra. Workaround: applica migration localmente.
 
-### Webhook Stripe non arriva
+### Login con Google non funziona
 
-```bash
-# Assicurati che Stripe CLI sia in ascolto:
-stripe listen --forward-to localhost:3000/api/webhooks/stripe
+Verifica che il **redirect URI** su Google Cloud Console sia:
+`https://<your-project-ref>.supabase.co/auth/v1/callback`
+(NON `/api/auth/callback/google` — è il pattern NextAuth, deprecato)
 
-# Controlla che STRIPE_WEBHOOK_SECRET in .env corrisponda
-# al segreto che Stripe CLI stampa al primo avvio
-```
+### Email transazionali non partono
 
-### Email transazionali non funzionano
+- `NEXT_PUBLIC_APP_URL` deve essere impostato (anche `http://localhost:3000` in dev)
+- Senza SMTP: le email sono loggate in stdout
 
-- `NEXT_PUBLIC_APP_URL` deve essere impostato (anche a `http://localhost:3000`)
-- Se `EMAIL_SERVER_HOST` non è configurato, le email vengono loggate nei log
-  del terminale invece che spedite (utile per debug locale)
+### Webhook Lemon Squeezy non arriva
 
-### Build fallisce con errori TypeScript
-
-```bash
-# Controlla gli errori specifici
-npx next build 2>&1 | grep -i "error"
-
-# Spesso è un'import mancante o un tipo sbagliato
-# I comandi più utili per fixare:
-npm install          # reinstalla le dipendenze
-npx prisma generate  # rigenera i tipi Prisma
-```
+1. Verifica endpoint su LS Dashboard: `https://your-domain.com/api/webhooks/lemonsqueezy`
+2. Verifica `LEMONSQUEEZY_WEBHOOK_SECRET` in `.env` corrisponda a quello mostrato da LS
+3. In dev: usa [webhook.site](https://webhook.site) o un tunnel ngrok
 
 ### "Non riesco a vedere il corso dopo l'acquisto"
 
-1. Vai su `/login` e accedi con Google
-2. Verifica che l'email dell'ordine corrisponda a quella del login
-3. Dopo il login vieni reindirizzato al corso acquistato
-4. Se l'accesso non si attiva, controlla i webhook del provider di pagamento
+1. Login con la stessa email dell'ordine (Google o Magic Link)
+2. Verifica che l'ordine sia `status='completed'`:
+   ```bash
+   npx tsx scripts/audit-v1-readiness.ts
+   ```
+3. Se l'ordine è pending: controlla che il webhook LS sia arrivato (sezione sopra)
+
+### Active Stripe orders bloccano V1
+
+`docs/roadmap-current.md` §1.2 — V1 blocker. Drenare prima del V1 GA:
+- Refunda ordini Stripe attivi
+- OPPURE migrali manualmente a Lemon Squeezy
+- Poi rimuovi il codice dual-provider (Fase 8)
 
 ---
 
-## Strumenti e Operazioni per Agenti AI (Agent Developer Guide)
+## Strumenti per Agenti AI (Agent Developer Guide)
 
-Courser include una suite completa di script e pipeline automatizzate utilizzate dagli agenti AI per tradurre, validare, rigenerare e deployare i funnel in pochi secondi.
+Pipeline automatizzate usate per tradurre, validare, rigenerare e deployare i funnel.
 
-### 1. Traduzione Automatica Offline (Argos Translate)
-Per tradurre una landing page dall'inglese a tutte o alcune delle 49+ lingue supportate:
+### Traduzione automatica (Argos)
+
 ```bash
-# Traduci in tutte le lingue disponibili
+# Traduci in tutte le lingue
 python scripts/translate/translate-argos.py amish-secrets all
 
-# Traduci solo in alcune lingue specifiche
+# Traduci solo in alcune lingue
 python scripts/translate/translate-argos.py amish-secrets de fr es pt
 
-# Forza la sovrascrittura di tutte le traduzioni esistenti (ignora il merge intelligente)
+# Forza sovrascrittura (ignora merge intelligente)
 python scripts/translate/translate-argos.py --force amish-secrets all
 ```
-*Nota*: Non utilizzare `extract-locales.ts` a meno che non si vogliano rigenerare i template da zero (sovrascriverebbe i testi custom come l'autore e le bio personalizzate).
 
-### 2. Validazione dei File di Lingua (Locales Validation)
-Prima di ogni build, è fondamentale validare che tutti i file JSON delle traduzioni contengano esattamente le stesse chiavi del file di riferimento inglese (`en.json`):
+### Validazione i18n
+
 ```bash
-# Esegui la validazione per un corso specifico
 npm run validate:locales
-# Oppure direttamente via script:
-npx tsx scripts/validate/validate-locales.ts amish-secrets
+# o mirato: npx tsx scripts/validate/validate-locales.ts <slug>
 ```
 
-### 3. Rigenerazione del Locale Resolver
-Se vengono modificate le localizzazioni del database o le regole di instradamento geografico, rigenera il resolver statico:
+### Rigenerazione locale resolver
+
 ```bash
 npm run generate:locales
-# Oppure direttamente via script:
-npx tsx scripts/generate/generate-locale-resolver.ts
+# o: npx tsx scripts/generate/generate-locale-resolver.ts
 ```
 
-### 4. Controllo di Qualità e Typecheck
-Sempre prima di un deploy, verifica che non ci siano errori di compilazione TypeScript o test falliti:
+### Quality gate pre-deploy
+
 ```bash
-# Esegui il controllo dei tipi statico
-npm run typecheck
-
-# Esegui la suite di test unitari e di integrazione (Vitest)
-npm run test
+npm run check    # typecheck + lint + test
 ```
 
-### 5. Deploy Vercel (Produzione)
-Il deploy in produzione viene fatto direttamente tramite la CLI di Vercel:
+### Audit V1 readiness
+
+```bash
+npx tsx scripts/audit-v1-readiness.ts
+# Verifica: orphanProducts=0, activeStripeOrders=0, NextAuth tables=0, typecheck=0, SSE test exists
+```
+
+### Diagnostica DMs
+
+```bash
+npm run check:messaging
+# o: npx tsx scripts/diagnose-messaging-extended.ts
+# Rileva re-introduzione accidentale di /api/messages (legacy)
+```
+
+### Deploy Vercel
+
 ```bash
 npx vercel --prod
 ```
 
----
-
-## Documentazione Allegata
-
-- [MISSION.md](MISSION.md) — Bussola strategica del progetto
-- [ARCHITECTURE.md](ARCHITECTURE.md) — Architettura tecnica
-- [docs/roadmap-current.md](docs/roadmap-current.md) — Roadmap canonica (V1 blockers + Post-V1 + Tech debt + Out-of-scope)
-- [docs/archive/MVP-SPEC-initial.md](docs/archive/MVP-SPEC-initial.md) — Specifica MVP legacy (archiviato)
-- [docs/production.md](docs/production.md) — Deployment + audit + cron runbook
-
+> ⚠️ **Mai** aggiungere `postbuild: "prisma migrate deploy"` in `package.json` (vedi sezione Prisma sopra).
