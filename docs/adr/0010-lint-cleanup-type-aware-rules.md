@@ -231,6 +231,23 @@ follow-up ADR note documenting why reset was chosen over revert.
 - The two-pass gate generalizes to any type-aware rule substitution, not just lint (e.g., test fixture refactors, Codemod scripts). Any code-modifying script that touches code paths with TypeScript narrowing should follow the same gate conceptually.
 - The `eslint-plugin-unused-imports` dependency addition is the **only** new dev-dep anticipated by this ADR; once installed, it stays.
 
+## Corrections
+
+- **`a284500` (varsIgnorePattern-squash, 2026-07-13)** — the commit body
+  stated the diff as "4 insertions, 5 deletions" but the actual stat was
+  **5 insertions, 6 deletions**. The likely cause: the original
+  3-line "stale explanatory comment" in `src/lib/services/order-service.ts`
+  was actually 4 lines (with a trailing blank), and the replacement
+  comment was 4 lines (not 3 as the body claimed). Net: 1 extra
+  insertion + 1 extra deletion. The commit's *code change is correct*
+  (working tree byte-equivalent, lint count 40→37, no regressions);
+  only the body text is inaccurate. Picked the **safer followup-commit
+  alternative** over `git commit --amend` to avoid a second force-push
+  (the squashed commit's SHA is already in 2 reflog entries from the
+  original rebase; amending would invalidate downstream consumers that
+  pin the SHA). This is the canonical NIT-3 fix per the user's
+  bookkeeping preference.
+
 ## References
 
 - `eslint.config.mjs` — current canonical severity per rule.
