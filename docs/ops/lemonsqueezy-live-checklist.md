@@ -250,8 +250,31 @@ For the top-level fallback `Product.lemonVariantId` column (the
 
 ### §3.0 — Schema migration: TEXT → jsonb (one-time, required for §3.2/§3.3)
 
+> **⚠️ Lock warning**: `ALTER TABLE ... ALTER COLUMN ... TYPE` takes
+> an `ACCESS EXCLUSIVE` lock on `Product`. The GIN `CREATE INDEX`
+> (without `CONCURRENTLY`) ALSO takes a write-block lock. The §1
+> pre-flight already schedules a 2-hour no-traffic window — that's
+> the lock budget. On a `Product` table with hundreds of rows this
+> is sub-second; on tens of thousands of rows, 10-30s. Do NOT run
+> this during production traffic.
+
+**Step 1 — Update `prisma/schema.prisma`** (before the migration so
+`prisma migrate dev` doesn't detect drift):
+
+```diff
+ model Product {
+   ...
+-  pricesByCurrency String?
++  pricesByCurrency String? @db.JsonB
+-  countryOverrides String?
++  countryOverrides String? @db.JsonB
+   ...
+ }
+```
+
+**Step 2 — Pre-flight: confirm current state**
+
 ```sql
--- ── Pre-flight: confirm current state ────────────────────────
 SELECT column_name, data_type
 FROM information_schema.columns
 WHERE table_name = 'Product'
@@ -259,29 +282,43 @@ WHERE table_name = 'Product'
 -- expect: both rows show data_type = 'text'
 ```
 
+**Step 3 — Run the migration via Prisma's workflow** (NOT raw SQL;
+this generates the migration file + keeps `schema.prisma` and the DB
+in sync):
+
+```bash
+npx prisma migrate dev --name product_jsonb_columns
+```
+
+Prisma's auto-generated `prisma/migrations/<timestamp>_product_jsonb_columns/migration.sql`
+will contain the `ALTER COLUMN ... TYPE jsonb USING ...::jsonb`. If
+the operator wants to also add the GIN indexes (see "Why the GIN
+indexes" below), they must be added MANUALLY to the auto-generated
+migration file (Prisma's `@@index` syntax for `jsonb_path_ops` is
+not yet stable across versions — verify against the current Prisma
+release).
+
+**Step 4 — If adding GIN indexes, append to the auto-generated
+migration** (after the two `ALTER COLUMN` statements):
+
 ```sql
--- ── Migration (one-time, sub-second on small tables) ─────────
--- Wraps the two ALTERs in a single transaction for atomicity.
-BEGIN;
-
-ALTER TABLE "Product"
-  ALTER COLUMN "countryOverrides" TYPE jsonb
-    USING "countryOverrides"::jsonb,
-  ALTER COLUMN "pricesByCurrency" TYPE jsonb
-    USING "pricesByCurrency"::jsonb;
-
--- Add GIN indexes for the common query patterns
--- (countryOverride lookups, pricesByCurrency lookups)
 CREATE INDEX IF NOT EXISTS "Product_countryOverrides_gin"
   ON "Product" USING gin ("countryOverrides" jsonb_path_ops);
 CREATE INDEX IF NOT EXISTS "Product_pricesByCurrency_gin"
   ON "Product" USING gin ("pricesByCurrency" jsonb_path_ops);
-
-COMMIT;
 ```
 
+```bash
+git add prisma/schema.prisma \
+        prisma/migrations/<timestamp>_product_jsonb_columns/
+git commit -m "feat(db): convert Product.countryOverrides + pricesByCurrency to jsonb
+  ... (the §3.0 schema migration from the LS live-setup checklist)
+"
+```
+
+**Step 5 — Post-migration: confirm**
+
 ```sql
--- ── Post-migration: confirm ──────────────────────────────────
 SELECT column_name, data_type
 FROM information_schema.columns
 WHERE table_name = 'Product'
@@ -289,14 +326,22 @@ WHERE table_name = 'Product'
 -- expect: both rows show data_type = 'jsonb'
 ```
 
-> **Why the GIN indexes**: the codebase calls
-> `getCountryPriceOverride()` and `parsePricesByCurrency()` in the
-> hot path of every landing-page render (`src/lib/utils/pricing.ts`
-> L67-74 + L137-141). With `TEXT` columns, every call did a full
-> scan-then-`JSON.parse()`; with `jsonb` + GIN, the common
-> `WHERE countryOverrides @> '{"BR": ...}'` patterns are
-> index-accelerated. Significant perf win for landing-page TTFB.
-> The indexes are `IF NOT EXISTS` so re-running is safe.
+> **Why the GIN indexes (and the caveat)**: with `TEXT` columns,
+> the codebase did a full scan-then-`JSON.parse()` for every
+> landing-page render (per `src/lib/utils/pricing.ts` L67-74 +
+> L137-141). The CURRENT code path does `parseCountryOverrides()` →
+> `JSON.parse()` → object lookup `overrides[country.toUpperCase()]`
+> — it does NOT issue SQL-level containment queries like
+> `WHERE "countryOverrides" @> '{"BR": {}}'`. The GIN indexes with
+> `jsonb_path_ops` accelerate EXACTLY those containment queries,
+> which the current code path does NOT use. They are **forward-looking**:
+> they enable a future SQL-level refactor of `getCountryPriceOverride()`.
+> The perf cost of building them is one-time (sub-second on a small
+> table); the storage cost is ~10-20% of the `countryOverrides` JSON size.
+>
+> **Recommendation**: include the GIN indexes IF a future refactor
+> will use SQL-level containment (track in `FUTURE.md`). Skip them
+> for the V1.0 cutover (just land the column-type change).
 
 ### §3.1 — Update `Product.lemonVariantId` (top-level column)
 
