@@ -26,5 +26,7 @@ scripts/translate/__pycache__/
 /prisma/migrations/dev.db
 /prisma/migrations/dev.db-journal
 coverage/
+playwright-report/
+test-results/
 yarn-error.log*
 .env.test
