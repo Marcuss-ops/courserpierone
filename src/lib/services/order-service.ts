@@ -1,6 +1,5 @@
 import { prisma } from "../db/prisma";
 import { sendPurchaseConfirmation } from "./email";
-import { COUNTRY_LOCALE } from "@/lib/i18n/_generated/locale-data";
 import { NotFoundError } from "@/lib/errors";
 
 export interface ProcessOrderInput {
@@ -61,8 +60,13 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
     paymentProvider,
     amount,
     currency,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // locals prefixed with `_` are NOT auto-ignored by @typescript-eslint/no-unused-vars
+    // here — the codebase's eslint.config.mjs only sets argsIgnorePattern: "^_" (line 37),
+    // not varsIgnorePattern. Keep this disable until that config is broadened.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     locale,
-    customerCountry,
+    customerCountry: _customerCountry,
     channelId,
   } = input;
 
@@ -205,11 +209,16 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
       );
     });
 
-  // ── 5. Resolve ebook locale from country ────────────────────────
-  // Use customer_country → COUNTRY_LOCALE mapping, fallback to locale param, then "en"
-  const ebookLang = (customerCountry && COUNTRY_LOCALE[customerCountry])
-    ? COUNTRY_LOCALE[customerCountry].split("-")[0]
-    : (locale.split("-")[0] ?? "en");
+  // ── 5. Ebook locale resolution: deferred to dashboard-side ─────
+  // We intentionally do NOT pre-compute the ebook language here. The
+  // purchase-confirmation email sends the full BCP-47 `locale` (e.g.
+  // "it-it") for template routing; the actual ebook file pick is owned
+  // by the dashboard route (post-login) and lives outside this service.
+  // Earlier derivations (`ebookLang` + the `COUNTRY_LOCALE` import that
+  // fed it) were hoisted here in error during the MCR refactor; cleared
+  // per the C2 no-unused-vars sweep. Downstream consumers continue to
+  // receive `customerCountry` (see destructure above) for analytics +
+  // future locale hooks without forcing this service to act on it.
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
