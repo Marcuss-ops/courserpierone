@@ -12,13 +12,21 @@
 # Or, to validate connectivity:
 #   psql "$DIRECT_URL" -c "SELECT current_database();"
 #
-# This script is safe to source multiple times. It DOES NOT auto-fetch
-# credentials from any vendor — you must export DATABASE_URL + DIRECT_URL
-# first (see "Credential sourcing" below).
+# This script is safe to source multiple times. By default it does
+# NOT auto-fetch credentials from any vendor — the operator must
+# either:
 #
-# When sourced: the script silently exports PRIMARY_DATABASE_URL (if not
-# already set) and prints a status summary. It does NOT modify
-# DATABASE_URL or DIRECT_URL — those are owned by the operator.
+#   (a) Provide a `.env.staging.local` file (created via
+#       `vercel env pull .env.staging.local --environment=preview`)
+#       which this script auto-sources on every run, OR
+#   (b) Manually `export DATABASE_URL + DIRECT_URL` in their shell
+#       before sourcing this script.
+#
+# See "Credential sourcing" below for both paths (Path A: vercel
+# env pull / Path B: manual export). When sourced, the script also
+# silently exports PRIMARY_DATABASE_URL (if not already set) and
+# prints a status summary. It does NOT modify DATABASE_URL or
+# DIRECT_URL — those are owned by the operator.
 #
 # When executed directly (e.g. `bash scripts/ops/staging-env.sh --check`):
 # runs the same checks + an optional psql smoke-test.
@@ -101,6 +109,53 @@ for arg in "$@"; do
   esac
 done
 
+# ─── Auto-source .env.staging.local (if present) ──────────────────────────────────
+#
+# The file is the idiomatic vercel env pull output — operator-curated
+# (not auto-fetched by this script). Idempotent: set -a / set +a toggles
+# the allexport shell option for the duration of the source so every
+# KEY=VALUE line in the file gets exported; re-sourcing the script is
+# a no-op (every var is re-set to the same value).
+#
+# Provenance per var in .env.staging.local:
+#   DATABASE_URL, DIRECT_URL        → Supabase Pooled/Direct (port 6543/5432)
+#   LEMONSQUEEZY_API_KEY            → Lemon Squeezy Dashboard → Settings → API
+#   LEMONSQUEEZY_STORE_ID           → Lemon Squeezy Dashboard → Settings → Stores
+#   LEMONSQUEEZY_WEBHOOK_SECRET     → Lemon Squeezy Webhook creation (32-char hex)
+#   NEXT_PUBLIC_APP_URL             → Vercel → Project → Settings → Domains (custom)
+#   NEXT_PUBLIC_SUPABASE_*          → Mirror of server-side Supabase project URL + anon JWT
+#   STRIPE_SECRET_KEY + _WEBHOOK_SECRET + ENABLE_STRIPE_CHECKOUT
+#                                 → Stripe Dashboard → Developers → API keys (legacy)
+#
+# SAFE: this script intentionally does NOT use `set -e` (see header).
+# A missing .env.staging.local falls through silently with an
+# informational note, so an operator without it isn’t kicked out of
+# their shell.
+
+if [[ -f .env.staging.local ]]; then
+  set -a
+  # shellcheck disable=SC1091  # .env.staging.local is operator-curated, intentionally outside the lint target
+  source .env.staging.local
+  set +a
+  printf '—— sourced .env.staging.local (%d lines, %d env vars) ——
+' \
+    "$(wc -l < .env.staging.local)" \
+    "$(grep -cE '^[A-Z_][A-Z0-9_]*=' .env.staging.local || echo 0)"
+else
+  printf '—— .env.staging.local NOT present in CWD ——
+'
+  printf '   Recommendation: run `vercel env pull .env.staging.local \
+'
+  printf '                              --environment=preview` once
+'
+  printf '   (vercel login first, project team SSO required). The script
+'
+  printf '   auto-sources it on every subsequent invocation. See the
+'
+  printf '   header "Credential sourcing" block for the full workflow.
+'
+fi
+
 # ─── PRIMARY_DATABASE_URL mirror ────────────────────────────────────
 #
 # PRIMARY_DATABASE_URL is the canonical env name honored by the audit +
@@ -115,6 +170,14 @@ if [[ -z "${PRIMARY_DATABASE_URL:-}" && -n "${DIRECT_URL:-}" ]]; then
   export PRIMARY_DATABASE_URL="$DIRECT_URL"
   PRIMARY_MIRRORED=true
 fi
+
+# ─── Credential sourcing notes (full blockquote in header; recapped here) ──
+# The header comment (top of file) has the full Path A / Path B workflow.
+# This sibling blockquote reminds operators that:
+#   - `.env.staging.local` is auto-sourced if present (already happened above)
+#   - DATABASE_URL/DIRECT_URL are NOT auto-overwritten by this script —
+#     whatever the operator set (via the file, manual export, or pre-existing
+#     shell-state) is what the downstream tools see.
 
 # ─── Status print ──────────────────────────────────────────────────
 
