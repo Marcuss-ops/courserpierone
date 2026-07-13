@@ -662,14 +662,17 @@ WITH db_live_ids AS (
     WHERE p.status = 'published' AND kv.value->>'lemonVariantId' IS NOT NULL
 ),
 -- Forward drift: staging expected X, DB has Y != X
--- Use `->` (jsonb) for the first navigation; `->>text->>text` is
--- undefined on older PG and behaves version-dependently. The chain
--- `jsonb->text->>'key'` is defined for JSONB LHS and degrades
--- gracefully via the standard NULL short-circuit on BOTH whole-NULL
--- maps AND missing country/currency keys — no explicit
--- CASE-WHEN-IS-NOT-NULL wrapper is needed. (Only `db_live_ids` uses
--- `kv.value->>'lemonVariantId'` on jsonb from `jsonb_each`; that
--- branch is also JSONB→text and is defined on every PG version.)
+-- Use `->` (jsonb) for the first navigation. Modern PG parses
+-- `->>text->>text` via an implicit text→jsonb cast, so the
+-- alternative is not literally undefined — but it IS a structural
+-- footgun: a future operator reading text-as-LHS-of-`->>` has to
+-- know the cast exists to understand why it parses. `->` keeps
+-- the chain explicitly typed JSONB→JSONB→text (no implicit cast),
+-- which degrades through the standard JSONB NULL short-circuit on
+-- BOTH whole-NULL maps AND missing country/currency keys — no
+-- explicit CASE-WHEN-IS-NOT-NULL wrapper needed. (`db_live_ids`
+-- uses `kv.value->>'lemonVariantId'` on JSONB from `jsonb_each`,
+-- which is the same explicit-type pattern — symmetry holds.)
 forward_drift AS (
   SELECT s.slug, s.field, s.country_or_curr, s.expected_id AS expected,
          CASE s.field
