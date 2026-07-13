@@ -662,28 +662,28 @@ WITH db_live_ids AS (
     WHERE p.status = 'published' AND kv.value->>'lemonVariantId' IS NOT NULL
 ),
 -- Forward drift: staging expected X, DB has Y != X
+-- Use `->` (jsonb) for the first navigation; `->>text->>text` is
+-- undefined on older PG and behaves version-dependently. The chain
+-- `jsonb->text->>'key'` is defined for JSONB LHS and degrades
+-- gracefully via the standard NULL short-circuit on BOTH whole-NULL
+-- maps AND missing country/currency keys — no explicit
+-- CASE-WHEN-IS-NOT-NULL wrapper is needed. (Only `db_live_ids` uses
+-- `kv.value->>'lemonVariantId'` on jsonb from `jsonb_each`; that
+-- branch is also JSONB→text and is defined on every PG version.)
 forward_drift AS (
   SELECT s.slug, s.field, s.country_or_curr, s.expected_id AS expected,
          CASE s.field
            WHEN 'lemonVariantId'  THEN p."lemonVariantId"
-           WHEN 'countryOverride' THEN CASE WHEN p."countryOverrides" IS NOT NULL
-                                              THEN p."countryOverrides"->>s.country_or_curr->>'lemonVariantId'
-                                              ELSE NULL END
-           WHEN 'currencyPrice'   THEN CASE WHEN p."pricesByCurrency" IS NOT NULL
-                                              THEN p."pricesByCurrency"->>s.country_or_curr->>'lemonVariantId'
-                                              ELSE NULL END
+           WHEN 'countryOverride' THEN p."countryOverrides"->s.country_or_curr->>'lemonVariantId'
+           WHEN 'currencyPrice'   THEN p."pricesByCurrency"->s.country_or_curr->>'lemonVariantId'
          END AS actual
     FROM staging_live_ids s
     LEFT JOIN "Product" p ON p.slug = s.slug
    WHERE s.expected_id IS DISTINCT FROM
          COALESCE(CASE s.field
            WHEN 'lemonVariantId'  THEN p."lemonVariantId"
-           WHEN 'countryOverride' THEN CASE WHEN p."countryOverrides" IS NOT NULL
-                                              THEN p."countryOverrides"->>s.country_or_curr->>'lemonVariantId'
-                                              ELSE NULL END
-           WHEN 'currencyPrice'   THEN CASE WHEN p."pricesByCurrency" IS NOT NULL
-                                              THEN p."pricesByCurrency"->>s.country_or_curr->>'lemonVariantId'
-                                              ELSE NULL END
+           WHEN 'countryOverride' THEN p."countryOverrides"->s.country_or_curr->>'lemonVariantId'
+           WHEN 'currencyPrice'   THEN p."pricesByCurrency"->s.country_or_curr->>'lemonVariantId'
          END, '')
 ),
 -- Reverse drift: DB has ID X, staging has no row or mismatching ID
