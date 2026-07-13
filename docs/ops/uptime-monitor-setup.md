@@ -66,7 +66,7 @@ ops-1 runs, ops-2 verifies. All boxes required.
 
 ## §2 — Vendor comparison
 
-| Vendor | 30s native? | Free tier | Status page | Alert path | Setup time | Cost |
+| Vendor | 30s polling available? | Free tier | Status page | Alert path | Setup time | Cost |
 | --- | --- | --- | --- | --- | --- | --- |
 | **BetterStack** (recommended) | ✓ (paid) / 3-min (Hobby free) | Yes (Hobby: 1 monitor, 3-min interval) | ✓ included (paid) | Custom webhook + email + SMS + PagerDuty native | 10 min | $0 (Hobby) / ~$20/mo (Team) |
 | **UptimeRobot** | Only on Business plan | Yes (5-min interval) | ✓ on Pro+ | Webhook + email + SMS + PagerDuty native | 15 min | $0 (free) / $60/mo (Business) |
@@ -234,9 +234,14 @@ posts to `ALERT_WEBHOOK_URL` with this Slack-compatible shape:
 integration) doesn't discriminate between error-sink alerts and
 uptime alerts. The §6 JSON below is the exact shape.
 
-### §5.2 — PagerDuty Events API v2 (escalation)
+### §5.2 — PagerDuty Events API v2 (escalation, FALLBACK only)
 
-If the operator wants PagerDuty escalation (per [`../production.md` §3.1](../production.md):
+> **Preferred path: native vendor PagerDuty integration** — BetterStack
+> and UptimeRobot Business both ship native PagerDuty integrations
+> (see §2.1 and §2.2). Use those; the curl below is the FALLBACK for
+> vendors without native support (e.g. cron-job.org).
+
+If the operator wants PagerDuty escalation (per [`../production.md` §3.1`](../production.md):
 P0 = primary on-call, business hours), the monitor can fire a
 PagerDuty event instead of (or in addition to) the webhook:
 
@@ -396,7 +401,7 @@ After 7 days in production, audit:
 | 503 fires but monitor shows "up" | Vendor treats 503 as "degraded" not "down" | Configure the monitor to treat BOTH 5xx and 4xx as failure (canonical: anything not 2xx = down). |
 | Monitor polls at 30s but only 1 fail in 5min triggers alert | Vendor's SLA is "3 consecutive" not "3 in 5min" | Per §4, set "3 fails in 5min" (BetterStack native) OR "3 consecutive" as the closest approximation. |
 | Monitor's own dashboard is down | Vendor outage (BetterStack/UptimeRobot itself is down) | Per [`../production.md` §6.5`](../production.md): this is the documented SPOF. **Open work**: a secondary synthetic-ping (cron-job.org as a 2nd-tier monitor, or a custom Vercel cron that pings `ALERT_WEBHOOK_URL` and alerts via email on silence >5min). For now, Slack/Discord channel silence >5min = manual eyeball by ops. |
-| Function invocation budget exceeded (e.g. interval dropped to 5s) | At 30s polling, ~86,400 probes/month fits in Vercel Pro's 1M invocations/mo budget with ~11.5× headroom. NOT a current blocker. | If interval is dropped to 5s (17,280/day = ~518,400/month), still fits. Below 5s, check Vercel Dashboard → Usage → Functions before going to prod. |
+| Function invocation budget tight at faster intervals (sub-5s) | At 30s polling, ~86,400 probes/month fits in Vercel Pro's 1M invocations/mo budget with ~11.5× headroom. NOT a current blocker. | If interval is dropped to 5s (17,280/day = ~518,400/month), still fits. Below 5s, check Vercel Dashboard → Usage → Functions before going to prod. |
 | False positives during Supabase maintenance | Supabase Pro plan maintenance windows (typically 5-15 min) flip the DB temporarily | Pre-schedule a "monitor pause" window in the vendor's dashboard. BetterStack: "Maintenance windows". UptimeRobot: "Maintenance". |
 | PagerDuty not firing despite 503s | PagerDuty integration key rotated but not updated in the monitor | Re-paste the integration key per §1. Re-test with the vendor's "Test PagerDuty" button. |
 | Health endpoint returns 200 but Supabase IS down (false negative) | The endpoint's `prisma.$queryRaw\`SELECT 1\`` succeeded against the pooler, but a specific query path is broken | Open work: add a domain-specific probe (e.g., `prisma.product.count()` against a known product) — see `FUTURE.md` for the placeholder. Not in scope for V1.0. |
