@@ -206,9 +206,6 @@ export default async function LocaleLandingPage({
   const { verified_token, token, country: countryOverride } = searchParamsResolved;
   const accessToken = verified_token || token;
 
-  // Extract language from locale (fr-fr → fr) for translation lookup
-  const lang = localeToLang(locale);
-
   // Validate locale
   const safeLocale = ALL_LOCALES.includes(locale) || LANG_CODES.includes(locale)
     ? locale
@@ -241,7 +238,7 @@ export default async function LocaleLandingPage({
   const countryCode = countryOverride || headersList.get("x-vercel-ip-country") || headersList.get("cf-ipcountry") || "IT";
 
   // ─── Prezzo dinamico per paese ────────────────────
-  const { price: displayPrice, currency: displayCurrency } = getPriceString(data, currentLocale, countryCode);
+  const { price: displayPrice } = getPriceString(data, currentLocale, countryCode);
 
   // ─── Carica LocaleContent per la lingua corrente ──
   const localeContent = loadLocaleContentSafe(domain, currentLocale);

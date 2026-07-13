@@ -29,8 +29,6 @@ export function LessonProgressButton({
       if (res.ok) {
         const data = await res.json();
         const lessonIds = data.progress.map((p: { lessonId: string; completed: boolean }) => p.lessonId);
-        const total = data.lessons?.length || 0;
-        const completedCount = data.progress.filter((p: { completed: boolean }) => p.completed).length;
 
         setCompleted(lessonIds.includes(lessonId));
       }

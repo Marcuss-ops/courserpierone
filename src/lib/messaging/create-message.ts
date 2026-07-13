@@ -144,7 +144,7 @@ export async function createMessageAndNotify(
  */
 async function maybeNotifyOfflinePartner({
   conversationId,
-  senderId,
+  senderId: _senderId,
   senderName,
   partnerId,
 }: {

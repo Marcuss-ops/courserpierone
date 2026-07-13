@@ -8,7 +8,7 @@ interface LumioNavProps {
   t: LumioT;
 }
 
-export function LumioNav({ lc, t }: LumioNavProps) {
+export function LumioNav({ lc }: LumioNavProps) {
   return (
     <SharedNav
       variant="pill-dark"

@@ -63,24 +63,8 @@ function useScrollTracking(productSlug: string) {
   }, [productSlug]);
 }
 
-function trackClickBuy(productSlug: string, extra?: Record<string, unknown>) {
-  sendEvent("click_buy", productSlug, extra);
-}
-
 export function trackCheckoutOpen(productSlug: string, extra?: Record<string, unknown>) {
   sendEvent("checkout_open", productSlug, extra);
-}
-
-function trackCheckoutComplete(productSlug: string, extra?: Record<string, unknown>) {
-  sendEvent("checkout_complete", productSlug, extra);
-}
-
-function trackLessonStart(productSlug: string, lessonId: string) {
-  sendEvent("lesson_start", productSlug, { lessonId });
-}
-
-function trackLessonComplete(productSlug: string, lessonId: string) {
-  sendEvent("lesson_complete", productSlug, { lessonId });
 }
 
 export function AnalyticsTracker({ productSlug }: AnalyticsTrackerProps) {

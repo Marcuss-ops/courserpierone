@@ -53,7 +53,6 @@ export function SharedFooter({
   brand,
   links,
   rightsReserved,
-  accentColor = "#ffffff",
   variant = "bordered",
 }: SharedFooterProps) {
   const styles = VARIANT_STYLES[variant] ?? VARIANT_STYLES.bordered;

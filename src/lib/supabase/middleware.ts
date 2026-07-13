@@ -20,7 +20,7 @@ export async function updateSession(request: NextRequest) {
     return { supabaseResponse, hasSession };
   }
 
-  const supabase = createServerClient<Database>(
+  const _supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {

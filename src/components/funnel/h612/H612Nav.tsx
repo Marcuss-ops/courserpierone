@@ -8,7 +8,7 @@ interface H612NavProps {
   t: H612T;
 }
 
-export function H612Nav({ lc, t }: H612NavProps) {
+export function H612Nav({ lc }: H612NavProps) {
   return (
     <SharedNav
       variant="bar-dark"

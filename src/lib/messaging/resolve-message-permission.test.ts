@@ -62,7 +62,6 @@ const CREATOR_ID = "creator-1";
 const STUDENT_ID = "student-1";
 const ANOTHER_STUDENT_ID = "student-2";
 const PRODUCT_ID = "prod-1";
-const ANOTHER_PRODUCT_ID = "prod-2";
 const ORDER_ID = "order-1";
 const GRANT_ID = "grant-1";
 

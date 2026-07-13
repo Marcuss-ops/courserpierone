@@ -112,7 +112,7 @@ export async function generateCourseConfig(slug: string) {
     }
 
   // Build lessons
-  const lessons: CourseConfig["lessons"] = product.lessons.map((lesson, i) => {
+  const lessons: CourseConfig["lessons"] = product.lessons.map((lesson, _i) => {
     const ltByLocale: Record<string, { title: string; description: string; videoUrl: string }> = {};
     for (const lt of lesson.translations) {
       ltByLocale[lt.locale] = {

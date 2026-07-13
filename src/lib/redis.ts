@@ -191,36 +191,3 @@ export async function cacheSet(key: string, value: unknown, ttlSeconds: number =
   }
 }
 
-/**
- * Elimina una chiave dalla cache Redis.
- */
-async function cacheDel(key: string): Promise<void> {
-  const r = getRedis();
-  if (!r) return;
-  try {
-    await r.del(key);
-  } catch {
-    // Silently fail
-  }
-}
-
-/**
- * Helper: avvolge una funzione asincrona con cache Redis read-through.
- *
- * - Se la cache ha un valore per `key`, lo restituisce subito.
- * - Altrimenti chiama `fn()`, salva il risultato in cache per `ttlSeconds`,
- *   e lo restituisce.
- * - Se Redis non è configurato, chiama `fn()` direttamente (no-op cache).
- */
-async function cacheWrap<T>(
-  key: string,
-  fn: () => Promise<T>,
-  ttlSeconds: number = FIVE_MINUTES
-): Promise<T> {
-  const cached = await cacheGet<T>(key);
-  if (cached !== null) return cached;
-
-  const result = await fn();
-  await cacheSet(key, result, ttlSeconds);
-  return result;
-}

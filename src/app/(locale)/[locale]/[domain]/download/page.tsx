@@ -123,7 +123,6 @@ export default async function DownloadPage({
   const staticBookUrl = activeBook ? `/courses/${domain}/${encodeURIComponent(activeBook.fileName)}` : null;
 
   const downloadUrl = staticBookUrl || `/api/ebook/${domain}/download?lang=${currentLang}&disposition=attachment${token ? `&token=${token}` : ""}`;
-  const viewerUrl = staticBookUrl || `/api/ebook/${domain}/download?lang=${currentLang}&disposition=inline${token ? `&token=${token}` : ""}`;
 
   const activeOrderId = order_id || orderId;
   const downloadQs = new URLSearchParams();

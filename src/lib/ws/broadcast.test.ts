@@ -145,7 +145,7 @@ describe("deliverThreadDeleted", () => {
     const conv: SubscribedConversationsCache = new Map();
     const inbox: InboxClientsCache = new Map();
     const wsADeleter = makeSocket("user-a");
-    const conv_ = conv.set("conv-1", new Set([wsADeleter]));
+    const _conv = conv.set("conv-1", new Set([wsADeleter]));
 
     const result = deliverThreadDeleted(conv, inbox, event);
     expect(result.delivered).toBe(1);

@@ -35,17 +35,3 @@ export async function createClient() {
   );
 }
 
-/**
- * Ottiene l'utente corrente dalla sessione Supabase.
- * Restituisce l'user object o null se non autenticato.
- * 
- * Uso:
- *   const { user } = await getCurrentUser();
- *   if (!user) redirect("/login");
- */
-async function getCurrentUser() {
-  const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user) return { supabase, user: null };
-  return { supabase, user };
-}

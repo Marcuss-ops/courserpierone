@@ -26,7 +26,6 @@ const ORDER_ID_CUID = "ckl0abc123def456";        // matches Order.id (Prisma cui
 const ORDER_ID_STRIPE = "cs_test_a1b2c3d4e5f6";  // matches Order.providerOrderId (Stripe Session ID)
 const OTHER_USER = "user-other";
 const PRODUCT = "prod-1";
-const OTHER_PRODUCT = "prod-2";
 
 const ORDER_ROW_FOR_PRODUCT = {
   id: ORDER_ID_CUID,

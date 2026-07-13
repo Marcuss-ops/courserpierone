@@ -504,7 +504,6 @@ export default function LanguageSelector({
             ) : showAll ? (
               // ── All locales grouped ──
               filteredGroups.map((group) => {
-                const hasActive = group.locales.some((l) => l.code === normalize(currentLocale));
                 return (
                   <div key={group.lang} className="mb-1">
                     <div className="flex items-center gap-2 px-4 py-1.5">

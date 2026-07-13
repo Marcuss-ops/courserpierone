@@ -16,12 +16,6 @@ import type {
 export type CheckoutProduct = CreateCheckoutInput["product"];
 
 /**
- * Pricing risolta dal PricingService — mantiene la shape usata dai
- * provider per determinare il `variantId` / `priceId` da invocare.
- */
-type ResolvedPricing = CreateCheckoutInput["pricing"];
-
-/**
  * Phase 1 of MCR — provider registration.
  *
  * Only LemonSqueezy is registered for new-session creation. The

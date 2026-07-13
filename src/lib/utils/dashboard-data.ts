@@ -12,17 +12,6 @@ export interface ProductMetric {
   conversion: string;
 }
 
-interface DashboardStats {
-  totalRevenue: number;
-  totalRevenueTrend: string;
-  netSales: number;
-  netSalesTrend: string;
-  activeFunnels: number;
-  activeFunnelsTrend: string;
-  averageCR: string;
-  averageCRTrend: string;
-}
-
 export const DASHBOARD_DATA = {
   stats: {
     totalRevenue: 0,

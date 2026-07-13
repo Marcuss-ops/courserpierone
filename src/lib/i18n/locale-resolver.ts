@@ -31,16 +31,6 @@ import { getCurrencyFromLocale } from "./currency-map";
 
 export { getCurrencyFromLocale };
 
-interface LocaleInfo {
-  code: string;            // "fr-fr"
-  languageCode: string;    // "fr"
-  countryCode: string;     // "FR"
-  name: string;            // "French (France)"
-  nativeName: string;      // "Français (France)"
-  fallbackLocale: string;  // "en-us"
-  currency: string;        // "EUR"
-}
-
 export { LANG_TO_DEFAULT_LOCALE, DEFAULT_LOCALE };
 
 export function isKnownLocale(code: string): boolean {

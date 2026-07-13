@@ -335,15 +335,6 @@ function formatEnvStatus(result: ValidationResult): string {
   return lines.join("\n");
 }
 
-/**
- * Stampa lo stato delle env vars su console.
- * Da chiamare all'avvio dell'app per debug.
- */
-function printEnvStatus(): void {
-  const result = validateEnv();
-  console.log(formatEnvStatus(result));
-}
-
 // ═══ Esegui validazione all'import ═══════════════════════
 // Questo blocco viene eseguito quando il modulo viene importato.
 // In produzione, logga solo se ci sono problemi.

@@ -101,7 +101,6 @@ export async function rateLimitAsync(
     return rateLimit(key, maxRequests, windowMs);
   }
 
-  const now = Date.now();
   const redisKey = `ratelimit:${key}`;
   const windowSeconds = Math.ceil(windowMs / 1000);
 

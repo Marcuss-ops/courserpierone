@@ -36,8 +36,6 @@ export default function AdminDashboard() {
   const [analytics, setAnalytics] = useState<DashboardApiResponse | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"overview" | "funnel">("overview");
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
-
   useEffect(() => {
     async function fetchData() {
       try {
@@ -92,7 +90,6 @@ export default function AdminDashboard() {
   };
 
   async function handleStatusChange(id: string, status: string) {
-    setActionLoading(id);
     try {
       const res = await fetch(`/api/products/${id}`, {
         method: "PUT",
@@ -106,13 +103,11 @@ export default function AdminDashboard() {
         }));
       }
     } finally {
-      setActionLoading(null);
       setOpenMenuId(null);
     }
   }
 
   async function handleDuplicate(id: string) {
-    setActionLoading(id);
     try {
       const res = await fetch(`/api/products/${id}/duplicate`, { method: "POST" });
       if (res.ok) {
@@ -121,14 +116,12 @@ export default function AdminDashboard() {
         alert("Errore nella duplicazione del prodotto");
       }
     } finally {
-      setActionLoading(null);
       setOpenMenuId(null);
     }
   }
 
   async function handleDelete(id: string) {
     if (!confirm("Sei sicuro di voler eliminare questo prodotto? Questa azione è irreversibile.")) return;
-    setActionLoading(id);
     try {
       const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
       if (res.ok) {
@@ -137,7 +130,6 @@ export default function AdminDashboard() {
         alert("Errore nell'eliminazione del prodotto");
       }
     } finally {
-      setActionLoading(null);
       setOpenMenuId(null);
     }
   }

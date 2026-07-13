@@ -90,9 +90,9 @@ const PAGE_SIZE = 50;
  */
 export function ChatView({
   conversationId,
-  productId,
+  productId: _productId,
   currentUserId,
-  currentUserName,
+  currentUserName: _currentUserName,
   otherUser,
   lessonId,
 }: ChatViewProps) {

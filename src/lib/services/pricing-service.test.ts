@@ -58,13 +58,6 @@ const productOnlyLemon: PricingProduct = {
   countryOverrides: null,
 };
 
-const productOnlyStripe: PricingProduct = {
-  lemonVariantId: null,
-  stripePriceId: "stripe_only",
-  pricesByCurrency: null,
-  countryOverrides: null,
-};
-
 const productNoProvider: PricingProduct = {
   lemonVariantId: null,
   stripePriceId: null,

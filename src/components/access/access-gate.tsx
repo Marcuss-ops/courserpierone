@@ -7,6 +7,6 @@ interface AccessGateProps {
   token?: string;
 }
 
-export function AccessGate({ children, productSlug, token }: AccessGateProps) {
+export function AccessGate({ children, productSlug: _productSlug, token: _token }: AccessGateProps) {
   return <>{children}</>;
 }

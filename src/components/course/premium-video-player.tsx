@@ -9,7 +9,7 @@ interface PremiumVideoPlayerProps {
   title: string;
 }
 
-export function PremiumVideoPlayer({ videoUrl, productSlug, title }: PremiumVideoPlayerProps) {
+export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: PremiumVideoPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isReady, setIsReady] = useState(false);

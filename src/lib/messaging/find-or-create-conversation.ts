@@ -36,32 +36,6 @@
 import { prisma } from "@/lib/db/prisma";
 
 /**
- * Cerca una conversazione esistente tra due utenti per un dato prodotto.
- * L'ordine (userOneId, userTwoId) può essere either way — risolviamo
- * con un OR pair nella WHERE clause.
- *
- * Usato da GET /api/messages per verificare se esiste già una
- * conversazione tra me e il partner su quel prodotto.
- */
-async function findConversation(
-  userId: string,
-  otherUserId: string,
-  productId: string,
-) {
-  const [minId, maxId] = [userId, otherUserId].sort();
-
-  return prisma.conversation.findFirst({
-    where: {
-      productId,
-      OR: [
-        { userOneId: minId, userTwoId: maxId },
-        { userOneId: maxId, userTwoId: minId },
-      ],
-    },
-  });
-}
-
-/**
  * Atomically finds or creates a conversation between two users scoped
  * to a product.
  *
