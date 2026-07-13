@@ -160,17 +160,19 @@ done
 # .env.staging.local before sourcing this script.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-${0}}")" && pwd)"
 PROJECT_ROOT="$SCRIPT_DIR/../.."
-STAGING_ENV_FILE=""
-# 0. Explicit env-var override (multi-project operators — set
-#    STAGING_ENV_FILE in shell rc to bypass the heuristic entirely).
-if [[ -n "${STAGING_ENV_FILE:-}" && -f "$STAGING_ENV_FILE" ]]; then
-  : # STAGING_ENV_FILE already set; honor it as-is
+# Compute STAGING_ENV_FILE ONLY if not already set (explicit override
+# wins).
 # 1. Project-root canonical (default Vercel env pull destination)
-elif [[ -f "$PROJECT_ROOT/.env.staging.local" ]]; then
-  STAGING_ENV_FILE="$PROJECT_ROOT/.env.staging.local"
 # 2. CWD fallback (operator-override; works when sourced full-path)
-elif [[ -f ./.env.staging.local ]]; then
-  STAGING_ENV_FILE="./.env.staging.local"
+# Multi-project operators: set STAGING_ENV_FILE in shell rc to
+# bypass this heuristic entirely (the outer 'if [[ -z ... ]]' guards
+# against clobbering the override).
+if [[ -z "${STAGING_ENV_FILE:-}" ]]; then
+  if [[ -f "$PROJECT_ROOT/.env.staging.local" ]]; then
+    STAGING_ENV_FILE="$PROJECT_ROOT/.env.staging.local"
+  elif [[ -f ./.env.staging.local ]]; then
+    STAGING_ENV_FILE="./.env.staging.local"
+  fi
 fi
 
 if [[ -n "$STAGING_ENV_FILE" ]]; then
