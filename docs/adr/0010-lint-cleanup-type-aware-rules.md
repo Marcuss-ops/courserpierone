@@ -73,14 +73,56 @@ If either invariant fails, **DO NOT COMMIT**. Either revert (`git revert HEAD --
 
 ### Per-rule playbook
 
-#### C1 — `@typescript-eslint/prefer-nullish-coalescing` (231 → 0 expected)
+(Subsections ordered to mirror the **Migration order** above —
+**C2 → C1 → C3 → C4** — for narrative coherence. Operators reading
+top-to-bottom in this playbook now see the buckets in the same
+sequence the Migration order recommends tackling them.)
 
-- This rule emits **suggestion-only** autofixes (`||`→`??` is unsafe for falsy values).
-- **`npm run lint:fix` / `eslint --fix` / `--fix-type suggestion` ALL produce 0 changes** in this codebase's ESLint v10 + typescript-eslint v8.60 environment (verified empirically on 2026-07-13).
-- The actual fix path is via either:
-  - **`npx eslint-interactive src/`** — interactive CLI; operator picks `@typescript-eslint/prefer-nullish-coalescing`, presses `<Enter>`, then `f` to apply suggestions one-by-one. Manual per-file review required.
-  - **A programmatic Node script** that consumes the suggestion list from `ESLint.lintFiles({ fix }: true)` and writes fixes back, with per-line review gate.
-- Expectation: 0-15% of the 231 may be REJECTED by the operator during interactive review (where the LHS could be a legitimate empty-string or zero fallback). The remaining 85%+ will land type-safely because `recommendedTypeChecked` only flags type-nullish LHS.
+#### Verification pattern — `pipefail` + exit-capture (apply to every rule below)
+
+When verifying a lint fix, **never** capture exit code via a piped-through-`tail`
+pattern, because the pipe-final-process's exit code (always `0` for `tail`)
+masks the real tool status. Empirically demonstrated on 2026-07-13:
+`npx tsc --noEmit | tail -10; echo $?` prints `0` (from `tail`) even when
+`tsc` exited non-zero with typecheck regressions, which is precisely how
+the broken commit `8a035c3` ("lint(c2): destructure-rename attempt")
+landed on `main` (broken syntax reached production; fixed in `6047e57`).
+
+The two correct patterns:
+
+```bash
+# Pattern A — `set -o pipefail` (most ergonomic; bail on any pipe stage failure)
+set -o pipefail
+npx tsc --noEmit 2>&1 | tail -20   # now $? reflects tsc's exit, not tail's
+TSC=$?
+echo "tsc exit: $TSC"               # 0 = clean, non-zero = broken
+if [ $TSC -ne 0 ]; then
+  echo "REGRESSION: typecheck failed post-substitution — see Recovery procedure"
+  exit 1
+fi
+```
+
+```bash
+# Pattern B — direct PIPESTATUS capture (no shell-mode change; safer for shared scripts)
+npx tsc --noEmit > /tmp/tsc.out 2>&1
+TSC=${PIPESTATUS[0]}                # PIPESTATUS is set AFTER the pipe completes
+echo "tsc exit: $TSC"               # 0 = clean, non-zero = broken
+# /tmp/tsc.out holds the full output for diff against /tmp/tsc-before.txt
+```
+
+**Anti-pattern (DO NOT USE):**
+
+```bash
+# BREAKS: $? reads tail's exit (always 0), not tsc's
+npx tsc --noEmit | tail -10
+echo "tsc exit: $?"                  # always 0 — broken contract, lets regressions land
+```
+
+The same gotcha applies to `npx eslint … | tail`, `npx playwright test | tail`,
+and any other pipe-to-tail pattern over a tool whose exit code is the
+**operator's only signal of success vs regression**. Make `${PIPESTATUS[0]}`
+(or `set -o pipefail`) the default in any verification script that gates
+a commit.
 
 #### C2 — `@typescript-eslint/no-unused-vars` (63 → 0 expected)
 
@@ -107,6 +149,15 @@ If either invariant fails, **DO NOT COMMIT**. Either revert (`git revert HEAD --
   Then `npm run lint:fix` will mechanically remove unused imports.
 - After the autofix, verify with the two-pass gate (`npx tsc --noEmit` baseline + after).
 - For the residual ~5-10 cases that survive both pass paths (e.g., unused types, unused re-exports), per-file manual review.
+
+#### C1 — `@typescript-eslint/prefer-nullish-coalescing` (231 → 0 expected)
+
+- This rule emits **suggestion-only** autofixes (`||`→`??` is unsafe for falsy values).
+- **`npm run lint:fix` / `eslint --fix` / `--fix-type suggestion` ALL produce 0 changes** in this codebase's ESLint v10 + typescript-eslint v8.60 environment (verified empirically on 2026-07-13).
+- The actual fix path is via either:
+  - **`npx eslint-interactive src/`** — interactive CLI; operator picks `@typescript-eslint/prefer-nullish-coalescing`, presses `<Enter>`, then `f` to apply suggestions one-by-one. Manual per-file review required.
+  - **A programmatic Node script** that consumes the suggestion list from `ESLint.lintFiles({ fix }: true)` and writes fixes back, with per-line review gate.
+- Expectation: 0-15% of the 231 may be REJECTED by the operator during interactive review (where the LHS could be a legitimate empty-string or zero fallback). The remaining 85%+ will land type-safely because `recommendedTypeChecked` only flags type-nullish LHS.
 
 #### C3 — `@typescript-eslint/no-explicit-any` (30 → 0 expected)
 
@@ -150,7 +201,11 @@ git push origin main
 ```bash
 # 2. If `git revert` itself errors out mid-pipeline (as observed 2026-07-13
 #    with a heredoc-EOF truncation during amend), fall through to:
-git reset --hard <pre-flight-anchor-SHA>   # the SHA captured at step 1
+git reset --hard <pre-flight-anchor-SHA>   # <pre-flight-anchor-SHA> = the SHA immediately
+                                            # preceding the offending substitution
+                                            # (commonly HEAD~1 at substitution time,
+                                            # NOT the /tmp/tsc-before.txt file which is
+                                            # the typecheck error-set snapshot from step 1)
 git push --force-with-lease origin main
 
 # 3. Anchor the recovery with a follow-up ADR note explaining WHY reset
