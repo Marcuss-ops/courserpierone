@@ -151,6 +151,11 @@ done
 # Note: this resolution is idempotent — SCRIPT_DIR is computed once
 # per source invocation. Re-sourcing the script re-derives the same
 # paths so a fallback is sticky across re-sources.
+# Multi-project caveat: PROJECT_ROOT ALWAYS wins over CWD by design.
+# If you have multiple projects with their own .env.staging.local in
+# sub-directories and need to override this script's resolution,
+# rename the conflict file to `.env.staging.local.other` — the
+# script's only triggered path is the exact basename match.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-${0}}")" && pwd)"
 PROJECT_ROOT="$SCRIPT_DIR/../.."
 STAGING_ENV_FILE=""
