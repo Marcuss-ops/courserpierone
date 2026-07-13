@@ -2,19 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { RotateCcw, Play, Volume2, VolumeX, Loader2, Gauge } from "lucide-react";
-import type {
-  YTPlayer,
-  VimeoPlayer,
-  VimeoTimeUpdateData,
-  YTOnStateChangeEvent,
+import {
+  isYTPlayer,
+  type YTPlayer,
+  type VimeoPlayer,
+  type VimeoTimeUpdateData,
+  type YTOnStateChangeEvent,
 } from "./video-player-sdks";
-
-/** Type guard: narrows the playerRef union to YTPlayer. */
-function isYTPlayer(
-  p: YTPlayer | VimeoPlayer | null,
-): p is YTPlayer {
-  return p !== null && "seekTo" in p;
-}
 
 interface PremiumVideoPlayerProps {
   videoUrl: string;
@@ -128,8 +122,15 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
                   }
                 }
 
-                // Avvia il timer di tracciamento tempo
-                const trackInterval = setInterval(() => {
+                // Avvia il timer di tracciamento tempo.
+                // Nota: l'API YouTube IFrame ignora il valore di ritorno di
+                // onReady, quindi qualsiasi cleanup function restituita qui non
+                // verrebbe mai invocata. L'interval di tracking gira quindi
+                // fino allo scaricamento della pagina (accettabile per un
+                // single-page video player). L'effect cleanup esterno
+                // (re-run su cambio `videoUrl`/`storageKey`) previene la
+                // creazione di un nuovo trackInterval per il prossimo player.
+                setInterval(() => {
                   const currentTime = ytPlayer.getCurrentTime();
                   const duration = ytPlayer.getDuration();
                   if (currentTime > 0 && currentTime < duration - 10) {
@@ -139,8 +140,6 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
                     localStorage.removeItem(storageKey);
                   }
                 }, 2000);
-
-                return () => clearInterval(trackInterval);
               },
               onStateChange: (event: YTOnStateChangeEvent) => {
                 // YT.PlayerState.PLAYING = 1, PAUSED = 2, ENDED = 0

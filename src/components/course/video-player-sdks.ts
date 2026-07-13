@@ -63,6 +63,26 @@ export interface VimeoNamespace {
   Player: new (element: HTMLElement) => VimeoPlayer;
 }
 
+/**
+ * Type guard: narrows `YTPlayer | VimeoPlayer | null` to `YTPlayer`.
+ *
+ * The two SDK surfaces are structurally disjoint on the methods used here:
+ * - `YTPlayer` has `seekTo(seconds, allowSeekAhead)` (YouTube IFrame API)
+ * - `VimeoPlayer` has `setCurrentTime(seconds)` (Vimeo Player API)
+ *
+ * The `in` check is type-safe because both interfaces are nominal from
+ * the consumer's perspective (we never have an object that's both).
+ *
+ * The `p !== null` short-circuit handles the initial `useRef<...>(null)`
+ * value before the SDK loads — the ref stays null until the YT/Vimeo
+ * SDK is fetched and the player instance is assigned.
+ */
+export function isYTPlayer(
+  p: YTPlayer | VimeoPlayer | null,
+): p is YTPlayer {
+  return p !== null && "seekTo" in p;
+}
+
 declare global {
   interface Window {
     YT?: YTNamespace;
