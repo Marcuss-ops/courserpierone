@@ -232,8 +232,7 @@ describe("GET /api/conversations", () => {
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(body.conversations).toHaveLength(2);
-    const byId = Object.fromEntries(body.conversations.map((c: any) => [c.id, c]));
+    expect(body.conversations).toHaveLength(2);      const byId = Object.fromEntries(body.conversations.map((c: { id: string; [key: string]: unknown }) => [c.id, c]));
     expect(byId["conv-A"].otherUser.id).toBe(OTHER_A);
     expect(byId["conv-A"].unreadCount).toBe(0);
     expect(byId["conv-B"].otherUser.id).toBe(OTHER_B);

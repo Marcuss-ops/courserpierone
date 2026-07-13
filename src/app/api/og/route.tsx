@@ -179,8 +179,9 @@ export async function GET(request: NextRequest) {
         height: 630,
       }
     );
-  } catch (e: any) {
-    return new Response(`Failed to generate Open Graph image: ${e.message}`, {
+  } catch (e) {
+    const error = e as Error;
+    return new Response(`Failed to generate Open Graph image: ${error.message || String(e)}`, {
       status: 500,
     });
   }

@@ -642,7 +642,7 @@ export async function sendPurchaseConfirmation(
     : filled.body;
 
   // Resolve static PDF attachment if exists
-  const attachments: any[] = [];
+  const attachments: { filename: string; path: string }[] = [];
   if (productName) {
     const staticPdfPath = path.join(process.cwd(), "public", "courses", productName, `${ebookLang}.pdf`);
     if (fs.existsSync(staticPdfPath)) {

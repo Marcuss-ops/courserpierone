@@ -115,7 +115,16 @@ export async function GET(request: NextRequest) {
     }
 
     // Standardized notifications list
-    const events: any[] = [];
+    type SocialProofEvent = {
+      id: string;
+      type: "purchase" | "lesson";
+      name: string;
+      city: string;
+      createdAt: Date;
+      lessonTitle?: string;
+      lessonPosition?: number;
+    };
+    const events: SocialProofEvent[] = [];
 
     // Map order events
     recentOrders.forEach((order) => {

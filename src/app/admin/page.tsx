@@ -59,7 +59,7 @@ export default function AdminDashboard() {
               averageCR: (analyticsData?.cr ?? "0") + "%",
               averageCRTrend: "-",
             },
-            products: products.map((p: any) => ({
+            products: products.map((p: ProductApiItem & { templateId?: string; status?: string; locales?: string[]; lessonsCount?: number; revenue?: number; conversion?: string }) => ({
               id: p.id,
               slug: p.slug,
               title: p.slug,

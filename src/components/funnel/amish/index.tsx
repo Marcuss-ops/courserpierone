@@ -60,20 +60,25 @@ export default function TemplateAmish({
   );
 
   // ── Structured data ──
-  const lc = data.localeContent as any;
+  const lc = data.localeContent as
+    | {
+        modules?: { items?: { title: string; desc: string }[] };
+        faq?: { items?: { q: string; a: string }[] };
+        testimonials?: { items?: { name?: string; role?: string; avatar?: string; text?: string }[] };
+      }
+    | undefined;
   const modules =
     lc?.modules?.items?.length ? lc.modules.items : data.ui?.benefits ?? [];
   const faqItems =
     lc?.faq?.items?.length ? lc.faq.items : data.ui?.faq ?? [];
   const testimonials =
     data.testimonials?.length
-      ? data.testimonials
-      : lc?.testimonials?.items?.map((tst: any) => ({
-          name: tst.name,
-          location: tst.role ?? "",
-          avatar: tst.avatar ?? "",
-          text: tst.text,
-        })) ??
+      ? data.testimonials          : lc?.testimonials?.items?.map((tst: { name?: string; role?: string; avatar?: string; text?: string }) => ({
+            name: tst.name ?? "",
+            location: tst.role ?? "",
+            avatar: tst.avatar ?? "",
+            text: tst.text ?? "",
+          })) ??
         data.ui?.testimonials ??
         [];
 

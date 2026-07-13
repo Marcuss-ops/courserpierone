@@ -162,7 +162,7 @@ function mapConfigToTemplateData(data: CourseConfig, locale: string, lang: strin
     author: data.author,
     languages: data.languages,
     ui: content.ui ?? undefined,
-    testimonials: (content.ui as any)?.testimonials ?? undefined,
+    testimonials: (content.ui as { testimonials?: Array<{ name: string; location: string; avatar: string; text: string }> } | undefined)?.testimonials ?? undefined,
     localeContent,
     lezioni: data.lessons.map((l) => ({
       titolo: l.titles[lang] ?? Object.values(l.titles)[0] ?? "",
@@ -171,7 +171,7 @@ function mapConfigToTemplateData(data: CourseConfig, locale: string, lang: strin
   };
 }
 
-function flattenObject(obj: any, prefix = ""): Record<string, string> {
+function flattenObject(obj: Record<string, unknown> | null | undefined, prefix = ""): Record<string, string> {
   const result: Record<string, string> = {};
   if (!obj || typeof obj !== "object") return result;
 
@@ -180,13 +180,19 @@ function flattenObject(obj: any, prefix = ""): Record<string, string> {
     if (typeof val === "string") {
       result[newKey] = val;
     } else if (typeof val === "object" && !Array.isArray(val)) {
-      Object.assign(result, flattenObject(val, newKey));
+      // val is narrowed to `object | null` by the typeof guard above; cast
+      // is safe for the recursive call (the function only reads indexable
+      // string keys via Object.entries).
+      Object.assign(result, flattenObject(val as Record<string, unknown>, newKey));
     } else if (Array.isArray(val)) {
       val.forEach((item, index) => {
         if (typeof item === "string") {
           result[`${newKey}_${index + 1}`] = item;
         } else if (typeof item === "object") {
-          Object.assign(result, flattenObject(item, `${newKey}_${index + 1}`));
+          // Same as the val cast above: item is narrowed to `object` after
+          // the `typeof item === "object"` check, and the recursive call
+          // only reads indexable string keys.
+          Object.assign(result, flattenObject(item as Record<string, unknown>, `${newKey}_${index + 1}`));
         }
       });
     }
