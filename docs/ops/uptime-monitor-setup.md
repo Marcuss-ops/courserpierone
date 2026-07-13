@@ -338,9 +338,27 @@ parallel. Both fire on the same trigger condition.
 > can leave the placeholders literal (the on-call engineer will see
 > the template strings and grep the monitor's logged response body
 > to fill in the values manually). The latency is ACTIONABLE for
-> triage: a high DB latency pre-failure is a slow-queries warning;
-> a high Redis latency is a cache-layer degradation; both ≈ 0 is a
-> hard connection failure.
+> triage: for pre-failure degradation signals, check the `degraded`
+> (200) responses in the vendor’s history — those carry the
+> high-but-non-zero latencies that signal slow-queries warming up. A
+> hard DB connection failure resets the timer to `0` (per the
+> catch-branch in `src/app/api/health/route.ts` L88-105), so a 503
+> with `database.latencyMs: 0` means hard-fail; a 503 with
+> `latencyMs: <timeout-duration>` (e.g. 5000ms) means
+> connection-TIMEOUT (pool exhaustion — different mitigation:
+> connection-pool sizing, Supabase compute scaling). A
+> high-but-non-zero `redis.latencyMs` is a cache-layer degradation,
+> not a hard fail.
+>
+> **Vendor-interpolation caveat**: a monitor that doesn’t extract
+> the response body can leave the placeholders literal; the on-call
+> engineer will see the template strings and grep the monitor’s
+> logged response body to fill in the values manually. **cron-job.org
+> cannot interpolate response-body fields** — its webhook body is a
+> static template, so the placeholders will arrive in the alert as
+> literal `<db-latencyMs>ms` strings. Use BetterStack or UptimeRobot
+> Business (both support response-body JSON-path extraction) if
+> actionable latency is required.
 
 ### PagerDuty variant
 
