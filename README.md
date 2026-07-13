@@ -339,6 +339,15 @@ Verifica che il **redirect URI** su Google Cloud Console sia:
 - OPPURE migrali manualmente a Lemon Squeezy
 - Poi rimuovi il codice dual-provider (Fase 8)
 
+### Running E2E tests — fail-fast semantics
+
+`npm run test:e2e` esegue i 3 file LS-touching (`tests/e2e/checkout.ls.spec.ts`, `tests/e2e/refund.lemonsqueezy.spec.ts`, `tests/e2e/ls-webhook-customdata.spec.ts`) con guard differenziati. La differenza cruciale:
+
+- **Env var LS mancanti** (`LEMONSQUEEZY_API_KEY`, `LEMONSQUEEZY_WEBHOOK_SECRET`, `LEMONSQUEEZY_STORE_ID`, `TEST_LEMON_VARIANT_ID`) → **l'intero file LS fallisce a module-load** con `rc != 0` e messaggio `❌ Missing required Lemon Squeezy env vars: …` (da `tests/e2e/fixtures/ls-env-guard.ts:34-40`). Niente silent skip, niente `rc=0` falsi positivi. **Impostazione**: per ottenere le creds vedi [`scripts/ops/staging-bootstrap.md` §3.1](scripts/ops/staging-bootstrap.md#get-section-31).
+- **Env var LS presenti ma prodotto DB-side senza `lemonVariantId`** (ovvero la riga `Product` con `slug = "test-course-e2e"` esiste ma ha `lemonVariantId = null`) → il singolo test salta con `test.skip(true, "TEST_LEMON_VARIANT_ID not configured on the seeded test product")`. **NO** module-load fail. Test adiacenti continuano a girare.
+
+L'evidenza empirica (3 staged probe: env assenti / stub `DATABASE_URL` / direct `requireLsEnvVars()` invocation) è documentata in [`docs/ops/staging-run-log-2026-07-13.md`](docs/ops/staging-run-log-2026-07-13.md). La tabella pre-`0c91b77` vs post-`0c91b77` (il commit che ha introdotto `requireLsEnvVars()` al posto del vecchio `test.skip(!hasLsCreds, …)`) è inclusa.
+
 ---
 
 ## Strumenti per Agenti AI (Agent Developer Guide)
