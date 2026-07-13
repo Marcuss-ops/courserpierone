@@ -326,11 +326,25 @@ queries**:
 > zero current-code-path benefit.
 
 If the operator chooses to include them (e.g. as part of the V1.1
-refactor):
+refactor), use the **`--create-only` flag** to avoid the interactive
+re-prompt wall on a second `migrate dev` invocation:
+
+```bash
+# 1. Generate the migration file WITHOUT applying it
+npx prisma migrate dev --create-only --name product_jsonb_columns
+
+# 2. Edit prisma/migrations/<timestamp>_product_jsonb_columns/migration.sql
+#    to append the GIN CREATE INDEX statements (below), AFTER the two
+#    ALTER COLUMN statements and BEFORE the auto-generated COMMIT (if any).
+
+# 3. Apply the modified file
+npx prisma migrate dev
+```
+
+The SQL to append (between the ALTERs and the COMMIT in the
+auto-generated file):
 
 ```sql
--- Append to the auto-generated migration file (after the two
--- ALTER COLUMN statements, BEFORE the COMMIT):
 CREATE INDEX IF NOT EXISTS "Product_countryOverrides_gin"
   ON "Product" USING gin ("countryOverrides" jsonb_path_ops);
 CREATE INDEX IF NOT EXISTS "Product_pricesByCurrency_gin"
