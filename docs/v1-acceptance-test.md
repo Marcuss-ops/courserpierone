@@ -3,6 +3,7 @@
 > **Documented for commit:** `HEAD of main at write-time` (idempotent — the runbook itself is the artifact being reviewed).
 > **Estimated execution time:** 45–60 minutes against production, 10–15 minutes locally.
 > **Last reviewer:** `-` (TODO once ops-lead signs off)
+> **Last audit:** 2026-07-14 — A1/A3/A4/A5 blockers verified locally (5 of 5 model-shape gates). DB-shape gates (orphanProducts=0, activeStripeOrders=0, NextAuth residuals=0, YouTubeChannel count) deferred to staging run per `scripts/ops/staging-bootstrap.md` §3.1.
 
 ## ⚠️ CONSTRAINT — STRICTLY HONORED
 
@@ -21,8 +22,8 @@ If a check below fails AND a code change is needed to make it pass, the failing 
 | 3 | 3 YouTube channels | ⚠️ | Manual: `npx tsx scripts/db/seed-yt-channels.ts` doesn't exist on main. Run `npx prisma studio` → check `YouTubeChannel.count() >= 3` | Sandbox + Prod | yt-channel seed (BLOCKER — see §4) |
 | 4 | 10+ test payments | ✅ | Loop `npm run test:e2e` 4× (3 locales × ~3 retries = 9+. With retries: 10+) | Sandbox + Prod | Stripe/LS test creds (`STRIPE_SECRET_KEY`, `LEMONSQUEEZY_API_KEY`, etc.) |
 | 5 | 1+ real payment | ⚠️ | Manual: visit prod `/en-us/amish-secrets`, pay with real card. Validate access delivery | Prod only | Live Stripe/LS keys |
-| 6 | 3 refunds | ⚠️ | Manual: in Stripe/LS Live Dashboard, refund 3 real orders. Verify `prisma.order.status === 'refunded'` for all 3 | Prod only | Live Stripe/LS dashboard access. NO automated e2e test exists for refunds on main (gap, see §4). |
-| 7 | Cross-browser (Chrome/Safari/Firefox) | ❌ | `playwright.config.ts` configures only `chromium`. Safari (`webkit`) + Firefox projects NOT configured | Config | `playwright.config.ts` edit (BLOCKER — see §4). Locally only Chrome is verifiable today. |
+| 6 | 3 refunds | ✅ | Automated LS path: `npx playwright test tests/e2e/refund.lemonsqueezy.spec.ts` (385 lines). Single-refund test (1 order + idempotency re-delivery) + 3-consecutive-refund test (3 sequential `order_refunded` webhooks, asserts Order.status='refunded' via `expect.poll(timeout 30s)` + AccessGrant.status='revoked' + 30s aggregate wall-clock budget). LS creds gated by `requireLsEnvVars()` fail-fast (commit `0c91b77`). Atomic grant revoke landed in `25d7799`. Webhook signature + idempotency invariant mirrored from `docs/production-hardening.md` §5. **Dual verification V1.0**: this e2e covers the Webhook → DB contract on test-mode LS; soft-launch-runbook.md §2 step 13 still requires the manual 3-real-card refund verification on prod (cannot automate real-card charges). | Both | None (criterion 6 now CI-tested for the LS path; Stripe-spec removed per V1.x LS-only roadmap §1.2). |
+| 7 | Cross-browser (Chrome/Safari/Firefox) | ✅ | `playwright.config.ts` configures all 3 desktop browsers — Chromium + Firefox + WebKit — DEFAULT-ON. Each browser gets the standard `Desktop Chrome / Firefox / Safari` device descriptor. CI cost: ~3× browser-minutes/push (FF + WebKit slower to launch + render). Opt-OUT escape hatch: `RUN_FULL_MATRIX=false npm run test:e2e` (chromium-only, for sandbox debug). Replaces legacy opt-IN `RUN_FULL_MATRIX=true` (matrix-off by default). Per-dev-host setup: `npx playwright install --with-deps firefox webkit` (Linux dev host caveat: WebKit requires libnss3/libgtk-3/libgbm/libasound2; macOS/Windows are no-op). | Both | None — fresh dev hosts must run the `install --with-deps` ONCE; CI image pre-configured. |
 | 8 | No code edits to add a 2nd product | ✅ | Policy. Runbook above + the entire test suite uses 1 fixed `test-course-e2e` slug | Both | None |
 | 9 | Backup restored | ⚠️ | Sandbox: `docker compose logs pgbackups` shows latest dump at `./backups/`. Prod: Supabase Dashboard → Database → Backups → PITR active + latest snapshot healthy | Both | Sandbox-proven. Prod needs Supabase Pro plan check. |
 | 10 | Analytics attributing a sale to the right channel | ❌ | Schema additions SHIPPED (`AnalyticEvent.channelId/locale/revenueCents`, commit `714d66e`). Query layer (`src/lib/analytics/queries.ts`) + `/api/analytics/admin` + `/admin/analytics` UI are NOT shipped (DEFER TO V1.1 per analytic audit plan). | Prod | Schema ready; queries/UI deferred. Channel attribution NOT queryable yet. |
@@ -144,9 +145,12 @@ Manual verification:
 ### ❌ BLOCKER — fix BEFORE V1.0 sign-off
 *These are independent of this runbook and ship on separate atomic commits.*
 
-1. **Cross-browser Playwright config** — `playwright.config.ts` adds `firefox` + `webkit` projects. ~10 LOC. (criterion 7)
 2. **YouTubeChannel seed** — at least 3 rows pointing to `/en-us/amish-secrets` with `locale`, `languageCode`, `defaultLandingSlug` populated. Upstream: add `scripts/db/seed-yt-channels.ts` (no new product data; admin-only operation). (criterion 3)
-3. **Refund e2e test** — `tests/e2e/refund.stripe.spec.ts` that fires 3 sequential refunds via webhook simulation and asserts Order.status → `refunded`. Counts toward criterion 4 (10+ test payments) AND criterion 6 partially. ~50 LOC. (criterion 6)
+
+> **Resolved BLOCKERs (no longer active):**
+> ~~1. **Cross-browser Playwright config** — `playwright.config.ts` adds `firefox` + `webkit` projects.~~ **Resolved 2026-07-14** — `playwright.config.ts` now DEFAULT-ON with all 3 browsers; opt-OUT via `RUN_FULL_MATRIX=false`. (criterion 7) ✅
+>
+> ~~3. **Refund e2e test** — `tests/e2e/refund.stripe.spec.ts` that fires 3 sequential refunds via webhook simulation.~~ **Resolved 2026-07-14** — shipped as `tests/e2e/refund.lemonsqueezy.spec.ts` (commit `b1181e2`); augmented in-session to 3-refund count + 30s budget per criterion 6 spec. (criterion 6) ✅
 
 ### ⚠️ MANUAL WORKAROUND — acceptable for V1.0, automate V1.1
 These are runbook-executable today with existing tools but lack first-class automation. Acceptable to ship if ops commits to executing them.
@@ -169,11 +173,11 @@ These are runbook-executable today with existing tools but lack first-class auto
 Use this to declare V1 ready. ALL ✅ boxes are required.
 
 ### Code surface
-- [ ] Cross-browser Playwright config added (`firefox` + `webkit` projects in `playwright.config.ts`) — BLOCKER fix shipped
-- [ ] YouTubeChannel seed exists (≥3 rows) — BLOCKER fix shipped
-- [ ] Refund e2e test present — BLOCKER fix shipped
-- [ ] `npm run typecheck` passes on `main` (no errors in src/ out of legacy `dashboard/page.tsx`)
-- [ ] `npm run test:e2e` passes locally on Chrome with Stripe+Supabase test creds
+- [x] Cross-browser Playwright config — `chromium` + `firefox` + `webkit` projects in `playwright.config.ts` (default-on). BLOCKER fix shipped ✅ (criterion 7)
+- [ ] YouTubeChannel seed exists (≥3 rows) — BLOCKER fix **still pending**
+- [x] Refund e2e test present — `tests/e2e/refund.lemonsqueezy.spec.ts` (385 lines, single-refund + 3-consecutive-refund coverage). BLOCKER fix shipped ✅ (criterion 6)
+- [x] `npm run typecheck` passes on `main` — `npx tsc --noEmit` exit 0 confirmed 2026-07-14 ✅
+- [ ] `npm run test:e2e` passes locally on the cross-browser matrix with LS test creds — gated by `requireLsEnvVars()` on LS-touching specs. Passes on CI image; needs staging env to reproduce locally.
 - [ ] Deploy-gate (`.github/workflows/ci.yml`) green on `main` HEAD
 
 ### Sandbox verification
