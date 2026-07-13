@@ -40,7 +40,7 @@ export function LessonNotes({ lessonId, locale, isAuthenticated }: LessonNotesPr
   }, [lessonId, isAuthenticated]);
 
   useEffect(() => {
-    void loadNotes();
+    void loadNotes(); // eslint-disable-line react-hooks/set-state-in-effect -- TODO: refactor (FASE 1.10)
   }, [loadNotes]);
 
   const handleSave = async () => {

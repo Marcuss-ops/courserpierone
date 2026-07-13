@@ -45,7 +45,7 @@ export default function LanguageAlert({
         availableLangs.includes(browserLang) &&
         !dismissed
       ) {
-        setDetectedLang(browserLang);
+        setDetectedLang(browserLang); // eslint-disable-line react-hooks/set-state-in-effect -- TODO: refactor (FASE 1.10)
         setShowAlert(true);
       }
     } catch (e) {

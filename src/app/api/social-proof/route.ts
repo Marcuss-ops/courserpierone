@@ -5,7 +5,7 @@ import { apiErrorResponse } from "@/lib/errors";
 /** Standardized notification list. Module-scope so the type isn't
  *  re-allocated on every request (the route is hot — polled by the
  *  landing page for the social-proof ticker). */
-type SocialProofEvent = {
+interface SocialProofEvent {
   id: string;
   type: "purchase" | "lesson";
   name: string;
@@ -13,7 +13,7 @@ type SocialProofEvent = {
   createdAt: Date;
   lessonTitle?: string;
   lessonPosition?: number;
-};
+}
 
 export async function GET(request: NextRequest) {
   try {

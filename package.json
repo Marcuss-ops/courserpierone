@@ -38,7 +38,7 @@
     "lucide-react": "^1.17.0",
     "next": "^16.2.6",
     "next-intl": "^4.13.0",
-    "nodemailer": "^7.0.13",
+    "nodemailer": "^9.0.3",
     "openai": "^6.39.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
@@ -67,5 +67,10 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.60.0",
     "vitest": "^4.1.8"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "^8.5.10"
+    }
   }
 }

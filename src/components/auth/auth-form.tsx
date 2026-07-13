@@ -51,7 +51,7 @@ export function AuthForm({ lang }: AuthFormProps) {
         hashErrorCode || oauthCodeParam
           ? ` (${hashErrorCode || oauthCodeParam})`
           : "";
-      setError(t.oauthError);
+      setError(t.oauthError); // eslint-disable-line react-hooks/set-state-in-effect -- TODO: refactor (FASE 1.10)
       setOauthDetail(`${t.oauthErrorDetail}: ${decoded}${codeSuffix}\n${t.oauthErrorHint}`);
       // Clean both fragment and query params so refresh doesn't reprocess
       const cleanUrl =

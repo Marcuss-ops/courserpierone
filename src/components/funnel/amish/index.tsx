@@ -60,13 +60,7 @@ export default function TemplateAmish({
   );
 
   // ── Structured data ──
-  const lc = data.localeContent as
-    | {
-        modules?: { items?: { title: string; desc: string }[] };
-        faq?: { items?: { q: string; a: string }[] };
-        testimonials?: { items?: { name?: string; role?: string; avatar?: string; text?: string }[] };
-      }
-    | undefined;
+  const lc = data.localeContent;
   const modules =
     lc?.modules?.items?.length ? lc.modules.items : data.ui?.benefits ?? [];
   const faqItems =

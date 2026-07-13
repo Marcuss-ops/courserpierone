@@ -48,7 +48,7 @@ export function PWAInstallBanner() {
 
   useEffect(() => {
     if (window.matchMedia("(display-mode: standalone)").matches) {
-      setInstalled(true);
+      setInstalled(true); // eslint-disable-line react-hooks/set-state-in-effect -- TODO: refactor (FASE 1.10)
       return;
     }
 

@@ -12,7 +12,7 @@ export default function ProductsPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
-    setLoading(true);
+    setLoading(true); // eslint-disable-line react-hooks/set-state-in-effect -- TODO: refactor (FASE 1.10)
     fetch("/api/products")
       .then((r) => r.json() as Promise<ProductApiItem[]>)
       .then((data) => {

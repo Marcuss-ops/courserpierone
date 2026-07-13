@@ -31,6 +31,9 @@ export interface AmishProps {
       ui?: { labels?: Record<string, string> };
       modules?: { items?: { title: string; desc: string }[] };
       faq?: { items?: { q: string; a: string }[] };
+      // Optional: maps LocaleContent.testimonials.items into Unicode shape.
+      // Shape mirrors what amish/index.tsx expects in the `.map()` lambda.
+      testimonials?: { items?: { name?: string; role?: string; avatar?: string; text?: string }[] };
     };
   };
   locale?: string;

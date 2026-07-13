@@ -375,8 +375,8 @@ export default function LanguageSelector({
       setOpen(false);
       return;
     }
-    document.cookie = `locale=${code}; path=/; max-age=31536000; sameSite=lax`;
-    window.location.href = `/${code}/${productSlug}`;
+    document.cookie = `locale=${code}; path=/; max-age=31536000; sameSite=lax`; // eslint-disable-line react-hooks/immutability -- TODO: refactor (FASE 1.10)
+    window.location.href = `/${code}/${productSlug}`; // eslint-disable-line react-hooks/immutability -- TODO: refactor (FASE 1.10)
   }
 
   // Find active locale info

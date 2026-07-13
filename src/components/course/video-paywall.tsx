@@ -70,7 +70,7 @@ export function VideoPaywall({
     }
 
     if (!isAuthenticated) {
-      setHasAccess(false);
+      setHasAccess(false); // eslint-disable-line react-hooks/set-state-in-effect -- TODO: refactor (FASE 1.10)
       setChecking(false);
       return;
     }

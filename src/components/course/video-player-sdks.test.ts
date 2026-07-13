@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
   isYTPlayer,
   type YTPlayer,
@@ -20,8 +20,8 @@ describe("isYTPlayer", () => {
     // discriminating on `seekTo` specifically (not just truthiness
     // of any method).
     const p = {
-      seekTo: () => {},
-      playVideo: () => {},
+      seekTo: vi.fn(),
+      playVideo: vi.fn(),
     } as unknown as YTPlayer;
     expect(isYTPlayer(p)).toBe(true);
   });

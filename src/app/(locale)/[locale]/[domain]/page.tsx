@@ -162,7 +162,7 @@ function mapConfigToTemplateData(data: CourseConfig, locale: string, lang: strin
     author: data.author,
     languages: data.languages,
     ui: content.ui ?? undefined,
-    testimonials: (content.ui as { testimonials?: Array<{ name: string; location: string; avatar: string; text: string }> } | undefined)?.testimonials ?? undefined,
+    testimonials: (content.ui as { testimonials?: { name: string; location: string; avatar: string; text: string }[] } | undefined)?.testimonials ?? undefined,
     localeContent,
     lezioni: data.lessons.map((l) => ({
       titolo: l.titles[lang] ?? Object.values(l.titles)[0] ?? "",

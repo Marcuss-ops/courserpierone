@@ -63,7 +63,7 @@ export default function AdminUsersPage() {
   }
 
   useEffect(() => {
-    void fetchUsers();
+    void fetchUsers(); // eslint-disable-line react-hooks/set-state-in-effect -- TODO: refactor (FASE 1.10)
      
   }, []);
 

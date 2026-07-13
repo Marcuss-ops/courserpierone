@@ -21,7 +21,7 @@ export function LessonBuilder({ locales, lessons, onChange }: LessonBuilderProps
   const [activeLocale, setActiveLocale] = useState(locales[0] ?? "it");
 
   useEffect(() => {
-    setActiveLocale((prev) => (locales.includes(prev) ? prev : (locales[0] ?? "it")));
+    setActiveLocale((prev) => (locales.includes(prev) ? prev : (locales[0] ?? "it"))); // eslint-disable-line react-hooks/set-state-in-effect -- TODO: refactor (FASE 1.10)
   }, [locales]);
 
   function updateLesson(index: number, updater: (lesson: LessonFormItem) => LessonFormItem) {

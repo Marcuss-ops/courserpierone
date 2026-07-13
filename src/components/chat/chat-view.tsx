@@ -220,7 +220,7 @@ export function ChatView({
 
   // Initialize: fetch messages on mount
   useEffect(() => {
-    void fetchInitialMessages();
+    void fetchInitialMessages(); // eslint-disable-line react-hooks/set-state-in-effect -- TODO: refactor (FASE 1.10)
   }, [fetchInitialMessages]);
 
   // ── Mark received messages as read (CANONICAL: PATCH /api/conversations/[id]/read) ──

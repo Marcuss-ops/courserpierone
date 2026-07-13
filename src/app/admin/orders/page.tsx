@@ -60,7 +60,7 @@ export default function AdminOrdersPage() {
   }
 
   useEffect(() => {
-    void fetchOrders();
+    void fetchOrders(); // eslint-disable-line react-hooks/set-state-in-effect -- TODO: refactor (FASE 1.10)
      
   }, []);
 

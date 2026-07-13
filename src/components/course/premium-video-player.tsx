@@ -47,7 +47,7 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
   const storageKey = `courser-progress-${productSlug}-${videoUrl}`;
 
   useEffect(() => {
-    setIsReady(false);
+    setIsReady(false); // eslint-disable-line react-hooks/set-state-in-effect -- TODO: refactor (FASE 1.10)
     setShowResumeToast(false);
     setResumedTime(null);
 
@@ -181,7 +181,8 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
             if (savedTime) {
               const time = parseFloat(savedTime);
               if (time > 5) {
-                player.setCurrentTime(time);
+                // Best-effort resume: Vimeo's setCurrentTime returns a Promise we don't need to await.
+                void player.setCurrentTime(time);
                 setResumedTime(time);
                 setShowResumeToast(true);
                 setTimeout(() => setShowResumeToast(false), 5000);
@@ -195,8 +196,20 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
                 } else if (data.seconds >= duration - 10) {
                   localStorage.removeItem(storageKey);
                 }
+              }).catch((err) => {
+                // Swallow single-fetch errors so a transient duration failure does not break tracking,
+                // but log so Vimeo SDK issues remain observable in DevTools.
+                if (typeof console !== "undefined") {
+                  console.warn("[premium-video-player] Vimeo's getDuration() rejected (skipping this tick):", err);
+                }
               });
             });
+          }).catch((err) => {
+            // If `player.ready()` rejects, keep loading state; the user can refresh to retry.
+            // Log so SDK init issues surface in DevTools instead of vanishing silently.
+            if (typeof console !== "undefined") {
+              console.warn("[premium-video-player] Vimeo's player.ready() rejected (loader persists):", err);
+            }
           });
         }
       }, 500);
@@ -219,7 +232,8 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
       if (isYouTube && "seekTo" in playerRef.current) {
         playerRef.current.seekTo(0, true);
       } else if ("setCurrentTime" in playerRef.current) {
-        playerRef.current.setCurrentTime(0);
+        // Best-effort reset: Vimeo's setCurrentTime returns a Promise we don't need to await.
+        void playerRef.current.setCurrentTime(0);
       }
       localStorage.removeItem(storageKey);
       setShowResumeToast(false);

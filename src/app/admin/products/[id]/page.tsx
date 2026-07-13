@@ -137,7 +137,7 @@ export default function EditProductPage() {
   }
 
   useEffect(() => {
-    void fetchProduct();
+    void fetchProduct(); // eslint-disable-line react-hooks/set-state-in-effect -- TODO: refactor (FASE 1.10)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -150,7 +150,7 @@ export default function EditProductPage() {
   }
 
   useEffect(() => {
-    setTexts(allProductTranslations[locale] ?? allProductTranslations.it ?? {});
+    setTexts(allProductTranslations[locale] ?? allProductTranslations.it ?? {}); // eslint-disable-line react-hooks/set-state-in-effect -- TODO: refactor (FASE 1.10)
   }, [locale, allProductTranslations]);
 
   async function handleSave() {

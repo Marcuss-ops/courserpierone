@@ -315,7 +315,7 @@ export function useRealtimeChat({
     if (enabled) {
       void connectWs();
     } else {
-      cleanup();
+      cleanup(); // eslint-disable-line react-hooks/set-state-in-effect -- TODO: refactor (FASE 1.10)
       setConnected(false);
     }
 

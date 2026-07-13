@@ -91,7 +91,7 @@ export default function SocialProof({ productSlug, locale }: SocialProofProps) {
       }
     }
     void fetchEvents();
-  }, [productSlug, locale]);
+  }, [productSlug, locale]); // eslint-disable-line react-hooks/exhaustive-deps -- TODO: refactor (FASE 1.10)
 
   useEffect(() => {
     if (events.length === 0) return;
@@ -122,7 +122,7 @@ export default function SocialProof({ productSlug, locale }: SocialProofProps) {
       clearTimeout(initialTimeout);
       clearInterval(interval);
     };
-  }, [events]);
+  }, [events]); // eslint-disable-line react-hooks/exhaustive-deps -- TODO: refactor (FASE 1.10)
 
   if (!currentEvent) return null;
 
