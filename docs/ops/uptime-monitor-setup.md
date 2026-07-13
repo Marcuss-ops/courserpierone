@@ -43,7 +43,7 @@
 | Alert path | `ALERT_WEBHOOK_URL` (Slack/Discord) **OR** PagerDuty Events API v2 |
 | Recommended vendor | **BetterStack** (30s native, status page included) |
 | Cost | $0 (cron-job.org) → ~$20/mo (BetterStack) → ~$60/mo (UptimeRobot Business) |
-| Probe volume | 86,400 function invocations/day at 30s (Vercel `nodejs` runtime) |
+| Probe volume | **2,880 probes/day (~86,400/month)** at 30s (Vercel `nodejs` runtime) — ~11.5× headroom on Vercel Pro's 1M invocations/mo budget |
 
 ---
 
@@ -68,7 +68,7 @@ ops-1 runs, ops-2 verifies. All boxes required.
 
 | Vendor | 30s native? | Free tier | Status page | Alert path | Setup time | Cost |
 | --- | --- | --- | --- | --- | --- | --- |
-| **BetterStack** (recommended) | ✓ | No | ✓ included | Custom webhook + email + SMS + PagerDuty native | 10 min | ~$20/mo |
+| **BetterStack** (recommended) | ✓ (paid) / 3-min (Hobby free) | Yes (Hobby: 1 monitor, 3-min interval) | ✓ included (paid) | Custom webhook + email + SMS + PagerDuty native | 10 min | $0 (Hobby) / ~$20/mo (Team) |
 | **UptimeRobot** | Only on Business plan | Yes (5-min interval) | ✓ on Pro+ | Webhook + email + SMS + PagerDuty native | 15 min | $0 (free) / $60/mo (Business) |
 | **cron-job.org** | ❌ (1-min minimum) | Yes | No (external only) | Custom POST (any URL, any body) | 5 min | $0 |
 
@@ -82,7 +82,7 @@ ops-1 runs, ops-2 verifies. All boxes required.
 
 ### §2.1 — BetterStack (recommended, 30s native, ~$20/mo)
 
-1. **Sign up**: https://betterstack.com/ → create account.
+1. **Sign up**: https://betterstack.com/ → create account. **Hobby free plan: 1 monitor, 3-min interval — NOT acceptable for V1.0's 30s requirement.** Use the paid Team plan (~$20/mo) for the 30s + status page + PagerDuty native integration.
 2. **Create monitor**: Monitors → "+ Add monitor" → "HTTP(s)".
 3. **Configure**:
    - **URL**: `https://<prod-domain>/api/health`
@@ -274,6 +274,10 @@ Recommended for V1.0: fire BOTH paths simultaneously.
 - **PagerDuty** — escalates to on-call per [`../production.md` §3.4](../production.md)
   rotation. For P0 incidents (per §3.1).
 
+**Prefer the vendor's NATIVE PagerDuty integration** (BetterStack and
+UptimeRobot Business both have it — see §2.1 and §2.2). The §5.2
+curl is the FALLBACK for vendors without native PagerDuty support.
+
 Configure the monitor's escalation policy: "Webhook + PagerDuty" in
 parallel. Both fire on the same trigger condition.
 
@@ -349,7 +353,10 @@ curl -sS https://<prod-domain>/api/health | jq '.status'
 # expect: "healthy"
 
 # 2. From a separate host (NOT the Vercel edge), block egress to Supabase:
-#    (replace <supabase-host> with the actual DB host from DIRECT_URL)
+#    <supabase-host> is the HOST portion of DIRECT_URL — e.g. for Supabase it's
+#    `db.<project-ref>.supabase.co` (NOT the full connection URL with port/user/pass).
+#    Extract via `psql "$DIRECT_URL" -c "\conninfo"` or copy from Supabase Dashboard
+#    → Project → Settings → Database → "Direct connection" → host field.
 sudo iptables -A OUTPUT -p tcp --dport 5432 -d <supabase-host> -j DROP
 # OR: use a network-policy tool to block the egress. The goal is to
 #     make prisma.$queryRaw`SELECT 1` fail without breaking other egress.
@@ -389,10 +396,12 @@ After 7 days in production, audit:
 | 503 fires but monitor shows "up" | Vendor treats 503 as "degraded" not "down" | Configure the monitor to treat BOTH 5xx and 4xx as failure (canonical: anything not 2xx = down). |
 | Monitor polls at 30s but only 1 fail in 5min triggers alert | Vendor's SLA is "3 consecutive" not "3 in 5min" | Per §4, set "3 fails in 5min" (BetterStack native) OR "3 consecutive" as the closest approximation. |
 | Monitor's own dashboard is down | Vendor outage (BetterStack/UptimeRobot itself is down) | Per [`../production.md` §6.5`](../production.md): this is the documented SPOF. **Open work**: a secondary synthetic-ping (cron-job.org as a 2nd-tier monitor, or a custom Vercel cron that pings `ALERT_WEBHOOK_URL` and alerts via email on silence >5min). For now, Slack/Discord channel silence >5min = manual eyeball by ops. |
-| Function invocations spike (86,400/day at 30s) | Each probe is a Vercel function invocation (cold start every 30s on the free plan) | Vercel Pro allows 1M invocations/mo. 2.6M probes/mo = 2.6× over. **Open work**: switch `/api/health` from `runtime = "nodejs"` to `runtime = "edge"` (the DB+Redis checks can run on edge via the Upstash edge client; reduce cold-start cost ~10×). Track in `FUTURE.md`. |
+| Function invocation budget exceeded (e.g. interval dropped to 5s) | At 30s polling, ~86,400 probes/month fits in Vercel Pro's 1M invocations/mo budget with ~11.5× headroom. NOT a current blocker. | If interval is dropped to 5s (17,280/day = ~518,400/month), still fits. Below 5s, check Vercel Dashboard → Usage → Functions before going to prod. |
 | False positives during Supabase maintenance | Supabase Pro plan maintenance windows (typically 5-15 min) flip the DB temporarily | Pre-schedule a "monitor pause" window in the vendor's dashboard. BetterStack: "Maintenance windows". UptimeRobot: "Maintenance". |
 | PagerDuty not firing despite 503s | PagerDuty integration key rotated but not updated in the monitor | Re-paste the integration key per §1. Re-test with the vendor's "Test PagerDuty" button. |
 | Health endpoint returns 200 but Supabase IS down (false negative) | The endpoint's `prisma.$queryRaw\`SELECT 1\`` succeeded against the pooler, but a specific query path is broken | Open work: add a domain-specific probe (e.g., `prisma.product.count()` against a known product) — see `FUTURE.md` for the placeholder. Not in scope for V1.0. |
+| Monitor fires on cert error but server is fine (false positive) | Vendor treats expired/invalid TLS certs as "down" even when HTTP response is 200. Common during cert rotations. | Configure the monitor to fire on HTTP status + body, NOT on TLS handshake. Most vendors: "Validate certificate" toggle → OFF. Verify by temporarily revoking the cert in a staging env. |
+| Health endpoint returns 503 after migrating to `edge` runtime | Supabase free-tier DB is IPv6-only (per `staging-run-log-2026-07-12.md`). Vercel edge runtime may not have IPv6 outbound to Supabase. | **Pre-condition for the §9 edge-runtime migration**: verify Vercel edge runtime has IPv6 outbound to the Supabase DB host. Keep `nodejs` runtime until verified, otherwise the migration breaks the health probe silently. |
 
 ---
 
@@ -401,7 +410,7 @@ After 7 days in production, audit:
 | Item | Why deferred | Track in |
 | --- | --- | --- |
 | Secondary synthetic-ping for `ALERT_WEBHOOK_URL` itself | Per [`../production.md` §6.5`](../production.md): if Slack/Discord is down, BOTH the server-error-sink AND uptime-monitor alert paths go silent. Need a 2nd channel (email to `ops@courssy.com` on >5min silence). | `FUTURE.md` |
-| Switch `/api/health` to `edge` runtime | 30s probes × 86,400/day = 2.6M function invocations/mo, well over Vercel Pro's 1M budget. Edge runtime reduces cost ~10×. | `FUTURE.md` |
+| Switch `/api/health` to `edge` runtime | Current 30s polling = ~86,400 probes/month (fits Vercel Pro's 1M budget with ~11.5× headroom). Edge runtime is a **latency/cold-start optimization** (avoids Vercel's `nodejs` cold-start tax on each 30s probe), not a budget fix. **GOTCHA**: Supabase free-tier is IPv6-only (per `staging-run-log-2026-07-12.md`); verify edge runtime has IPv6 outbound BEFORE migrating. | `FUTURE.md` |
 | Domain-specific probe (e.g., `prisma.product.count()`) | The current `SELECT 1` is a connection-level liveness check. A V1.1 probe would assert a known product is queryable (deeper health). | `FUTURE.md` |
 | Per-severity alert routing | Per [`../production.md` §6.4`](../production.md): currently one `ALERT_WEBHOOK_URL`. V1.1 splits into `ALERT_WEBHOOK_P0/P1/P2` for per-severity Slack channels. | `production.md` §6.4 |
 
@@ -420,7 +429,7 @@ After 7 days in production, audit:
 | Soft-launch gate that assumes monitor is wired | [`./soft-launch-runbook.md` §1 pre-flight](../ops/soft-launch-runbook.md) |
 | `ALERT_WEBHOOK_URL` env definition | `src/lib/env.ts` (optional, line 175-179) |
 | Health endpoint source | `src/app/api/health/route.ts` |
-| Alert payload format (Slack/Discord canonical) | `src/lib/logging/server-error-sink.ts` (`fetch(alertUrl, { body: JSON.stringify({ text, blocks }) })`) |
+| Alert payload format (Slack/Discord canonical) | `src/lib/logging/server-error-sink.ts` — `logServerError()` (the `fetch(alertUrl, ...)` block; L-citations drift, function-name ref is durable) |
 | Soft-launch env provisioning (env vars) | `scripts/ops/staging-env.sh` |
 | Vercel Production env batch setup | `scripts/ops/vercel-prod-env.sh` |
 
