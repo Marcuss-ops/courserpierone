@@ -260,3 +260,41 @@ follow-up ADR note documenting why reset was chosen over revert.
 ## Errata
 
 - **`a284500` (varsIgnorePattern-squash, 2026-07-13)** — commit body stated a 4-ins/5-del diff, but the actual stat was **5-ins/6-del**. The code change itself is correct; only the body text was inaccurate. Picked the followup-commit alternative over `git commit --amend` to avoid a second force-push (reflog churn + operator friction).
+
+## Related operator scripts
+
+- **`scripts/ops/git-squash.sh`** — operator template for 2-N commit
+  squashes via custom `GIT_SEQUENCE_EDITOR`. Codifies the destructive
+  history-rewrite pattern from the 2 prior in-repo rebase operations
+  that this ADR's verification gate was designed to support:
+
+  1. The **lint-squash** (preceded the git-squash.sh landing) —
+     squashed 4 lint commits into 1; first end-to-end application of
+     the `GIT_SEQUENCE_EDITOR` + `git commit --amend -F -` +
+     `git push --force-with-lease` chain in this codebase.
+  2. The **varsIgnorePattern-squash** (commit `a284500`, see §Errata
+     above) — squashed 2 commits (config broadening + per-line
+     directive removal) into 1. The §Errata section documents the
+     diff-stat accounting issue in the original commit body.
+
+  Both used the same `GIT_SEQUENCE_EDITOR` pattern: a `sed`-based
+  script that matched exact SHAs in the auto-generated rebase todo
+  and only flipped the absorbed commits to `fixup`, leaving the
+  survivor as `pick` (preserving the chain verbatim with new SHAs
+  from the parent change — standard `rebase -i` behavior). All
+  intermediate + post-chain commits stayed as `pick`.
+
+  `scripts/ops/git-squash.sh` generalizes this for any future 2-N
+  commit squash: signature-style usage (`<sha1> [sha2 sha3 ...]`),
+  dry-run default (no mutation, no push), `--apply` required for
+  mutation, `--non-interactive` for CI, per-batch two-pass gate
+  (pre/post `tsc --noEmit` error-set parity, lint delta = expected
+  count), `--force-with-lease` push with 5-attempt exponential
+  backoff (31s total), reflog-based recovery hint on every exit
+  path, and 14 documented exit codes.
+
+  Codifies ADR 0010's verification pattern for destructive
+  operations: the operator can use this script for any future
+  history rewrite without having to re-derive the approach. The
+  §Errata section's `a284500` cross-reference is part of the
+  canonical discovery trail.
