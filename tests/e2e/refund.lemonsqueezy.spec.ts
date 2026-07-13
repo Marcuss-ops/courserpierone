@@ -1,10 +1,16 @@
 import { test, expect } from "@playwright/test";
 import { prisma, cleanupTestUser } from "./fixtures/db";
+import { requireLsEnvVars } from "./fixtures/ls-env-guard";
 import {
   createLemonCheckout,
   generateLemonWebhookPayload,
   signLemonWebhookPayload,
 } from "./fixtures/ls-helpers";
+
+// Fail-fast no-skip guard: if any required LS env var is missing,
+// throw at module-load so Playwright reports a HARD FAILURE (not a
+// silent skip). See tests/e2e/fixtures/ls-env-guard.ts for rationale.
+requireLsEnvVars();
 
 /**
  * tests/e2e/refund.lemonsqueezy.spec.ts
@@ -51,14 +57,8 @@ import {
 
 const TEST_EMAIL = "ls-refund-e2e@example.com";
 
-const hasLsCreds =
-  !!process.env.LEMONSQUEEZY_API_KEY &&
-  !!process.env.LEMONSQUEEZY_WEBHOOK_SECRET &&
-  !!process.env.LEMONSQUEEZY_STORE_ID &&
-  !!process.env.TEST_LEMON_VARIANT_ID;
-
-test.skip(!hasLsCreds, "LS test credentials not configured (LEMONSQUEEZY_* + TEST_LEMON_VARIANT_ID)");
-
+// (The previous test.skip(!hasLsCreds, ...) pattern is removed —
+//  replaced by the requireLsEnvVars() throw at module-load above.
 test.beforeEach(async () => {
   await cleanupTestUser(TEST_EMAIL);
 });
