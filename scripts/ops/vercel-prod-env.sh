@@ -153,7 +153,7 @@ fi
 # on every run, which matters when an operator iterates during pre-flight).
 EXISTING_FILE=$(mktemp)
 AFTER_FILE=$(mktemp)
-trap 'rm -f "$EXISTING_FILE" "$AFTER_FILE"' EXIT
+trap 'rm -f "$EXISTING_FILE" "$AFTER_FILE"' EXIT INT TERM
 vercel env ls production 2>/dev/null | awk 'NR>1 && $1 != "" {print $1}' | sort -u > "$EXISTING_FILE"
 
 # Helper: returns 0 (true) if env var is already set in Production scope
