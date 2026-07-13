@@ -298,13 +298,13 @@ parallel. Both fire on the same trigger condition.
 
 ```json
 {
-  "text": "🚨 *Health endpoint 503 — production degraded*\n• Path: `/api/health`\n• Status: `503 unhealthy`\n• Failed since: `<ISO 8601 timestamp of first fail in the window>`\n• Fails in last 5min: `3`\n• Digest: `uptime-monitor-<monitor-id>`",
+  "text": "🚨 *Health endpoint 503 — production degraded*\n• Path: `/api/health`\n• Status: `503 unhealthy`\n• Failed since: `<ISO 8601 timestamp of first fail in the window>`\n• Fails in last 5min: `3`\n• Digest: `uptime-monitor-<monitor-id>`\n• Latency: `database=<db-latencyMs>ms, redis=<redis-latencyMs>ms`",
   "blocks": [
     {
       "type": "section",
       "text": {
         "type": "mrkdwn",
-        "text": "🚨 *Health endpoint 503 — production degraded* \n• Path: `/api/health` \n• Status: `503 unhealthy` \n• Failed since: `<ISO 8601 timestamp of first fail in the window>` \n• Fails in last 5min: `3` \n• Digest: `uptime-monitor-<monitor-id>`"
+        "text": "🚨 *Health endpoint 503 — production degraded* \n• Path: `/api/health` \n• Status: `503 unhealthy` \n• Failed since: `<ISO 8601 timestamp of first fail in the window>` \n• Fails in last 5min: `3` \n• Digest: `uptime-monitor-<monitor-id>` \n• Latency: `database=<db-latencyMs>ms, redis=<redis-latencyMs>ms`"
       }
     }
   ]
@@ -325,6 +325,22 @@ parallel. Both fire on the same trigger condition.
 > that don't render `blocks`. The `blocks` field is the rich-rendering
 > path (Slack + Discord). Both are present in `server-error-sink.ts`
 > (line 102-114) — match it exactly.
+
+> **Latency placeholders**: `<db-latencyMs>` and `<redis-latencyMs>`
+> are extracted from the 503 response body's `services.database.latencyMs`
+> and `services.redis.latencyMs` fields respectively (per the §3
+> 503 contract + `src/app/api/health/route.ts` L88-105 where these
+> fields are populated). The monitor's webhook body can interpolate
+> these from the response body. Per the §3 503 response example, a
+> 503 typically has `database.latencyMs: 0` (DB is down, the query
+> didn't return) and `redis.latencyMs: <small-positive>` (Redis is
+> still reachable). A monitor that doesn't extract the response body
+> can leave the placeholders literal (the on-call engineer will see
+> the template strings and grep the monitor's logged response body
+> to fill in the values manually). The latency is ACTIONABLE for
+> triage: a high DB latency pre-failure is a slow-queries warning;
+> a high Redis latency is a cache-layer degradation; both ≈ 0 is a
+> hard connection failure.
 
 ### PagerDuty variant
 
