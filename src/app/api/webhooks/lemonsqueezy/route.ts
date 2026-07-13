@@ -147,45 +147,107 @@ async function POST_IMPL(request: NextRequest) {
       console.log("[LS Webhook] subscription_created:", data.id);
     }
 
-    // ── subscription_cancelled → revoke access ─────────────────
+    // ── subscription_cancelled → revoke access (Order + AccessGrant atomically) ──
+    // Mirror of the order_refunded pattern (see comment above). Subscription
+    // events use `data.id` as the LS subscription_id, which was stored on
+    // `Order.providerOrderId` by the subscription_created handler. The
+    // status="completed" filter on findMany + status="active" filter on
+    // accessGrant.updateMany together prevent double-revocation on re-
+    // delivery: if the grant is already "revoked", the second webhook
+    // hit becomes a no-op for the grant while the order's findMany
+    // continues to match (then the order status flips to "failed" again
+    // — idempotent under the existing idempotency gate).
     if (eventName === "subscription_cancelled") {
-      const orderId = String(data.id);
-
-      const updated = await prisma.order.updateMany({
-        where: {
-          paymentProvider: "lemonsqueezy",
-          providerOrderId: orderId,
-          status: "completed", // only downgrade completed orders
-        },
-        data: { status: "failed" },
-      });
-
-      if (updated.count > 0) {
-        console.log(
-          `[LS Webhook] subscription_cancelled: revoked ${updated.count} order(s) for ${orderId}`
-        );
-      }
+      const { count } = await revokeCompletedLsOrders(String(data.id), "failed");
+      console.log(
+        count > 0
+          ? `[LS Webhook] subscription_cancelled: failed ${count} order(s) and revoked ${count} AccessGrant(s) for ${String(data.id)}`
+          : `[LS Webhook] subscription_cancelled: no completed orders found for ${String(data.id)} (already revoked or never existed)`,
+      );
     }
 
-    // ── subscription_payment_failed → revoke access ────────────
+    // ── subscription_payment_failed → revoke access (Order + AccessGrant atomically) ──
+    // Same pattern as subscription_cancelled above. Conceptually a
+    // payment-processor-driven revocation (Stripe-equivalent for LS).
     if (eventName === "subscription_payment_failed") {
-      const orderId = String(data.id);
+      const { count } = await revokeCompletedLsOrders(String(data.id), "failed");
+      console.log(
+        count > 0
+          ? `[LS Webhook] subscription_payment_failed: failed ${count} order(s) and revoked ${count} AccessGrant(s) for ${String(data.id)}`
+          : `[LS Webhook] subscription_payment_failed: no completed orders found for ${String(data.id)} (already revoked or never existed)`,
+      );
+    }
 
-      const updated = await prisma.order.updateMany({
+    // ─── Helper: revoke completed LS orders + their dual-written AccessGrant ───
+    // Mirrors the MCR Phase 2 invariant: an Order.status and its
+    // AccessGrant.status MUST agree (revoked when the order is no-longer-
+    // completed), so we always update both atomically in a single
+    // $transaction. This centralizes the pattern so the 3 event
+    // handlers (order_refunded + subscription_cancelled +
+    // subscription_payment_failed) don't drift independently.
+    //
+    // Params:
+    //   providerOrderId — LS resource id (order.id for order_refunded,
+    //                       subscription id for subscription_* events)
+    //   orderStatus     — the new Order.status to set
+    //                       ("refunded" for orders, "failed" for subscriptions)
+    //
+    // Returns: { count } where count = number of orders (and grants,
+    // by atomicity) revoked. count==0 means no completed orders existed
+    // (caller should log a no-op + ack).
+    //
+    // Idempotency:
+    //   - The processedWebhook gate (above) prevents re-delivery from
+    //     rerunning the handler.
+    //   - Within a single delivery: findMany's status="completed"
+    //     filter ensures already-revoked orders are NOT re-matched,
+    //     so the updateMany is a true no-op on re-entry.
+    //   - accessGrant.updateMany's status="active" filter prevents
+    //     double-revocation of already-revoked grants (won't update
+    //     revokedAt a second time).
+    async function revokeCompletedLsOrders(
+      providerOrderId: string,
+      orderStatus: "refunded" | "failed",
+    ): Promise<{ count: number }> {
+      const ordersToRevoke = await prisma.order.findMany({
         where: {
           paymentProvider: "lemonsqueezy",
-          providerOrderId: orderId,
+          providerOrderId,
           status: "completed",
         },
-        data: { status: "failed" },
+        select: { id: true },
       });
 
-      if (updated.count > 0) {
-        console.log(
-          `[LS Webhook] subscription_payment_failed: revoked ${updated.count} order(s) for ${orderId}`
-        );
+      if (ordersToRevoke.length === 0) {
+        return { count: 0 };
       }
+
+      const orderInternalIds = ordersToRevoke.map((o) => o.id);
+
+      await prisma.$transaction([
+        prisma.order.updateMany({
+          where: { id: { in: orderInternalIds } },
+          data: { status: orderStatus },
+        }),
+        prisma.accessGrant.updateMany({
+          where: {
+            sourceType: "order",
+            sourceId: { in: orderInternalIds },
+            status: "active", // don't double-revoke: skip already-revoked grants
+          },
+          data: {
+            status: "revoked",
+            revokedAt: new Date(),
+          },
+        }),
+      ]);
+
+      return { count: orderInternalIds.length };
     }
+
+    // ── order_refunded → mark order as refunded AND revoke its AccessGrant ──
+    // Historically the handler inlined the findMany + $transaction. With
+    // 3 callers, it's now extracted into revokeCompletedLsOrders above.
 
     // ── order_refunded → mark order as refunded AND revoke its AccessGrant ──
     // Once MCR Phase 2 cuts over (USE_ACCESS_GRANT_RESOLVER=true), the
@@ -194,50 +256,12 @@ async function POST_IMPL(request: NextRequest) {
     // access through the new resolver. The two updates run atomically
     // in a single transaction so the order and its grant always agree.
     if (eventName === "order_refunded") {
-      const orderId = String(data.id);
-
-      // Find the internal order IDs that this refund applies to. The
-      // status='completed' filter mirrors the original behavior (don't
-      // re-revoke an already-refunded order). findMany (vs updateMany)
-      // gives us the IDs we need for the grant lookup.
-      const ordersToRefund = await prisma.order.findMany({
-        where: {
-          paymentProvider: "lemonsqueezy",
-          providerOrderId: orderId,
-          status: "completed",
-        },
-        select: { id: true },
-      });
-
-      if (ordersToRefund.length === 0) {
-        console.log(
-          `[LS Webhook] order_refunded: no completed orders found for ${orderId} (already refunded or never existed)`
-        );
-      } else {
-        const orderInternalIds = ordersToRefund.map((o) => o.id);
-
-        await prisma.$transaction([
-          prisma.order.updateMany({
-            where: { id: { in: orderInternalIds } },
-            data: { status: "refunded" },
-          }),
-          prisma.accessGrant.updateMany({
-            where: {
-              sourceType: "order",
-              sourceId: { in: orderInternalIds },
-              status: "active", // don't double-revoke: skip already-revoked grants
-            },
-            data: {
-              status: "revoked",
-              revokedAt: new Date(),
-            },
-          }),
-        ]);
-
-        console.log(
-          `[LS Webhook] order_refunded: refunded ${orderInternalIds.length} order(s) and revoked their AccessGrant(s) for ${orderId}`
-        );
-      }
+      const { count } = await revokeCompletedLsOrders(String(data.id), "refunded");
+      console.log(
+        count > 0
+          ? `[LS Webhook] order_refunded: refunded ${count} order(s) and revoked ${count} AccessGrant(s) for ${String(data.id)}`
+          : `[LS Webhook] order_refunded: no completed orders found for ${String(data.id)} (already refunded or never existed)`,
+      );
     }
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
