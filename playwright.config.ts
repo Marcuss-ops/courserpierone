@@ -3,31 +3,35 @@ import { defineConfig, devices } from "@playwright/test";
 const baseURL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
 // =========================================================================
-// Multi-browser matrix policy
+// Cross-browser matrix — DEFAULT ON (V1 acceptance criterion 7)
 // =========================================================================
-// Default mode (CI, dev, every PR): Chromium-only. Cheapest sanity
-// check that covers the most common WebKit/Firefox-compatible
-// codepaths. RUN_FULL_MATRIX not set → just chromium on every push.
+// Default mode (CI, dev, every PR): all 3 desktop browsers — Chromium,
+// Firefox, WebKit — exercise the full cross-browser matrix on every
+// push. Satisfies V1 acceptance criterion 7 directly from CI
+// (docs/v1-acceptance-test.md §1 row 7 + §4 BLOCKER #1).
 //
-// Pre-release gate (manual, operator-driven before a release/tag):
-// set RUN_FULL_MATRIX=true to opt into Firefox + WebKit alongside
-// Chromium. This is the only invocation that exercises the full
-// cross-browser matrix.
+// Opt-OUT (emergency / debug only): set RUN_FULL_MATRIX=false to run
+// chromium-only — useful when debugging a single-browser issue
+// without paying for the full matrix, or when a Firefox/WebKit
+// binary is missing in a sandbox. NOT the V1 path.
 //
 // Usage:
-//   # every commit / PR (default):
-//   npx playwright test                       # Chromium only
-//   npm run test:e2e                          # Chromium only
+//   # every commit / PR (V1 default):
+//   npx playwright test                            # all 3 browsers
+//   npm run test:e2e                               # all 3 browsers
+//   npm run test:e2e -- --project=firefox          # single browser
+//   npm run test:e2e -- --project=webkit           # single browser
 //
-//   # pre-release (manual, gated):
-//   RUN_FULL_MATRIX=true npx playwright test
-//   RUN_FULL_MATRIX=true npm run test:e2e
+//   # opt-OUT (debug / emergency — chromium only):
+//   RUN_FULL_MATRIX=false npx playwright test
+//   RUN_FULL_MATRIX=false npm run test:e2e
 //
-// Browser-prerequisite setup (one-time, manual — NOT auto-installed
-// by `npm install` to keep CI images lean):
-//   npx playwright install chromium            # always present
-//   npx playwright install firefox             # required before RUN_FULL_MATRIX
-//   npx playwright install webkit              # required before RUN_FULL_MATRIX
+// Browser-prerequisite setup (one-time per dev host — NOT
+// auto-installed by `npm install` to keep CI images lean, but
+// REQUIRED for default-on e2e):
+//   npx playwright install chromium               # always present
+//   npx playwright install firefox                # required (default-on)
+//   npx playwright install webkit                 # required (default-on)
 //
 // Linux dev-host caveat: WebKit (and Firefox, less so) require
 // system libs (libnss3, libatk-bridge2.0-0, libgtk-3, libgbm,
@@ -46,14 +50,15 @@ const baseURL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 // already ship with the system libs; --with-deps is idempotent for
 // them.
 //
-// CI cost rationale (docs/v1-acceptance-test.md §4 BLOCKER #1):
-// running FF and WebKit on every push roughly triples CI cost (3×
-// browser-minutes from 3× slower interpretation). Capping to
-// pre-release aligns with the user's "no branches / only main /
-// frequent push" mode + keeps the deploy-gate (`.github/workflows/
-// ci.yml` deploy-gate status) cheap per push.
+// CI cost note: running FF + WebKit alongside Chromium roughly
+// triples browser-minutes (slower launch + render). Accepted as the
+// V1 default-on trade — the criterion 7 gate is more valuable than
+// the marginal CI cost for a single repo + deduped e2e suite.
+// Future optimization (track in FUTURE.md): per-browser test
+// sharding OR profile-gated matrix (smoke vs full) to reduce cost
+// without losing cross-browser coverage on the pre-release gate.
 // =========================================================================
-const RUN_FULL_MATRIX = process.env.RUN_FULL_MATRIX === "true";
+const RUN_FULL_MATRIX = process.env.RUN_FULL_MATRIX !== "false";
 
 const matrixProjects = RUN_FULL_MATRIX
   ? [
