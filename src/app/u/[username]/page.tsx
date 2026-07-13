@@ -9,8 +9,6 @@ import {
   Calendar,
   Clock,
   ChevronRight,
-  MessageSquare,
-  Share2,
   CheckCircle,
 } from "lucide-react";
 import { prisma } from "@/lib/db/prisma";

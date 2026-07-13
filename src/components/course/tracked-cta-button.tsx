@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { trackCheckoutOpen } from "./analytics-tracker";
 
 function detectUserCurrency(): string {

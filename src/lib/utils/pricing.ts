@@ -9,7 +9,7 @@
  * Usato da: page.tsx (landing), checkout/route.ts, components
  */
 
-import type { CourseConfig, PriceByLocale } from "@/lib/config/white-label-data";
+import type { PriceByLocale } from "@/lib/config/white-label-data";
 import { getCurrencyFromLocale } from "@/lib/i18n/currency-map";
 
 // ─── Country Override Interface ───────────────────────────

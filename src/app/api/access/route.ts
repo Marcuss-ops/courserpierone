@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
-import { apiErrorResponse } from "@/lib/errors";
 import { withRateLimit } from "@/lib/utils/rate-limit";
 import { findCompletedOrder, findCompletedOrderByOrderId } from "@/lib/access";
 

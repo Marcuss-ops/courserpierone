@@ -7,7 +7,6 @@ import {
   ChevronRight, 
   BookOpen, 
   Download, 
-  Menu, 
   X
 } from "lucide-react";
 import type { CourseConfig, LanguageEntry } from "@/lib/config/white-label-data";

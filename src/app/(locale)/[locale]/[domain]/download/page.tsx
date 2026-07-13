@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
 import type { Metadata } from "next";
-import { Download, BookOpen, ArrowLeft, Globe, CheckCircle, ExternalLink } from "lucide-react";
+import { Download, BookOpen, ArrowLeft, CheckCircle } from "lucide-react";
 import { getCourseConfig } from "@/lib/config/white-label-data";
 import { AccessGate } from "@/components/course/access-gate";
 import { loadLocaleContentSafe } from "@/lib/i18n/load-locale-content";

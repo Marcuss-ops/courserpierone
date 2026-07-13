@@ -12,7 +12,7 @@ import { LumioStory } from "./LumioStory";
 import { LumioLessons } from "./LumioLessons";
 import { LumioTestimonials } from "./LumioTestimonials";
 import { LumioCTA } from "./LumioCTA";
-import { SharedFooter, type FooterLink } from "@/components/funnel/shared/SharedFooter";
+import { SharedFooter } from "@/components/funnel/shared/SharedFooter";
 
 export default function TemplateLumio({
   data,

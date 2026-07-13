@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Play, BookOpen, ChevronRight } from "lucide-react";
 import { ProgressBar } from "./progress-bar";
-import { getUiTranslations, uiT, localeToLanguage } from "@/lib/i18n";
+import { getUiTranslations, uiT } from "@/lib/i18n";
 
 interface CourseCardProps {
   slug: string;

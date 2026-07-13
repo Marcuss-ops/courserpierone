@@ -13,7 +13,7 @@ import { H612Story } from "./H612Story";
 import { H612Lessons } from "./H612Lessons";
 import { H612Testimonials } from "./H612Testimonials";
 import { H612CTA } from "./H612CTA";
-import { SharedFooter, type FooterLink } from "@/components/funnel/shared/SharedFooter";
+import { SharedFooter } from "@/components/funnel/shared/SharedFooter";
 
 export default function TemplateH612({
   data,

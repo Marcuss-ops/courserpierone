@@ -26,8 +26,7 @@ import {
   Filter,
   Copy,
   Trash2,
-  ExternalLink,
-  Loader2
+  ExternalLink
 } from "lucide-react";
 
 export default function AdminDashboard() {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { RotateCcw, Play, Pause, Volume2, VolumeX, Loader2, Gauge } from "lucide-react";
+import { RotateCcw, Play, Volume2, VolumeX, Loader2, Gauge } from "lucide-react";
 
 interface PremiumVideoPlayerProps {
   videoUrl: string;

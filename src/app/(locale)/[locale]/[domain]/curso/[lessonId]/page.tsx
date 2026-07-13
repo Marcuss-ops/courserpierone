@@ -15,7 +15,6 @@ import { getCourseConfig } from "@/lib/config/white-label-data";
 import { AnalyticsTracker } from "@/components/course/analytics-tracker";
 import { LessonProgressButton, ProgressBar } from "@/components/course/lesson-progress-button";
 import { VideoPaywall } from "@/components/course/video-paywall";
-import { LessonNotes } from "@/components/course/lesson-notes";
 import { LessonAssets } from "@/components/course/lesson-assets";
 import { TrackLessonView } from "@/components/course/track-lesson-view";
 import { MobileSidebar } from "@/components/layout/mobile-sidebar";

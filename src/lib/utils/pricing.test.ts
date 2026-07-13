@@ -5,7 +5,6 @@ import {
   getPriceString,
   getCurrentAmountAndSymbol,
   parsePricesByCurrency,
-  type CountryPriceOverride,
 } from "./pricing";
 
 // ─── Test Data ────────────────────────────────────────────────

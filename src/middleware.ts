@@ -4,7 +4,7 @@
 //   - locale redirect logic (locale-redirects.ts)
 //   - cookie helpers (locale-cookie.ts)
 
-import { type NextRequest, NextResponse } from "next/server";
+import { type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 import { isKnownPath, checkProtectedAccess } from "@/lib/middleware/protected-routes";
 import {

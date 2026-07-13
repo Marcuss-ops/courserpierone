@@ -2,7 +2,6 @@
 // Extracted from AmishAuthor. Reusable by any template.
 
 import { User } from "lucide-react";
-import type { ReactNode } from "react";
 
 interface SharedAuthorProps {
   /** Author name. */
