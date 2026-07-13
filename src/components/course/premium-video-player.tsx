@@ -2,6 +2,19 @@
 
 import { useEffect, useRef, useState } from "react";
 import { RotateCcw, Play, Volume2, VolumeX, Loader2, Gauge } from "lucide-react";
+import type {
+  YTPlayer,
+  VimeoPlayer,
+  VimeoTimeUpdateData,
+  YTOnStateChangeEvent,
+} from "./video-player-sdks";
+
+/** Type guard: narrows the playerRef union to YTPlayer. */
+function isYTPlayer(
+  p: YTPlayer | VimeoPlayer | null,
+): p is YTPlayer {
+  return p !== null && "seekTo" in p;
+}
 
 interface PremiumVideoPlayerProps {
   videoUrl: string;
@@ -21,7 +34,7 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const speedMenuRef = useRef<HTMLDivElement>(null);
-  const playerRef = useRef<any>(null);
+  const playerRef = useRef<YTPlayer | VimeoPlayer | null>(null);
   const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
   // Close speed menu on click outside
@@ -81,7 +94,7 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
 
     if (isYouTube) {
       // Carica l'SDK di YouTube se non è già presente
-      if (!(window as any).YT) {
+      if (!window.YT) {
         const tag = document.createElement("script");
         tag.src = "https://www.youtube.com/iframe_api";
         const firstScriptTag = document.getElementsByTagName("script")[0];
@@ -95,20 +108,20 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
       }
 
       const checkYT = setInterval(() => {
-        if ((window as any).YT?.Player && iframeRef.current) {
+        if (window.YT && iframeRef.current) {
           clearInterval(checkYT);
           
-          playerRef.current = new (window as any).YT.Player(iframeRef.current, {
+          const ytPlayer = new window.YT.Player(iframeRef.current, {
             events: {
               onReady: () => {
                 setIsReady(true);
                 setIsPlaying(false);
-                playerRef.current.setVolume(75);
+                ytPlayer.setVolume(75);
                 const savedTime = localStorage.getItem(storageKey);
                 if (savedTime) {
                   const time = parseFloat(savedTime);
                   if (time > 5) {
-                    playerRef.current.seekTo(time, true);
+                    ytPlayer.seekTo(time, true);
                     setResumedTime(time);
                     setShowResumeToast(true);
                     setTimeout(() => setShowResumeToast(false), 5000);
@@ -117,26 +130,25 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
 
                 // Avvia il timer di tracciamento tempo
                 const trackInterval = setInterval(() => {
-                  if (playerRef.current && typeof playerRef.current.getCurrentTime === "function") {
-                    const currentTime = playerRef.current.getCurrentTime();
-                    const duration = playerRef.current.getDuration();
-                    if (currentTime > 0 && currentTime < duration - 10) {
-                      localStorage.setItem(storageKey, currentTime.toString());
-                    } else if (currentTime >= duration - 10) {
-                      // Se è quasi finito, rimuovi il progresso
-                      localStorage.removeItem(storageKey);
-                    }
+                  const currentTime = ytPlayer.getCurrentTime();
+                  const duration = ytPlayer.getDuration();
+                  if (currentTime > 0 && currentTime < duration - 10) {
+                    localStorage.setItem(storageKey, currentTime.toString());
+                  } else if (currentTime >= duration - 10) {
+                    // Se è quasi finito, rimuovi il progresso
+                    localStorage.removeItem(storageKey);
                   }
                 }, 2000);
 
                 return () => clearInterval(trackInterval);
               },
-              onStateChange: (event: any) => {
+              onStateChange: (event: YTOnStateChangeEvent) => {
                 // YT.PlayerState.PLAYING = 1, PAUSED = 2, ENDED = 0
                 setIsPlaying(event.data === 1);
               }
             }
           });
+          playerRef.current = ytPlayer;
         }
       }, 500);
 
@@ -145,7 +157,7 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
       };
     } else if (isVimeo) {
       // Carica l'SDK di Vimeo
-      if (!(window as any).Vimeo) {
+      if (!window.Vimeo) {
         const tag = document.createElement("script");
         tag.src = "https://player.vimeo.com/api/player.js";
         const firstScriptTag = document.getElementsByTagName("script")[0];
@@ -158,10 +170,10 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
       }
 
       const checkVimeo = setInterval(() => {
-        if ((window as any).Vimeo?.Player && iframeRef.current) {
+        if (window.Vimeo && iframeRef.current) {
           clearInterval(checkVimeo);
 
-          const player = new (window as any).Vimeo.Player(iframeRef.current);
+          const player = new window.Vimeo.Player(iframeRef.current);
           playerRef.current = player;
 
           player.ready().then(() => {
@@ -177,7 +189,7 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
               }
             }
 
-            player.on("timeupdate", (data: any) => {
+            player.on("timeupdate", (data: VimeoTimeUpdateData) => {
               player.getDuration().then((duration: number) => {
                 if (data.seconds > 0 && data.seconds < duration - 10) {
                   localStorage.setItem(storageKey, data.seconds.toString());
@@ -205,9 +217,9 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
   const resetToStart = () => {
     if (playerRef.current) {
       const isYouTube = videoUrl.includes("youtube.com") || videoUrl.includes("youtu.be");
-      if (isYouTube && typeof playerRef.current.seekTo === "function") {
+      if (isYouTube && "seekTo" in playerRef.current) {
         playerRef.current.seekTo(0, true);
-      } else if (typeof playerRef.current.setCurrentTime === "function") {
+      } else if ("setCurrentTime" in playerRef.current) {
         playerRef.current.setCurrentTime(0);
       }
       localStorage.removeItem(storageKey);
@@ -244,7 +256,7 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
           <div
             className="absolute inset-0 z-20 cursor-pointer"
             onPointerUp={() => {
-              if (!playerRef.current) return;
+              if (!isYTPlayer(playerRef.current)) return;
               if (isPlaying) {
                 playerRef.current.pauseVideo();
               } else {
@@ -262,7 +274,7 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
           <div className="absolute bottom-3 left-3 z-40 flex items-center gap-2 bg-black/60 backdrop-blur-md rounded-full px-3 py-1.5 border border-white/10" onPointerDown={(e) => e.stopPropagation()}>
             <button
               onClick={() => {
-                if (!playerRef.current) return;
+                if (!isYTPlayer(playerRef.current)) return;
                 if (isMuted) {
                   playerRef.current.unMute();
                   setIsMuted(false);
@@ -281,7 +293,7 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
               max={100}
               value={isMuted ? 0 : volume}
               onChange={(e) => {
-                if (!playerRef.current) return;
+                if (!isYTPlayer(playerRef.current)) return;
                 const vol = Number(e.target.value);
                 playerRef.current.setVolume(vol);
                 setVolume(vol);
@@ -309,7 +321,7 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
                     <button
                       key={speed}
                       onClick={() => {
-                        if (playerRef.current && typeof playerRef.current.setPlaybackRate === "function") {
+                        if (isYTPlayer(playerRef.current)) {
                           playerRef.current.setPlaybackRate(speed);
                           setPlaybackRate(speed);
                           setShowSpeedMenu(false);
