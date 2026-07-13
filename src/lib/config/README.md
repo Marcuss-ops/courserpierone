@@ -25,7 +25,7 @@ interface CourseConfig {
   lemonVariantId?: string;
   languages: Record<string, LanguageEntry>;
   lessons: LessonConfig[];
-  ebookChapters: { it: string; en: string; page: number }[];
+  ebookChapters: { page: number; [locale: string]: string | number }[];
 }
 
 interface LanguageEntry {

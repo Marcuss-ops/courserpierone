@@ -47,7 +47,7 @@ export interface CourseConfig {
     videos: Record<string, string>;
     duration: string;
   }[];
-  ebookChapters: { it: string; en: string; page: number }[];
+  ebookChapters: { page: number; [locale: string]: string | number }[];
 }
 
 export async function generateCourseConfig(slug: string) {

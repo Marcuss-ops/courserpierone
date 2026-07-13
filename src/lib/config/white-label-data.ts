@@ -34,7 +34,8 @@ export interface CourseConfig {
   lemonVariantId?: string;
   languages: Record<string, LanguageEntry>;
   lessons: LessonConfig[];
-  ebookChapters: { it: string; en: string; page: number }[];
+  /** Locale-keyed chapter titles + page number. Access titles via `chapter[lang]`. */
+  ebookChapters: { page: number; [locale: string]: string | number }[];
   /** Country-specific price overrides: { "BR": { currency: "BRL", price: 9900, symbol: "R$", ... } } */
   countryOverrides?: Record<string, { currency: string; price: number; symbol?: string; lemonVariantId?: string; stripePriceId?: string }> | string;
 }

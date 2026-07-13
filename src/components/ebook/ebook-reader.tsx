@@ -203,7 +203,11 @@ export function EbookReader({
             <nav className={`flex-1 overflow-y-auto custom-scrollbar p-4 bg-white ${!course.ebookChapters || course.ebookChapters.length === 0 ? "flex flex-col justify-center" : "space-y-1"}`}>
               {course.ebookChapters && course.ebookChapters.length > 0 ? (
                 course.ebookChapters.map((chapter, idx) => {
-                  const chTitle = (chapter as unknown as Record<string, string>)[currentLang] || chapter.en || "";
+                  // chapter[currentLang] / chapter.en are typed as `string | number`
+                  // by the index signature; the runtime value is always a string
+                  // (locale-keyed title) except for `page` which we don't access here.
+                  // Coerce with String() for the edge case of a missing locale.
+                  const chTitle = String(chapter[currentLang] || chapter.en || "");
                   const active = currentPage >= chapter.page && (idx === course.ebookChapters.length - 1 || currentPage < course.ebookChapters[idx + 1].page);
                   return (
                     <button 
