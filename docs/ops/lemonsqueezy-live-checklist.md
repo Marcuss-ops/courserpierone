@@ -52,7 +52,7 @@
 | Goal | Bring LS test-mode to live mode, update DB variant IDs, ready for V&V |
 | Estimated time | **2-3 business days** (KYC/KYB review is the bottleneck, not the clicks) |
 | Click count | **6 dashboard sections** in the LS Dashboard |
-| SQL operations | **1 schema migration** (TEXT → jsonb) + **3 UPDATE patterns** (1 plain + 2 `jsonb_set`) |
+| SQL operations | **1 schema migration** (TEXT → jsonb) + **3 UPDATE patterns** (1 plain + 2 `jsonb_set`) + **1 drift-verification CTE** (2-way diff: forward + reverse, §3.5.4) |
 | Money movement | Real corporate credit cards in the V&V phase (per `soft-launch-runbook.md`) |
 | Pre-flight gate | All `soft-launch-runbook.md` §1 boxes GREEN (this checklist is a hard dependency) |
 | Cross-ref | [`lemon-squeezy-live-setup.md` §1-6](./lemon-squeezy-live-setup.md) for WHY each step matters |
@@ -537,6 +537,244 @@ WHERE status = 'published'
 > **All 3 queries must return 0 rows.** If any returns rows, fix the
 > missing IDs (likely a country/currency that was in LS Dashboard
 > but missing from the staging table) and re-run.
+
+### §3.5 — Drift verification (LS Dashboard ↔ DB cross-check)
+
+> **Purpose.** Final guardrail before §4 (end-to-end verification).
+> Confirm there is NO drift between the LS Dashboard (source of
+> truth for live-mode variant IDs) and the DB (cached snapshot).
+> Drift can be introduced by:
+>
+> - A variant re-creation in LS Dashboard (LS regenerates the ID;
+>   the DB stays stale until a new `jsonb_set` is run)
+> - A typo'd ID in §3.1 / §3.2 / §3.3 (e.g. `987654` vs `987645`)
+> - A missed country / currency (the staging table from §2.3.a
+>   didn't list it)
+> - A manual DB edit that didn't reach LS (or vice versa)
+>
+> **Scope semantic**: §3.4 checks **internal** consistency (no NULL
+> IDs in the DB). §3.5 checks **external** consistency (DB IDs match
+> LS Dashboard IDs). Both are required: an ID can be present in the
+> DB but wrong; both queries must agree with the LS staging table.
+> **Run AFTER §3.4 returns clean (0 rows).** Run BEFORE §4
+> (end-to-end real-buyer test).
+
+#### §3.5.1 — Top-level `lemonVariantId` dump (DB)
+
+```sql
+SELECT slug, "lemonVariantId" AS db_live_variant_id
+FROM "Product"
+WHERE status = 'published'
+ORDER BY slug;
+```
+
+> **Lightweight eyeball variant**: §3.5.1–§3.5.3 are the read-only
+> dumps an operator runs WITHOUT a staging CSV. For a rigorous
+> 0-row verdict use §3.5.4 (requires loading the staging table from
+> §2.3.a via `\copy` after creating the TEMP TABLE).
+
+> **Operator action**: cross-reference each row against the staging
+> table from §2.3.a (the SINGLE source of truth for live variant
+> IDs captured during the cutover).
+>
+> **Drift indicators**:
+> - Row in DB but not in staging table → undocumented new product
+>   (the staging table missed it; fill in from LS Dashboard NOW)
+> - Row in staging table but missing from DB → missed §3.1 UPDATE
+> - Both rows present but IDs differ → §3.1 typo OR LS regenerated
+>   the ID after Copy-to-Live (re-run §3.1 against the new LS ID)
+
+#### §3.5.2 — `countryOverrides.*.lemonVariantId` dump (DB)
+
+```sql
+SELECT slug, kv.key                       AS country_code,
+       kv.value->>'lemonVariantId'        AS db_live_variant_id
+FROM "Product", jsonb_each("countryOverrides") AS kv
+WHERE "Product".status = 'published'
+ORDER BY slug, country_code;
+```
+
+> **Operator action**: cross-reference against the staging table's
+> `countryOverrides.*.lemonVariantId` column. One DB row per
+> `(slug, country_code)` pair. The `,  field` in the staging table
+> distinguishes `countryOverride` rows from `currencyPrice` rows.
+
+#### §3.5.3 — `pricesByCurrency.*.lemonVariantId` dump (DB)
+
+```sql
+SELECT slug, kv.key                       AS currency_code,
+       kv.value->>'lemonVariantId'        AS db_live_variant_id
+FROM "Product", jsonb_each("pricesByCurrency") AS kv
+WHERE "Product".status = 'published'
+ORDER BY slug, currency_code;
+```
+
+> **Operator action**: cross-reference against the staging table's
+> `pricesByCurrency.*.lemonVariantId` column.
+
+#### §3.5.4 — Programmatic drift detection (2-way diff via `TEMP TABLE`)
+
+For an automated cross-check (replacing the manual eyeball of
+§3.5.1–§3.5.3 dumps with a single `0 rows = no drift` verdict):
+
+```sql
+-- 0. Spin up a tmp staging table from the §2.3.a spreadsheet.
+--    One row per (slug, field, country_or_curr, expected_id):
+--      field           = 'lemonVariantId' | 'countryOverride' | 'currencyPrice'
+--      country_or_curr = NULL for top-level rows; otherwise the
+--                        country code (e.g. 'BR') or currency code ('USD')
+CREATE TEMP TABLE staging_live_ids (
+  slug             TEXT NOT NULL,
+  field            TEXT NOT NULL CHECK (field IN ('lemonVariantId', 'countryOverride', 'currencyPrice')),
+  country_or_curr  TEXT,
+  expected_id      TEXT NOT NULL
+);
+
+-- Paste the §2.3.a spreadsheet as CSV (one header row, 4 columns).
+-- The staging table from §2.3.a is the SINGLE source of truth.
+\copy staging_live_ids FROM '/path/to/staging_live_ids.csv' WITH (FORMAT csv, HEADER true)
+-- Note: `\copy` is a psql meta-command — it requires psql interactive
+-- mode or `psql -f file.sql`. `psql -c "..."` will reject `\copy`. For
+-- shell-automation, use `COPY staging_live_ids FROM STDIN` and pipe the
+-- CSV through psql input.
+```
+
+Then run a 2-way diff (forward + reverse, atomically):
+
+```sql
+WITH db_live_ids AS (
+  -- Top-level column
+  SELECT p.slug,
+         'lemonVariantId' AS field,
+         NULL::TEXT       AS country_or_curr,
+         p."lemonVariantId" AS actual_id
+    FROM "Product" p
+    WHERE p.status = 'published' AND p."lemonVariantId" IS NOT NULL
+  UNION ALL
+  -- countryOverrides entries
+  SELECT p.slug, 'countryOverride', kv.key, kv.value->>'lemonVariantId'
+    FROM "Product" p, jsonb_each(p."countryOverrides") kv
+    WHERE p.status = 'published' AND kv.value->>'lemonVariantId' IS NOT NULL
+  UNION ALL
+  -- pricesByCurrency entries
+  SELECT p.slug, 'currencyPrice', kv.key, kv.value->>'lemonVariantId'
+    FROM "Product" p, jsonb_each(p."pricesByCurrency") kv
+    WHERE p.status = 'published' AND kv.value->>'lemonVariantId' IS NOT NULL
+),
+-- Forward drift: staging expected X, DB has Y != X
+forward_drift AS (
+  SELECT s.slug, s.field, s.country_or_curr, s.expected_id AS expected,
+         CASE s.field
+           WHEN 'lemonVariantId'  THEN p."lemonVariantId"
+           WHEN 'countryOverride' THEN CASE WHEN p."countryOverrides" IS NOT NULL
+                                              THEN p."countryOverrides"->>s.country_or_curr->>'lemonVariantId'
+                                              ELSE NULL END
+           WHEN 'currencyPrice'   THEN CASE WHEN p."pricesByCurrency" IS NOT NULL
+                                              THEN p."pricesByCurrency"->>s.country_or_curr->>'lemonVariantId'
+                                              ELSE NULL END
+         END AS actual
+    FROM staging_live_ids s
+    LEFT JOIN "Product" p ON p.slug = s.slug
+   WHERE s.expected_id IS DISTINCT FROM
+         COALESCE(CASE s.field
+           WHEN 'lemonVariantId'  THEN p."lemonVariantId"
+           WHEN 'countryOverride' THEN CASE WHEN p."countryOverrides" IS NOT NULL
+                                              THEN p."countryOverrides"->>s.country_or_curr->>'lemonVariantId'
+                                              ELSE NULL END
+           WHEN 'currencyPrice'   THEN CASE WHEN p."pricesByCurrency" IS NOT NULL
+                                              THEN p."pricesByCurrency"->>s.country_or_curr->>'lemonVariantId'
+                                              ELSE NULL END
+         END, '')
+),
+-- Reverse drift: DB has ID X, staging has no row or mismatching ID
+reverse_drift AS (
+  SELECT d.slug, d.field, d.country_or_curr, d.actual_id, s.expected_id
+    FROM db_live_ids d
+    LEFT JOIN staging_live_ids s
+      ON s.slug = d.slug
+     AND s.field = d.field
+     AND COALESCE(s.country_or_curr, '') = COALESCE(d.country_or_curr, '')
+   WHERE s.expected_id IS NULL
+      OR s.expected_id != d.actual_id
+)
+-- Combine both directions into ONE result set for the operator
+SELECT 'forward'  AS drift_direction, slug, field, country_or_curr, expected AS expected_id, actual
+  FROM forward_drift
+UNION ALL
+SELECT 'reverse'  AS drift_direction, slug, field, country_or_curr, expected_id, actual_id
+  FROM reverse_drift
+ORDER BY drift_direction, slug, field, country_or_curr NULLS FIRST;
+-- expect: 0 rows total (both forward + reverse drift = 0)
+```
+
+> **Result interpretation**:
+> - **`forward` rows**: the staging table listed an ID that the DB
+>   disagrees with → typo in §3.x or LS regenerated the variant
+>   post-Copy-to-Live. Fix in §3.5.5.
+> - **`reverse` rows**: an ID exists in the DB but the staging
+>   table has no matching entry → undocumented drift (the staging
+>   table snapshot from §2.3.a was incomplete). Backfill the staging
+>   table from the LS Dashboard, then either re-run §3 to add the
+>   missing entry OR accept (it was already there).
+> - **0 rows total**: PASS. Proceed to §4.
+
+> **Why `IS DISTINCT FROM` (not `!=`)**: NULL-tolerant comparison
+> for the `country_or_curr` join. Also handles the edge case where
+> `p."countryOverrides"->>NULL->>'lemonVariantId'` returns SQL NULL
+> (non-existent country key) instead of crashing.
+
+#### §3.5.5 — Drift remediation
+
+If §3.5.4 returns rows, fix each drift row with a targeted
+`jsonb_set` UPDATE:
+
+```sql
+-- Example 1: countryOverride drift (BR variant, expected "987654")
+UPDATE "Product"
+SET "countryOverrides" = jsonb_set(
+  "countryOverrides",
+  '{BR,lemonVariantId}',
+  '"987654"',  -- the LS Dashboard's CURRENT ID (not the stale DB ID)
+  false
+)
+WHERE slug = 'amish-secrets';
+
+-- Example 2: currencyPrice drift (USD variant, expected "123456")
+UPDATE "Product"
+SET "pricesByCurrency" = jsonb_set(
+  "pricesByCurrency",
+  '{USD,lemonVariantId}',
+  '"123456"',
+  false
+)
+WHERE slug = 'amish-secrets';
+
+-- Example 3: top-level drift (default-currency variant)
+UPDATE "Product"
+SET "lemonVariantId" = '777777'
+-- `lemonVariantId` is String (top-level column, NOT nested in JSONB),
+-- per `prisma/schema.prisma` model Product. The §3.0 TEXT→jsonb migration
+-- only affected `countryOverrides` + `pricesByCurrency`; `lemonVariantId`
+-- always was String. Plain UPDATE, NOT jsonb_set.
+WHERE slug = 'amish-secrets';
+```
+
+> **Drift remediation loop**: after each correction, re-run §3.5.4
+> to confirm the row is gone. Once `UNION ALL` returns 0 rows, drift
+> is resolved. Proceed to §4.
+
+#### §3.5.6 — Post-cutover drift monitoring (optional, weekly cadence)
+
+> For the first month post-cutover, re-run §3.5.4 weekly against
+> the SAME frozen staging table from §2.3.a. Any row that appears
+> is a regression. The most common cause is LS Regenerating a
+> variant ID (e.g., after a price change in LS Dashboard); the
+> remediation is re-run §3.x for the affected `(slug, field,
+> country_or_curr)` triple with the new LS Dashboard ID.
+>
+> After the first month with 0 drift events, drop the cadence to
+> monthly + on-demand. Drift is a regression signal — the DB is
+> stale relative to LS; the DB is the cache, LS is authoritative.
 
 ---
 
