@@ -241,4 +241,145 @@ test.describe("LemonSqueezy refund flow (V1 acceptance criterion #6)", () => {
     //     expect(refundAnalyticsCount).toBeGreaterThanOrEqual(1);
     //   }
   });
+
+  // ──────────────────────────────────────────────────────────────────────
+  // V1 acceptance criterion #6 — 3-refund COUNT test (sister to the
+  // single-refund test above). The structural-invariant test above
+  // covers idempotency + denial + atomic grant revoke via ONE order.
+  // This test covers the *count* of refunds criterion #6 demands
+  // (soft-launch-runbook.md §2 step 13: "3 LS refunds processed"),
+  // with an explicit 30s wall-clock budget per the soft-launch runbook
+  // failure-recovery SLA (production.md §2 + checklist §3 step 13:
+  // "all 3 corresponding `Order` rows flipped to `status='refunded'`
+  // within ≤30s of webhook delivery").
+  // ──────────────────────────────────────────────────────────────────────
+  test(
+    "3 consecutive refunds: Order.status='refunded' + AccessGrant.status='revoked' within 30s (V1 criterion #6 — count)",
+    async ({ request }) => {
+      const product = await prisma.product.findUnique({
+        where: { slug: "test-course-e2e" },
+      });
+      if (!product?.lemonVariantId) {
+        test.skip(true, "TEST_LEMON_VARIANT_ID not configured on the seeded test product");
+        return;
+      }
+
+      const customData = {
+        courseSlug: product.slug,
+        locale: "en-us",
+        variantId: product.lemonVariantId,
+      };
+
+      // Three distinct provider order IDs — disambiguates the 3
+      // concurrent rows in DB (each Order findFirst below is keyed on
+      // providerOrderId, NOT the shared TEST_EMAIL, which collapses to
+      // multiple orders under one user).
+      const orderIds = Array.from(
+        { length: 3 },
+        (_, i) => `ls-order-multi-${Date.now()}-${i}`,
+      );
+
+      // LS API keys validation — mirror the sibling test. Without this
+      // single call, a rotated/broken LEMONSQUEEZY_API_KEY would NOT
+      // surface here (webhook signature uses LEMONSQUEEZY_WEBHOOK_SECRET,
+      // not the API key, so signature-only tests silently pass with a
+      // bad API key). One call + URL assertion is enough to catch it.
+      const checkout = await createLemonCheckout(product.lemonVariantId, customData);
+      expect(checkout?.data?.attributes?.url).toBeTruthy();
+
+      const start = Date.now();
+
+      // ── Phase 1: 3 sequential order_created + order_refunded pairs ──
+      for (const orderId of orderIds) {
+        // order_created — fresh purchase (LS handler dual-writes Order + AccessGrant)
+        const orderCreatedPayload = generateLemonWebhookPayload(orderId, {
+          ...customData,
+          email: TEST_EMAIL,
+        });
+        const { signature: createdSig, body: createdBody } =
+          signLemonWebhookPayload(orderCreatedPayload);
+        const createdResp = await request.post("/api/webhooks/lemonsqueezy", {
+          headers: { "x-signature": createdSig },
+          data: createdBody,
+        });
+        expect(createdResp.status()).toBe(200);
+
+        // order_refunded — keeper invariant: LS handler atomic
+        // Order.status='refunded' + AccessGrant.status='revoked' flip
+        // (commit 25d7799). Payload body only needs meta.event_name +
+        // data.id; HMAC signature is over BODY bytes (no whitespace).
+        const refundPayload = {
+          meta: { event_name: "order_refunded" },
+          data: { id: orderId, type: "orders", attributes: {} },
+        };
+        const { signature: refundSig, body: refundBody } =
+          signLemonWebhookPayload(refundPayload);
+        const refundResp = await request.post("/api/webhooks/lemonsqueezy", {
+          headers: { "x-signature": refundSig },
+          data: refundBody,
+        });
+        expect(refundResp.status()).toBe(200);
+      }
+
+      // ── Assertion 1: each Order.status flips to 'refunded' within 30s ──
+      //
+      // Per-order polling catches flakes per the ls-env-guard fail-fast
+      // philosophy (c362ad7 regression class): a single slow refund
+      // surfaces explicitly rather than failing the whole suite quietly.
+      // `intervals` is the backoff schedule — fast first check
+      // (100ms) catches the common-case webhook delivery, longer
+      // intervals absorb transient Supabase replication / cold-start
+      // latency. 30s upper bound matches soft-launch-runbook.md §2
+      // step 13 + soft-launch §3 step 13 + production.md §2 rollback
+      // decision tree.
+      for (const orderId of orderIds) {
+        await expect
+          .poll(
+            async () => {
+              const order = await prisma.order.findFirst({
+                where: { providerOrderId: orderId },
+              });
+              return order?.status;
+            },
+            { timeout: 30_000, intervals: [100, 250, 500, 1000] },
+          )
+          .toBe("refunded");
+      }
+
+      // ── Assertion 2: matching AccessGrants 'revoked' (atomic with refund) ──
+      //
+      // AccessGrant.status='revoked' is the post-cutover source of
+      // truth for "is this user authorized" (V1 acceptance criterion
+      // #6 + roadmap-current.md §1.2 + soft-launch-runbook.md §2 step
+      // 14). Each Order row has exactly ONE matching AccessGrant row
+      // via sourceType='order' + sourceId=Order.id.
+      for (const orderId of orderIds) {
+        const order = await prisma.order.findFirst({
+          where: { providerOrderId: orderId },
+        });
+        expect(order).toBeTruthy();
+
+        const grant = await prisma.accessGrant.findFirst({
+          where: { sourceType: "order", sourceId: order?.id },
+        });
+        expect(grant).toBeTruthy();
+        expect(grant?.status).toBe("revoked");
+        expect(grant?.revokedAt).toBeTruthy();
+      }
+
+      // ── Assertion 3: 3 LS refunds within 30s wall-clock budget ──
+      //
+      // The 30s gate is the V1 soft-launch criterion #6 SLA
+      // (soft-launch-runbook.md §2 step 13 + production.md §2
+      // rollback decision tree). Per-order polls have their own
+      // timeout: 30_000ms each (Playwright enforces), so a single
+      // stuck refund fails per-order with a clear message BEFORE this
+      // aggregate timer is the deciding assertion. This aggregate
+      // is therefore a sanity ceiling for the fast path: webhook
+      // roundtrips + DB writes should each complete in <1s under
+      // normal load — 30s aggregate provides 10× headroom.
+      const elapsedMs = Date.now() - start;
+      expect(elapsedMs).toBeLessThan(30_000);
+    },
+  );
 });
