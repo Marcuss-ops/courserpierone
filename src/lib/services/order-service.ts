@@ -229,9 +229,10 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
 
   // ── 8. Track analytics event ────────────────────────────────
   // channelId is the YouTube attribution flowing in from the checkout
-  // (LS customData.channelId). Stored on AnalyticEvent (existing column)
-  // rather than on Order — attribution is an analytics concern, not a
-  // transactional one. See V1 acceptance-test criterion #10.
+  // (LS customData.channelId). Stored on AnalyticEvent.channelId (the
+  // dedicated column is the source of truth) rather than on Order —
+  // attribution is an analytics concern, not a transactional one.
+  // See V1 acceptance-test criterion #10.
   await prisma.analyticEvent
     .create({
       data: {
@@ -242,7 +243,6 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
           provider: paymentProvider,
           amount,
           currency,
-          ...(channelId ? { channelId } : {}),
           ...(stripeSessionId ? { stripeSessionId } : {}),
           ...(providerOrderId ? { providerOrderId } : {}),
         }),

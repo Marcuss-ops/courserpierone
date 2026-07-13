@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import crypto from "crypto";
 import { prisma, cleanupTestUser } from "./fixtures/db";
 import {
   generateLemonWebhookPayload,
@@ -227,6 +228,87 @@ test.describe("LS webhook custom_data path (canonical meta.custom_data)", () => 
     });
     expect(grant).toBeTruthy();
     expect(grant?.status).toBe("active");
+
+    // channelId flows through ProcessOrderInput → AnalyticEvent (parity
+    // with the order_created test — explicit assertion the user asked for).
+    const analyticsEvent = await prisma.analyticEvent.findFirst({
+      where: {
+        userId: order?.userId,
+        eventType: "purchase",
+        productId: product.id,
+      },
+    });
+    expect(analyticsEvent).toBeTruthy();
+    expect(analyticsEvent?.channelId).toBe(TEST_CHANNEL_ID);
+  });
+
+  test("subscription_created: defensive fallback to attributes.custom_data (no meta.custom_data)", async ({
+    request,
+  }) => {
+    const product = await prisma.product.findUnique({
+      where: { slug: "test-course-e2e" },
+    });
+    if (!product?.lemonVariantId) {
+      test.skip(true, "TEST_LEMON_VARIANT_ID not configured on the seeded test product");
+      return;
+    }
+
+    // Build a subscription-shaped payload where customData lives ONLY
+    // at the legacy `attributes.custom_data` path (no `meta.custom_data`).
+    // The route's defensive fallback chain must still resolve the product.
+    const orderId = `ls-cd-sub-fallback-${Date.now()}`;
+    const customData = {
+      courseSlug: product.slug,
+      locale: "fr-fr",
+      channelId: TEST_CHANNEL_ID,
+    };
+
+    const body = JSON.stringify({
+      meta: { event_name: "subscription_created" }, // ← no custom_data here
+      data: {
+        id: orderId,
+        type: "subscriptions",
+        attributes: {
+          user_email: TEST_EMAIL,
+          user_name: "Test User",
+          total: 0,
+          currency: "EUR",
+          customer_country: "FR",
+          variant_id: parseInt(product.lemonVariantId, 10),
+          custom_data: customData, // ← legacy subscription path
+        },
+      },
+    });
+    const signature = crypto
+      .createHmac("sha256", process.env.LEMONSQUEEZY_WEBHOOK_SECRET ?? "")
+      .update(body, "utf8")
+      .digest("hex");
+
+    const resp = await request.post("/api/webhooks/lemonsqueezy", {
+      headers: { "x-signature": signature },
+      data: body,
+    });
+    expect(resp.status()).toBe(200);
+
+    // Order resolved, locale "fr-fr"
+    const order = await prisma.order.findFirst({
+      where: { user: { email: TEST_EMAIL }, providerOrderId: orderId },
+    });
+    expect(order).toBeTruthy();
+    expect(order?.status).toBe("completed");
+    expect(order?.locale).toBe("fr-fr");
+    expect(order?.productId).toBe(product.id);
+
+    // channelId persisted on the AnalyticEvent (parity with the canonical
+    // subscription_created test above)
+    const analyticsEvent = await prisma.analyticEvent.findFirst({
+      where: {
+        userId: order?.userId,
+        eventType: "purchase",
+        productId: product.id,
+      },
+    });
+    expect(analyticsEvent?.channelId).toBe(TEST_CHANNEL_ID);
   });
 
   test("defensive fallback: payload without meta.custom_data still resolves via attributes.first_order_item.product_options.custom_data", async ({
@@ -271,7 +353,6 @@ test.describe("LS webhook custom_data path (canonical meta.custom_data)", () => 
         },
       },
     });
-    const crypto = await import("crypto");
     const signature = crypto
       .createHmac("sha256", process.env.LEMONSQUEEZY_WEBHOOK_SECRET ?? "")
       .update(body, "utf8")
