@@ -12,21 +12,25 @@
 # Or, to validate connectivity:
 #   psql "$DIRECT_URL" -c "SELECT current_database();"
 #
-# This script is safe to source multiple times. By default it does
-# NOT auto-fetch credentials from any vendor — the operator must
-# either:
+# This script is safe to source multiple times. It does NOT auto-
+# fetch credentials from any vendor under either sourcing path —
+# the operator must explicitly choose Path A (`.env.staging.local`)
+# OR Path B (manual export); the script picks up whichever the
+# operator provides:
 #
-#   (a) Provide a `.env.staging.local` file (created via
-#       `vercel env pull .env.staging.local --environment=preview`)
-#       which this script auto-sources on every run, OR
-#   (b) Manually `export DATABASE_URL + DIRECT_URL` in their shell
-#       before sourcing this script.
+#   Path A — `vercel env pull .env.staging.local --environment=preview`
+#            writes the canonical Vercel env pull output to the
+#            project root. This script auto-sources it on every
+#            run (with project-root + CWD fallback resolution).
 #
-# See "Credential sourcing" below for both paths (Path A: vercel
-# env pull / Path B: manual export). When sourced, the script also
-# silently exports PRIMARY_DATABASE_URL (if not already set) and
-# prints a status summary. It does NOT modify DATABASE_URL or
-# DIRECT_URL — those are owned by the operator.
+#   Path B — Manual `export DATABASE_URL + DIRECT_URL` in the
+#            operator's shell BEFORE sourcing this script. Useful
+#            for ad-hoc sessions or when vercel CLI is unavailable.
+#
+# When sourced, the script also silently exports PRIMARY_DATABASE_URL
+# (if not already set) and prints a status summary. It does NOT
+# modify DATABASE_URL or DIRECT_URL — those are owned by the
+# operator.
 #
 # When executed directly (e.g. `bash scripts/ops/staging-env.sh --check`):
 # runs the same checks + an optional psql smoke-test.
@@ -125,34 +129,62 @@ done
 #   NEXT_PUBLIC_APP_URL             → Vercel → Project → Settings → Domains (custom)
 #   NEXT_PUBLIC_SUPABASE_*          → Mirror of server-side Supabase project URL + anon JWT
 #   STRIPE_SECRET_KEY + _WEBHOOK_SECRET + ENABLE_STRIPE_CHECKOUT
-#                                 → Stripe Dashboard → Developers → API keys (legacy)
+#                                 → Stripe Dashboard → Developers → API keys
+#                                   (active when ENABLE_STRIPE_CHECKOUT=true;
+#                                    legacy/parity path during the LS-primary rollout)
+#   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+#                                 → Stripe Dashboard → Developers → API keys
+#                                   (browser-exposed pk_test_/pk_live_; surfaced as
+#                                    .env even when ENABLE_STRIPE_CHECKOUT=false)
 #
 # SAFE: this script intentionally does NOT use `set -e` (see header).
 # A missing .env.staging.local falls through silently with an
 # informational note, so an operator without it isn’t kicked out of
 # their shell.
 
-if [[ -f .env.staging.local ]]; then
+# Resolve .env.staging.local location. Order of preference:
+#   1. <project-root>/.env.staging.local  (canonical Vercel env pull destination)
+#   2. <cwd>/.env.staging.local           (operator-override; works when sourced full-path)
+# Both paths are tried; whichever exists first wins. If neither
+# exists, the script falls back to manual export (Path B in the
+# header blockquote).
+# Note: this resolution is idempotent — SCRIPT_DIR is computed once
+# per source invocation. Re-sourcing the script re-derives the same
+# paths so a fallback is sticky across re-sources.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-${0}}")" && pwd)"
+PROJECT_ROOT="$SCRIPT_DIR/../.."
+STAGING_ENV_FILE=""
+if [[ -f "$PROJECT_ROOT/.env.staging.local" ]]; then
+  STAGING_ENV_FILE="$PROJECT_ROOT/.env.staging.local"
+elif [[ -f ./.env.staging.local ]]; then
+  STAGING_ENV_FILE="./.env.staging.local"
+fi
+
+if [[ -n "$STAGING_ENV_FILE" ]]; then
   set -a
   # shellcheck disable=SC1091  # .env.staging.local is operator-curated, intentionally outside the lint target
-  source .env.staging.local
+  source "$STAGING_ENV_FILE"
   set +a
-  printf '—— sourced .env.staging.local (%d lines, %d env vars) ——
+  printf '—— sourced %s (%d lines, %d env vars) ——
 ' \
-    "$(wc -l < .env.staging.local)" \
-    "$(grep -cE '^[A-Z_][A-Z0-9_]*=' .env.staging.local || echo 0)"
+    "$STAGING_ENV_FILE" \
+    "$(wc -l < "$STAGING_ENV_FILE")" \
+    "$(grep -cE '^[A-Z_][A-Z0-9_]*=' "$STAGING_ENV_FILE" || echo 0)"
 else
-  printf '—— .env.staging.local NOT present in CWD ——
-'
+  printf '—— .env.staging.local NOT found (searched project root: %s and cwd: %s) ——
+' \
+    "$PROJECT_ROOT" "$(pwd)"
   printf '   Recommendation: run `vercel env pull .env.staging.local \
 '
-  printf '                              --environment=preview` once
+  printf '                              --environment=preview` from
 '
-  printf '   (vercel login first, project team SSO required). The script
+  printf '   the project root (vercel login first, project team SSO
 '
-  printf '   auto-sources it on every subsequent invocation. See the
+  printf '   required). The script auto-sources it on every subsequent
 '
-  printf '   header "Credential sourcing" block for the full workflow.
+  printf '   invocation. See the header "Credential sourcing" block for
+'
+  printf '   the full workflow.
 '
 fi
 
