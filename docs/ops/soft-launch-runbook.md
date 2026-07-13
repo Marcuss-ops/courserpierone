@@ -115,7 +115,7 @@ ops-1 runs, ops-2 verifies. Stop the runbook and abort if ANY box unchecked.
 
 ### Step 4 — Checkout reale (real corporate card × 3 locales)
 
-- [ ] **ops-1**: ALL 3 buyers MUST arrive via UTM-tagged URLs: `https://<prod-domain>/<locale>/amish-secrets?utm_source=youtube&utm_campaign=<channel-name>`. This is the channel-attribution hook required for Step 15 — `customData.channelId` is set on the LS checkout per `src/lib/commerce/payments/providers/lemonsqueezy/index.ts` L57-61, and flows to the webhook → `processOrder` → `AnalyticEvent.channelId`.
+- [ ] **ops-1**: ALL 3 buyers MUST arrive via UTM-tagged URLs: `https://<prod-domain>/<locale>/amish-secrets?utm_source=youtube&utm_campaign=<channel-name>`. This is the channel-attribution hook required for Step 15 — `customData.channelId` is set on the LS checkout by `createCheckout()` in `src/lib/commerce/payments/providers/lemonsqueezy/index.ts`, and flows to the webhook → `processOrder()` → `AnalyticEvent.channelId`.
 - [ ] **ops-1**: Log in as the Step 1 user (Supabase magic-link user from Step 1). Visit `/it-it/amish-secrets` (with UTM), click the CTA. LS checkout opens in a new tab.
 - [ ] **ops-1**: Complete payment with the IT real card. LS shows order confirmation.
 - [ ] **ops-1**: Log out. Log in as the Step 2 user (Google OAuth user from Step 2). Repeat for `/en-us/amish-secrets` (EN card, with UTM).
@@ -213,7 +213,8 @@ ops-1 runs, ops-2 verifies. Stop the runbook and abort if ANY box unchecked.
 ### Step 15 — Attribuzione canale (channel attribution)
 
 - [ ] **ops-1**: For this step, the buyer MUST have arrived at the landing page via a YouTube channel link (e.g. `https://<prod-domain>/it-it/amish-secrets?utm_source=youtube&utm_campaign=<channel-name>`). Repeat the purchase with a fresh buyer using such a URL. (If the 3 purchases from Step 4 already had UTMs, use those — otherwise fire a 4th purchase with a UTM-tagged URL.)
-- [ ] **ops-2**: Run `psql "$DIRECT_URL" -c "SELECT ae.\"eventType\", ae.locale, ae.\"channelId\", ae.\"revenueCents\", ae.\"sessionId\", vs.\"utmSource\", vs.\"utmCampaign\" FROM \"AnalyticEvent\" ae LEFT JOIN \"VisitorSession\" vs ON ae.\"sessionId\" = vs.id WHERE ae.\"eventType\"='purchase' AND vs.\"utmSource\"='youtube' ORDER BY ae.\"createdAt\" DESC LIMIT 5;"` — assert the row exists, `channelId` is populated, `revenueCents` matches the order amount, `utmCampaign` is non-null (on `VisitorSession`, NOT on `AnalyticEvent` — verified against `prisma/schema.prisma` L238-253 + L255-268), `sessionId` is shared with the matching `landing_view` event.
+- [ ] **ops-2** (PRE-FLIGHT, before Step 4 charges): Run `psql "$DIRECT_URL" -c "SELECT count(*) FROM \"AnalyticEvent\" WHERE \"eventType\"='purchase' AND \"createdAt\" > NOW() - INTERVAL '1 hour';"` — assert **0** (baseline; no purchases yet). Re-run AFTER Step 5 fires all 3 webhooks — assert **3**. The `purchase` eventType is in the `AnalyticEvent.eventType` enum (`pageview | scroll_deep | click_buy | checkout_open | checkout_complete | purchase | refund | checkout_abandoned | lesson_start | lesson_complete`), but the actual emission happens inside `processOrder()` at `src/lib/services/order-service.ts`. If 0 post-Step 5, the emission is missing — open P1 incident, do NOT proceed.
+- [ ] **ops-2**: Run `psql "$DIRECT_URL" -c "SELECT ae.\"eventType\", ae.locale, ae.\"channelId\", ae.\"revenueCents\", ae.\"sessionId\", vs.\"utmSource\", vs.\"utmCampaign\" FROM \"AnalyticEvent\" ae LEFT JOIN \"VisitorSession\" vs ON ae.\"sessionId\" = vs.id WHERE ae.\"eventType\"='purchase' AND vs.\"utmSource\"='youtube' ORDER BY ae.\"createdAt\" DESC LIMIT 5;"` — assert the row exists, `channelId` is populated, `revenueCents` matches the order amount, `utmCampaign` is non-null (on `VisitorSession`, NOT on `AnalyticEvent` — verified at runbook-write time against `prisma/schema.prisma` `model AnalyticEvent` and `model VisitorSession`; byte-verify before each major release), `sessionId` is shared with the matching `landing_view` event.
 - [ ] **ops-2**: Run the same query with `eventType='pageview'` (the pre-purchase landing view) — assert the same `sessionId` ties the pre-purchase and post-purchase events together.
 - [ ] **ops-1**: Visit `/admin/analytics` (V1.0 schema is ready per commit `714d66e`; the queries are deferred to V1.1 per `roadmap-current.md` §1.5 — so this UI may not exist yet; ops-2 verifies via SQL only).
 - [ ] **REQUIRES VERIFICATION**: the `AnalyticEvent` table captures the YouTube channel attribution end-to-end (landing view → purchase). `channelId`, `revenueCents`, and `utmCampaign` are all populated. The same `sessionId` ties pre-purchase and post-purchase events.
@@ -334,7 +335,8 @@ ops-1 runs, ops-2 verifies. Stop the runbook and abort if ANY box unchecked.
 >   the same card 3 times (LS fraud-rules may flag the repeated BINs).
 >   If the failure is in Step 4, use a different card OR re-fire the
 >   webhook from the LS Dashboard (the handler is idempotent via
->   `processedWebhook` table per `src/app/api/webhooks/lemonsqueezy/route.ts` L46-58).
+>   the `processedWebhook` table — see `POST` handler in
+>   `src/app/api/webhooks/lemonsqueezy/route.ts`).
 > - **Step 5** (webhook): use the LS Dashboard "Resend" feature
 >   instead of triggering a new charge. The handler is idempotent
 >   (`processedWebhook.findUnique` gate prevents re-processing).
