@@ -256,3 +256,7 @@ follow-up ADR note documenting why reset was chosen over revert.
 - [TypeScript ESLint docs — `no-unused-vars`](https://typescript-eslint.io/rules/no-unused-vars/) — confirms partial autofix on destructured siblings only.
 - Incident date: 2026-07-13. Commits implicated (now overwritten on remote via force-push): `31ebfc5` (C1), `e01c1ab` (C1-fixup), `e11264b` (revert-on-revert, dropped).
 - ADR supersedes the original task phrasing "atomic per-file commits using `npm run lint:fix -- --rule '{...}'` per rule group" — that pattern does not work for type-aware suggestion-only autofixes and was the root cause of the incident.
+
+## Errata
+
+- **`a284500` (varsIgnorePattern-squash, 2026-07-13)** — commit body stated a 4-ins/5-del diff, but the actual stat was **5-ins/6-del**. The code change itself is correct; only the body text was inaccurate. Picked the followup-commit alternative over `git commit --amend` to avoid a second force-push (reflog churn + operator friction).
