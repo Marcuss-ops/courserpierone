@@ -10,6 +10,11 @@ export interface ProductApiItem {
   templateId: string;
   lessonsCount: number;
   locales: string[];
+  /** Aggregate revenue for this product (computed by /api/products). Optional
+   *  because the list endpoint may omit it for products with zero sales. */
+  revenue?: number;
+  /** Conversion rate string (e.g. "2.4%") from /api/analytics/dashboard. */
+  conversion?: string;
   createdAt: string;
 }
 

@@ -2,6 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { apiErrorResponse } from "@/lib/errors";
 
+/** Standardized notification list. Module-scope so the type isn't
+ *  re-allocated on every request (the route is hot — polled by the
+ *  landing page for the social-proof ticker). */
+type SocialProofEvent = {
+  id: string;
+  type: "purchase" | "lesson";
+  name: string;
+  city: string;
+  createdAt: Date;
+  lessonTitle?: string;
+  lessonPosition?: number;
+};
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -115,15 +128,6 @@ export async function GET(request: NextRequest) {
     }
 
     // Standardized notifications list
-    type SocialProofEvent = {
-      id: string;
-      type: "purchase" | "lesson";
-      name: string;
-      city: string;
-      createdAt: Date;
-      lessonTitle?: string;
-      lessonPosition?: number;
-    };
     const events: SocialProofEvent[] = [];
 
     // Map order events

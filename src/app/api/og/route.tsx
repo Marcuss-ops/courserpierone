@@ -180,8 +180,8 @@ export async function GET(request: NextRequest) {
       }
     );
   } catch (e) {
-    const error = e as Error;
-    return new Response(`Failed to generate Open Graph image: ${error.message || String(e)}`, {
+    const message = e instanceof Error ? e.message : String(e);
+    return new Response(`Failed to generate Open Graph image: ${message}`, {
       status: 500,
     });
   }
