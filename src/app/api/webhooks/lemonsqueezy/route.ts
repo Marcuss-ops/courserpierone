@@ -4,6 +4,11 @@ import { NotFoundError, ValidationError } from "@/lib/errors";
 import { prisma } from "@/lib/db/prisma";
 import { Prisma } from "@prisma/client";
 import crypto from "crypto";
+import type {
+  LsWebhookPayload,
+  LsWebhookMeta,
+  LsOrderAttributes,
+} from "./types";
 
 // Force dynamic — webhook non può essere statico
 export const dynamic = "force-dynamic";
@@ -34,8 +39,7 @@ async function POST_IMPL(request: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  let payload: any;
+  let payload: LsWebhookPayload;
   try {
     payload = JSON.parse(body);
   } catch {
@@ -68,7 +72,7 @@ async function POST_IMPL(request: NextRequest) {
     // https://docs.lemonsqueezy.com/help/checkout/passing-custom-data)
     // with defensive fallbacks to the older per-resource paths so a
     // legacy/migrated payload still resolves cleanly.
-    async function handleLsOrder(meta: any, attributes: any, orderId: string) {
+    async function handleLsOrder(meta: LsWebhookMeta, attributes: LsOrderAttributes | undefined, orderId: string) {
       const customData =
         meta?.custom_data ??
         attributes?.first_order_item?.product_options?.custom_data ??

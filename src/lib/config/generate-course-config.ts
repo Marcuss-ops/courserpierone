@@ -51,7 +51,7 @@ export interface CourseConfig {
 }
 
 export async function generateCourseConfig(slug: string) {
-  let existingConfig: any = {};
+  let existingConfig: Partial<CourseConfig> = {};
   try {
     const configPath = path.join(process.cwd(), "public", "courses", slug, "config.json");
     if (fs.existsSync(configPath)) {

@@ -22,6 +22,20 @@ export interface CountryPriceOverride {
   stripePriceId?: string | null;
 }
 
+/** Input shape for countryOverrides before parseCountryOverrides computes
+ *  the derived fields. `amount` is excluded because it's computed from
+ *  `price / 100` at parse time; `symbol` is excluded because it has a
+ *  fallback to CURRENCY_SYMBOLS[currency] (or the currency code itself).
+ *  The CourseConfig type uses this shape directly (no `amount` field —
+ *  it's computed at display time). */
+export interface CountryPriceOverrideInput {
+  currency: string;
+  price: number;
+  symbol?: string;
+  lemonVariantId?: string | null;
+  stripePriceId?: string | null;
+}
+
 // ─── Currency symbols mapping ─────────────────────────────
 const CURRENCY_SYMBOLS: Record<string, string> = {
   EUR: "€", USD: "$", GBP: "£", JPY: "¥", BRL: "R$",
@@ -37,14 +51,14 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
  * Valuta un oggetto countryOverrides (può essere string JSON o oggetto già parsato)
  */
 export function parseCountryOverrides(
-  overrides: string | Record<string, any> | null | undefined
+  overrides: string | Record<string, CountryPriceOverrideInput> | null | undefined
 ): Record<string, CountryPriceOverride> | null {
   if (!overrides) return null;
   try {
     const parsed = typeof overrides === "string" ? JSON.parse(overrides) : overrides;
     const result: Record<string, CountryPriceOverride> = {};
     for (const [code, val] of Object.entries(parsed)) {
-      const v = val as any;
+      const v = val as CountryPriceOverrideInput;
       result[code] = {
         currency: v.currency,
         price: v.price,
@@ -64,7 +78,7 @@ export function parseCountryOverrides(
  * Trova il prezzo specifico per un paese (se presente negli overrides)
  */
 export function getCountryPriceOverride(
-  data: { countryOverrides?: Record<string, any> | string | null },
+  data: { countryOverrides?: Record<string, CountryPriceOverrideInput> | string | null },
   country: string | null | undefined
 ): CountryPriceOverride | null {
   if (!country || !data.countryOverrides) return null;
@@ -79,7 +93,7 @@ export function getCountryPriceOverride(
  * Ottiene il prezzo e la valuta giusti per un locale + paese
  */
 export function getPriceString(
-  data: { prices?: Record<string, PriceByLocale>; price?: number; countryOverrides?: any },
+  data: { prices?: Record<string, PriceByLocale>; price?: number; countryOverrides?: string | Record<string, CountryPriceOverrideInput> | null },
   locale: string,
   country?: string | null
 ): { price: string; currency: string } {
@@ -108,7 +122,7 @@ export function getPriceString(
  * Ottiene l'importo corrente e il simbolo per un dato locale/paese
  */
 export function getCurrentAmountAndSymbol(
-  data: { prices?: Record<string, PriceByLocale>; price?: number; countryOverrides?: any },
+  data: { prices?: Record<string, PriceByLocale>; price?: number; countryOverrides?: string | Record<string, CountryPriceOverrideInput> | null },
   locale: string,
   country?: string | null
 ): { currentAmount: number; symbol: string; currency: string; baseAmount: number } {

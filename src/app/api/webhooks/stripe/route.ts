@@ -111,8 +111,10 @@ async function POST_IMPL(request: NextRequest) {
     // ── invoice.payment_failed → revoke access for subscription orders ──
     if (event.type === "invoice.payment_failed") {
       const invoice = event.data.object;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sub = (invoice as any).subscription;
+      // `subscription` is on Stripe.Invoice at runtime but not in the
+      // v22 type defs we have installed. Structural cast documents the
+      // expected shape without resorting to `as any`.
+      const sub = (invoice as Stripe.Invoice & { subscription?: string | Stripe.Subscription | null }).subscription;
       const subscriptionId = typeof sub === "string" ? sub : undefined;
 
       if (subscriptionId) {
