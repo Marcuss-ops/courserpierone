@@ -60,12 +60,11 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
     paymentProvider,
     amount,
     currency,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    // locals prefixed with `_` are NOT auto-ignored by @typescript-eslint/no-unused-vars
-    // here — the codebase's eslint.config.mjs only sets argsIgnorePattern: "^_" (line 37),
-    // not varsIgnorePattern. Keep this disable until that config is broadened.
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     locale,
+    // _customerCountry is the underscore-prefixed binding (varsIgnorePattern: "^_"
+    // in eslint.config.mjs handles it without a per-line disable). The interface
+    // field is still `customerCountry` — LS + Stripe webhooks + tests pass the
+    // original key.
     customerCountry: _customerCountry,
     channelId,
   } = input;

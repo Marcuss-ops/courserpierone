@@ -34,7 +34,7 @@ export default tseslint.config(
       "react/jsx-uses-vars": "error",
 
       // TypeScript-specific overrides
-      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/prefer-nullish-coalescing": "warn",
       "unused-imports/no-unused-imports": "error",
