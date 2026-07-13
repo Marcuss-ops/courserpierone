@@ -339,8 +339,8 @@ parallel. Both fire on the same trigger condition.
 > the template strings and grep the monitor's logged response body
 > to fill in the values manually). The latency is ACTIONABLE for
 > triage: for pre-failure degradation signals, check the `degraded`
-> (200) responses in the vendor’s history — those carry the
-> high-but-non-zero latencies that signal slow-queries warming up. A
+> (200) responses in the **uptime monitor’s** history — those carry the
+> high-but-non-zero latencies that signal slow-query latency warming up. A
 > hard DB connection failure resets the timer to `0` (per the
 > catch-branch in `src/app/api/health/route.ts` L88-105), so a 503
 > with `database.latencyMs: 0` means hard-fail; a 503 with
