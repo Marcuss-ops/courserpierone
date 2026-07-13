@@ -282,31 +282,22 @@ WHERE table_name = 'Product'
 -- expect: both rows show data_type = 'text'
 ```
 
-**Step 3 — Run the migration via Prisma's workflow** (NOT raw SQL;
-this generates the migration file + keeps `schema.prisma` and the DB
-in sync):
+**Step 3a — Generate the migration file against staging/local**
+(NOT raw SQL; this generates the migration file + keeps
+`schema.prisma` and the staging DB in sync):
 
 ```bash
 npx prisma migrate dev --name product_jsonb_columns
 ```
 
 Prisma's auto-generated `prisma/migrations/<timestamp>_product_jsonb_columns/migration.sql`
-will contain the `ALTER COLUMN ... TYPE jsonb USING ...::jsonb`. If
-the operator wants to also add the GIN indexes (see "Why the GIN
-indexes" below), they must be added MANUALLY to the auto-generated
-migration file (Prisma's `@@index` syntax for `jsonb_path_ops` is
-not yet stable across versions — verify against the current Prisma
-release).
+will contain the `ALTER COLUMN ... TYPE jsonb USING ...::jsonb`.
+The `prisma generate` re-run also regenerates the Prisma Client
+types (so the TS code can still use the existing `Record<string, ...>`
+shape on these fields).
 
-**Step 4 — If adding GIN indexes, append to the auto-generated
-migration** (after the two `ALTER COLUMN` statements):
-
-```sql
-CREATE INDEX IF NOT EXISTS "Product_countryOverrides_gin"
-  ON "Product" USING gin ("countryOverrides" jsonb_path_ops);
-CREATE INDEX IF NOT EXISTS "Product_pricesByCurrency_gin"
-  ON "Product" USING gin ("pricesByCurrency" jsonb_path_ops);
-```
+**Step 3b — Commit + push → CI runs `prisma migrate deploy` against
+production** (non-interactive, no prompts):
 
 ```bash
 git add prisma/schema.prisma \
@@ -314,6 +305,71 @@ git add prisma/schema.prisma \
 git commit -m "feat(db): convert Product.countryOverrides + pricesByCurrency to jsonb
   ... (the §3.0 schema migration from the LS live-setup checklist)
 "
+git push origin main
+# CI runs: .github/workflows/prisma-migrate.yml -> prisma migrate deploy
+#          against the production DB (via the IPv6 GH runner)
+```
+
+> **DO NOT run `prisma migrate dev` against production.** It is
+> interactive (prompts for confirmation, regenerates Prisma Client,
+> and may fail in non-TTY contexts). Production deploys always go
+> through `prisma migrate deploy` via the CI workflow.
+
+**Step 4 — (OPTIONAL) GIN indexes for future SQL-level containment
+queries**:
+
+> **Skip for V1.0** — the current `pricing.ts` code does NOT issue
+> `@>` containment queries (it does `JSON.parse()` + object lookup
+> post-fetch). The GIN indexes are forward-looking for a V1.1+
+> refactor of `getCountryPriceOverride()`. Including them in V1.0
+> costs a few seconds of index build + ~10-20% of JSON storage with
+> zero current-code-path benefit.
+
+If the operator chooses to include them (e.g. as part of the V1.1
+refactor):
+
+```sql
+-- Append to the auto-generated migration file (after the two
+-- ALTER COLUMN statements, BEFORE the COMMIT):
+CREATE INDEX IF NOT EXISTS "Product_countryOverrides_gin"
+  ON "Product" USING gin ("countryOverrides" jsonb_path_ops);
+CREATE INDEX IF NOT EXISTS "Product_pricesByCurrency_gin"
+  ON "Product" USING gin ("pricesByCurrency" jsonb_path_ops);
+```
+
+> **Do NOT use Prisma's `@@index` for `jsonb_path_ops`** — the
+> Prisma schema syntax for `jsonb_path_ops` is not yet stable across
+> versions. Manually append the `CREATE INDEX` statements to the
+> auto-generated migration file (raw SQL in the migration is fine;
+> Prisma's introspection accepts it).
+
+> **`CREATE INDEX CONCURRENTLY` option** (mitigates the §3.0 lock
+> warning): if the operator wants the GIN indexes WITHOUT blocking
+> writes (and has a longer maintenance window), drop the
+> `CREATE INDEX` statements from inside the migration transaction
+> (so `prisma migrate dev` generates only the two `ALTER COLUMN`
+> statements), then run the `CREATE INDEX CONCURRENTLY` in a
+> SEPARATE session:
+>
+> ```sql
+> -- Inside a separate psql session, NOT inside the migration:
+> CREATE INDEX CONCURRENTLY "Product_countryOverrides_gin"
+>   ON "Product" USING gin ("countryOverrides" jsonb_path_ops);
+> ```
+>
+> `CONCURRENTLY` cannot be inside a transaction. The index build
+> takes longer (~2-3× the blocking time) but does NOT block writes
+> on `Product`. The §1 pre-flight's 2-hour no-traffic window absorbs
+> the blocking variant; if the operator is NOT in a no-traffic
+> window (e.g. running the migration against staging with live
+> traffic), `CONCURRENTLY` is the right choice.
+
+The git commit is now in Step 3b (covers schema + migration file
+together). If the operator adds the GIN indexes in Step 4, the
+auto-generated migration file is already updated, so no extra
+commit is needed — just include the GIN append in the same commit
+message.
+
 ```
 
 **Step 5 — Post-migration: confirm**
