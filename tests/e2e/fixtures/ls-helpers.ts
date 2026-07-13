@@ -56,28 +56,77 @@ export async function createLemonCheckout(variantId: string, customData: Record<
   return response.json();
 }
 
-export function generateLemonWebhookPayload(orderId: string, customData: Record<string, string>) {
+export interface LemonWebhookPayloadOptions {
+  /** Override the buyer email. Defaults to `test-${orderId}@example.com`. */
+  email?: string;
+  /** Override the event_name. Defaults to "order_created". */
+  eventName?: string;
+  /** Override the total in cents. Defaults to 4900. */
+  total?: number;
+  /** Override the currency. Defaults to "USD". */
+  currency?: string;
+  /** Override the customer country. Defaults to "US". */
+  customerCountry?: string;
+  /** If true, emit a subscription-shaped payload (no first_order_item). Defaults to false. */
+  subscriptionShape?: boolean;
+}
+
+/**
+ * Build a Lemon Squeezy webhook payload that mirrors what the LS
+ * platform actually POSTs (per https://docs.lemonsqueezy.com/help/checkout/passing-custom-data):
+ *
+ *   { meta: { event_name, custom_data }, data: { id, type, attributes: {...} } }
+ *
+ * The `customData` argument populates BOTH `meta.custom_data` (canonical
+ * per LS docs) AND the older `first_order_item.product_options.custom_data`
+ * path (defensive: ensures route-level fallback chains stay honest).
+ */
+export function generateLemonWebhookPayload(
+  orderId: string,
+  customData: Record<string, string>,
+  options: LemonWebhookPayloadOptions = {},
+) {
+  const {
+    email = `test-${orderId}@example.com`,
+    eventName = "order_created",
+    total = 4900,
+    currency = "USD",
+    customerCountry = "US",
+    subscriptionShape = false,
+  } = options;
+
+  const dataType = subscriptionShape ? "subscriptions" : "orders";
+
+  const baseAttributes: Record<string, unknown> = {
+    user_email: email,
+    user_name: "Test User",
+    total,
+    currency,
+    customer_country: customerCountry,
+  };
+
+  if (!subscriptionShape) {
+    baseAttributes.first_order_item = {
+      variant_id: parseInt(customData.variantId ?? "0", 10),
+      product_options: {
+        custom_data: customData,
+      },
+    };
+  } else {
+    // Subscription-shaped payloads carry `variant_id` directly on
+    // attributes (no `first_order_item` wrapper).
+    baseAttributes.variant_id = parseInt(customData.variantId ?? "0", 10);
+  }
+
   const payload = {
     meta: {
-      event_name: "order_created",
+      event_name: eventName,
       custom_data: customData,
     },
     data: {
       id: orderId,
-      type: "orders",
-      attributes: {
-        user_email: `test-${orderId}@example.com`,
-        user_name: "Test User",
-        total: 4900,
-        currency: "USD",
-        customer_country: "US",
-        first_order_item: {
-          variant_id: parseInt(customData.variantId ?? "0", 10),
-          product_options: {
-            custom_data: customData,
-          },
-        },
-      },
+      type: dataType,
+      attributes: baseAttributes,
     },
   };
 

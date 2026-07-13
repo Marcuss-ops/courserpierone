@@ -64,8 +64,15 @@ async function POST_IMPL(request: NextRequest) {
   // ─── Process the event ──────────────────────────────────────
   try {
     // ─── Helper: process LS order/subscription ──────────────────
-    async function handleLsOrder(attributes: any, orderId: string) {
-      const customData = attributes?.first_order_item?.product_options?.custom_data ?? {};
+    // Reads customData from `meta.custom_data` (canonical LS path per
+    // https://docs.lemonsqueezy.com/help/checkout/passing-custom-data)
+    // with defensive fallbacks to the older per-resource paths so a
+    // legacy/migrated payload still resolves cleanly.
+    async function handleLsOrder(meta: any, attributes: any, orderId: string) {
+      const customData =
+        meta?.custom_data ??
+        attributes?.first_order_item?.product_options?.custom_data ??
+        {};
       const customerEmail = attributes?.user_email ?? attributes?.customer_email ?? "";
 
       if (!customerEmail) {
@@ -90,6 +97,7 @@ async function POST_IMPL(request: NextRequest) {
         currency,
         locale: customData.locale ?? "it",
         customerCountry: attributes?.customer_country ?? attributes?.country ?? null,
+        channelId: customData.channelId ?? null,
       });
     }
 
@@ -100,7 +108,7 @@ async function POST_IMPL(request: NextRequest) {
 
       console.log(`[LS Webhook] order_created: ${orderId}, email: ${attributes?.user_email ?? attributes?.customer_email}`);
 
-      await handleLsOrder(attributes, orderId);
+      await handleLsOrder(payload.meta, attributes, orderId);
     }
 
     // ─── Subscription Created ───────────────────────────────────
@@ -111,8 +119,14 @@ async function POST_IMPL(request: NextRequest) {
 
       if (customerEmail) {
         const variantId = String(attributes?.variant_id ?? attributes?.product_variant_id ?? "");
-        const customData = attributes?.custom_data ?? {};
-        const productSlug = customData.courseSlug ?? "";
+        // Canonical path: meta.custom_data. Legacy fallback: attributes.custom_data
+        // (per LS docs, subscriptions carry customData at meta.custom_data, but
+        //  defensive in case a payload has the older shape).
+        const customData =
+          payload.meta?.custom_data ??
+          attributes?.custom_data ??
+          {};
+        const productSlug = customData.courseSlug ?? customData.productSlug ?? "";
         const customerName = attributes?.user_name ?? "";
 
         await processOrder({
@@ -126,6 +140,7 @@ async function POST_IMPL(request: NextRequest) {
           currency: attributes?.currency ?? "usd",
           locale: customData.locale ?? "it",
           customerCountry: attributes?.customer_country ?? attributes?.country ?? null,
+          channelId: customData.channelId ?? null,
         });
       }
 

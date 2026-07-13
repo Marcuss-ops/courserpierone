@@ -32,6 +32,8 @@ export interface ProcessOrderInput {
   locale: string;
   /** Customer's country code (ISO 3166-1 alpha-2, e.g. "IT", "US") — used to localize ebook download */
   customerCountry?: string | null;
+  /** YouTube channel attribution (from LS customData.channelId) — written to AnalyticEvent.channelId */
+  channelId?: string | null;
 }
 
 /**
@@ -61,6 +63,7 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
     currency,
     locale,
     customerCountry,
+    channelId,
   } = input;
 
   // ── 1. Find or create user ──────────────────────────────────
@@ -225,15 +228,21 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
   }
 
   // ── 8. Track analytics event ────────────────────────────────
+  // channelId is the YouTube attribution flowing in from the checkout
+  // (LS customData.channelId). Stored on AnalyticEvent (existing column)
+  // rather than on Order — attribution is an analytics concern, not a
+  // transactional one. See V1 acceptance-test criterion #10.
   await prisma.analyticEvent
     .create({
       data: {
         productId: product.id,
         eventType: "purchase",
+        ...(channelId ? { channelId } : {}),
         metadata: JSON.stringify({
           provider: paymentProvider,
           amount,
           currency,
+          ...(channelId ? { channelId } : {}),
           ...(stripeSessionId ? { stripeSessionId } : {}),
           ...(providerOrderId ? { providerOrderId } : {}),
         }),
