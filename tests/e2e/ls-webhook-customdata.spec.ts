@@ -425,6 +425,152 @@ test.describe("LS webhook custom_data path (canonical meta.custom_data)", () => 
     expect(processed).toBe(1);
   });
 
+  test("subscription_cancelled: revokes Order.status + AccessGrant atomically", async ({
+    request,
+  }) => {
+    const product = await prisma.product.findUnique({
+      where: { slug: "test-course-e2e" },
+    });
+    if (!product?.lemonVariantId) {
+      test.skip(true, "TEST_LEMON_VARIANT_ID not configured on the seeded test product");
+      return;
+    }
+
+    // Phase 1: subscription_created establishes the Order + AccessGrant.
+    // Per LS webhook semantics, `data.id` is the LS subscription_id
+    // (stable for the subscription's lifetime) — we use the same id as
+    // the order's providerOrderId (per subscription_created handler).
+    const subscriptionId = `ls-cd-sub-cancel-${Date.now()}`;
+    const createdPayload = generateLemonWebhookPayload(
+      subscriptionId,
+      {
+        courseSlug: product.slug,
+        locale: "en-us",
+        channelId: TEST_CHANNEL_ID,
+      },
+      {
+        email: TEST_EMAIL,
+        eventName: "subscription_created",
+        subscriptionShape: true,
+      },
+    );
+    const createdSig = signLemonWebhookPayload(createdPayload);
+    const resp1 = await request.post("/api/webhooks/lemonsqueezy", {
+      headers: { "x-signature": createdSig.signature },
+      data: createdSig.body,
+    });
+    expect(resp1.status()).toBe(200);
+
+    const initialOrder = await prisma.order.findFirst({
+      where: { user: { email: TEST_EMAIL }, providerOrderId: subscriptionId },
+    });
+    expect(initialOrder?.status).toBe("completed");
+
+    const initialGrant = await prisma.accessGrant.findFirst({
+      where: { sourceType: "order", sourceId: initialOrder?.id },
+    });
+    expect(initialGrant?.status).toBe("active");
+    expect(initialGrant?.revokedAt).toBeNull();
+
+    // Phase 2: subscription_cancelled flips BOTH Order.status → 'failed'
+    // AND AccessGrant.status → 'revoked' atomically (same findMany +
+    // $transaction([order.updateMany, accessGrant.updateMany]) pattern
+    // as order_refunded).
+    const cancelPayload = {
+      meta: { event_name: "subscription_cancelled" },
+      data: { id: subscriptionId, type: "subscriptions", attributes: {} },
+    };
+    const cancelSig = signLemonWebhookPayload(cancelPayload);
+    const resp2 = await request.post("/api/webhooks/lemonsqueezy", {
+      headers: { "x-signature": cancelSig.signature },
+      data: cancelSig.body,
+    });
+    expect(resp2.status()).toBe(200);
+
+    const cancelledOrder = await prisma.order.findFirst({
+      where: { user: { email: TEST_EMAIL }, providerOrderId: subscriptionId },
+    });
+    expect(cancelledOrder?.status).toBe("failed");
+
+    const revokedGrant = await prisma.accessGrant.findFirst({
+      where: { sourceType: "order", sourceId: initialOrder?.id },
+    });
+    expect(revokedGrant?.status).toBe("revoked");
+    expect(revokedGrant?.revokedAt).toBeTruthy();
+    expect(revokedGrant?.revokedAt?.getTime()).toBeGreaterThan(0);
+  });
+
+  test("subscription_payment_failed: revokes Order.status + AccessGrant atomically", async ({
+    request,
+  }) => {
+    const product = await prisma.product.findUnique({
+      where: { slug: "test-course-e2e" },
+    });
+    if (!product?.lemonVariantId) {
+      test.skip(true, "TEST_LEMON_VARIANT_ID not configured on the seeded test product");
+      return;
+    }
+
+    // Phase 1: subscription_created establishes the Order + AccessGrant.
+    const subscriptionId = `ls-cd-sub-payfail-${Date.now()}`;
+    const createdPayload = generateLemonWebhookPayload(
+      subscriptionId,
+      {
+        courseSlug: product.slug,
+        locale: "en-us",
+        channelId: TEST_CHANNEL_ID,
+      },
+      {
+        email: TEST_EMAIL,
+        eventName: "subscription_created",
+        subscriptionShape: true,
+      },
+    );
+    const createdSig = signLemonWebhookPayload(createdPayload);
+    const resp1 = await request.post("/api/webhooks/lemonsqueezy", {
+      headers: { "x-signature": createdSig.signature },
+      data: createdSig.body,
+    });
+    expect(resp1.status()).toBe(200);
+
+    const initialOrder = await prisma.order.findFirst({
+      where: { user: { email: TEST_EMAIL }, providerOrderId: subscriptionId },
+    });
+    expect(initialOrder?.status).toBe("completed");
+
+    const initialGrant = await prisma.accessGrant.findFirst({
+      where: { sourceType: "order", sourceId: initialOrder?.id },
+    });
+    expect(initialGrant?.status).toBe("active");
+    expect(initialGrant?.revokedAt).toBeNull();
+
+    // Phase 2: subscription_payment_failed flips BOTH atomically.
+    // Same pattern as subscription_cancelled (and order_refunded). The
+    // status on AccessGrant flips to 'revoked' with revokedAt populated.
+    const payfailPayload = {
+      meta: { event_name: "subscription_payment_failed" },
+      data: { id: subscriptionId, type: "subscriptions", attributes: {} },
+    };
+    const payfailSig = signLemonWebhookPayload(payfailPayload);
+    const resp2 = await request.post("/api/webhooks/lemonsqueezy", {
+      headers: { "x-signature": payfailSig.signature },
+      data: payfailSig.body,
+    });
+    expect(resp2.status()).toBe(200);
+
+    const failedOrder = await prisma.order.findFirst({
+      where: { user: { email: TEST_EMAIL }, providerOrderId: subscriptionId },
+    });
+    expect(failedOrder?.status).toBe("failed");
+
+    const revokedGrant = await prisma.accessGrant.findFirst({
+      where: { sourceType: "order", sourceId: initialOrder?.id },
+    });
+    expect(revokedGrant?.status).toBe("revoked");
+    expect(revokedGrant?.revokedAt).toBeTruthy();
+    expect(revokedGrant?.revokedAt?.getTime()).toBeGreaterThan(0);
+  });
+
   test("subscription_created: defensive fallback to attributes.custom_data (no meta.custom_data)", async ({
     request,
   }) => {
