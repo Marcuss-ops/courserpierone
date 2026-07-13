@@ -187,22 +187,55 @@ async function POST_IMPL(request: NextRequest) {
       }
     }
 
-    // ── order_refunded → mark order as refunded (auto-revoke access) ──
+    // ── order_refunded → mark order as refunded AND revoke its AccessGrant ──
+    // Once MCR Phase 2 cuts over (USE_ACCESS_GRANT_RESOLVER=true), the
+    // AccessGrant is the source of truth for "is this user authorized to
+    // access this product" — Order.status='refunded' alone won't deny
+    // access through the new resolver. The two updates run atomically
+    // in a single transaction so the order and its grant always agree.
     if (eventName === "order_refunded") {
       const orderId = String(data.id);
 
-      const updated = await prisma.order.updateMany({
+      // Find the internal order IDs that this refund applies to. The
+      // status='completed' filter mirrors the original behavior (don't
+      // re-revoke an already-refunded order). findMany (vs updateMany)
+      // gives us the IDs we need for the grant lookup.
+      const ordersToRefund = await prisma.order.findMany({
         where: {
           paymentProvider: "lemonsqueezy",
           providerOrderId: orderId,
           status: "completed",
         },
-        data: { status: "refunded" },
+        select: { id: true },
       });
 
-      if (updated.count > 0) {
+      if (ordersToRefund.length === 0) {
         console.log(
-          `[LS Webhook] order_refunded: marked ${updated.count} order(s) as refunded for ${orderId}`
+          `[LS Webhook] order_refunded: no completed orders found for ${orderId} (already refunded or never existed)`
+        );
+      } else {
+        const orderInternalIds = ordersToRefund.map((o) => o.id);
+
+        await prisma.$transaction([
+          prisma.order.updateMany({
+            where: { id: { in: orderInternalIds } },
+            data: { status: "refunded" },
+          }),
+          prisma.accessGrant.updateMany({
+            where: {
+              sourceType: "order",
+              sourceId: { in: orderInternalIds },
+              status: "active", // don't double-revoke: skip already-revoked grants
+            },
+            data: {
+              status: "revoked",
+              revokedAt: new Date(),
+            },
+          }),
+        ]);
+
+        console.log(
+          `[LS Webhook] order_refunded: refunded ${orderInternalIds.length} order(s) and revoked their AccessGrant(s) for ${orderId}`
         );
       }
     }

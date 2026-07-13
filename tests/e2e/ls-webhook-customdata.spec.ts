@@ -242,6 +242,189 @@ test.describe("LS webhook custom_data path (canonical meta.custom_data)", () => 
     expect(analyticsEvent?.channelId).toBe(TEST_CHANNEL_ID);
   });
 
+  test("order_refunded: revokes AccessGrant atomically with the order refund", async ({
+    request,
+  }) => {
+    const product = await prisma.product.findUnique({
+      where: { slug: "test-course-e2e" },
+    });
+    if (!product?.lemonVariantId) {
+      test.skip(true, "TEST_LEMON_VARIANT_ID not configured on the seeded test product");
+      return;
+    }
+
+    // ── Phase 1: order_created establishes the Order + AccessGrant ──
+    const orderId = `ls-cd-revoke-${Date.now()}`;
+    const customData = {
+      courseSlug: product.slug,
+      locale: "en-us",
+      channelId: TEST_CHANNEL_ID,
+    };
+
+    const createdPayload = generateLemonWebhookPayload(orderId, customData, {
+      email: TEST_EMAIL,
+    });
+    const createdSig = signLemonWebhookPayload(createdPayload);
+    const createdResp = await request.post("/api/webhooks/lemonsqueezy", {
+      headers: { "x-signature": createdSig.signature },
+      data: createdSig.body,
+    });
+    expect(createdResp.status()).toBe(200);
+
+    // Sanity: the order is completed, the grant is active.
+    const initialOrder = await prisma.order.findFirst({
+      where: { user: { email: TEST_EMAIL }, providerOrderId: orderId },
+    });
+    expect(initialOrder?.status).toBe("completed");
+
+    const initialGrant = await prisma.accessGrant.findFirst({
+      where: { sourceType: "order", sourceId: initialOrder?.id },
+    });
+    expect(initialGrant?.status).toBe("active");
+    expect(initialGrant?.revokedAt).toBeNull();
+
+    // ── Phase 2: order_refunded flips BOTH atomically ──
+    const refundPayload = {
+      meta: { event_name: "order_refunded" },
+      data: { id: orderId, type: "orders", attributes: {} },
+    };
+    const refundSig = signLemonWebhookPayload(refundPayload);
+    const refundResp = await request.post("/api/webhooks/lemonsqueezy", {
+      headers: { "x-signature": refundSig.signature },
+      data: refundSig.body,
+    });
+    expect(refundResp.status()).toBe(200);
+
+    // Order.status → 'refunded'
+    const refundedOrder = await prisma.order.findFirst({
+      where: { user: { email: TEST_EMAIL }, providerOrderId: orderId },
+    });
+    expect(refundedOrder?.status).toBe("refunded");
+
+    // AccessGrant.status → 'revoked' + revokedAt populated
+    const revokedGrant = await prisma.accessGrant.findFirst({
+      where: { sourceType: "order", sourceId: initialOrder?.id },
+    });
+    expect(revokedGrant?.status).toBe("revoked");
+    expect(revokedGrant?.revokedAt).toBeTruthy();
+    expect(revokedGrant?.revokedAt?.getTime()).toBeGreaterThan(0);
+
+    // ── Phase 3: re-delivery is idempotent (the grant stays revoked, revokedAt unchanged) ──
+    const firstRevokedAt = revokedGrant?.revokedAt;
+    const refundRedelivery = signLemonWebhookPayload(refundPayload);
+    const redeliveryResp = await request.post("/api/webhooks/lemonsqueezy", {
+      headers: { "x-signature": refundRedelivery.signature },
+      data: refundRedelivery.body,
+    });
+    expect(redeliveryResp.status()).toBe(200);
+
+    const grantAfterRedelivery = await prisma.accessGrant.findFirst({
+      where: { sourceType: "order", sourceId: initialOrder?.id },
+    });
+    expect(grantAfterRedelivery?.status).toBe("revoked");
+    // revokedAt should be unchanged: the gate runs BEFORE the business
+    // logic on re-delivery, so neither updateMany fires the second time.
+    expect(grantAfterRedelivery?.revokedAt?.getTime()).toBe(firstRevokedAt?.getTime());
+  });
+
+  test("order_refunded: graceful exit when the order was already refunded (ordersToRefund.length === 0)", async ({
+    request,
+  }) => {
+    const product = await prisma.product.findUnique({
+      where: { slug: "test-course-e2e" },
+    });
+    if (!product?.lemonVariantId) {
+      test.skip(true, "TEST_LEMON_VARIANT_ID not configured on the seeded test product");
+      return;
+    }
+
+    // ── Phase 1: order_created establishes the Order + AccessGrant ──
+    const orderId = `ls-cd-preexist-${Date.now()}`;
+    const createdPayload = generateLemonWebhookPayload(
+      orderId,
+      {
+        courseSlug: product.slug,
+        locale: "en-us",
+        channelId: TEST_CHANNEL_ID,
+      },
+      { email: TEST_EMAIL },
+    );
+    const createdSig = signLemonWebhookPayload(createdPayload);
+    const createdResp = await request.post("/api/webhooks/lemonsqueezy", {
+      headers: { "x-signature": createdSig.signature },
+      data: createdSig.body,
+    });
+    expect(createdResp.status()).toBe(200);
+
+    const initialOrder = await prisma.order.findFirst({
+      where: { user: { email: TEST_EMAIL }, providerOrderId: orderId },
+    });
+    expect(initialOrder?.status).toBe("completed");
+
+    // ── Phase 2: simulate a pre-refund (admin manual / out-of-order webhook) ──
+    // The order is now 'refunded' but the grant is still 'active'. This is
+    // exactly the scenario the "no completed orders found" branch is
+    // designed for: the findMany filter status='completed' will return 0,
+    // the handler will log and return 200, and processedWebhook will be
+    // created so LS doesn't retry.
+    await prisma.order.update({
+      where: { id: initialOrder?.id },
+      data: { status: "refunded" },
+    });
+
+    const grantBeforeWebhook = await prisma.accessGrant.findFirst({
+      where: { sourceType: "order", sourceId: initialOrder?.id },
+    });
+    expect(grantBeforeWebhook?.status).toBe("active");
+
+    // ── Phase 3: fire the late order_refunded webhook ──
+    const refundPayload = {
+      meta: { event_name: "order_refunded" },
+      data: { id: orderId, type: "orders", attributes: {} },
+    };
+    const refundSig = signLemonWebhookPayload(refundPayload);
+    const refundResp = await request.post("/api/webhooks/lemonsqueezy", {
+      headers: { "x-signature": refundSig.signature },
+      data: refundSig.body,
+    });
+    // Handler returns 200 OK so LS marks the delivery done and stops retrying.
+    expect(refundResp.status()).toBe(200);
+
+    // The grant is NOT touched (findMany returned 0, the $transaction
+    // never ran). Status stays 'active' + revokedAt stays null.
+    //
+    // NOTE: this documents a KNOWN LIMITATION: if the order is refunded
+    // by a path that does NOT go through the LS webhook (e.g., admin
+    // manual refund), the AccessGrant stays 'active' until MCR Phase 2
+    // cutover exposes the read-path that resolves "Order.status
+    // overrides grant.status". Tracked as a followup (V1.1 / pre-V1
+    // hardening).
+    const grantAfterWebhook = await prisma.accessGrant.findFirst({
+      where: { sourceType: "order", sourceId: initialOrder?.id },
+    });
+    expect(grantAfterWebhook?.status).toBe("active");
+    expect(grantAfterWebhook?.revokedAt).toBeNull();
+
+    // The order's status is unchanged (handler truly no-op'd — it
+    // didn't accidentally re-set the order to 'completed' or to any
+    // other status). Defense against a regression that bypasses the
+    // findMany filter and runs the updateMany unconditionally.
+    const orderAfterWebhook = await prisma.order.findFirst({
+      where: { user: { email: TEST_EMAIL }, providerOrderId: orderId },
+    });
+    expect(orderAfterWebhook?.status).toBe("refunded");
+
+    // The processedWebhook gate still fires (deliveryId is created), so
+    // the same LS delivery won't be retried.
+    const processed = await prisma.processedWebhook.count({
+      where: {
+        provider: "lemonsqueezy",
+        deliveryId: `LS-${orderId}-order_refunded`,
+      },
+    });
+    expect(processed).toBe(1);
+  });
+
   test("subscription_created: defensive fallback to attributes.custom_data (no meta.custom_data)", async ({
     request,
   }) => {

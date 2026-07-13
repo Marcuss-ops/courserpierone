@@ -218,25 +218,22 @@ test.describe("LemonSqueezy refund flow (V1 acceptance criterion #6)", () => {
     });
     expect(processedAfterReDelivery).toBe(1);
 
-    // Aspirational assertions — NOT in the LS handler today.
-    // Documented here for the spec, gated off so the suite stays
-    // green. Folds in once the corresponding handler change ships.
+    // AccessGrant.status → 'revoked' (UNCONDITIONAL — the LS handler
+    // now revokes grants atomically with the order refund; once
+    // USE_ACCESS_GRANT_RESOLVER=true, the new resolver denies access
+    // because of this status flip).
+    const grant = await prisma.accessGrant.findFirst({
+      where: { sourceType: "order", sourceId: initialOrder?.id },
+    });
+    expect(grant).toBeTruthy();
+    expect(grant?.status).toBe("revoked");
+    expect(grant?.revokedAt).toBeTruthy();
+
+    // AnalyticEvent of type 'refund' — STILL aspirational (not yet
+    // emitted by the LS handler). Gated off so the suite stays green;
+    // folds in once the refund branch ships a parallel analytics.create
+    // call (separate followup).
     //
-    //   // AccessGrant.status → 'revoked'
-    //   // (LS handler does NOT currently revoke grants on
-    //   //  order_refunded. Once USE_ACCESS_GRANT_RESOLVER is on,
-    //   //  the grant must be actively revoked here too.)
-    //   const grant = await prisma.accessGrant.findFirst({
-    //     where: { sourceType: "order", sourceId: orderId },
-    //   });
-    //   if (process.env.USE_ACCESS_GRANT_RESOLVER === "true") {
-    //     expect(grant?.status).toBe("revoked");
-    //   }
-    //
-    //   // AnalyticEvent of type 'refund'
-    //   // (LS handler does NOT currently emit 'refund' analytics.
-    //   //  processOrder emits 'purchase' on order_created; the
-    //   //  refund branch needs a parallel analytics.create call.)
     //   const refundAnalyticsCount = await prisma.analyticEvent.count({
     //     where: { user: { email: TEST_EMAIL }, eventType: "refund" },
     //   });
