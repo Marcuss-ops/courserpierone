@@ -341,7 +341,7 @@ Verifica che il **redirect URI** su Google Cloud Console sia:
 
 ### Running E2E tests — fail-fast semantics
 
-`npm run test:e2e` esegue i 3 file LS-touching (`tests/e2e/checkout.ls.spec.ts`, `tests/e2e/refund.lemonsqueezy.spec.ts`, `tests/e2e/ls-webhook-customdata.spec.ts`) con guard differenziati. La differenza cruciale:
+`npm run test:e2e` (che gira l'intera suite `tests/e2e/` via `playwright.config.ts: testDir`) include i 3 file LS-touching (`tests/e2e/checkout.ls.spec.ts`, `tests/e2e/refund.lemonsqueezy.spec.ts`, `tests/e2e/ls-webhook-customdata.spec.ts`) — sono questi 3 ad avere i guard differenziati. La differenza cruciale:
 
 - **Env var LS mancanti** (`LEMONSQUEEZY_API_KEY`, `LEMONSQUEEZY_WEBHOOK_SECRET`, `LEMONSQUEEZY_STORE_ID`, `TEST_LEMON_VARIANT_ID`) → **l'intero file LS fallisce a module-load** con `rc != 0` e messaggio `❌ Missing required Lemon Squeezy env vars: …` (da `tests/e2e/fixtures/ls-env-guard.ts:34-40`). Niente silent skip, niente `rc=0` falsi positivi. **Impostazione**: per ottenere le creds vedi [`scripts/ops/staging-bootstrap.md` §3.1](scripts/ops/staging-bootstrap.md#get-section-31).
 - **Env var LS presenti ma prodotto DB-side senza `lemonVariantId`** (ovvero la riga `Product` con `slug = "test-course-e2e"` esiste ma ha `lemonVariantId = null`) → il singolo test salta con `test.skip(true, "TEST_LEMON_VARIANT_ID not configured on the seeded test product")`. **NO** module-load fail. Test adiacenti continuano a girare.
