@@ -151,16 +151,24 @@ done
 # Note: this resolution is idempotent — SCRIPT_DIR is computed once
 # per source invocation. Re-sourcing the script re-derives the same
 # paths so a fallback is sticky across re-sources.
-# Multi-project caveat: PROJECT_ROOT ALWAYS wins over CWD by design.
-# If you have multiple projects with their own .env.staging.local in
-# sub-directories and need to override this script's resolution,
-# rename the conflict file to `.env.staging.local.other` — the
-# script's only triggered path is the exact basename match.
+#
+# ─── Multi-project operators ───
+# Priority order is PROJECT_ROOT > CWD > unset. STAGING_ENV_FILE env
+# var (if set in shell rc) wins over BOTH file lookups — use it for
+# multi-project workflows where the script-dir lookup finds the
+# wrong file. Example: export STAGING_ENV_FILE=~/work/other-proj/
+# .env.staging.local before sourcing this script.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-${0}}")" && pwd)"
 PROJECT_ROOT="$SCRIPT_DIR/../.."
 STAGING_ENV_FILE=""
-if [[ -f "$PROJECT_ROOT/.env.staging.local" ]]; then
+# 0. Explicit env-var override (multi-project operators — set
+#    STAGING_ENV_FILE in shell rc to bypass the heuristic entirely).
+if [[ -n "${STAGING_ENV_FILE:-}" && -f "$STAGING_ENV_FILE" ]]; then
+  : # STAGING_ENV_FILE already set; honor it as-is
+# 1. Project-root canonical (default Vercel env pull destination)
+elif [[ -f "$PROJECT_ROOT/.env.staging.local" ]]; then
   STAGING_ENV_FILE="$PROJECT_ROOT/.env.staging.local"
+# 2. CWD fallback (operator-override; works when sourced full-path)
 elif [[ -f ./.env.staging.local ]]; then
   STAGING_ENV_FILE="./.env.staging.local"
 fi
