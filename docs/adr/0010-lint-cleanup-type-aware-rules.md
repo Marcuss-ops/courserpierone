@@ -103,9 +103,9 @@ fi
 ```
 
 ```bash
-# Pattern B — direct PIPESTATUS capture (no shell-mode change; safer for shared scripts)
-npx tsc --noEmit > /tmp/tsc.out 2>&1
-TSC=${PIPESTATUS[0]}                # PIPESTATUS is set AFTER the pipe completes
+# Pattern B — direct PIPESTATUS capture, no shell-mode change (safer for shared scripts)
+npx tsc --noEmit 2>&1 | tee /tmp/tsc.out
+TSC=${PIPESTATUS[0]}                # index 0 = npx tsc; index 1 = tee
 echo "tsc exit: $TSC"               # 0 = clean, non-zero = broken
 # /tmp/tsc.out holds the full output for diff against /tmp/tsc-before.txt
 ```
