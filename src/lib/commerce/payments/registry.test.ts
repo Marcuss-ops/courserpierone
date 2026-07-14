@@ -15,7 +15,6 @@ vi.mock("@/lib/payment/lemonsqueezy", () => ({
 import { NotImplementedError } from "@/lib/errors";
 import { paymentProviderRegistry } from "./registry";
 import { lemonSqueezyProvider } from "./providers/lemonsqueezy";
-import { legacyStripeProvider } from "./providers/legacy/stripe";
 import type { PaymentProvider } from "./types";
 
 // ─── Helpers ────────────────────────────────────────────────────────
@@ -88,18 +87,22 @@ describe("paymentProviderRegistry", () => {
 
 // ─── Stub-method surface ───────────────────────────────────────────
 //
-// These tests verify the NOT_IMPLEMENTED contracts so that callers
-// predicting "Phase 2 / Phase 4 will fill these in" are not surprised
-// by runtime crashes mid-transition. Uses NotImplementedError (501),
-// `NotImplementedError` è 501 (feature deferred to a future MCR phase),
+// These tests verify the NOT_IMPLEMENTED contract for the only
+// registered provider (Lemon Squeezy) so that callers predicting
+// "Phase 2 / Phase 4 will fill these in" are not surprised by runtime
+// crashes mid-transition. Uses NotImplementedError (501), which is
 // distinct from 502 (upstream provider failure) so monitors don't
 // conflate "feature not yet built" with "provider upstream down".
+//
+// C1a cleanup: removed the legacy Stripe new-session provider test
+// surface — only LemonSqueezy is registered for new sessions; the
+// Stripe legacy webhook (`/api/webhooks/stripe`) is regression-tested
+// at the e2e layer separately in tests/e2e/checkout.stripe.spec.ts.
 
 describe("payment providers — stub methods (Phase 2/4 follow-up)", () => {
   beforeEach(() => {
     paymentProviderRegistry.__test_only_clearAll();
     paymentProviderRegistry.register(lemonSqueezyProvider);
-    paymentProviderRegistry.register(legacyStripeProvider);
   });
 
   it("lemonsqueezy.parseWebhook throws 501 NOT_IMPLEMENTED_PHASE_2", async () => {
@@ -120,40 +123,10 @@ describe("payment providers — stub methods (Phase 2/4 follow-up)", () => {
     expect((caught as NotImplementedError).statusCode).toBe(501);
   });
 
-  it("stripe.parseWebhook throws 501 NOT_IMPLEMENTED_PHASE_2", async () => {
-    let caught: unknown;
-    try {
-      await paymentProviderRegistry.get("stripe").parseWebhook({
-        provider: "stripe",
-        deliveryId: "x",
-        rawBody: "",
-      });
-    } catch (e) {
-      caught = e;
-    }
-    expect(caught).toBeInstanceOf(NotImplementedError);
-    expect((caught as NotImplementedError).code).toBe(
-      "NOT_IMPLEMENTED_PHASE_2",
-    );
-  });
-
   it("lemonsqueezy.retrievePayment throws 501 NOT_IMPLEMENTED_PHASE_4", async () => {
     let caught: unknown;
     try {
       await paymentProviderRegistry.get("lemonsqueezy").retrievePayment("ref");
-    } catch (e) {
-      caught = e;
-    }
-    expect(caught).toBeInstanceOf(NotImplementedError);
-    expect((caught as NotImplementedError).code).toBe(
-      "NOT_IMPLEMENTED_PHASE_4",
-    );
-  });
-
-  it("stripe.retrievePayment throws 501 NOT_IMPLEMENTED_PHASE_4", async () => {
-    let caught: unknown;
-    try {
-      await paymentProviderRegistry.get("stripe").retrievePayment("ref");
     } catch (e) {
       caught = e;
     }

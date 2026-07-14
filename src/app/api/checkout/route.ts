@@ -49,13 +49,13 @@ export const POST = withRateLimit(async function POST(request: NextRequest) {
 
     pricingService.validateProvider(pricing);
 
-    // Phase 7 cleanup: the Stripe legacy gate is removed. LS is the
-    // sole new-session provider as of V1.5+. The legacy Stripe webhook
-    // at /api/webhooks/stripe/route.ts is kept for processing
-    // pre-cutover refund/dispute events. ENABLE_STRIPE_CHECKOUT is
-    // still defined in env.ts (the legacy provider class still
-    // references it as a defense-in-depth check) but no caller
-    // exercises the new-session path anymore.
+    // Phase 7 cleanup: LS is the sole new-session provider as of
+    // V1.5+. The legacy Stripe webhook at /api/webhooks/stripe/route.ts
+    // remains for processing pre-cutover refund/dispute events.
+    // ENABLE_STRIPE_CHECKOUT remains in env.ts but has no live readers
+    // after C1a (the legacy provider module was removed); slated for
+    // C1b removal. The legacy webhook handler does NOT consult the
+    // flag by design — it processes events that pre-date it.
     //
     // If pricing.lemonVariantId is missing, CheckoutService.createCheckout
     // throws a CheckoutError with a diagnostic message ("Nessun

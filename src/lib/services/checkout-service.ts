@@ -22,11 +22,13 @@ export type CheckoutProduct = CreateCheckoutInput["product"];
  * registry throws on duplicate slug if this file is ever imported
  * twice (e.g., HMR) — that's a programmer error, surfaced loudly.
  *
- * Phase 7 cleanup: the legacy Stripe provider is no longer registered
- * for new sessions. The `legacy/stripe/index.ts` file is kept around
- * for the legacy webhook (`/api/webhooks/stripe/route.ts`) which
- * still processes pre-cutover refund/dispute events, but no new
- * checkout session is ever created via Stripe.
+ * Phase 7 cleanup (LS-only MoR): only Lemon Squeezy is registered for
+ * new-session creation. The legacy Stripe webhook at
+ * `/api/webhooks/stripe/route.ts` remains for processing pre-cutover
+ * refund/dispute events; no new checkout session is ever created via
+ * Stripe. The legacy provider module
+ * `src/lib/commerce/payments/providers/legacy/stripe/` was removed in
+ * the C1a cleanup commit.
  */
 paymentProviderRegistry.register(lemonSqueezyProvider);
 

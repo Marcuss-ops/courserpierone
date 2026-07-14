@@ -9,8 +9,7 @@
  * plain singleton.
  *
  * Production registration (set in src/lib/services/checkout-service.ts):
- *   - lemonsqueezy  → `LemonSqueezyPaymentProvider` (primary MoR)
- *   - stripe        → `LegacyStripePaymentProvider` (gated, fallback)
+ *   - lemonsqueezy  → `LemonSqueezyPaymentProvider` (sole new-session MoR)
  *
  * Tests can use `clearAll()` between cases (the method is marked
  * `__test_only_*` to discourage production use — the call sites in
