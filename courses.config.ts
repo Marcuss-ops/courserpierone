@@ -26,8 +26,15 @@ export interface CourseMeta {
   title: string;
   /** One-sentence tagline used in marketing catalog card. */
   tagline: string;
-  /** Course rendering template — selects the components/ folder at runtime. */
-  templateId: "amish" | "book-claude" | "lumio" | "h612" | "horizon";
+  /**
+   * Course rendering template — selects the components/ folder at runtime.
+   *
+   * Includes `default` for smoke-tests and placeholder courses that ship
+   * without a dedicated components/ folder: `[domain]/page.tsx` falls
+   * through to inline JSX when this templateId is rendered. Mirrors the
+   * `template` union in `CourseConfig` (src/lib/config/white-label-data.ts).
+   */
+  templateId: "amish" | "book-claude" | "lumio" | "h612" | "horizon" | "default";
   /** Cover image path (served from /public). */
   coverImage: string;
   /** Locales this course ships content for. Used for the /courses filter chips. */
