@@ -47,8 +47,18 @@
 import { prisma } from "@/lib/db/prisma";
 
 export interface DmContext {
-  /** ID + nome del creator (admin) che possiede il prodotto. Null se `shouldQuery=false`. */
-  creator: { id: string; name: string | null } | null;
+  /**
+   * Creator (admin) che possiede il prodotto. Null se `shouldQuery=false`.
+   * `image` + `role` servono a `ChatView` per renderizzare l'avatar e
+   * il ruolo-bubble dell'altro utente (additivo: i call site esistenti
+   * continuano a usare solo `id` + `name`).
+   */
+  creator: {
+    id: string;
+    name: string | null;
+    image: string | null;
+    role: string;
+  } | null;
   /** ID del prodotto (per costruire `?productId=...` URL). Null se `shouldQuery=false`. */
   product: { id: string } | null;
 }
@@ -74,7 +84,7 @@ export async function getDmContext(
     prisma.user.findFirst({
       where: { role: "admin" },
       orderBy: { createdAt: "asc" },
-      select: { id: true, name: true },
+      select: { id: true, name: true, image: true, role: true },
     }),
     prisma.product.findUnique({
       where: { slug: domainSlug },

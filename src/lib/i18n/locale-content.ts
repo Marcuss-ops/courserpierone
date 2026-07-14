@@ -191,6 +191,25 @@ export interface LocaleContent {
     format_label: string;
     read_label: string;
     onboarded_toast: string;
+    // Skool-mimic redesign 2026-07-14 — optional perché solo it/en hanno
+    // traduzione; le altre 5 lingue ottengono `undefined` e il fallback
+    // inline nel componente rende la stringa di default IT.
+    section_my_courses_title?: string;
+    section_my_courses_count_one?: string;
+    section_my_courses_count_other?: string;
+    section_browse_title?: string;
+    section_browse_subtitle?: string;
+    empty_library?: string;
+    empty_browse?: string;
+    footer_brand?: string;
+    footer_rights?: string;
+    footer_privacy?: string;
+    footer_terms?: string;
+    footer_refund?: string;
+    chat_title?: string;
+    chat_offline_creator?: string;
+    chat_offline_self?: string;
+    lang_label?: string;
   };
 
   /** Download page */
@@ -255,6 +274,12 @@ export function createEmptyLocale(locale: string, defaults?: Partial<LocaleConte
       video_title: "", video_desc: "", lessons_count_label: "", start_label: "",
       ebook_title: "", ebook_desc: "", format_label: "", read_label: "",
       onboarded_toast: "",
+      section_my_courses_title: "", section_my_courses_count_one: "",
+      section_my_courses_count_other: "", section_browse_title: "",
+      section_browse_subtitle: "", empty_library: "", empty_browse: "",
+      footer_brand: "", footer_rights: "", footer_privacy: "",
+      footer_terms: "", footer_refund: "", chat_title: "",
+      chat_offline_creator: "", chat_offline_self: "", lang_label: "",
     },
     download: {
       title: "", subtitle: "", download_button: "", view_online: "",

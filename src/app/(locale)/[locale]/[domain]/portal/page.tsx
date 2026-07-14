@@ -4,19 +4,17 @@ import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
 import type { Metadata } from "next";
-import { 
-  Play, 
-  BookOpen, 
-  Sparkles,
-  ArrowRight,
-  LogOut
-} from "lucide-react";
+import { ArrowRight, ShoppingBag, GraduationCap } from "lucide-react";
 import { getCourseConfig } from "@/lib/config/white-label-data";
 import { AccessGate } from "@/components/course/access-gate";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { loadLocaleContentCached } from "@/lib/i18n/load-locale-content";
-import { ContactCreatorButton } from "@/components/chat/contact-creator-button";
 import { getDmContext } from "@/lib/messaging/get-dm-context";
+import { findOrCreateConversation } from "@/lib/messaging/find-or-create-conversation";
+import { prisma } from "@/lib/db/prisma";
+import { UserNav } from "@/components/user-nav";
+import { ChatView } from "@/components/chat/chat-view";
+import { CourseCard } from "@/components/dashboard/course-card";
 
 export async function generateMetadata({
   params,
@@ -78,50 +76,32 @@ export default async function ProductPortalPage({
   searchParams: Promise<{ lang?: string; onboarded?: string; order_id?: string; orderId?: string }>;
 }) {
   const { domain, locale } = await params;
-  const { lang, onboarded, order_id, orderId } = await searchParams;
-  
+  const { lang: queryLang, onboarded, order_id, orderId } = await searchParams;
+
   const course = await getCourseConfig(domain);
   if (!course) return notFound();
 
   const { user, dbUser } = await getServerUser();
   const isAuthenticated = !!user?.email;
+  const isAdminViewer = dbUser?.role === "admin";
 
-  // ── Trova il creator (admin) e il product ID per i DM ──
-  // Fase 3.1: dedupato in getDmContext helper (single source of truth).
-  // Skip query quando viewer è admin o non autenticato (gate check-in).
+  // ── DM context (creator + product): single source of truth helper ──
+  // Skip query for admin viewers (they shouldn't auto-create DMs with themselves)
+  // and for unauthenticated visitors (AccessGate will render the purchase prompt).
   const { creator, product } = await getDmContext(
     domain,
-    isAuthenticated && dbUser?.role !== "admin",
+    isAuthenticated && !isAdminViewer,
   );
 
-  const currentLang = lang || course.defaultLanguage || "en";
+  const currentLang = queryLang || course.defaultLanguage || "en";
   const content = course.languages[currentLang] || course.languages[course.defaultLanguage];
 
-  // Load locale content for translations (cached via Redis)
+  // Load locale content for translations (cached via Redis). Missing keys
+  // for non-IT/EN locales fall back gracefully via inline defaults below.
   const localeContent = await loadLocaleContentCached(domain, currentLang);
   const lc = localeContent.portal;
-
-  // Warm accent from product config, fallback to amber #C9840D
-  const accent = course.accentColor ?? "#C9840D";
-  const isVideoComingSoon = domain === "amish-secrets";
-  const hasVideoLessons = course.lessons?.some((lesson) =>
-    Object.values(lesson.videos ?? {}).some((videoUrl) => Boolean(videoUrl?.trim()))
-  ) ?? false;
-
-  const COMING_SOON_TRANSLATIONS: Record<string, string> = {
-    it: "Prossimamente",
-    en: "Coming Soon",
-    es: "Próximamente",
-    fr: "Bientôt disponible",
-    de: "Demnächst",
-    pt: "Em breve",
-    default: "Coming Soon"
-  };
-  const langKey = currentLang.split("-")[0]?.toLowerCase() ?? "en";
-  const comingSoonText = COMING_SOON_TRANSLATIONS[langKey] ?? COMING_SOON_TRANSLATIONS.default;
-
-  // ID della prima lezione (per quick-start dopo acquisto)
-  const firstLessonId = course.lessons?.[0]?.id ?? "lesson-1";
+  // normalizedLang = 2-letter code (es. "en", "it") per i18n route + components.
+  const lang = currentLang.split("-")[0]?.toLowerCase() ?? "en";
 
   const activeOrderId = order_id || orderId;
   const portalQs = new URLSearchParams();
@@ -129,194 +109,479 @@ export default async function ProductPortalPage({
   if (onboarded) portalQs.set("onboarded", onboarded);
   if (activeOrderId) portalQs.set("order_id", activeOrderId);
 
-  return (
-    <AccessGate productSlug={domain} courseTitle={content.title} callbackUrl={`/${locale}/${domain}/portal?${portalQs.toString()}`} orderId={activeOrderId}>
-      <div className="min-h-screen bg-[#f5f5f7] text-[#1d1d1f] font-sans overflow-x-hidden relative">
-        {/* Top Navigation */}
-        <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-zinc-200/80">
-          <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-center">
-            <span className="text-xl font-black tracking-tighter text-zinc-900 uppercase">{course.slug}.</span>
+  // ════════════════════════════════════════════════════════════════════════
+  // SKOOL-MIMIC REDESIGN — DATA FETCHING (server-side, parallel)
+  // ════════════════════════════════════════════════════════════════════════
+  //   1. OWNED LIBRARY — orders (admin: virtual "all published" set)
+  //   2. BROWSE CATALOG — published products NOT in the owned set
+  //   3. CHAT CONTEXT — findOrCreateConversation for the chat panel
+  //   4. PROGRESS — aggregate completedLessons per product (zero-redundancy)
+  // ════════════════════════════════════════════════════════════════════════
+  interface OwnedRow {
+    orderId: string;
+    productId: string;
+    slug: string;
+    coverUrl: string | null;
+    defaultLanguage: string;
+    lessonsCount: number;
+    purchasedAt: Date;
+    completedLessons: number;
+  }
+  interface BrowseRow {
+    productId: string;
+    slug: string;
+    coverUrl: string | null;
+    defaultLanguage: string;
+    lessonsCount: number;
+  }
 
-            {isAuthenticated && (
-              <a
-                href="/auth/signout"
-                className="absolute right-6 p-2.5 bg-zinc-100 hover:bg-zinc-200 rounded-xl text-zinc-600 hover:text-red-500 transition-all border border-zinc-200"
+  let owned: OwnedRow[] = [];
+  let browse: BrowseRow[] = [];
+  let conversationId: string | null = null;
+  const targetUserId = dbUser?.id ?? null;
+
+  if (targetUserId) {
+    // Admin-viewer: see every published product as a "virtual order".
+    // Mirrors /dashboard logic to keep the library consistent across pages.
+    const ownedCandidates = isAdminViewer
+      ? prisma.product.findMany({
+          where: { status: "published" },
+          select: {
+            id: true,
+            slug: true,
+            coverUrl: true,
+            defaultLanguage: true,
+            _count: { select: { lessons: true } },
+          },
+        })
+      : prisma.order.findMany({
+          where: { userId: targetUserId, status: "completed" },
+          include: {
+            product: {
+              select: {
+                id: true,
+                slug: true,
+                coverUrl: true,
+                defaultLanguage: true,
+                _count: { select: { lessons: true } },
+              },
+            },
+          },
+          orderBy: { createdAt: "desc" },
+        });
+
+    // Chat conversation: auto-upsert (idempotent) — needed so the right-rail
+    // ChatView can mount with a non-null conversationId on first visit.
+    const chatPromise = creator && product && !isAdminViewer
+      ? findOrCreateConversation(targetUserId, creator.id, product.id)
+          .then((c) => c.id)
+          .catch(() => null)
+      : Promise.resolve(null);
+
+    // Browse catalog candidate query: independent from ownedCandidates
+    // (published products are just being queried, no overlap with owned set).
+    // Hoisted into the first Promise.all to eliminate an extra round-trip
+    // with Supavisor free tier (~50-100ms cold start saving).
+    const allPublishedPromise = prisma.product.findMany({
+      where: { status: "published" },
+      select: {
+        id: true,
+        slug: true,
+        coverUrl: true,
+        defaultLanguage: true,
+        _count: { select: { lessons: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const [candidatesRaw, chatId, allPublished] = await Promise.all([
+      ownedCandidates,
+      chatPromise,
+      allPublishedPromise,
+    ]);
+    conversationId = chatId;
+
+    // ── Owned library shape ──
+    const ownedProductIds = isAdminViewer
+      ? new Set((candidatesRaw as { id: string }[]).map((p) => p.id))
+      : new Set(
+          (candidatesRaw as { product: { id: string } }[]).map((o) => o.product.id),
+        );
+
+    // ── Browse catalog = published products NOT in owned set ──
+    // One query for "all published" (small set), filter in-memory to
+    // avoid a complex NOT-IN subquery on the (admin) virtual path.
+    browse = allPublished
+      .filter((p) => !ownedProductIds.has(p.id))
+      .map<BrowseRow>((p) => ({
+        productId: p.id,
+        slug: p.slug,
+        coverUrl: p.coverUrl,
+        defaultLanguage: p.defaultLanguage,
+        lessonsCount: p._count.lessons,
+      }));
+
+    // ── Per-product completedLessons (only for non-admin viewers) ──
+    if (isAdminViewer) {
+      owned = (candidatesRaw as {
+        id: string;
+        slug: string;
+        coverUrl: string | null;
+        defaultLanguage: string;
+        _count: { lessons: number };
+      }[]).map<OwnedRow>((p) => ({
+        orderId: `admin-virtual-${p.id}`,
+        productId: p.id,
+        slug: p.slug,
+        coverUrl: p.coverUrl,
+        defaultLanguage: p.defaultLanguage,
+        lessonsCount: p._count.lessons,
+        purchasedAt: new Date(),
+        completedLessons: 0,
+      }));
+    } else {
+      const orderRows = candidatesRaw as {
+        id: string;
+        createdAt: Date;
+        product: {
+          id: string;
+          slug: string;
+          coverUrl: string | null;
+          defaultLanguage: string;
+          _count: { lessons: number };
+        };
+      }[];
+      const productIds = orderRows.map((o) => o.product.id);
+      const lessons =
+        productIds.length > 0
+          ? await prisma.lesson.findMany({
+              where: { productId: { in: productIds } },
+              select: { id: true, productId: true },
+            })
+          : [];
+      const lessonIds = lessons.map((l) => l.id);
+      const completedRows =
+        lessonIds.length > 0
+          ? await prisma.lessonProgress.findMany({
+              where: {
+                userId: targetUserId,
+                lessonId: { in: lessonIds },
+                completed: true,
+              },
+              select: { lessonId: true },
+            })
+          : [];
+
+      const lessonToProduct = new Map(lessons.map((l) => [l.id, l.productId]));
+      const completedByProduct = new Map<string, number>();
+      for (const row of completedRows) {
+        const pid = lessonToProduct.get(row.lessonId);
+        if (pid) {
+          completedByProduct.set(pid, (completedByProduct.get(pid) ?? 0) + 1);
+        }
+      }
+
+      owned = orderRows.map<OwnedRow>((o) => ({
+        orderId: o.id,
+        productId: o.product.id,
+        slug: o.product.slug,
+        coverUrl: o.product.coverUrl,
+        defaultLanguage: o.product.defaultLanguage,
+        lessonsCount: o.product._count.lessons,
+        purchasedAt: o.createdAt,
+        completedLessons: completedByProduct.get(o.product.id) ?? 0,
+      }));
+    }
+  }
+
+  // ── Inline i18n fallbacks for keys missing in non-IT/EN locales ──
+  // (FR/DE/ES/TH/NO/DK/HI/KO haven't been translated yet; the live
+  // fallback chain in loadLocaleContentCached would otherwise yield `null`.)
+  const t = {
+    myCoursesTitle: lc.section_my_courses_title || "I Tuoi Corsi",
+    myCoursesCountOne: lc.section_my_courses_count_one || "1 corso nella tua libreria",
+    myCoursesCountOther:
+      (lc.section_my_courses_count_other || "{n} corsi nella tua libreria").replace(
+        "{n}",
+        String(owned.length),
+      ),
+    emptyLibrary: lc.empty_library || "Esplora il catalogo per iniziare il tuo primo percorso.",
+    browseTitle: lc.section_browse_title || "Esplora il Catalogo",
+    browseSubtitle:
+      lc.section_browse_subtitle || "Continua il tuo percorso con altri corsi",
+    emptyBrowse: lc.empty_browse || "Al momento non ci sono altri corsi disponibili.",
+    chatTitle: lc.chat_title || "Chat con il Creator",
+    chatOnline: "Online",
+    chatOffline:
+      lc.chat_offline_creator ||
+      (lang === "en"
+        ? "The creator is not available here. Open chat from the page button."
+        : "Il creator non è ancora disponibile qui. Apri la chat dal bottone della pagina."),
+    chatOfflineSelf:
+      lc.chat_offline_self ||
+      (lang === "en"
+        ? "You're the creator of this course — chat is reserved for your students."
+        : "Sei il creator di questo corso — la chat è riservata ai tuoi studenti."),
+    chatNeedLogin:
+      lang === "en"
+        ? "Sign in to chat with the creator."
+        : "Accedi per chattare con il creator.",
+    footerRights: lc.footer_rights || "Tutti i diritti riservati.",
+    footerBrand: lc.footer_brand || "Un progetto Courssy",
+    footerPrivacy: lc.footer_privacy || "Privacy Policy",
+    footerTerms: lc.footer_terms || "Termini di Servizio",
+    footerRefund: lc.footer_refund || "Politica di Rimborso",
+    langLabel: lc.lang_label || "Lingua",
+  };
+
+  return (
+    <AccessGate
+      productSlug={domain}
+      courseTitle={content.title}
+      callbackUrl={`/${locale}/${domain}/portal?${portalQs.toString()}`}
+      orderId={activeOrderId}
+    >
+      <div className="min-h-screen bg-cream-dark-bg text-cream-dark-text font-sans antialiased relative overflow-x-hidden">
+        {/* Top Navigation — Skool: brand left, profile+dropdown top-right */}
+        <nav className="sticky top-0 z-50 bg-cream-dark-bg/80 backdrop-blur-xl border-b border-cream-dark-border">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+            <Link
+              href={`/${locale}/${domain}`}
+              className="flex items-center gap-2 hover:opacity-70 transition-opacity min-w-0"
+            >
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-sm shrink-0"
+                style={{ background: "linear-gradient(135deg, #1a1a1a 0%, #444 100%)" }}
+                aria-hidden
               >
-                <LogOut className="w-4 h-4" />
-              </a>
-            )}
+                C
+              </div>
+              <span className="font-serif italic text-[20px] sm:text-[22px] leading-none tracking-[-0.2px] text-cream-dark-text lowercase truncate">
+                {course.slug}.
+              </span>
+            </Link>
+
+            {/* Profile dropdown — sempre visibile in alto a destra
+                come richiesto. Mostra avatar + nome + dropdown
+                (Dashboard / Modifica Profilo / Sign out). */}
+            {dbUser ? (
+              <UserNav
+                user={{
+                  name: dbUser.name,
+                  email: dbUser.email,
+                  image: dbUser.image,
+                  role: dbUser.role,
+                }}
+              />
+            ) : isAuthenticated ? (
+              <Link
+                href={`/${locale}/${domain}/portal`}
+                className="text-sm text-cream-dark-text-soft font-medium hover:text-cream-dark-text transition-colors"
+              >
+                {lang === "en" ? "Sign in" : "Accedi"}
+              </Link>
+            ) : null}
           </div>
         </nav>
 
-        {/* Hero Section */}
-        <div className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-50 via-orange-50/40 to-[#f5f5f7]" />
-          <div className="absolute top-0 right-0 w-96 h-96 bg-amber-200/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
-          <div className="absolute bottom-0 left-0 w-72 h-72 bg-orange-200/15 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/3" />
-          
-          <main className="relative max-w-5xl mx-auto px-6 pt-16 pb-8 md:pt-24 md:pb-12 space-y-12">
-            {/* Header */}
-            <div className="text-center space-y-4 max-w-2xl mx-auto">
-              <div 
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border"
-                style={{ 
-                  backgroundColor: `${accent}10`,
-                  borderColor: `${accent}30`
-                }}
-              >
-                <Sparkles className="w-3.5 h-3.5 animate-pulse" style={{ color: accent }} />
-                <span 
-                  className="text-[10px] font-black uppercase tracking-widest"
-                  style={{ color: accent }}
-                >
-                  {lc.access_badge || "Access Guaranteed"}
-                </span>
-              </div>
-              <h1 className="text-4xl md:text-5xl font-extrabold text-zinc-900 tracking-tight leading-tight">
-                {content.title}
-              </h1>
-              <p className="text-zinc-500 text-sm md:text-base font-medium leading-relaxed">
-                {lc.welcome_text || "Welcome to your private area. Choose which section to access to start your journey right away."}
-              </p>
-              {onboarded === "1" && (
-                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-green-50 border border-green-200 text-green-700 text-xs font-bold animate-fadeIn">
-                  <Sparkles className="w-4 h-4" />
-                  {lc.onboarded_toast || "Accesso garantito! Inizia subito con la prima lezione."}
-                </div>
-              )}
-            </div>
-          </main>
-        </div>
-
-        {/* Hub Selection Cards */}
-        <main className="max-w-5xl mx-auto px-6 py-8 md:py-12 space-y-12">
-          <div className={`grid grid-cols-1 ${(hasVideoLessons || isVideoComingSoon) ? "md:grid-cols-2" : ""} gap-8`}>
-            {(hasVideoLessons || isVideoComingSoon) && (
-              isVideoComingSoon ? (
-                <div
-                  className="group bg-white/75 rounded-[1.5rem] p-8 shadow-sm transition-all duration-300 flex flex-col justify-between min-h-[320px] relative overflow-hidden border border-zinc-200/50 opacity-80"
-                >
-                  <div className="space-y-6 relative z-10">
-                    <div 
-                      className="w-14 h-14 rounded-2xl flex items-center justify-center"
-                      style={{ backgroundColor: `${accent}08`, border: `1px solid ${accent}15` }}
-                    >
-                      <Play className="w-6 h-6 fill-current text-zinc-400" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-3">
-                        <h3 className="text-xl font-bold text-zinc-500">
-                          {lc.video_title || "Video Course"}
-                        </h3>
-                        <span 
-                          className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest text-white shrink-0"
-                          style={{ backgroundColor: accent }}
-                        >
-                          {comingSoonText}
-                        </span>
-                      </div>
-                      <p className="text-zinc-400 text-xs mt-2 font-medium leading-relaxed">
-                        {lc.video_desc || "Access video lessons, watch detailed explanations and track your progress."}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-6 border-t border-zinc-100 relative z-10">
-                    <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-                      {course.lessons?.length || 0} {lc.lessons_count_label || "Lessons"}
-                    </span>
-                    <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                      {comingSoonText}
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <Link
-                  href={`/${locale}/${domain}/curso/${firstLessonId}?lang=${currentLang}`}
-                  className="group bg-white rounded-[1.5rem] p-8 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] flex flex-col justify-between min-h-[320px] relative overflow-hidden border border-zinc-200/60"
-                >
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-amber-50/50 via-transparent to-orange-50/30" />
-                  
-                  <div className="space-y-6 relative z-10">
-                    <div 
-                      className="w-14 h-14 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500"
-                      style={{ backgroundColor: `${accent}12`, border: `1px solid ${accent}20` }}
-                    >
-                      <Play className="w-6 h-6 fill-current" style={{ color: accent }} />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-zinc-900">
-                        {lc.video_title || "Video Course"}
-                      </h3>
-                      <p className="text-zinc-500 text-xs mt-2 font-medium leading-relaxed">
-                        {lc.video_desc || "Access video lessons, watch detailed explanations and track your progress."}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-6 border-t border-zinc-100 relative z-10">
-                    <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-                      {course.lessons.length} {lc.lessons_count_label || "Lessons"}
-                    </span>
-                    <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest group-hover:gap-2 transition-all" style={{ color: accent }}>
-                      {lc.start_label || "Start"} <ArrowRight className="w-3.5 h-3.5" />
-                    </span>
-                  </div>
-                </Link>
-              )
-            )}
-            {/* Card 2: eBook */}
-            <Link
-              href={`/${locale}/${domain}/ebook?lang=${currentLang}`}
-              className="group bg-white rounded-[1.5rem] p-8 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] flex flex-col justify-between min-h-[320px] relative overflow-hidden border border-zinc-200/60"
-            >
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-orange-50/50 via-transparent to-amber-50/30" />
-              
-              <div className="space-y-6 relative z-10">
-                <div 
-                  className="w-14 h-14 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500"
-                  style={{ backgroundColor: `${accent}12`, border: `1px solid ${accent}20` }}
-                >
-                  <BookOpen className="w-6 h-6" style={{ color: accent }} />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-zinc-900">
-                    {lc.ebook_title || "Digital Book"}
-                  </h3>
-                  <p className="text-zinc-500 text-xs mt-2 font-medium leading-relaxed">
-                    {lc.ebook_desc || "Read the complete guide in eBook format directly from the web reader or download the offline PDF."}
+        {/* Main: 2-column Skool layout (Courses-left flex-1 + Chat right-rail 400px) */}
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 lg:py-10 pb-24 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,400px)] gap-6 lg:gap-8">
+          {/* ── LEFT: Courses (My Library + Browse Catalog) ─────────── */}
+          <div className="space-y-10 min-w-0">
+            {/* MY COURSES */}
+            <section>
+              <header className="flex items-end justify-between gap-4 mb-5">
+                <div className="min-w-0">
+                  <h2 className="font-serif text-2xl md:text-3xl text-cream-dark-text leading-tight">
+                    {t.myCoursesTitle}
+                  </h2>
+                  <p className="text-sm text-cream-dark-text-soft font-light mt-1">
+                    {owned.length === 0
+                      ? t.emptyLibrary
+                      : owned.length === 1
+                        ? t.myCoursesCountOne
+                        : t.myCoursesCountOther}
                   </p>
                 </div>
-              </div>
+                {owned.length > 0 && dbUser && !isAdminViewer && (
+                  <Link
+                    href={`/${lang}/dashboard`}
+                    className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-cream-dark-gold hover:gap-2.5 transition-all shrink-0"
+                  >
+                    {lang === "en" ? "Open Dashboard" : "Apri Dashboard"}
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                )}
+              </header>
 
-              <div className="flex items-center justify-between pt-6 border-t border-zinc-100 relative z-10">
-                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-                  {lc.format_label || "PDF / Web Format"}
-                </span>
-                <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest group-hover:gap-2 transition-all" style={{ color: accent }}>
-                  {lc.read_label || "Read"} <ArrowRight className="w-3.5 h-3.5" />
-                </span>
-              </div>
-            </Link>
+              {owned.length === 0 ? (
+                <div className="bg-cream-dark-surface border border-cream-dark-border rounded-3xl p-10 lg:p-12 text-center space-y-4 shadow-md shadow-black/20">
+                  <div className="w-14 h-14 rounded-2xl bg-cream-dark-bg border border-cream-dark-border mx-auto flex items-center justify-center">
+                    <GraduationCap className="w-7 h-7 text-cream-dark-gold/70" />
+                  </div>
+                  <p className="text-cream-dark-text-soft font-light max-w-sm mx-auto">
+                    {t.emptyLibrary}
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  {owned.map((o) => (
+                    <CourseCard
+                      key={o.orderId}
+                      slug={o.slug}
+                      coverUrl={o.coverUrl}
+                      lessonCount={o.lessonsCount}
+                      completedLessons={o.completedLessons}
+                      purchasedAt={o.purchasedAt}                        href={`/${(o.defaultLanguage ?? lang).split("-")[0]}/${o.slug}/portal?lang=${currentLang}`}
+                      lang={lang}
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* BROWSE CATALOG — only if there are products the user doesn't own */}
+            {(browse.length > 0 || isAdminViewer) && (
+              <section>
+                <header className="mb-5">
+                  <h2 className="font-serif text-2xl md:text-3xl text-cream-dark-text leading-tight">
+                    {t.browseTitle}
+                  </h2>
+                  <p className="text-sm text-cream-dark-text-soft font-light mt-1">
+                    {t.browseSubtitle}
+                  </p>
+                </header>
+                {browse.length === 0 ? (
+                  <div className="bg-cream-dark-surface border border-cream-dark-border rounded-3xl p-10 text-center space-y-3 shadow-md shadow-black/20">
+                    <ShoppingBag className="w-8 h-8 text-cream-dark-text-soft/40 mx-auto" />
+                    <p className="text-cream-dark-text-soft font-light">{t.emptyBrowse}</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    {browse.map((b) => (
+                      <CourseCard
+                        key={b.productId}
+                        slug={b.slug}
+                        coverUrl={b.coverUrl}
+                        lessonCount={b.lessonsCount}
+                        completedLessons={0}
+                        purchasedAt={null}
+                        href={`/${(b.defaultLanguage ?? lang).split("-")[0]}/${b.slug}`}
+                        lang={lang}
+                      />
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
           </div>
 
-          {/* DM: Scrivi al creator — visibile solo a studenti autenticati */}
-          {/* Fase 3.1: sostituisce il vecchio ChatModal in-page con un
-              link diretto alla inbox unificata /dashboard/messages/[creatorId].
-              Lo studente atterra nella chat view canonica con productId
-              nell'URL (Fase 3.3 read-side guard). lessonId non serve qui. */}
-          {isAuthenticated && dbUser && creator && product?.id && (
-            <div className="flex justify-center pt-4 border-t border-zinc-100">
-              <ContactCreatorButton
-                creatorId={creator.id}
-                productId={product.id}
-                currentUserId={dbUser.id}
-              />
+          {/* ── RIGHT RAIL: Chat with creator (always-open) ───────── */}
+          <aside className="lg:sticky lg:top-24 lg:self-start h-[600px] lg:h-[calc(100vh-7rem)] min-w-0">
+            <div className="bg-cream-dark-surface border border-cream-dark-border rounded-3xl shadow-2xl shadow-black/30 h-full overflow-hidden flex flex-col">
+              {/* Chat header — Skool style: avatar + creator name + green online dot */}
+              <header className="px-5 py-4 border-b border-cream-dark-border flex items-center gap-3 shrink-0">
+                <div className="relative shrink-0">
+                  <div className="w-11 h-11 rounded-full bg-gradient-to-br from-[#FFF5E6] to-[#FFE4C4] flex items-center justify-center overflow-hidden border border-cream-dark-border">
+                    {creator?.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={creator.image}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="font-bold text-cream-dark-gold text-base">
+                        {(creator?.name ?? "C")[0]?.toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <span
+                    className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-cream-dark-surface"
+                    aria-hidden
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-cream-dark-text truncate">
+                    {creator?.name ?? t.chatTitle}
+                  </p>
+                  <p className="text-[10px] text-emerald-400 font-medium uppercase tracking-wider mt-0.5 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    {conversationId ? t.chatOnline : (lang === "en" ? "Connecting…" : "Connessione…")}
+                  </p>
+                </div>
+              </header>
+
+              {/* Body: ChatView when conversationId is resolved; otherwise an offline hint
+                  coerente con "chat con il creator già aperta" (mai blank quando possibile). */}
+              {conversationId && creator && dbUser && product ? (
+                <ChatView
+                  conversationId={conversationId}
+                  productId={product.id}
+                  currentUserId={dbUser.id}
+                  currentUserName={dbUser.name ?? dbUser.email}
+                  otherUser={{
+                    id: creator.id,
+                    name: creator.name,
+                    image: creator.image,
+                    role: creator.role,
+                  }}
+                />
+              ) : isAdminViewer ? (
+                <ChatOfflineHint message={t.chatOfflineSelf} />
+              ) : !isAuthenticated ? (
+                <ChatOfflineHint message={t.chatNeedLogin} />
+              ) : (
+                <ChatOfflineHint message={t.chatOffline} />
+              )}
             </div>
-          )}
+          </aside>
         </main>
 
+        {/* Footer — minimal, brand + legal anchors */}
+        <footer className="border-t border-cream-dark-border bg-cream-dark-bg/40 backdrop-blur-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+            <p className="text-xs text-cream-dark-text-soft font-light">
+              © 2026 Courssy · {t.footerBrand} · {t.footerRights}
+            </p>
+            <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-cream-dark-text-soft">
+              <Link href="/privacy" className="hover:text-cream-dark-gold transition-colors">
+                {t.footerPrivacy}
+              </Link>
+              <span className="text-cream-dark-text-soft/40">·</span>
+              <Link href="/terms" className="hover:text-cream-dark-gold transition-colors">
+                {t.footerTerms}
+              </Link>
+              <span className="text-cream-dark-text-soft/40">·</span>
+              <Link href="/refund" className="hover:text-cream-dark-gold transition-colors">
+                {t.footerRefund}
+              </Link>
+              <span className="text-cream-dark-text-soft/40">·</span>
+              <span>
+                {t.langLabel}: <span className="font-semibold text-cream-dark-text">{lang.toUpperCase()}</span>
+              </span>
+            </nav>
+          </div>
+        </footer>
       </div>
     </AccessGate>
+  );
+}
+
+/**
+ * ChatOfflineHint — inline sub-component used when `<ChatView>` cannot
+ * mount (admin viewer / unauthenticated / no creator present). Renders a
+ * soft empty state inside the same right-rail container so the layout
+ * doesn't collapse.
+ */
+function ChatOfflineHint({ message }: { message: string }) {
+  return (
+    <div className="flex-1 flex items-center justify-center px-6 py-10 text-center">
+      <div className="space-y-2 max-w-[260px]">
+        <p className="text-sm text-cream-dark-text-soft font-light leading-relaxed">
+          {message}
+        </p>
+      </div>
+    </div>
   );
 }

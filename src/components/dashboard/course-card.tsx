@@ -8,7 +8,8 @@ interface CourseCardProps {
   coverUrl: string | null;
   lessonCount: number;
   completedLessons: number;
-  purchasedAt: Date;
+  /** Data acquisto; null = "sfoglia catalogo" (l'utente non ha ancora acquistato, nasconde la riga "Acquistato il..."). */
+  purchasedAt: Date | null;
   href: string;
   lang?: string; // 2-letter locale (e.g. "it", "en", "es"); defaults to "it"
 }
@@ -31,11 +32,13 @@ export function CourseCard({
 
   const t = getUiTranslations(lang);
   const formatterLocale = lang === "en" ? "en-US" : lang === "es" ? "es-ES" : "it-IT";
-  const purchasedDate = new Date(purchasedAt).toLocaleDateString(formatterLocale, {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  const purchasedDate = purchasedAt
+    ? new Date(purchasedAt).toLocaleDateString(formatterLocale, {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : null;
 
   return (
     <Link
@@ -73,9 +76,11 @@ export function CourseCard({
           <h3 className="font-serif text-xl text-cream-text leading-tight group-hover:text-cream-espresso transition-colors line-clamp-2">
             {title}
           </h3>
-          <p className="text-xs text-cream-text-soft font-light">
-            {uiT(t, "dashCourseCardPurchasedOn", { date: purchasedDate })}
-          </p>
+          {purchasedDate && (
+            <p className="text-xs text-cream-text-soft font-light">
+              {uiT(t, "dashCourseCardPurchasedOn", { date: purchasedDate })}
+            </p>
+          )}
         </div>
 
         <div className="pt-3 border-t border-cream-border-soft">

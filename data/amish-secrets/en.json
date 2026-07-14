@@ -456,6 +456,22 @@
     "ebook_title": "Digital Book",
     "ebook_desc": "Read the complete guide in eBook format directly from the web reader or download the offline PDF.",
     "format_label": "PDF / Web Format",
-    "read_label": "Read"
+    "read_label": "Read",
+    "section_my_courses_title": "My Courses",
+    "section_my_courses_count_one": "1 course in your library",
+    "section_my_courses_count_other": "{n} courses in your library",
+    "section_browse_title": "Browse Catalog",
+    "section_browse_subtitle": "Continue your journey with other courses",
+    "empty_library": "Explore the catalog to start your first course.",
+    "empty_browse": "No other courses available right now.",
+    "chat_title": "Chat with the Creator",
+    "chat_offline_creator": "The creator is not available here. Open chat from the page button.",
+    "chat_offline_self": "You are the creator of this course — chat is reserved for your students.",
+    "footer_brand": "A Courssy project",
+    "footer_rights": "All rights reserved.",
+    "footer_privacy": "Privacy Policy",
+    "footer_terms": "Terms of Service",
+    "footer_refund": "Refund Policy",
+    "lang_label": "Language"
   }
 }
