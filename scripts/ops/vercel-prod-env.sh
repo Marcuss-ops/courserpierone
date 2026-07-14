@@ -95,8 +95,14 @@
 #     `npx vercel env add USE_ACCESS_GRANT_RESOLVER production "true"`
 #     only during the deliberate resolver rollout in docs/phase-5*)
 #   - NEXT_PUBLIC_*_STRIPE_PUBLISHABLE_KEY, ENABLE_STRIPE_CHECKOUT,
-#     GOOGLE_CLIENT_ID/SECRET — REMOVED from env registry (cleanup C1b/c,
-#     C2)
+#     GOOGLE_CLIENT_ID/SECRET — REMOVED from env registry (legacy
+#     Stripe UI gate + Stripe client-side payment init + Google OAuth
+#     creds that live in Supabase Auth dashboard, not Vercel env).
+#     Removed in commits `a0e511e` (C1g, legacy provider module) +
+#     `4242f18` (C2a, env registration + Vercel rm + .env.example).
+#     Verified absent in Production + Preview + Development via
+#     `npx vercel env ls <scope>` (returns "No environment variable
+#     found").
 
 # CRITICAL: this script must be EXECUTED, not sourced. Sourcing would
 # either kill the shell (via `set -e` + missing var) or silently skip
