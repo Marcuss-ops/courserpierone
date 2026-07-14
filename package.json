@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && npm run validate:locales && npm run generate:locales && next build",
+    "build": "npm run validate:locales && next build",
     "start": "next start",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
