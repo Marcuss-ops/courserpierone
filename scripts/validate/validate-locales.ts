@@ -201,9 +201,31 @@ function main() {
       const localeKeys = flattenKeys(localeData);
       const missing: string[] = [];
 
+      // Sub-trees whose missing keys are treated as warnings (soft) rather
+      // than fatal errors. Used to tolerate iterating i18n namespaces where
+      // only `it.json` + `en.json` are translated first; inline `??`/inline
+      // fallbacks in the component cover the gap at runtime until the
+      // async translation pipeline catches up.
+      //
+      // Rationale: an empty-string key in JSON would BREAK the `?? "fallback"`
+      // runtime safety net (since `"" ?? x` = `""`, NOT `x`). Option D
+      // preserves the JS undefined-path so the inline component default text
+      // renders while translations propagate.
+      const SOFT_SUBTREES = ["portal."];
+
       for (const key of referenceKeys) {
         if (!localeKeys.has(key)) {
-          missing.push(key);
+          const isSoft = SOFT_SUBTREES.some((prefix) => key.startsWith(prefix));
+          if (isSoft) {
+            // Track with the same discrepancy channel so it's logged but
+            // not fatal (catches accidental deletions later when the
+            // subtree solidifies).
+            discrepancies.push(
+              `      ⚠️ ${key}: missing (soft — pending async translation)`,
+            );
+          } else {
+            missing.push(key);
+          }
         }
       }
 
