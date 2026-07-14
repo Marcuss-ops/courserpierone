@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { LogOut, User, UserCog } from "lucide-react";
+import { LogOut, User, Settings, UserCog, CreditCard, Bell, Lock } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 export interface UserNavProps {
@@ -130,12 +130,44 @@ export function UserNav({ user }: UserNavProps) {
               Dashboard
             </Link>
             <Link
-              href="/account/profile"
+              href="/account"
               className="flex items-center gap-3 px-4 py-2 text-[14px] text-black hover:bg-black/5 transition-colors"
               onClick={() => setIsOpen(false)}
             >
-              <UserCog className="w-4 h-4" />
-              Modifica Profilo
+              <Settings className="w-4 h-4" />
+              Impostazioni
+            </Link>
+            <Link
+              href="/account/profile"
+              className="flex items-center gap-3 px-4 py-2 text-[14px] text-black hover:bg-black/5 transition-colors pl-9"
+              onClick={() => setIsOpen(false)}
+            >
+              <UserCog className="w-3.5 h-3.5" />
+              Modifica profilo
+            </Link>
+            <Link
+              href="/account/password"
+              className="flex items-center gap-3 px-4 py-2 text-[14px] text-black hover:bg-black/5 transition-colors pl-9"
+              onClick={() => setIsOpen(false)}
+            >
+              <Lock className="w-3.5 h-3.5" />
+              Password
+            </Link>
+            <Link
+              href="/account/payments"
+              className="flex items-center gap-3 px-4 py-2 text-[14px] text-black hover:bg-black/5 transition-colors pl-9"
+              onClick={() => setIsOpen(false)}
+            >
+              <CreditCard className="w-3.5 h-3.5" />
+              Pagamenti
+            </Link>
+            <Link
+              href="/account/notifications"
+              className="flex items-center gap-3 px-4 py-2 text-[14px] text-black hover:bg-black/5 transition-colors pl-9"
+              onClick={() => setIsOpen(false)}
+            >
+              <Bell className="w-3.5 h-3.5" />
+              Notifiche
             </Link>
             {user.role === "admin" && (
               <Link

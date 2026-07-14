@@ -32,6 +32,7 @@ import { prisma } from "@/lib/db/prisma";
 import { sanitizeHtml } from "@/lib/utils/sanitize";
 import { messageBroker, NEW_MESSAGE } from "@/lib/ws/broker";
 import { sendDmNotificationEmail } from "@/lib/services/email";
+import { createNotification } from "@/lib/notifications/create-notification";
 
 const OFFLINE_THRESHOLD_MS = 5 * 60 * 1000; // 5 min
 
@@ -116,6 +117,38 @@ export async function createMessageAndNotify(
       createdAt: created.createdAt.toISOString(),
     },
   });
+
+  // ── 2.5 In-app notification (Centro Notifiche bell) ─────
+  // Fire-and-forget: il partner riceverà una riga in `Notification`
+  // con type="chat_reply". La campanella (NotificationBell in
+  // CourseTopNav) la mostrerà al prossimo poll di 30s (V1: niente
+  // WS notifications stream — solo REST GET /api/notifications.
+  // Quando il partner NON ha inappChatReply=true, createNotification
+  // logga warning e skappa l'INSERT. NB: questo è un effetto diverso
+  // dall'email offline (che usa lastSeenAt + unreadCount cooldown):
+  //   • Notification→ campanella in-app (persistito, badge realtime)
+  //   • email       → fallback email quando partner è offline da ≥5min
+  // Le due sono indipendenti e complementari.
+  try {
+    const senderName =
+      sender.name?.trim() ||
+      sender.email?.split("@")[0] ||
+      "Uno studente";
+    const snippet = content.trim().slice(0, 80);
+    await createNotification({
+      recipientId: partnerId,
+      type: "chat_reply",
+      entityId: created.id,
+      title: `${senderName} — nuovo messaggio`,
+      body: snippet || "(messaggio vuoto)",
+      // V1: la campanella è solo notification feed — il click naviga via
+      // courseAreaHref al /chat (non deep-link alla singola conversation).
+      link: undefined,
+    });
+  } catch (err) {
+    // Non bloccare il flusso se la INSERT notifica fallisce
+    console.error("[dm-notif] createNotification failed:", err);
+  }
 
   // ── 3. Offline email notification (best-effort) ────────────
   // Solo se il partner è offline (lastSeenAt mancante o > 5 min fa) E

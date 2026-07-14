@@ -2,6 +2,7 @@ import { getServerUser } from "@/lib/supabase/get-user";
 import { AccessGate } from "@/components/course/access-gate";
 import { CourseTopNav } from "@/components/layout/course-top-nav";
 import { loadLocaleContentCached } from "@/lib/i18n/load-locale-content";
+import { getInitialNotifications } from "@/lib/notifications/get-initial-notifications";
 import type { Metadata } from "next";
 
 /**
@@ -36,6 +37,23 @@ export default async function CourseLayout({
 }) {
   const { locale, domain } = await params;
   const { dbUser } = await getServerUser();
+
+  // Centri Notifiche (bell): pre-fetch SSR per badge subito visibile
+  // al primo paint. Failure-tolerant: se la tabella Notification
+  // non esiste ancora (migration pending) il fallback è `unreadCount=0`
+  // e `recent=[]` — la UI continua a funzionare e polleremo pian piano.
+  let notifications: { unreadCount: number; recent: Awaited<ReturnType<typeof getInitialNotifications>>["recent"] } = {
+    unreadCount: 0,
+    recent: [],
+  };
+  if (dbUser?.id) {
+    try {
+      notifications = await getInitialNotifications(dbUser.id);
+    } catch (err) {
+      // Tabella mancante post-deploy → log + fallback vuoto.
+      console.warn("[notif] getInitialNotifications failed (migration pending?):", err);
+    }
+  }
 
   // Locale i18n for tab labels. Falls back via createEmptyLocale defaults
   // + inline `|| "X"` if a locale file lacks these keys.
@@ -74,6 +92,11 @@ export default async function CourseLayout({
           courseSlug={domain}
           locale={locale}
           labels={labels}
+          notifications={
+            dbUser
+              ? notifications
+              : undefined
+          }
         />
         <main className="relative max-w-7xl mx-auto px-4 sm:px-6 py-8 lg:py-10 pb-24">
           {children}

@@ -199,6 +199,62 @@ model User {
   // permette query `WHERE userId = X AND status='active'` per il
   // resolver `resolve-product-access` (PR 3 of MCR).
   accessGrants    AccessGrant[]      @relation("UserAccessGrants")
+
+  // Centro Notifiche (Bell feature): ogni utente può ricevere
+  // notifiche in-app (compaiono nella campanella in CourseTopNav) e
+  // può avere preferenze di delivery per categoria. CASCADE su entrambi
+  // — cancellare un utente elimina le sue notifiche/preferenze.
+  notifications          Notification[]
+  notificationPreference NotificationPreference?
+}
+
+// ─── Centro Notifiche (Skool-style Bell) ─────────────────────────────
+// Modello unico per TUTTE le tipologie di notifica in-app. `type` non è
+// un enum Prisma (perché futuri tipi devono aggiungersi senza migration):
+// viene validato lato application in src/lib/notifications/create-notification.ts.
+// `entityId` è un riferimento polimorfico (string) — non FK — perché
+// l'entità può essere Message/Lesson/Product/SystemAdmin announcement.
+// Triggers V1 (vedi createMessageAndNotify in src/lib/messaging/create-message.ts
+// + POST /api/admin/notifications/broadcast):
+//   • chat_reply     — automatico, fired dopo ogni Message.create
+//   • new_lesson     — manuale admin (broadcast a utenti prodotto)
+//   • new_course     — manuale admin
+//   • lesson_update  — manuale admin
+//   • course_update  — manuale admin
+//   • system_admin   — manuale admin (annuncio globale)
+//   • community_reply— riservato V2 (richiede CommunityTopic/Post schema)
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  entityId  String
+  title     String
+  body      String?
+  link      String?
+  read      Boolean  @default(false)
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([userId, createdAt])
+}
+
+// ─── NotificationPreference ───────────────────────────────────────────
+// Una riga per User (PK = userId). Default all-true per fare
+// "Just Works" out of the box: nuovo utente → campanella subito attiva.
+// getOrCreatePreference upsert se mancante (idempotente).
+model NotificationPreference {
+  userId              String   @id
+  emailNewLesson      Boolean  @default(true)
+  emailCommunityReply Boolean  @default(true)
+  inappChatReply      Boolean  @default(true)
+  inappNewLesson      Boolean  @default(true)
+  inappCommunityReply Boolean  @default(true)
+  updatedAt           DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // ─── Progresso Lezioni (ripristinato post-fix schema-corrupt) ──

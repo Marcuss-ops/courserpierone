@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { UserNav } from "@/components/user-nav";
+import { NotificationBell } from "@/components/layout/notification-bell";
+import type { SerializedNotification } from "@/lib/notifications/get-initial-notifications";
 
 interface CourseTopNavProps {
   /** Profile info passed down from Server Component layout. Null when unauthenticated. */
@@ -25,6 +27,11 @@ interface CourseTopNavProps {
     chat: string;
     aboutCourse: string;
   };
+  /** Notifiche bell props attive quando l'utente è autenticato. */
+  notifications?: {
+    unreadCount: number;
+    recent: SerializedNotification[];
+  };
 }
 
 /**
@@ -45,6 +52,7 @@ export function CourseTopNav({
   courseSlug,
   locale,
   labels,
+  notifications,
 }: CourseTopNavProps) {
   const pathname = usePathname();
   const [hidden, setHidden] = useState(false);
@@ -140,7 +148,7 @@ export function CourseTopNav({
           </Link>
         </div>
 
-        {/* Right cluster: about link + User profile dropdown */}
+        {/* Right cluster: about link + Notification bell + User profile dropdown */}
         <div className="flex items-center gap-2 shrink-0">
           <Link
             href={`${basePath}/about`}
@@ -148,6 +156,13 @@ export function CourseTopNav({
           >
             {labels.aboutCourse}
           </Link>
+          {user && notifications && (
+            <NotificationBell
+              initialUnreadCount={notifications.unreadCount}
+              initialRecent={notifications.recent}
+              courseAreaHref={`${basePath}/chat`}
+            />
+          )}
           {user && <UserNav user={user} />}
         </div>
       </div>
