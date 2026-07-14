@@ -62,9 +62,9 @@ Riepilogo (`.env.example` contiene i default completi):
 | `LEMONSQUEEZY_STORE_ID` | ✅ | Lemon Squeezy Store ID |
 | `LEMONSQUEEZY_WEBHOOK_SECRET` | ✅ | Webhook secret LS |
 | `OPENAI_API_KEY` | ❌ | Traduzioni automatiche (opzionale) |
-| `EMAIL_SERVER_HOST` / `EMAIL_SERVER_PORT` / `EMAIL_SERVER_USER` / `EMAIL_SERVER_PASSWORD` / `EMAIL_FROM` | ❌ | SMTP per email transazionali |
+| `EMAIL_SERVER_HOST` / `EMAIL_SERVER_PORT` / `EMAIL_SERVER_USER` / `EMAIL_SERVER_PASSWORD` / `EMAIL_FROM` | ❌ | Required per send email — vedi sezione "Email (Transazionali)" sotto |
 
-Senza Stripe env (V1.x rimuove): `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`. Senza NextAuth env: nessuna (Supabase Auth non le richiede).
+Senza Stripe env client-side (V1.x rimuove): solo `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` restano richiesti dalla drain legacy (webhook-only). Senza NextAuth env: nessuna (Supabase Auth non le richiede).
 
 ---
 
@@ -104,7 +104,7 @@ Auth gestita interamente da **Supabase Auth**. Niente NextAuth.
 2. **Supabase Dashboard** — Authentication → Providers → Google → Enable
    - Incolla Client ID + Client Secret da Google Cloud Console
    - Salva
-3. Le env `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` non servono lato client (passano solo via Supabase) ma è utile tenerle per riferimento.
+3. Google OAuth credentials (Client ID + Secret) vivono **solo nella dashboard Supabase** del progetto. Non servono come env Vercel — il flusso OAuth è gestito interamente da Supabase Auth.
 
 ---
 

@@ -86,15 +86,17 @@
 #   64 usage error (unknown flag)
 #
 # NOT in scope (deliberately skipped; rationale below):
-#   - STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET + NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-#     (LEGACY provider — Lemon Squeezy is the PRIMARY post-Phase 7. Set
-#     these in Vercel Production ONLY if ENABLE_STRIPE_CHECKOUT=true per
-#     docs/production.md + tests/e2e/checkout.stripe.spec.ts fallback.)
-#   - ENABLE_STRIPE_CHECKOUT + USE_ACCESS_GRANT_RESOLVER
-#     (feature flags with hardcoded defaults `'false'` — flip via
-#     `npx vercel env add ENABLE_STRIPE_CHECKOUT production "true"` only
-#     during a deliberate Stripe fallback per the rollout cadence in
-#     docs/production.md)
+#   - STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET
+#     (LEGACY provider webhook-only — Lemon Squeezy is the PRIMARY post-
+#     Phase 7. Used by the legacy webhook handler for refund/dispute
+#     events that pre-date the cutover; removable after C4 drain.)
+#   - USE_ACCESS_GRANT_RESOLVER
+#     (feature flag with hardcoded default `'false'` — flip via
+#     `npx vercel env add USE_ACCESS_GRANT_RESOLVER production "true"`
+#     only during the deliberate resolver rollout in docs/phase-5*)
+#   - NEXT_PUBLIC_*_STRIPE_PUBLISHABLE_KEY, ENABLE_STRIPE_CHECKOUT,
+#     GOOGLE_CLIENT_ID/SECRET — REMOVED from env registry (cleanup C1b/c,
+#     C2)
 
 # CRITICAL: this script must be EXECUTED, not sourced. Sourcing would
 # either kill the shell (via `set -e` + missing var) or silently skip
@@ -179,20 +181,15 @@ _gen_secret() {
 # port 5432 + IPv6-only on free tier). SUPABASE_URL/SERVICE_ROLE_KEY
 # → server-side admin (storage, OAuth flows).
 #
-# GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET are listed here because they
-# are the Supabase Auth "Google provider" credentials. In practice
-# they are most often configured in the SUPABASE dashboard (Auth →
-# Providers → Google), NOT as Vercel env vars — see docs from
-# scripts/diagnose-oauth.ts. Listed here for completeness; skipped
-# silently if the shell vars are unset (preserves the existing
-# `optional: true` semantics from src/lib/env.ts).
+# GOOGLE OAuth credentials are NOT in this Vercel env registry: configure
+# Client ID + Secret in the Supabase Dashboard (Authentication → Providers
+# → Google). scripts/diagnose-oauth.ts can still read process.env for
+# diagnostic visibility.
 CATEGORY_SUPABASE_DB_AUTH=(
   "DATABASE_URL|SUPABASE_DATABASE_URL|Supabase pooled (port 6543, pgBouncer)"
   "DIRECT_URL|SUPABASE_DIRECT_URL|Supabase direct (port 5432, IPv6-only on free tier)"
   "SUPABASE_URL|SUPABASE_URL|Supabase project URL (https://<ref>.supabase.co)"
   "SUPABASE_SERVICE_ROLE_KEY|SUPABASE_SERVICE_ROLE_KEY|Supabase service role JWT — server-only, full privilege"
-  "GOOGLE_CLIENT_ID|GOOGLE_CLIENT_ID|Google OAuth client ID (OPTIONAL — usually set in Supabase Auth dashboard)"
-  "GOOGLE_CLIENT_SECRET|GOOGLE_CLIENT_SECRET|Google OAuth client secret (OPTIONAL — see above)"
 )
 
 # ── 2. Lemon Squeezy (API + Webhook + Store) ───────────────────────
@@ -206,16 +203,15 @@ CATEGORY_LEMONSQUEEZY=(
 )
 
 # ── 3. Email (SMTP) ────────────────────────────────────────────────
-# All 5 required by src/lib/services/email.ts. EMAIL_SERVER_HOST/PORT
-# have defaults in src/lib/env.ts (smtp.gmail.com / 587) but Vercel
-# production should set them explicitly so the Production-scope values
-# aren't picked up from defaults that the env proxy can lose.
+# All 5 required by src/lib/services/email.ts. None have defaults in
+# src/lib/env.ts anymore (cleanup C1e) — set explicitly to your SMTP
+# provider (Resend, SendGrid, Mailgun, Gmail SMTP).
 CATEGORY_EMAIL_SMTP=(
-  "EMAIL_SERVER_HOST|EMAIL_SERVER_HOST|SMTP host (default smtp.gmail.com)"
-  "EMAIL_SERVER_PORT|EMAIL_SERVER_PORT|SMTP port (default 587)"
+  "EMAIL_SERVER_HOST|EMAIL_SERVER_HOST|SMTP host (e.g. smtp.resend.com)"
+  "EMAIL_SERVER_PORT|EMAIL_SERVER_PORT|SMTP port (e.g. 587 or 2525)"
   "EMAIL_SERVER_USER|EMAIL_SERVER_USER|SMTP username (REQUIRED for actual send)"
-  "EMAIL_SERVER_PASSWORD|EMAIL_SERVER_PASSWORD|SMTP password / Gmail App Password"
-  "EMAIL_FROM|EMAIL_FROM|From address (default noreply@courser.app)"
+  "EMAIL_SERVER_PASSWORD|EMAIL_SERVER_PASSWORD|SMTP password / Resend API key"
+  "EMAIL_FROM|EMAIL_FROM|From address (e.g. 'Courssy <no-reply@courssy.com>')"
 )
 
 # ── 4. Redis (Upstash) ─────────────────────────────────────────────

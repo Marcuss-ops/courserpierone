@@ -36,18 +36,14 @@ import {
 
 const TEST_EMAIL = "stripe-legacy-e2e@example.com";
 
-const hasLegacyStripeCreds =
-  !!process.env.STRIPE_WEBHOOK_SECRET;
-
-test.skip(!hasLegacyStripeCreds, "STRIPE_WEBHOOK_SECRET not configured");
-// V1.5: Stripe legacy path (webhook handler) is gated by
-// ENABLE_STRIPE_CHECKOUT for explicit legacy activation. The
-// primary provider toggle is LS; Stripe remains as a regression
-// safety-net for historical purchases.
-test.skip(
-  process.env.ENABLE_STRIPE_CHECKOUT !== "true",
-  "ENABLE_STRIPE_CHECKOUT is false (V1.5: LS primary, legacy Stripe webhook gated)"
-);
+// V1.5+: only the legacy webhook handler is exercised here,
+// not new-session creation. ENABLE_STRIPE_CHECKOUT was REMOVED
+// from env.ts in C1b cleanup — the legacy webhook is now active
+// whenever STRIPE_WEBHOOK_SECRET is configured (default for V1.x
+// during the drain window). The single `test.skip` below is the
+// only gate, ensuring the legacy webhook logic is actually tested
+// in CI when creds are present.
+test.skip(!process.env.STRIPE_WEBHOOK_SECRET, "STRIPE_WEBHOOK_SECRET not configured");
 
 test.beforeEach(async () => {
   await cleanupTestUser(TEST_EMAIL);

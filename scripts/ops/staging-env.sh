@@ -128,14 +128,11 @@ done
 #   LEMONSQUEEZY_WEBHOOK_SECRET     → Lemon Squeezy Webhook creation (32-char hex)
 #   NEXT_PUBLIC_APP_URL             → Vercel → Project → Settings → Domains (custom)
 #   NEXT_PUBLIC_SUPABASE_*          → Mirror of server-side Supabase project URL + anon JWT
-#   STRIPE_SECRET_KEY + _WEBHOOK_SECRET + ENABLE_STRIPE_CHECKOUT
+#   STRIPE_SECRET_KEY + _WEBHOOK_SECRET
 #                                 → Stripe Dashboard → Developers → API keys
-#                                   (active when ENABLE_STRIPE_CHECKOUT=true;
-#                                    legacy/parity path during the LS-primary rollout)
-#   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-#                                 → Stripe Dashboard → Developers → API keys
-#                                   (browser-exposed pk_test_/pk_live_; surfaced as
-#                                    .env even when ENABLE_STRIPE_CHECKOUT=false)
+#                                   (legacy webhook-only path during the LS-primary
+#                                    rollout; required for refund/dispute events that
+#                                    pre-date the cutover. Removable after C4 drain.)
 #
 # SAFE: this script intentionally does NOT use `set -e` (see header).
 # A missing .env.staging.local falls through silently with an

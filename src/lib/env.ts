@@ -65,29 +65,19 @@ export const ENV_DEFINITIONS: EnvVarDef[] = [
   },
 
   // ═══ Required — necessarie per feature specifiche ═══
-  {
-    key: "GOOGLE_CLIENT_ID",
-    category: "required",
-    description: "Google OAuth Client ID (configurato nella Supabase Auth dashboard)",
-    optional: true,
-  },
-  {
-    key: "GOOGLE_CLIENT_SECRET",
-    category: "required",
-    description: "Google OAuth Client Secret (configurato nella Supabase Auth dashboard)",
-    optional: true,
-  },
+  // Stripe legacy webhook receipt is intentional: see C4 cleanup commit
+  // for full removal after drain (V1.x blocker).
+  // Google OAuth credentials live in Supabase Dashboard → Authentication →
+  // Providers → Google (not in this Vercel env registry).
   {
     key: "EMAIL_SERVER_HOST",
     category: "required",
-    description: "SMTP host per invio email (conferme acquisto)",
-    defaultValue: "smtp.gmail.com",
+    description: "SMTP host per invio email (conferme acquisto). Required — set explicitly (e.g. smtp.resend.com).",
   },
   {
     key: "EMAIL_SERVER_PORT",
     category: "required",
-    description: "SMTP port",
-    defaultValue: "587",
+    description: "SMTP port. Required — set explicitly (e.g. 2525 for Resend on Vercel egress).",
   },
   {
     key: "EMAIL_SERVER_USER",
@@ -104,33 +94,18 @@ export const ENV_DEFINITIONS: EnvVarDef[] = [
   {
     key: "EMAIL_FROM",
     category: "required",
-    description: "Mittente delle email",
-    defaultValue: "noreply@courser.app",
+    description: "Mittente delle email. Required — set explicitly (e.g. 'Courssy <no-reply@courssy.com>').",
   },
   {
     key: "STRIPE_SECRET_KEY",
     category: "required",
-    description: "Stripe secret key (sk_test_... o sk_live_...)",
+    description: "Stripe secret key (sk_test_... o sk_live_...) — used by the legacy webhook handler for refund/subscription events. Removable after C4 drain (V1.x blocker).",
     optional: true,
   },
   {
     key: "STRIPE_WEBHOOK_SECRET",
     category: "required",
-    description: "Stripe webhook signing secret (whsec_...)",
-    optional: true,
-  },
-  {
-    key: "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
-    category: "required",
-    description: "Stripe publishable key (pk_test_... o pk_live_...)",
-    optional: true,
-  },
-  {
-    key: "ENABLE_STRIPE_CHECKOUT",
-    category: "optional",
-    description:
-      "Feature flag (V1.5) — se 'true', abilita la creazione di nuove sessioni Stripe checkout quando lemonVariantId non è configurato su un prodotto. Default 'false': LS è il primary provider e Stripe è solo webhook-compatibile per ordini legacy.",
-    defaultValue: "false",
+    description: "Stripe webhook signing secret (whsec_...) — required by the legacy webhook handler; removable after C4 drain.",
     optional: true,
   },
   {

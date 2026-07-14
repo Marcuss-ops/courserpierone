@@ -48,11 +48,10 @@ nslookup www.courssy.com
 | `LEMONSQUEEZY_API_KEY` | ✅ | Live key |
 | `LEMONSQUEEZY_STORE_ID` | ✅ | Store UUID |
 | `LEMONSQUEEZY_WEBHOOK_SECRET` | ✅ | `openssl rand -hex 16` |
-| `STRIPE_SECRET_KEY` | ⚠️ | Solo per drain ordini legacy |
-| `STRIPE_WEBHOOK_SECRET` | ⚠️ | Solo per drain |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | ⚠️ | Solo per drain |
+| `STRIPE_SECRET_KEY` | ⚠️ | Solo per drain ordini legacy (webhook handler) |
+| `STRIPE_WEBHOOK_SECRET` | ⚠️ | Solo per drain (webhook signature) |
 | `EMAIL_SERVER_HOST` | ✅ | Es. `smtp.resend.com` |
-| `EMAIL_SERVER_PORT` | ✅ | Default `587` |
+| `EMAIL_SERVER_PORT` | ✅ | Es. `587` (o `2525` se Resend/Vercel lo blocca) |
 | `EMAIL_SERVER_USER` | ✅ | SMTP user |
 | `EMAIL_SERVER_PASSWORD` | ✅ | App password (non master pwd) |
 | `EMAIL_FROM` | ✅ | Es. `no-reply@courssy.com` |

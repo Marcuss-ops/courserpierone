@@ -48,10 +48,14 @@ describe("ENV_DEFINITIONS", () => {
   it("contains all major service keys", () => {
     const allKeys = ENV_DEFINITIONS.map((d) => d.key);
     expect(allKeys).toContain("STRIPE_SECRET_KEY");
-    expect(allKeys).toContain("GOOGLE_CLIENT_ID");
     expect(allKeys).toContain("OPENAI_API_KEY");
     expect(allKeys).toContain("LEMONSQUEEZY_API_KEY");
     expect(allKeys).toContain("SUPABASE_URL");
+    // After C2 cleanup: GOOGLE_CLIENT_ID/SECRET moved to Supabase Dashboard
+    // (Auth → Providers → Google) — no longer in Vercel env registry.
+    expect(allKeys).not.toContain("GOOGLE_CLIENT_ID");
+    expect(allKeys).not.toContain("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY");
+    expect(allKeys).not.toContain("ENABLE_STRIPE_CHECKOUT");
   });
 });
 
@@ -111,16 +115,21 @@ describe("validateEnv", () => {
     resetEnvValidation();
 
     const result = validateEnv();
+    // After C1e cleanup: EMAIL_SERVER_HOST has no defaultValue — unset
+    // produces a `required` warning so the operator sets it explicitly.
     const emailWarning = result.warnings.find((w) => w.key === "EMAIL_SERVER_HOST");
-    expect(emailWarning).toBeUndefined();
+    expect(emailWarning).toBeDefined();
+    expect(result.valid).toBe(true); // warning, not error
   });
 });
 
 describe("env proxy accessor", () => {
-  it("returns default for unset vars with default values", async () => {
+  it("returns undefined for required unset vars with no default", async () => {
+    // After C1e cleanup: EMAIL_SERVER_HOST has no defaultValue and is
+    // category="required" (not critical) — caller MUST set it explicitly.
     deleteEnv("EMAIL_SERVER_HOST");
     const { env } = await import("./env");
-    expect(env.EMAIL_SERVER_HOST).toBe("smtp.gmail.com");
+    expect(env.EMAIL_SERVER_HOST).toBeUndefined();
   });
 
   it("returns undefined for optional unset vars", async () => {

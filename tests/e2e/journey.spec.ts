@@ -13,9 +13,9 @@ import { signUpTestUser, deleteSupabaseUserById } from "./fixtures/supabase-auth
  * The journey exercises the user-facing flow with LemonSqueezy as the
  * primary payment provider. The legacy-Stripe-regression test
  * (signed webhook only, no real Stripe session creation) lives in
- * checkout.stripe.spec.ts and is gated by ENABLE_STRIPE_CHECKOUT for
- * explicit legacy activation. V1.5 mandate: the primary customer
- * journey MUST NOT depend on Stripe creds.
+ * checkout.stripe.spec.ts and is gated by STRIPE_WEBHOOK_SECRET
+ * presence. V1.5 mandate: the primary customer journey MUST NOT
+ * depend on Stripe creds.
  *
  * Flow per locale (it-it, en-us, es-es):
  *   1. Sign up test user via Supabase admin (email_confirm: true)

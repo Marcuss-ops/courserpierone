@@ -57,12 +57,13 @@ VARS=(
   "LEMONSQUEEZY_STORE_ID|Lemon Squeezy Live Store ID"
   "LEMONSQUEEZY_WEBHOOK_SECRET|Lemon Squeezy webhook signing secret"
   "EMAIL_SERVER_HOST|Resend SMTP host (smtp.resend.com)"
-  "EMAIL_SERVER_PORT|Resend SMTP port (587)"
+  "EMAIL_SERVER_PORT|Resend SMTP port (587 — or 2525 if blocked)"
   "EMAIL_SERVER_USER|Resend SMTP user (resend)"
   "EMAIL_SERVER_PASSWORD|Resend SMTP password (= API key)"
-  "EMAIL_FROM|Email mittente (noreply@courser.app)"
-  "GOOGLE_CLIENT_ID|Google OAuth Client ID (Web app)"
-  "GOOGLE_CLIENT_SECRET|Google OAuth Client Secret"
+  "EMAIL_FROM|Courssy <no-reply@your-domain.com>"
+  # GOOGLE_CLIENT_ID/SECRET removed in C2 cleanup — they live in Supabase
+  # Dashboard → Authentication → Providers → Google, NOT in this Vercel
+  # env registry.
   "KV_REST_API_URL|Upstash Redis REST URL"
   "KV_REST_API_TOKEN|Upstash Redis REST Token"
   "REDIS_URL|Upstash Redis ioredis TCP (fallback)"
