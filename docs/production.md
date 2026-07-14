@@ -400,10 +400,12 @@ await prisma.user.update({
 |---|---|---|---|---|---|
 | **Critical** | `DATABASE_URL`, `DIRECT_URL`, `SUPABASE_SERVICE_ROLE_KEY` | Immediate via gitleaks PR block | **180 d** or on compromise | **15 min** (rotate + redeploy) | Vercel env history + 1Password vault |
 | **Required (payments)** | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `LEMONSQUEEZY_API_KEY`, `LEMONSQUEEZY_WEBHOOK_SECRET` | Immediate via gitleaks PR block | **365 d** or on compromise | **30 min** (roll key in vendor + Vercel + redeploy) | Vendor dashboards + 1Password |
-| **Required (auth)** | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `EMAIL_SERVER_PASSWORD`, `LOG_ERROR_SECRET`, `CRON_SECRET` | Immediate via gitleaks PR block | **365 d** or on compromise | **30 min** (vendor + Vercel + redeploy) | Vendor dashboards + 1Password |
+| **Required (auth)** | `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `EMAIL_SERVER_PASSWORD`, `LOG_ERROR_SECRET`, `CRON_SECRET` | Immediate via gitleaks PR block | **365 d** or on compromise | **30 min** (vendor + Vercel + redeploy) | Vendor dashboards + 1Password |
 | **Optional** | `OPENAI_API_KEY`, `ALERT_WEBHOOK_URL`, `NEXT_PUBLIC_APP_URL` | < 24 h (alert slack = noise) | **annually** | **15 min** (Vercel replacement) | Vendor + 1Password |
 
 > "Detection window" assumes gitleaks CI is green on main AND `npm audit` is run weekly. Both already on the deploy-gate.
+>
+> **NB post-C2a (2026-07-15, commit 4242f18):** `GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET` were REMOVED from this registry and from `src/lib/env.ts` + `.env.example` + the Vercel dashboard. They live ONLY in **Supabase Dashboard → Authentication → Providers → Google** (Google OAuth is mediated by Supabase; rotation is handled via that UI, not via Vercel env). See `docs/ops/supabase-auth-setup.md` §3.1 for the canonical bridge.
 
 ### 5.2 Rotation procedure (Critical tier — `SUPABASE_SERVICE_ROLE_KEY`)
 

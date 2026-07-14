@@ -146,6 +146,41 @@ export function useRealtimeChat({
     pollRef.current = setInterval(poll, 10_000);
   }, [conversationId, onMessages, cleanup, safeSetConnected]);
 
+  /**
+   * safeStartPolling — single source of truth for "I want to switch to
+   * HTTP polling fallback". Defers the side-effect out of any
+   * synchronous effect/EventSource callback scope (parity with
+   * safeSetConnected), and guards against post-unmount execution via
+   * `mountedRef.current` (cheap double-check both before scheduling
+   * the microtask AND after the microtask fires, in case the
+   * component unmounted in the interim).
+   *
+   * Used by both the SSE onerror path (auto-degrade to polling) and
+   * the EventSource constructor catch (synchronous failure during
+   * stream init). Defining it once means the deferred-sideEffect
+   * contract is documented in one place rather than repeated inline
+   * at 2 sites.
+   *
+   * Ordering note: when called from onerror immediately after
+   * safeSetConnected(false), both schedule their own microtasks —
+   * so setState(false) and the polling kickoff are independent
+   * microtasks. React 18 batches within the next commit window
+   * and startPolling's own mounted+mode guards are idempotent, so
+   * the brief ordering shift is functionally safe.
+   *
+   * Deps: `[startPolling]` — `mountedRef` is a ref (stable), and
+   * `startPolling` itself is a useCallback whose identity matches
+   * its declaration-time deps. We pass `startPolling` so the
+   * consumer's deps array can swap `startPolling → safeStartPolling`
+   * without lying about what's actually used.
+   */
+  const safeStartPolling = useCallback(() => {
+    if (!mountedRef.current) return;
+    queueMicrotask(() => {
+      if (mountedRef.current) startPolling();
+    });
+  }, [startPolling]);
+
   // ── SSE connection (canonical realtime path) ──────────────
   const connectSse = useCallback(() => {
     if (!mountedRef.current || modeRef.current === "sse") return;
@@ -180,20 +215,24 @@ export function useRealtimeChat({
         es.close();
         esRef.current = null;
         modeRef.current = null;
-        // Auto-deferred by safeSetConnected; startPolling triggers
-        // cleanup() which won't re-close es (esRef.current is null
-        // already) and starts the polling interval.
+        // Both safeSetConnected and safeStartPolling auto-defer to
+        // queueMicrotask; React 18 collapses into one commit frame.
+        // startPolling's own internal cleanup() is idempotent — the
+        // ES is already closed above so the second esRef.current
+        // check inside cleanup will short-circuit.
         safeSetConnected(false);
-        startPolling();
+        safeStartPolling();
       };
     } catch {
+      // Outer mounted check is a cheap early-return optimization
+      // (avoids the microtask allocation in safeStartPolling if we
+      // already know we'd skip). safeStartPolling also guards
+      // internally, but we save one closure allocation.
       if (mountedRef.current) {
-        queueMicrotask(() => {
-          if (mountedRef.current) startPolling();
-        });
+        safeStartPolling();
       }
     }
-  }, [conversationId, onMessages, cleanup, safeSetConnected, startPolling]);
+  }, [conversationId, onMessages, cleanup, safeSetConnected, safeStartPolling]);
 
   // ── Initialize / teardown based on enabled flag ────────────
   useEffect(() => {
