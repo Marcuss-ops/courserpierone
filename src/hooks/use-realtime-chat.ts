@@ -189,7 +189,14 @@ export function useRealtimeChat({
       connectSse();
     } else {
       cleanup();
-      setConnected(false);
+      // Defer setConnected out of the synchronous effect-call scope
+      // so react-hooks/set-state-in-effect is satisfied. Without
+      // this, eslint-plugin-react-hooks flags the in-effect setState
+      // as causing cascading renders. Mirrors the queueMicrotask
+      // pattern already used in startPolling/onerror paths above.
+      queueMicrotask(() => {
+        if (mountedRef.current) setConnected(false);
+      });
     }
     return () => {
       mountedRef.current = false;
