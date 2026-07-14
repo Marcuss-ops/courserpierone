@@ -255,6 +255,9 @@ CATEGORY_NEXT_PUBLIC=(
   "NEXT_PUBLIC_APP_URL|APP_URL|Public app URL (e.g. https://www.courssy.com) — used in cron emails + OAuth redirects"
   "NEXT_PUBLIC_SUPABASE_URL|SUPABASE_URL|Same as SUPABASE_URL (browser-exposed; client-side Supabase init)"
   "NEXT_PUBLIC_SUPABASE_ANON_KEY|SUPABASE_ANON_KEY|Supabase anon JWT (browser-safe; client-side Supabase init)"
+  # NB: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY was REMOVED in C2a (4242f18).
+  # The legacy publishable key is no longer in env.ts or .env.example —
+  # do NOT re-add it. See NOT-in-scope block above for the full removal trail.
 )
 
 # ── 8. Other optional (skipped silently if shell vars unset) ─────

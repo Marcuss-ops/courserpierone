@@ -44,6 +44,24 @@ interface PageProps {
 export const dynamic = "force-static";
 export const revalidate = 3600; // 1h
 
+/**
+ * Enumerate the 5 marketing-supported locales so Vercel prerenders each
+ * /<locale>/courses page at build time. Without this, `force-static`
+ * alone still allows first-hit SSR for unenumerated locales; with it,
+ * the 5 known locales are guaranteed to be static. Unknown locale
+ * params still fall through to dynamic render (default `dynamicParams`
+ * is fine because middleware redirects invalid locale URLs upstream).
+ */
+export function generateStaticParams() {
+  return [
+    { locale: "it-it" },
+    { locale: "en-us" },
+    { locale: "es-es" },
+    { locale: "fr-fr" },
+    { locale: "de-de" },
+  ];
+}
+
 // `course.locales` uses 2-letter codes ("it", "en", "fr"…), while the URL
 // and locale-resolver carry full locale-prefixed codes ("it-it", "en-gb"…).
 // Strip the country part so the membership test works.
@@ -59,7 +77,10 @@ function getCoursesForLocale(locale: string): CourseMeta[] {
 // Per-locale marketing titles and descriptions. Keeping this small
 // (5-core languages) keeps the page light; other locales fall back to
 // the English copy. Move to courses.config.ts if it grows.
-type Copy = { title: string; description: string };
+interface Copy {
+  title: string;
+  description: string;
+}
 const COPY_BY_LANG: Record<string, Copy> = {
   it: {
     title: "Scopri i Corsi · Courssy",

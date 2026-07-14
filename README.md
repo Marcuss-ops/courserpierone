@@ -19,7 +19,7 @@ analytics, protezione accessi e gestione progressi.
 - **OpenAI API key** (opzionale, per traduzioni automatiche)
 - **Account SMTP** (opzionale, per email transazionali)
 
-> ⚠️ **V1.x in transizione a LS-only.** Stripe ancora presente (`stripe@^22.2.0` in package.json, webhook `src/app/api/webhooks/stripe/`, campi Prisma, e2e test, 5+ lingue di legal i18n) ma in rimozione pianificata (Fase 8, vedi [roadmap §1.2](docs/roadmap-current.md)). Drain `activeStripeOrders === 0` è V1 blocker. Le env `STRIPE_*` esistono e vanno drainate ma NON servono per nuovi ordini.
+> ⚠️ **V1.x status (2026-07-15):** LS-only per i nuovi ordini dal commit `a0e511e` (C1g: legacy Stripe provider module rimosso) + `4242f18` (C2a: env registry cleaned — `ENABLE_STRIPE_CHECKOUT`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `GOOGLE_CLIENT_ID/SECRET` rimossi, Vercel + `.env.example` svuotati). Stripe residuo: `stripe@^22.2.0` in package.json + webhook `src/app/api/webhooks/stripe/` + campi Prisma legacy (`Order.stripeSessionId/StripeSubscriptionId`, `Product.stripePriceId`) + e2e test (`tests/e2e/checkout.stripe.spec.ts`) — **tutti richiesti dal drain legacy** finché `activeStripeOrders === 0` ([V1 blocker, roadmap §1.2](docs/roadmap-current.md#12-active-stripe-orders)). Solo `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` restano required, e SOLO dal webhook handler per refund/dispute. Fase 8 (post‑V1) rimuove definitivamente webhook + DB columns + npm package.
 
 ---
 
