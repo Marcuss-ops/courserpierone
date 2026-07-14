@@ -375,16 +375,23 @@ grep -c 'NEVER' docs/production.md
 
 ### ✅ NONE — no BLOCKERs
 
-Every hardening check passes its static evidence check. The two `⚠️` items are documented as **deploy-time wiring** (NOT code gaps):
+Every hardening check passes its static evidence check. The two `⚠️` items + the two post-audit operational gotchas are documented as **non-blockers** (NOT code gaps):
 
 | Gap class | Item | Resolution path |
 |---|---|---|
 | ACCEPTABLE-AS-IS (verified out-of-repo) | #1 test/prod envs | Vercel env-config layer; runbook §5 secret rotation procedure |
 | DEPLOY-TIME WIRING (not code) | #7 uptime active | Configure external monitor (BetterStack/UptimeRobot) at deploy time |
+| OPERATIONAL-GOTCHA (local-dev only, post-audit) | Appendix B.1 (shell env shadows `.env`) | Always `unset DATABASE_URL DIRECT_URL` before `npx prisma …`; see Appendix B.1 |
+| OPERATIONAL-GOTCHA (local-dev only, post-audit) | Appendix B.2 (Prisma parser + URL-special chars in password) | Reset Supabase DB password to hex-only (`openssl rand -hex 16`); see Appendix B.2 |
+| OPERATIONAL-GOTCHA (latent in production, post-audit) | Appendix B.3 (Supavisor transaction-mode + PgBouncer params) | Params: `?pgbouncer=true&connection_limit=3&pool_timeout=10&statement_cache_size=0` (`.env` must mirror; sync to Vercel prod env) |
 
 ### DEFER-TO-V1.1
 
-None. All hardening checks above are within V1.0 scope.
+| Item | Reason | Pointer |
+|---|---|---|
+| `scripts/ops/db-password-validate.sh` | Reject non-hex DB passwords before Prisma loads `.env` | Appendix B.2 (Forward-fix) |
+
+All other hardening checks above are within V1.0 scope.
 
 ---
 
@@ -450,11 +457,173 @@ Use this punch list to declare the production hardening pass complete.
 | `docs/production.md` | #8 (rollback procedure + secret rotation + alert escalation) |
 | `docs/v1-acceptance-test.md` | Cross-ref for V1.0 launch hardening + acceptance gates |
 
+---
+
+## Appendix B — Operational gotchas discovered during V1.0 production cutover
+
+> Hard-earned from the live Supabase cutover. **Both bite silently with cryptic symptoms** — the symptom is always `tenant/user <ref> not found`, and the cause is _never_ what the symptom suggests.
+
+**TL;DR — two local-dev gotchas, same misleading symptom:**
+- **B.1** Stale shell env (`export DATABASE_URL=…`) silently overrides `.env` → Prisma connects to the wrong host.
+- **B.2** URL-special chars in DB password (`&`, `%`, etc.) get mangled by Prisma's second-pass URL parser → Supavisor rejects with the same error.
+
+Documenting both so the next operator doesn't burn an hour debugging Prisma when the answer is one shell command.
+
+### B.1 Always `unset DATABASE_URL DIRECT_URL` before Prisma CLI ⚠️
+
+**Symptom.** `npx prisma migrate status` (or `migrate deploy`) connects to a host or password that **isn't in your `.env`**. `psql` against the same `.env` value works perfectly. Prisma even opens a TCP socket — Supavisor just rejects with `tenant/user <ref> not found`.
+
+**Root cause.** **Prisma gives precedence to exported shell environment variables over `.env` files.** Once you (or a previous terminal session) run `export DATABASE_URL=…`, every subsequent `npx prisma …` in that same shell ignores the freshly-edited `.env`. The `.env`-vs-shell precedence is undocumented in Prisma's CLI surface area but is hard-coded in `prisma -v` output and reproducible by `env | grep DATABASE_URL`.
+
+**Fix.**
+
+```bash
+unset DATABASE_URL DIRECT_URL
+export -n DATABASE_URL DIRECT_URL 2>/dev/null || true   # belt + suspenders for some shells
+
+# Sanity check
+env | grep -E '^(DATABASE_URL|DIRECT_URL)=' || echo "no stale shell vars ✓"
+
+# Now run Prisma
+npx prisma migrate status
+npx prisma migrate deploy
+```
+
+If you're on a new machine, also run `env | grep -E '^(DATABASE_URL|DIRECT_URL)='` once at the start of every debugging session to confirm no stale leftovers from a prior deploy shell.
+
+**Why this is sneaky.** CI environments (`.github/workflows/prisma-migrate.yml`) read from `secrets.*` — no shell overrides possible — so production migrations always pass. The gotcha is purely **local development**: an engineer's shell history from a prior debugging session silently wins over the `.env` they just edited, even after a `git pull` aligned `DATABASE_URL`/`DIRECT_URL`.
+
+> **Same precedence hijack applies to `direnv`/`.envrc` users.** `direnv` auto-exports on `cd` and silently shadows `.env` until you edit `.envrc`. During debugging, `direnv status` shows the active shell-overlay vars.
+
+**Forward-fix.** Wrap every Prisma CLI invocation behind a helper shell function that unsets first (**use a function, not an alias** — aliases don't propagate to non-interactive shells, Makefile recipes, or CI runbooks). The leading `unset` step is belt-and-suspenders for `set -u` shells where `env -u` errors out on a non-existent var:
+
+```bash
+# Add to ~/.zshrc / ~/.bashrc (interactive shells AND scripts):
+prisma-safe() {
+  unset DATABASE_URL DIRECT_URL 2>/dev/null || true
+  env -u DATABASE_URL -u DIRECT_URL npx prisma "$@"
+}
+# Usage: prisma-safe migrate deploy
+# Usage in CI runbook / Makefile: source ~/.zshrc && prisma-safe migrate deploy
+```
+
+### B.2 Supabase DB password must be URL-safe (hex random preferred) ⚠️
+
+**Symptom.** Same as B.1 — `npx prisma migrate …` reports `tenant/user <ref> not found`. `psql` against the same `DATABASE_URL` works. Re-saving the connection string in `.env` does not help. The error message from Supavisor misleadingly points at **tenant routing** when the real cause is **authentication**.
+
+**Root cause.** The chain is fragile even though `pg-connection-string` itself is RFC-3986-correct for userinfo parsing. **Prisma 5.x round-trips the percent-decoded password bytes through a second parser** (the engine binary → the underlying `pg` client) before sending to the wire. That second pass is known to mishandle unescaped `&`, `?`, `#` in the password — the engine receives different bytes than what `psql` sends against the same URL. Supavisor's `tenant/user not found` response is misleading: tenant routing works fine, the credential is what failed. (Known issue: tracked across multiple user reports against Prisma 5.x — the fix is upstream; the workaround is below.)
+
+**Fix.** When you reset the Supabase database password, generate one manually as **hex pure** (only `0-9` + `a-f`). Never accept Supabase's auto-generated verbatim without inspecting it first.
+
+```bash
+NEW_PWD="$(openssl rand -hex 16)"   # 32 hex chars · 128-bit entropy · fully URL-safe
+echo "$NEW_PWD"
+# Example ✓: 2325dc24e27fea86ae66b20ba31b2b17
+```
+
+Update `.env` — **no encoding required**, paste the raw password between the `:` and `@`:
+
+```env
+DATABASE_URL=postgresql://postgres.evgowbruopqtfharusdj:2325dc24e27fea86ae66b20ba31b2b17@aws-1-eu-central-1.pooler.supabase.com:6543/postgres
+DIRECT_URL=postgresql://postgres.evgowbruopqtfharusdj:2325dc24e27fea86ae66b20ba31b2b17@aws-1-eu-central-1.pooler.supabase.com:5432/postgres
+```
+
+**Why hex.** URL-safe, supported by every auth backend (Supabase, Prisma, psql, Postgres shell), trivially copy-pasteable, visually distinct in URLs, and `openssl rand -hex 16` gives 128 bits of entropy (≈ 16 random ASCII chars). Eliminates the entire percent-encoding surface area — no question of "did I encode this `&` correctly?" ever arises again.
+
+**Strategy for Supabase free-tier password reset.** Supabase free tier does **NOT** allow custom passwords — the `Reset database password` button always returns a Supabase-generated random string. Two options:
+
+1. **Strategy A — re-roll until clean.** Click `Reset` repeatedly until the displayed password contains no `&`, `%`, `?`, `#`, `:`, `/`. URL-special chars are a small fraction of Supabase's password alphabet, so **typically 1–3 resets suffice** (worst case ~5–10). **Copy immediately** — password is shown once and never retrievable.
+2. **Strategy B — Supabase Pro ($25/mo).** Lets you set a custom hex password via `ALTER USER postgres WITH PASSWORD '…'`. Worth it only if you reset passwords often (e.g. multiple projects + rotation cadence).
+
+**Verification after update.**
+
+```bash
+# 1. .env holds the new password, no shell override
+grep -E '^(DATABASE_URL|DIRECT_URL)=' .env | sed 's@://[^@]*@://[***REDACTED***]@'
+unset DATABASE_URL DIRECT_URL
+
+# 2. psql smoke-test (proves creds accepted by Supavisor)
+psql "postgresql://postgres.evgowbruopqtfharusdj:<NEW_PWD>@aws-1-eu-central-1.pooler.supabase.com:5432/postgres" \
+  -c "SELECT current_database(), current_user;"
+# Expect: postgres | postgres
+
+# 3. Final Prisma gate
+npx prisma migrate status
+# Expect: "Database schema is up to date."
+```
+
+**Forward-fix.** *(TODO — V1.1 sidequest — see §9 DEFER-TO-V1.1 row.)* Add a preflight validator that rejects non-hex passwords in `.env` early — fail before Prisma even sees the URL:
+
+```bash
+# scripts/ops/db-password-validate.sh  ← does NOT exist yet
+# Trivially robust extractor: uses the JS URL parser (handles all RFC-3986 edges — `@`, `:`, query params, ports, %-encoding).
+DB_PWD=$(node -e 'console.log(new URL(require("fs").readFileSync(".env","utf8").match(/^DATABASE_URL=(.+)$/m)[1].trim()).password)')
+# Note: the regex-based `grep | sed` extractor is a footgun here — it breaks on passwords containing @ (even %40-encoded), or unusual host:port layouts. Use the Node form for any production preflight.
+[[ "$DB_PWD" =~ ^[a-f0-9]+$ ]] && echo "✓ hex-only password" || \
+  echo "✗ FAIL: password contains URL-special chars — reset to hex"
+```
+
+> **Cross-ref for V1.0 readers:** the diagnosis → fix sequence that uncovered both B.1 and B.2 is annotated in [`docs/ops/v1-readiness-2026-07-12.md`](./ops/v1-readiness-2026-07-12.md) and the canonical Supabase cutover runbook in [`docs/ops/staging-bootstrap.md`](./ops/staging-bootstrap.md).
+
+### B.3 Supabase Supavisor transaction-mode requires `?pgbouncer=true&statement_cache_size=0` (latent in prod, fixed during V1.0 audit) ⚠️
+
+**Symptom.** Any code path that runs multiple Prisma queries in parallel (`Promise.all([prisma.X.count(), prisma.Y.count()])`) crashes with Postgres error **`42P05 — prepared statement "s2" already exists`**. Single-query endpoints work fine. The error surfaces reliably in `scripts/audit-v1-readiness.ts` (8 parallel counters) and ANY production API route under Serverless-burst traffic that fans out concurrent Prisma reads.
+
+**Root cause.** Supabase's Supavisor at port 6543 is a **transaction-mode pooler** — PgBouncer/Supavisor in transaction mode does NOT allow session-scoped prepared statements to span pooled connections. Prisma 5's default engine caches prepared statements by query shape (`s1`, `s2`, `s3`...). When two concurrent requests reuse the same prepared-statement name on **different pooled connections**, the second `PREPARE` collides → Postgres returns `42P05`.
+
+**The mistake `src/lib/db/prisma.ts` was making** (and `.env` was matching): the `DATABASE_URL` was appended with no params, so Prisma defaulted to prepared-stmt caching against a pooler that can't honor it. `prisma/schema.prisma` (the Connection Pooling block) documented that `?pgbouncer=true&connection_limit=3` should be appended, but `.env` was non-compliant. This is a **class of bugs** (latent Promise.all crashes) that only fires under concurrent traffic — easy to miss in dev, blocked in production.
+
+**Fix.** Append the canonical params to `DATABASE_URL` (canonical order — matches Prisma 5.7+ docs for transaction-mode poolers):
+
+```
+?pgbouncer=true&connection_limit=3&pool_timeout=10&statement_cache_size=0
+```
+
+- `pgbouncer=true` — switches Prisma into transaction-mode-aware behavior.
+- `connection_limit=3` — safe for Vercel free-tier × Supavisor free-tier (~15-conn pool).
+- `pool_timeout=10` — fast-fail hanging prerenders.
+- `statement_cache_size=0` — defense-in-depth: fully disable Prisma's per-engine prepared-stmt cache.
+
+Full example (replace the placeholder password with your own from the Supabase Dashboard — see B.2):
+
+```
+DATABASE_URL=postgresql://postgres.evgowbruopqtfharusdj:<HEX_PWD>@aws-1-eu-central-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=3&pool_timeout=10&statement_cache_size=0
+DIRECT_URL=postgresql://postgres.evgowbruopqtfharusdj:<HEX_PWD>@aws-1-eu-central-1.pooler.supabase.com:5432/postgres
+```
+
+**Why this is sneaky.** Local Prisma scripts that use the schema datasource AND issue only one query at a time look fine — the bug only fires under concurrency. The V1 readiness audit was the first time we ran ≥2 concurrent conditions against the pooler, and the crash surfaced immediately.
+
+**Forward-fix.** *(Deploy-time wiring.)* Mirror this URL in **Vercel Production env** (`vercel env ls --environment production | grep DATABASE_URL`) without delay — the local `.env` is only one side of the same param contract. The audit-script crash was a reproducible pre-fix for a latent production bug; shipping without the Vercel env sync means the same crash happens on the first concurrent prod request. The `§9 OPERATIONAL-GOTCHA` row flags this as the highest-urgency followup.
+
+**Verification:**
+
+```bash
+# 1. Confirm .env has the params (URL redacted)
+grep '^DATABASE_URL=' .env | sed -s 's@://[^@]*@://[***REDACTED***]@'
+
+# 2. Smoke-test concurrent Promise.all against the pooler (proves 42P05 is gone)
+npx tsx scripts/audit-v1-readiness.ts | grep -E 'GREEN|RED|42P05'
+
+# 3. Live health check on /api/health (production runtime)
+curl -s https://[prod]/api/health | jq .services.database.status
+# Expect: "up"
+```
+
+> **Source-of-truth declarations — these two files MUST mirror each other verbatim:**
+>
+> - [`prisma/schema.prisma`](../prisma/schema.prisma) — schema-side canonical declaration (the Connection Pooling block); comment-block explains why-each-param.
+> - [`src/lib/db/prisma.ts`](../src/lib/db/prisma.ts) — runtime-side canonical declaration (JSDoc above `createPrismaClient`); client factory consumed by all 18 API routes + audit script.
+>
+> **Cross-ref:** the canonical Prisma docs page is https://www.prisma.io/docs/orm/overview/databases/postgresql#pgbouncer. For Vercel × Supavisor free-tier pool-size economics that justify `connection_limit=3`, see [`docs/ops/supabase-auth-setup.md`](./ops/supabase-auth-setup.md).
+
+---
+
 ## Document control
 
 | Field | Value |
 |---|---|
 | First written | next commit (this file) |
 | Audit commit | the HEAD under audit at write-time (`a5cb35d`) |
+| Post-audit appendices | **Appendix B** — operational gotchas from V1.0 Supabase cutover (July 2026). NOT re-audited against the TL;DR matrix above; tracked in §9 under a new `OPERATIONAL GOTCHA` gap class. |
 | Replay cadence | per V-minor release + after any new infra addition |
 | Reviewer | TBD — ops-lead + eng-lead dual sign |

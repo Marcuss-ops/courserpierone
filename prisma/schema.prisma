@@ -10,9 +10,37 @@ datasource db {
 
 
 // ═══ Connection Pooling ═══════════════════════════════════
-// DATABASE_URL = Pooled connection (pgBouncer, port 6543)
-//   → usa ?pgbouncer=true&connection_limit=3 per serverless Vercel
-// DIRECT_URL   = Direct connection (port 5432, solo per migrations)
+// ═══ Connection Pooling ══════════════════════════════
+// AUTHORITATIVE PARAMS for DATABASE_URL when using Supabase Supavisor
+// transaction-mode pooler (port 6543):
+//
+//   ?pgbouncer=true&connection_limit=3&pool_timeout=10&statement_cache_size=0
+//
+// Why each param:
+//   - pgbouncer=true           → Prisma 5 enables transaction-mode handling;
+//                                disables session-scoped prepared statements
+//                                that conflict with PgBouncer/Supavisor's
+//                                per-conn state.
+//   - connection_limit=3       → Safe for Vercel free-tier + Supavisor free
+//                                tier (~15-conn pool): 3 concurrent lambdas
+//                                × 3 conns = 9, leaves headroom for migrations
+//                                and the audit script.
+//   - pool_timeout=10          → Fast-fail hanging prerenders on Vercel
+//                                (avoids 60s default timeout piling up).
+//   - statement_cache_size=0   → Defense-in-depth alongside pgbouncer=true;
+//                                fully disables Prisma's per-engine prepared
+//                                statement cache to prevent 42P05.
+//
+// Missing ANY of these → Postgres `42P05 prepared statement "s2" already
+// exists` crashes under concurrent Promise.all(query) (the audit script
+// + any production API route under Serverless-burst traffic).
+// Full diagnosis & reproduction: docs/production-hardening.md Appendix B.3.
+//
+// This block is the canonical source-of-truth. src/lib/db/prisma.ts and
+// scripts/ops/staging-env.sh MUST mirror these values exactly.
+//
+// DATABASE_URL → Supavisor transaction-mode pooler (port 6543)
+// DIRECT_URL   → Supavisor session-mode pooler (port 5432, only for prisma migrate)
 //
 // Supabase: prendi entrambi gli URL da Project Settings → Database
 

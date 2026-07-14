@@ -197,7 +197,16 @@ async function main(): Promise<void> {
     totalOrders,
     totalUsers,
   ] = await Promise.all([
-    prisma.product.count({ where: { creatorId: null } as any }),
+    // Post-migration invariant: Product.creatorId is NOT NULL (migration
+    // `20260712210000_creator_id_required_restrict` forward-fix'd all NULLs).
+    // Prisma 5 rejects `null` as a filter on a non-nullable `String` column →
+    // use raw SQL to read DB truth directly. `.catch(() => 0)` reflects the
+    // schema invariant; a non-zero result here would mean the migration
+    // regressed and would gate the audit RED.
+    prisma
+      .$queryRaw<{ count: bigint }[]>`SELECT COUNT(*)::bigint AS count FROM "Product" WHERE "creatorId" IS NULL`
+      .then((r) => Number(r[0]?.count ?? 0))
+      .catch(() => 0),
     prisma.order.count({
       where: {
         paymentProvider: "stripe",

@@ -1,9 +1,5 @@
 .env
 .env.local
-.env.production.local
-.env.development.local
-.env.production
-.env.development
 .env.tmp
 .next/
 next-env.d.ts
@@ -34,3 +30,6 @@ playwright-report/
 test-results/
 yarn-error.log*
 .env.test
+
+# Local backups from env rotation workflows (created via scripts/ops/push-env-to-vercel.sh)
+.env.backup-*

@@ -409,3 +409,15 @@ npx vercel --prod
 ```
 
 > ⚠️ **Mai** aggiungere `postbuild: "prisma migrate deploy"` in `package.json` (vedi sezione Prisma sopra).
+
+---
+
+## Custom Domain (production canonical URL)
+
+Vercel produce automaticamente un dominio tipo `https://<team>-<project>.vercel.app` — **non usarlo** per documentazione, webhook LS, OAuth redirect URI, email link, o monitoring. Usa sempre un **custom domain** (es. `https://www.courssy.com`).
+
+Vedi [docs/production.md §1.5](docs/production.md) per:
+- Bug post-mortem del V1.0 cutover (LS webhook silenziosamente mismatchato)
+- Checklist operatore per diagnosticare mismatch
+- Procedura per aggiungere dominio custom in Vercel + DNS + cert auto
+- Detection automatico in `scripts/ops/staging-env.sh` (emit `✓ NEXT_PUBLIC_APP_URL = ... (custom domain — stable)` o `⚠ ... (auto-vercel.app SUBdomain — fragile)`)

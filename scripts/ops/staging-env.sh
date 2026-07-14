@@ -226,6 +226,54 @@ fi
 #     whatever the operator set (via the file, manual export, or pre-existing
 #     shell-state) is what the downstream tools see.
 
+# ─── Canonical URL detection (custom domain vs vercel.app) ─────────
+#
+# Verifies that NEXT_PUBLIC_APP_URL points at a CUSTOM DOMAIN rather than
+# the auto-generated `<team>-<project>.vercel.app` subdomain.
+#
+# Why this matters:
+#   1. Lemon Squeezy webhook URL (configured LS-side) MUST equal
+#      `${NEXT_PUBLIC_APP_URL}/api/webhooks/lemonsqueezy` — otherwise LS
+#      posts events to the wrong host and our handler never receives them.
+#   2. Vercel auto-subdomains (`*.vercel.app`) change per project and per
+#      team transfer; custom domains are stable, so docs, LS webhook
+#      config, email links, and OAuth redirect URIs stay consistent
+#      across redeploys.
+#   3. BetterStack / UptimeRobot / monitoring tools pin their target URL
+#      against a stable hostname — custom domain is the canonical target.
+#
+# Cross-ref: docs/production.md §1.5 for the full procedure and bug
+# post-mortem (the canonical-detect lived-experience bug caught at V1.0
+# cutover when prod URL silently aliased to courssy.lemonsqueezy.com).
+
+APP_URL="${NEXT_PUBLIC_APP_URL:-}"
+if [[ -z "$APP_URL" ]]; then
+  CANONICAL_DOMAIN_KIND='unset'
+  CANONICAL_DOMAIN_VERDICT='✗ FAIL'
+# Anchored hostname regex — force the prefix to end at a `\.` so the engine
+# doesn't depend on greedy backtracking. Supports both subdomain form
+# (`subdomain.vercel.app`) and apex (`vercel.app`). Excludes path/typosquat
+# false positives like `docs.com/redir-to-vercel.app-track`.
+elif [[ "$APP_URL" =~ ^https?://([^/]+\.)?vercel\.app(/|$|\?|#) ]]; then
+  CANONICAL_DOMAIN_KIND='vercel.app auto-subdomain (fragile)'
+  CANONICAL_DOMAIN_VERDICT='⚠ WARN'
+else
+  CANONICAL_DOMAIN_KIND='custom domain (stable)'
+  CANONICAL_DOMAIN_VERDICT='✓ OK'
+fi
+
+# Export so downstream tooling (staging-backfill.sh, audit-wrapper) can
+# gate on the verdict without re-parsing the printed prose.
+#
+# ⚠️ SOURCED-MODE POLLUTION: when this script is `source`d (per the header
+# "Why this is a sourced helper" section), these 3 vars leak into the parent
+# shell's namespace. A future caller setting `APP_URL=https://localhost:3000`
+# will silently hit the upstream prod value. To avoid: `unset APP_URL
+# CANONICAL_DOMAIN_KIND CANONICAL_DOMAIN_VERDICT` after sourcing, OR have
+# downstream tools re-read from `.env` rather than trusting the exported
+# shell vars.
+export APP_URL CANONICAL_DOMAIN_KIND CANONICAL_DOMAIN_VERDICT
+
 # ─── Status print ──────────────────────────────────────────────────
 
 printf '\n—— scripts/ops/staging-env.sh status ——\n'
@@ -234,16 +282,19 @@ if [[ -n "${DATABASE_URL:-}" ]]; then
   printf '✓ DATABASE_URL         set (%d chars)\n' "${#DATABASE_URL}"
 else
   printf '✗ DATABASE_URL         UNSET — required for migrate deploy + runtime\n'
-  printf '    export DATABASE_URL="postgres://postgres.<STAGING-REF>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres"\n'
-  printf '    See docs/ops/staging-bootstrap.md §2.3 (pooled, port 6543, pgBouncer)\n'
+  printf '    export DATABASE_URL="postgres://postgres.<STAGING-REF>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=3&pool_timeout=10&statement_cache_size=0"\n'
+  printf '    See docs/ops/staging-bootstrap.md §2.3 (pooled, port 6543, pgBouncer) + docs/production-hardening.md Appendix B.3\n'
+  printf '    Canonical params enforced: prisma/schema.prisma (the Connection Pooling block)\n'
 fi
 
 if [[ -n "${DIRECT_URL:-}" ]]; then
   printf '✓ DIRECT_URL           set (%d chars)\n' "${#DIRECT_URL}"
 else
   printf '✗ DIRECT_URL           UNSET — required for migrate deploy + audit\n'
-  printf '    export DIRECT_URL="postgres://postgres:<password>@db.<STAGING-REF>.supabase.com:5432/postgres"\n'
-  printf '    See docs/ops/staging-bootstrap.md §2.3 (direct, port 5432, IPv6-only on free tier)\n'
+  printf '    # IPv6-only on free tier — use Supavisor SESSION-mode on port 5432 instead.\n'
+  printf '    export DIRECT_URL="postgres://postgres.<STAGING-REF>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres"\n'
+  printf '    See docs/ops/staging-bootstrap.md §2.3 (session-mode pooler, port 5432, IPv4-capable) + docs/production-hardening.md Appendix B.3\n'
+  printf '    Password MUST be hex-only (see Appendix B.2)\n'
 fi
 
 if [[ -n "${PRIMARY_DATABASE_URL:-}" ]]; then
@@ -255,6 +306,14 @@ if [[ -n "${PRIMARY_DATABASE_URL:-}" ]]; then
 else
   printf '✗ PRIMARY_DATABASE_URL UNSET — audit scripts will fail\n'
   printf '    Set DIRECT_URL (PRIMARY_DATABASE_URL auto-mirrors) OR export PRIMARY_DATABASE_URL directly.\n'
+fi
+
+# Canonical URL detection — uses exported vars from §06 above.
+printf '%s NEXT_PUBLIC_APP_URL      = %s (%s)\n' "$CANONICAL_DOMAIN_VERDICT" "$APP_URL" "$CANONICAL_DOMAIN_KIND"
+if [[ "$CANONICAL_DOMAIN_VERDICT" == *"WARN"* ]]; then
+  printf '    Recommendation: add custom domain in Vercel → Settings → Domains\n'
+  printf '    and update NEXT_PUBLIC_APP_URL to match. Same for LS Webhook URL.\n'
+  printf '    See docs/production.md §1.5 for the full procedure + bug post-mortem.\n'
 fi
 
 # ─── Next-steps hint ──────────────────────────────────────────────

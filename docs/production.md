@@ -90,6 +90,117 @@ GitHub → Settings → Branches → main → "Require status checks to pass bef
 
 ---
 
+## §1.5 — Canonical URL detection (custom domain vs vercel.app)
+
+> **V1.0 lived experience:** at cutover the prod URL silently aliased to `*.vercel.app` instead of `courssy.com`. LS webhook was configured against `https://www.courssy.com/api/webhooks/lemonsqueezy` — matching the **intended** canonical URL but **mismatching** the **actual** Vercel alias at that moment. Symptom: checkout successfully created in LS but POST events landed on `/dev/null`. Without the detection block in `scripts/ops/staging-env.sh` §06 (added in this same PR), the next operator would have burned another debugging round to discover the mismatch.
+
+### 1.5.1 The two URL forms and why they matter
+
+| URL kind | Example | Stable? | LS webhook match? | OAuth redirect URI stable? | Email link trust? |
+|---|---|---|---|---|---|
+| **Custom domain** | `https://www.courssy.com` | ✓ forever | ✓ matches env | ✓ | ✓ |
+| `*.vercel.app` auto-subdomain | `https://courserpierone-3ixx72gb7-marcuss-ops-projects.vercel.app` | ✗ per team transfer / project rename | ✗ silent mismatch | ✗ rot | ✗ looks unofficial |
+
+**Default rule:** the canonical production URL is the **custom DOMAIN**, not the Vercel-assigned subdomain. Vercel's `*.vercel.app` URL is for shareable preview links during development, NOT for documentation, webhook configuration, OAuth client setup, or production monitoring.
+
+### 1.5.2 Detection procedure (operator checklist)
+
+```bash
+# 1) Confirm what's currently set in Vercel prod
+vercel env ls production | grep NEXT_PUBLIC_APP_URL
+# Expected output: NEXT_PUBLIC_APP_URL  Production  https://www.courssy.com
+# ✗ FAIL if: it shows a vercel.app URL
+
+# 2) Confirm what's actually serving traffic (GET, follows redirects — matches real visitor behavior):
+curl -sSL https://www.courssy.com/ -o /dev/null -w 'http_code=%{http_code} effective=%{url_effective}\n'
+curl -sSL https://<vercel-app-url>/ -o /dev/null -w 'http_code=%{http_code} effective=%{url_effective}\n'
+# Both should return 200 with `effective` exactly equal to the URL you requested.
+# If courssy.com returns 404, the custom domain is NOT configured despite the env var.
+
+# 3) Confirm LS webhook URL matches canonical URL
+# Lemon Squeezy Dashboard → Settings → Webhooks → check URL column
+# Expected: https://www.courssy.com/api/webhooks/lemonsqueezy
+# ✗ FAIL if: it shows a vercel.app URL (produces silent webhook loss)
+
+# 4) Confirm OAuth redirect URI is on canonical URL
+# Supabase Dashboard → Auth → URL Configuration
+# Expected: https://www.courssy.com/auth/v1/callback (etc.)
+```
+
+### 1.5.3 How to fix a mismatch
+
+> **Markdown note:** step A's bash block closes after the `KNOWN DRIFT` comment to render the `⚠️ Don't paste <...>` warning as a Markdown blockquote (visible prose), then **re-opens** for steps B–E. This split-with-prose pattern is intentional — the prose between two fences draws operator attention to the placeholder-verbatim footgun more effectively than embedding it as a `#` bash comment would.
+
+```bash
+# A) Add custom domain in Vercel (apex + www are SEPARATE calls — the joined form
+#    `vercel domains add www.foo.com foo.com` adds only one domain per invocation, a known CLI footgun):
+vercel domains add courssy.com
+vercel domains add www.courssy.com
+# Configure apex↔www redirect at Vercel → Domains → Edit (typically www→apex 301, or vice-versa).
+# Then DNS at your registrar (verify live records before copy-paste — `vercel domains inspect` is NOT a real subcommand in CLI 55.x):
+#   dig +short courssy.com A           # must return Vercel anycast IP (216.198.79.1 as of 2026-07-14; geo-distributed, may rotate)
+#   dig +short www.courssy.com CNAME   # must return a vercel-dns-XXX subdomain (e.g. eba31c5633a73749.vercel-dns-017.com. for ours)
+# Configure as (using whatever values `dig` returned above):
+#   ‑ Apex (courssy.com):    A    record → 216.198.79.1           (Vercel anycast IP; geo-rotates, verify via dig)
+#   ‑ www (www.courssy.com):  CNAME record → <dig-output-prefix>.vercel-dns-XXX.com.
+# Vercel auto-issues Let's Encrypt cert within minutes of DNS propagation.
+#
+# 📝 KNOWN DRIFT: Vercel geo-distributed anycast IPs rotate. The Apex A record
+# we saw was 216.198.79.1 at cutover-time (2026-07-14), NOT the much-quoted
+# 76.76.21.61 (older docs/reference). Trust `dig +short courssy.com A` over
+# any versioned fallback.
+```
+
+> ⚠️ Don't paste the `<...>` placeholder markers above into your DNS
+> provider UI verbatim. The angle-brackets are template markers, NOT literal
+> characters — replace `<dig-output-prefix>` with the actual values your
+> `dig +short` commands returned before configuring DNS at your registrar.
+
+```bash
+# B) Update Vercel env to canonical URL:
+printf 'https://www.courssy.com\n' | vercel env add NEXT_PUBLIC_APP_URL production
+# (Vercel env rm + add, OR unset + set if it was already on vercel.app)
+
+# C) Update LS Dashboard webhook URL to match (manual GUI click; no LS API for webhook config):
+# https://app.lemonsqueezy.com/settings/webhooks → edit endpoint URL
+
+# D) Update Supabase Auth redirect URIs:
+# Supabase Dashboard → Auth → URL Configuration → Site URL + Redirect URLs
+
+# E) Update docs/email templates/OAuth client setup:
+grep -rn 'vercel.app\|courssy\.lemonsqueezy\.com' docs/ README.md scripts/ src/
+# Replace any stale vercel.app references with the canonical coursey.com
+```
+
+### 1.5.4 Automated detection in `scripts/ops/staging-env.sh`
+
+After sourcing the staging-env helper, the canonical URL status block (added in this same PR) emits:
+
+```
+✓ NEXT_PUBLIC_APP_URL    = https://www.courssy.com (custom domain — stable)
+```
+
+or:
+
+```
+⚠ NEXT_PUBLIC_APP_URL    = https://courserpierone-3ixx72gb7-marcuss-ops-projects.vercel.app (auto-vercel.app SUBdomain — fragile)
+    Recommendation: add custom domain in Vercel → Settings → Domains
+    and update NEXT_PUBLIC_APP_URL to match. Same for LS Webhook URL.
+```
+
+The script exports three shell variables alongside the printout (`CANONICAL_DOMAIN_KIND`, `CANONICAL_DOMAIN_VERDICT`, `APP_URL`) so downstream tooling in this repo (e.g. `staging-backfill.sh`) can gate on the verdict without re-parsing prose.
+
+### 1.5.5 Acceptance criterion before V1.0 GA
+
+The V1 readiness audit (`scripts/audit-v1-readiness.ts`) will be extended to verify:
+
+- `vercel env ls production | grep NEXT_PUBLIC_APP_URL` does NOT return any vercel.app URL.
+- LS webhook URL (fetched via LS Dashboard, not programmatically) matches `${NEXT_PUBLIC_APP_URL}/api/webhooks/lemonsqueezy` byte-for-byte.
+
+Until automated, this is an **operator checklist** per §1.5.2 run after every green gate merge. Reason it is not yet automated: LS doesn't expose webhook URL config via API as of writing (only the dashboard).
+
+---
+
 ## §2 — Rollback Procedure
 
 ### 2.1 Decision tree
@@ -180,6 +291,28 @@ Three scenarios:
 | **Synthetic-ping fail** | `/api/cron/check-supabase-pitr` | Dashboard restore prompt proxy unreachable — fires `logServerError` → `ALERT_WEBHOOK_URL` (P1 default). Live-evidence + runbook in [Appendix E](#appendix-e--synthetic-ping-run-log). |
 | Stripe/LS webhook 4xx spike | Dashboard | Signature mismatch or downstream error |
 | Vercel runtime logs | Vercel Dashboard | Cold-start spikes, build errors after deploy |
+
+### 3.2.1 Degraded status is acceptable for V1 GO LIVE (Redis PING silently fails in Lambda runtime)
+
+`/api/health` may report `status: "degraded"` even when the application is fully functional. This is the current expected state because:
+
+- **`services.database.status="up"`** — Prisma DB query (`SELECT 1`) succeeds. This is the only hard requirement for V1 GA.
+- **`services.redis.status="down"`** with `latencyMs:0` — the `@upstash/redis` `ping()` call **silently throws** inside the Vercel Lambda runtime (a known runtime quirk; external REST PING against the same URL + token returns `{"result":"PONG"}` http_code=200, confirming the credentials + Upstash DB are alive).
+
+**Why this is OK for V1 GO LIVE** — all Redis-dependent code paths have try/catch fallbacks:
+
+| Path | File | Fallback behavior |
+|---|---|---|
+| `cacheGet` / `cacheSet` / `cacheDel` | `src/lib/redis.ts` | Silently returns `null` / no-ops on Redis error |
+| `rateLimitAsync` | `src/lib/utils/rate-limit.ts` | Falls back to per-instance in-memory rate-limit (less accurate under multi-instance burst, but functional) |
+| `logServerError` → Redis keyspace | `src/lib/logging/server-error-sink.ts` | Caught + swallowed; in-memory digest dedup still works |
+| `/api/health` PING | `src/app/api/health/route.ts` | Sets `redisStatus="down"`, returns overall `degraded` (HTTP 200, NOT 503) |
+
+**Hard verdict:** no user-facing feature hard-fails on Redis unavailability. Cache misses become direct DB queries (slower but correct). Rate limits may let brief bursts through under multi-instance load. Error-sink dedup stays in-memory per instance. The platform ships.
+
+**Investigate further if** any of: (a) `/api/health` ever reports `services.database.status="down"` → that's a P0 (see §3.1); (b) `latencyMs:0` persists past 60s after a fresh deploy with restaged env vars (we may have env-injection bug); (c) `cacheGet` cold-start pattern shows degraded p95 response times (since Redis miss is now DB hit).
+
+**Future work (post-V1):** switch from `@upstash/redis` to manual HTTP fetch (avoids the silent-throw quirk), or run a smoke-test route that prints `process.env.KV_REST_API_URL` length to confirm runtime injection.
 
 ### 3.3 Comms templates
 
