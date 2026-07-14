@@ -135,7 +135,7 @@ export async function AccessGate({
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
           <Link
-            href={`/${product.defaultLanguage ?? "it"}/${product.slug}`}
+            href={`/${product.defaultLanguage ?? "it"}/${product.slug}/about`}
             className="px-8 py-4 rounded-2xl text-sm font-black uppercase tracking-widest text-white flex items-center gap-2 transition-all hover:scale-[1.02]"
             style={{
               background: "linear-gradient(135deg, #C9840D 0%, #C9840DCC 100%)",
@@ -143,7 +143,7 @@ export async function AccessGate({
             }}
           >
             <Sparkles className="w-4 h-4" />
-            Acquista Ora
+            Scopri il Corso
             <ArrowRight className="w-4 h-4" />
           </Link>
 

@@ -1,0 +1,84 @@
+import { getServerUser } from "@/lib/supabase/get-user";
+import { AccessGate } from "@/components/course/access-gate";
+import { CourseTopNav } from "@/components/layout/course-top-nav";
+import { loadLocaleContentCached } from "@/lib/i18n/load-locale-content";
+import type { Metadata } from "next";
+
+/**
+ * CourseLayout — wraps `/[locale]/[domain]/`, `/community`, `/chat` tabs.
+ *
+ * Single source of truth for:
+ * 1. AccessGate (paywall for non-enrolled users, redirects to /about)
+ * 2. Top nav with the 3 tabs + scroll-hide behavior (Skool-feed pattern)
+ * 3. Authenticated user payload for the UserNav dropdown in CourseTopNav
+ *
+ * Each tab page does its OWN data fetching below this layer — we don't hoist
+ * fetches here to avoid waterfalls when only one tab is active.
+ */
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; domain: string }>;
+}): Promise<Metadata> {
+  // Layouts can't intercept params in App Router without children, and
+  // child pages (page.tsx / community / chat) generate their own metadata.
+  // Returning {} here is fine — child generateMetadata wins.
+  return {};
+}
+
+export default async function CourseLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode;
+  params: Promise<{ locale: string; domain: string }>;
+}) {
+  const { locale, domain } = await params;
+  const { dbUser } = await getServerUser();
+
+  // Locale i18n for tab labels. Falls back via createEmptyLocale defaults
+  // + inline `|| "X"` if a locale file lacks these keys.
+  const lang2 = locale.split("-")[0]?.toLowerCase() ?? "en";
+  const lc = (await loadLocaleContentCached(domain, lang2)).portal;
+
+  const labels = {
+    course: lc.tab_corso || (lang2 === "it" ? "Corso" : "Course"),
+    community:
+      lc.tab_community || (lang2 === "it" ? "Community" : "Community"),
+    chat:
+      lc.tab_chat ||
+      (lang2 === "it" ? "Chat con il Creator" : "Chat with Creator"),
+    aboutCourse:
+      lc.tab_about_course ||
+      (lang2 === "it" ? "Info corso" : "About this course"),
+  };
+
+  return (
+    <AccessGate
+      productSlug={domain}
+      callbackUrl={`/${locale}/${domain}`}
+    >
+      <div className="min-h-screen bg-cream-dark-bg text-cream-dark-text font-sans antialiased relative overflow-x-hidden">
+        <CourseTopNav
+          user={
+            dbUser
+              ? {
+                  name: dbUser.name,
+                  email: dbUser.email,
+                  image: dbUser.image,
+                  role: dbUser.role,
+                }
+              : null
+          }
+          courseSlug={domain}
+          locale={locale}
+          labels={labels}
+        />
+        <main className="relative max-w-7xl mx-auto px-4 sm:px-6 py-8 lg:py-10 pb-24">
+          {children}
+        </main>
+      </div>
+    </AccessGate>
+  );
+}

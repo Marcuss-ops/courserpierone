@@ -207,9 +207,28 @@ export interface LocaleContent {
     footer_terms?: string;
     footer_refund?: string;
     chat_title?: string;
+    chat_subtitle?: string;
+    chat_empty_hint?: string;
     chat_offline_creator?: string;
     chat_offline_self?: string;
     lang_label?: string;
+    // Skool-mimic redesign 2026-07-14 — tab nav + tab-specific copy.
+    tab_corso?: string;
+    tab_community?: string;
+    tab_chat?: string;
+    tab_about_course?: string;
+    tab_chat_subtitle?: string;
+    tab_chat_connecting?: string;
+    tab_corso_lessons_title?: string;
+    tab_corso_lessons_subtitle?: string;
+    tab_corso_ebook_title?: string;
+    tab_corso_ebook_desc?: string;
+    tab_corso_dl_title?: string;
+    tab_corso_dl_desc?: string;
+    tab_community_title?: string;
+    tab_community_subtitle?: string;
+    tab_community_empty_title?: string;
+    tab_community_empty_desc?: string;
   };
 
   /** Download page */
@@ -278,8 +297,15 @@ export function createEmptyLocale(locale: string, defaults?: Partial<LocaleConte
       section_my_courses_count_other: "", section_browse_title: "",
       section_browse_subtitle: "", empty_library: "", empty_browse: "",
       footer_brand: "", footer_rights: "", footer_privacy: "",
-      footer_terms: "", footer_refund: "", chat_title: "",
+      footer_terms: "", footer_refund: "", chat_title: "", chat_subtitle: "", chat_empty_hint: "",
       chat_offline_creator: "", chat_offline_self: "", lang_label: "",
+      tab_corso: "", tab_community: "", tab_chat: "", tab_about_course: "",
+      tab_chat_subtitle: "", tab_chat_connecting: "",
+      tab_corso_lessons_title: "", tab_corso_lessons_subtitle: "",
+      tab_corso_ebook_title: "", tab_corso_ebook_desc: "",
+      tab_corso_dl_title: "", tab_corso_dl_desc: "",
+      tab_community_title: "", tab_community_subtitle: "",
+      tab_community_empty_title: "", tab_community_empty_desc: "",
     },
     download: {
       title: "", subtitle: "", download_button: "", view_online: "",
