@@ -29,12 +29,12 @@
 ## 1. TL;DR — Baseline (2026-07-15, sandbox re-run)
 
 > 📌 **Read this first.** §1 numbers are from the SANDBOX replay in §3
-> (port-55440 deterministic seed with 13 mixed-provider `sda-`-prefixed
-> Orders). **They are NOT staging/prod numbers.** Production re-runs
-> populate the §4 template separately — do NOT interpret §1 as the
-> current production drain queue size until an operator has committed
-> the §4 production snapshot back to this file (a normal weekly cadence,
-> see §7).
+> (port-55440 deterministic seed with 13 mixed-provider Orders,
+> cuids all prefixed `sda-`; see §3.4). **They are NOT staging/prod
+> numbers.** Production re-runs populate the §4 template separately
+> — do NOT interpret §1 as the current production drain queue size
+> until an operator has committed the §4 production snapshot back to
+> this file (a normal weekly cadence, see §7).
 
 | Field | Value |
 | --- | --- |

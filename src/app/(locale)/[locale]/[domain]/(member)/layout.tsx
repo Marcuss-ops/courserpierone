@@ -22,9 +22,9 @@ export async function generateMetadata({
   // Router contract (it must take a `params` Promise) but the layout
   // wrapper does not need to consume it here — child pages generate
   // their own metadata. Underscore-prefixed rename keeps
-  // `@typescript-eslint/no-unused-vars` silent without changing the
-  // shape of the object Next.js introspects.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // `@typescript-eslint/no-unused-vars` silent (the underscore-prefix
+  // convention is on by default in our eslint config) without
+  // changing the shape of the object Next.js introspects.
   params: _params,
 }: {
   params: Promise<{ locale: string; domain: string }>;
