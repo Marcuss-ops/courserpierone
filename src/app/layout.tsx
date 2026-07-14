@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Playfair_Display, Inter } from "next/font/google";
 import { Footer } from "@/components/footer";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 import { getSeoMetadata, SEO_LOCALES } from "@/lib/i18n/seo-metadata";
 import "./globals.css";
 
@@ -85,10 +86,19 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang={locale} className={`${playfair.variable} ${inter.variable}`}>
-      <body className="bg-white text-gray-900 antialiased min-h-screen flex flex-col">
-        <div className="flex-1 flex flex-col">{children}</div>
-        <Footer currentLocale={locale} />
+    // `suppressHydrationWarning` allows next-themes to inject `class="dark"`
+    // BEFORE React hydrates (localStorage → <html> class swap) without React
+    // throwing a hydration mismatch warning in dev.
+    <html
+      lang={locale}
+      className={`${playfair.variable} ${inter.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="bg-white dark:bg-cream-dark-bg text-gray-900 dark:text-cream-dark-text antialiased min-h-screen flex flex-col transition-colors duration-300">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem storageKey="courser-theme">
+          <div className="flex-1 flex flex-col">{children}</div>
+          <Footer currentLocale={locale} />
+        </ThemeProvider>
         {/* PWA Service Worker registration */}
         <script
           dangerouslySetInnerHTML={{

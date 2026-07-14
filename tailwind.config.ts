@@ -1,6 +1,9 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  // next-themes: dark-class strategy. Adds `dark:` variants that activate
+  // when <html class="dark"> is set by ThemeProvider (src/components/providers/theme-provider.tsx).
+  darkMode: "class",
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
@@ -25,7 +28,13 @@ const config: Config = {
           peach: '#FFC882',
           orange: '#A0521A',
         },
-        // Warm dark mode (premium dark) — base + accents for dark surfaces
+        // Warm dark mode (premium dark) — base + accents for dark surfaces.
+        // `cream-dark-*` tokens serve a DUAL purpose in this app:
+        //   1. Always-on premium look on cream-dark-themed pages
+        //      (course area, account layout, dashboard, /about, /chat).
+        //   2. Target of `dark:` variants on light pages that flip to the
+        //      premium dark surface when the user toggles theme → dark
+        //      (footer, login, user-nav dropdown, error pages).
         'cream-dark': {
           bg: '#1A1208',         // deep warm dark — like dark chocolate
           surface: '#221A10',     // slightly lighter for cards-on-dark

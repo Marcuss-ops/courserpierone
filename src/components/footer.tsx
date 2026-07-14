@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { getUiTranslations } from "@/lib/i18n/ui-translations";
 import { localeToLanguage } from "@/lib/i18n/locale-resolver";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 /**
  * Global footer shown on the public website.
@@ -11,6 +12,11 @@ import { localeToLanguage } from "@/lib/i18n/locale-resolver";
  * Hidden on app routes (dashboard, admin, account, uploader, auth) because
  * those are full-screen app views with their own visual identity (dark warm
  * theme) — a light cream footer below them would clash visually.
+ *
+ * Dark mode: every visible class has a `dark:` variant swapping to
+ * cream-dark-* tokens. This footer is the canonical "light page" demo
+ * surface — when user toggles dark, the cream cream gradient flips to
+ * the warm-dark surface and text/border colors migrate accordingly.
  */
 const HIDE_ON_PREFIXES = ["/dashboard", "/admin", "/account", "/uploader", "/auth", "/debug-locale"];
 
@@ -42,7 +48,7 @@ export function Footer({ currentLocale: cookieLocale }: FooterProps = {}) {
   const t = getUiTranslations(lang);
 
   return (
-    <footer className="border-t border-black/[0.06] bg-gradient-to-b from-[#FAFAF8] to-[#F5F4F0]">
+    <footer className="border-t border-black/[0.06] dark:border-cream-dark-border bg-gradient-to-b from-[#FAFAF8] to-[#F5F4F0] dark:from-cream-dark-bg dark:to-cream-dark-surface transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Main grid: brand + link columns + language */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
@@ -50,18 +56,18 @@ export function Footer({ currentLocale: cookieLocale }: FooterProps = {}) {
           <div className="col-span-2 sm:col-span-1">
             <Link
               href="/"
-              className="inline-block text-lg font-serif italic text-black/80 hover:text-black transition-colors"
+              className="inline-block text-lg font-serif italic text-black/80 dark:text-cream-dark-text hover:text-black dark:hover:text-cream-dark-gold transition-colors"
             >
               courssy
             </Link>
-            <p className="mt-3 text-[13px] text-black/45 leading-relaxed max-w-[180px]">
+            <p className="mt-3 text-[13px] text-black/45 dark:text-cream-dark-text-soft leading-relaxed max-w-[180px]">
               {t.footerTagline}
             </p>
           </div>
 
           {/* Explore */}
           <div>
-            <h4 className="text-[12px] font-semibold uppercase tracking-wider text-black/35 mb-3">
+            <h4 className="text-[12px] font-semibold uppercase tracking-wider text-black/35 dark:text-cream-dark-text-soft mb-3">
               {t.footerExplore}
             </h4>
             <ul className="space-y-2">
@@ -72,7 +78,7 @@ export function Footer({ currentLocale: cookieLocale }: FooterProps = {}) {
 
           {/* Legal */}
           <div>
-            <h4 className="text-[12px] font-semibold uppercase tracking-wider text-black/35 mb-3">
+            <h4 className="text-[12px] font-semibold uppercase tracking-wider text-black/35 dark:text-cream-dark-text-soft mb-3">
               {t.footerLegal}
             </h4>
             <ul className="space-y-2">
@@ -84,17 +90,22 @@ export function Footer({ currentLocale: cookieLocale }: FooterProps = {}) {
 
           {/* Language */}
           <div className="col-span-2 sm:col-span-1">
-            <h4 className="text-[12px] font-semibold uppercase tracking-wider text-black/35 mb-3">
+            <h4 className="text-[12px] font-semibold uppercase tracking-wider text-black/35 dark:text-cream-dark-text-soft mb-3">
               {t.footerLanguage}
             </h4>
             <LanguageSwitcher cookieLocale={cookieLocale} />
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="mt-10 pt-5 border-t border-black/[0.05] flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] text-black/35">
+        {/* Bottom bar — copyright + ThemeToggle */}
+        <div className="mt-10 pt-5 border-t border-black/[0.05] dark:border-cream-dark-border flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] text-black/35 dark:text-cream-dark-text-soft">
           <span>© 2026 Courssy. {t.footerRights}</span>
-
+          <div className="flex items-center gap-3">
+            <span className="hidden sm:inline text-[11px] uppercase tracking-widest text-black/30 dark:text-cream-dark-text-soft/70">
+              Tema
+            </span>
+            <ThemeToggle variant="light" />
+          </div>
         </div>
       </div>
     </footer>
@@ -128,7 +139,7 @@ function FooterLinkItem({
       <Link
         href={href}
         aria-current={isCurrent ? "page" : undefined}
-        className="text-[13px] text-black/55 hover:text-black hover:underline underline-offset-3 transition-colors"
+        className="text-[13px] text-black/55 dark:text-cream-dark-text-soft hover:text-black dark:hover:text-cream-dark-gold hover:underline underline-offset-3 transition-colors"
       >
         {label}
       </Link>
@@ -163,7 +174,7 @@ function LanguageSwitcher({ cookieLocale }: { cookieLocale?: string }) {
       value={currentLocale}
       onChange={handleChange}
       aria-label="Select language"
-      className="bg-white border border-black/10 rounded-lg px-3 py-2 text-[13px] font-medium text-black/70 hover:border-black/25 focus:outline-none focus:ring-2 focus:ring-amber-200 focus:border-amber-300 cursor-pointer transition-all w-full"
+      className="bg-white dark:bg-cream-dark-surface border border-black/10 dark:border-cream-dark-border rounded-lg px-3 py-2 text-[13px] font-medium text-black/70 dark:text-cream-dark-text hover:border-black/25 dark:hover:border-cream-dark-gold/40 focus:outline-none focus:ring-2 focus:ring-amber-200 dark:focus:ring-cream-dark-gold/40 focus:border-amber-300 dark:focus:border-cream-dark-gold cursor-pointer transition-all w-full"
     >
       {LANGUAGES.map((lang) => (
         <option key={lang.code} value={lang.code}>

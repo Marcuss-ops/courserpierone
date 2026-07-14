@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { UserNav } from "@/components/user-nav";
 import { NotificationBell } from "@/components/layout/notification-bell";
+import { ThemeToggle } from "@/components/theme-toggle";
 import type { SerializedNotification } from "@/lib/notifications/get-initial-notifications";
 
 interface CourseTopNavProps {
@@ -40,7 +41,7 @@ interface CourseTopNavProps {
  * Behavior:
  * - 3 main tabs: `/[locale]/[slug]/` (Corso, default), `/community`, `/chat`.
  * - Auxiliary link "Info corso" → `/[locale]/[slug]/about` (the marketing landing now demoted to sub-page).
- * - User profile dropdown top-right (always visible, per CourseOwner requirement).
+ * - Right cluster: ThemeToggle (dark/light mode) + NotificationBell + UserNav profile dropdown.
  * - Scroll-hide: nav slides up (-translate-y-full) when user scrolls DOWN past 50px,
  *   slides back down on scroll UP or near top. Pure CSS transition, no layout jank.
  *
@@ -99,6 +100,8 @@ export function CourseTopNav({
     <nav
       className={[
         "sticky top-0 z-50",
+        // Always cream-dark themed — login/footer/etc pages can flip via
+        // `dark:` variants but the course area is the premium surface.
         "bg-cream-dark-bg/85 backdrop-blur-xl border-b border-cream-dark-border",
         "transition-transform duration-300 ease-out",
         hidden ? "-translate-y-full" : "translate-y-0",
@@ -148,7 +151,7 @@ export function CourseTopNav({
           </Link>
         </div>
 
-        {/* Right cluster: about link + Notification bell + User profile dropdown */}
+        {/* Right cluster: about link + ThemeToggle + NotificationBell + User profile dropdown */}
         <div className="flex items-center gap-2 shrink-0">
           <Link
             href={`${basePath}/about`}
@@ -156,6 +159,9 @@ export function CourseTopNav({
           >
             {labels.aboutCourse}
           </Link>
+          {/* Theme toggle — visible to ALL (logged in or not) so users can
+              flip to dark mode even on login / marketing pages. The course */}
+          <ThemeToggle variant="dark" />
           {user && notifications && (
             <NotificationBell
               initialUnreadCount={notifications.unreadCount}

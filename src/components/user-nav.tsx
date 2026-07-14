@@ -19,8 +19,14 @@ export interface UserNavProps {
  * UserNav — client component for the public navbar.
  *
  * - When logged in: shows avatar + name with a dropdown menu
- *   (Dashboard, Sign out).
+ *   (Dashboard, Impostazioni hub → Profile/Password/Pagamenti/Notifiche,
+ *   Admin Panel if admin).
  * - When logged out: shows a "sign in" link.
+ *
+ * Dark mode: every visible surface has a paired `dark:` variant. On
+ * cream-dark-themed pages (course area), the dropdown blends with the
+ * surrounding surface. On light pages (footer, login), the dropdown
+ * mirrors the cream-dark-* token suite once the user toggles dark.
  */
 export function UserNav({ user }: UserNavProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -57,7 +63,7 @@ export function UserNav({ user }: UserNavProps) {
     return (
       <Link
         href="/login"
-        className="text-[15px] font-normal underline underline-offset-4 hover:opacity-60 transition-opacity"
+        className="text-[15px] font-normal underline underline-offset-4 hover:opacity-60 transition-opacity dark:text-cream-dark-text"
       >
         sign in
       </Link>
@@ -100,22 +106,26 @@ export function UserNav({ user }: UserNavProps) {
           <img
             src={user.image}
             alt={displayName}
-            className="w-8 h-8 rounded-full object-cover border border-black/10"
+            className="w-8 h-8 rounded-full object-cover border border-black/10 dark:border-cream-dark-border"
           />
         ) : (
-          <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center text-[12px] font-medium text-black/70">
+          <div className="w-8 h-8 rounded-full bg-black/10 dark:bg-cream-dark-surface flex items-center justify-center text-[12px] font-medium text-black/70 dark:text-cream-dark-text-soft">
             {initials}
           </div>
         )}
-        <span className="text-[15px] font-normal hidden sm:inline">{displayName}</span>
+        <span className="text-[15px] font-normal hidden sm:inline dark:text-cream-dark-text">
+          {displayName}
+        </span>
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-black/10 rounded-xl shadow-lg overflow-hidden z-50">
-          <div className="px-4 py-3 border-b border-black/5">
-            <p className="text-[14px] font-medium text-black truncate">{displayName}</p>
+        <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-cream-dark-bg border border-black/10 dark:border-cream-dark-border rounded-xl shadow-lg overflow-hidden z-50">
+          <div className="px-4 py-3 border-b border-black/5 dark:border-cream-dark-border">
+            <p className="text-[14px] font-medium text-black dark:text-cream-dark-text truncate">
+              {displayName}
+            </p>
             {user.role === "admin" && (
-              <span className="inline-block mt-1 px-2 py-0.5 bg-black/5 text-black/70 text-[10px] font-medium rounded uppercase tracking-wider">
+              <span className="inline-block mt-1 px-2 py-0.5 bg-black/5 dark:bg-cream-dark-surface text-black/70 dark:text-cream-dark-text-soft text-[10px] font-medium rounded uppercase tracking-wider">
                 Admin
               </span>
             )}
@@ -123,7 +133,7 @@ export function UserNav({ user }: UserNavProps) {
           <div className="py-1">
             <Link
               href="/dashboard"
-              className="flex items-center gap-3 px-4 py-2 text-[14px] text-black hover:bg-black/5 transition-colors"
+              className="flex items-center gap-3 px-4 py-2 text-[14px] text-black dark:text-cream-dark-text hover:bg-black/5 dark:hover:bg-cream-dark-surface transition-colors"
               onClick={() => setIsOpen(false)}
             >
               <User className="w-4 h-4" />
@@ -131,7 +141,7 @@ export function UserNav({ user }: UserNavProps) {
             </Link>
             <Link
               href="/account"
-              className="flex items-center gap-3 px-4 py-2 text-[14px] text-black hover:bg-black/5 transition-colors"
+              className="flex items-center gap-3 px-4 py-2 text-[14px] text-black dark:text-cream-dark-text hover:bg-black/5 dark:hover:bg-cream-dark-surface transition-colors"
               onClick={() => setIsOpen(false)}
             >
               <Settings className="w-4 h-4" />
@@ -139,7 +149,7 @@ export function UserNav({ user }: UserNavProps) {
             </Link>
             <Link
               href="/account/profile"
-              className="flex items-center gap-3 px-4 py-2 text-[14px] text-black hover:bg-black/5 transition-colors pl-9"
+              className="flex items-center gap-3 px-4 py-2 text-[14px] text-black dark:text-cream-dark-text hover:bg-black/5 dark:hover:bg-cream-dark-surface transition-colors pl-9"
               onClick={() => setIsOpen(false)}
             >
               <UserCog className="w-3.5 h-3.5" />
@@ -147,7 +157,7 @@ export function UserNav({ user }: UserNavProps) {
             </Link>
             <Link
               href="/account/password"
-              className="flex items-center gap-3 px-4 py-2 text-[14px] text-black hover:bg-black/5 transition-colors pl-9"
+              className="flex items-center gap-3 px-4 py-2 text-[14px] text-black dark:text-cream-dark-text hover:bg-black/5 dark:hover:bg-cream-dark-surface transition-colors pl-9"
               onClick={() => setIsOpen(false)}
             >
               <Lock className="w-3.5 h-3.5" />
@@ -155,7 +165,7 @@ export function UserNav({ user }: UserNavProps) {
             </Link>
             <Link
               href="/account/payments"
-              className="flex items-center gap-3 px-4 py-2 text-[14px] text-black hover:bg-black/5 transition-colors pl-9"
+              className="flex items-center gap-3 px-4 py-2 text-[14px] text-black dark:text-cream-dark-text hover:bg-black/5 dark:hover:bg-cream-dark-surface transition-colors pl-9"
               onClick={() => setIsOpen(false)}
             >
               <CreditCard className="w-3.5 h-3.5" />
@@ -163,7 +173,7 @@ export function UserNav({ user }: UserNavProps) {
             </Link>
             <Link
               href="/account/notifications"
-              className="flex items-center gap-3 px-4 py-2 text-[14px] text-black hover:bg-black/5 transition-colors pl-9"
+              className="flex items-center gap-3 px-4 py-2 text-[14px] text-black dark:text-cream-dark-text hover:bg-black/5 dark:hover:bg-cream-dark-surface transition-colors pl-9"
               onClick={() => setIsOpen(false)}
             >
               <Bell className="w-3.5 h-3.5" />
@@ -172,7 +182,7 @@ export function UserNav({ user }: UserNavProps) {
             {user.role === "admin" && (
               <Link
                 href="/admin"
-                className="flex items-center gap-3 px-4 py-2 text-[14px] text-black hover:bg-black/5 transition-colors"
+                className="flex items-center gap-3 px-4 py-2 text-[14px] text-black dark:text-cream-dark-text hover:bg-black/5 dark:hover:bg-cream-dark-surface transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 <User className="w-4 h-4" />
@@ -182,7 +192,7 @@ export function UserNav({ user }: UserNavProps) {
             <button
               onClick={handleSignOut}
               disabled={isSigningOut}
-              className="w-full flex items-center gap-3 px-4 py-2 text-[14px] text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+              className="w-full flex items-center gap-3 px-4 py-2 text-[14px] text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors disabled:opacity-50"
             >
               <LogOut className="w-4 h-4" />
               {isSigningOut ? "Signing out..." : "Sign out"}
