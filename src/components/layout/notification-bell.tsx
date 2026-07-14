@@ -146,11 +146,6 @@ export function NotificationBell({
     return () => window.removeEventListener("focus", onFocus);
   }, [fetchNotifications]);
 
-  // ── Refresh-when-dropdown-opens (so the user sees latest) ───
-  useEffect(() => {
-    if (open) void fetchNotifications();
-  }, [open, fetchNotifications]);
-
   // ── Mark single notification read (optimistic) ──────────────
   const markRead = useCallback(async (id: string) => {
     setRecent((prev) =>
@@ -205,7 +200,14 @@ export function NotificationBell({
   return (
     <div ref={dropdownRef} className="relative">
       <button
-        onClick={() => setOpen(!open)}
+        onClick={() => {
+          const willOpen = !open;
+          setOpen(willOpen);
+          // Refresh-on-open inline (replaces useEffect-driven fetch
+          // to avoid react-hooks/set-state-in-effect on the dropdown
+          // toggle path).
+          if (willOpen) void fetchNotifications();
+        }}
         className={`relative p-2.5 rounded-xl border transition-all ${
           open
             ? "bg-cream-dark-gold/10 border-cream-dark-gold/30 text-cream-dark-gold"

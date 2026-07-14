@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Image from "next/image";
 import { Camera, Loader2, Check, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -140,11 +141,13 @@ export function AvatarUploader({ currentImage, userName }: AvatarUploaderProps) 
           aria-label="Cambia immagine profilo"
         >
           {previewUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element -- V1, signed URL not in next/image config
-            <img
+            <Image
               src={previewUrl}
               alt={userName}
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              sizes="(max-width: 640px) 96px, 112px"
+              unoptimized
             />
           ) : (
             <span className="font-serif text-3xl sm:text-4xl text-cream-espresso">

@@ -55,7 +55,6 @@ export default async function CommunityTab({
   if (!course) return notFound();
 
   const { dbUser } = await getServerUser();
-  const isAdminViewer = dbUser?.role === "admin";
   const lang2 = locale.split("-")[0]?.toLowerCase() ?? "en";
   const lc = (await loadLocaleContentCached(domain, lang2)).portal;
 
@@ -141,13 +140,13 @@ export default async function CommunityTab({
   // Order: current user pinned at top (so they can see "you are here"),
   // then everyone else by progress desc.
   const selfId = dbUser?.id ?? null;
-  type Mate = {
+  interface Mate {
     userId: string;
     name: string;
     image: string | null;
     joinedAt: Date;
     completed: number;
-  };
+  }
   const mates: Mate[] = orders.map((o) => ({
     userId: o.userId,
     name: o.user.name ?? o.user.email?.split("@")[0] ?? "Studente",

@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import { MessageSquare, Sparkles } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +10,6 @@ import { getServerUser } from "@/lib/supabase/get-user";
 import { loadLocaleContentCached } from "@/lib/i18n/load-locale-content";
 import { getDmContext } from "@/lib/messaging/get-dm-context";
 import { findOrCreateConversation } from "@/lib/messaging/find-or-create-conversation";
-import { prisma } from "@/lib/db/prisma";
 import { ChatView } from "@/components/chat/chat-view";
 import Link from "next/link";
 
@@ -142,11 +142,13 @@ export default async function CourseChatTab({
             <div className="relative shrink-0">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FFF5E6] to-[#FFE4C4] flex items-center justify-center overflow-hidden border border-cream-dark-border">
                 {creator.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={creator.image}
                     alt=""
+                    width={40}
+                    height={40}
                     className="w-full h-full object-cover"
+                    unoptimized
                   />
                 ) : (
                   <span className="font-bold text-cream-dark-gold text-sm">

@@ -15,13 +15,13 @@ interface PreferencesFormProps {
   initial: PrefState;
 }
 
-const TOGGLE_ROWS: Array<{
+const TOGGLE_ROWS: {
   key: keyof PrefState;
   label: string;
   description: string;
   Icon: typeof Mail;
   category: "inapp" | "email";
-}> = [
+}[] = [
   {
     key: "inappChatReply",
     label: "Nuovi messaggi in chat",
@@ -63,14 +63,12 @@ export function PreferencesForm({ initial }: PreferencesFormProps) {
   const [state, setState] = useState<PrefState>(initial);
   const [saving, setSaving] = useState<keyof PrefState | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [savedKey, setSavedKey] = useState<keyof PrefState | null>(null);
 
   async function toggle(key: keyof PrefState) {
     const next = !state[key];
     setError(null);
     setState((prev) => ({ ...prev, [key]: next }));
     setSaving(key);
-    setSavedKey(null);
     try {
       const res = await fetch("/api/account/preferences", {
         method: "PATCH",
@@ -84,8 +82,6 @@ export function PreferencesForm({ initial }: PreferencesFormProps) {
         setError(data.error ?? "Errore durante il salvataggio");
         return;
       }
-      setSavedKey(key);
-      setTimeout(() => setSavedKey(null), 2000);
     } catch {
       setState((prev) => ({ ...prev, [key]: !next }));
       setError("Errore di rete. Riprova.");
@@ -119,7 +115,6 @@ export function PreferencesForm({ initial }: PreferencesFormProps) {
             const Icon = row.Icon;
             const checked = state[row.key];
             const isSaving = saving === row.key;
-            const isSaved = savedKey === row.key;
             return (
               <div
                 key={row.key}
@@ -172,7 +167,6 @@ export function PreferencesForm({ initial }: PreferencesFormProps) {
             const Icon = row.Icon;
             const checked = state[row.key];
             const isSaving = saving === row.key;
-            const isSaved = savedKey === row.key;
             return (
               <div
                 key={row.key}

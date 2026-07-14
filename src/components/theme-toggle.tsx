@@ -1,8 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import { Sun, Moon } from "lucide-react";
+
+// Module-scope stable identities for useSyncExternalStore.
+// Hoisted out of the component so React doesn't re-subscribe or
+// recompute snapshots on every render. Inline arrow functions
+// inside the component would return fresh references each render
+// and trigger the "The result of getSnapshot should be cached"
+// dev-mode warning + react-hooks/exhaustive-deps lint hit.
+const subscribeToMount = (): (() => void) => () => undefined;
+const getClientMountSnapshot = (): boolean => true;
+const getServerMountSnapshot = (): boolean => false;
 
 interface ThemeToggleProps {
   /**
@@ -27,8 +37,14 @@ interface ThemeToggleProps {
  */
 export function ThemeToggle({ variant = "dark" }: ThemeToggleProps) {
   const { theme, setTheme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  // Hydration-safe "are we on the client yet?" snapshot. Server returns
+  // false; after hydration the client snapshot flips to true and React
+  // re-renders. No useEffect/setState cycle, no hydration mismatch.
+  const mounted = useSyncExternalStore(
+    subscribeToMount,
+    getClientMountSnapshot,
+    getServerMountSnapshot,
+  );
 
   // Pre-mount placeholder keeps layout stable; same size as the button
   // (w-9 h-9) so the surrounding flex doesn't shift on hydration.
@@ -66,7 +82,7 @@ export function ThemeToggle({ variant = "dark" }: ThemeToggleProps) {
       {/* `sr-only` description for screen readers */}
       <span className="sr-only">Theme toggle</span>
       {/* Theme name retained for debugging — never read in JSX */}
-      {/* eslint-disable-next-line @typescript-eslint/no-unused-vars -- diagnostic only */}
+      { }
       <span data-theme-debug aria-hidden style={{ display: "none" }}>
         {String(theme)}
       </span>

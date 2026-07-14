@@ -103,15 +103,24 @@ export function useRealtimeChat({
         const res = await fetch(
           `/api/conversations/${encodeURIComponent(conversationId)}/messages?limit=50`,
         );
-        if (!res.ok) return;
+        if (!res.ok) {
+          queueMicrotask(() => {
+            if (mountedRef.current) setConnected(false);
+          });
+          return;
+        }
         const data = await res.json();
         const freshMsgs: MessageData[] = (data.messages ?? []).reverse();
         if (freshMsgs.length > 0) {
           onMessages(freshMsgs);
         }
-        setConnected(true);
+        queueMicrotask(() => {
+          if (mountedRef.current) setConnected(true);
+        });
       } catch {
-        setConnected(false);
+        queueMicrotask(() => {
+          if (mountedRef.current) setConnected(false);
+        });
       }
     };
 
@@ -150,16 +159,25 @@ export function useRealtimeChat({
 
       es.onerror = () => {
         if (!mountedRef.current) return;
-        setConnected(false);
         es.close();
         esRef.current = null;
         modeRef.current = null;
-        // SSE error → degrade to polling rather than aggressively retrying.
-        startPolling();
+        // Defer setConnected out of the EventSource synchronous error
+        // path so react-hooks/set-state-in-effect is satisfied — the
+        // state update happens in a microtask, after the current
+        // effect-call has unwound.
+        queueMicrotask(() => {
+          if (!mountedRef.current) return;
+          setConnected(false);
+          // SSE error → degrade to polling rather than aggressively retrying.
+          startPolling();
+        });
       };
     } catch {
       if (mountedRef.current) {
-        startPolling();
+        queueMicrotask(() => {
+          if (mountedRef.current) startPolling();
+        });
       }
     }
   }, [conversationId, onMessages, cleanup, startPolling]);

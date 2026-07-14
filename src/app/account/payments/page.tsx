@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Image from "next/image";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { CreditCard, Receipt } from "lucide-react";
@@ -118,11 +119,13 @@ export default async function PaymentsPage() {
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         {o.product.coverUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element -- V1, signed URL not in next/image config
-                          <img
+                          <Image
                             src={o.product.coverUrl}
                             alt=""
+                            width={40}
+                            height={40}
                             className="w-10 h-10 rounded-lg object-cover border border-cream-border shrink-0"
+                            unoptimized
                           />
                         ) : (
                           <div className="w-10 h-10 rounded-lg bg-cream-border flex items-center justify-center shrink-0 font-serif text-cream-text-soft">
