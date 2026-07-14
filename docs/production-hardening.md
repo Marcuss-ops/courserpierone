@@ -25,7 +25,7 @@
 
 ### 1. Separate test/prod envs ⚠️ PARTIAL
 
-**Architecture.** `src/lib/env.ts` uses a **flat single-slot** model: `STRIPE_SECRET_KEY` (one var, accepts `sk_test_*` OR `sk_live_*`). The same holds for `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`, `LEMONSQUEEZY_API_KEY`, `LEMONSQUEEZY_WEBHOOK_SECRET`. **There is no code path that discriminates `sk_test_*` from `sk_live_*`** — that discrimination lives in Vercel environment config (which is out-of-repo):
+**Architecture.** `src/lib/env.ts` uses a **flat single-slot** model: `STRIPE_SECRET_KEY` (one var, accepts `sk_test_*` OR `sk_live_*`). The same holds for `STRIPE_WEBHOOK_SECRET`, `LEMONSQUEEZY_API_KEY`, `LEMONSQUEEZY_WEBHOOK_SECRET` (NB: `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` was REMOVED in C2a commit `4242f18`; V1.x retains `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` solely for the legacy webhook drain — see README §V1.x warning box). **There is no code path that discriminates `sk_test_*` from `sk_live_*`** — that discrimination lives in Vercel environment config (which is out-of-repo):
 
 - **Vercel → Project → Settings → Environment Variables** has three scopes: `Production`, `Preview`, `Development`.
 - Production env holds `STRIPE_SECRET_KEY=sk_live_*`.
@@ -426,7 +426,7 @@ Use this punch list to declare the production hardening pass complete.
 ### Deploy-time (out-of-repo)
 - [ ] Vercel Production env holds `STRIPE_SECRET_KEY=sk_live_*` (test in Preview only)
 - [ ] Vercel Production env holds `STRIPE_WEBHOOK_SECRET=whsec_*` (needed for §5 Stripe signature verification — without it §5 400s every stripe trigger)
-- [ ] Vercel Production env holds `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_*` (test in Preview only)
+- [x] ~~Vercel Production env holds `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_*`~~ — REMOVED in C2a commit `4242f18` (publishable key non più in env registry). `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` restano required (legacy webhook drain — see Fase 8).
 - [ ] Vercel Production env holds `LEMONSQUEEZY_API_KEY=<live>` (test in Preview only)
 - [ ] Vercel Production env holds `LEMONSQUEEZY_WEBHOOK_SECRET=<live>` (needed for §5 LS HMAC verification)
 - [ ] `ALERT_WEBHOOK_URL` set in Vercel Production env + receiver responds 2xx (and must NOT be unset — silent-degradation)
