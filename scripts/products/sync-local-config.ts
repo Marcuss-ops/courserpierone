@@ -39,15 +39,70 @@ interface ConfigShape {
   defaultLanguage?: string;
 }
 
-async function findFirstAdminId(): Promise<string | null> {
-  // `Product.creatorId` is REQUIRED + ON DELETE RESTRICT per
-  // prisma/schema.prisma Phase 1.2+4 hardening. We pick the first available
-  // admin OR creator account to satisfy the FK on a brand-new Product row.
-  const u = await prisma.user.findFirst({
+/**
+ * Resolve the `creatorId` for a brand-new Product row.
+ *
+ * `Product.creatorId` is REQUIRED + ON DELETE RESTRICT per
+ * `prisma/schema.prisma` Phase 1.2+4 hardening. Resolution:
+ *
+ *   1. Explicit `--creator <userId>` argv override (works regardless of
+ *      how many admin/creator users exist).
+ *   2. Otherwise AUTO: works only if exactly 1 admin/creator exists in DB.
+ *      Zero → error loud (operator must bootstrap an admin first).
+ *      Two+  → error loud (ambiguous ownership — silent cross-course
+ *      attachment is a sharp edge on multi-admin orgs, so we surface it).
+ *
+ * Throws on every failure mode. Returns the resolved `userId` on success.
+ */
+async function resolveCreatorId(): Promise<string> {
+  // 1. Explicit --creator <userId> override.
+  const idx = process.argv.indexOf("--creator");
+  if (idx !== -1) {
+    const explicit = process.argv[idx + 1];
+    if (!explicit || explicit.startsWith("--")) {
+      throw new Error(
+        "❌ --creator flag passed without a value. Usage: --creator <userId>",
+      );
+    }
+    const u = await prisma.user.findUnique({
+      where: { id: explicit },
+      select: { id: true, role: true },
+    });
+    if (!u) {
+      throw new Error(`❌ --creator ${explicit} user not found in DB.`);
+    }
+    if (u.role !== "admin" && u.role !== "creator") {
+      throw new Error(
+        `❌ --creator ${explicit} has role="${u.role}". Must be 'admin' or 'creator'.`,
+      );
+    }
+    return u.id;
+  }
+
+  // 2. AUTO: exactly 1 admin/creator required.
+  const admins = await prisma.user.findMany({
     where: { OR: [{ role: "admin" }, { role: "creator" }] },
-    select: { id: true },
+    select: { id: true, role: true },
   });
-  return u?.id ?? null;
+  if (admins.length === 0) {
+    throw new Error(
+      `❌ No admin/creator user found in DB.\n` +
+        `   Create one first, or pass --creator <userId> explicitly.\n` +
+        `   Product.creatorId is REQUIRED (ON DELETE RESTRICT).`,
+    );
+  }
+  if (admins.length > 1) {
+    const list = admins.map((a) => `  • ${a.role}:${a.id}`).join("\n");
+    throw new Error(
+      `❌ ${admins.length} admin/creator users found; ambiguous ownership.\n` +
+        `   Either:\n` +
+        `     • Pass --creator <userId> to pick explicitly, OR\n` +
+        `     • Prune admin/creator roles to exactly one user.\n` +
+        `\n` +
+        `   Found:\n${list}\n`,
+    );
+  }
+  return admins[0].id;
 }
 
 async function main() {
@@ -128,15 +183,9 @@ async function main() {
       });
       console.log(`   ✓ Product refreshed (id=${existingProduct.id}).`);
     } else {
-      // Brand-new course: pick first admin/creator to satisfy FK.
-      const creatorId = await findFirstAdminId();
-      if (!creatorId) {
-        console.error(
-          `❌ No admin/creator user found in DB. Create one before first sync.\n` +
-            `   Product.creatorId is REQUIRED (ON DELETE RESTRICT, schema.prisma).`,
-        );
-        process.exit(1);
-      }
+      // Brand-new course: resolve creatorId (throws loud on multi-admin —
+      // see resolveCreatorId). Failure exits 2 with explicit message.
+      const creatorId = await resolveCreatorId();
       const created = await prisma.product.create({
         data: {
           slug,
