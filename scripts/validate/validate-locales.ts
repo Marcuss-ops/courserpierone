@@ -200,6 +200,12 @@ function main() {
 
       const localeKeys = flattenKeys(localeData);
       const missing: string[] = [];
+      // Declared above the missing-keys loop so the soft-skip branch above
+      // can push to it without triggering `Cannot access X before initialization`
+      // (TDZ). The checkInconsistencies results below are appended into the
+      // SAME array rather than reassigning, keeping a single source of truth
+      // for the per-file diagnostics accumulated in this iteration.
+      const discrepancies: string[] = [];
 
       // Sub-trees whose missing keys are treated as warnings (soft) rather
       // than fatal errors. Used to tolerate iterating i18n namespaces where
@@ -207,10 +213,11 @@ function main() {
       // fallbacks in the component cover the gap at runtime until the
       // async translation pipeline catches up.
       //
-      // Rationale: an empty-string key in JSON would BREAK the `?? "fallback"`
-      // runtime safety net (since `"" ?? x` = `""`, NOT `x`). Option D
-      // preserves the JS undefined-path so the inline component default text
-      // renders while translations propagate.
+      // Rationale: writing an empty-string key into JSON files would BREAK
+      // the `?? "fallback"` runtime safety net (since `"" ?? x` = `""`, NOT
+      // `x`). The soft-subtree flag preserves the JS undefined-key path so
+      // the inline component default text renders while the async translator
+      // propagates the missing keys.
       const SOFT_SUBTREES = ["portal."];
 
       for (const key of referenceKeys) {
@@ -229,7 +236,9 @@ function main() {
         }
       }
 
-      const discrepancies = checkInconsistencies(file, localeData, enData);
+      // Append translation inconsistencies (placeholder brackets, IT leaks,
+      // long untranslated English snippets) onto the same array.
+      discrepancies.push(...checkInconsistencies(file, localeData, enData));
 
       if (missing.length > 0 || discrepancies.length > 0) {
         totalFatalErrors += missing.length;
