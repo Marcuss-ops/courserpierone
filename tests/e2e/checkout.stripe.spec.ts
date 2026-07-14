@@ -18,31 +18,34 @@ import {
  *
  * Scope discipline:
  *   - NO real Stripe Checkout session is created in this test
- *     (createStripeCheckoutSession is intentionally NOT called — the
- *     prod-side provider's createCheckout is rejected if
- *     ENABLE_STRIPE_CHECKOUT !== "true" since Phase 7).
+ *     (the legacy Stripe new-session provider was removed in commit
+ *     C1a and `ENABLE_STRIPE_CHECKOUT` env flag was removed in C2a).
  *   - The test synthesizes a minimal Stripe.Checkout.Session-shaped
  *     object in-memory, then runs generateStripeWebhookPayload +
  *     signStripeWebhookPayload + a POST to the legacy handler. This
  *     exercises the verified-signature path only — no Stripe API
  *     dependency, only STRIPE_WEBHOOK_SECRET for HMAC signing.
  *
- * Activation:
- *   - Gated by ENABLE_STRIPE_CHECKOUT (legacy activation signal). When
- *     the flag is off, this file is skipped — aligning with the
- *     V1.5 mandate that LS is the primary provider and the legacy
- *     Stripe path is opt-in.
+ * Activation (post-C2a):
+ *   - Gated solely by `STRIPE_WEBHOOK_SECRET env var`. The legacy
+ *     historical `ENABLE_STRIPE_CHECKOUT !== 'true'` gate that
+ *     existed pre-C2a is no longer enforced (the flag itself was
+ *     removed from src/lib/env.ts). When STRIPE_WEBHOOK_SECRET is
+ *     set, the test exercises the legacy webhook; otherwise it
+ *     skips. This matches the V1.5 mandate that LS is the primary
+ *     provider while still probing the legacy refund/dispute path.
  */
 
 const TEST_EMAIL = "stripe-legacy-e2e@example.com";
 
-// V1.5+: only the legacy webhook handler is exercised here,
-// not new-session creation. ENABLE_STRIPE_CHECKOUT was REMOVED
-// from env.ts in C1b cleanup — the legacy webhook is now active
-// whenever STRIPE_WEBHOOK_SECRET is configured (default for V1.x
-// during the drain window). The single `test.skip` below is the
-// only gate, ensuring the legacy webhook logic is actually tested
-// in CI when creds are present.
+// V1.5+ post-C2a: only the legacy webhook handler is exercised here,
+// not new-session creation. The historical `ENABLE_STRIPE_CHECKOUT`
+// flag was removed from src/lib/env.ts in commit C2a; the legacy
+// webhook itself remains active (running on every real Stripe event
+// delivery) for the historical-refund drain window. The only gate
+// here is `test.skip` on STRIPE_WEBHOOK_SECRET — if the secret is
+// missing, the test skips (cannot sign a valid HMAC). When the
+// secret IS set, the legacy webhook logic gets exercised in CI.
 test.skip(!process.env.STRIPE_WEBHOOK_SECRET, "STRIPE_WEBHOOK_SECRET not configured");
 
 test.beforeEach(async () => {
@@ -68,13 +71,13 @@ test.describe("Stripe legacy webhook regression (V1.5 LS-primary)", () => {
 
     // 1. Synthesize a minimal Stripe.Checkout.Session in-memory.
     //
-    // We DO NOT call createStripeCheckoutSession here: the V1.5 prod-side
-    // provider rejects new-session creation when ENABLE_STRIPE_CHECKOUT
-    // is unset, so creating a real session from this test would either
-    // 401/403 against the legacy provider OR fail the LS-primary mandate
-    // by depending on prod-side Stripe. Instead, we hand-craft the
-    // minimal session-shape that the legacy handler reads (id +
-    // metadata + customer_email + amount_total).
+    // We hand-craft the minimal session-shape that the legacy handler
+    // reads (id + metadata + customer_email + amount_total). No
+    // real Stripe API call: post-C2a the legacy Stripe new-session
+    // provider module is gone, so calling any createCheckout-style
+    // Stripe API from this test would require mocking vendor code.
+    // Instead, this test exercises the verified-signature path that
+    // the legacy webhook relies on, post-C1a.
     const syntheticSession = {
       id: `cs_test_synth_${Date.now()}`,
       object: "checkout.session",

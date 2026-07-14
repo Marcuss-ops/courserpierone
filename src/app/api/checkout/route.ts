@@ -49,18 +49,17 @@ export const POST = withRateLimit(async function POST(request: NextRequest) {
 
     pricingService.validateProvider(pricing);
 
-    // Phase 7 cleanup: LS is the sole new-session provider as of
-    // V1.5+. The legacy Stripe webhook at /api/webhooks/stripe/route.ts
-    // remains for processing pre-cutover refund/dispute events.
-    // ENABLE_STRIPE_CHECKOUT remains in env.ts but has no live readers
-    // after C1a (the legacy provider module was removed); slated for
-    // C1b removal. The legacy webhook handler does NOT consult the
-    // flag by design — it processes events that pre-date it.
+    // V1.5+ LS-primary: LS is the sole new-session provider. The
+    // historical `ENABLE_STRIPE_CHECKOUT` env flag and the legacy
+    // Stripe new-session provider were both removed in commits C1a
+    // (provider module) + C2a (env registry entry). The legacy
+    // Stripe webhook at `/api/webhooks/stripe/route.ts` remains ONLY
+    // for processing pre-cutover refund/dispute events; it does not
+    // consult any activation flag (it processes by Stripe signature).
     //
-    // If pricing.lemonVariantId is missing, CheckoutService.createCheckout
-    // throws a CheckoutError with a diagnostic message ("Nessun
-    // metodo di pagamento disponibile...") -- no need for an extra
-    // route-level gate here.
+    // If `pricing.lemonVariantId` is missing, `CheckoutService.createCheckout`
+    // throws a `CheckoutError` with a diagnostic message ("Nessun
+    // metodo di pagamento disponibile...") — no route-level gate needed.
 
     const userEmail = user?.email ?? body.email ?? "";
 
