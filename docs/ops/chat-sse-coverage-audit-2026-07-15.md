@@ -130,7 +130,7 @@ US1 + US2 (community chat) sono stati **progettati** per V1 ma mai implementati 
 | Tab navigation punta a `/community` ma `page.tsx` inesistente | `src/components/layout/course-top-nav.tsx` line 42 (comment: "3 main tabs: `/[locale]/[slug]/` (Corso, default), `/community`, `/chat`") | Link nella nav punta a una rotta che NON esiste (verrà 404) |
 | `src/app/(locale)/[locale]/[domain]/community/page.tsx` | FILE_DOES_NOT_EXIST (file-picker probe 2026-07-15) | Pagina community non esiste |
 | `CommunityTopic`/`CommunityPost` schema models | **ASSENTI** in `prisma/schema.prisma` | Nessuna tabella per topic thread / posts |
-| `community_reply` notification type | `prisma/schema.prisma` line 252 (comment): `community_reply — riservato V2 (richiede CommunityTopic/Post schema)` | Tipo di notifica commentato come V2 reservation |
+| `community_reply` notification type | `prisma/schema.prisma` line 192 (comment): `community_reply — riservato V2 (richiede CommunityTopic/Post schema)` | Tipo di notifica commentato come V2 reservation |
 | `Notification.type: 'community_reply'` nel centro notifiche | Zero LIVE. Solo nel commento del schema. | Non emesso da nessuna route |
 
 ### 4.2 Verdict su community chat
@@ -155,7 +155,7 @@ US1 + US2 (community chat) sono stati **progettati** per V1 ma mai implementati 
 | 8 | DM close (DELETE) | chat REST | `fetch` | `DELETE /api/conversations/[id]` | n/a (idempotent 404) | ❌ | `dashboard/messages/[userId]/page.tsx` |
 | 9 | Inbox unread badge counter | notif badge | **REST polling** | `GET /api/notifications` | n/a (lapsed = stale UI, acceptable) | ❌ | `inbox-provider.tsx` |
 | 10 | Notifications campanella (Centro Notifiche) | notif feed | **REST polling** | `GET /api/notifications` | poll 30s | ❌ | `notification-bell.tsx` |
-| 11 | DM typing indicator | V2 reservation | n/a (no-op in V1) | `useRealtimeChat.sendTyping()` is `void` | n/a | ❌ | docstring `use-realtime-chat.ts:40` |
+| 11 | DM typing indicator | V2 reservation | n/a (all 3 surfaces are no-op stubs in V1) | `sendTyping` / `resetTypingTimer` (outbound) + `isOtherTyping` (inbound) + UI rendering in `<ChatView>` are **preserved as no-op stubs** so the consumer code doesn't change; SSE server emits ONLY message batches (no typing events) per §2 wire contract, so `isOtherTyping` stays `false` in V1 | n/a | ❌ | `use-realtime-chat.ts:37-42` docstring ("no-op stubs so the consumer (`chat-view.tsx`) doesn't need to change") + `<ChatView>` isOtherTyping |
 | 12 | Community thread real-time | V2 reservation | n/a | n/a | n/a | ❌ N/A (no code) | n/a |
 | 13 | Community topic list | V2 reservation | n/a | n/a | n/a | ❌ N/A (no code) | n/a |
 | 14 | `/api/auth/ws-token` | V1 (rimosso C3) | n/a | n/a | n/a (C3) | ❌ `0 hit (route deleted)` | `route.ts` NON esiste (C3) |
@@ -201,15 +201,21 @@ Queste righe sono stale (implicano un path WS che non esiste post-C3). NON rompo
 //   C3 cleanup: previously WebSocket-first → SSE-first now.
 ```
 
-### 7.2 `src/components/layout/inbox-provider.tsx:30`
+### 7.2 *(originariamente flaggato `src/components/layout/inbox-provider.tsx:30` poi rimosso dopo re-reading del file)*
 
-**Stale**:
+Su re-reading del JSDoc effettivo (linee 25–32), il commento NON è stale — è una **V2-reservation description** correttamente formulata:
+
 ```
-*   pilotata dal WS ormai rimosso. Il polling di `useInbox()` (future
-*   refreshato ogni 30s) può reintroduire un polling leggero; per V1 ci
+ * Il badge NON si auto-incrementa in realtime per i messaggi che
+ * arrivano mentre l'utente è su un'altra pagina — quella UX era
+ * pilotata dal WS ormai rimosso. Il polling di `useInbox()` (future
+ * V2: endpoint `GET /api/notifications/recent-unread-by-conversation`
+ * refreshato ogni 30s) può reintroduire un polling leggero; per V1 ci
+ * accontentiamo del refresh-on-navigation.
+ */
 ```
 
-(line 27 è OK — riconosce correttamente la rimozione; line 30 pare frammentata)
+→ Rimosso da §7: il docstring acknowledges correttamente WS rimosso + reserves V2 endpoint. Non richiede fix.
 
 ### 7.3 `src/components/layout/mobile-bottom-nav.tsx:30`
 
@@ -333,14 +339,19 @@ Verdict V1: REST polling a 30s è accettabile per la campanella (scenario notif 
 ```
 client <ChatView>                server
    │                                │
-   ├─new WebSocket(/api/auth/ws-token)─► NextAuth WS upgrade → JWT verify → connection open
-   │                                │
+   ├─new WebSocket(url)─►           WS upgrade (server.ts + custom `ws` npm package)
+   ├─fetch /api/auth/ws-token { WS_SECRET }─►
+   │                                ├─ HS256 sign with WS_SECRET (server-side)
+   │<── JWT signed token ──────────┤
+   ├─WebSocket client.connect(token)─►
+   │                                ├─ verify JWT (WS_SECRET)
+   │<── WS connection open ─────────┤
    ├─messageBroker.subscribe       │
    │  [ON_MESSAGE event]           │
    │                                │
    │                                ├─ prisma.message.create
    │                                ├─ messageBroker.emit(NEW_MESSAGE, payload)
-   │<── WS frame: NEW_MESSAGE ──────┤
+   │<── WS frame: NEW_MESSAGE ─────┤
 ```
 
 ### Post-C3 (main @ 060f0be)
