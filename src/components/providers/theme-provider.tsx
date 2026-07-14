@@ -1,6 +1,7 @@
 "use client";
 
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import type { ComponentProps } from "react";
 
 /**
  * ThemeProvider — thin client-side wrapper around next-themes.
@@ -15,24 +16,19 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
  *                                               the same domain (rare but possible).
  *
  * Why a wrapper:
- *   - Allows easy swap of `attribute` to `data-theme` later without
- *     changing root-layout code.
- *   - Lets us add a useEffect for sanity-checking that the dark class was
- *     applied (lazy) without polluting layout.tsx.
+ *   - All next-themes config lives in ONE function-call site (src/app/layout.tsx).
+ *     If we ever want to swap `attribute` to `data-theme` or add a Vercel-Analytics
+ *     darkmode signal, it's a single-file change.
+ *   - ComponentProps<typeof NextThemesProvider> keeps us in sync with the upstream
+ *     library's actual prop shape (no manual duplication).
  *
  * `suppressHydrationWarning` lives on <html> in src/app/layout.tsx — it's
  * required because next-themes injects the `class="dark"` BEFORE React
  * hydrates, so without suppressing, React would log a hydration mismatch.
  */
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  return (
-    <NextThemesProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      storageKey="courser-theme"
-    >
-      {children}
-    </NextThemesProvider>
-  );
+export function ThemeProvider({
+  children,
+  ...props
+}: ComponentProps<typeof NextThemesProvider>) {
+  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
 }
