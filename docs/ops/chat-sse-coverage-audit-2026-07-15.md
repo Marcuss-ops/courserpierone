@@ -17,7 +17,7 @@
 | **`/dashboard/messages/[userId]`** | ✅ sì | stesso del DM | stesso | ❌ nessuna |
 | **`/dashboard/creator/messages/[userId]`** | ✅ sì | stesso del DM | stesso | ❌ nessuna |
 | **Inbox badge counts** (`InboxProvider`) | ✅ sì | REST polling `/api/notifications` ogni 30s | n/a (no realtime richiesto) | ❌ nessuna |
-| **Typing indicator** | ⚠️ no-op in V1 | hook ha `sendTyping()` come **no-op documentato** (V2 surface assente) | n/a | ❌ nessuna (no-op) |
+| **Typing indicator** | ⚠️ no-op in V1 (3-surface stubs — vedi §5 r.11 per breakdown completo) | hook docstring `use-realtime-chat.ts:37-42`: outbound (`sendTyping` / `resetTypingTimer`) + inbound (`isOtherTyping`) + UI rendering in `<ChatView>` sono preservati come **no-op stubs** (consumer code invariato); SSE server emette SOLO message batches (no typing events) per §2 wire contract → `isOtherTyping` resta `false` → typing-dots UI è "dead" code path in V1 | n/a | ❌ nessuna (no-op) |
 | **Notifications campanella** (`NotificationBell`) | ✅ sì | REST polling `/api/notifications` ogni 30s | n/a (L'hook `useRealtimeChat` non c'entra) | ❌ nessuna |
 | **Community chat V1 US1/US2** | ❌ **V2 reservation** (NON implementato) | n/a — pagina `community/page.tsx` inesistente; nessuno schema `CommunityTopic/Post` | n/a | n/a (nessun code) |
 
@@ -203,21 +203,9 @@ Queste righe sono stale (implicano un path WS che non esiste post-C3). NON rompo
 
 ### 7.2 *(originariamente flaggato `src/components/layout/inbox-provider.tsx:30` poi rimosso dopo re-reading del file)*
 
-Su re-reading del JSDoc effettivo (linee 25–32), il commento NON è stale — è una **V2-reservation description** correttamente formulata:
+Re-reading `inbox-provider.tsx:25-32` shows the JSDoc is correctly framed as "WS rimosso + V2 reservation per `GET /api/notifications/recent-unread-by-conversation`"; not actually stale → rimosso da §7 stale-comment list.
 
-```
- * Il badge NON si auto-incrementa in realtime per i messaggi che
- * arrivano mentre l'utente è su un'altra pagina — quella UX era
- * pilotata dal WS ormai rimosso. Il polling di `useInbox()` (future
- * V2: endpoint `GET /api/notifications/recent-unread-by-conversation`
- * refreshato ogni 30s) può reintroduire un polling leggero; per V1 ci
- * accontentiamo del refresh-on-navigation.
- */
-```
-
-→ Rimosso da §7: il docstring acknowledges correttamente WS rimosso + reserves V2 endpoint. Non richiede fix.
-
-### 7.3 `src/components/layout/mobile-bottom-nav.tsx:30`
+### 7.2 `src/components/layout/mobile-bottom-nav.tsx:30`
 
 **Stale**:
 ```
@@ -232,7 +220,7 @@ Su re-reading del JSDoc effettivo (linee 25–32), il commento NON è stale — 
 // useInbox() REST polling (post-C3; WS rimosso).
 ```
 
-### 7.4 `src/app/dashboard/messages/conversation-list.tsx:15`
+### 7.3 `src/app/dashboard/messages/conversation-list.tsx:15`
 
 **Stale**:
 ```
