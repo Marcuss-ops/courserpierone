@@ -8,41 +8,8 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-
-// ═══ Connection Pooling ═══════════════════════════════════
-// ═══ Connection Pooling ══════════════════════════════
-// AUTHORITATIVE PARAMS for DATABASE_URL when using Supabase Supavisor
-// transaction-mode pooler (port 6543):
-//
-//   ?pgbouncer=true&connection_limit=3&pool_timeout=10&statement_cache_size=0
-//
-// Why each param:
-//   - pgbouncer=true           → Prisma 5 enables transaction-mode handling;
-//                                disables session-scoped prepared statements
-//                                that conflict with PgBouncer/Supavisor's
-//                                per-conn state.
-//   - connection_limit=3       → Safe for Vercel free-tier + Supavisor free
-//                                tier (~15-conn pool): 3 concurrent lambdas
-//                                × 3 conns = 9, leaves headroom for migrations
-//                                and the audit script.
-//   - pool_timeout=10          → Fast-fail hanging prerenders on Vercel
-//                                (avoids 60s default timeout piling up).
-//   - statement_cache_size=0   → Defense-in-depth alongside pgbouncer=true;
-//                                fully disables Prisma's per-engine prepared
-//                                statement cache to prevent 42P05.
-//
-// Missing ANY of these → Postgres `42P05 prepared statement "s2" already
-// exists` crashes under concurrent Promise.all(query) (the audit script
-// + any production API route under Serverless-burst traffic).
-// Full diagnosis & reproduction: docs/production-hardening.md Appendix B.3.
-//
-// This block is the canonical source-of-truth. src/lib/db/prisma.ts and
-// scripts/ops/staging-env.sh MUST mirror these values exactly.
-//
-// DATABASE_URL → Supavisor transaction-mode pooler (port 6543)
-// DIRECT_URL   → Supavisor session-mode pooler (port 5432, only for prisma migrate)
-//
-// Supabase: prendi entrambi gli URL da Project Settings → Database
+// Runtime: pooled Supabase URL. Pool params: docs/production-hardening.md Appendix B.3.
+// Migrations: Prisma migrate uses DIRECT_URL (non-pooled session connection).
 
 // ─── Prodotti (Libri / Corsi) ───────────────────────────────
 // Phase 1.2 del piano DMs: ogni prodotto è associato a un creator
@@ -257,22 +224,9 @@ model NotificationPreference {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// ─── Progresso Lezioni (ripristinato post-fix schema-corrupt) ──
-// NB: questo modello era presente nello schema originale (commit
-// 3770bb85) ma è stato accidentalmente fuso dentro `model User` da
-// una sed-sweep troppo ampia eseguita in questo turn. Lo ripristiniamo
-// come blocco separato per:
-//   1. Soddisfare il vincolo Prisma "ogni @@unique/@@index dichiarato
-//      in top-level model".
-//   2. Correggere la duplicazione `createdAt`/`updatedAt` che era stata
-//      incollata due volte (una in User e una fusa in LessonProgress).
-//   3. Preservare la semantica FK originale: NESSUNA clausola
-//      `onDelete` = default Prisma NoAction / PG NO ACTION. Il refuso
-//      `onDelete: Cascade` (aggiunto in prima battuta) sarebbe una
-//      cambio comportamentale rispetto a 3770bb85 — lo rimuoviamo per
-//      coerenza col baseline. Se Product→Cascade→Lesson elimina una
-//      Lesson, i LessonProgress orfani sono già protetti da FK a livello
-//      SQL (vedi docs/archive runbook futuro V2.x per cleanup batch).
+// ─── Progresso Lezioni ──
+// NB: do NOT add `onDelete: Cascade` on the `lesson` FK — Prisma default
+//     (NoAction) matches the V1 baseline (commit 3770bb85).
 model LessonProgress {
   id           String    @id @default(cuid())
   userId       String
