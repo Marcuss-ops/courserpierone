@@ -26,7 +26,7 @@
 #        export LEMONSQUEEZY_API_KEY='sk_live_...'
 #        export LEMONSQUEEZY_STORE_ID='<store-id>'
 #        export LEMONSQUEEZY_WEBHOOK_SECRET='<webhook-secret>'
-#        export EMAIL_SERVER_HOST='smtp.gmail.com'
+#        export EMAIL_SERVER_HOST='smtp.resend.com'  # or smtp.sendgrid.net / smtp.mailgun.org / smtp.gmail.com etc.
 #        export EMAIL_SERVER_PORT='587'
 #        export EMAIL_SERVER_USER='noreply@courssy.com'
 #        export EMAIL_SERVER_PASSWORD='<app-password>'

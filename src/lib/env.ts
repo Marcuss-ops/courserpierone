@@ -82,14 +82,12 @@ export const ENV_DEFINITIONS: EnvVarDef[] = [
   {
     key: "EMAIL_SERVER_USER",
     category: "required",
-    description: "SMTP username",
-    optional: true,
+    description: "SMTP username. Required — set explicitly (e.g. `resend` per Resend, full email address per Gmail SMTP with App Password).",
   },
   {
     key: "EMAIL_SERVER_PASSWORD",
     category: "required",
-    description: "SMTP password o App Password",
-    optional: true,
+    description: "SMTP password o App Password. Required — set explicitly (non master password; Gmail requires an App Password, Resend/SendGrid/Mailgun pass the provider API key).",
   },
   {
     key: "EMAIL_FROM",
@@ -245,7 +243,10 @@ export function validateEnv(): ValidationResult {
  *   env.DATABASE_URL            → string (crasha se mancante in produzione)
  *   env.STRIPE_SECRET_KEY       → string | undefined
  *   env.NEXT_PUBLIC_APP_URL     → string con default
- *   env.EMAIL_SERVER_HOST       → string con default "smtp.gmail.com"
+ *   env.EMAIL_SERVER_HOST       → string (required; nessun default — C1e cleanup)
+ *   env.EMAIL_SERVER_USER       → string (required; nessun default — C2b cleanup)
+ *   env.EMAIL_SERVER_PASSWORD   → string (required; nessun default — C2b cleanup)
+ *   env.EMAIL_FROM              → string (required; nessun default — C1e cleanup)
  */
 const _envTarget: Record<string, string | undefined> = {};
 
