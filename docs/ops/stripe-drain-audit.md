@@ -28,6 +28,14 @@
 
 ## 1. TL;DR — Baseline (2026-07-15, sandbox re-run)
 
+> 📌 **Read this first.** §1 numbers are from the SANDBOX replay in §3
+> (port-55440 deterministic seed with 13 mixed-provider `sda-`-prefixed
+> Orders). **They are NOT staging/prod numbers.** Production re-runs
+> populate the §4 template separately — do NOT interpret §1 as the
+> current production drain queue size until an operator has committed
+> the §4 production snapshot back to this file (a normal weekly cadence,
+> see §7).
+
 | Field | Value |
 | --- | --- |
 | **Date baseline captured** | 2026-07-15 |
@@ -207,7 +215,7 @@ because `paymentProvider='stripe'` is <1% of the table.
 | Sum of query (1) row_count | 13 (5 LS-completed + 5 stripe-completed + 1 stripe-pending + 2 stripe-refunded) | 13 | ✓ PASS |
 | Query (2) total | 6 (3 stripe-completed-no-sub + 1 stripe-pending + 2 stripe-completed-with-sub) | 6 | ✓ PASS |
 | Query (3) ⊆ Query (2) | `Query (3) ⊆ Query (2)` (the leak is a subset of the drain queue) | `2 ⊆ 6` | ✓ PASS |
-| Grand total Orders | `LE_count + ST_count = 5 + 8 = 13` | 13 | ✓ PASS |
+| Grand total Orders | `Sum of all paymentProvider counts = total Orders` (invariant: SUM(COUNT(*)) over GROUP BY = COUNT(*); holds for any DB regardless of which providers exist) | 13 = 13 | ✓ PASS |
 
 ### §3.4 Seed inventory (for transparency on what query outputs represent)
 
