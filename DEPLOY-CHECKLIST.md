@@ -57,7 +57,6 @@ nslookup www.courssy.com
 | `EMAIL_FROM` | ✅ | Es. `no-reply@courssy.com` |
 | `CRON_SECRET` | ✅ | `openssl rand -base64 32` |
 | `ALERT_WEBHOOK_URL` | ✅ | Slack incoming webhook per monitoring |
-| `WS_SECRET` | ✅ | `openssl rand -base64 32` |
 | `LOG_ERROR_SECRET` | ✅ | `openssl rand -base64 32` |
 | `NEXT_PUBLIC_LOG_ERROR_SECRET` | ✅ | Stesso valore di LOG_ERROR_SECRET |
 | `UPSTASH_REDIS_REST_URL` | ✅ | Upstash REST endpoint |
@@ -173,8 +172,8 @@ Triggerare un sign-in reale con email personale. Verificare:
 - Redirect a `/dashboard`
 
 ```bash
-# Quick check: SMTP service running?
-npm run dev:ws
+# Quick check: SMTP service running? —Vercel Preview con env SMTP già settate—
+curl -sS https://www.courssy.com/api/health | jq # → services.redis.email.status
 # Poi: trigger signup via UI su https://www.courssy.com/login
 ```
 
@@ -222,11 +221,10 @@ Configura Slack incoming webhook:
 - `https://api.slack.com/messaging/webhooks`
 - URL `/api/alerts` lo usa per errori 500+ e rate-limit superati
 
-### #16 WS_SECRET + LOG_ERROR_SECRET
+### #16 LOG_ERROR_SECRET + cron secrets
 
 ```bash
 # Genera tutti i secret random richiesti
-openssl rand -base64 32  # WS_SECRET
 openssl rand -base64 32  # LOG_ERROR_SECRET
 openssl rand -base64 32  # CRON_SECRET
 openssl rand -hex 16     # LEMONSQUEEZY_WEBHOOK_SECRET

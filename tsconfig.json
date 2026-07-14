@@ -26,6 +26,9 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@courses/*": [
+        "./courses/*"
       ]
     },
     "target": "ES2017"

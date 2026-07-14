@@ -67,7 +67,8 @@ vi.mock("@/lib/messaging/api-authorize", () => ({
 
 // NB: getPartnerId non è mockato — è una pure helper (no prisma access,
 // no async I/O) ed esercitare il real impl qui vale come mini-regression
-// del derivation logic (lato server.ts WS upgrade usa la stessa helper,
+// del derivation logic (~~lato server.ts WS upgrade~~ C3 removed; ora la
+// helper vive solo qui e nel consumer REST POST della conversation).
 // quindi un break qui si propaga anche lì).
 
 function setDefaultAuthorizeAllowed(

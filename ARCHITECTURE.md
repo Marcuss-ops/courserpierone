@@ -123,6 +123,6 @@ Pubblica ──── generateCourseConfig(slug) → CourseConfigCache DB row
 
 ## Note operative
 
-- **Dev server paralleli**: `npm run dev` (Next.js) + `npm run dev:ws` (`server.ts` per il WS bridge dei DM). Vedi `docs/production.md` per la topologia di produzione.
+- **Dev server**: `npm run dev` (Next.js alone — la real-time chat passa via SSE in `/api/conversations/[id]/stream`, polling server-driven interno al route handler). Vedi `docs/production.md` per la topologia di produzione.
 - **Typecheck + lint**: `npm run check` (typecheck + eslint + vitest). Vedi `docs/roadmap-current.md` §1.5 per il baseline degli errori pre-esistenti.
 - **DB locale**: `docker compose up -d db redis` (Postgres 16 + Redis). Lo stack include `pgbackups` per i backup automatici (PITR per Supabase prod).

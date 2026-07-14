@@ -52,7 +52,9 @@ VARS=(
   "CRON_SECRET|Secret per /api/cron/* e /api/diagnose-oauth"
   "LOG_ERROR_SECRET|Secret per error sink server-side"
   "NEXT_PUBLIC_LOG_ERROR_SECRET|Same as LOG_ERROR_SECRET (client-visible OK)"
-  "WS_SECRET|Secret per WebSocket auth (manca in .env.example!)"
+  # WS_SECRET removed in C3 cleanup — la WS bridge (server.ts) è stata
+  # rimossa; il realtime chat ora passa interamente via SSE. Le tab
+  # aperte con WS subscription non esistono più.
   "LEMONSQUEEZY_API_KEY|Lemon Squeezy Live API key"
   "LEMONSQUEEZY_STORE_ID|Lemon Squeezy Live Store ID"
   "LEMONSQUEEZY_WEBHOOK_SECRET|Lemon Squeezy webhook signing secret"

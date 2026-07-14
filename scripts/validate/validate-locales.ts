@@ -3,19 +3,26 @@
  * Validate Locales — Verifica che ogni JSON lingua abbia tutte le chiavi
  * presenti in en.json. Se manca una chiave, il build fallisce.
  *
+ * Per ADR-0011: il directory base è `courses/<slug>/locales/<code>.json`
+ * invece del vecchio `data/<slug>/<code>.json`. Anche la "soft subtree"
+ * (portal.*) è documentata inline — vale per tutte le lingue, non solo
+ * it/en; lo script si limita a segnalare senza bloccare il build.
+ *
  * Uso:
- *   npx tsx scripts/validate/validate-locales.ts <slug>
+ *   npx tsx scripts/validate/validate-locales.ts
  *   npx tsx scripts/validate/validate-locales.ts amish-secrets
  *
- * Aggiungi a package.json:
- *   "validate:locales": "npx tsx scripts/validate/validate-locales.ts"
+ * (nessun slug arg → autoscansione di `courses/*`).
  */
 
 import { readFileSync, readdirSync } from "fs";
 import { resolve } from "path";
 import process from "process";
 
-const DATA_DIR = resolve(__dirname, "..", "..", "data");
+// ─── ADR-0011: per-course plugin folders ────────────────────────
+// `courses/<slug>/locales/<code>.json` è il nuovo path canonico.
+// Il vecchio `data/<slug>/<code>.json` NON viene più consultato.
+const COURSES_ROOT = resolve(__dirname, "..", "..", "courses");
 
 /**
  * Flatten a nested object into dot-notation paths.
@@ -27,7 +34,6 @@ function flattenKeys(obj: unknown, prefix = ""): Set<string> {
   if (obj === null || obj === undefined) return keys;
 
   if (Array.isArray(obj)) {
-    // For arrays, check the first element's structure as template
     if (obj.length > 0 && typeof obj[0] === "object") {
       const itemKeys = flattenKeys(obj[0], `${prefix}[]`);
       itemKeys.forEach((k) => keys.add(k));
@@ -54,11 +60,9 @@ function flattenKeys(obj: unknown, prefix = ""): Set<string> {
     const path = prefix ? `${prefix}.${key}` : key;
 
     if (typeof value === "object" && value !== null && !Array.isArray(value)) {
-      // Nested object — recurse
       const nested = flattenKeys(value, path);
       nested.forEach((k) => keys.add(k));
     } else if (Array.isArray(value)) {
-      // Array — check first item if it's an object
       if (value.length > 0 && typeof value[0] === "object" && value[0] !== null) {
         const itemKeys = flattenKeys(value[0], `${path}[]`);
         itemKeys.forEach((k) => keys.add(k));
@@ -81,17 +85,17 @@ function main() {
     slugs = [argSlug];
   } else {
     try {
-      slugs = readdirSync(DATA_DIR, { withFileTypes: true })
+      slugs = readdirSync(COURSES_ROOT, { withFileTypes: true })
         .filter((dirent) => dirent.isDirectory())
         .map((dirent) => dirent.name);
     } catch {
-      console.error(`❌ Impossibile leggere la cartella data: ${DATA_DIR}`);
+      console.error(`❌ Impossibile leggere la cartella courses: ${COURSES_ROOT}`);
       process.exit(1);
     }
   }
 
   if (slugs.length === 0) {
-    console.log("⚠️ Nessuna cartella trovata in data/ per la validazione.");
+    console.log("⚠️ Nessuna cartella di corso trovata in /courses per la validazione.");
     process.exit(0);
   }
 
@@ -100,14 +104,15 @@ function main() {
   let totalFilesChecked = 0;
 
   for (const slug of slugs) {
-    const slugDir = resolve(DATA_DIR, slug);
-    const enPath = resolve(slugDir, "en.json");
+    // ADR-0011: locales/ subfolder inside courses/<slug>/
+    const localesDir = resolve(COURSES_ROOT, slug, "locales");
+    const enPath = resolve(localesDir, "en.json");
 
     // Check directory exists
     try {
-      if (!readdirSync(slugDir)) {}
+      if (!readdirSync(localesDir)) {}
     } catch {
-      console.error(`❌ Directory not found: ${slugDir}`);
+      console.error(`❌ Directory not found: ${localesDir}`);
       continue;
     }
 
@@ -116,7 +121,7 @@ function main() {
     try {
       enData = JSON.parse(readFileSync(enPath, "utf-8"));
     } catch {
-      console.error(`⚠️ Skip ${slug}: en.json not found or invalid JSON in ${slugDir}`);
+      console.error(`⚠️ Skip ${slug}: en.json not found or invalid JSON in ${localesDir}`);
       continue;
     }
 
@@ -126,7 +131,7 @@ function main() {
     console.log(`   Reference (en.json): ${referenceKeys.size} keys\n`);
 
     // List all JSON files in the directory (excluding en.json)
-    const files = readdirSync(slugDir)
+    const files = readdirSync(localesDir)
       .filter((f) => f.endsWith(".json") && f !== "en.json")
       .sort();
 
@@ -141,7 +146,6 @@ function main() {
       return curr;
     }
 
-    // Check for translations containing placeholders or untranslated fallback texts
     function checkInconsistencies(fileName: string, localeData: any, enData: any): string[] {
       const issues: string[] = [];
       const lang = fileName.split(".")[0];
@@ -160,12 +164,10 @@ function main() {
         } else if (typeof obj === "string") {
           const val = obj.trim();
 
-          // 1. Placeholder brackets [Add your story]
           if (/\[[^\]]*\]/.test(val)) {
             issues.push(`      ⚠️ ${path}: contains placeholder brackets: "${val}"`);
           }
 
-          // 2. Italian text leakages in foreign JSON
           const italianWords = ["pagamento sicuro", "recensioni verificate", "fattura inclusa", "ritiro"];
           const lowerVal = val.toLowerCase();
           for (const word of italianWords) {
@@ -174,7 +176,6 @@ function main() {
             }
           }
 
-          // 3. Long texts left untranslated from English
           const enVal = getValueByPath(enData, path);
           if (enVal && typeof enVal === "string" && val.length > 30 && val === enVal.trim()) {
             issues.push(`      ⚠️ ${path}: is identical to English reference text (untranslated): "${val.slice(0, 30)}..."`);
@@ -187,7 +188,7 @@ function main() {
     }
 
     for (const file of files) {
-      const filePath = resolve(slugDir, file);
+      const filePath = resolve(localesDir, file);
       let localeData: Record<string, unknown>;
 
       try {
@@ -200,33 +201,14 @@ function main() {
 
       const localeKeys = flattenKeys(localeData);
       const missing: string[] = [];
-      // Declared above the missing-keys loop so the soft-skip branch above
-      // can push to it without triggering `Cannot access X before initialization`
-      // (TDZ). The checkInconsistencies results below are appended into the
-      // SAME array rather than reassigning, keeping a single source of truth
-      // for the per-file diagnostics accumulated in this iteration.
       const discrepancies: string[] = [];
 
-      // Sub-trees whose missing keys are treated as warnings (soft) rather
-      // than fatal errors. Used to tolerate iterating i18n namespaces where
-      // only `it.json` + `en.json` are translated first; inline `??`/inline
-      // fallbacks in the component cover the gap at runtime until the
-      // async translation pipeline catches up.
-      //
-      // Rationale: writing an empty-string key into JSON files would BREAK
-      // the `?? "fallback"` runtime safety net (since `"" ?? x` = `""`, NOT
-      // `x`). The soft-subtree flag preserves the JS undefined-key path so
-      // the inline component default text renders while the async translator
-      // propagates the missing keys.
       const SOFT_SUBTREES = ["portal."];
 
       for (const key of referenceKeys) {
         if (!localeKeys.has(key)) {
           const isSoft = SOFT_SUBTREES.some((prefix) => key.startsWith(prefix));
           if (isSoft) {
-            // Track with the same discrepancy channel so it's logged but
-            // not fatal (catches accidental deletions later when the
-            // subtree solidifies).
             discrepancies.push(
               `      ⚠️ ${key}: missing (soft — pending async translation)`,
             );
@@ -236,8 +218,6 @@ function main() {
         }
       }
 
-      // Append translation inconsistencies (placeholder brackets, IT leaks,
-      // long untranslated English snippets) onto the same array.
       discrepancies.push(...checkInconsistencies(file, localeData, enData));
 
       if (missing.length > 0 || discrepancies.length > 0) {

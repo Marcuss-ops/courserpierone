@@ -24,8 +24,12 @@ const nextConfig = {
       { protocol: "https", hostname: "images.unsplash.com" },
     ],
   },
+  // ADR-0011: courses/<slug>/ plugin folders replace data/<slug>/.
+  // Bundle only the *.json files (locales + config.json) — TSX under
+  // courses/ is compiled by webpack/turbopack and doesn't need raw
+  // bundling into the Lambda filesystem image.
   outputFileTracingIncludes: {
-    '/**/*': ['./data/**/*'],
+    '/**/*': ['./courses/**/*.json'],
   },
   async rewrites() {
     return [

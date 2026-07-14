@@ -5,7 +5,7 @@
  * di una Conversation row dato il viewer. Centralizza il pattern
  * ripetuto in:
  *   - `src/app/api/messages/stream/route.ts` (SSE auth wiring)
- *   - `server.ts` (WS upgrade handler)
+ *   - `~~server.ts~~ (WS upgrade handler — C3 removed)`
  *
  * Convenzione di coppia canonica (Fase 1.3 / schema Conversation):
  *   - `conversation.userOneId = min(userId, otherUserId)` (lessicografico)

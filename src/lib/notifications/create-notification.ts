@@ -174,11 +174,13 @@ export async function createNotification(
       },
     });
 
-    // TODO Fase futura: emit WS broadcast su /ws?scope=notifications
-    // (mirror di messageBroker.emit(NEW_MESSAGE, ...)). Per V1 il client
-    //   polla /api/notifications ogni 30s dal NotificationBell — niente
-    //   realtime feed push (lo aggiungeremo quando il numero di utenti
-    //   cresce e 30s polling diventerà insufficiente).
+    // TODO Fase futura: aggiungere un endpoint
+    // `GET /api/notifications/stream` SSE se il polling 30s diventa
+    // insufficiente (molti utenti attivi). Pre-C3 questo hook avrebbe
+    // emesso messageBroker.emit per aggiornare una subscription WS
+    // dedicata `/ws?scope=notifications` — la WS infra è stata rimossa in
+    // cleanup C3 quindi l'unica opzione oggi è un SSE canonico. V1 il
+    // client polla /api/notifications ogni 30s dal NotificationBell.
 
     return {
       ...created,

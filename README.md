@@ -177,10 +177,9 @@ courser/
 │   │   └── ...
 │   ├── lib/
 │   │   ├── db/                    # Prisma client singleton
-│   │   ├── messaging/             # permission resolver, find-or-create conversation
+│    │   ├── messaging/             # permission resolver, find-or-create conversation
 │   │   ├── payment/               # Lemon Squeezy client
 │   │   ├── supabase/              # server client, get-user
-│   │   ├── ws/                    # WS broker + SSE fallback
 │   │   └── i18n/                  # use-chat-t, locale resolver
 │   └── ...
 ├── public/
@@ -208,10 +207,8 @@ courser/
 | Comando | Descrizione |
 |---|---|
 | `npm run dev` | Dev server (Next.js 16) |
-| `npm run dev:ws` | Dev server + WS broker (`server.ts`) |
 | `npm run build` | Build produzione (prisma generate + validate:locales + generate:locales + next build) |
 | `npm start` | Server produzione (Next.js) |
-| `npm run start:ws` | Server produzione + WS broker |
 | `npm run typecheck` | TypeScript check (`tsc --noEmit`) |
 | `npm run lint` | ESLint (read-only) |
 | `npm run lint:fix` | ESLint con autofix |

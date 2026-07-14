@@ -92,9 +92,15 @@ export async function getCourseConfig(slug: string): Promise<CourseConfig | null
 
   let config: CourseConfig | null = null;
 
-  // 2. File system (sviluppo locale)
+  // 2. File system (sviluppo locale + Vercel Lambda).
+  // ADR-0011: reads `courses/<slug>/config.json` directly. There is no
+  // `public/courses/<slug>/config.json` mirror anymore — the course
+  // plugin folder under `courses/` is the SINGLE source-of-truth, and
+  // `next.config.mjs` `outputFileTracingIncludes` (`./courses/**/*.json`)
+  // bundles these into the serverless Lambda image so the `fs.readFileSync`
+  // works at runtime on Vercel.
   try {
-    const configPath = path.join(process.cwd(), 'public', 'courses', slug, 'config.json');
+    const configPath = path.join(process.cwd(), 'courses', slug, 'config.json');
     if (fs.existsSync(configPath)) {
       const fileContent = fs.readFileSync(configPath, 'utf8');
       config = JSON.parse(fileContent) as CourseConfig;

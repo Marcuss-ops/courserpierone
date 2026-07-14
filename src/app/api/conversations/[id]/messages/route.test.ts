@@ -42,10 +42,10 @@ vi.mock("@/lib/utils/sanitize", () => ({
   sanitizeHtml: (s: string) => s,
 }));
 
-vi.mock("@/lib/ws/broker", () => ({
-  messageBroker: { emit: vi.fn() },
-  NEW_MESSAGE: "newMessage",
-}));
+// C3 cleanup: il mock di @/lib/ws/broker è stato rimosso insieme a
+// server.ts + src/lib/ws/* (la route POST non chiama più
+// messageBroker.emit). createMessageAndNotify è completamente mocked
+// quindi non c'è alcuna emition del broker dietro le quinte.
 
 const mockSendDmNotificationEmail = vi.fn().mockResolvedValue(undefined);
 vi.mock("@/lib/services/email", () => ({

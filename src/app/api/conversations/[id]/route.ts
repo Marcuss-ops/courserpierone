@@ -3,10 +3,6 @@ import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { withRateLimit } from "@/lib/utils/rate-limit";
 import { apiErrorResponse } from "@/lib/errors";
-import {
-  messageBroker,
-  THREAD_DELETED,
-} from "@/lib/ws/broker";
 
 /**
  * DELETE /api/conversations/[id]
@@ -16,10 +12,12 @@ import {
  *   - CASCADE su `Message.conversationId` (definito in `prisma/schema.prisma`):
  *     TUTTI i messaggi associati vengono cancellati automaticamente
  *     dal DB in un colpo solo.
- *   - Viene emesso un evento WS `threadDeleted` (via messageBroker)
- *     cosicché entrambi i partecipanti storici — se collegati via
- *     WebSocket con subscrizione conversation OR inbox — vedono
- *     immediatamente la UI chiudersi.
+ *   - ~~Viene emesso un evento WS `threadDeleted` (via messageBroker)~~ →
+ *     C3 cleanup: rimosso insieme a server.ts + src/lib/ws/*. Il partner
+ *     che ha la conversation aperta la vede chiudersi alla prossima poll
+ *     SSE (2s) oppure via navigation successiva. La eventuale
+ *     inconsistenza UI temporanea (≤2s) è accettabile per V1 e accelera
+ *     il cleanup.
  *   - 204 No Content: conferma canonica per idempotenza.
  *
  * Authorization (deliberatamente SEMPLIFICATA rispetto a
@@ -118,22 +116,12 @@ export const DELETE = withRateLimit(
         where: { id: conversation.id },
       });
 
-      // ── 4. WS broadcast (entrambi i partecipanti) ────────────
-      // Emesso DOPO la delete DB: il bridge WS in server.ts fan-out
-      // a subscribedConversations[convId] + inboxClients[userOneId]
-      // + inboxClients[userTwoId]. Se la delete fallisce (throw
-      // Prisma) NON emettiamo l'evento: la row è ancora viva e i WS
-      // non devono chiudere la UI di un thread che esiste ancora.
-      //
-      // NB: `messageBroker.emit` è sync ma il bridge server.ts è async
-      // (callback `EventEmitter` tipicamente sync). Tolerable latency
-      // perché il bridge stesso è una `Set.forEach` di WS.send (no I/O
-      // bloccante su server). Allo stesso modo di NEW_MESSAGE.
-      messageBroker.emit(THREAD_DELETED, {
-        conversationId: conversation.id,
-        userOneId: conversation.userOneId,
-        userTwoId: conversation.userTwoId,
-      });
+      // ── 4. ~WS broadcast (entrambi i partecipanti)~ — C3 removed ──
+      // Pre-C3: messageBroker.emit(THREAD_DELETED, {...}) chiamava il
+      // bridge WS in server.ts che fan-out a subscribedConversations
+      // + inboxClients[userOneId/userTwoId]. C3 cleanup ha rimosso
+      // l'intera infrastruttura WS; il partner vede la chiusura alla
+      // prossima SSE-poll (≤2s) o via navigation successiva.
 
       // ── 5. 204 No Content (success canonico) ─────────────────
       return new NextResponse(null, { status: 204 });

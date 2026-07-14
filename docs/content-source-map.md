@@ -41,15 +41,27 @@ This document traces 4 distinct **data sources**, 6 **templates**, and 3 **publi
 | Read by | `src/lib/config/white-label-data.ts:108` (step 4 of `getCourseConfig` chain) |
 | Status | Live (highest-write-frequency source) |
 
-### 1.4 Public JSON files (`public/courses/[slug]/config.json` + `data/[slug]/[locale].json`)
+### 1.4 Plugin-folders (per ADR-0011) `courses/<slug>/{locales,components,config.json}` + `public/courses/<slug>/*.pdf`
+
+> **Architecture** (replaces pre-ADR-0011 layout which used `data/<slug>/<locale>.json`
+> + `public/courses/<slug>/config.json`). Full migration path recorded in
+> `docs/adr/0011-course-plugin-decoupling.md`. The canonical registry of
+> available courses lives at `courses.config.ts` (single source of truth) and
+> is re-exported typed via `src/lib/courses/registry.ts`. PDF lesson assets
+> remain under `public/courses/<slug>/*.pdf` because Next.js serves them via
+> the static edge CDN — they are *assets*, not configuration.
 
 | Aspect | Value |
 |---|---|
-| Contains (config.json) | Full `CourseConfig` — slug, template, lessons, languages, prices, accent color, etc. |
-| Contains (data/[slug]/[locale].json) | 49+ locale bundles per slug — `nav`, `hero`, `problem`, `story`, `author`, `modules`, `includes`, `testimonials`, `offer`, `faq`, `final_cta`, `footer`, `trust`, `audience`, `seo`, `ui` |
-| Written by | `scripts/translate/extract-locales.ts` (regenerates from input data), `scripts/translate/sync-data-to-config.ts:86` (writes config.json), `scripts/products/copy-pdfs.ts`, `src/lib/config/generate-course-config.ts:189` (writes `courseDir/config.json`), admin "Genera config.json" button in `src/app/admin/products/[id]/page.tsx:236` |
-| Read by | `src/lib/config/white-label-data.ts:96` (step 3 of `getCourseConfig` chain) + `src/lib/i18n/load-locale-content.ts` (loadLocaleContentSafe + loadLocaleContentCached) |
-| Status | Live (filesystem-bound — deployment requires rebuild to push data/ updates to Vercel) |
+| Contains (`courses/<slug>/locales/<locale>.json`) | 49+ locale bundles per slug — `nav`, `hero`, `problem`, `story`, `author`, `modules`, `includes`, `testimonials`, `offer`, `faq`, `final_cta`, `footer`, `trust`, `audience`, `seo`, `ui`, `portal`, `lessons`, `download` |
+| Contains (`courses/<slug>/config.json`) | Full `CourseConfig` — slug, template, lessons, languages, prices, accent color, etc. |
+| Contains (`courses/<slug>/components/`) | Course-specific React orchestrator (only for `templateId === "amish"\|custom`). Other templates stay under `src/components/funnel/<templateId>/`. |
+| Contains (`courses/<slug>/config.json`) as registry source | Each course must also have a matching entry in `courses.config.ts` (validation: `scripts/audit-v1-readiness.ts`). |
+| Contains (`public/courses/<slug>/*.pdf`) | Served lesson asset PDFs (eBook chapters, checklists). Served as `/courses/<slug>/*.pdf` via the static edge. |
+| Written by | `scripts/translate/extract-locales.ts` (regenerates locale JSONs from input data), `scripts/products/sync-local-config.ts <slug>` — single command that upserts both `Product` (DB) AND `CourseConfigCache` (DB) from the source-of-truth `courses/<slug>/config.json`, admin UI in `src/app/admin/products/[id]/page.tsx` for Products row edits |
+| Read by | `src/lib/i18n/load-locale-content.ts` (loadLocaleContentSafe + loadLocaleContentCached — reads `courses/<slug>/locales/<locale>.json`); `src/lib/config/white-label-data.ts` step 3 (reads `courses/<slug>/config.json`, no `public/` mirror per ADR-0011 §Q2 verdict) |
+| Bundled to Vercel Lambda | `./courses/**/*.json` declared in `next.config.mjs` `outputFileTracingIncludes` — required so the serverless fs reader finds the locale + config files at runtime |
+| Status | Live (filesystem-bound at build; DB-mirrored for orders/access in `CourseConfigCache`) |
 
 ---
 

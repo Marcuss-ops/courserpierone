@@ -2,12 +2,14 @@
  * load-locale-content.ts
  *
  * Carica il file JSON della lingua per un prodotto.
- * Legge da data/{slug}/{locale}.json (generato da extract-locales.ts).
+ * Legge da `courses/<slug>/locales/<locale>.json` (per ADR-0011 — see
+ * `docs/adr/0011-course-plugin-decoupling.md`). The earlier
+ * `data/<slug>/<locale>.json` path is no longer consulted.
  *
  * Fallback:
- *   1. Prova data/{slug}/{locale}.json
- *   2. Prova data/{slug}/{lang}.json (codice a 2 lettere)
- *   3. Prova data/{slug}/{default}.json
+ *   1. Prova `courses/<slug>/locales/<locale>.json`
+ *   2. Prova `courses/<slug>/locales/{lang}.json` (codice a 2 lettere)
+ *   3. Prova `courses/<slug>/locales/{default}.json`
  *   4. Crea un LocaleContent vuoto
  */
 
@@ -17,7 +19,8 @@ import type { LocaleContent } from "./locale-content";
 import { createEmptyLocale } from "./locale-content";
 import { cacheGet, cacheSet } from "../redis";
 
-const DATA_DIR = resolve(process.cwd(), "data");
+// ─── ADR-0011: per-course plugin folder at courses/<slug>/ ───
+const DATA_DIR = resolve(process.cwd(), "courses");
 
 const LOCALE_FALLBACK_CHAIN: Record<string, string[]> = {
   "en-gb": ["en-gb", "en"],
@@ -37,7 +40,7 @@ const LOCALE_FALLBACK_CHAIN: Record<string, string[]> = {
  * (Interno — esposto solo a `loadLocaleContentSafe` / `loadLocaleContentCached`.)
  */
 function loadLocaleContent(slug: string, locale: string): LocaleContent | null {
-  const productDir = resolve(DATA_DIR, slug);
+  const productDir = resolve(DATA_DIR, slug, "locales");
   if (!existsSync(productDir)) return null;
 
   // Costruisci chain di fallback

@@ -13,8 +13,11 @@
  *
  *   CHECK 1 — DM-AUTH wiring.
  *     Every file under `src/app/api/messages/**` or
- *     `src/app/api/conversations/**` (excluding `*.test.ts`) PLUS
- *     `server.ts` (the WS upgrade handler) MUST contain at least one of:
+ *     `src/app/api/conversations/**` (excluding `*.test.ts`) MUST contain at least one of:
+ *       (Pre-C3 also required `server.ts` (the WS upgrade handler) — REMOVED
+ *       in commit C3 because the entire WS infrastructure is gone. The
+ *       check still enforces DM-AUTH on every /api/messages/** +
+ *       /api/conversations/** file below.)
  *       - authorizeDmRequest(...)
  *       - loadAuthorizedConversation(...)
  *       - resolveMessagingPermission(...)
@@ -297,12 +300,14 @@ function check1DmAuth(): Finding[] {
   const root = projectRoot();
   const messagesRoot = path.join(root, "src/app/api/messages");
   const conversationsRoot = path.join(root, "src/app/api/conversations");
-  const serverFile = path.join(root, "server.ts");
 
   const candidates: string[] = [];
   if (fs.existsSync(messagesRoot)) candidates.push(...collectTsFiles(messagesRoot));
   if (fs.existsSync(conversationsRoot)) candidates.push(...collectTsFiles(conversationsRoot));
-  if (fs.existsSync(serverFile)) candidates.push(serverFile);
+  // NB: pre-C3 also added `server.ts` (the WS upgrade handler) to
+  // candidates. The WS infra was deleted in cleanup C3; any future
+  // re-introduction of a comparable hook should be added back here
+  // AND wired to authorizeDmRequest / loadAuthorizedConversation.
 
   const bypassSet = new Set(ALLOWLIST_DM_AUTH_BYPASS.map((a) => a.file));
 
@@ -448,7 +453,7 @@ function main(): void {
 
   if (findings.length === 0) {
     console.log("✅ CHECK 1 (DM-AUTH wiring): every DM entry point under");
-    console.log("   src/app/api/{messages,conversations}/** (plus server.ts)");
+    console.log("   src/app/api/{messages,conversations}/** is wired to the SSOT resolver.");
     console.log("   is wired to authorizeDmRequest / loadAuthorizedConversation /");
     console.log("   resolveMessagingPermission (or is explicitly bypass-allowed).");
     console.log("");

@@ -1,31 +1,26 @@
 /**
  * scripts/db/seed-youtube-channels.ts
  *
- * Idempotent seed of ≥3 YouTubeChannel rows for channel attribution.
+ * Per ADR-0011 (course plugin decoupling): instead of hardcoding three
+ * channels for ONE course (amish-secrets × it/en/es), the seed now
+ * iterates `COURSES[]` (the canonical platform course registry) and
+ * generates ONE channel per `course × platform-locale` pair.
+ *
+ * Adding a new course that needs YouTube attribution = add the entry to
+ * `courses.config.ts` + run this script. Zero changes to this file.
+ *
+ * Platform-locale defaults (hardcoded for V1) — extend this list when
+ * a new platform-locale needs channel attribution; the seed will then
+ * generate additional channels for every registered course automatically.
  *
  * Pattern: upsert keyed on `channelUrl` (@unique). Re-running the
  * script produces the same end-state without errors — no blind
  * `createMany`, no duplicate rows on re-runs.
  *
- * Minimum viable seed (per docs/v1-acceptance-test.md §1 criterion 3,
- * scaled up per user's go-live plan):
- *   - 1 channel per primary language: it-it, en-us, es-es.
- *   - defaultLandingSlug = 'amish-secrets' for all three (the canonical
- *     V1 product slug — see docs/v1-acceptance-test.md §4 BLOCKER
- *     items).
- *   - trackingCode is set per-channel so analytics attribution can
- *     recover the channel from URL parameters (`?channel=...`).
- *
- * Pre-condition: Locale rows must exist (it-it, en-us, es-es) for the
- * FK `YouTubeChannel.localeId → Locale.id` (RESTRICT). If not, the
- * script fails with a clear instruction to run seed-locales.ts first.
- *
  * Usage:
  *   npx tsx scripts/db/seed-youtube-channels.ts
  *
- * Verify via psql (NOT `prisma studio -c` which is the wrong command
- * per the user's pasted plan — `studio -c` is shorthand for opening
- * Studio on a connection, not running a query):
+ * Verify via psql:
  *   psql "$DIRECT_URL" -c \
  *     'SELECT id, "channelName", locale, "defaultLandingSlug",
  *             "trackingCode", "isActive"
@@ -34,24 +29,24 @@
  *      ORDER BY locale;'
  *
  * Cross-script reference (consistency):
- *   - scripts/db/seed-locales.ts — sibling DB-seed convention that
- *     this script mirrors (shared `prisma` client, upsert on unique
- *     field, one console.log line per row).
- *
- * Conventions:
- *   - Mirrors scripts/diagnose-messaging.ts (top-level main + .catch exit).
- *   - Always calls `prisma.$disconnect()` on success path.
- *   - DRY-RUN by virtue of upsert equivalence — re-running is a no-op.
- *   - Exit codes: 0 on success, 1 on runtime error, 2 on missing
- *     prerequisites (Locale rows).
+ *   - scripts/db/seed-locales.ts        — sibling DB-seed convention.
+ *   - courses.config.ts                 — COURSES[] source-of-truth.
+ *   - src/lib/courses/registry.ts       — typed mirror.
  */
 
 import { prisma } from "../../src/lib/db/prisma";
+import { ACTIVE_COURSES, type CourseMeta } from "../../courses.config";
+
+interface PlatformLocale {
+  locale: string;
+  languageCode: string;
+  countryCode: string;
+}
 
 interface ChannelSeed {
   channelName: string;
-  channelUrl: string; // @unique in schema — upsert keyed here
-  locale: string; // matches Locale.code → FK lookup → localeId
+  channelUrl: string;
+  locale: string;
   languageCode: string;
   countryCode: string;
   niche: string;
@@ -60,46 +55,44 @@ interface ChannelSeed {
   isActive: boolean;
 }
 
-const CHANNELS: ChannelSeed[] = [
-  {
-    channelName: "Amish Secrets IT",
-    channelUrl: "https://www.youtube.com/@amish-secrets-it",
-    locale: "it-it",
-    languageCode: "it",
-    countryCode: "IT",
-    niche: "amish-secrets",
-    defaultLandingSlug: "amish-secrets",
-    trackingCode: "yt-it-amish",
-    isActive: true,
-  },
-  {
-    channelName: "Amish Secrets EN",
-    channelUrl: "https://www.youtube.com/@amish-secrets-en",
-    locale: "en-us",
-    languageCode: "en",
-    countryCode: "US",
-    niche: "amish-secrets",
-    defaultLandingSlug: "amish-secrets",
-    trackingCode: "yt-en-amish",
-    isActive: true,
-  },
-  {
-    channelName: "Amish Secrets ES",
-    channelUrl: "https://www.youtube.com/@amish-secrets-es",
-    locale: "es-es",
-    languageCode: "es",
-    countryCode: "ES",
-    niche: "amish-secrets",
-    defaultLandingSlug: "amish-secrets",
-    trackingCode: "yt-es-amish",
-    isActive: true,
-  },
+// V1 platform-wide YouTube locale defaults. Extend as the platform grows.
+const PLATFORM_LOCALES: PlatformLocale[] = [
+  { locale: "it-it", languageCode: "it", countryCode: "IT" },
+  { locale: "en-us", languageCode: "en", countryCode: "US" },
+  { locale: "es-es", languageCode: "es", countryCode: "ES" },
 ];
 
-async function main(): Promise<void> {
-  console.log("🌐 Seeding YouTube channels (idempotent upsert on channelUrl)...\n");
+/** Build channel seed entries by crossing COURSES × PLATFORM_LOCALES. */
+function buildChannelSeeds(): ChannelSeed[] {
+  const seeds: ChannelSeed[] = [];
+  for (const course of ACTIVE_COURSES) {
+    const slugToken = course.slug.split("-").pop() ?? course.slug;
+    for (const lang of PLATFORM_LOCALES) {
+      seeds.push({
+        channelName: `${course.title} ${lang.countryCode}`,
+        channelUrl: `https://www.youtube.com/@${course.slug}-${lang.languageCode}`,
+        locale: lang.locale,
+        languageCode: lang.languageCode,
+        countryCode: lang.countryCode,
+        niche: course.slug,
+        defaultLandingSlug: course.slug,
+        trackingCode: `yt-${lang.languageCode}-${slugToken}`,
+        isActive: true,
+      });
+    }
+  }
+  return seeds;
+}
 
-  // ── Pre-flight: confirm referenced Locale rows exist. ───────
+async function main(): Promise<void> {
+  const CHANNELS = buildChannelSeeds();
+  console.log(
+    `🌐 Seeding YouTube channels (idempotent upsert on channelUrl)...\n` +
+      `   ${ACTIVE_COURSES.length} active course(s) × ${PLATFORM_LOCALES.length} platform locale(s) ` +
+      `= ${CHANNELS.length} channel row(s).\n`,
+  );
+
+  // ── Pre-flight: confirm referenced Locale rows exist. ────────
   // YouTubeChannel.localeId has RESTRICT FK on Locale.id (per
   // prisma/schema.prisma). A missing locale row would surface as
   // an opaque Prisma error at upsert time. We catch it here with
@@ -133,16 +126,11 @@ async function main(): Promise<void> {
   // ── Upsert loop. ─────────────────────────────────────────────
   // `where: { channelUrl }` is the @unique key per schema. On
   // first run: creates the row. On subsequent runs: updates the
-  // existing row's fields (channelName, localeId, locale,
-  // languageCode, countryCode, niche, defaultLandingSlug,
-  // trackingCode, isActive) to match the latest seed values.
-  // Re-running with identical seed = no-op \u2014 safe for CI re-runs.
+  // existing row's fields to match the latest seed values.
   for (const ch of CHANNELS) {
     // The non-null assertion is sound: the missing-locales pre-flight
     // above guarantees every code in CHANNELS has an existing locale
-    // row mapped here. If the assertion ever fires, the pre-flight
-    // logic has a bug \u2014 not a runtime data issue. Deliberate and
-    // explicit rather than defensive runtime shim.
+    // row mapped here.
     const localeId = existingByCode.get(ch.locale)!;
 
     await prisma.youTubeChannel.upsert({
@@ -172,20 +160,16 @@ async function main(): Promise<void> {
       },
     });
     console.log(
-      `  ✅ ${ch.locale.padEnd(6)} → ${ch.channelName.padEnd(20)} ${ch.channelUrl}`,
+      `  ✅ ${ch.locale.padEnd(6)} → ${ch.channelName.padEnd(28)} ${ch.channelUrl}`,
     );
   }
 
   const total = await prisma.youTubeChannel.count();
   console.log(
     `\n✅ Done! ${total} YouTubeChannel row(s) total ` +
-      `(incl. pre-existing; this script adds 3 if the table is empty).`,
-  );
-
-  console.log(
-    `\nℹ️  Verify via psql:\n` +
-      `   psql "$DIRECT_URL" -c \\\n` +
-      `     'SELECT id, "channelName", locale, "defaultLandingSlug" FROM "YouTubeChannel" ORDER BY locale;'\n`,
+      `(incl. pre-existing; this script adds ${
+        CHANNELS.length === 1 ? "1" : CHANNELS.length
+      } upserted this run).\n`,
   );
 
   await prisma.$disconnect();
@@ -193,8 +177,6 @@ async function main(): Promise<void> {
 
 main().catch((err) => {
   console.error("\n❌ Seed failed:", err);
-  prisma.$disconnect().catch(() => {
-    /* ignore \u2014 already-failing disconnect */
-  });
+  prisma.$disconnect().catch(() => {});
   process.exit(1);
 });

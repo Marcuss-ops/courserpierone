@@ -43,7 +43,7 @@
 #        bash scripts/ops/vercel-prod-env.sh --dry-run
 #
 #      Or, auto-generate the missing random secrets (CRON_SECRET +
-#      LOG_ERROR_SECRET + WS_SECRET) when their shell vars are unset:
+#      LOG_ERROR_SECRET) when their shell vars are unset:
 #        bash scripts/ops/vercel-prod-env.sh --auto-generate
 #
 # Categories:
@@ -59,7 +59,7 @@
 #   6. CRON_SECRET               (cron route auth — Bearer token)
 #   7. NEXT_PUBLIC_*             (browser-exposed: APP_URL, SUPABASE_URL,
 #                                  SUPABASE_ANON_KEY)
-#   8. Other optional            (LOG_ERROR_SECRET, WS_SECRET, OPENAI_API_KEY
+#   8. Other optional            (LOG_ERROR_SECRET, OPENAI_API_KEY
 #                                  — skipped if shell vars unset; no error)
 #
 # Cross-refs:
@@ -259,13 +259,13 @@ CATEGORY_NEXT_PUBLIC=(
 
 # ── 8. Other optional (skipped silently if shell vars unset) ─────
 # LOG_ERROR_SECRET — guard for /api/log-error endpoint (PM2-style
-# central-log shipper). WS_SECRET — guard for the WebSocket bridge
-# in server.ts. OPENAI_API_KEY — optional tier for translations
-# (see docs/production.md §5.1). All three are skipped on unset
-# shell var, matching env.ts' `optional: true` semantics.
+# central-log shipper). OPENAI_API_KEY — optional tier for translations
+# (see docs/production.md §5.1). Both are skipped on unset shell var,
+# matching env.ts' `optional: true` semantics. NB: WS_SECRET was
+# REMOVED in cleanup C3 along with server.ts + src/lib/ws/* — the WS
+# bridge is gone, so the secret has no consumer.
 CATEGORY_OTHER_OPTIONAL=(
   "LOG_ERROR_SECRET|LOG_ERROR_SECRET|/api/log-error auth; auto-generates with --auto-generate"
-  "WS_SECRET|WS_SECRET|WebSocket bridge auth (server.ts); auto-generates with --auto-generate"
   "OPENAI_API_KEY|OPENAI_API_KEY|OpenAI API key (optional tier — see docs/production.md §5.1)"
 )
 
@@ -288,10 +288,10 @@ add_var() {
 
   local value="${!shell_var:-}"
 
-  # Auto-generate the 3 random secrets if the flag is set
+  # Auto-generate the 2 random secrets if the flag is set
   if [[ -z "$value" && "$IS_AUTO_GENERATE" == true ]]; then
     case "$vercel_name" in
-      CRON_SECRET|LOG_ERROR_SECRET|WS_SECRET)
+      CRON_SECRET|LOG_ERROR_SECRET)
         value="$(_gen_secret)"
         printf '  [gen]     %-32s (auto-generated %d-char secret)\n' "$vercel_name" "${#value}"
         ;;

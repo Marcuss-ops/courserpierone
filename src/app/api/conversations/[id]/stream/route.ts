@@ -46,7 +46,8 @@ import { getPartnerId } from "@/lib/messaging/get-partner-id";
  * Rate limit: NON wrappato da withRateLimit qui. SSE è long-lived e
  * il tier "MESSAGES" (10/min) sarebbe troppo stretto per una
  * connessione che resta aperta minuti-ore. Il rate-limit si applica
- * al WS upgrade (in server.ts) e alle REST POST, non all'SSE passivo.
+ * alle REST POST, non all'SSE passivo. NB: pre-C3 esisteva anche un
+ * rate-limit sul WS upgrade handler in server.ts (ormai rimosso).
  */
 export async function GET(
   request: NextRequest,
@@ -104,7 +105,8 @@ export async function GET(
   // per propagarlo in avanti senza reimplementare la matrice.
   //
   // Phase 2.0 V2: usa `getPartnerId` helper per DRY (la stessa logica
-  // lives in server.ts al WS upgrade handler — estratta).
+  // ~~lives in server.ts al WS upgrade handler~~ — pre-C3 era in due
+  // posti, ora vive solo qui dopo la rimozione del bridge WS).
   const targetId = getPartnerId(conversation, dbUser.id);
 
   const auth = await authorizeDmRequest({

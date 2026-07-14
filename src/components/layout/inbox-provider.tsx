@@ -11,35 +11,26 @@ import {
 } from "react";
 
 /**
- * Fase 4.3: InboxProvider — global client-side store per il badge
- * "non letti" realtime.
+ * InboxProvider — global client-side store per il badge "non letti".
  *
- * Cosa fa:
- *   1. Apre UN WebSocket user-scoped verso `/ws?token=...&scope=inbox`
- *      (HMAC firmato da `/api/auth/ws-token?scope=inbox`).
- *   2. Quando riceve `{type:"inboxUpdate", conversationId, message}`:
- *      incrementa `totalUnread` e incrementa `byConversation[convId]`.
- *   3. Espone `useInbox()` hook a `NotificationsDropdown`,
- *      `MobileBottomNav`, `ConversationList` per renderizzare i badge
- *      in realtime (NO refresh di pagina necessario).
- *   4. Espone `markRead(convId)` che decrementa localmente + manda
- *      via BroadcastChannel "messagesRead" event per sincronizzare
- *      eventuali altre tab aperte (in modo che un'azione di PATCH
- *      /api/messages/read in una tab non lasci le altre stale). (legacy removed in chore(dm): cfb2d12)
- *
- * Architettura (ssegue Fase 4.3 = Option A del thinker):
- *   - Server: `inboxClients: Map<userId, Set<WebSocket>>` in server.ts.
- *     Bridge NEW_MESSAGE fa fan-out a inboxClients[event.receiverId].
- *   - Client: questo provider è montato UNA volta per pagina
- *     dashboard, e tutti i consumer si agganciano via `useInbox()`.
- *   - SSR-safe: totalUnread è inizializzato con il valore SSR computed
- *     sul server (vedi `initialTotalUnread` prop). Stato locale-
- *     client evolve solo dopo WS events.
- *
- * Self-skip: il server garantisce che l'inboxUpdate NON arriva al
- * sender (vedi `event.receiverId` vs senderId). Quindi lato client
- * non serve filtrare ulteriormente.
+ * C3 cleanup (post-deletion of server.ts + src/lib/ws/* + ws-token): il
+ * WS user-scoped inbox subscription è stato rimosso. Il consumer
+ * surface (useInbox hook + Context + markRead) resta invariato, ma
+ * `totalUnread` / `byConversation` ora evolve SOLO:
+ *   1. al primo paint via SSR (props `initialTotalUnread` +
+ *      `initialByConversation` dal server-rendered layout);
+ *   2. localmente quando l'utente marca una conversation read
+ *      (markRead) → BroadcastChannel "messagesRead" mantiene le tab
+ *      sincronizzate.
+ * Il badge NON si auto-incrementa in realtime per i messaggi che
+ * arrivano mentre l'utente è su un'altra pagina — quella UX era
+ * pilotata dal WS ormai rimosso. Il polling di `useInbox()` (future
+ * V2: endpoint `GET /api/notifications/recent-unread-by-conversation`
+ * refreshato ogni 30s) può reintroduire un polling leggero; per V1 ci
+ * accontentiamo del refresh-on-navigation.
  */
+
+
 
 type InboxConversationState = Record<string, number>;
 
@@ -64,17 +55,6 @@ interface InboxProviderProps {
   children: React.ReactNode;
 }
 
-interface InboxUpdateMessage {
-  type: "inboxUpdate";
-  conversationId: string;
-  message: {
-    id: string;
-    senderId: string;
-    [k: string]: unknown;
-  };
-}
-
-const WS_RECONNECT_DELAY_MS = 2000;
 const BROADCAST_CHANNEL_NAME = "courser-inbox";
 
 export function InboxProvider({
@@ -86,10 +66,8 @@ export function InboxProvider({
   const [totalUnread, setTotalUnread] = useState<number>(initialTotalUnread);
   const [byConversation, setByConversation] =
     useState<InboxConversationState>(initialByConversation);
-  const [isConnected, setConnected] = useState<boolean>(false);
+  const [isConnected] = useState<boolean>(false);
 
-  const wsRef = useRef<WebSocket | null>(null);
-  const reconnectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const channelRef = useRef<BroadcastChannel | null>(null);
   const mountedRef = useRef<boolean>(true);
 
@@ -118,79 +96,15 @@ export function InboxProvider({
     }
   }, [byConversation]);
 
-  // ── WS inbox subscription ────────────────────────────────────
+  // ── C3: WS inbox subscription removed ────────────────────────────
+  // The previous WS subscription block (Fase 4.3) was deleted along
+  // with server.ts + src/lib/ws/* + /api/auth/ws-token. The Consumer
+  // Context + BroadcastChannel cross-tab sync remain (below).
   useEffect(() => {
     mountedRef.current = true;
     if (!enabled || typeof window === "undefined") {
       return;
     }
-
-    const openWs = async () => {
-      if (!mountedRef.current) return;
-      try {
-        // Fase 4.3: token firmato HMAC `userId:inbox:timestamp`.
-        const tokenRes = await fetch("/api/auth/ws-token?scope=inbox");
-        if (!tokenRes.ok) return;
-        const { token } = await tokenRes.json();
-
-        const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-        const host = window.location.host;
-        const ws = new WebSocket(
-          `${protocol}//${host}/ws?token=${encodeURIComponent(token)}&scope=inbox`,
-        );
-        wsRef.current = ws;
-
-        ws.onopen = () => {
-          if (!mountedRef.current) return;
-          setConnected(true);
-        };
-
-        ws.onmessage = (event) => {
-          if (!mountedRef.current) return;
-          try {
-            const data = JSON.parse(event.data) as InboxUpdateMessage;
-            if (data.type !== "inboxUpdate" || !data.conversationId) return;
-            // Skip self: per design il server non invia inboxUpdate al
-            // sender via fan-out su inboxClients[event.receiverId], ma
-            // difesa in profondità nel client.
-            // (non abbiamo qui currentUserId; rimandiamo al futuro se serve).
-
-            setTotalUnread((prev) => prev + 1);
-            setByConversation((prev) => ({
-              ...prev,
-              [data.conversationId]: (prev[data.conversationId] ?? 0) + 1,
-            }));
-          } catch {
-            /* payload non valido: ignora */
-          }
-        };
-
-        ws.onclose = () => {
-          if (!mountedRef.current) return;
-          setConnected(false);
-          wsRef.current = null;
-          // Reconnect dopo breve delay (no exponential backoff per V1).
-          reconnectRef.current = setTimeout(() => {
-            if (!mountedRef.current) return;
-            void openWs();
-          }, WS_RECONNECT_DELAY_MS);
-        };
-
-        ws.onerror = () => {
-          // ws.onerror è seguito da ws.onclose che gestisce il reconnect.
-          try {
-            ws.close();
-          } catch {
-            /* ignore */
-          }
-        };
-      } catch {
-        // Fetch token fallito: probabilmente utente non autenticato.
-        // Nessun reconnect fino a navigation successiva.
-      }
-    };
-
-    void openWs();
 
     // ── BroadcastChannel listener per cross-tab mark-read sync ──
     if (typeof BroadcastChannel !== "undefined") {
@@ -218,16 +132,6 @@ export function InboxProvider({
 
     return () => {
       mountedRef.current = false;
-      if (reconnectRef.current) clearTimeout(reconnectRef.current);
-      reconnectRef.current = null;
-      if (wsRef.current) {
-        try {
-          wsRef.current.close();
-        } catch {
-          /* ignore */
-        }
-        wsRef.current = null;
-      }
       if (channelRef.current) {
         try {
           channelRef.current.close();

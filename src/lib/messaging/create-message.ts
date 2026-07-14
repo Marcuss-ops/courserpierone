@@ -2,18 +2,25 @@
  * src/lib/messaging/create-message.ts
  *
  * Helper per la creazione di un nuovo Message in una Conversation
- * esistente con side-effects coordinati (WS broker emit + offline
+ * esistente con side-effects coordinati (in-app notification + offline
  * email notification).
  *
  * Fase 2.3: estratto da `/api/messages POST` per essere riusato da (legacy removed in chore(dm): cfb2d12)
  * `/api/conversations/[id]/messages POST`. Separa "persistenza +
- * orchestrazione" dalle route handlers sottili. La logica è
- * IDENTICA a quella già presente in `/api/messages POST` Fase 1.6: (legacy removed in chore(dm): cfb2d12)
+ * orchestrazione" dalle route handlers sottili.
+ *
+ * C3 cleanup: il WS broker emit (PASSO 3 sotto) è stato rimosso insieme
+ * a server.ts + src/lib/ws/*. La real-time fan-out verso le tab
+ * aperte sulla Conversation è ora gestita interamente dal SSE poll
+ * server-side di `/api/conversations/[id]/stream` (2s heartbeat, 15s
+ * keep-alive). Il flusso è:
  *   1. sanitizeHtml(content.trim()) — XSS-safe prima del persist.
- *   2. prisma.message.create with sender join
- *   3. messageBroker.emit(NEW_MESSAGE, { conversationId, productId,
- *      receiverId=partnerId, message: {...} }) per fan-out WS.
- *   4. Se receiver è offline (lastSeenAt > 5min fa) E
+ *   2. prisma.message.create with sender join.
+ *   3. ~~messageBroker.emit(NEW_MESSAGE, ...)~~ → C3 removed.
+ *      (Cross-tab realtime ora passa solo via SSE 2s poll.)
+ *   4. createNotification({ type: "chat_reply" }) → campanella
+ *      NotificationBell (REST polla /api/notifications ogni 30s).
+ *   5. Se receiver è offline (lastSeenAt > 5min fa) E
  *      conversation ha ≤ 1 unread NON-self → fire
  *      `sendDmNotificationEmail` (cooldown anti-spam).
  *
@@ -24,13 +31,12 @@
  *   - L'email locale è hardcoded "en" (vedi Fase 5 del piano DMs per
  *     derivare dal dbUser.locale). Per V1 non è bloccante.
  *
- * Performance: una INSERT + un broker.emit (sync) + opzionale un
+ * Performance: una INSERT + 1 INSERT (notification) + opzionale un
  * SELECT count + opzionale un SMTP call. Nessun N+1.
  */
 
 import { prisma } from "@/lib/db/prisma";
 import { sanitizeHtml } from "@/lib/utils/sanitize";
-import { messageBroker, NEW_MESSAGE } from "@/lib/ws/broker";
 import { sendDmNotificationEmail } from "@/lib/services/email";
 import { createNotification } from "@/lib/notifications/create-notification";
 
@@ -98,27 +104,10 @@ export async function createMessageAndNotify(
     },
   });
 
-  // ── 2. WS broker emit (real-time fan-out) ──────────────────
-  // Fase 4.3: includiamo `receiverId` (= partner). Il bridge WS
-  // (server.ts) usa questo campo per due fan-out:
-  //   (a) per-conversation: WS subscribed a subscribedConversations
-  //       [conversationId] ricevono `{type:"newMessage"}`
-  //   (b) inbox user-scoped: WS subscribed a inboxClients[receiverId]
-  //       ricevono `{type:"inboxUpdate", conversationId, message}`
-  //       per aggiornare badge "non letti" senza page refresh.
-  //
-  // Per i DM uno-a-uno, partnerId = receiverId = l'unico altro membro.
-  messageBroker.emit(NEW_MESSAGE, {
-    conversationId: conversation.id,
-    productId: conversation.productId,
-    receiverId: partnerId,
-    message: {
-      ...created,
-      createdAt: created.createdAt.toISOString(),
-    },
-  });
-
-  // ── 2.5 In-app notification (Centro Notifiche bell) ─────
+  // ── 2. In-app notification (Centro Notifiche bell) ─────
+  // C3: rimossa la messageBroker.emit(NEW_MESSAGE, ...) call. Il
+  // real-time cross-tab ora passa via SSE 2s polling del route handler
+  // `/api/conversations/[id]/stream` (vedi docstring sopra).
   // Fire-and-forget: il partner riceverà una riga in `Notification`
   // con type="chat_reply". La campanella (NotificationBell in
   // CourseTopNav) la mostrerà al prossimo poll di 30s (V1: niente

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Send, Loader2, Wifi, WifiOff, ArrowUp, User } from "lucide-react";
-import { useRealtimeChat } from "@/lib/ws/use-realtime-chat";
+import { useRealtimeChat } from "@/hooks/use-realtime-chat";
 import { useChatT } from "@/lib/i18n/use-chat-t";
 
 interface MessageData {

@@ -150,7 +150,7 @@ export const MessagingDenyReason = {
    * è ora REQUIRED + FK Restrict a livello DB, di conseguenza questo
    * deny-reason non è più raggiungibile dal resolver. Il constant è
    * mantenuto ESPORTATO per compatibilità con i consumer già in
-   * produzione (server.ts WS bridge + src/app/api/conversations/[id]/stream/route.ts
+   * produzione (~~server.ts WS bridge~~ C3 removed + src/app/api/conversations/[id]/stream/route.ts
    * SSE handler + src/lib/messaging/api-authorize.ts HTTP error mapper).
    * Poiché il resolver non lo restituisce mai più, le route lo
    * traducono in stato "irragiungibile" come safety net.
