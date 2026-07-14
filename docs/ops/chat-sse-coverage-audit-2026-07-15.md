@@ -201,9 +201,7 @@ Queste righe sono stale (implicano un path WS che non esiste post-C3). NON rompo
 //   C3 cleanup: previously WebSocket-first → SSE-first now.
 ```
 
-### 7.2 *(originariamente flaggato `src/components/layout/inbox-provider.tsx:30` poi rimosso dopo re-reading del file)*
-
-Re-reading `inbox-provider.tsx:25-32` shows the JSDoc is correctly framed as "WS rimosso + V2 reservation per `GET /api/notifications/recent-unread-by-conversation`"; not actually stale → rimosso da §7 stale-comment list.
+> **Re-reading note (no fix required):** Originally `src/components/layout/inbox-provider.tsx:30` was flagged as a stale-comment candidate, but re-reading `inbox-provider.tsx:25-32` shows the JSDoc is correctly framed as "WS rimosso + V2 reservation per `GET /api/notifications/recent-unread-by-conversation`"; not actually stale → rimosso da §7 stale-comment list.
 
 ### 7.2 `src/components/layout/mobile-bottom-nav.tsx:30`
 
@@ -229,11 +227,11 @@ Re-reading `inbox-provider.tsx:25-32` shows the JSDoc is correctly framed as "WS
 
 (continua "WS sovrapposti agli SSR" alla riga 17 — stesso pattern)
 
-### 7.5 Action plan per §7
+### 7.4 Action plan per §7
 
 Un singolo commit separato "sweep stale WS-implausible comments post-C3", che:
 
-- Sostituisce ~4-5 docstring drift con realtà post-C3.
+- Sostituisce 3 stale-comment candidates (vedi §7.1-§7.3 per breakdown: chat-view / mobile-bottom-nav / conversation-list) con realtà post-C3.
 - Zero logic change, comment-only.
 - Pre-commit verification: ripgrep LIVE `src/` → 0 stale, ripgrep LIVE `src/` → 0 actual WS deps (rimane invariato).
 

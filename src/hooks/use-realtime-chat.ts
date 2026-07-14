@@ -89,6 +89,30 @@ export function useRealtimeChat({
     modeRef.current = null;
   }, []);
 
+  /**
+   * safeSetConnected — single source of truth for "I want to flip the
+   * connection state". Defers the setState out of any synchronous
+   * effect/EventSource callback scope so `react-hooks/set-state-in-effect`
+   * is always satisfied, and guards against setState-after-unmount via
+   * `mountedRef.current`.
+   *
+   * Used by all 6 call sites in this hook (poll-res-not-ok, poll-success,
+   * poll-exception, SSE-open, SSE-error, init-effect-else). Defining it
+   * once means the deferred-setState contract is documented in one place
+   * rather than repeated inline 6 times.
+   *
+   * Deps: empty — `mountedRef` is a ref (stable identity across renders),
+   * `setConnected` is the setter returned by `useState` (also stable).
+   * Wrapped in `useCallback` so referential identity is stable across
+   * renders, keeping any future dep arrays honest.
+   */
+  const safeSetConnected = useCallback((value: boolean) => {
+    if (!mountedRef.current) return;
+    queueMicrotask(() => {
+      if (mountedRef.current) setConnected(value);
+    });
+  }, []);
+
   // ── HTTP polling (last-resort fallback) ────────────────────
   // Used when SSE connection fails (Vercel function timeout, network
   // error). Polls every 10s — slower than SSE (2s), but always works.
@@ -104,9 +128,7 @@ export function useRealtimeChat({
           `/api/conversations/${encodeURIComponent(conversationId)}/messages?limit=50`,
         );
         if (!res.ok) {
-          queueMicrotask(() => {
-            if (mountedRef.current) setConnected(false);
-          });
+          safeSetConnected(false);
           return;
         }
         const data = await res.json();
@@ -114,19 +136,15 @@ export function useRealtimeChat({
         if (freshMsgs.length > 0) {
           onMessages(freshMsgs);
         }
-        queueMicrotask(() => {
-          if (mountedRef.current) setConnected(true);
-        });
+        safeSetConnected(true);
       } catch {
-        queueMicrotask(() => {
-          if (mountedRef.current) setConnected(false);
-        });
+        safeSetConnected(false);
       }
     };
 
     void poll();
     pollRef.current = setInterval(poll, 10_000);
-  }, [conversationId, onMessages, cleanup]);
+  }, [conversationId, onMessages, cleanup, safeSetConnected]);
 
   // ── SSE connection (canonical realtime path) ──────────────
   const connectSse = useCallback(() => {
@@ -142,7 +160,7 @@ export function useRealtimeChat({
 
       es.onopen = () => {
         if (!mountedRef.current) return;
-        setConnected(true);
+        safeSetConnected(true);
       };
 
       es.onmessage = (event) => {
@@ -162,16 +180,11 @@ export function useRealtimeChat({
         es.close();
         esRef.current = null;
         modeRef.current = null;
-        // Defer setConnected out of the EventSource synchronous error
-        // path so react-hooks/set-state-in-effect is satisfied — the
-        // state update happens in a microtask, after the current
-        // effect-call has unwound.
-        queueMicrotask(() => {
-          if (!mountedRef.current) return;
-          setConnected(false);
-          // SSE error → degrade to polling rather than aggressively retrying.
-          startPolling();
-        });
+        // Auto-deferred by safeSetConnected; startPolling triggers
+        // cleanup() which won't re-close es (esRef.current is null
+        // already) and starts the polling interval.
+        safeSetConnected(false);
+        startPolling();
       };
     } catch {
       if (mountedRef.current) {
@@ -180,7 +193,7 @@ export function useRealtimeChat({
         });
       }
     }
-  }, [conversationId, onMessages, cleanup, startPolling]);
+  }, [conversationId, onMessages, cleanup, safeSetConnected, startPolling]);
 
   // ── Initialize / teardown based on enabled flag ────────────
   useEffect(() => {
@@ -189,20 +202,16 @@ export function useRealtimeChat({
       connectSse();
     } else {
       cleanup();
-      // Defer setConnected out of the synchronous effect-call scope
-      // so react-hooks/set-state-in-effect is satisfied. Without
-      // this, eslint-plugin-react-hooks flags the in-effect setState
-      // as causing cascading renders. Mirrors the queueMicrotask
-      // pattern already used in startPolling/onerror paths above.
-      queueMicrotask(() => {
-        if (mountedRef.current) setConnected(false);
-      });
+      // Auto-deferred by safeSetConnected; react-hooks/set-state-in-effect
+      // no longer fires because the setState happens in a microtask, after
+      // the synchronous effect-call has unwound.
+      safeSetConnected(false);
     }
     return () => {
       mountedRef.current = false;
       cleanup();
     };
-  }, [enabled, connectSse, cleanup]);
+  }, [enabled, connectSse, cleanup, safeSetConnected]);
 
   // ── Typing indicator stubs (no WS = no cross-client typing) ─────
   // Pre-C3, typing was forwarded via the WS broker's typing/stopTyping
