@@ -19,17 +19,23 @@ function getTransporter(): nodemailer.Transporter | null {
   if (_transporter) return _transporter;
 
   const host = process.env.EMAIL_SERVER_HOST;
+  const port = process.env.EMAIL_SERVER_PORT;
   const user = process.env.EMAIL_SERVER_USER;
   const pass = process.env.EMAIL_SERVER_PASSWORD;
+  const from = process.env.EMAIL_FROM;
 
-  if (!host || !user || !pass) {
+  // C1e/C2b cleanup: defaults removed from env.ts (smtp.gmail.com / 587 /
+  // noreply@courser.app) — every required email env must be set explicitly.
+  // If any is missing, return null so callers can short-circuit (they log
+  // a dev-friendly summary instead of sending).
+  if (!host || !port || !user || !pass || !from) {
     return null;
   }
 
   _transporter = nodemailer.createTransport({
     host,
-    port: parseInt(process.env.EMAIL_SERVER_PORT || "587"),
-    secure: process.env.EMAIL_SERVER_PORT === "465",
+    port: parseInt(port, 10),
+    secure: port === "465",
     auth: { user, pass },
   });
 
@@ -489,7 +495,10 @@ export async function sendDmNotificationEmail(
     return false;
   }
 
-  const from = process.env.EMAIL_FROM ?? "noreply@courser.app";
+  // EMAIL_FROM is validated upstream by getTransporter(); an explicit
+  // guard adds type honesty in case that contract is loosened in future.
+  const from = process.env.EMAIL_FROM;
+  if (!from) return false;
   const tpl = resolveTemplate(locale, DM_NOTIFICATION_TEMPLATES);
   const inboxUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://courser.app"}/dashboard/messages`;
 
@@ -554,7 +563,8 @@ export async function sendAbandonedCheckoutEmail(
     return false;
   }
 
-  const from = process.env.EMAIL_FROM ?? "noreply@courser.app";
+  const from = process.env.EMAIL_FROM;
+  if (!from) return false;
   const tpl = resolveTemplate(locale, ABANDONED_TEMPLATES);
   const filled = fillTemplate(tpl, productName);
 
@@ -611,7 +621,8 @@ export async function sendPurchaseConfirmation(
     return false;
   }
 
-  const from = process.env.EMAIL_FROM ?? "noreply@courser.app";
+  const from = process.env.EMAIL_FROM;
+  if (!from) return false;
   const tpl = resolveTemplate(locale, PURCHASE_TEMPLATES);
   const filled = fillTemplate(tpl, productName);
 

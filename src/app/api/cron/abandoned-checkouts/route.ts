@@ -52,13 +52,10 @@ export async function GET(request: Request) {
         let checkoutUrl = checkout.checkoutUrl
           || `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/${checkout.product.slug}`;
 
-        // Applica sconto automatico 10% (RECOVERY10)
-        if (checkoutUrl.includes("lemonsqueezy.com")) {
-          checkoutUrl += checkoutUrl.includes("?") ? "&discount=RECOVERY10" : "?discount=RECOVERY10";
-        } else {
-          // Per Stripe, lo passiamo come parametro per essere inoltrato al checkout
-          checkoutUrl += checkoutUrl.includes("?") ? "&coupon=RECOVERY10" : "?coupon=RECOVERY10";
-        }
+        // C2b: LS-only checkout. RECOVERY10 is appended as `discount=`
+        // (Lemon Squeezy's checkout-discount format). The legacy `coupon=`
+        // branch for Stripe is gone (no new Stripe sessions post Phase 7).
+        checkoutUrl += checkoutUrl.includes("?") ? "&discount=RECOVERY10" : "?discount=RECOVERY10";
 
         const success = await sendAbandonedCheckoutEmail(
           checkout.email,

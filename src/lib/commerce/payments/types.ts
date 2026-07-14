@@ -52,7 +52,10 @@ export interface CreateCheckoutInput {
 
 export interface CheckoutSession {
   url: string;
-  provider: "lemonsqueezy" | "stripe";
+  /** Sole new-session provider as of Phase 7 (C1a cleanup). legacy
+   *  Stripe webhook events still flow through the registry but do not
+   *  produce new CheckoutSessions. */
+  provider: "lemonsqueezy";
 }
 
 // ─── Phase 2 (future): parseWebhook ────────────────────────────────────

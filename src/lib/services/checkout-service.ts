@@ -65,7 +65,6 @@ export class CheckoutService {
         locale: input.locale,
         userEmail: input.userEmail,
         url: session.url,
-        provider: "lemonsqueezy",
       });
       return session;
     }
@@ -95,13 +94,11 @@ export class CheckoutService {
     locale: string;
     userEmail?: string;
     url: string;
-    provider: "lemonsqueezy" | "stripe";
   }): Promise<void> {
-    // Phase 7: provider arg is now effectively always "lemonsqueezy"
-    // (Stripe new-session is removed). Keeping the union type for
-    // backward compat with the cron worker that still reads
-    // AbandonedCheckout.paymentProvider as a free-form string.
-    void input.provider;
+    // LS-only by Phase 7 (C1a cleanup). paymentProvider column on the
+    // AbandonedCheckout row is hardcoded to "lemonsqueezy" so the cron
+    // worker (and any historical data migration scripts) can still
+    // read paymentProvider as a free-form string.
     if (!input.userEmail) return;
 
     try {
@@ -119,7 +116,7 @@ export class CheckoutService {
           data: {
             checkoutUrl: input.url,
             locale: input.locale,
-            paymentProvider: input.provider,
+            paymentProvider: "lemonsqueezy",
           },
         });
       } else {
@@ -128,7 +125,7 @@ export class CheckoutService {
             email: input.userEmail,
             productId: input.product.id,
             locale: input.locale,
-            paymentProvider: input.provider,
+            paymentProvider: "lemonsqueezy",
             checkoutUrl: input.url,
             status: "pending",
           },
