@@ -19,7 +19,7 @@ analytics, protezione accessi e gestione progressi.
 - **OpenAI API key** (opzionale, per traduzioni automatiche)
 - **Account SMTP** (opzionale, per email transazionali)
 
-> ⚠️ **V1.x status (2026-07-15):** LS-only per i nuovi ordini dal commit `a0e511e` (C1g: legacy Stripe provider module rimosso) + `4242f18` (C2a: env registry cleaned — `ENABLE_STRIPE_CHECKOUT`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `GOOGLE_CLIENT_ID/SECRET` rimossi, Vercel + `.env.example` svuotati). Stripe residuo: `stripe@^22.2.0` in package.json + webhook `src/app/api/webhooks/stripe/` + campi Prisma legacy (`Order.stripeSessionId`, `Order.stripeSubscriptionId`, `Product.stripePriceId`) + e2e test (`tests/e2e/checkout.stripe.spec.ts`) — **tutti richiesti dal drain legacy** finché `activeStripeOrders === 0` ([V1 blocker, roadmap §1.2](docs/roadmap-current.md#12-active-stripe-orders)). Solo `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` restano required, e SOLO dal webhook handler — gestisce eventi legacy pre-cutover: `checkout.session.completed`/`.expired` (back-fill ordini), `invoice.payment_failed`, `customer.subscription.deleted`, `charge.refunded`. Fase 8 (post‑V1) rimuove definitivamente webhook + DB columns + npm package.
+> ✅ **V1.x status:** Stripe è stato rimosso dal codebase. Il provider di pagamento unico è Lemon Squeezy.
 
 ---
 
@@ -64,7 +64,7 @@ Riepilogo (`.env.example` contiene i default completi):
 | `OPENAI_API_KEY` | ❌ | Traduzioni automatiche (opzionale) |
 | `EMAIL_SERVER_HOST` / `EMAIL_SERVER_PORT` / `EMAIL_SERVER_USER` / `EMAIL_SERVER_PASSWORD` / `EMAIL_FROM` | ❌ | Required per send email — vedi sezione "Email (Transazionali)" sotto |
 
-Senza Stripe env client-side (V1.x rimuove): solo `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` restano richiesti dalla drain legacy (webhook-only). Senza NextAuth env: nessuna (Supabase Auth non le richiede).
+Senza NextAuth env: nessuna (Supabase Auth non le richiede).
 
 ---
 
@@ -110,7 +110,7 @@ Auth gestita interamente da **Supabase Auth**. Niente NextAuth.
 
 ## Pagamenti (Lemon Squeezy)
 
-**Canonical V1.x:** Lemon Squeezy come Merchant of Record (target: unico provider, gestisce pagamenti + tasse + fatture). **Legacy da drainare:** Stripe (`stripe@^22.2.0` ancora in package.json, webhook route, campi Prisma, e2e test, 5+ lingue di legal i18n). Vedi Fase 8 in [roadmap §1.2](docs/roadmap-current.md) per il piano di rimozione completa.
+**Canonical V1.x:** Lemon Squeezy come Merchant of Record (unico provider, gestisce pagamenti + tasse + fatture).
 
 1. Crea account su [lemonsqueezy.com](https://lemonsqueezy.com)
 2. Settings → API → copia `LEMONSQUEEZY_API_KEY`
@@ -161,7 +161,7 @@ courser/
 │   │   ├── admin/                 # dashboard admin (prodotti, ordini, utenti)
 │   │   ├── api/                   # REST (Next.js Route Handlers)
 │   │   │   ├── conversations/     # DM canonici (POST/GET/PATCH/stream)
-│   │   │   ├── webhooks/lemonsqueezy/  # solo LS (Stripe rimosso)
+│   │   │   ├── webhooks/lemonsqueezy/  # solo LS
 │   │   │   ├── checkout/
 │   │   │   ├── progress/
 │   │   │   └── ...
@@ -329,12 +329,6 @@ Verifica che il **redirect URI** su Google Cloud Console sia:
    ```
 3. Se l'ordine è pending: controlla che il webhook LS sia arrivato (sezione sopra)
 
-### Active Stripe orders bloccano V1
-
-`docs/roadmap-current.md` §1.2 — V1 blocker. Drenare prima del V1 GA:
-- Refunda ordini Stripe attivi
-- OPPURE migrali manualmente a Lemon Squeezy
-- Poi rimuovi il codice dual-provider (Fase 8)
 
 ### Running E2E tests — fail-fast semantics
 
@@ -388,7 +382,7 @@ npm run check    # typecheck + lint + test
 
 ```bash
 npx tsx scripts/audit-v1-readiness.ts
-# Verifica: orphanProducts=0, activeStripeOrders=0, NextAuth tables=0, typecheck=0, SSE test exists
+# Verifica: orphanProducts=0, residualNextAuth (Account/Session/VerificationToken) = 0 (o `-1` sentinel = tabella assente post-$queryRaw)
 ```
 
 ### Diagnostica DMs

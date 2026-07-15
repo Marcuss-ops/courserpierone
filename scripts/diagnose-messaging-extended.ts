@@ -162,11 +162,21 @@ const ALLOWLIST_DM_AUTH_BYPASS: readonly { file: string; rationale: string }[] =
 // creator discovery) and preserve the rationale annotation metadata.
 const HAND_CURATED_ORDER_STATUS_RAW: readonly { file: string; rationale: string }[] = [
   // ── (b) Write-side: order creation from payment provider ──
-  { file: "src/lib/services/order-service.ts", rationale: "WRITES Order.status='completed' from Stripe/LemonSqueezy webhook payload (write-side; opposite direction of the SSOT reader)." },
+  { file: "src/lib/services/order-service.ts", rationale: "WRITES Order.status='completed' from LemonSqueezy webhook payload (write-side; opposite direction of the SSOT reader)." },
 
-  // ── (c) Refund handlers (write-side) ──
-  { file: "src/app/api/webhooks/stripe/route.ts", rationale: "Stripe webhook — DOWNgrades an Order to refunded (write-side, payment-provider state machine)." },
-  { file: "src/app/api/webhooks/lemonsqueezy/route.ts", rationale: "LemonSqueezy webhook — DOWNgrades an Order to refunded (write-side, payment-provider state machine)." },
+  // ── (c) Refund handlers (write-side, LS-only post V1.x C1a) ──
+  //   - The Stripe webhook entry that lived here was removed as part of
+  //     the V1.x C1a cleanup (legacy Stripe provider module hard-deleted;
+  //     see docs/audit-log.md for the commit lineage). The only live
+  //     post-C1a webhook handler in this allowlist is the LemonSqueezy one
+  //     below.
+  //   - The 3 downgrading events (order_refunded, subscription_cancelled,
+  //     subscription_payment_failed) are all funneled through the same
+  //     revokeCompletedLsOrders() helper in
+  //     src/app/api/webhooks/lemonsqueezy/route.ts — atomic Order +
+  //     AccessGrant revocation with `status="active"` filter on the grant
+  //     to prevent double-revoke on re-delivery.
+  { file: "src/app/api/webhooks/lemonsqueezy/route.ts", rationale: "LemonSqueezy webhook — DOWNgrades an Order to refunded/failed (write-side, payment-provider state machine; covers order_refunded, subscription_cancelled, subscription_payment_failed events through revokeCompletedLsOrders())." },
 
   // ── (d) Admin operator listings ──
   { file: "src/app/api/admin/orders/route.ts", rationale: "Admin listing (operator-only). Uses in-memory JSON filter not raw prisma.findFirst." },

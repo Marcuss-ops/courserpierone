@@ -46,17 +46,20 @@ Lo script `scripts/audit-v1-readiness.ts` (read-only, no mutations) misura **i 3
    applicare il NOT NULL + Restrict FK sul creator. Recovery legacy pre-migration:
    `scripts/products/backfill-primary-creator.ts`.
 
-2. **`Order.paymentProvider = 'stripe' AND status IN ('pending','completed')`**
-   → ordini Stripe ancora attivi: devono essere drained (refund o migrazione
-   a Lemon Squeezy) prima di collassare il dual-provider.
-
-3. **`Account + Session + VerificationToken` row counts** → residui del vecchio
+2. **`Account + Session + VerificationToken` row counts** → residui del vecchio
    NextAuth: una purge mirata dovrebbe precedere `DROP TABLE` di quei tre
    modelli Prisma (migration `20260712220000_drop_nextauth_models`).
    Implementato via raw SQL (`prisma.$queryRaw`) per forward-compat: dopo
    che la migration è stata applicata, i modelli spariscono dal typed Prisma
    client e lo script restituisce `-1` (sentinel = tabella assente) per ogni
    tabella, che è un segnale GREEN (tabella post-cleanup = ✓).
+
+   *Nota V1.x C1a*: il gate counter `Order.paymentProvider='stripe' AND
+   status IN ('pending','completed')` (activeStripe-orders) è stato rimosso
+   dallo script — `Order.paymentProvider` è ora hardcoded a `'lemonsqueezy'`
+   in `processOrder` (vedi `prisma/schema.prisma` `@default("lemonsqueezy")`),
+   nessun dual-provider da collassare in V1.x. Vecchie righe stripe legacy
+   restano read-only consultabili dall'admin `/api/admin/orders`.
 
 Oltre ai 3 gate counter, emette sanity baselines (`Total products`,
 `Total orders`, `Total users`) e un gate decision (`GREEN` se tutti i
