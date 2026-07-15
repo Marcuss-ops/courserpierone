@@ -349,9 +349,6 @@
       "hero_secure": "Secure payment, instant access",
       "hero_verified": "*verified data",
       "hero_trust_ssl": "SSL secure",
-      "hero_trust_stripe": "Stripe",
-      "hero_trust_paypal": "PayPal",
-      "offer_stripe_paypal": "Stripe & PayPal",
       "offer_invoice": "Instant invoice",
       "footer_cookies": "Cookie Policy",
       "footer_withdrawal": "EU 14-day right of withdrawal",
@@ -457,11 +454,6 @@
     "ebook_desc": "Read the complete guide in eBook format directly from the web reader or download the offline PDF.",
     "format_label": "PDF / Web Format",
     "read_label": "Read",
-    "section_my_courses_title": "My Courses",
-    "section_my_courses_count_one": "1 course in your library",
-    "section_my_courses_count_other": "{n} courses in your library",
-    "section_browse_title": "Browse Catalog",
-    "section_browse_subtitle": "Continue your journey with other courses",
     "empty_library": "Explore the catalog to start your first course.",
     "empty_browse": "No other courses available right now.",
     "chat_title": "Chat with the Creator",
@@ -473,5 +465,23 @@
     "footer_terms": "Terms of Service",
     "footer_refund": "Refund Policy",
     "lang_label": "Language"
+  },
+  "pricing": {
+    "free": {
+      "features": [
+        "1 Product",
+        "3 Languages",
+        "Basic analytics"
+      ]
+    },
+    "pro": {
+      "features": [
+        "Unlimited products",
+        "20 Languages",
+        "AI translations",
+        "Advanced analytics",
+        "International payments"
+      ]
+    }
   }
 }

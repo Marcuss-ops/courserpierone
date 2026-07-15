@@ -349,9 +349,6 @@
       "hero_secure": "Pagamento sicuro, accesso istantaneo",
       "hero_verified": "*dati verificati",
       "hero_trust_ssl": "SSL sicuro",
-      "hero_trust_stripe": "Stripe",
-      "hero_trust_paypal": "PayPal",
-      "offer_stripe_paypal": "Stripe e PayPal",
       "offer_invoice": "Fattura istantanea",
       "footer_cookies": "Cookie Policy",
       "footer_withdrawal": "Diritto di recesso EU di 14 giorni",
@@ -457,11 +454,6 @@
     "ebook_desc": "Leggi la guida completa in formato eBook direttamente dal lettore web o scarica il PDF offline.",
     "format_label": "Formato PDF / Web",
     "read_label": "Leggi",
-    "section_my_courses_title": "I Tuoi Corsi",
-    "section_my_courses_count_one": "1 corso nella tua libreria",
-    "section_my_courses_count_other": "{n} corsi nella tua libreria",
-    "section_browse_title": "Esplora il Catalogo",
-    "section_browse_subtitle": "Continua il tuo percorso con altri corsi",
     "empty_library": "Esplora il catalogo per iniziare il tuo primo percorso.",
     "empty_browse": "Al momento non ci sono altri corsi disponibili.",
     "chat_title": "Chat con il Creator",
@@ -473,5 +465,23 @@
     "footer_terms": "Termini di Servizio",
     "footer_refund": "Politica di Rimborso",
     "lang_label": "Lingua"
+  },
+  "pricing": {
+    "free": {
+      "features": [
+        "1 Prodotto",
+        "3 Lingue",
+        "Analytics base"
+      ]
+    },
+    "pro": {
+      "features": [
+        "Prodotti illimitati",
+        "20 Lingue",
+        "Traduzioni AI",
+        "Analytics avanzati",
+        "Pagamenti internazionali"
+      ]
+    }
   }
 }
