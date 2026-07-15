@@ -13,6 +13,7 @@
 
 import { HmacVerificationError } from "./verifier";
 import { NotFoundError, ValidationError } from "@/lib/errors";
+import { NextResponse } from "next/server";
 
 /**
  * Provider-decided "ack with no side effects" sentinel (e.g. LS sends
@@ -109,6 +110,47 @@ export function isSecurityOrParseError(
  */
 export function isAckError(error: unknown): error is WebhookAckError {
   return error instanceof WebhookAckError;
+}
+
+/**
+ * Single-shot classifier that maps any thrown error from the webhook
+ * pipeline to an HTTP `NextResponse`. Used by route handlers to keep
+ * the transport layer free of branching logic.
+ *
+ * Mapping (mirrors what the route used to inline):
+ *   - WebhookAckError      → 200 { received: true } + info log
+ *   - HmacVerificationError / InvalidJsonError → 400
+ *   - transient pattern     → 503 (provider retries)
+ *   - NotFoundError / ValidationError (business) → 200 ack (stop retries)
+ *   - any other Error        → 500 + error log
+ *
+ * `requestId` is included in the logs so structured-log queries can
+ * correlate the response with the request trace.
+ */
+export function classifyWebhookError(
+  error: unknown,
+  requestId: string,
+): NextResponse {
+  if (isAckError(error)) {
+    console.info(`[LS Webhook ${requestId}] Ack-only payment`, {
+      reason: error.message,
+    });
+    return NextResponse.json({ received: true });
+  }
+  if (isSecurityOrParseError(error)) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+  if (isTransientError(error)) {
+    return NextResponse.json({ error: "Temporary failure" }, { status: 503 });
+  }
+  if (isAcknowledgableError(error)) {
+    return NextResponse.json(
+      { error: error.message, code: error.code },
+      { status: 200 },
+    );
+  }
+  console.error(`[LS Webhook ${requestId}] Unexpected error:`, error);
+  return NextResponse.json({ error: "Processing failed" }, { status: 500 });
 }
 
 // `safeStringify` removed in webhook extraction refactor (Phase 2 followup):

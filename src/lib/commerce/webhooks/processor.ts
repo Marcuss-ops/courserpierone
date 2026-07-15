@@ -53,7 +53,13 @@ interface LsCustomData {
   channelId?: string;
 }
 
-const LS_EVENT_PROCESSABLE = new Set([
+/**
+ * Canonical set of LS events this processor dispatches. Exported so
+ * tests (and any future tooling) can verify the parse-webhook happy
+ * path is in sync with the dispatch table — drift between the two
+ * is a silent contract violation.
+ */
+export const LS_EVENT_PROCESSABLE = new Set([
   "order_created",
   "subscription_created",
   "order_refunded",

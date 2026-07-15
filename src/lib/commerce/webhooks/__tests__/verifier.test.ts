@@ -3,37 +3,44 @@ import crypto from "crypto";
 import {
   verifyHmacSignature,
   HmacVerificationError,
-} from "../verifier";
+} from "@/lib/commerce/webhooks/verifier";
 
-const SECRET = "test-secret-123";
+const SECRET = "test_secret_abc";
+const BODY = '{"hello":"world"}';
 
-function sign(rawBody: string, secret = SECRET): string {
-  return crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
+function sign(body: string, secret: string): string {
+  return crypto.createHmac("sha256", secret).update(body).digest("hex");
 }
 
 describe("verifyHmacSignature", () => {
-  it("returns silently when signature is valid", () => {
-    const body = '{"hello":"world"}';
+  it("returns void on matching signature", () => {
     expect(() =>
-      verifyHmacSignature({ rawBody: body, signature: sign(body), secret: SECRET }),
+      verifyHmacSignature({
+        rawBody: BODY,
+        signature: sign(BODY, SECRET),
+        secret: SECRET,
+      }),
     ).not.toThrow();
   });
 
   it("throws MISSING_SIGNATURE when signature is null", () => {
-    expect(() =>
-      verifyHmacSignature({ rawBody: "{}", signature: null, secret: SECRET }),
-    ).toThrowError(HmacVerificationError);
-
     try {
-      verifyHmacSignature({ rawBody: "{}", signature: null, secret: SECRET });
+      verifyHmacSignature({ rawBody: BODY, signature: null, secret: SECRET });
+      expect.fail("expected throw");
     } catch (err) {
+      expect(err).toBeInstanceOf(HmacVerificationError);
       expect((err as HmacVerificationError).code).toBe("MISSING_SIGNATURE");
     }
   });
 
-  it("throws MISSING_SIGNATURE when signature is empty string", () => {
+  it("throws MISSING_SIGNATURE when signature is undefined", () => {
     try {
-      verifyHmacSignature({ rawBody: "{}", signature: "", secret: SECRET });
+      verifyHmacSignature({
+        rawBody: BODY,
+        signature: undefined,
+        secret: SECRET,
+      });
+      expect.fail("expected throw");
     } catch (err) {
       expect((err as HmacVerificationError).code).toBe("MISSING_SIGNATURE");
     }
@@ -41,31 +48,36 @@ describe("verifyHmacSignature", () => {
 
   it("throws MALFORMED_SIGNATURE when secret is empty", () => {
     try {
-      verifyHmacSignature({ rawBody: "{}", signature: "abc", secret: "" });
+      verifyHmacSignature({
+        rawBody: BODY,
+        signature: sign(BODY, SECRET),
+        secret: "",
+      });
+      expect.fail("expected throw");
     } catch (err) {
       expect((err as HmacVerificationError).code).toBe("MALFORMED_SIGNATURE");
     }
   });
 
-  it("throws INVALID_SIGNATURE when signature content differs", () => {
-    const body = '{"a":1}';
-    const wrong = sign(body, "other-secret");
+  it("throws INVALID_SIGNATURE on HMAC mismatch (correct length)", () => {
     try {
-      verifyHmacSignature({ rawBody: body, signature: wrong, secret: SECRET });
+      verifyHmacSignature({
+        rawBody: BODY,
+        signature: "0".repeat(64),
+        secret: SECRET,
+      });
+      expect.fail("expected throw");
     } catch (err) {
       expect((err as HmacVerificationError).code).toBe("INVALID_SIGNATURE");
     }
   });
 
-  it("throws INVALID_SIGNATURE when buffer lengths differ (no timingSafeEqual crash)", () => {
-    // Buffer.from(newSig).length mismatch must short-circuit BEFORE calling
-    // crypto.timingSafeEqual (which would throw on length-mismatched buffers).
+  it("throws INVALID_SIGNATURE on length mismatch (timingSafeEqual guard)", () => {
+    // timingSafeEqual would throw on length-mismatched buffers — the
+    // verifier must short-circuit to INVALID_SIGNATURE before that.
     try {
-      verifyHmacSignature({
-        rawBody: "{}",
-        signature: "short",
-        secret: SECRET,
-      });
+      verifyHmacSignature({ rawBody: BODY, signature: "abc", secret: SECRET });
+      expect.fail("expected throw");
     } catch (err) {
       expect((err as HmacVerificationError).code).toBe("INVALID_SIGNATURE");
     }
