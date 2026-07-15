@@ -98,7 +98,7 @@ describe("LemonSqueezyPaymentProvider.parseWebhook", () => {
 
   it("exposes the full raw payload for the dispatcher", async () => {
     const rawBody = JSON.stringify({
-      meta: { event_name: "order_created", custom_data: { courseSlug: "amish" } },
+      meta: { event_name: "order_created", custom_data: { courseSlug: "test-course-e2e" } },
       data: { id: "ls-42", attributes: { user_email: "a@b.com" } },
     });
     const event = await lemonSqueezyProvider.parseWebhook({

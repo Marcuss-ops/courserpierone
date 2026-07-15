@@ -25,8 +25,7 @@ const baseEvent = (eventType: string, correlationKey = "ls-1") => ({
   correlationKey,
   payload: {
     meta: {
-      event_name: eventType,
-      custom_data: { courseSlug: "amish-secrets", locale: "it" },
+      event_name: eventType,        custom_data: { courseSlug: "test-course-e2e", locale: "it" },
     },
     data: {
       id: correlationKey,
