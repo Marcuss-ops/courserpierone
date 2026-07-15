@@ -129,8 +129,6 @@ export async function generateMetadata({
 const TemplateLumio = nextDynamic(() => import("@/components/funnel/template-lumio"));
 const TemplateH612 = nextDynamic(() => import("@/components/funnel/template-h612"));
 const TemplateHorizon = nextDynamic(() => import("@/components/funnel/template-horizon"));
-const TemplateBookClaude = nextDynamic(() => import("@/components/funnel/template-book-claude"));
-const TemplateAmish = nextDynamic(() => import("@/components/funnel/template-amish"));
 
 // getPriceString è importata da @/lib/utils/pricing
 
@@ -303,7 +301,7 @@ export default async function LocaleLandingPage({
   const lc = localeContent; // shorthand
 
   // ─── Multi-Template ────────────────────────────
-  if (data.template === "lumio" || data.template === "h612" || data.template === "horizon" || data.template === "book-claude" || data.template === "amish" || data.template === "default") {
+  if (data.template === "lumio" || data.template === "h612" || data.template === "horizon" || data.template === "default") {
     const templateData = mapConfigToTemplateData(data, currentLocale, currentLang, localeContent, countryCode);
     if (templateData) {
       let TemplateComponent;
@@ -311,8 +309,6 @@ export default async function LocaleLandingPage({
         case "lumio": TemplateComponent = TemplateLumio; break;
         case "h612": TemplateComponent = TemplateH612; break;
         case "horizon": TemplateComponent = TemplateHorizon; break;
-        case "book-claude": TemplateComponent = TemplateBookClaude; break;
-        case "amish": TemplateComponent = TemplateAmish; break;
         default: TemplateComponent = TemplateLumio;
       }
       return (
