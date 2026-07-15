@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { prisma } from "@/lib/db/prisma";
 import { Lock, ArrowRight, Sparkles } from "lucide-react";
+import { env } from "@/lib/env";
 import { PendingOrderScreen } from "./pending-order-screen";
 
 interface AccessGateProps {
@@ -18,9 +19,15 @@ interface AccessGateProps {
  * Server-side access gate.
  *
  * Grants access if any of the following is true:
+ * - Product is in FREE_COURSE_SLUGS AND price === 0 (open-access test/free course)
  * - User is an admin
  * - User has a completed order for the product
  * - A valid completed order ID is provided in the query string
+ *
+ * For free courses (step 0), authenticated users also receive a
+ * `free_enrollment` AccessGrant on first visit so progress tracking,
+ * messaging, and ebook downloads work via the standard MCR Phase 2
+ * resolveProductAccess path.
  *
  * Otherwise redirects unauthenticated users to login (preserving the
  * callback URL) and shows a paywall to authenticated users without access.
@@ -39,7 +46,7 @@ export async function AccessGate({
     where: {
       OR: [{ slug: productSlug }, { id: productSlug }],
     },
-    select: { id: true, slug: true, defaultLanguage: true },
+    select: { id: true, slug: true, defaultLanguage: true, price: true },
   });
 
   if (!product) {
@@ -48,6 +55,50 @@ export async function AccessGate({
   }
 
   let hasAccess = false;
+
+  // 0. FREE COURSE BYPASS — courses listed in FREE_COURSE_SLUGS env var
+  // with price=0 are accessible to anyone (no login, no payment).
+  // This is the SSOT for "test/free" courses. Adding a slug here makes
+  // it open-access without touching the access resolver.
+  //
+  // Defense-in-depth: BOTH `FREE_COURSE_SLUGS` env var AND `price === 0`
+  // must be true. A real product whose price is accidentally set to 0
+  // is NOT bypassed unless its slug is also explicitly listed.
+  const freeSlugs = (env.FREE_COURSE_SLUGS ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (freeSlugs.includes(product.slug) && product.price === 0) {
+    hasAccess = true;
+
+    // For authenticated users, upsert a free_enrollment AccessGrant so
+    // progress tracking + messaging + ebook downloads work via the
+    // standard resolveProductAccess path (MCR Phase 2).
+    if (dbUser) {
+      try {
+        await prisma.accessGrant.upsert({
+          where: {
+            sourceType_sourceId_productId: {
+              sourceType: "free_enrollment",
+              sourceId: `free_enrollment:${dbUser.id}:${product.id}`,
+              productId: product.id,
+            },
+          },
+          update: {},
+          create: {
+            userId: dbUser.id,
+            productId: product.id,
+            sourceType: "free_enrollment",
+            sourceId: `free_enrollment:${dbUser.id}:${product.id}`,
+            status: "active",
+          },
+        });
+      } catch (err) {
+        // Best-effort: log and continue. The page still renders.
+        console.warn("[AccessGate] free_enrollment grant upsert failed:", err);
+      }
+    }
+  }
 
   // 1. Admin always has access
   if (dbUser?.role === "admin") {
