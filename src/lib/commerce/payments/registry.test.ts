@@ -15,6 +15,7 @@ vi.mock("@/lib/payment/lemonsqueezy", () => ({
 import { NotImplementedError } from "@/lib/errors";
 import { paymentProviderRegistry } from "./registry";
 import { lemonSqueezyProvider } from "./providers/lemonsqueezy";
+import { PAYMENT_PROVIDER_SLUGS } from "./types";
 import type { PaymentProvider } from "./types";
 
 // ─── Helpers ────────────────────────────────────────────────────────
@@ -29,6 +30,7 @@ function fakeProvider(slug: string): PaymentProvider {
     slug,
     createCheckout: vi.fn(),
     parseWebhook: vi.fn(),
+    translateEvent: vi.fn(),
     retrievePayment: vi.fn(),
   };
 }
@@ -82,6 +84,32 @@ describe("paymentProviderRegistry", () => {
 
     paymentProviderRegistry.__test_only_clearAll();
     expect(paymentProviderRegistry.has("ephemeral")).toBe(false);
+  });
+
+  // SSoT lock: extends the array ⇒ extends the derived union (compile-time
+  // guarantee); deletes the baseline literal ⇒ this test fails (runtime
+  // guarantee). Cheap to maintain, locks both directions of drift.
+  it("PAYMENT_PROVIDER_SLUGS contains the baseline provider (SSoT baseline guard)", () => {
+    expect(PAYMENT_PROVIDER_SLUGS).toContain("lemonsqueezy");
+  });
+
+  // Step 7 typo-guard: a register() call with a slug not in
+  // PAYMENT_PROVIDER_SLUGS must WARN (not throw) outside test runtime.
+  // Inside test runtime (the OTHER tests above) the guard is silent;
+  // here we explicitly simulate production runtime to verify the warn.
+  it("warns on unknown-slug register outside test runtime", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    vi.stubEnv("VITEST", "");
+    vi.stubEnv("NODE_ENV", "");
+    try {
+      paymentProviderRegistry.register(fakeProvider("typo-lmeonsqeezy"));
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining("typo-lmeonsqeezy"),
+      );
+    } finally {
+      warnSpy.mockRestore();
+      vi.unstubAllEnvs();
+    }
   });
 });
 

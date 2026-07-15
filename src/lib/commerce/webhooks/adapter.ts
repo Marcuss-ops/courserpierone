@@ -13,12 +13,13 @@
 
 import type { NextRequest } from "next/server";
 import crypto from "crypto";
+import type { PaymentProviderSlug } from "@/lib/commerce/payments/types";
 
 export interface WebhookAdapterConfig {
   /** HTTP header carrying the signature (e.g. "x-signature" for LS). */
   signatureHeader: string;
-  /** Identifier for logging + delivery-id derivation. */
-  providerSlug: "lemonsqueezy";
+  /** Identifier for logging + delivery-id derivation. Typed alias so future providers slot in. */
+  providerSlug: PaymentProviderSlug;
 }
 
 export interface RawWebhookBody {

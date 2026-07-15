@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+// Step 7: ensure the registry is populated with the LS adapter before
+// `processWebhookEvent` resolves the provider via `registry.get(...)`.
+// Tests are otherwise unchanged — the only diff is the new `beforeEach`.
 const { mockProcessOrder, mockRevokeOrder } = vi.hoisted(() => ({
   mockProcessOrder: vi.fn(),
   mockRevokeOrder: vi.fn(),
@@ -15,8 +18,13 @@ vi.mock("@/lib/commerce/orders/revoke-order", () => ({
 
 import {
   processWebhookEvent,
-  LS_EVENT_PROCESSABLE,
 } from "@/lib/commerce/webhooks/processor";
+// Step 7: LS_EVENT_PROCESSABLE moved out of processor.ts into the
+// Lemon Squeezy adapter (where provider-specific event names belong).
+// Import path reflects the new ownership.
+import { LS_EVENT_PROCESSABLE } from "@/lib/commerce/payments/providers/lemonsqueezy";
+import { lemonSqueezyProvider } from "@/lib/commerce/payments/providers/lemonsqueezy";
+import { paymentProviderRegistry } from "@/lib/commerce/payments/registry";
 
 const baseEvent = (eventType: string, correlationKey = "ls-1") => ({
   provider: "lemonsqueezy" as const,
@@ -41,6 +49,10 @@ const baseEvent = (eventType: string, correlationKey = "ls-1") => ({
 beforeEach(() => {
   vi.clearAllMocks();
   mockRevokeOrder.mockResolvedValue({ count: 1 });
+  // Step 7: re-register the LS adapter so the registry's `get("lemonsqueezy")`
+  // resolves — tests use `__test_only_clearAll()` indirectly via vitest mocking.
+  paymentProviderRegistry.__test_only_clearAll();
+  paymentProviderRegistry.register(lemonSqueezyProvider);
 });
 
 describe("LS_EVENT_PROCESSABLE export (drift guard)", () => {

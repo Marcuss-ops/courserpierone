@@ -28,7 +28,7 @@ vi.mock("@/lib/commerce/webhooks/verifier", async (importOriginal) => {
 
 // Imported AFTER mocks so the provider picks up the mocked modules.
 import { LemonSqueezyPaymentProvider } from "@/lib/commerce/payments/providers/lemonsqueezy";
-import { LS_EVENT_PROCESSABLE } from "@/lib/commerce/webhooks/processor";
+import { LS_EVENT_PROCESSABLE } from "@/lib/commerce/payments/providers/lemonsqueezy";
 import { HmacVerificationError } from "@/lib/commerce/webhooks/verifier";
 
 const provider = new LemonSqueezyPaymentProvider();

@@ -32,14 +32,89 @@ import {
 import type {
   CheckoutSession,
   CreateCheckoutInput,
+  OrderCreatedEvent,
+  OrderRevokedEvent,
+  PaymentDomainAction,
   PaymentEvent,
   PaymentProvider,
   ProviderPayment,
   RawWebhook,
 } from "../../types";
 
+// ===== LS provider-private shape (Step 7) =====
+// Kept module-private: processors and orchestrators consume only the
+// domain DTOs returned by translateEvent(), never the raw LS payload.
+
+interface LsOrderAttributes {
+  user_email?: string;
+  customer_email?: string;
+  user_name?: string;
+  total?: number;
+  currency?: string;
+  customer_country?: string;
+  country?: string;
+  variant_id?: number;
+  product_variant_id?: number;
+  first_order_item?: {
+    variant_id?: number;
+    product_options?: { custom_data?: Record<string, string> };
+  };
+  custom_data?: Record<string, string>;
+}
+
+interface LsCustomData {
+  courseSlug?: string;
+  productSlug?: string;
+  locale?: string;
+  channelId?: string;
+}
+
+/**
+ * Canonical LS events the adapter translates into a domain action.
+ * Drift-guard for tests: the set must stay in sync with the switch in
+ * `extractOrderCreated` / `extractOrderRevoked` below — adding a new
+ * event means adding the mapping here AND extending the switch.
+ */
+export const LS_EVENT_PROCESSABLE = new Set([
+  "order_created",
+  "subscription_created",
+  "order_refunded",
+  "subscription_cancelled",
+  "subscription_payment_failed",
+]);
+
 export class LemonSqueezyPaymentProvider implements PaymentProvider {
   readonly slug = "lemonsqueezy" as const;
+
+  /**
+   * Translate a parsed+verified LS event into a domain action.
+   *
+   * Imports the LS-specific payload shape (LsOrderAttributes /
+   * LsCustomData fallback chain) and emits the provider-agnostic
+   * OrderCreatedEvent / OrderRevokedEvent used by orders/.
+   *
+   * Events the adapter doesn't recognize (test pings, future LS event
+   * types arriving before this provider is updated) quietly return
+   * `{ type: "ignore", reason }` so the webhook processor logs a
+   * warning rather than crashing.
+   */
+  translateEvent(event: PaymentEvent): PaymentDomainAction {
+    switch (event.eventType) {
+      case "order_created":
+      case "subscription_created":
+        return translateOrderCreated(event);
+      case "order_refunded":
+        return translateOrderRevoked(event, "refunded");
+      case "subscription_cancelled":
+      case "subscription_payment_failed":
+        return translateOrderRevoked(event, "failed");
+      default:
+        return {
+          type: "ignore",
+          reason: `Unhandled event type: ${event.eventType} (deliveryId=${event.deliveryId})`,
+        };
+    }
+  }
 
   async createCheckout(input: CreateCheckoutInput): Promise<CheckoutSession> {
     const { product, pricing, locale, userEmail, channelId } = input;
@@ -167,3 +242,87 @@ export class LemonSqueezyPaymentProvider implements PaymentProvider {
 }
 
 export const lemonSqueezyProvider = new LemonSqueezyPaymentProvider();
+
+// ===== Module-private translation helpers =====
+
+/**
+ * Map an `order_created` / `subscription_created` LS event to the
+ * provider-agnostic `OrderCreatedEvent`. Encapsulates the LS-shape
+ * fallback chain so the webhook processor / orders/* never know
+ * about `meta.custom_data` vs `first_order_item.product_options.custom_data`.
+ */
+function translateOrderCreated(event: PaymentEvent): PaymentDomainAction {
+  const { payload, correlationKey } = event;
+  const data = (payload as { data?: { attributes?: LsOrderAttributes } }).data;
+  const meta = (payload as { meta?: { custom_data?: LsCustomData } }).meta;
+  const attributes = data?.attributes;
+
+  if (!attributes) {
+    // Missing attributes LS-side: ignore-ack via the same channel the
+    // processor would use; route handler logs + returns 200.
+    return {
+      type: "ignore",
+      reason: `LS order_created payload missing data.attributes (deliveryId=${event.deliveryId})`,
+    };
+  }
+
+  const customerEmail = attributes.user_email ?? attributes.customer_email ?? "";
+  if (!customerEmail) {
+    return {
+      type: "ignore",
+      reason: `Missing customer email in LS event ${event.deliveryId}`,
+    };
+  }
+
+  // Canonical LS customData path: meta.custom_data. Defensive fallback
+  // to first_order_item.product_options.custom_data (older payloads,
+  // pre-2024) and attributes.custom_data (subscription path variant).
+  const customData: LsCustomData =
+    meta?.custom_data ??
+    attributes.first_order_item?.product_options?.custom_data ??
+    attributes.custom_data ??
+    {};
+
+  const variantId = String(
+    attributes.first_order_item?.variant_id ??
+      attributes.variant_id ??
+      attributes.product_variant_id ??
+      "",
+  );
+
+  return {
+    type: "order_created",
+    data: {
+      paymentProvider: "lemonsqueezy",
+      providerOrderId: correlationKey,
+      email: customerEmail,
+      customerName: attributes.user_name ?? "",
+      productSlug: customData.courseSlug ?? customData.productSlug ?? "",
+      variantId,
+      amount: attributes.total ?? 0,
+      currency: attributes.currency ?? "usd",
+      locale: customData.locale ?? "it",
+      customerCountry:
+        attributes.customer_country ?? attributes.country ?? null,
+      channelId: customData.channelId ?? null,
+    },
+  };
+}
+
+/**
+ * Map `order_refunded` / `subscription_cancelled` / `subscription_payment_failed`
+ * LS events to the provider-agnostic `OrderRevokedEvent`.
+ */
+function translateOrderRevoked(
+  event: PaymentEvent,
+  status: "refunded" | "failed",
+): PaymentDomainAction {
+  return {
+    type: "order_revoked",
+    data: {
+      paymentProvider: "lemonsqueezy",
+      providerOrderId: event.correlationKey,
+      orderStatus: status,
+    },
+  };
+}

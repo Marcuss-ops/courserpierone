@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { lemonSqueezyProvider } from "@/lib/commerce/payments/providers/lemonsqueezy";
+// Step 7: route imports the registry (which triggers the LS-provider
+// registration side-effect via payments/init.ts) — never the concrete
+// LS adapter. The webhook transport layer talks only to the port.
+import { paymentProviderRegistry } from "@/lib/commerce/payments/init";
 import { readWebhookRequest, newRequestId } from "@/lib/commerce/webhooks/adapter";
 import { processWebhookEvent } from "@/lib/commerce/webhooks/processor";
 import { wasAlreadyProcessed, recordDelivery } from "@/lib/commerce/webhooks/idempotency";
@@ -20,12 +23,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       signatureHeader: "x-signature",
       providerSlug: "lemonsqueezy",
     });
-    const event = await lemonSqueezyProvider.parseWebhook({
-      provider: "lemonsqueezy",
-      deliveryId: "",
-      rawBody,
-      signature,
-    });
+    const event = await paymentProviderRegistry
+      .get("lemonsqueezy")
+      .parseWebhook({
+        provider: "lemonsqueezy",
+        deliveryId: "",
+        rawBody,
+        signature,
+      });
     if (
       await wasAlreadyProcessed({
         provider: "lemonsqueezy",

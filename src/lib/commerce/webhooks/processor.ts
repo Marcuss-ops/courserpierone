@@ -1,71 +1,30 @@
 /**
  * src/lib/commerce/webhooks/processor.ts
  *
- * Inbound-webhook orchestrator. Receives a normalized `PaymentEvent`
- * (output of `provider.parseWebhook`) and dispatches to the matching
- * domain action:
+ * Inbound-webhook orchestrator (provider-agnostic since Step 7).
  *
- *   - order_created            → processOrder
- *   - subscription_created     → processOrder
- *   - order_refunded           → revokeOrder({ status: "refunded" })
- *   - subscription_cancelled   → revokeOrder({ status: "failed"   })
- *   - subscription_payment_failed → revokeOrder({ status: "failed" })
+ * Receives a normalized `PaymentEvent` (output of `provider.parseWebhook`)
+ * and dispatches to the matching domain action via the
+ * `PaymentProvider.translateEvent` port. The processor itself is fully
+ * provider-agnostic: there is no Lemon Squeezy–specific code here.
  *
- * The processor is intentionally provider-agnostic in shape (it only
- * reads `event.eventType` + LS-flattened `event.payload`); future
- * providers emit their own eventType taxonomy and the dispatcher grows.
+ *   order_created            → processOrder
+ *   subscription_created     → processOrder
+ *   order_refunded           → revokeOrder({ status: "refunded" })
+ *   subscription_cancelled   → revokeOrder({ status: "failed"   })
+ *   subscription_payment_failed → revokeOrder({ status: "failed" })
+ *   (any other eventType)    → ignore (warn-log, no DB write)
  *
- * The 3 revoke event variants funnel through the same domain action
- * (`revokeOrder`) — symmetric to how the 2 order-creation events
- * funnel through `processOrder`. This collapse prevents the
- * "3 nearly-identical revoke branches" drift the old route had.
+ * Provider-specific shape parsing (LS `meta.custom_data` fallback
+ * chain, subscription lifecycle mapping, etc.) lives in the adapter
+ * (`PaymentProvider.translateEvent`) — this module only knows about
+ * `OrderCreatedEvent` / `OrderRevokedEvent` and dispatches accordingly.
  */
 
 import { processOrder } from "@/lib/commerce/orders/complete-order";
 import { revokeOrder } from "@/lib/commerce/orders/revoke-order";
+import { paymentProviderRegistry } from "@/lib/commerce/payments/init";
 import type { PaymentEvent } from "@/lib/commerce/payments/types";
-
-/**
- * Map of LS order attribute payload shape (subset needed for processOrder).
- * Kept inline — extracted only when a third provider ships.
- */
-interface LsOrderAttributes {
-  user_email?: string;
-  customer_email?: string;
-  user_name?: string;
-  total?: number;
-  currency?: string;
-  customer_country?: string;
-  country?: string;
-  variant_id?: number;
-  product_variant_id?: number;
-  first_order_item?: {
-    variant_id?: number;
-    product_options?: { custom_data?: Record<string, string> };
-  };
-  custom_data?: Record<string, string>;
-}
-
-interface LsCustomData {
-  courseSlug?: string;
-  productSlug?: string;
-  locale?: string;
-  channelId?: string;
-}
-
-/**
- * Canonical set of LS events this processor dispatches. Exported so
- * tests (and any future tooling) can verify the parse-webhook happy
- * path is in sync with the dispatch table — drift between the two
- * is a silent contract violation.
- */
-export const LS_EVENT_PROCESSABLE = new Set([
-  "order_created",
-  "subscription_created",
-  "order_refunded",
-  "subscription_cancelled",
-  "subscription_payment_failed",
-]);
 
 /**
  * Move a normalized PaymentEvent into the matching domain action.
@@ -73,96 +32,35 @@ export const LS_EVENT_PROCESSABLE = new Set([
  * Throws domain errors (NotFoundError, ValidationError, transient
  * upstream errors). The route handler is responsible for translating
  * those into HTTP responses; this module never speaks NextResponse.
+ *
+ * Idempotency: this function does NOT insert a `processedWebhook` row.
+ * The route handler (`/api/webhooks/lemonsqueezy/route.ts` and its
+ * future per-provider analogues) gates via `wasAlreadyProcessed` BEFORE
+ * calling this function. Idempotency lives at the transport layer,
+ * not here.
  */
 export async function processWebhookEvent(event: PaymentEvent): Promise<void> {
-  const { eventType } = event;
+  const provider = paymentProviderRegistry.get(event.provider);
+  const action = provider.translateEvent(event);
 
-  if (!LS_EVENT_PROCESSABLE.has(eventType)) {
-    console.warn(
-      `[webhook-processor] Unhandled event type: ${eventType} (deliveryId=${event.deliveryId})`,
-    );
-    return;
-  }
-
-  switch (eventType) {
+  switch (action.type) {
     case "order_created":
-    case "subscription_created":
-      return handleOrderOrSubscriptionCreated(event);
-    case "order_refunded":
-      return revokeByEvent(event, "refunded");
-    case "subscription_cancelled":
-    case "subscription_payment_failed":
-      return revokeByEvent(event, "failed");
-    default:
-      // Defensive: LS_EVENT_PROCESSABLE gated it, but TS doesn't know.
+      return processOrder(action.data);
+
+    case "order_revoked": {
+      const { count } = await revokeOrder(action.data);
+      console.log(
+        count > 0
+          ? `[webhook-processor] ${event.eventType}: ${action.data.orderStatus} ${count} order(s) and revoked ${count} AccessGrant(s) for ${action.data.providerOrderId}`
+          : `[webhook-processor] ${event.eventType}: no completed orders found for ${action.data.providerOrderId} (already revoked or never existed)`,
+      );
+      return;
+    }
+
+    case "ignore":
+      console.warn(
+        `[webhook-processor] Ignored event (deliveryId=${event.deliveryId}): ${action.reason}`,
+      );
       return;
   }
-}
-
-async function handleOrderOrSubscriptionCreated(
-  event: PaymentEvent,
-): Promise<void> {
-  const { payload, correlationKey } = event;
-  const data = (payload as { data?: { attributes?: LsOrderAttributes } }).data;
-  const meta = (payload as { meta?: { custom_data?: LsCustomData } }).meta;
-  const attributes = data?.attributes;
-
-  if (!attributes) {
-    throw new Error("LS order_created payload missing data.attributes");
-  }
-
-  const customerEmail = attributes.user_email ?? attributes.customer_email ?? "";
-  if (!customerEmail) {
-    console.error(
-      `[webhook-processor] Missing customer email in LS event ${event.deliveryId}`,
-    );
-    return;
-  }
-
-  // Canonical LS customData path: meta.custom_data. Defensive fallback
-  // to first_order_item.product_options.custom_data (older payloads,
-  // pre-2024) and attributes.custom_data (subscription path variant).
-  const customData: LsCustomData =
-    meta?.custom_data ??
-    attributes.first_order_item?.product_options?.custom_data ??
-    attributes.custom_data ??
-    {};
-
-  const variantId = String(
-    attributes.first_order_item?.variant_id ??
-      attributes.variant_id ??
-      attributes.product_variant_id ??
-      "",
-  );
-
-  await processOrder({
-    email: customerEmail,
-    customerName: attributes.user_name ?? "",
-    productSlug: customData.courseSlug ?? customData.productSlug ?? "",
-    variantId,
-    providerOrderId: correlationKey,
-    paymentProvider: "lemonsqueezy",
-    amount: attributes.total ?? 0,
-    currency: attributes.currency ?? "usd",
-    locale: customData.locale ?? "it",
-    customerCountry:
-      attributes.customer_country ?? attributes.country ?? null,
-    channelId: customData.channelId ?? null,
-  });
-}
-
-async function revokeByEvent(
-  event: PaymentEvent,
-  orderStatus: "refunded" | "failed",
-): Promise<void> {
-  const { count } = await revokeOrder({
-    paymentProvider: "lemonsqueezy",
-    providerOrderId: event.correlationKey,
-    orderStatus,
-  });
-  console.log(
-    count > 0
-      ? `[webhook-processor] ${event.eventType}: ${orderStatus} ${count} order(s) and revoked ${count} AccessGrant(s) for ${event.correlationKey}`
-      : `[webhook-processor] ${event.eventType}: no completed orders found for ${event.correlationKey} (already revoked or never existed)`,
-  );
 }

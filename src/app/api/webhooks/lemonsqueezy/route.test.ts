@@ -38,8 +38,21 @@ const { mockParseWebhook, mockProcessWebhookEvent, mockWasAlreadyProcessed, mock
     mockRecordDelivery: vi.fn(),
   }));
 
+// Step 7: complete stub provider (all required PaymentProvider methods)
+// so the route's `paymentProviderRegistry.get("lemonsqueezy").parseWebhook(...)`
+// call returns a fully-typed object. The mock for this module alone
+// does NOT trigger init.ts's side-effect registration under vitest's
+// module isolation; that's why beforeEach below calls
+// `paymentProviderRegistry.register(lemonSqueezyProvider)` explicitly
+// (matching the pattern in webhooks/__tests__/processor.test.ts).
 vi.mock("@/lib/commerce/payments/providers/lemonsqueezy", () => ({
-  lemonSqueezyProvider: { parseWebhook: mockParseWebhook },
+  lemonSqueezyProvider: {
+    slug: "lemonsqueezy" as const,
+    createCheckout: vi.fn(),
+    parseWebhook: mockParseWebhook,
+    translateEvent: vi.fn(),
+    retrievePayment: vi.fn(),
+  },
 }));
 
 vi.mock("@/lib/commerce/webhooks/processor", () => ({
@@ -50,6 +63,13 @@ vi.mock("@/lib/commerce/webhooks/idempotency", () => ({
   wasAlreadyProcessed: mockWasAlreadyProcessed,
   recordDelivery: mockRecordDelivery,
 }));
+
+// Step 7: import registry + the (mocked) LS adapter so beforeEach
+// can re-register the stub. Importing from "@/lib/commerce/payme..."init"
+// here would re-trigger init.ts's side-effect, which we explicitly
+// want to bypass (see comment above + processor.test.ts mirror).
+import { paymentProviderRegistry } from "@/lib/commerce/payments/registry";
+import { lemonSqueezyProvider } from "@/lib/commerce/payments/providers/lemonsqueezy";
 
 import { POST } from "./route";
 
@@ -63,6 +83,11 @@ const sampleEvent = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // Step 7: re-hydrate the registry with the (mocked) LS provider for
+  // each test — router-handler tests rely on registry.get("lemonsqueezy")
+  // returning a usable provider, just like processor.test.ts.
+  paymentProviderRegistry.__test_only_clearAll();
+  paymentProviderRegistry.register(lemonSqueezyProvider);
   mockParseWebhook.mockResolvedValue(sampleEvent);
   mockProcessWebhookEvent.mockResolvedValue(undefined);
   mockWasAlreadyProcessed.mockResolvedValue(false);

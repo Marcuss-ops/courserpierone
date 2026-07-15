@@ -1,10 +1,16 @@
 import { prisma } from "@/lib/db/prisma";
 import { CheckoutError } from "@/lib/errors";
-import { paymentProviderRegistry } from "@/lib/commerce/payments/registry";
-import { lemonSqueezyProvider } from "@/lib/commerce/payments/providers/lemonsqueezy";
+// Step 7: import the registry from payments/init.ts so the LS-provider
+// registration side-effect runs exactly once, regardless of which
+// module pulls the registry into the bundle (route, orchestrator,
+// etc.). Direct `register(lemonSqueezyProvider)` here would couple
+// orchestrator code to the concrete LS adapter and prevent the port
+// pattern from holding together.
+import { paymentProviderRegistry } from "@/lib/commerce/payments/init";
 import type {
   CheckoutSession,
   CreateCheckoutInput,
+  PaymentProviderSlug,
 } from "@/lib/commerce/payments/types";
 
 /**
@@ -14,18 +20,6 @@ import type {
  * Prisma → services a livello di import-time.
  */
 export type CheckoutProduct = CreateCheckoutInput["product"];
-
-/**
- * Phase 1 of MCR — provider registration.
- *
- * Only LemonSqueezy is registered for new-session creation. The
- * registry throws on duplicate slug if this file is ever imported
- * twice (e.g., HMR) — that's a programmer error, surfaced loudly.
- *
- * Phase 7 cleanup (LS-only MoR): only Lemon Squeezy is registered for
- * new-session creation.
- */
-paymentProviderRegistry.register(lemonSqueezyProvider);
 
 /**
  * CheckoutService — orchestrator (NOT provider).
@@ -60,6 +54,7 @@ export class CheckoutService {
         locale: input.locale,
         userEmail: input.userEmail,
         url: session.url,
+        paymentProvider: "lemonsqueezy",
       });
       return session;
     }
@@ -89,11 +84,13 @@ export class CheckoutService {
     locale: string;
     userEmail?: string;
     url: string;
+    paymentProvider: PaymentProviderSlug;
   }): Promise<void> {
-    // LS-only by Phase 7 (C1a cleanup). paymentProvider column on the
-    // AbandonedCheckout row is hardcoded to "lemonsqueezy" so the cron
-    // worker (and any historical data migration scripts) can still
-    // read paymentProvider as a free-form string.
+    // Phase 1 of MCR + Step 7: AbandonedCheckout rows now carry the
+    // `paymentProvider` resolved by the orchestrator (the only module
+    // that knows which provider produced the checkout). The cron
+    // worker (and any historical data migration scripts) read the
+    // provider slug back as a string — no LS-only literal here.
     if (!input.userEmail) return;
 
     try {
@@ -111,7 +108,7 @@ export class CheckoutService {
           data: {
             checkoutUrl: input.url,
             locale: input.locale,
-            paymentProvider: "lemonsqueezy",
+            paymentProvider: input.paymentProvider,
           },
         });
       } else {
@@ -120,7 +117,7 @@ export class CheckoutService {
             email: input.userEmail,
             productId: input.product.id,
             locale: input.locale,
-            paymentProvider: "lemonsqueezy",
+            paymentProvider: input.paymentProvider,
             checkoutUrl: input.url,
             status: "pending",
           },

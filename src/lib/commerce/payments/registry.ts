@@ -16,7 +16,25 @@
  * CheckoutService assume a one-time registration at boot).
  */
 
-import type { PaymentProvider } from "./types";
+import type { PaymentProvider, PaymentProviderSlug } from "./types";
+import { PAYMENT_PROVIDER_SLUGS } from "./types";
+
+// Step 7 collapser: derive the runtime list from `PAYMENT_PROVIDER_SLUGS`
+// so the type alias + the runtime warning stay in sync without manual
+// duplication. New provider = 1-line edit on the array in types.ts.
+const KNOWN_PROVIDER_SLUGS: readonly PaymentProviderSlug[] = PAYMENT_PROVIDER_SLUGS;
+
+/**
+ * Test-runtime detection. `process.env.VITEST` is the canonical vitest
+ * marker (always set during vitest runs, regardless of `NODE_ENV` in
+ * CI configurations). Falling back to `NODE_ENV === "test"` covers
+ * Jest-style runners that don't set VITEST. The two together cover
+ * common CI setups; the warning will fire ONLY when an actual
+ * production / dev-server register() happens with a typo'd slug.
+ */
+function isTestRuntime(): boolean {
+  return Boolean(process.env.VITEST) || process.env.NODE_ENV === "test";
+}
 
 class PaymentProviderRegistry {
   private readonly providers = new Map<string, PaymentProvider>();
@@ -30,6 +48,24 @@ class PaymentProviderRegistry {
     if (this.providers.has(provider.slug)) {
       throw new Error(
         `[paymentProviderRegistry] Duplicate registration for slug "${provider.slug}".`,
+      );
+    }
+    // Step 7 lightweight typo-guard: surface unknown-slug warnings at
+    // registration-time, not lazily at first `.get()`. A typo'd slug
+    // here would 500 on the next webhook call — better to log a one-
+    // liner at boot. NOT a throw: adding Stripe later means a one-line
+    // addition to `PAYMENT_PROVIDER_SLUGS` in types.ts — both the type
+    // union and the runtime list are auto-derived. Test stubs (alpha/
+    // beta/test-only slugs in registry.test.ts) are exempted via
+    // `isTestRuntime()` so vitest CI runs don't false-positive.
+    if (
+      !isTestRuntime() &&
+      !KNOWN_PROVIDER_SLUGS.includes(provider.slug as PaymentProviderSlug)
+    ) {
+      console.warn(
+        `[paymentProviderRegistry] registering unknown slug "${provider.slug}". ` +
+          `Add it to PAYMENT_PROVIDER_SLUGS in src/lib/commerce/payments/types.ts ` +
+          `if this is intentional.`,
       );
     }
     this.providers.set(provider.slug, provider);
@@ -67,6 +103,15 @@ class PaymentProviderRegistry {
    * Marked with the `__test_only_` prefix by convention (see also
    * `__test_only_*` patterns in src/lib/env.ts and
    * src/lib/utils/rate-limit.ts).
+   *
+   * NOTE on test isolation: vitest's `vi.mock` does NOT propagate the
+   * module-level `paymentProviderRegistry.register(...)` side-effect
+   * from `payments/init.ts` into the test file's module graph. Tests
+   * that mock `@/lib/commerce/payments/providers/lemonsqueezy` MUST
+   * call `__test_only_clearAll()` AND `register(lemonSqueezyProvider)`
+   * themselves in `beforeEach` — otherwise `get("lemonsqueezy")` throws.
+   * The same pattern applies for any future provider stub registered
+   * behind a `vi.mock(...)` factory.
    */
   __test_only_clearAll(): void {
     this.providers.clear();

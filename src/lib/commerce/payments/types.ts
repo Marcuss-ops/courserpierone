@@ -50,8 +50,8 @@ export interface CreateCheckoutInput {
 
 export interface CheckoutSession {
   url: string;
-  /** Sole new-session provider as of Phase 7 (C1a cleanup). */
-  provider: "lemonsqueezy";
+  /** Provider that produced this session — typed alias for future PRs. */
+  provider: PaymentProviderSlug;
 }
 
 // ─── Phase 2 (future): parseWebhook ────────────────────────────────────
@@ -94,10 +94,98 @@ export interface ProviderPayment {
   raw: Record<string, unknown>;
 }
 
+// === Domain layer: provider-agnostic DTOs + port extension (Step 7) ===
+
+/**
+ * Slug tuple of every payment provider registered with this app.
+ * Lives in types.ts (and not registry.ts) so consumers can import it
+ * WITHOUT triggering the registry's module-load side-effects.
+ *
+ * Step 7 uses the **const-as-type** pattern: the runtime array IS the
+ * source of truth, and the type is DERIVED from it. Adding a provider
+ * is a one-line change to the array — the type, the registry's
+ * runtime warning, and the call-site autocomplete all stay in sync
+ * automatically. To extend: add `"stripe"` to `PAYMENT_PROVIDER_SLUGS`.
+ *
+ * Phase 1: LS-only MoR. The array currently has a single element.
+ */
+// Public runtime surface — registry.ts imports this for the unknown-slug
+// warning check. Don't move it to a runtime config file without breaking
+// the cycle cleanly (init.ts → registry.ts → types.ts).
+export const PAYMENT_PROVIDER_SLUGS = ["lemonsqueezy"] as const;
+export type PaymentProviderSlug = (typeof PAYMENT_PROVIDER_SLUGS)[number];
+
+/**
+ * Provider-agnostic DTO describing one completed order.
+ *
+ * Built by `PaymentProvider.translateEvent` after HMAC verification +
+ * payload normalization. Callers in orders/* / webhooks/* work ONLY
+ * against this shape — never against provider-specific raw payloads.
+ *
+ * `variantId` is the per-provider variant (LS `variant_id`) used for
+ * fallback product resolution in complete-order.ts when neither slug
+ * nor productId is supplied.
+ */
+export interface OrderCreatedEvent {
+  paymentProvider: PaymentProviderSlug;
+  providerOrderId: string;
+  email: string;
+  customerName: string;
+  /** Product slug (canonical): set from LS customData.courseSlug, NOT productId. */
+  productSlug: string;
+  variantId: string;
+  amount: number;
+  currency: string;
+  locale: string;
+  customerCountry: string | null;
+  channelId: string | null;
+}
+
+/**
+ * Provider-agnostic DTO for order- or subscription-revocation events.
+ * Used by `revokeOrder()` in orders/revoke-order.ts via the same
+ * `paymentProvider`+`providerOrderId` lookup pattern as the creation
+ * path.
+ */
+export interface OrderRevokedEvent {
+  paymentProvider: PaymentProviderSlug;
+  providerOrderId: string;
+  /**
+   * Matches `RevokeOrderInput.orderStatus` (revoke-order.ts) so the
+   * webhook processor can pass `OrderRevokedEvent` directly to
+   * `revokeOrder(...)` without a re-mapping step. The earlier `status`
+   * field name collided semantically with the Prisma `Order.status`
+   * column and forced the processor to log/inspect `action.data.status`
+   * while `revokeOrder` expected `orderStatus`.
+   */
+  orderStatus: "refunded" | "failed";
+}
+
+/**
+ * Discriminated-union output of `PaymentProvider.translateEvent`. The
+ * webhook processor switches on `type` and dispatches:
+ *   - `order_created`   → processOrder(event.data)
+ *   - `order_revoked`   → revokeOrder(event.data)
+ *   - `ignore`          → no-op (warn + log + optional processedWebhook insert)
+ * Adding a new event category means adding a new union variant — the
+ * processor's switch will surface the missing case at compile time.
+ */
+export type PaymentDomainAction =
+  | { type: "order_created"; data: OrderCreatedEvent }
+  | { type: "order_revoked"; data: OrderRevokedEvent }
+  | { type: "ignore"; reason: string };
+
 // ─── The contract ─────────────────────────────────────────────────────
 
 export interface PaymentProvider {
-  /** Stable registry key (used by `paymentProviderRegistry.get(slug)`). */
+  /**
+   * Stable registry key. Typed as `string` (NOT `PaymentProviderSlug`) so
+   * test stubs and future providers can register without first extending
+   * the alias union. The `PaymentProviderSlug` alias is still the
+   * discriminant at the *call site* (e.g. `CheckoutSession.provider`,
+   * `OrderRevokedEvent.paymentProvider`) where it carries a real
+   * type-system signal.
+   */
   readonly slug: string;
 
   /**
@@ -109,9 +197,26 @@ export interface PaymentProvider {
 
   /**
    * Verify HMAC and normalize a webhook payload into a `PaymentEvent`.
-   * Stub in this PR (Phase 2: webhook inbox).
+   * Throws `HmacVerificationError` / `InvalidJsonError` / `WebhookAckError`
+   * for terminal-class failures — the route handler translates these
+   * to the appropriate HTTP response (400 / 400 / 200-ack).
    */
   parseWebhook(input: RawWebhook): Promise<PaymentEvent>;
+
+  /**
+   * Translate a normalized `PaymentEvent` (already HMAC-verified and
+   * JSON-parsed by `parseWebhook`) into a `PaymentDomainAction`.
+   * The translation encapsulates provider-specific payload shape
+   * (LS custom_data fallback chain, subscription lifecycle, etc.)
+   * behind a stable interface so the webhook processor stays
+   * provider-agnostic. Step 7 of the audit moves ownership of these
+   * provider-specific shapes into the adapter module.
+   *
+   * Returns `{ type: "ignore", reason }` for events that pass HMAC
+   * but are not relevant to the order/accessGrant pipeline (LS test
+   * pings, future event types, malformed-but-ackable payloads).
+   */
+  translateEvent(event: PaymentEvent): PaymentDomainAction;
 
   /**
    * Fetch a payment by provider reference (admin reconciliation).

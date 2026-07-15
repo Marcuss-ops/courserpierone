@@ -1,7 +1,12 @@
 import { prisma } from "@/lib/db/prisma";
 import { sendPurchaseConfirmation } from "@/lib/commerce/shared/email";
 import { NotFoundError } from "@/lib/errors";
-
+import type { PaymentProviderSlug } from "@/lib/commerce/payments/types";
+// NOTE: Step 7 keeps ProcessOrderInput shape 1:1 with the prior
+// LemonSqueezy-flavored version but lifts `paymentProvider` from a
+// literal "lemonsqueezy" to the `PaymentProviderSlug` union. Adding a
+// second provider (Stripe) is now a single field-type-extension change
+// here, plus a new adapter in src/lib/commerce/payments/providers/.
 export interface ProcessOrderInput {
   /** Customer email — used for find-or-create user */
   email: string;
@@ -15,8 +20,9 @@ export interface ProcessOrderInput {
   variantId?: string;
   /** Provider's own order ID (unique per provider via @@unique) */
   providerOrderId?: string;
-  /** Payment provider identifier */
-  paymentProvider: "lemonsqueezy";
+  /** Payment provider identifier */ // Generic alias instead of literal "lemonsqueezy"
+  paymentProvider: PaymentProviderSlug;
+
   /** Amount in cents */
   amount: number;
   /** Currency code (eur, usd, etc.) */
@@ -120,7 +126,7 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
   // for idempotency (e.g. via ProcessedWebhook).
   if (providerOrderId) {
     const existing = await prisma.order.findFirst({
-      where: { paymentProvider: "lemonsqueezy", providerOrderId },
+      where: { paymentProvider, providerOrderId },
     });
     if (existing) {
       console.log(`[OrderService] Order ${providerOrderId} already exists, skipping`);

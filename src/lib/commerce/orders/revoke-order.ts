@@ -32,10 +32,25 @@
 
 import { prisma } from "@/lib/db/prisma";
 
+/**
+ * Step 7: revoke-side input now uses the `PaymentProviderSlug` union
+ * instead of the literal `"lemonsqueezy"` so adding a future provider
+ * (Stripe) is one field-type-extension change here, plus the matching
+ * adapter in src/lib/commerce/payments/providers/.
+ *
+ * `RevokeOrderStatus` lives here (not in payments/types.ts) so this
+ * module owns the revocation status vocabulary. `OrderRevokedEvent`
+ * (in types.ts) hardcodes the same string-union inline to avoid a
+ * reverse import — the discriminator union at the call sites
+ * (processor.ts log line, processor.test.ts expectations) stays
+ * type-checked.
+ */
+import type { PaymentProviderSlug } from "@/lib/commerce/payments/types";
+
 export type RevokeOrderStatus = "refunded" | "failed";
 
 export interface RevokeOrderInput {
-  paymentProvider: "lemonsqueezy";
+  paymentProvider: PaymentProviderSlug;
   /**
    * Provider-side identifier. For `order_refunded` this is the LS
    * `order.id`. For `subscription_*` events this is the LS
