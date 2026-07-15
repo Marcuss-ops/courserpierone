@@ -225,6 +225,23 @@ export interface LocaleContent {
     tab_community_subtitle?: string;
     tab_community_empty_title?: string;
     tab_community_empty_desc?: string;
+    // (2026-07-15) Community feed (Skool-style) — replaces the old
+    // student-leaderboard copy. The leaderboard is gone; this page now
+    // shows a scrollable feed of creator-posted resources.
+    tab_community_feed_title?: string;
+    tab_community_feed_subtitle?: string;
+    tab_community_feed_count_one?: string;
+    tab_community_feed_count_other?: string;
+    tab_community_feed_empty_title?: string;
+    tab_community_feed_empty_desc?: string;
+    tab_community_feed_pinned_badge?: string;
+    tab_community_feed_type_note?: string;
+    tab_community_feed_type_link?: string;
+    tab_community_feed_type_pdf?: string;
+    tab_community_feed_type_video?: string;
+    tab_community_feed_cta_link?: string;
+    tab_community_feed_cta_pdf?: string;
+    tab_community_feed_cta_video?: string;
   };
 
   /** Download page */
@@ -300,6 +317,14 @@ export function createEmptyLocale(locale: string, defaults?: Partial<LocaleConte
       tab_corso_dl_title: "", tab_corso_dl_desc: "",
       tab_community_title: "", tab_community_subtitle: "",
       tab_community_empty_title: "", tab_community_empty_desc: "",
+      tab_community_feed_title: "", tab_community_feed_subtitle: "",
+      tab_community_feed_count_one: "", tab_community_feed_count_other: "",
+      tab_community_feed_empty_title: "", tab_community_feed_empty_desc: "",
+      tab_community_feed_pinned_badge: "",
+      tab_community_feed_type_note: "", tab_community_feed_type_link: "",
+      tab_community_feed_type_pdf: "", tab_community_feed_type_video: "",
+      tab_community_feed_cta_link: "", tab_community_feed_cta_pdf: "",
+      tab_community_feed_cta_video: "",
     },
     download: {
       title: "", subtitle: "", download_button: "", view_online: "",

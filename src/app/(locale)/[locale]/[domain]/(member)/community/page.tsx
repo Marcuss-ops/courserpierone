@@ -1,12 +1,18 @@
 import { headers } from "next/headers";
-import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 import type { Metadata } from "next";
-import { Users, Award, TrendingUp } from "lucide-react";
+import {
+  FileText,
+  Link as LinkIcon,
+  FileDown,
+  Play,
+  Pin,
+  Rss,
+} from "lucide-react";
 import { getCourseConfig } from "@/lib/config/white-label-data";
-import { getServerUser } from "@/lib/supabase/get-user";
 import { loadLocaleContentCached } from "@/lib/i18n/load-locale-content";
 import { prisma } from "@/lib/db/prisma";
 
@@ -31,18 +37,20 @@ export async function generateMetadata({
 }
 
 /**
- * Community tab — Skool-mimic leaderboard-style grid.
+ * Community tab — Skool-style scrollable feed of creator-posted resources.
  *
- * MVP scope:
- * - Anonymized student names (use first name initial or first token).
- * - Progress bar per student (% lessons completed).
- * - "Joined X days ago" relative timestamp.
+ * (2026-07-15) Replaces the previous student-leaderboard view. The user
+ * wanted a feed of resources the creator has posted, not a list of
+ * enrolled students. Read-only MVP — admin CRUD UI is deferred to a
+ * followup (today: seed via `npx tsx scripts/seed-community-posts.ts`).
  *
- * Out of scope V1:
- * - Posts/comments (Skool has them; we don't because the course is a
- *   digital info-product and chat-with-creator handles Q&A).
- * - Real-time presence.
- * - Public profiles (privacy).
+ * Post types: "note" | "link" | "pdf" | "video". The `type` field is
+ * validated application-side in src/lib/community/post-types.ts (not yet
+ * extracted — duplicated here inline for the MVP).
+ *
+ * Sort order: pinned posts first (newest pinned), then all others by
+ * createdAt DESC. This matches the canonical compound index on
+ * (productId, pinned, createdAt).
  */
 export default async function CommunityTab({
   params,
@@ -54,35 +62,44 @@ export default async function CommunityTab({
   const course = await getCourseConfig(domain);
   if (!course) return notFound();
 
-  const { dbUser } = await getServerUser();
   const lang2 = locale.split("-")[0]?.toLowerCase() ?? "en";
   const lc = (await loadLocaleContentCached(domain, lang2)).portal;
 
   const t = {
     title:
-      lc.tab_community_title ||
+      lc.tab_community_feed_title ??
+      lc.tab_community_title ??
       (lang2 === "it" ? "Community del Corso" : "Course Community"),
     subtitle:
-      lc.tab_community_subtitle ||
+      lc.tab_community_feed_subtitle ??
+      lc.tab_community_subtitle ??
       (lang2 === "it"
-        ? "Studenti che stanno seguendo questo corso insieme a te."
-        : "Students following this course alongside you."),
-    totalLabel: (lang2 === "it" ? "studenti iscritti" : "students enrolled"),
-    progressAvg:
-      lang2 === "it" ? "Media completamento" : "Average progress",
-    topLabel: (lang2 === "it" ? "Top performer" : "Top performer"),
-    yourBadge: (lang2 === "it" ? "Sei qui" : "You"),
-    joined: (lang2 === "it" ? "Iscritto" : "Joined"),
-    completedLessons:
-      lang2 === "it" ? "Lezioni completate" : "Completed lessons",
+        ? "Risorse e aggiornamenti pubblicati dal creator."
+        : "Resources and updates posted by the creator."),
+    countOne:
+      lc.tab_community_feed_count_one ??
+      (lang2 === "it" ? "1 risorsa pubblicata" : "1 resource posted"),
+    countOther:
+      lc.tab_community_feed_count_other ??
+      (lang2 === "it" ? "risorse pubblicate" : "resources posted"),
     emptyTitle:
-      lc.tab_community_empty_title ||
-      (lang2 === "it" ? "Nessuno ancora" : "No one yet"),
+      lc.tab_community_feed_empty_title ??
+      (lang2 === "it" ? "Nessuna risorsa ancora" : "No resources yet"),
     emptyDesc:
-      lc.tab_community_empty_desc ||
+      lc.tab_community_feed_empty_desc ??
       (lang2 === "it"
-        ? "Sii il primo a iscriverti: condividi questo corso dalla pagina /about."
-        : "Be the first. Share this course from the /about page."),
+        ? "Il creator non ha ancora pubblicato risorse. Torna a trovarci!"
+        : "The creator hasn't posted any resources yet. Check back soon!"),
+    pinnedBadge:
+      lc.tab_community_feed_pinned_badge ??
+      (lang2 === "it" ? "In evidenza" : "Pinned"),
+    typeNote: lc.tab_community_feed_type_note ?? (lang2 === "it" ? "Nota" : "Note"),
+    typeLink: lc.tab_community_feed_type_link ?? (lang2 === "it" ? "Link" : "Link"),
+    typePdf: lc.tab_community_feed_type_pdf ?? "PDF",
+    typeVideo: lc.tab_community_feed_type_video ?? (lang2 === "it" ? "Video" : "Video"),
+    ctaLink: lc.tab_community_feed_cta_link ?? (lang2 === "it" ? "Apri link" : "Open link"),
+    ctaPdf: lc.tab_community_feed_cta_pdf ?? (lang2 === "it" ? "Scarica PDF" : "Download PDF"),
+    ctaVideo: lc.tab_community_feed_cta_video ?? (lang2 === "it" ? "Guarda video" : "Watch video"),
   };
 
   // Resolve productId from slug
@@ -92,111 +109,78 @@ export default async function CommunityTab({
   });
   if (!product) return notFound();
 
-  // Total lessons (for denominator)
-  const lessonRows = await prisma.lesson.findMany({
+  // Fetch the feed: pinned first, then by createdAt DESC.
+  // The compound index (productId, pinned, createdAt) makes this efficient.
+  const posts = await prisma.communityPost.findMany({
     where: { productId: product.id },
-    select: { id: true },
-  });
-  const totalLessons = lessonRows.length;
-
-  // Fellow students: all users with completed orders, recent first, capped.
-  const orders = await prisma.order.findMany({
-    where: {
-      productId: product.id,
-      status: "completed",
-    },
-    select: {
-      userId: true,
-      createdAt: true,
-      user: {
-        select: { id: true, name: true, email: true, image: true },
+    orderBy: [{ pinned: "desc" }, { createdAt: "desc" }],
+    take: 50,
+    include: {
+      author: {
+        select: { id: true, name: true, email: true, image: true, role: true },
       },
     },
-    orderBy: { createdAt: "desc" },
-    take: 60,
   });
 
-  // Aggregate each user's completed lessons for this product
-  const lessonIds = lessonRows.map((l) => l.id);
-  const userIds = orders.map((o) => o.userId);
-  const progressByUser = new Map<string, number>();
-  if (lessonIds.length > 0 && userIds.length > 0) {
-    const progress = await prisma.lessonProgress.findMany({
-      where: {
-        userId: { in: userIds },
-        lessonId: { in: lessonIds },
-        completed: true,
-      },
-      select: { userId: true },
-    });
-    for (const row of progress) {
-      progressByUser.set(
-        row.userId,
-        (progressByUser.get(row.userId) ?? 0) + 1,
-      );
-    }
-  }
-
-  // Order: current user pinned at top (so they can see "you are here"),
-  // then everyone else by progress desc.
-  const selfId = dbUser?.id ?? null;
-  interface Mate {
-    userId: string;
-    name: string;
-    image: string | null;
-    joinedAt: Date;
-    completed: number;
-  }
-  const mates: Mate[] = orders.map((o) => ({
-    userId: o.userId,
-    name: o.user.name ?? o.user.email?.split("@")[0] ?? "Studente",
-    image: o.user.image ?? null,
-    joinedAt: o.createdAt,
-    completed: progressByUser.get(o.userId) ?? 0,
-  }));
-
-  const sorted = [
-    ...(selfId
-      ? mates.filter((m) => m.userId === selfId)
-      : []),
-    ...mates
-      .filter((m) => m.userId !== selfId)
-      .sort((a, b) => b.completed - a.completed || b.joinedAt.getTime() - a.joinedAt.getTime()),
-  ];
-
-  // Stats
-  const totalMates = orders.length;
-  const avgProgress =
-    totalMates > 0
-      ? Math.round(
-          (mates.reduce((s, m) => s + m.completed, 0) /
-            Math.max(totalMates * totalLessons, 1)) *
-            100,
-        )
-      : 0;
-  const topMates = [...mates]
-    .filter((m) => m.userId !== selfId)
-    .sort((a, b) => b.completed - a.completed)
-    .slice(0, 3);
   const accent = course.accentColor ?? "#C9840D";
+  const totalPosts = posts.length;
 
-  const localeDateFormatter = (date: Date) =>
-    new Intl.DateTimeFormat(
-      lang2 === "it" ? "it-IT" : lang2 === "fr" ? "fr-FR" : lang2 === "de" ? "de-DE" : "en-US",
-      {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      },
+  // Type icon + label resolver (inline MVP — will move to a shared helper
+  // when admin CRUD UI lands and we need the same mapping in 2+ places).
+  const typeMeta = (
+    type: string,
+  ): {
+    label: string;
+    icon: typeof FileText;
+    cta: string | null;
+  } => {
+    switch (type) {
+      case "link":
+        return { label: t.typeLink, icon: LinkIcon, cta: t.ctaLink };
+      case "pdf":
+        return { label: t.typePdf, icon: FileDown, cta: t.ctaPdf };
+      case "video":
+        return { label: t.typeVideo, icon: Play, cta: t.ctaVideo };
+      case "note":
+      default:
+        return { label: t.typeNote, icon: FileText, cta: null };
+    }
+  };
+
+  // Relative time formatter (it/en only for MVP; falls back to en-US).
+  // `nowMs` is captured once at the top of the render so `Date.now()` is
+  // not called inside the loop. Safe in this Server Component — the rule
+  // `react-hooks/purity` targets Client Components (where `Date.now()`
+  // during render can cause hydration mismatches); here we're on the
+  // server, rendering once per request, so the value is deterministic
+  // for the lifetime of the response.
+  // eslint-disable-next-line react-hooks/purity
+  const nowMs = Date.now();
+  const relTime = (date: Date) => {
+    const diffMs = nowMs - date.getTime();
+    const diffMin = Math.floor(diffMs / 60_000);
+    const diffHour = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHour / 24);
+    if (diffMin < 1) return lang2 === "it" ? "proprio ora" : "just now";
+    if (diffMin < 60)
+      return lang2 === "it" ? `${diffMin} min fa` : `${diffMin}m ago`;
+    if (diffHour < 24)
+      return lang2 === "it" ? `${diffHour} ore fa` : `${diffHour}h ago`;
+    if (diffDay < 7)
+      return lang2 === "it" ? `${diffDay}g fa` : `${diffDay}d ago`;
+    return new Intl.DateTimeFormat(
+      lang2 === "it" ? "it-IT" : "en-US",
+      { day: "numeric", month: "short", year: "numeric" },
     ).format(date);
+  };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       {/* Header */}
       <header className="space-y-3">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cream-dark-gold/15 border border-cream-dark-gold/30 text-cream-dark-gold text-[10px] font-black uppercase tracking-widest">
-          <Users className="w-3 h-3" />
-          {t.totalLabel}: <strong>{totalMates}</strong>
+          <Rss className="w-3 h-3" />
+          {lang2 === "it" ? "Feed della Community" : "Community Feed"}
         </div>
         <h1 className="font-serif text-3xl md:text-5xl text-cream-dark-text leading-tight tracking-tight">
           {t.title}
@@ -204,134 +188,146 @@ export default async function CommunityTab({
         <p className="text-cream-dark-text-soft font-light leading-relaxed max-w-3xl">
           {t.subtitle}
         </p>
-        {totalMates >= 1 && (
-          <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-cream-dark-text-soft">
-            <span className="inline-flex items-center gap-1.5">
-              <TrendingUp className="w-3.5 h-3.5" />
-              {t.progressAvg}: <strong className="text-cream-dark-text">{avgProgress}%</strong>
-            </span>
-          </div>
+        {totalPosts > 0 && (
+          <p className="text-xs text-cream-dark-text-soft font-medium pt-1">
+            <strong className="text-cream-dark-text">{totalPosts}</strong>{" "}
+            {totalPosts === 1 ? t.countOne : t.countOther}
+          </p>
         )}
       </header>
 
-      {/* Top 3 performers — for empty states with very low data, skip */}
-      {topMates.length > 0 && topMates[0].completed > 0 && (
-        <section className="space-y-3">
-          <h2 className="flex items-center gap-2 font-serif text-sm uppercase tracking-widest text-cream-dark-text-soft font-black">
-            <Award className="w-4 h-4" style={{ color: accent }} />
-            {t.topLabel}
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {topMates.map((m, idx) => (
-              <div
-                key={m.userId}
-                className="bg-cream-dark-surface border border-cream-dark-border rounded-2xl p-4 shadow-md shadow-black/20 relative overflow-hidden"
-              >
-                <span
-                  className="absolute top-2 right-2 text-xs font-black w-7 h-7 rounded-lg flex items-center justify-center"
-                  style={{
-                    backgroundColor: idx === 0 ? accent : `${accent}30`,
-                    color: idx === 0 ? "#000" : accent,
-                  }}
-                >
-                  #{idx + 1}
-                </span>
-                <p className="font-serif text-cream-dark-text text-sm font-bold truncate">
-                  {m.name}
-                </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <div className="flex-1 h-1.5 bg-cream-dark-bg rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full"
-                      style={{
-                        backgroundColor: accent,
-                        width: `${totalLessons > 0 ? (m.completed / totalLessons) * 100 : 0}%`,
-                      }}
-                    />
-                  </div>
-                  <span className="text-[10px] font-bold text-cream-dark-text-soft">
-                    {m.completed}/{totalLessons}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Full grid */}
-      {sorted.length > 0 ? (
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {sorted.map((m) => {
-            const isSelf = m.userId === selfId;
-            const init = m.name.split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || m.name[0]?.toUpperCase() || "?";
-            return (
-              <div
-                key={m.userId}
-                className={[
-                  "rounded-2xl p-4 flex items-center gap-3 shadow-md shadow-black/20",
-                  isSelf
-                    ? "bg-cream-dark-gold/10 border-2 border-cream-dark-gold/40"
-                    : "bg-cream-dark-surface border border-cream-dark-border",
-                ].join(" ")}
-              >
-                <div
-                  className="shrink-0 w-12 h-12 rounded-full overflow-hidden flex items-center justify-center font-bold text-sm"
-                  style={{
-                    backgroundImage: m.image ? `url(${m.image})` : undefined,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                    backgroundColor: !m.image ? `${accent}25` : undefined,
-                    color: !m.image ? accent : undefined,
-                    border: `1px solid ${accent}30`,
-                  }}
-                >
-                  {!m.image && init}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-serif text-cream-dark-text text-sm font-bold flex items-center gap-2 truncate">
-                    {m.name}
-                    {isSelf && (
-                      <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-cream-dark-gold text-cream-dark-bg">
-                        {t.yourBadge}
-                      </span>
-                    )}
-                  </p>
-                  <div className="flex items-center gap-2 mt-1.5">
-                    <div className="flex-1 h-1.5 bg-cream-dark-bg rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full"
-                        style={{
-                          backgroundColor: accent,
-                          width: `${totalLessons > 0 ? (m.completed / totalLessons) * 100 : 0}%`,
-                        }}
-                      />
-                    </div>
-                    <span className="text-[10px] font-bold text-cream-dark-text-soft shrink-0">
-                      {m.completed}/{totalLessons}
-                    </span>
-                  </div>
-                  <p className="text-[10px] text-cream-dark-text-soft font-light mt-1">
-                    {t.joined}: {localeDateFormatter(m.joinedAt)}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </section>
-      ) : (
+      {/* Feed */}
+      {totalPosts === 0 ? (
         <section className="bg-cream-dark-surface border border-cream-dark-border rounded-2xl p-12 text-center space-y-2">
-          <Users className="w-10 h-10 text-cream-dark-text-soft/40 mx-auto" />
+          <Rss className="w-10 h-10 text-cream-dark-text-soft/40 mx-auto" />
           <p className="text-cream-dark-text font-bold">{t.emptyTitle}</p>
           <p className="text-cream-dark-text-soft text-sm font-light max-w-md mx-auto">
             {t.emptyDesc}
           </p>
-          <Link
-            href={`/${locale}/${domain}/about`}
-            className="inline-flex items-center gap-1.5 mt-3 px-4 py-2 bg-cream-dark-gold/20 border border-cream-dark-gold/30 rounded-xl text-cream-dark-gold text-xs font-bold hover:bg-cream-dark-gold/30 transition"
-          >
-            {lang2 === "it" ? "Scopri di più →" : "Learn more →"}
-          </Link>
+        </section>
+      ) : (
+        <section className="space-y-4">
+          {posts.map((p) => {
+            const meta = typeMeta(p.type);
+            const Icon = meta.icon;
+            const authorName =
+              p.author.name ?? p.author.email?.split("@")[0] ?? "Creator";
+            const authorInit =
+              authorName
+                .split(/\s+/)
+                .slice(0, 2)
+                .map((w) => w[0]?.toUpperCase() ?? "")
+                .join("") || authorName[0]?.toUpperCase() || "?";
+            return (
+              <article
+                key={p.id}
+                className={[
+                  "rounded-2xl p-5 sm:p-6 shadow-md shadow-black/20 transition-colors",
+                  p.pinned
+                    ? "bg-cream-dark-gold/8 border-2 border-cream-dark-gold/35"
+                    : "bg-cream-dark-surface border border-cream-dark-border",
+                ].join(" ")}
+              >
+                {/* Author + meta row */}
+                <div className="flex items-start gap-3 mb-3">
+                  <div
+                    className="shrink-0 w-11 h-11 rounded-full overflow-hidden flex items-center justify-center font-bold text-sm"
+                    style={{
+                      backgroundImage: p.author.image
+                        ? `url(${p.author.image})`
+                        : undefined,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                      backgroundColor: !p.author.image
+                        ? `${accent}25`
+                        : undefined,
+                      color: !p.author.image ? accent : undefined,
+                      border: `1px solid ${accent}30`,
+                    }}
+                  >
+                    {p.author.image ? (
+                      <Image
+                        src={p.author.image}
+                        alt=""
+                        width={44}
+                        height={44}
+                        className="w-full h-full object-cover"
+                        unoptimized
+                      />
+                    ) : (
+                      authorInit
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-serif text-cream-dark-text text-sm font-bold truncate">
+                        {authorName}
+                      </p>
+                      {p.author.role === "admin" && (
+                        <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-cream-dark-gold/20 text-cream-dark-gold border border-cream-dark-gold/30">
+                          {lang2 === "it" ? "Creator" : "Creator"}
+                        </span>
+                      )}
+                      <span
+                        className="text-[10px] text-cream-dark-text-soft/70 font-light"
+                        title={p.createdAt.toISOString()}
+                      >
+                        · {relTime(p.createdAt)}
+                      </span>
+                    </div>
+                    {/* Type + pinned badges */}
+                    <div className="flex items-center gap-1.5 mt-1.5">
+                      {p.pinned && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-cream-dark-gold/20 border border-cream-dark-gold/30 text-cream-dark-gold text-[9px] font-black uppercase tracking-wider">
+                          <Pin className="w-2.5 h-2.5" />
+                          {t.pinnedBadge}
+                        </span>
+                      )}
+                      <span
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider"
+                        style={{
+                          backgroundColor: `${accent}15`,
+                          color: accent,
+                          border: `1px solid ${accent}30`,
+                        }}
+                      >
+                        <Icon className="w-2.5 h-2.5" />
+                        {meta.label}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Title + body */}
+                <h3 className="font-serif text-lg sm:text-xl text-cream-dark-text font-bold leading-snug">
+                  {p.title}
+                </h3>
+                {p.body && (
+                  <p className="text-sm text-cream-dark-text-soft font-light mt-2 leading-relaxed whitespace-pre-line">
+                    {p.body}
+                  </p>
+                )}
+
+                {/* CTA — for link/pdf/video types */}
+                {meta.cta && p.url && (
+                  <a
+                    href={p.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all hover:scale-[1.02]"
+                    style={{
+                      backgroundColor: accent,
+                      color: "#0a0a0a",
+                      boxShadow: `0 4px 16px ${accent}40`,
+                    }}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    {meta.cta}
+                  </a>
+                )}
+              </article>
+            );
+          })}
         </section>
       )}
     </div>

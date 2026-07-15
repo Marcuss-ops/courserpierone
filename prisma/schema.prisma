@@ -47,6 +47,7 @@ model Product {
   orders             Order[]
   abandonedCheckouts AbandonedCheckout[]
   conversations      Conversation[]
+  communityPosts     CommunityPost[]
 
   // MCR Phase 2: back-pointer su AccessGrant. La relazione viene
   // usata dal provider di resolver AccessGrant e da eventuali future
@@ -157,6 +158,11 @@ model User {
   createdProducts Product[] @relation("CreatorProducts")
   lessonProgresses    LessonProgress[]
 
+  // Community feed (2026-07-15) — posts the user has authored in course
+  // community feeds. ON DELETE RESTRICT matches the AccessGrant pattern:
+  // deleting a user must not silently drop their posted resources.
+  communityPosts CommunityPost[] @relation("CommunityPostAuthor")
+
   // MCR Phase 2: access grants unificano acquisti, free enrollment,
   // admin grant, bundle inclusion. Il back-pointer `accessGrants`
   // permette query `WHERE userId = X AND status='active'` per il
@@ -169,6 +175,39 @@ model User {
   // — cancellare un utente elimina le sue notifiche/preferenze.
   notifications          Notification[]
   notificationPreference NotificationPreference?
+}
+
+// ─── Community Feed (2026-07-15) — Skool-style creator posts ──────────
+// Per-product feed where the creator posts resources (links, PDFs, videos,
+// notes) for enrolled students. Read-only MVP — admin CRUD UI deferred.
+// Schema mirrors the lessons table pattern (per-product, ordered by
+// createdAt) with one extra `pinned` flag for the sticky "welcome" post.
+//
+// `type` ∈ { "note", "link", "pdf", "video" } — validated application-side
+// in src/lib/community/post-types.ts. Not a Prisma enum so future types
+// (audio, image, poll) can be added without a migration.
+//
+// `url` is the attachment/link target. For type="note" it's null.
+// ON DELETE RESTRICT on author (matches AccessGrant): deleting the creator
+// must not silently drop their posted resources — require explicit cleanup.
+model CommunityPost {
+  id        String   @id @default(cuid())
+  productId String
+  authorId  String
+  title     String
+  body      String?  @db.Text
+  type      String   @default("note")
+  url       String?
+  pinned    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  author  User    @relation("CommunityPostAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+
+  // Compound index for the canonical feed query:
+  //   WHERE productId = X ORDER BY pinned DESC, createdAt DESC
+  @@index([productId, pinned, createdAt])
 }
 
 // ─── Centro Notifiche (Skool-style Bell) ─────────────────────────────
