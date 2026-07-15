@@ -102,23 +102,13 @@ describe("payment providers — stub methods (Phase 2/4 follow-up)", () => {
     paymentProviderRegistry.register(lemonSqueezyProvider);
   });
 
-  it("lemonsqueezy.parseWebhook throws 501 NOT_IMPLEMENTED_PHASE_2", async () => {
-    let caught: unknown;
-    try {
-      await paymentProviderRegistry.get("lemonsqueezy").parseWebhook({
-        provider: "lemonsqueezy",
-        deliveryId: "x",
-        rawBody: "",
-      });
-    } catch (e) {
-      caught = e;
-    }
-    expect(caught).toBeInstanceOf(NotImplementedError);
-    expect((caught as NotImplementedError).code).toBe(
-      "NOT_IMPLEMENTED_PHASE_2",
-    );
-    expect((caught as NotImplementedError).statusCode).toBe(501);
-  });
+  // parseWebhook is now implemented (post-webhook extraction refactor).
+  // Full contract coverage lives in:
+  //   src/lib/commerce/webhooks/__tests__/provider-lemonsqueezy.test.ts
+  // The 5 supported LS events pass through to a normalized PaymentEvent;
+  // invalid HMAC / signature-missing throws HmacVerificationError;
+  // missing meta.event_name throws WebhookAckError. retrievePayment
+  // alone remains a Phase 4 stub.
 
   it("lemonsqueezy.retrievePayment throws 501 NOT_IMPLEMENTED_PHASE_4", async () => {
     let caught: unknown;

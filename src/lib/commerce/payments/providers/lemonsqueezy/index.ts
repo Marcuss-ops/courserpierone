@@ -22,8 +22,13 @@
 import { createCheckout as lsCreateCheckout } from "@lemonsqueezy/lemonsqueezy.js";
 import { env } from "@/lib/env";
 import { CheckoutError, NotImplementedError } from "@/lib/errors";
-import { initLS, getStoreId } from "@/lib/payment/lemonsqueezy";
+import { initLS, getStoreId, getWebhookSecret } from "@/lib/payment/lemonsqueezy";
 import { getUiTranslations } from "@/lib/i18n/ui-translations";
+import { verifyHmacSignature } from "@/lib/commerce/webhooks/verifier";
+import {
+  InvalidJsonError,
+  WebhookAckError,
+} from "@/lib/commerce/webhooks/error-classifier";
 import type {
   CheckoutSession,
   CreateCheckoutInput,
@@ -94,11 +99,63 @@ export class LemonSqueezyPaymentProvider implements PaymentProvider {
     };
   }
 
-  async parseWebhook(_input: RawWebhook): Promise<PaymentEvent> {
-    throw new NotImplementedError(
-      "lemonsqueezy.parseWebhook not implemented yet (Phase 2: webhook inbox).",
-      { code: "NOT_IMPLEMENTED_PHASE_2" },
-    );
+  async parseWebhook(input: RawWebhook): Promise<PaymentEvent> {
+    // 1. HMAC verification using crypto.timingSafeEqual. Throws
+    //    HmacVerificationError on missing/invalid signature; the
+    //    route handler translates that into a 400 response.
+    verifyHmacSignature({
+      rawBody: input.rawBody,
+      signature: input.signature ?? null,
+      secret: getWebhookSecret(),
+    });
+
+    // 2. JSON parse. Malformed body is a deterministic 4xx — the
+    //    provider can stop retrying immediately. Use the dedicated
+    //    `InvalidJsonError` so the route classifier routes it to 400
+    //    (NOT to the 200-ack branch that handles business errors).
+    let payload: unknown;
+    try {
+      payload = JSON.parse(input.rawBody);
+    } catch {
+      throw new InvalidJsonError();
+    }
+
+    // 3. Shape check. LS always wraps events as { meta, data }. Missing
+    //    fields mean the payload is either malformed or a test ping —
+    //    ack-style (200) per LS docs so deliveries stop piling up.
+    const meta = (payload as { meta?: { event_name?: string } }).meta;
+    const data = (payload as {
+      data?: { id?: string | number };
+    }).data;
+    const eventName = meta?.event_name;
+    const dataId = data?.id;
+
+    if (!eventName || dataId === undefined || dataId === null) {
+      // LS sends ping-style payloads (test or pre-subscription) with
+      // meta.event_name missing. Per LS docs, the correct response is
+      // 200 with no side effect — signal to the route to ack and stop
+      // retries. WebhookAckError triggers that exact flow without
+      // recording a ProcessedWebhook row.
+      throw new WebhookAckError(
+        "LS webhook missing meta.event_name or data.id — silently acked",
+      );
+    }
+
+    // 4. Normalize to PaymentEvent. The deliveryId is the LS-equivalent
+    //    of Stripe's `event.id` — composite of (resource id + event_name)
+    //    so re-deliveries of the same event produce the same key.
+    const deliveryId = `LS-${String(dataId)}-${eventName}`;
+
+    return {
+      provider: "lemonsqueezy",
+      eventType: eventName,
+      deliveryId,
+      // correlationKey is the resource id (LS order_id for order events,
+      // LS subscription_id for subscription events). The processor uses
+      // this to find the matching Order row.
+      correlationKey: String(dataId),
+      payload: payload as Record<string, unknown>,
+    };
   }
 
   async retrievePayment(_reference: string): Promise<ProviderPayment> {
