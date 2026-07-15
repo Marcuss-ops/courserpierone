@@ -3,6 +3,11 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { getFreeCourseSlugs } from "@/lib/env";
+import {
+  evaluateAccess,
+  type AccessPolicy,
+  type AccessContext,
+} from "@/lib/access/policies";
 
 // IMPORTANT: This middleware runs in Vercel Edge runtime. Free-course
 // slug lookups use `getFreeCourseSlugs()` from src/lib/env.ts — the single
@@ -85,6 +90,25 @@ function extractSlugFromPath(pathname: string): string | null {
  * Checks if the request targets a protected route and the user
  * has no session. Returns a redirect/403 response if access is
  * denied, or null if access is allowed.
+ *
+ * Step 8 — replaced the inline if-cascade with the typed
+ * AccessPolicy discriminated-union evaluator. The Edge context
+ * (no DB) is built from the already-known `hasSession` flag +
+ * `isFreeCourseSlug` boolean (slug extracted from the URL).
+ *
+ * Edge-portable policies only: `free_course` + `session_required`.
+ * `requiresDb: true` policies (admin_role / owned_grant /
+ * pending_order) live in Node runtime — the RSC AccessGate
+ * (`src/components/course/access-gate.tsx`) and the API
+ * require-admin (`src/lib/auth/require-admin.ts`) cover those.
+ *
+ * Status-code semantics preserved bit-for-bit:
+ *   - /api/{translate,config,upload} → 403 with the original
+ *     "Unauthorized — admin access required" message (matches the
+ *     pre-Step-8 implementation; intentionally conflates 401 vs 403
+ *     for missing session on admin-only routes — the route scan is
+ *     session-presence-only, not role-aware).
+ *   - Page routes → /login redirect with callbackUrl
  */
 export function checkProtectedAccess(
   request: NextRequest,
@@ -92,49 +116,69 @@ export function checkProtectedAccess(
 ): NextResponse | null {
   const { pathname } = request.nextUrl;
 
-  // ── Dashboard ──
-  if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
-    if (!hasSession) return redirectToLogin(request);
-  }
+  // Build the Edge-portable AccessContext (no DB lookup).
+  const slug = extractSlugFromPath(pathname);
+  const ctx: AccessContext = {
+    pathname,
+    hasSession,
+    isFreeCourseSlug: !!slug && isFreeCourseSlug(slug),
+  };
 
-  // ── Admin routes (bare) ──
-  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
-    if (!hasSession) return redirectToLogin(request);
-  }
+  // Build the Edge-portable policy chain. The order matters:
+  //   - For product sub-paths: free_course FIRST (no session needed
+  //     for free courses), then session_required as fallback.
+  //   - For admin/dashboard/api/admin-only: only session_required.
+  // Routes that don't match any classification: no policy → return
+  // null = allow.
+  const policies: AccessPolicy[] = [];
 
-  // ── Admin routes (with locale prefix) ──
-  const adminLocaleMatch = /^\/([a-z]{2,5}(-[a-z]{2,5})?)\/admin(\/.*)?$/.exec(pathname);
-  if (adminLocaleMatch && !hasSession) {
-    return redirectToLogin(request);
-  }
-
-  // ── Product sub-paths (require auth, EXCEPT free courses) ──
-  if (isProductSubPath(pathname) && !hasSession) {
-    // Free course bypass: extract the slug from the path and check if
-    // it's in NEXT_PUBLIC_FREE_COURSE_SLUGS. The full defense-in-depth check (slug
-    // + price === 0) happens in the AccessGate + API handlers via the
-    // isFreeCourse helper — see src/lib/courses/is-free-course.ts.
-    const slug = extractSlugFromPath(pathname);
-    if (!slug || !isFreeCourseSlug(slug)) {
-      return redirectToLogin(request);
-    }
-  }
-
-  // ── Protected API routes (require admin) ──
   if (
+    pathname === "/dashboard" ||
+    pathname.startsWith("/dashboard/")
+  ) {
+    policies.push({ kind: "session_required" });
+  } else if (
+    pathname === "/admin" ||
+    pathname.startsWith("/admin/")
+  ) {
+    policies.push({ kind: "session_required" });
+  } else if (/^\/[^/]+\/admin(\/.*)?$/.test(pathname)) {
+    // Locale-prefixed admin route (e.g. /it-it/admin, /en-us/admin/teams)
+    policies.push({ kind: "session_required" });
+  } else if (isProductSubPath(pathname)) {
+    // /portal, /download, /curso + locale-prefixed variants. Free
+    // course bypass runs FIRST so the session check is skipped when
+    // the slug is in NEXT_PUBLIC_FREE_COURSE_SLUGS. The slug's price
+    // check happens server-side in isFreeCourse() via the RSC
+    // AccessGate for defense-in-depth.
+    policies.push({ kind: "free_course" });
+    policies.push({ kind: "session_required" });
+  } else if (
     pathname.startsWith("/api/translate") ||
     pathname.startsWith("/api/config") ||
     pathname.startsWith("/api/upload")
   ) {
-    if (!hasSession) {
-      return NextResponse.json(
-        { error: "Unauthorized — admin access required" },
-        { status: 403 },
-      );
-    }
+    policies.push({ kind: "session_required" });
   }
 
-  return null;
+  if (policies.length === 0) return null;
+
+  const decision = evaluateAccess(policies, ctx);
+  if (decision.action === "allow") return null;
+
+  // Map deny → NextResponse (status codes preserved per route class).
+  // Admin-only API routes: 403 (preserve the in-tree conflation of
+  // missing-session vs forbidden; future improvement — V2 could
+  // route this through `requireAdmin` and split 401 vs 403).
+  if (pathname.startsWith("/api/")) {
+    return NextResponse.json(
+      { error: "Unauthorized — admin access required" },
+      { status: 403 },
+    );
+  }
+
+  // Page routes → /login redirect with callbackUrl.
+  return redirectToLogin(request);
 }
 
 // ─── Helpers ───────────────────────────────────────────────

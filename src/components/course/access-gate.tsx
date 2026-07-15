@@ -6,6 +6,11 @@ import { prisma } from "@/lib/db/prisma";
 import { Lock, ArrowRight, Sparkles } from "lucide-react";
 import { isFreeCourse } from "@/lib/courses/is-free-course";
 import { PendingOrderScreen } from "./pending-order-screen";
+import {
+  evaluateAccess,
+  type AccessPolicy,
+  type AccessContext,
+} from "@/lib/access/policies";
 
 interface AccessGateProps {
   productSlug: string;
@@ -18,19 +23,24 @@ interface AccessGateProps {
 /**
  * Server-side access gate.
  *
- * Grants access if any of the following is true:
- * - Product is in NEXT_PUBLIC_FREE_COURSE_SLUGS AND price === 0 (open-access test/free course)
- * - User is an admin
- * - User has a completed order for the product
- * - A valid completed order ID is provided in the query string
+ * Step 8 refactor — the inline if-cascade (`hasAccess = false` →
+ * free → admin → owned → pendingOrder → paywall fallback) is
+ * REPLACED by the typed AccessPolicy discriminated-union evaluator
+ * (`src/lib/access/policies.ts`). Public surface is unchanged:
  *
- * For free courses (step 0), authenticated users also receive a
- * `free_enrollment` AccessGrant on first visit so progress tracking,
- * messaging, and ebook downloads work via the standard MCR Phase 2
- * resolveProductAccess path.
+ *   - children rendered when access is allowed
+ *   - PendingOrderScreen rendered when there's a pending order owned
+ *     by the current user (matched via `pending_order` policy)
+ *   - redirect to /login when the user is unauthenticated and access
+ *     is denied (callbackUrl preserved)
+ *   - paywall JSX rendered when authenticated but no access
  *
- * Otherwise redirects unauthenticated users to login (preserving the
- * callback URL) and shows a paywall to authenticated users without access.
+ * Side effects preserved bit-for-bit:
+ *   - On free-course bypass for an authenticated user, upsert a
+ *     `free_enrollment` AccessGrant so progress tracking / messaging /
+ *     ebook downloads work via the MCR Phase 2 resolveProductAccess path.
+ *   - The paywall JSX uses Italian copy and the gold accent vars
+ *     (preserved as-is from the pre-Step-8 version).
  */
 export async function AccessGate({
   productSlug,
@@ -54,24 +64,64 @@ export async function AccessGate({
     return <>{children}</>;
   }
 
-  let hasAccess = false;
+  // ── Hoist DB lookups (Step 8 invariant: policies are pure, data
+  //    fetching happens BEFORE evaluateAccess) ──────────────────
+  const completedOrder = dbUser
+    ? await prisma.order.findFirst({
+        where: {
+          userId: dbUser.id,
+          productId: product.id,
+          status: "completed",
+        },
+      })
+    : null;
 
-  // 0. FREE COURSE BYPASS — courses listed in NEXT_PUBLIC_FREE_COURSE_SLUGS env var
-  // with price=0 are accessible to anyone (no login, no payment).
-  // This is the SSOT for "test/free" courses. Adding a slug here makes
-  // it open-access without touching the access resolver.
-  //
-  // Defense-in-depth: BOTH `NEXT_PUBLIC_FREE_COURSE_SLUGS` env var AND `price === 0`
-  // must be true. A real product whose price is accidentally set to 0
-  // is NOT bypassed unless its slug is also explicitly listed.
-  // The check itself lives in src/lib/courses/is-free-course.ts (DRY).
-  if (isFreeCourse(product.slug, product.price)) {
-    hasAccess = true;
+  const orderByRef = orderId
+    ? await prisma.order.findFirst({
+        where: {
+          OR: [{ id: orderId }, { providerOrderId: orderId }],
+          productId: product.id,
+        },
+      })
+    : null;
 
-    // For authenticated users, upsert a free_enrollment AccessGrant so
-    // progress tracking + messaging + ebook downloads work via the
-    // standard resolveProductAccess path (MCR Phase 2).
-    if (dbUser) {
+  // Defensive coalescing: the AccessContext fields are optional, but
+  // their semantics are null-vs-undefined-aware in evaluatePolicy.
+  // Use `null` for "explicitly no value" so the policy's null-check
+  // (e.g., `userRole === null` → opt out) is symmetric with "DB says
+  // no user".
+  const ctx: AccessContext = {
+    pathname: callbackUrl,
+    hasSession: !!user,
+    isFreeCourseSlug: isFreeCourse(product.slug, product.price),
+    userId: dbUser?.id ?? null,
+    userRole: dbUser?.role ?? null,
+    hasCompletedOrder:
+      completedOrder?.status === "completed" ||
+      orderByRef?.status === "completed",
+    pendingOrderOwnerId:
+      orderByRef?.status === "pending" ? orderByRef.userId : null,
+    pendingOrderId: orderByRef?.status === "pending" ? orderByRef.id : null,
+    productDefaultLanguage: product.defaultLanguage,
+  };
+
+  // RSC chain — full Node-side AccessPolicy set. Order matters:
+  // free_course runs first (no DB needed), then admin/owned/
+  // pending_order with requiresDb. first-match wins.
+  const policies: AccessPolicy[] = [
+    { kind: "free_course" },
+    { kind: "admin_role", requiresDb: true },
+    { kind: "owned_grant", requiresDb: true },
+    { kind: "pending_order", requiresDb: true },
+  ];
+  const decision = evaluateAccess(policies, ctx);
+
+  // ── ALLOW branch ────────────────────────────────────────────
+  if (decision.action === "allow") {
+    // Free-course side-effect: upsert free_enrollment AccessGrant
+    // on first authenticated visit so progress tracking +
+    // messaging + ebook downloads work via the standard path.
+    if (decision.reason === "free_course_bypass" && dbUser) {
       try {
         await prisma.accessGrant.upsert({
           where: {
@@ -95,65 +145,36 @@ export async function AccessGate({
         console.warn("[AccessGate] free_enrollment grant upsert failed:", err);
       }
     }
-  }
-
-  // 1. Admin always has access
-  if (dbUser?.role === "admin") {
-    hasAccess = true;
-  }
-
-  // 2. Authenticated user with completed order
-  if (!hasAccess && dbUser) {
-    const order = await prisma.order.findFirst({
-      where: {
-        userId: dbUser.id,
-        productId: product.id,
-        status: "completed",
-      },
-    });
-    if (order) hasAccess = true;
-  }
-
-  // 3. Access via order_id query param (post-checkout immediate access)
-  let pendingOrderId: string | null = null;
-  if (!hasAccess && orderId) {
-    const order = await prisma.order.findFirst({
-      where: {
-        OR: [{ id: orderId }, { providerOrderId: orderId }],
-        productId: product.id,
-      },
-    });
-    if (order?.status === "completed") {
-      hasAccess = true;
-    } else if (order?.status === "pending") {
-      // Only the order owner (or a guest who will log in) may see the
-      // verifying screen. Otherwise fall through to the paywall.
-      if (!user?.email || dbUser?.id === order.userId) {
-        pendingOrderId = order.id;
-      }
-    }
-  }
-
-  if (hasAccess) {
     return <>{children}</>;
   }
 
-  // Pending order from checkout — show verifying screen with auto-refresh,
-  // or redirect unauthenticated users to login preserving the callback URL.
-  if (pendingOrderId) {
+  // ── PENDING branch ──────────────────────────────────────────
+  if (decision.action === "pending") {
     if (!user?.email) {
+      // Guest viewing a pending order they don't own: drop to the
+      // login flow (matching the original code's behavior — the
+      // pending_order policy itself already gated on pendingOrderOwnerId
+      // === userId, so an unauthed guest seeing this branch is by
+      // design impossible; the safety check is for type-soundness.)
       redirect(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
     }
-    return <PendingOrderScreen orderId={pendingOrderId} locale={product.defaultLanguage ?? "it"} />;
+    return (
+      <PendingOrderScreen
+        orderId={decision.orderId}
+        locale={decision.productDefaultLanguage ?? product.defaultLanguage ?? "it"}
+      />
+    );
   }
 
+  // ── DENY branch ─────────────────────────────────────────────
   // Not authenticated → redirect to login with callback URL
   if (!user?.email) {
     const loginUrl = `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`;
     redirect(loginUrl);
   }
 
-  // Authenticated but no access → paywall
+  // Authenticated but no access → paywall JSX (preserved verbatim
+  // from pre-Step-8 implementation — Italian copy + gold accent vars).
   return (
     <div className="min-h-screen bg-[#070709] text-zinc-100 font-sans flex items-center justify-center p-6 relative overflow-hidden">
       <div
