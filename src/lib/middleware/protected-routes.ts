@@ -2,7 +2,13 @@
 
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { env } from "@/lib/env";
+
+// IMPORTANT: This middleware runs in Vercel Edge runtime. The `env` Proxy
+// in src/lib/env.ts uses dynamic `process.env[prop]` access, which
+// Next.js Webpack cannot statically replace at build time — it evaluates
+// to `undefined` in Edge. We use `process.env.FREE_COURSE_SLUGS` directly
+// (literal access IS statically replaced by Webpack).
+// See https://nextjs.org/docs/app/building-your-application/optimizing/package-bundling#middleware
 
 // ─── Known non-landing paths (skip locale handling) ────────
 const KNOWN_PREFIXES = [
@@ -41,7 +47,11 @@ function isProductSubPath(pathname: string): boolean {
 // A product with a matching slug but non-zero price would pass the
 // middleware check but still be denied at the page/API level.
 function isFreeCourseSlug(slug: string): boolean {
-  const freeSlugs = (env.FREE_COURSE_SLUGS ?? "")
+  // Direct process.env access (NOT via the env Proxy) — see import
+  // comment above. Webpack statically replaces this at build time,
+  // so it works in Edge runtime. The env Proxy uses dynamic
+  // process.env[prop] which does NOT.
+  const freeSlugs = (process.env.FREE_COURSE_SLUGS ?? "")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
