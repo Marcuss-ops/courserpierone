@@ -1,7 +1,11 @@
 import { prisma } from "../../src/lib/db/prisma";
 
 async function main() {
-  const slug = process.argv[2] || "amish-secrets";
+  const slug = process.argv[2];
+  if (!slug) {
+    console.error("Usage: tsx add-currency-prices.ts <slug>");
+    process.exit(1);
+  }
 
   const product = await prisma.product.findUnique({ where: { slug } });
   if (!product) {

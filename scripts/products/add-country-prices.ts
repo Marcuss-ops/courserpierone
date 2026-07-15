@@ -6,10 +6,10 @@
  *
  * Uso:
  *   npx tsx scripts/products/add-country-prices.ts <slug>
- *   npx tsx scripts/products/add-country-prices.ts amish-secrets
+ *   npx tsx scripts/products/add-country-prices.ts <slug>
  *
  * Per sovrascrivere un paese specifico:
- *   COUNTRY=BR PRICE=9900 CURRENCY=BRL SYMBOL="R$" npx tsx scripts/products/add-country-prices.ts amish-secrets
+ *   COUNTRY=BR PRICE=9900 CURRENCY=BRL SYMBOL="R$" npx tsx scripts/products/add-country-prices.ts <slug>
  */
 
 import { prisma } from "../../src/lib/db/prisma";
@@ -40,7 +40,11 @@ const DEFAULT_COUNTRY_PRICES: CountryOverrides = {
 };
 
 async function main() {
-  const slug = process.argv[2] || "amish-secrets";
+  const slug = process.argv[2];
+  if (!slug) {
+    console.error("Usage: tsx add-country-prices.ts <slug>");
+    process.exit(1);
+  }
 
   const overrideCountry = process.env.COUNTRY;
 

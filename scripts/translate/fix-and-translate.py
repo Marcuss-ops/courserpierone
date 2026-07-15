@@ -16,8 +16,8 @@ except ImportError:
     sys.exit(1)
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-DATA_DIR = os.path.join(ROOT_DIR, "data", "amish-secrets")
-CONFIG_PATH = os.path.join(ROOT_DIR, "public", "courses", "amish-secrets", "config.json")
+DATA_DIR = None  # computed in main() from argv <slug>
+CONFIG_PATH = None  # computed in main() from argv <slug>
 
 ITALIAN_FALLBACKS = ["pagamento sicuro", "recensioni verificate", "ssl sicuro", "fattura inclusa", "ritiro"]
 
@@ -46,6 +46,13 @@ def get_translator(source: str, target: str):
         return None
 
 def main():
+    global DATA_DIR, CONFIG_PATH
+    if len(sys.argv) < 2:
+        print("Usage: python fix-and-translate.py <slug>")
+        sys.exit(1)
+    slug = sys.argv[1]
+    DATA_DIR = os.path.join(ROOT_DIR, "data", slug)
+    CONFIG_PATH = os.path.join(ROOT_DIR, "public", "courses", slug, "config.json")
     if not os.path.exists(CONFIG_PATH):
         print(f"Error: {CONFIG_PATH} not found.")
         sys.exit(1)

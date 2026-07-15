@@ -2,16 +2,16 @@
 translate-missing.py — Traduci tutte le chiavi mancanti per un prodotto.
 
 Uso:
-  python scripts/translate/translate-missing.py
-    -> Traduce portal + course per amish-secrets
+  python scripts/translate/translate-missing.py --product <slug>
+    -> Traduce portal + course per il prodotto specificato
 
-  python scripts/translate/translate-missing.py --product amish-secrets --all
-    -> Traduce TUTTE le sezioni mancanti per amish-secrets
+  python scripts/translate/translate-missing.py --product <slug> --all
+    -> Traduce TUTTE le sezioni mancanti
 
-  python scripts/translate/translate-missing.py --product amish-secrets --section portal --section course
+  python scripts/translate/translate-missing.py --product <slug> --section portal --section course
     -> Solo sezioni specifiche
 
-  python scripts/translate/translate-missing.py --product amish-secrets --dry-run
+  python scripts/translate/translate-missing.py --product <slug> --dry-run
     -> Mostra cosa tradurrebbe senza scrivere
 """
 
@@ -168,7 +168,7 @@ def translate_missing(
 
 def main():
     parser = argparse.ArgumentParser(description="Translate missing locale keys for a product")
-    parser.add_argument("--product", default="amish-secrets", help="Product slug (directory under data/)")
+    parser.add_argument("--product", required=True, help="Product slug (directory under data/)")
     parser.add_argument("--section", action="append", dest="sections",
                         help="Section(s) to translate (e.g. --section portal --section course)")
     parser.add_argument("--all", action="store_true",

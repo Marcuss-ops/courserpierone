@@ -2,10 +2,17 @@ import fs from "fs";
 import path from "path";
 
 const ROOT_DIR = path.resolve(__dirname, "..", "..");
-const DATA_DIR = path.join(ROOT_DIR, "data", "amish-secrets");
-const CONFIG_PATH = path.join(ROOT_DIR, "public", "courses", "amish-secrets", "config.json");
+let DATA_DIR: string;
+let CONFIG_PATH: string;
 
 function main() {
+  const slug = process.argv[2];
+  if (!slug) {
+    console.error("Usage: tsx sync-data-to-config.ts <slug>");
+    process.exit(1);
+  }
+  DATA_DIR = path.join(ROOT_DIR, "data", slug);
+  CONFIG_PATH = path.join(ROOT_DIR, "public", "courses", slug, "config.json");
   if (!fs.existsSync(CONFIG_PATH)) {
     console.error(`❌ Config file not found at: ${CONFIG_PATH}`);
     process.exit(1);

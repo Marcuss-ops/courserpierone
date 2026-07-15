@@ -12,8 +12,8 @@ except ImportError:
     print("ERROR: argostranslate not installed.")
     sys.exit(1)
 
-DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data", "amish-secrets")
-EN_FILE = os.path.join(DATA_DIR, "en.json")
+DATA_DIR = None  # computed in main() from argv <slug>
+EN_FILE = None  # computed in main() from argv <slug>
 
 def get_translator(source: str, target: str):
     a_pkg.update_package_index()
@@ -36,6 +36,13 @@ def get_translator(source: str, target: str):
     return fl.get_translation(tl)
 
 def main():
+    global DATA_DIR, EN_FILE
+    if len(sys.argv) < 2:
+        print("Usage: python translate-selective.py <slug>")
+        sys.exit(1)
+    slug = sys.argv[1]
+    DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data", slug)
+    EN_FILE = os.path.join(DATA_DIR, "en.json")
     if not os.path.exists(EN_FILE):
         print(f"Error: {EN_FILE} not found.")
         sys.exit(1)
