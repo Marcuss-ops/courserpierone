@@ -16,6 +16,7 @@ import { getCourseConfig } from "@/lib/config/white-label-data";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { loadLocaleContentCached } from "@/lib/i18n/load-locale-content";
 import { prisma } from "@/lib/db/prisma";
+import { extractYouTubeId, youTubeThumbnailUrl } from "@/lib/youtube/id";
 
 export async function generateMetadata({
   params,
@@ -232,6 +233,10 @@ export default async function CourseCorsoTab({
               lesson.descriptions[locale] ??
               lesson.descriptions[lang2] ??
               "";
+            const lessonVideoUrl =
+              lesson.videos[locale] ?? lesson.videos[lang2] ?? "";
+            const ytId = extractYouTubeId(lessonVideoUrl);
+            const thumbnailUrl = ytId ? youTubeThumbnailUrl(ytId) : null;
 
             const cta =
               isCompleted
@@ -244,49 +249,79 @@ export default async function CourseCorsoTab({
               <Link
                 key={lesson.id}
                 href={`${basePath}/curso/${lesson.id}?lang=${lang2}`}
-                className="group block bg-cream-dark-surface border border-cream-dark-border rounded-2xl p-5 hover:border-cream-dark-gold/40 hover:bg-cream-dark-surface/80 hover:-translate-y-0.5 transition-all shadow-md shadow-black/20"
+                className="group block bg-cream-dark-surface border border-cream-dark-border rounded-2xl overflow-hidden hover:border-cream-dark-gold/40 hover:bg-cream-dark-surface/80 hover:-translate-y-0.5 transition-all shadow-md shadow-black/20"
               >
-                <div className="flex items-start gap-4">
-                  <div
-                    className={[
-                      "shrink-0 w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs border",
-                      isCompleted
-                        ? "bg-cream-dark-gold/30 text-cream-dark-gold border-cream-dark-gold/40"
-                        : "bg-cream-dark-bg text-cream-dark-text-soft border-cream-dark-border",
-                    ].join(" ")}
-                  >
-                    {isCompleted ? (
-                      <Check className="w-4 h-4" />
+                <div className="flex flex-col sm:flex-row items-stretch">
+                  {/* YouTube-style thumbnail (left) — 16:9 on mobile, fixed
+                      width on desktop. Shows YT hqdefault.jpg when the
+                      lesson has a YouTube URL; falls back to a dark
+                      placeholder with a play icon for non-YouTube videos. */}
+                  <div className="relative w-full sm:w-44 md:w-56 shrink-0 aspect-video sm:aspect-auto bg-black overflow-hidden">
+                    {thumbnailUrl ? (
+                      // Using <img> intentionally (not next/image): the
+                      // thumbnail is served from Google's CDN, which
+                      // doesn't need our image optimizer. `unoptimized`
+                      // would also work with next/image but adds a
+                      // processing hop for a 3rd-party URL.
+                      <img
+                        src={thumbnailUrl}
+                        alt={lessonTitle}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                      />
                     ) : (
-                      <Play className="w-4 h-4 fill-current" />
+                      <div className="w-full h-full min-h-[140px] flex items-center justify-center bg-cream-dark-bg">
+                        <Play className="w-12 h-12 text-cream-dark-text-soft/30 fill-current" />
+                      </div>
+                    )}
+                    {/* Duration badge (YouTube-style bottom-right overlay) */}
+                    {lesson.duration && (
+                      <span className="absolute bottom-2 right-2 bg-black/85 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                        {lesson.duration}
+                      </span>
+                    )}
+                    {/* Completion checkmark (top-left overlay) */}
+                    {isCompleted && (
+                      <span className="absolute top-2 left-2 inline-flex items-center justify-center w-7 h-7 rounded-full bg-cream-dark-gold text-cream-dark-bg shadow-lg">
+                        <Check className="w-3.5 h-3.5" />
+                      </span>
                     )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-serif text-base text-cream-dark-text font-bold leading-tight">
+
+                  {/* Title + description (middle) */}
+                  <div className="flex-1 p-5 flex flex-col justify-center min-w-0">
+                    <h3 className="font-serif text-base md:text-lg text-cream-dark-text font-bold leading-tight">
                       {lessonTitle}
                     </h3>
                     {lessonDesc && (
-                      <p className="text-xs text-cream-dark-text-soft font-light mt-1 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-cream-dark-text-soft font-light mt-1.5 line-clamp-2 leading-relaxed">
                         {lessonDesc}
                       </p>
                     )}
-                    <div className="flex items-center gap-3 mt-2 text-[10px] text-cream-dark-text-soft font-medium">
-                      {lesson.duration && (
-                        <span>{lesson.duration}</span>
-                      )}
-                      {lesson.number && (
-                        <span className="text-cream-dark-text-soft/60">
-                          · Lesson {lesson.number}
-                        </span>
-                      )}
-                    </div>
+                    {lesson.number && (
+                      <p className="text-[10px] text-cream-dark-text-soft/60 font-medium mt-2 uppercase tracking-widest">
+                        Lezione {lesson.number}
+                      </p>
+                    )}
                   </div>
-                  <div
-                    className="shrink-0 inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg group-hover:gap-2 transition-all"
-                    style={{ color: accent }}
-                  >
-                    {cta}
-                    <ChevronRight className="w-3 h-3" />
+
+                  {/* Prominent button CTA (right) — YouTube-style, not a
+                      text link with chevron. Uses the course accent as
+                      the background. The whole row is clickable (Link
+                      wrapper) so the button is decorative, not a
+                      nested anchor. */}
+                  <div className="px-5 pb-5 sm:px-5 sm:py-5 sm:border-l sm:border-cream-dark-border flex items-center justify-center sm:justify-end shrink-0">
+                    <span
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all group-hover:scale-[1.03] group-hover:shadow-lg"
+                      style={{
+                        backgroundColor: accent,
+                        color: "#0a0a0a",
+                        boxShadow: `0 4px 16px ${accent}30`,
+                      }}
+                    >
+                      <Play className="w-3.5 h-3.5 fill-current" />
+                      {cta}
+                    </span>
                   </div>
                 </div>
               </Link>
@@ -295,8 +330,12 @@ export default async function CourseCorsoTab({
         </div>
       </section>
 
-      {/* eBook + Downloadables — side by side */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      {/* eBook + Downloadables — stacked vertically (full width).
+          (2026-07-15) Production feedback: the side-by-side grid was
+          cramped on tablet/laptop. Vertical stack gives each card more
+          breathing room and reads more like the Skool-style "next step"
+          pattern. */}
+      <section className="space-y-4">
         <Link
           href={`${basePath}/ebook?lang=${lang2}`}
           className="group block bg-cream-dark-surface border border-cream-dark-border rounded-2xl p-6 hover:border-cream-dark-gold/40 hover:-translate-y-0.5 transition-all shadow-md shadow-black/20"

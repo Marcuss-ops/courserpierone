@@ -9,6 +9,7 @@ import {
   type VimeoTimeUpdateData,
   type YTOnStateChangeEvent,
 } from "./video-player-sdks";
+import { extractYouTubeId } from "@/lib/youtube/id";
 
 interface PremiumVideoPlayerProps {
   videoUrl: string;
@@ -56,19 +57,10 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
 
     const getCleanEmbedUrl = (url: string): string => {
       if (isYouTube) {
-        let videoId = "";
-        if (url.includes("youtube.com/embed/")) {
-          videoId = url.split("youtube.com/embed/")[1]?.split("?")[0] || "";
-        } else if (url.includes("youtube.com/watch")) {
-          try {
-            const urlParams = new URLSearchParams(url.split("?")[1]);
-            videoId = urlParams.get("v") || "";
-          } catch {
-            videoId = "";
-          }
-        } else if (url.includes("youtu.be/")) {
-          videoId = url.split("youtu.be/")[1]?.split("?")[0] || "";
-        }
+        // ID extraction moved to src/lib/youtube/id.ts (shared with the
+        // portal lesson cards) — DRY, single source of truth for the
+        // watch/embed/short URL parsing.
+        const videoId = extractYouTubeId(url) ?? "";
         if (videoId) {
           return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=3&fs=0&controls=0&disablekb=1&showinfo=0&color=white&playsinline=1&origin=${encodeURIComponent(typeof window !== 'undefined' ? window.location.origin : 'https://www.courssy.com')}`;
         }
