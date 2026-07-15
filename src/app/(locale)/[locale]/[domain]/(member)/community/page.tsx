@@ -15,6 +15,7 @@ import {
 import { getCourseConfig } from "@/lib/config/white-label-data";
 import { loadLocaleContentCached } from "@/lib/i18n/load-locale-content";
 import { prisma } from "@/lib/db/prisma";
+import { getContrastTextColor } from "@/lib/ui/contrast";
 
 export async function generateMetadata({
   params,
@@ -317,7 +318,7 @@ export default async function CommunityTab({
                     className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all hover:scale-[1.02]"
                     style={{
                       backgroundColor: accent,
-                      color: "#0a0a0a",
+                      color: getContrastTextColor(accent),
                       boxShadow: `0 4px 16px ${accent}40`,
                     }}
                   >

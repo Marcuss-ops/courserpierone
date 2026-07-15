@@ -16,6 +16,7 @@ import { getServerUser } from "@/lib/supabase/get-user";
 import { loadLocaleContentCached } from "@/lib/i18n/load-locale-content";
 import { prisma } from "@/lib/db/prisma";
 import { extractYouTubeId, youTubeThumbnailUrl } from "@/lib/youtube/id";
+import { getContrastTextColor } from "@/lib/ui/contrast";
 import { LessonThumbnail } from "@/components/course/lesson-thumbnail";
 
 export async function generateMetadata({
@@ -292,7 +293,7 @@ export default async function CourseCorsoTab({
                       className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all group-hover:scale-[1.03] group-hover:shadow-lg"
                       style={{
                         backgroundColor: accent,
-                        color: "#0a0a0a",
+                        color: getContrastTextColor(accent),
                         boxShadow: `0 4px 16px ${accent}30`,
                       }}
                     >
