@@ -137,7 +137,7 @@ export default function TermsPage() {
                   <strong>Pro Plan:</strong> €29/month, unlimited funnels, custom domain, zero transaction fees.
                 </p>
                 <p className="pt-4">
-                  Payments are managed by Stripe and Lemon Squeezy. Invoices are generated automatically and are accessible from your account.
+                  Payments are managed by Lemon Squeezy. Invoices are generated automatically and are accessible from your account.
                 </p>
                 <p className="pt-4">
                   <strong>Refund Policy:</strong> We offer a 30-day money-back guarantee for your first billing cycle. If you are not satisfied with the platform within 30 days of subscribing, you may contact us at <a href="mailto:supporto@courssy.it" className="underline underline-offset-2">supporto@courssy.it</a> to request a full refund.

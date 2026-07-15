@@ -58,7 +58,7 @@ export class NotFoundError extends AppError {
  *
  * The `code` suffix convention (`NOT_IMPLEMENTED_PHASE_2`,
  * `NOT_IMPLEMENTED_PHASE_4`) is grep-friendly: a Phase PR can find
- * the stubs it owns without grepping on Stripe-vs-LS code paths.
+ * the stubs it owns without grepping on payment-provider code paths.
  */
 export class NotImplementedError extends AppError {
   constructor(

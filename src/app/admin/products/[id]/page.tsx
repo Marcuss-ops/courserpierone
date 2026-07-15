@@ -62,8 +62,8 @@ export default function EditProductPage() {
   const [translatedLocales, setTranslatedLocales] = useState<string[]>([]);
   const [translationsByLocale, setTranslationsByLocale] = useState<Record<string, Record<string, string>>>({});
   const [allProductTranslations, setAllProductTranslations] = useState<Record<string, Record<string, string>>>({});
-  const [pricesByCurrency, setPricesByCurrency] = useState<Record<string, { price: number; lemonVariantId?: string | null; stripePriceId?: string | null }>>({});
-  const [countryOverrides, setCountryOverrides] = useState<Record<string, { currency: string; price: number; symbol?: string; lemonVariantId?: string | null; stripePriceId?: string | null }>>({});
+  const [pricesByCurrency, setPricesByCurrency] = useState<Record<string, { price: number; lemonVariantId?: string | null }>>({});
+  const [countryOverrides, setCountryOverrides] = useState<Record<string, { currency: string; price: number; symbol?: string; lemonVariantId?: string | null }>>({});
 
   async function fetchProduct() {
     setLoading(true);
@@ -359,7 +359,7 @@ export default function EditProductPage() {
                   <CreditCard className="w-3 h-3" /> Lemon Squeezy Variant ID
                 </label>
                 <p className="text-[9px] text-zinc-600 mb-2 font-medium">
-                  Imposta questo campo per usare Lemon Squeezy come processore di pagamento invece di Stripe.
+                  Imposta questo campo per usare Lemon Squeezy come processore di pagamento.
                 </p>
                 <input
                   type="text"

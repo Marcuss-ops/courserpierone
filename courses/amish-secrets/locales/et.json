@@ -349,9 +349,6 @@
       "hero_secure": "Turvaline makse, kohene juurdepääs",
       "hero_verified": "* kontrollitud andmed",
       "hero_trust_ssl": "SSL turvaline",
-      "hero_trust_stripe": "Stripe",
-      "hero_trust_paypal": "PayPal",
-      "offer_stripe_paypal": "Stripe / PayPal",
       "offer_invoice": "Kiirarve",
       "footer_cookies": "Cookie",
       "footer_withdrawal": "ELi 14-päevane taganemisõigus",
@@ -457,5 +454,23 @@
     "ebook_desc": "Lugege täielikku juhendit e-raamatu vormingus otse veebilugejast või laadige alla võrguühenduseta PDF.",
     "format_label": "PDF / veebivorming",
     "read_label": "Loe"
+  },
+  "pricing": {
+    "free": {
+      "features": [
+        "1 Product",
+        "3 Languages",
+        "Basic analytics"
+      ]
+    },
+    "pro": {
+      "features": [
+        "Unlimited products",
+        "20 Languages",
+        "AI translations",
+        "Advanced analytics",
+        "International payments"
+      ]
+    }
   }
 }

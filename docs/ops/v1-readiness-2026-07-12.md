@@ -111,7 +111,6 @@ need real action — not handled by the structural migration alone:
   not yet authored).
 - Refund e2e test on Lemon Squeezy (`tests/e2e/refund.lemonsqueezy.spec.ts`
   not yet authored).
-- CI alignment to LS-first (remove `ENABLE_STRIPE_CHECKOUT` gating
-  from `tests/e2e/journey.spec.ts`).
+- CI alignment to LS-first (payment stack is LS-only).
 - MCR Phase 2 backfill on staging (`scripts/migrate-grants-from-orders.ts`,
   commit `5395bfa` consolidation done).

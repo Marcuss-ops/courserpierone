@@ -3,7 +3,7 @@
  *
  * Covers 6 case matrix:
  *   1. (happy)   orderId matches Order.id (cuid) → Order returned
- *   2. (happy)   orderId matches Order.providerOrderId (Stripe/Lemon) → Order returned
+ *   2. (happy)   orderId matches Order.providerOrderId (Lemon) → Order returned
  *   3. (guard #1) falsy orderId ("") → null SENZA DB hit (security-critical)
  *   4. (guard #1b) undefined orderId → null SENZA DB hit
  *   5. (guard #2) falsy productId ("") → null SENZA DB hit (security-critical)
@@ -23,7 +23,7 @@ vi.mock("@/lib/db/prisma", () => ({
 }));
 
 const ORDER_ID_CUID = "ckl0abc123def456";        // matches Order.id (Prisma cuid)
-const ORDER_ID_STRIPE = "cs_test_a1b2c3d4e5f6";  // matches Order.providerOrderId (Stripe Session ID)
+const ORDER_ID_PROVIDER = "order_a1b2c3d4e5f6";  // matches Order.providerOrderId (LemonSqueezy Order ID)
 const OTHER_USER = "user-other";
 const PRODUCT = "prod-1";
 
@@ -31,10 +31,8 @@ const ORDER_ROW_FOR_PRODUCT = {
   id: ORDER_ID_CUID,
   userId: OTHER_USER,
   productId: PRODUCT,
-  paymentProvider: "stripe",
-  stripeSessionId: ORDER_ID_STRIPE,
-  stripeSubscriptionId: null,
-  providerOrderId: ORDER_ID_STRIPE,
+  paymentProvider: "lemonsqueezy",
+  providerOrderId: ORDER_ID_PROVIDER,
   amount: 4900,
   currency: "eur",
   locale: "it",
@@ -73,20 +71,20 @@ describe("findCompletedOrderByOrderId — V3.1 sibling SSO for Pattern B", () =>
     });
   });
 
-  // ── 2: happy path via Order.providerOrderId (Stripe) ──────────
-  it("returns the Order when orderId matches Order.providerOrderId (Stripe cs_test_...)", async () => {
+  // ── 2: happy path via Order.providerOrderId (Lemon) ──────────
+  it("returns the Order when orderId matches Order.providerOrderId (Lemon order_...)", async () => {
     const { findCompletedOrderByOrderId } = await import(
       "./find-completed-order-by-order-id"
     );
     const order = await findCompletedOrderByOrderId({
-      orderId: ORDER_ID_STRIPE,
+      orderId: ORDER_ID_PROVIDER,
       productId: PRODUCT,
     });
     expect(order).toBeTruthy();
     // Same query as before — il WHERE è lo stesso (OR su id|providerOrderId).
     expect(mockFindFirst).toHaveBeenCalledWith({
       where: {
-        OR: [{ providerOrderId: ORDER_ID_STRIPE }, { id: ORDER_ID_STRIPE }],
+        OR: [{ providerOrderId: ORDER_ID_PROVIDER }, { id: ORDER_ID_PROVIDER }],
         productId: PRODUCT,
         status: "completed",
       },

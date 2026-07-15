@@ -89,7 +89,7 @@ export default function PrivacyPage() {
                     <strong>Account Information:</strong> name, email, encrypted password
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
-                    <strong>Payment Information:</strong> processed securely by Stripe and Lemon Squeezy, never stored on our servers
+                    <strong>Payment Information:</strong> processed securely by Lemon Squeezy, never stored on our servers
                   </li>
                   <li className="pl-6 relative before:absolute before:left-0 before:top-2">—
                     <strong>Usage Data:</strong> pages visited, actions performed, timestamps
@@ -204,7 +204,7 @@ export default function PrivacyPage() {
                   We use essential cookies (required for platform operation) and analytical cookies (to understand how you interact with our service). You can manage cookie preferences directly from your browser settings.
                 </p>
                 <p>
-                  Third-party services placing cookies: <strong>Stripe</strong> (payment processing), <strong>Lemon Squeezy</strong> (merchant of record), and <strong>Vercel</strong> (hosting provider).
+                  Third-party services placing cookies: <strong>Lemon Squeezy</strong> (payment processing and merchant of record) and <strong>Vercel</strong> (hosting provider).
                 </p>
               </div>
 

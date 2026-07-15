@@ -349,9 +349,6 @@
       "hero_secure": "تأمين الدفع، الوصول الفوري",
       "hero_verified": "* بيانات متحققة",
       "hero_trust_ssl": "SSL مؤمن",
-      "hero_trust_stripe": "Stripe",
-      "hero_trust_paypal": "PayPal",
-      "offer_stripe_paypal": "Stripe / PayPal",
       "offer_invoice": "الفواتير الثابتة",
       "footer_cookies": "Cookie",
       "footer_withdrawal": "EU 14day right of withdrawal",
@@ -457,5 +454,23 @@
     "ebook_desc": "اقرأ الدليل الكامل في شكل EBook مباشرة من قارئ الشبكة العالمية أو تنزيل الـ PDF.",
     "format_label": "PDF/Web Format",
     "read_label": "اقرأ"
+  },
+  "pricing": {
+    "free": {
+      "features": [
+        "1 Product",
+        "3 Languages",
+        "Basic analytics"
+      ]
+    },
+    "pro": {
+      "features": [
+        "Unlimited products",
+        "20 Languages",
+        "AI translations",
+        "Advanced analytics",
+        "International payments"
+      ]
+    }
   }
 }

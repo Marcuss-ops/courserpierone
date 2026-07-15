@@ -7,27 +7,11 @@ interface HorizonFAQProps {
 }
 
 export function HorizonFAQ({ lc }: HorizonFAQProps) {
-  const items =
-    lc?.faq?.items?.length
-      ? lc.faq.items
-      : [
-          {
-            q: "Come funziona?",
-            a: "Scegli un template, personalizza con AI, pubblica.",
-          },
-          {
-            q: "Posso cambiare template dopo?",
-            a: "Sì, puoi switchare in qualsiasi momento.",
-          },
-          {
-            q: "Accetta pagamenti internazionali?",
-            a: "Sì, Stripe gestisce 135+ valute automaticamente.",
-          },
-          {
-            q: "Serve conoscere il codice?",
-            a: "No, il Cervellone fa tutto per te.",
-          },
-        ];
+  const items = lc?.faq?.items ?? [];
+
+  if (items.length === 0) {
+    return null;
+  }
 
   return (
     <section id="faq" className="py-20" style={{ background: "#fff9ee" }}>
@@ -42,7 +26,7 @@ export function HorizonFAQ({ lc }: HorizonFAQProps) {
               top: "100px",
             }}
           >
-            {lc?.faq?.title || "FAQ"}
+            {lc?.faq?.title ?? "FAQ"}
           </h2>
           <div className="flex flex-col">
             {items.map((faq, i) => (

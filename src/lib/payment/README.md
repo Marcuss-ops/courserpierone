@@ -1,39 +1,12 @@
 # `payment/` — Payment Integrations
 
-> Stripe e LemonSqueezy — wrapper per API e webhook processing.
+> LemonSqueezy — wrapper per API e webhook processing.
 
 ## File
 
 | File | Descrizione |
 |---|---|
-| `stripe.ts` | Client Stripe singleton (`getStripe()`) |
 | `lemonsqueezy.ts` | Client LemonSqueezy, Store ID, checkout helpers |
-
----
-
-## Stripe (`stripe.ts`)
-
-```ts
-import { getStripe } from "@/lib/payment/stripe";
-
-const stripe = getStripe();
-// usa stripe.customers, stripe.paymentIntents, stripe.webhooks ...
-```
-
-**Variabili d'ambiente richieste:**
-```env
-STRIPE_SECRET_KEY=sk_live_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-STRIPE_PUBLISHABLE_KEY=pk_live_...   # per frontend (opzionale)
-```
-
-**API routes correlate:**
-- `POST /api/webhooks/stripe` — webhook per payment events
-- `POST /api/checkout` — creazione payment intent / checkout session
-
-**Eventi webhook Stripe tracciati:**
-- `checkout.session.completed` → crea/aggiorna ordine + genera accesso
-- `checkout.session.expired` → marca checkout come scaduto
 
 ---
 
@@ -64,12 +37,12 @@ LEMONSQUEEZY_WEBHOOK_SECRET=...
 
 ```
 Checkout (frontend)
-  → /api/checkout (crea sessione Stripe/LS)
-  → Redirect a Stripe/LS checkout
+  → /api/checkout (crea sessione LS)
+  → Redirect a LS checkout
   → Pagamento completato
-  → Webhook (Stripe o LS)
+  → Webhook LS
   → processOrder() in order-service.ts
-  → Crea/aggiorna Order + UserProduct
+  → Crea/aggiorna Order + AccessGrant
   → Invia email conferma (locale dal checkout)
 ```
 
@@ -78,15 +51,14 @@ Checkout (frontend)
 ```ts
 import { processOrder } from "@/lib/services/order-service";
 
-// Crea ordine da webhook Stripe/LS
+// Crea ordine da webhook LS
 await processOrder({
-  provider: "stripe" | "lemonsqueezy",
-  providerId: "evt_...",
+  paymentProvider: "lemonsqueezy",
+  providerOrderId: "...",
   productId: "prod_...",
   email: "user@example.com",
   amount: 9700,         // in centesimi
   currency: "EUR",
   locale: "it-it",
-  userId: "user_123",   // opzionale
 });
 ```

@@ -349,9 +349,6 @@
       "hero_secure": "Plata sigură, acces instant",
       "hero_verified": "* Date verificate",
       "hero_trust_ssl": "SSL securizat",
-      "hero_trust_stripe": "Stripe",
-      "hero_trust_paypal": "PayPal",
-      "offer_stripe_paypal": "Stripe / PayPal",
       "offer_invoice": "Factura instant",
       "footer_cookies": "Cookie",
       "footer_withdrawal": "Dreptul UE de retragere de 14 zile",
@@ -457,5 +454,23 @@
     "ebook_desc": "Citiți ghidul complet în format eBook direct de la cititorul de web sau descărcați PDF-ul offline.",
     "format_label": "PDF / Format web",
     "read_label": "Citit"
+  },
+  "pricing": {
+    "free": {
+      "features": [
+        "1 Product",
+        "3 Languages",
+        "Basic analytics"
+      ]
+    },
+    "pro": {
+      "features": [
+        "Unlimited products",
+        "20 Languages",
+        "AI translations",
+        "Advanced analytics",
+        "International payments"
+      ]
+    }
   }
 }

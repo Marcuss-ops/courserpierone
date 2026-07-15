@@ -349,9 +349,6 @@
       "hero_secure": "Säker betalning, omedelbar åtkomst",
       "hero_verified": "*verifierade data",
       "hero_trust_ssl": "SSL säker",
-      "hero_trust_stripe": "Stripe",
-      "hero_trust_paypal": "PayPal",
-      "offer_stripe_paypal": "Stripe / PayPal",
       "offer_invoice": "omedelbar faktura",
       "footer_cookies": "Cookie",
       "footer_withdrawal": "EU 14-dagars rätt till återkallelse",
@@ -457,5 +454,23 @@
     "ebook_desc": "Läs hela guiden i eBook-format direkt från webbläsaren eller ladda ner offline PDF.",
     "format_label": "PDF / Web Format",
     "read_label": "Läs mer"
+  },
+  "pricing": {
+    "free": {
+      "features": [
+        "1 Product",
+        "3 Languages",
+        "Basic analytics"
+      ]
+    },
+    "pro": {
+      "features": [
+        "Unlimited products",
+        "20 Languages",
+        "AI translations",
+        "Advanced analytics",
+        "International payments"
+      ]
+    }
   }
 }

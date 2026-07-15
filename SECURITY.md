@@ -20,7 +20,7 @@ Courssy è una piattaforma single-creator per la vendita di corsi digitali con f
 |---|---|---|
 | API pubbliche senza auth | Enumerazione utenti/corsi | Rate limiting, UUID non incrementali |
 | API autenticate (studente) | Accesso a dati di altri utenti | Verifica ownership su ogni query |
-| Webhook (Stripe, LemonSqueezy) | Ordini falsi, replay attack | Firma crittografica, (idempotency — gap) |
+| Webhook (LemonSqueezy) | Ordini falsi, replay attack | Firma crittografica, idempotency su `ProcessedWebhook` |
 | Input utente (DM, profili) | XSS, HTML injection | DOMPurify server-side |
 | Upload avatar | File malevoli, path traversal | Validazione tipo/dimensione, path ownership check |
 | Supabase Storage | Accesso non autorizzato a file | RLS policies, presigned URLs |
@@ -68,7 +68,7 @@ Courssy è una piattaforma single-creator per la vendita di corsi digitali con f
 
 ### 6. Webhook e Pagamenti
 
-- **Verifica firma**: Stripe usa `stripe.webhooks.constructEvent()` con `STRIPE_WEBHOOK_SECRET`. LemonSqueezy usa HMAC-SHA256 con `LEMONSQUEEZY_WEBHOOK_SECRET`.
+- **Verifica firma**: LemonSqueezy usa HMAC-SHA256 con `LEMONSQUEEZY_WEBHOOK_SECRET`.
 - **Transazioni atomiche**: l'ordine viene creato in una singola operazione Prisma. Lo stato dell'ordine (`pending` → `completed`) viene aggiornato solo dopo verifica firma webhook.
 
 ### 7. Sicurezza File Upload (Avatar)
@@ -82,7 +82,7 @@ Courssy è una piattaforma single-creator per la vendita di corsi digitali con f
 - **HTTPS everywhere**: Vercel forza HTTPS su tutti gli endpoint. Supabase impone TLS per il database.
 - **Environment variables**: validate da `env.ts` con schema typed (critical/required/optional). Nessuna chiave hardcodata.
 - **CORS**: gestito da Next.js middleware. Solo il dominio dell'app può fare richieste API.
-- **Dipendenza minima da servizi esterni**: solo Supabase (auth + DB + storage) e Stripe/LemonSqueezy (pagamenti).
+- **Dipendenza minima da servizi esterni**: solo Supabase (auth + DB + storage) e LemonSqueezy (pagamenti).
 
 ---
 
@@ -96,7 +96,7 @@ I seguenti gap sono riconosciuti e prioritizzati. Pull request sono benvenute.
 |---|---|---|---|
 | **Webhook idempotency** | Webhook duplicati possono creare ordini doppi | P0 | Tabella `processed_webhooks` con `delivery_id` unico; check prima del processing |
 | **Signed URLs per video** | I link video (YouTube) sono embed pubblici senza protezione | P0 | Supabase Storage signed URLs con TTL breve; proxy lato server per i video privati |
-| **Pagamento fallito** | Nessun handler per `invoice.payment_failed` — l'accesso non viene revocato su mancato rinnovo | P0 | Aggiungere handler webhook Stripe per `invoice.payment_failed` → `Order.status = "failed"` → revoca accesso |
+| **Pagamento fallito** | Nessun handler per eventi LS di pagamento fallito — l'accesso non viene revocato su mancato rinnovo | P0 | Aggiungere handler webhook LS per `subscription_payment_failed` → `Order.status = "failed"` → revoca accesso |
 
 ### 🟡 Medi
 
@@ -147,7 +147,7 @@ Si prega di **non** esfiltrare, modificare o distruggere dati durante il test. U
 - **Next.js 14+** — aggiornamenti di sicurezza tramite Dependabot/Renovate
 - **Prisma 5** — migration sicure con review manuale degli SQL generati
 - **DOMPurify** — sanitizzazione HTML, aggiornato all'ultima versione stabile
-- **Stripe SDK** — aggiornato per supportare le ultime API di pagamento
+- **LemonSqueezy SDK/API** — aggiornato per supportare le ultime API di pagamento
 - **Supabase JS SDK** — gestisce JWT verification e storage
 
 Eseguire `npm audit` regolarmente e mantenere le dipendenze aggiornate.

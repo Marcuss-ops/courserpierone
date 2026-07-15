@@ -349,9 +349,6 @@
       "hero_secure": "Matatag na kabayaran, madaling makuha",
       "hero_verified": "* Binagong datos",
       "hero_trust_ssl": "Ligtas na SSL",
-      "hero_trust_stripe": "Stripe",
-      "hero_trust_paypal": "PayPal",
-      "offer_stripe_paypal": "Stripe / PayPal",
       "offer_invoice": "Kagyat na Tinig",
       "footer_cookies": "Cookie",
       "footer_withdrawal": "EU 14-araw na karapatan ng withdrawal",
@@ -457,5 +454,23 @@
     "ebook_desc": "Basahin ang kumpletong gabay sa eBOok format nang direkta mula sa web readure o i-upload ang offline PDF.",
     "format_label": "PDF / Web Format",
     "read_label": "Basahin"
+  },
+  "pricing": {
+    "free": {
+      "features": [
+        "1 Product",
+        "3 Languages",
+        "Basic analytics"
+      ]
+    },
+    "pro": {
+      "features": [
+        "Unlimited products",
+        "20 Languages",
+        "AI translations",
+        "Advanced analytics",
+        "International payments"
+      ]
+    }
   }
 }

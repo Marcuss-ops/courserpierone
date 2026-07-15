@@ -349,9 +349,6 @@
       "hero_secure": "Sikker betaling, øjeblikkelig adgang",
       "hero_verified": "* verificerede data",
       "hero_trust_ssl": "SSL sikker",
-      "hero_trust_stripe": "Stripe",
-      "hero_trust_paypal": "PayPal",
-      "offer_stripe_paypal": "Stripe / PayPal",
       "offer_invoice": "Øjeblikkelig faktura",
       "footer_cookies": "Cookie",
       "footer_withdrawal": "EU 14- dages fortrydelsesret",
@@ -457,5 +454,23 @@
     "ebook_desc": "Læs hele vejledningen i eBook format direkte fra web-læseren eller download offline PDF.",
     "format_label": "PDF / webformat",
     "read_label": "Læs"
+  },
+  "pricing": {
+    "free": {
+      "features": [
+        "1 Product",
+        "3 Languages",
+        "Basic analytics"
+      ]
+    },
+    "pro": {
+      "features": [
+        "Unlimited products",
+        "20 Languages",
+        "AI translations",
+        "Advanced analytics",
+        "International payments"
+      ]
+    }
   }
 }

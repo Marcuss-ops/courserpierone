@@ -22,13 +22,13 @@ const MOCK_PRODUCT = {
 };
 
 const MOCK_COUNTRY_OVERRIDES_JSON = JSON.stringify({
-  BR: { currency: "BRL", price: 9900, symbol: "R$", lemonVariantId: "123", stripePriceId: "price_br" },
+  BR: { currency: "BRL", price: 9900, symbol: "R$", lemonVariantId: "123" },
   IN: { currency: "INR", price: 299900, symbol: "₹" },
   JP: { currency: "JPY", price: 780000, symbol: "¥", lemonVariantId: "456" },
 });
 
 const MOCK_COUNTRY_OVERRIDES_OBJECT = {
-  BR: { currency: "BRL", price: 9900, symbol: "R$", lemonVariantId: "123", stripePriceId: "price_br" },
+  BR: { currency: "BRL", price: 9900, symbol: "R$", lemonVariantId: "123" },
   IN: { currency: "INR", price: 299900, symbol: "₹" },
   JP: { currency: "JPY", price: 780000, symbol: "¥", lemonVariantId: "456" },
 };
@@ -44,7 +44,6 @@ describe("parseCountryOverrides", () => {
     expect(result!.BR.symbol).toBe("R$");
     expect(result!.BR.amount).toBe(99); // price / 100
     expect(result!.BR.lemonVariantId).toBe("123");
-    expect(result!.BR.stripePriceId).toBe("price_br");
   });
 
   it("parses a pre-parsed object directly", () => {
@@ -79,11 +78,10 @@ describe("parseCountryOverrides", () => {
     expect(result!.FR.symbol).toBe("€");
   });
 
-  it("handles lemonVariantId and stripePriceId when null", () => {
-    const overrides = { US: { currency: "USD", price: 5400, lemonVariantId: null, stripePriceId: null } };
+  it("handles lemonVariantId when null", () => {
+    const overrides = { US: { currency: "USD", price: 5400, lemonVariantId: null } };
     const result = parseCountryOverrides(overrides);
     expect(result!.US.lemonVariantId).toBeNull();
-    expect(result!.US.stripePriceId).toBeNull();
   });
 
   it("handles multiple countries", () => {
@@ -342,7 +340,7 @@ describe("getCurrentAmountAndSymbol", () => {
 describe("parsePricesByCurrency", () => {
   const validPrices = JSON.stringify({
     EUR: { price: 4900, symbol: "€" },
-    USD: { price: 5400, symbol: "$", stripePriceId: "price_usd" },
+    USD: { price: 5400, symbol: "$" },
     BRL: { price: 29900, lemonVariantId: "ls_br" },
   });
 
@@ -351,7 +349,6 @@ describe("parsePricesByCurrency", () => {
     expect(result).not.toBeNull();
     expect(result!.EUR.price).toBe(4900);
     expect(result!.EUR.symbol).toBe("€");
-    expect(result!.USD.stripePriceId).toBe("price_usd");
     expect(result!.BRL.lemonVariantId).toBe("ls_br");
   });
 
@@ -374,8 +371,7 @@ describe("parsePricesByCurrency", () => {
 
   it("preserves optional fields (undefined when missing)", () => {
     const result = parsePricesByCurrency(validPrices);
-    // stripePriceId and lemonVariantId were not in the JSON → undefined
-    expect(result!.EUR.stripePriceId).toBeUndefined();
+    // lemonVariantId was not in the JSON → undefined
     expect(result!.EUR.lemonVariantId).toBeUndefined();
   });
 

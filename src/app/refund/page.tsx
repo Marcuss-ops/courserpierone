@@ -105,7 +105,7 @@ export default function RefundPage() {
                   Processing of Refunds
                 </h2>
                 <p>
-                  Once your refund request is received, it will be inspected and processed within 3 to 5 business days. The refund will be credited back to your original payment method (managed via our Merchant of Record, Lemon Squeezy, or Stripe).
+                  Once your refund request is received, it will be inspected and processed within 3 to 5 business days. The refund will be credited back to your original payment method (managed via our Merchant of Record, Lemon Squeezy).
                 </p>
                 <p>
                   Please note that once a refund is processed, access to the paid subscription features or the digital course contents will be immediately terminated.

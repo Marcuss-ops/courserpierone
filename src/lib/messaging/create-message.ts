@@ -37,7 +37,7 @@
 
 import { prisma } from "@/lib/db/prisma";
 import { sanitizeHtml } from "@/lib/utils/sanitize";
-import { sendDmNotificationEmail } from "@/lib/services/email";
+import { sendDmNotificationEmail } from "@/lib/commerce/shared/email";
 import { createNotification } from "@/lib/notifications/create-notification";
 
 const OFFLINE_THRESHOLD_MS = 5 * 60 * 1000; // 5 min

@@ -19,11 +19,11 @@ import { processOrder } from "@/lib/services/order-service";
 
 ### `processOrder(params)`
 
-Elabora un ordine da webhook Stripe o LemonSqueezy.
+Elabora un ordine da webhook LemonSqueezy.
 
 ```ts
 await processOrder({
-  provider: "stripe",
+  provider: "lemonsqueezy",
   providerId: "evt_xxx",
   productId: "prod_amish123",
   email: "mario@esempio.com",

@@ -64,7 +64,7 @@ ops-1 runs, ops-2 verifies. Stop the runbook and abort if ANY box unchecked.
 
 - [ ] **ops-1**: All 3 BLOCKER items from `v1-acceptance-test.md` §4 are closed (cross-browser Playwright config + YouTubeChannel seed + refund e2e test). Verify with: `gh pr list --state merged --label "v1-blocker"` returns ≥3 items.
 - [ ] **ops-1**: LS live mode is wired per `lemon-squeezy-live-setup.md` (V1 store activation + V2 products + V3 variants + V4 webhook + V5 signing secret + V6 custom data). Verify with: `curl -sS https://<prod-domain>/api/health | jq '.ok'` returns `true` AND `psql "$DIRECT_URL" -c "SELECT count(*) FROM \"Product\" WHERE \"lemonVariantId\" IS NOT NULL;"` returns ≥1.
-- [ ] **ops-1**: Vercel Production env holds: `STRIPE_*` (legacy, can be empty/drained), `LEMONSQUEEZY_API_KEY` (live), `LEMONSQUEEZY_STORE_ID` (live), `LEMONSQUEEZY_WEBHOOK_SECRET` (live), `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `ALERT_WEBHOOK_URL` (test ping returns 2xx), `REDIS_URL`.
+- [ ] **ops-1**: Vercel Production env holds: `LEMONSQUEEZY_API_KEY` (live), `LEMONSQUEEZY_STORE_ID` (live), `LEMONSQUEEZY_WEBHOOK_SECRET` (live), `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `ALERT_WEBHOOK_URL` (test ping returns 2xx), `REDIS_URL`.
 - [ ] **ops-1**: `MCR Phase 2 backfill` completed per `audit-log.md` (AccessGrant dual-write in production). Verify with: `psql "$DIRECT_URL" -c "SELECT count(*) FROM \"AccessGrant\" WHERE status='active';"` returns a non-zero count.
 - [ ] **ops-1**: `npm run test:e2e` is green on `main` HEAD (the existing journey test, NOT the soft-launch runbook). Verify with: `gh run list --workflow=ci.yml --limit 1` shows ✅ on the latest main commit.
 - [ ] **ops-2**: ALERT_WEBHOOK_URL is receiving real-time alerts (verify by pinging it once and asserting 2xx). Open the channel and confirm it's not stale (>24h silence = no recent firings).
@@ -110,7 +110,7 @@ ops-1 runs, ops-2 verifies. Stop the runbook and abort if ANY box unchecked.
   - `https://<prod-domain>/es-es/amish-secrets`
 - [ ] **ops-2**: For each URL, assert in browser DevTools Network tab: `GET /<locale>/amish-secrets` returns HTTP 200, response includes the locale-specific content (e.g., `Lezione 1` for `it-it`, `Lesson 1` for `en-us`, `Lección 1` for `es-es`).
 - [ ] **ops-2**: For each URL, `document.documentElement.lang` matches the locale (`it-IT`, `en-US`, `es-ES`).
-- [ ] **ops-2**: For each URL, the CTA button is visible and points to LS checkout (not Stripe — Phase 7 removed).
+- [ ] **ops-2**: For each URL, the CTA button is visible and points to LS checkout.
 - [ ] **REQUIRES VERIFICATION**: 3 locales render correctly with localized content. CTA buttons route to LS checkout (URL contains `lemonsqueezy.com` or our LS-store slug).
 
 ### Step 4 — Checkout reale (real corporate card × 3 locales)
@@ -274,7 +274,7 @@ ops-1 runs, ops-2 verifies. Stop the runbook and abort if ANY box unchecked.
 ### Code surface (must be ✅)
 
 - [ ] `npm run typecheck` passes on `main` HEAD (no errors in `src/` out of the legacy `dashboard/page.tsx` baseline)
-- [ ] `npm run test:e2e` passes locally on Chrome with Stripe+Supabase test creds (the existing journey + checkout tests, NOT this soft-launch runbook)
+- [ ] `npm run test:e2e` passes locally on Chrome with LS+Supabase test creds (the existing journey + checkout tests, NOT this soft-launch runbook)
 - [ ] `.github/workflows/ci.yml` deploy-gate is green on `main` HEAD
 
 ### Step verifications (every REQUIRES VERIFICATION line was asserted)
@@ -315,7 +315,7 @@ ops-1 runs, ops-2 verifies. Stop the runbook and abort if ANY box unchecked.
 | --- | --- | --- |
 | Step 5 webhook 401 | `LEMONSQUEEZY_WEBHOOK_SECRET` mismatch | Re-create LS webhook per `lemon-squeezy-live-setup.md` §5.4 (rotate-in-place procedure). Vercel env must match. Replay the missed events from LS Dashboard. |
 | Step 5 webhook 5xx | Transient app error (DB/SMTP timeout) | LS retries 16× over 24h. Wait + monitor Vercel logs. If persistent, rollback per `production.md` §2.2. |
-| Step 6 no `Order` row | LS webhook fired but `processOrder` failed silently (e.g. `Product.countryOverrides` drift per `lemon-squeezy-live-setup.md` §3.3) | Inspect Vercel logs for stack trace. Check `Product.lemonVariantId` matches the LS live variant. Replay via `stripe events resend` (no LS equivalent — use LS Dashboard → Webhooks → "Resend"). |
+| Step 6 no `Order` row | LS webhook fired but `processOrder` failed silently (e.g. `Product.countryOverrides` drift per `lemon-squeezy-live-setup.md` §3.3) | Inspect Vercel logs for stack trace. Check `Product.lemonVariantId` matches the LS live variant. Replay via LS Dashboard → Webhooks → "Resend". |
 | Step 7 no `AccessGrant` | MCR Phase 2 backfill not yet applied | Run `scripts/migrate-grants-from-orders.ts` per `audit-log.md` §Staging runbook. Replay the `order_created` events. |
 | Step 8 email missing | SMTP env misconfigured or `EMAIL_SERVER_PASSWORD` rotated | Check `EMAIL_SERVER_*` env. Check spam folder. If env is correct, the email is queued — re-run triggers a re-send (idempotent). |
 | Step 9 paywall on buyer | `AccessGrant` not created (Step 7 fail) or `USE_ACCESS_GRANT_RESOLVER=true` not flipped | See Step 7 recovery. If MCR is fully cut over, verify the flag. |

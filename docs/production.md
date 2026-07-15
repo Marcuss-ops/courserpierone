@@ -14,11 +14,11 @@
 | `deploy-gate` RED on a push to `main` | Read the failing job logs. Most common: typecheck or Playwright upstream. | Fix and re-push. Never force-merge. |
 | `prisma migrate deploy` fails | DO NOT rerun. Identify the migration. Either forward-fix OR `prisma migrate resolve --rolled-back <name>` + manual SQL cleanup, then PITR-restore in worst case. | Postmortem the migration. |
 | Vercel deploy fails after a green gate | Vercel-side issue. `vercel rollback` to previous deploy. | Inspect Vercel build logs. |
-| Stripe / LS webhook 5xx spike | Likely our app is down or webhook secret rotated. Check `ALERT_WEBHOOK_URL`. | If secret mismatch → rotate per §5; if app down → rollback. |
+| LS webhook 5xx spike | Likely our app is down or webhook secret rotated. Check `ALERT_WEBHOOK_URL`. | If secret mismatch → rotate per §5; if app down → rollback. |
 | `/api/health` returns 503 | Database connection issue. Check Supabase dashboard. | If down >5 min: P0 incident (see §3). |
 | Redis down | Rate limiter falls back to in-memory (logged elsewhere). Errors persist for 7-day TTL window. | Self-heals when Redis returns. |
 | Slack/Discord alert stops arriving | Verify webhook URL still valid in Vercel env. | Recreate webhook in vendor, update Vercel, redeploy. |
-| Student payment succeeded but no access | `prisma.order.findUnique({ where: { stripeSessionId } })` first. | If status=`pending` → webhook missed → `stripe events resend <event_id>`. |
+| Student payment succeeded but no access | `prisma.order.findFirst({ where: { providerOrderId } })` first. | If status=`pending` → webhook missed → re-send the LS webhook from the LS dashboard. |
 
 ---
 
@@ -69,8 +69,8 @@ curl -sS -H "Authorization: Bearer $CRON_SECRET" \
 # 3) Tail the alert channel for any new server-error-sink firings
 # (manual eyeball — no CLI for Slack archaeology; use the vendor web UI)
 
-# 4) One end-to-end checkout in Stripe TEST mode (optional, only on Friday deploys)
-# Use the same Stripe test cards documented in OAUTH-SETUP.md §5.
+# 4) One end-to-end checkout in LS test mode (optional, only on Friday deploys)
+# Use the LS test-mode workflow documented in docs/ops/lemon-squeezy-live-setup.md.
 ```
 
 If any check fails: roll back per §2. Don't debug in prod.
@@ -276,7 +276,7 @@ Three scenarios:
 
 | Sev | Definition | Examples | Detect via | Ack SLA | Resolve SLA | Comms required? | Postmortem |
 |---|---|---|---|---|---|---|---|
-| **P0** | Revenue-blocking. Core flows down | Stripe webhook down, login impossible, Supabase DB unreachable | Uptime monitor + user reports | **15 min** | **4 h** | ✅ Public status + Twitter/IG | Mandatory within 48h |
+| **P0** | Revenue-blocking. Core flows down | LS webhook down, login impossible, Supabase DB unreachable | Uptime monitor + user reports | **15 min** | **4 h** | ✅ Public status + Twitter/IG | Mandatory within 48h |
 | **P1** | Feature degraded | DMs queue lag, slow checkout, broken admin tools | `server-error-sink` Slack alert + Vercel runtime logs | **1 h** | **24 h** | ✅ Status page only | Mandatory within 7 days |
 | **P2** | Cosmetic / non-critical | Wrong timezone stamp, missing CSS, console warning | Manual report or CI gate | **24 h** | **next sprint** | ❌ Internal Slack | High-level summary |
 | **P3** | Informational | Third-party retry succeeded, deprecation warning | Slack | — | — | ❌ | None |
@@ -289,7 +289,7 @@ Three scenarios:
 | `server-error-sink` alert | `src/lib/logging/server-error-sink.ts` | Per-digest dedup'd errors with path + stack (rate-limited 1/min global cap) — fires to `ALERT_WEBHOOK_URL` |
 | `deploy-gate` RED | `.github/workflows/ci.yml` | CI failure (no prod impact, but blocks deploy) |
 | **Synthetic-ping fail** | `/api/cron/check-supabase-pitr` | Dashboard restore prompt proxy unreachable — fires `logServerError` → `ALERT_WEBHOOK_URL` (P1 default). Live-evidence + runbook in [Appendix E](#appendix-e--synthetic-ping-run-log). |
-| Stripe/LS webhook 4xx spike | Dashboard | Signature mismatch or downstream error |
+| LS webhook 4xx spike | Dashboard | Signature mismatch or downstream error |
 | Vercel runtime logs | Vercel Dashboard | Cold-start spikes, build errors after deploy |
 
 ### 3.2.1 Degraded status is acceptable for V1 GO LIVE (Redis PING silently fails in Lambda runtime)
@@ -399,7 +399,7 @@ await prisma.user.update({
 | Tier | Secrets | Detection window | Cadence | Recovery time | Backup |
 |---|---|---|---|---|---|
 | **Critical** | `DATABASE_URL`, `DIRECT_URL`, `SUPABASE_SERVICE_ROLE_KEY` | Immediate via gitleaks PR block | **180 d** or on compromise | **15 min** (rotate + redeploy) | Vercel env history + 1Password vault |
-| **Required (payments)** | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `LEMONSQUEEZY_API_KEY`, `LEMONSQUEEZY_WEBHOOK_SECRET` | Immediate via gitleaks PR block | **365 d** or on compromise | **30 min** (roll key in vendor + Vercel + redeploy) | Vendor dashboards + 1Password |
+| **Required (payments)** | `LEMONSQUEEZY_API_KEY`, `LEMONSQUEEZY_WEBHOOK_SECRET` | Immediate via gitleaks PR block | **365 d** or on compromise | **30 min** (roll key in vendor + Vercel + redeploy) | Vendor dashboards + 1Password |
 | **Required (auth)** | `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `EMAIL_SERVER_PASSWORD`, `LOG_ERROR_SECRET`, `CRON_SECRET` | Immediate via gitleaks PR block | **365 d** or on compromise | **30 min** (vendor + Vercel + redeploy) | Vendor dashboards + 1Password |
 | **Optional** | `OPENAI_API_KEY`, `ALERT_WEBHOOK_URL`, `NEXT_PUBLIC_APP_URL` | < 24 h (alert slack = noise) | **annually** | **15 min** (Vercel replacement) | Vendor + 1Password |
 
@@ -425,7 +425,7 @@ await prisma.user.update({
 # 6) (Follow-up commit) Rename SUPABASE_SERVICE_ROLE_KEY_V2 → SUPABASE_SERVICE_ROLE_KEY; delete V1 fallback code path.
 ```
 
-For other tiers, the same dual-key-then-revoke approach is recommended. **Never** rotate a single key in-place during peak traffic — forced roll-back from a half-broken state is worse than the brief overlap window.
+For `LEMONSQUEEZY_API_KEY` and other payment secrets, the same dual-key-then-revoke approach is recommended. **Never** rotate a single key in-place during peak traffic — forced roll-back from a half-broken state is worse than the brief overlap window.
 
 ### 5.3 What to do on a confirmed leak
 
@@ -760,7 +760,7 @@ INSERT INTO "LessonTranslation" (id, "lessonId", locale, title, "videoUrl", desc
 INSERT INTO "User" (id, email, name, role, "createdAt", "updatedAt") VALUES
   ('pitr-user-1', 'buyer-pitr@example.com', 'Buyer PITR', 'student', NOW(), NOW());
 INSERT INTO "Order" (id, "userId", "productId", "paymentProvider", amount, currency, locale, status, "createdAt") VALUES
-  ('pitr-ord-1', 'pitr-user-1', 'pitr-prod-1', 'stripe', 4900, 'EUR', 'it', 'completed', NOW());
+  ('pitr-ord-1', 'pitr-user-1', 'pitr-prod-1', 'lemonsqueezy', 4900, 'EUR', 'it', 'completed', NOW());
 INSERT INTO "LessonProgress" (id, "userId", "lessonId", completed, "completedAt", "createdAt", "updatedAt") VALUES
   ('pitr-pr-1', 'pitr-user-1', 'pitr-les-1', true, NOW(), NOW(), NOW());
 SELECT 'seed-T0-ok' as marker;
@@ -773,7 +773,7 @@ ls -lah ./pitr-snapshots/courser-T1.pitr.dump
 # ─── 3. Post-T1 mutations (these MUST be absent in restored target) ─
 docker exec -i pitr-src-db psql -U postgres -d courser <<'SQL'
 INSERT INTO "Order" (id, "userId", "productId", "paymentProvider", amount, currency, locale, status, "createdAt") VALUES
-  ('pitr-ord-2', 'pitr-user-1', 'pitr-prod-1', 'stripe',       4900, 'EUR', 'it', 'completed', NOW()),
+  ('pitr-ord-2', 'pitr-user-1', 'pitr-prod-1', 'lemonsqueezy', 4900, 'EUR', 'it', 'completed', NOW()),
   ('pitr-ord-3', 'pitr-user-1', 'pitr-prod-1', 'lemonsqueezy', 4900, 'USD', 'en-us', 'completed', NOW());
 INSERT INTO "LessonProgress" (id, "userId", "lessonId", completed, "completedAt", "createdAt", "updatedAt") VALUES
   ('pitr-pr-2', 'pitr-user-1', 'pitr-les-2', true, NOW(), NOW(), NOW());

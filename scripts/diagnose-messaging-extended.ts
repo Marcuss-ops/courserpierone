@@ -162,7 +162,7 @@ const ALLOWLIST_DM_AUTH_BYPASS: readonly { file: string; rationale: string }[] =
 // creator discovery) and preserve the rationale annotation metadata.
 const HAND_CURATED_ORDER_STATUS_RAW: readonly { file: string; rationale: string }[] = [
   // ── (b) Write-side: order creation from payment provider ──
-  { file: "src/lib/services/order-service.ts", rationale: "WRITES Order.status='completed' from LemonSqueezy webhook payload (write-side; opposite direction of the SSOT reader)." },
+  { file: "src/lib/commerce/orders/complete-order.ts", rationale: "WRITES Order.status='completed' from LemonSqueezy webhook payload (write-side; opposite direction of the SSOT reader; post-refactor `commerce/` consolidation commit, the $transaction with accessGrant.upsert runs atomically inside this file)." },
 
   // ── (c) Refund handlers (write-side, LS-only post V1.x C1a) ──
   //   - The Stripe webhook entry that lived here was removed as part of

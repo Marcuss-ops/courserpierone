@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
-import { sendAbandonedCheckoutEmail } from "@/lib/services/email";
+import { sendAbandonedCheckoutEmail } from "@/lib/commerce/shared/email";
 import { apiErrorResponse } from "@/lib/errors";
 
 /**
@@ -53,8 +53,7 @@ export async function GET(request: Request) {
           || `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/${checkout.product.slug}`;
 
         // C2b: LS-only checkout. RECOVERY10 is appended as `discount=`
-        // (Lemon Squeezy's checkout-discount format). The legacy `coupon=`
-        // branch for Stripe is gone (no new Stripe sessions post Phase 7).
+        // (Lemon Squeezy's checkout-discount format).
         checkoutUrl += checkoutUrl.includes("?") ? "&discount=RECOVERY10" : "?discount=RECOVERY10";
 
         const success = await sendAbandonedCheckoutEmail(

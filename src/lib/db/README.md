@@ -43,7 +43,7 @@ Lesson               # Lezioni di un corso
 LessonTranslation    # Traduzioni lezione
 CourseConfigCache    # Cache JSON config per ogni corso
 User                 # Autenticazione
-Order                # Ordini (Stripe + LemonSqueezy)
+Order                # Ordini (LemonSqueezy)
 AnalyticsEvent       # Eventi tracking
 UiTranslation        # Traduzioni UI globali
 Locale               # Locale supportati (71 lingue)

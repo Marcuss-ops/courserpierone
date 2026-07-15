@@ -7,14 +7,12 @@ import { CheckoutError } from "@/lib/errors";
  */
 export interface PricingProduct {
   lemonVariantId?: string | null;
-  stripePriceId?: string | null;
   pricesByCurrency?: string | null;
   countryOverrides?: string | null;
 }
 
 export interface ResolvedPricing {
   lemonVariantId?: string | null;
-  stripePriceId?: string | null;
   discountCode?: string;
 }
 
@@ -52,33 +50,30 @@ export class PricingService {
     const currency = input.currency ?? getCurrencyFromLocale(locale);
 
     let lemonVariantId = product.lemonVariantId;
-    let stripePriceId = product.stripePriceId;
 
     const currencyOverride = this.resolveCurrencyOverride(product, currency);
     if (currencyOverride) {
       lemonVariantId = currencyOverride.lemonVariantId ?? lemonVariantId;
-      stripePriceId = currencyOverride.stripePriceId ?? stripePriceId;
     }
 
     const countryOverride = this.resolveCountryOverride(product, country);
     if (countryOverride) {
       lemonVariantId = countryOverride.lemonVariantId ?? lemonVariantId;
-      stripePriceId = countryOverride.stripePriceId ?? stripePriceId;
     }
 
     const discountCode = this.resolveDiscountCode({ couponCode, country });
 
-    return { lemonVariantId, stripePriceId, discountCode };
+    return { lemonVariantId, discountCode };
   }
 
   /**
-   * Validates that at least one payment provider is configured.
+   * Validates that Lemon Squeezy is configured.
    * Throws CheckoutPricingError otherwise.
    */
   validateProvider(resolved: ResolvedPricing): void {
-    if (!resolved.lemonVariantId && !resolved.stripePriceId) {
+    if (!resolved.lemonVariantId) {
       throw new CheckoutPricingError(
-        "Nessun metodo di pagamento configurato per questo prodotto. Aggiungi un Lemon Variant ID o uno Stripe Price ID."
+        "Nessun metodo di pagamento configurato per questo prodotto. Aggiungi un Lemon Variant ID."
       );
     }
   }
@@ -86,7 +81,7 @@ export class PricingService {
   private resolveCurrencyOverride(
     product: PricingProduct,
     currency: string
-  ): { lemonVariantId?: string | null; stripePriceId?: string | null } | null {
+  ): { lemonVariantId?: string | null } | null {
     if (!product.pricesByCurrency) return null;
     const prices = parsePricesByCurrency(product.pricesByCurrency);
     return prices?.[currency.toUpperCase()] ?? null;
@@ -95,7 +90,7 @@ export class PricingService {
   private resolveCountryOverride(
     product: PricingProduct,
     country?: string | null
-  ): { lemonVariantId?: string | null; stripePriceId?: string | null } | null {
+  ): { lemonVariantId?: string | null } | null {
     if (!country || !product.countryOverrides) return null;
     const overrides = parseCountryOverrides(product.countryOverrides);
     return overrides?.[country.toUpperCase()] ?? null;

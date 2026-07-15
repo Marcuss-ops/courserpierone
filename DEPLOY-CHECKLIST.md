@@ -48,8 +48,7 @@ nslookup www.courssy.com
 | `LEMONSQUEEZY_API_KEY` | ✅ | Live key |
 | `LEMONSQUEEZY_STORE_ID` | ✅ | Store UUID |
 | `LEMONSQUEEZY_WEBHOOK_SECRET` | ✅ | `openssl rand -hex 16` |
-| `STRIPE_SECRET_KEY` | ⚠️ | Solo per drain ordini legacy (webhook handler) |
-| `STRIPE_WEBHOOK_SECRET` | ⚠️ | Solo per drain (webhook signature) |
+
 | `EMAIL_SERVER_HOST` | ✅ | Es. `smtp.resend.com` |
 | `EMAIL_SERVER_PORT` | ✅ | Es. `587` (o `2525` se Resend/Vercel lo blocca) |
 | `EMAIL_SERVER_USER` | ✅ | SMTP user |
@@ -236,14 +235,7 @@ openssl rand -hex 16     # LEMONSQUEEZY_WEBHOOK_SECRET
 
 ## ⏱️ FIRST WEEK post-live #17-20
 
-### #17 Stripe drain — V1 BLOCKER
-
-Per roadmap §1.2, `activeStripeOrders === 0` è blocker V1. Drain:
-- Refundare ordini Stripe attivi, OPPURE
-- Migrare manualmente a Lemon Squeezy via `npx tsx scripts/products/update-lemon.ts` (script esistente)
-- Dopo drain, rimuovere codice dual-provider (Fase 8, post-V1)
-
-### #18 Observability
+### #17 Observability
 
 | Tool | Setup |
 |---|---|

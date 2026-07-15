@@ -19,7 +19,6 @@ export interface CountryPriceOverride {
   symbol: string;
   amount: number;
   lemonVariantId?: string | null;
-  stripePriceId?: string | null;
 }
 
 /** Input shape for countryOverrides before parseCountryOverrides computes
@@ -33,7 +32,6 @@ export interface CountryPriceOverrideInput {
   price: number;
   symbol?: string;
   lemonVariantId?: string | null;
-  stripePriceId?: string | null;
 }
 
 // ─── Currency symbols mapping ─────────────────────────────
@@ -65,7 +63,6 @@ export function parseCountryOverrides(
         symbol: v.symbol || CURRENCY_SYMBOLS[v.currency] || v.currency,
         amount: v.price / 100,
         lemonVariantId: v.lemonVariantId ?? null,
-        stripePriceId: v.stripePriceId ?? null,
       };
     }
     return result;
@@ -148,7 +145,7 @@ export function getCurrentAmountAndSymbol(
 /**
  * Helper per parsare pricesByCurrency JSON
  */
-export function parsePricesByCurrency(raw: string | null | undefined): Record<string, { price: number; symbol?: string; stripePriceId?: string | null; lemonVariantId?: string | null }> | null {
+export function parsePricesByCurrency(raw: string | null | undefined): Record<string, { price: number; symbol?: string; lemonVariantId?: string | null }> | null {
   if (!raw) return null;
   try {
     return JSON.parse(raw);

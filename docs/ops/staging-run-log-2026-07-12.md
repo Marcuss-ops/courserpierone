@@ -175,12 +175,11 @@ _____
 - [ ] new AccessGrants inserted: `_____`
 - [ ] AccessGrants already present (upsert handshake): `_____`
 
-### Stage 4 — `audit-v1-readiness.ts` (3-gate read-only audit)
+### Stage 4 — `audit-v1-readiness.ts` (2-gate read-only audit)
 
 - [ ] **`exit code`**: `_____` (expected `0`)
 - [ ] gate 1 result (`orphanProducts`): `_____`
-- [ ] gate 2 result (`activeStripeOrders`): `_____`
-- [ ] gate 3 result (`residualNextAuth` (account/session/verificationToken totals)): `_____`
+- [ ] gate 2 result (`residualNextAuth` (account/session/verificationToken totals)): `_____`
 - [ ] audit JSON captured for stage 5 cross-check (path or paste): `_____`
 
 ### Stage 5 — `psql` direct-DB cross-check

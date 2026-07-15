@@ -10,7 +10,7 @@ lib/
 ├── config/        # Course config generation & reading
 ├── db/            # Prisma & Supabase clients
 ├── i18n/          # Internationalization (locale, player-locale, visitor-session)
-├── payment/       # Stripe & LemonSqueezy integrations
+├── payment/       # LemonSqueezy integration
 ├── services/      # Business logic (order-service, email)
 ├── utils/         # Shared utilities (validations, sanitize, types)
 ├── openai.ts      # OpenAI client (standalone)
@@ -25,7 +25,7 @@ Ogni subdirectory esporta il proprio contenuto. Per importare:
 // ✅ Consigliato — path specifico
 import { authOptions } from "@/lib/auth/auth";
 import { prisma } from "@/lib/db/prisma";
-import { getStripe } from "@/lib/payment/stripe";
+import { initLS } from "@/lib/payment/lemonsqueezy";
 
 // ❌ Da evitare — nessun index barrel centrale
 // (evita dipendenze circolari)
@@ -57,8 +57,6 @@ NEXTAUTH_SECRET=
 NEXTAUTH_URL=
 
 # Payment
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
 LEMONSQUEEZY_API_KEY=
 LEMONSQUEEZY_STORE_ID=
 LEMONSQUEEZY_WEBHOOK_SECRET=

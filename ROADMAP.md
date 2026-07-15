@@ -22,14 +22,14 @@
 - [ ] Player video embedded (YouTube/Vimeo)
 
 ### Settimana 4: Checkout & Delivery
-- [ ] Integrazione Stripe Checkout
+- [ ] Integrazione Lemon Squeezy Checkout
 - [ ] Webhook pagamento → concessione accesso
 - [ ] Area utente: lista acquisti + download PDF
 - [ ] Email transazionali (benvenuto, conferma ordine)
 
 ### Deliverable MVP
 - Sito pubblico in 3 lingue
-- 1 prodotto in vendita con checkout Stripe
+- 1 prodotto in vendita con checkout Lemon Squeezy
 - Accesso automatico dopo pagamento
 - Dashboard utente base
 

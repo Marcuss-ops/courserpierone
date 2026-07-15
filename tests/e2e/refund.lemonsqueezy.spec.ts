@@ -171,7 +171,7 @@ test.describe("LemonSqueezy refund flow (V1 acceptance criterion #6)", () => {
     // ── Assertion 3: processedWebhook idempotency row exists exactly once ──
     //
     // Mirrors docs/production-hardening.md §5 (signed webhooks verified):
-    // both Stripe and LS handlers write `prisma.processedWebhook`
+    // the LS handler writes `prisma.processedWebhook`
     // after successful processing. The deliveryId convention here is
     // `LS-<data.id>-<event_name>` (composite; LS has no native
     // delivery_id).

@@ -1,28 +1,24 @@
 import { describe, it, expect } from "vitest";
-import { PricingService, type PricingProduct } from "./pricing-service";
-import { CheckoutPricingError } from "./pricing-service";
+import { PricingService, type PricingProduct } from "./pricing";
+import { CheckoutPricingError } from "./pricing";
 
 // ─── Fixture: product with multi-currency + country overrides ─────
 const productWithOverrides: PricingProduct = {
   lemonVariantId: "lemon_global",
-  stripePriceId: "stripe_global",
   pricesByCurrency: JSON.stringify({
     USD: {
       price: 5500,
       currency: "USD",
-      stripePriceId: "stripe_usd",
       lemonVariantId: "lemon_usd",
     },
     GBP: {
       price: 4400,
       currency: "GBP",
-      stripePriceId: "stripe_gbp",
       lemonVariantId: "lemon_gbp",
     },
     JPY: {
       price: 800,
       currency: "JPY",
-      stripePriceId: null,
       lemonVariantId: "lemon_jpy",
     },
   }),
@@ -32,35 +28,30 @@ const productWithOverrides: PricingProduct = {
       price: 9900,
       symbol: "R$",
       lemonVariantId: "lemon_br",
-      stripePriceId: "stripe_br",
     },
     IN: {
       currency: "INR",
       price: 49900,
       symbol: "₹",
       lemonVariantId: "lemon_in",
-      stripePriceId: null, // IN has no Stripe price planned
     },
   }),
 };
 
 const productNoOverrides: PricingProduct = {
   lemonVariantId: "lemon_global",
-  stripePriceId: "stripe_global",
   pricesByCurrency: null,
   countryOverrides: null,
 };
 
 const productOnlyLemon: PricingProduct = {
   lemonVariantId: "lemon_only",
-  stripePriceId: null,
   pricesByCurrency: null,
   countryOverrides: null,
 };
 
 const productNoProvider: PricingProduct = {
   lemonVariantId: null,
-  stripePriceId: null,
   pricesByCurrency: null,
   countryOverrides: null,
 };
@@ -77,7 +68,6 @@ describe("PricingService.resolve — base behaviour", () => {
     });
 
     expect(result.lemonVariantId).toBe("lemon_global");
-    expect(result.stripePriceId).toBe("stripe_global");
     expect(result.discountCode).toBeUndefined();
   });
 
@@ -92,14 +82,13 @@ describe("PricingService.resolve — base behaviour", () => {
 
     expect(result).toEqual({
       lemonVariantId: "lemon_global",
-      stripePriceId: "stripe_global",
       discountCode: undefined,
     });
   });
 });
 
 describe("PricingService.resolve — currency override (scenario 7)", () => {
-  it("returns USD stripePriceId when currency=USD", () => {
+  it("returns USD lemonVariantId when currency=USD", () => {
     const svc = new PricingService();
     const result = svc.resolve({
       product: productWithOverrides,
@@ -108,11 +97,10 @@ describe("PricingService.resolve — currency override (scenario 7)", () => {
       country: "US",
     });
 
-    expect(result.stripePriceId).toBe("stripe_usd");
     expect(result.lemonVariantId).toBe("lemon_usd");
   });
 
-  it("returns GBP stripePriceId when currency=GBP", () => {
+  it("returns GBP lemonVariantId when currency=GBP", () => {
     const svc = new PricingService();
     const result = svc.resolve({
       product: productWithOverrides,
@@ -121,7 +109,6 @@ describe("PricingService.resolve — currency override (scenario 7)", () => {
       country: "GB",
     });
 
-    expect(result.stripePriceId).toBe("stripe_gbp");
     expect(result.lemonVariantId).toBe("lemon_gbp");
   });
 
@@ -134,7 +121,7 @@ describe("PricingService.resolve — currency override (scenario 7)", () => {
       country: "US",
     });
 
-    expect(result.stripePriceId).toBe("stripe_usd");
+    expect(result.lemonVariantId).toBe("lemon_usd");
   });
 
   it("falls back to global IDs when currency override key is absent", () => {
@@ -147,13 +134,12 @@ describe("PricingService.resolve — currency override (scenario 7)", () => {
     });
 
     // No currency override; DE is not emerging; no country override.
-    expect(result.stripePriceId).toBe("stripe_global");
     expect(result.lemonVariantId).toBe("lemon_global");
   });
 });
 
 describe("PricingService.resolve — country override", () => {
-  it("returns BR stripePriceId when country=BR", () => {
+  it("returns BR lemonVariantId when country=BR", () => {
     const svc = new PricingService();
     const result = svc.resolve({
       product: productWithOverrides,
@@ -163,10 +149,9 @@ describe("PricingService.resolve — country override", () => {
     });
 
     expect(result.lemonVariantId).toBe("lemon_br");
-    expect(result.stripePriceId).toBe("stripe_br");
   });
 
-  it("returns IN lemonVariantId only (no stripePriceId for IN)", () => {
+  it("returns IN lemonVariantId only", () => {
     const svc = new PricingService();
     const result = svc.resolve({
       product: productWithOverrides,
@@ -176,7 +161,6 @@ describe("PricingService.resolve — country override", () => {
     });
 
     expect(result.lemonVariantId).toBe("lemon_in");
-    expect(result.stripePriceId).toBe("stripe_global"); // falls back since IN override has stripePriceId=null
   });
 
   it("country override applied when no currency override matches (BRL not in pricesByCurrency)", () => {
@@ -191,7 +175,6 @@ describe("PricingService.resolve — country override", () => {
     });
 
     expect(result.lemonVariantId).toBe("lemon_br");
-    expect(result.stripePriceId).toBe("stripe_br");
   });
 
   it("country override takes precedence over currency override (when both match)", () => {
@@ -201,17 +184,14 @@ describe("PricingService.resolve — country override", () => {
     // so the country ID must win.
     const productWithCompetingOverrides: PricingProduct = {
       lemonVariantId: "lemon_global",
-      stripePriceId: "stripe_global",
       pricesByCurrency: JSON.stringify({
         BRL: {
           lemonVariantId: "lemon_brl_via_currency",
-          stripePriceId: "stripe_brl_via_currency",
         },
       }),
       countryOverrides: JSON.stringify({
         BR: {
           lemonVariantId: "lemon_br_via_country",
-          stripePriceId: "stripe_br_via_country",
         },
       }),
     };
@@ -225,7 +205,6 @@ describe("PricingService.resolve — country override", () => {
 
     // Country override wins (applied last in the resolve() chain)
     expect(result.lemonVariantId).toBe("lemon_br_via_country");
-    expect(result.stripePriceId).toBe("stripe_br_via_country");
   });
 
   it("handles null country gracefully", () => {
@@ -237,8 +216,7 @@ describe("PricingService.resolve — country override", () => {
       country: null,
     });
 
-    expect(result.stripePriceId).toBe("stripe_usd"); // USD currency override still applies
-    expect(result.lemonVariantId).toBe("lemon_usd");
+    expect(result.lemonVariantId).toBe("lemon_usd"); // USD currency override still applies
   });
 });
 
@@ -335,7 +313,7 @@ describe("PricingService.resolve — currency fallback via locale", () => {
       country: "GB",
     });
 
-    expect(result.stripePriceId).toBe("stripe_gbp");
+    expect(result.lemonVariantId).toBe("lemon_gbp");
   });
 
   it("uses explicit currency over locale fallback (when both passed)", () => {
@@ -348,19 +326,16 @@ describe("PricingService.resolve — currency fallback via locale", () => {
       country: "JP",
     });
 
-    // JPY override has no stripePriceId → falls back to global
     expect(result.lemonVariantId).toBe("lemon_jpy");
-    expect(result.stripePriceId).toBe("stripe_global");
   });
 });
 
 describe("PricingService.validateProvider", () => {
-  it("throws CheckoutPricingError when neither provider is configured", () => {
+  it("throws CheckoutPricingError when Lemon Squeezy is not configured", () => {
     const svc = new PricingService();
     expect(() =>
       svc.validateProvider({
         lemonVariantId: null,
-        stripePriceId: null,
         discountCode: undefined,
       })
     ).toThrow(CheckoutPricingError);
@@ -372,7 +347,6 @@ describe("PricingService.validateProvider", () => {
     try {
       svc.validateProvider({
         lemonVariantId: null,
-        stripePriceId: null,
         discountCode: undefined,
       });
     } catch (e) {
@@ -383,23 +357,11 @@ describe("PricingService.validateProvider", () => {
     expect((caught as Error).name).toBe("CheckoutPricingError");
   });
 
-  it("does NOT throw when only lemonVariantId is set", () => {
+  it("does NOT throw when lemonVariantId is set", () => {
     const svc = new PricingService();
     expect(() =>
       svc.validateProvider({
         lemonVariantId: "lemon_only",
-        stripePriceId: null,
-        discountCode: undefined,
-      })
-    ).not.toThrow();
-  });
-
-  it("does NOT throw when only stripePriceId is set", () => {
-    const svc = new PricingService();
-    expect(() =>
-      svc.validateProvider({
-        lemonVariantId: null,
-        stripePriceId: "stripe_only",
         discountCode: undefined,
       })
     ).not.toThrow();
@@ -415,7 +377,6 @@ describe("PricingService.validateProvider", () => {
     });
 
     expect(result.lemonVariantId).toBe("lemon_only");
-    expect(result.stripePriceId).toBeNull();
     expect(() => svc.validateProvider(result)).not.toThrow();
   });
 });
@@ -433,9 +394,7 @@ describe("PricingService — defence scenarios from DoD", () => {
       country: "US",
     });
 
-    expect(result.stripePriceId).toBe("stripe_usd");
     expect(result.lemonVariantId).toBe("lemon_usd");
-    expect(result.stripePriceId).not.toBe("stripe_global");
     expect(result.lemonVariantId).not.toBe("lemon_global");
   });
 
@@ -451,7 +410,6 @@ describe("PricingService — defence scenarios from DoD", () => {
 
     // country override wins
     expect(result.lemonVariantId).toBe("lemon_br");
-    expect(result.stripePriceId).toBe("stripe_br");
     // AND emerging-market auto-discount applies
     expect(result.discountCode).toBe("EMERGING60");
   });

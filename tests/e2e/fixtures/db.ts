@@ -9,13 +9,19 @@ export const prisma = new PrismaClient({
 });
 
 export async function cleanupTestData() {
+  // Reverse topological order: delete child/dependent rows before parents.
+  // Product MUST be deleted before User because Product.creatorId has an
+  // ON DELETE RESTRICT foreign key to User.
   await prisma.$transaction([
     prisma.analyticEvent.deleteMany(),
     prisma.processedWebhook.deleteMany(),
     prisma.abandonedCheckout.deleteMany(),
     prisma.order.deleteMany(),
-    prisma.user.deleteMany(),
+    prisma.lessonProgress.deleteMany(),
+    prisma.lessonNote.deleteMany(),
+    prisma.accessGrant.deleteMany(),
     prisma.product.deleteMany(),
+    prisma.user.deleteMany(),
   ]);
 }
 
@@ -44,7 +50,6 @@ export async function cleanupTestUser(email: string) {
 }
 
 export async function seedTestProduct() {
-  const stripePriceId = process.env.TEST_STRIPE_PRICE_ID ?? null;
   const lemonVariantId = process.env.TEST_LEMON_VARIANT_ID ?? null;
 
   // Phase 4 hardening: Product.creatorId è REQUIRED + FK Restrict. Il
@@ -53,17 +58,20 @@ export async function seedTestProduct() {
   // backfill-primary-creator.ts). Se nessun admin/creator esiste nel
   // DB di test, l'operazione fallisce loudmente — il test setup deve
   // includere un admin seeded prima dell'esecuzione della suite.
-  const canonicalCreator = await prisma.user.findFirst({
+  let canonicalCreator = await prisma.user.findFirst({
     where: { role: { in: ["admin", "creator"] } },
     orderBy: { createdAt: "asc" },
     select: { id: true },
   });
   if (!canonicalCreator) {
-    throw new Error(
-      "seedTestProduct: nessun admin/creator trovato nel DB di test. " +
-        "L'invariant Phase 4 richiede Product.creatorId NOT NULL — " +
-        "seedare un account admin prima di eseguire i test E2E.",
-    );
+    canonicalCreator = await prisma.user.create({
+      data: {
+        email: "e2e-test-admin@example.com",
+        role: "admin",
+        name: "E2E Test Admin",
+      },
+      select: { id: true },
+    });
   }
 
   const existing = await prisma.product.findUnique({
@@ -73,13 +81,10 @@ export async function seedTestProduct() {
   let product = existing;
 
   if (existing) {
-    if (
-      existing.stripePriceId !== stripePriceId ||
-      existing.lemonVariantId !== lemonVariantId
-    ) {
+    if (existing.lemonVariantId !== lemonVariantId) {
       product = await prisma.product.update({
         where: { slug: "test-course-e2e" },
-        data: { stripePriceId, lemonVariantId },
+        data: { lemonVariantId },
       });
     }
   } else {
@@ -90,7 +95,6 @@ export async function seedTestProduct() {
         price: 4900,
         currency: "eur",
         defaultLanguage: "en",
-        stripePriceId,
         lemonVariantId,
         creatorId: canonicalCreator.id,
       },

@@ -1,5 +1,5 @@
-import { prisma } from "../db/prisma";
-import { sendPurchaseConfirmation } from "./email";
+import { prisma } from "@/lib/db/prisma";
+import { sendPurchaseConfirmation } from "@/lib/commerce/shared/email";
 import { NotFoundError } from "@/lib/errors";
 
 export interface ProcessOrderInput {

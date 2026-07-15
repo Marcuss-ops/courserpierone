@@ -19,7 +19,6 @@ interface CountryPrice {
   price: number;
   symbol?: string;
   lemonVariantId?: string | null;
-  stripePriceId?: string | null;
 }
 
 type CountryOverrides = Record<string, CountryPrice>;
@@ -79,7 +78,6 @@ async function main() {
         price,
         symbol: symbol ?? undefined,
         lemonVariantId: process.env.LEMON_VARIANT_ID ?? existing[overrideCountry.toUpperCase()]?.lemonVariantId ?? null,
-        stripePriceId: process.env.STRIPE_PRICE_ID ?? existing[overrideCountry.toUpperCase()]?.stripePriceId ?? null,
       },
     };
   } else {
@@ -97,7 +95,6 @@ async function main() {
     const sym = info.symbol || info.currency;
     console.log(`  ${country}: ${sym}${(info.price / 100).toFixed(2)} (${info.currency})`);
     if (info.lemonVariantId) console.log(`       Lemon Variant: ${info.lemonVariantId}`);
-    if (info.stripePriceId) console.log(`       Stripe Price: ${info.stripePriceId}`);
   }
 
   console.log(`\n📌 ${Object.keys(overrides).length} paesi configurati.`);

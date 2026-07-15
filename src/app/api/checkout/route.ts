@@ -4,8 +4,8 @@ import { getServerUser } from "@/lib/supabase/get-user";
 import { checkoutSchema, validationErrorResponse } from "@/lib/utils/validations";
 import { getCurrencyFromLocale } from "@/lib/i18n/locale-resolver";
 import { withRateLimit } from "@/lib/utils/rate-limit";
-import { PricingService } from "@/lib/services/pricing-service";
-import { CheckoutService } from "@/lib/services/checkout-service";
+import { PricingService } from "@/lib/commerce/checkout/pricing";
+import { CheckoutService } from "@/lib/commerce/checkout/create-checkout";
 import { NotFoundError, apiErrorResponse } from "@/lib/errors";
 
 const pricingService = new PricingService();
@@ -49,13 +49,7 @@ export const POST = withRateLimit(async function POST(request: NextRequest) {
 
     pricingService.validateProvider(pricing);
 
-    // V1.5+ LS-primary: LS is the sole new-session provider. The
-    // historical `ENABLE_STRIPE_CHECKOUT` env flag and the legacy
-    // Stripe new-session provider were both removed in commits C1a
-    // (provider module) + C2a (env registry entry). The legacy
-    // Stripe webhook at `/api/webhooks/stripe/route.ts` remains ONLY
-    // for processing pre-cutover refund/dispute events; it does not
-    // consult any activation flag (it processes by Stripe signature).
+    // V1.5+ LS-primary: Lemon Squeezy is the sole payment provider.
     //
     // If `pricing.lemonVariantId` is missing, `CheckoutService.createCheckout`
     // throws a `CheckoutError` with a diagnostic message ("Nessun

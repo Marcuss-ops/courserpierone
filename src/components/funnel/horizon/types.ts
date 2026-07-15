@@ -53,6 +53,21 @@ export interface HorizonLocaleContent {
     title?: string;
     items?: { q: string; a: string }[];
   };
-  pricing?: { title?: string };
+  pricing?: {
+    title?: string;
+    free?: {
+      name?: string;
+      description?: string;
+      features?: string[];
+      cta?: string;
+    };
+    pro?: {
+      name?: string;
+      description?: string;
+      features?: string[];
+      cta?: string;
+      badge?: string;
+    };
+  };
   ui?: { labels?: Record<string, string> };
 }

@@ -44,7 +44,6 @@ export async function POST(
         slug: newSlug,
         coverUrl: original.coverUrl,
         templateId: original.templateId,
-        stripePriceId: original.stripePriceId,
         lemonVariantId: original.lemonVariantId,
         lemonStoreId: original.lemonStoreId,
         price: original.price,

@@ -17,7 +17,7 @@ export interface CourseConfig {
   author: string;
   price: number;
   prices?: Record<string, { amount: number; currency: string; symbol: string }>;
-  countryOverrides?: Record<string, { currency: string; price: number; symbol?: string; lemonVariantId?: string | null; stripePriceId?: string | null }>;
+  countryOverrides?: Record<string, { currency: string; price: number; symbol?: string; lemonVariantId?: string | null }>;
   lemonVariantId?: string;
   languages: Record<string, {
     title: string;

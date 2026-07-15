@@ -2,7 +2,7 @@
 
 > **Scopo:** verifica post-mortem C3 che TUTTE le route chat reali (DM + V1 US1/US2 community chat) usino la route SSE canonica oppure il fallback REST/polling — e che **nessun consumer** fosse legato all'infrastruttura WS custom rimossa. Il documento funge anche da baseline per il futuro V2 community chat (US1/US2) quando verrà implementato.
 >
-> **Audit window:** 2026-07-15, su main @ `060f0be` (post-C3 cleanup, post-stripe-drain baseline).
+> **Audit window:** 2026-07-15, su main @ `060f0be` (post-C3 cleanup, post-legacy-drain baseline).
 >
 > **Verdict one-liner:** ✅ **TUTTO canonico**. Nessun consumer era legato al WS rimosso. La rimozione C3 era safe-by-design (già retro-compatibile al commit time). Community chat è una V2 reservation — non esiste in V1 come `src/app/(locale)/[locale]/[domain]/community/page.tsx` (`FILE_DOES_NOT_EXIST`) e non ha schema (`CommunityTopic`/`CommunityPost` non sono nel `prisma/schema.prisma`).
 

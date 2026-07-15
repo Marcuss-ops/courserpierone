@@ -38,15 +38,15 @@ vi.mock("@/lib/db/prisma", () => {
   return { prisma: mockPrisma };
 });
 
-vi.mock("./email", () => ({
+vi.mock("@/lib/commerce/shared/email", () => ({
   sendPurchaseConfirmation: vi.fn(),
   sendAbandonedCheckoutEmail: vi.fn(),
 }));
 
 // Analytics helper uses real COUNTRY_LOCALE — import as-is
 import { prisma } from "@/lib/db/prisma";
-import { sendPurchaseConfirmation } from "./email";
-import { processOrder, type ProcessOrderInput } from "./order-service";
+import { sendPurchaseConfirmation } from "@/lib/commerce/shared/email";
+import { processOrder, type ProcessOrderInput } from "./complete-order";
 import { NotFoundError } from "@/lib/errors";
 
 // ─── Helpers ───────────────────────────────────────────────

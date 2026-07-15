@@ -114,17 +114,8 @@ export function AmishOffer({
           </SharedCTA>
 
           <div className="mt-5 flex items-center justify-center gap-4 text-xs text-white/40">
-            {t("offer_stripe_paypal") && (
-              <span className="flex items-center gap-1">
-                <Lock className="w-3.5 h-3.5" style={{ color: accent }} />
-                {t("offer_stripe_paypal")}
-              </span>
-            )}
             {t("offer_invoice") && (
-              <>
-                <span>&bull;</span>
-                <span>{t("offer_invoice")}</span>
-              </>
+              <span>{t("offer_invoice")}</span>
             )}
           </div>
 

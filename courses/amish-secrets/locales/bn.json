@@ -349,9 +349,6 @@
       "hero_secure": "নিরাপদ টাকা, ইনস্ট্যান্ট অ্যাকসেস",
       "hero_verified": "* পূর্ববর্তী তথ্য",
       "hero_trust_ssl": "নিরাপদ",
-      "hero_trust_stripe": "Stripe",
-      "hero_trust_paypal": "PayPal",
-      "offer_stripe_paypal": "Stripe / PayPal",
       "offer_invoice": "তাৎক্ষণিক বার্তা",
       "footer_cookies": "Cookie",
       "footer_withdrawal": "ইউরোপীয় ইউনিয়ন ১৪ দিনের প্রত্যাহারের অধিকার",
@@ -457,5 +454,23 @@
     "ebook_desc": "অনলাইন রিডার থেকে সরাসরি ছবিটি পড়া অথবা অফলাইন PDF-এর সম্পূর্ণ গাইডটি পড়ুন।",
     "format_label": "PDF / ওয়েব-পেজ",
     "read_label": "পড়ো"
+  },
+  "pricing": {
+    "free": {
+      "features": [
+        "1 Product",
+        "3 Languages",
+        "Basic analytics"
+      ]
+    },
+    "pro": {
+      "features": [
+        "Unlimited products",
+        "20 Languages",
+        "AI translations",
+        "Advanced analytics",
+        "International payments"
+      ]
+    }
   }
 }

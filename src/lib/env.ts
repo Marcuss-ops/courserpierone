@@ -7,7 +7,6 @@
  * Uso:
  *   import { env } from "@/lib/env";
  *   const dbUrl = env.DATABASE_URL;        // string (required)
- *   const stripeKey = env.STRIPE_SECRET_KEY; // string | undefined (optional)
  *
  * Categorie di validazione:
  *   - critical: l'app non può funzionare senza
@@ -65,8 +64,6 @@ export const ENV_DEFINITIONS: EnvVarDef[] = [
   },
 
   // ═══ Required — necessarie per feature specifiche ═══
-  // Stripe legacy webhook receipt is intentional: see C4 cleanup commit
-  // for full removal after drain (V1.x blocker).
   // Google OAuth credentials live in Supabase Dashboard → Authentication →
   // Providers → Google (not in this Vercel env registry).
   {
@@ -93,18 +90,6 @@ export const ENV_DEFINITIONS: EnvVarDef[] = [
     key: "EMAIL_FROM",
     category: "required",
     description: "Mittente delle email. Required — set explicitly (e.g. 'Courssy <no-reply@courssy.com>').",
-  },
-  {
-    key: "STRIPE_SECRET_KEY",
-    category: "required",
-    description: "Stripe secret key (sk_test_... o sk_live_...) — used by the legacy webhook handler for refund/subscription events. Removable after C4 drain (V1.x blocker).",
-    optional: true,
-  },
-  {
-    key: "STRIPE_WEBHOOK_SECRET",
-    category: "required",
-    description: "Stripe webhook signing secret (whsec_...) — required by the legacy webhook handler; removable after C4 drain.",
-    optional: true,
   },
   {
     key: "USE_ACCESS_GRANT_RESOLVER",
@@ -241,7 +226,6 @@ export function validateEnv(): ValidationResult {
  *
  * Esempi:
  *   env.DATABASE_URL            → string (crasha se mancante in produzione)
- *   env.STRIPE_SECRET_KEY       → string | undefined
  *   env.NEXT_PUBLIC_APP_URL     → string con default
  *   env.EMAIL_SERVER_HOST       → string (required; nessun default — C1e cleanup)
  *   env.EMAIL_SERVER_USER       → string (required; nessun default — C2b cleanup)

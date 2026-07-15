@@ -349,9 +349,6 @@
       "hero_secure": "Безопасный платеж",
       "hero_verified": "подтвержденные отзывы",
       "hero_trust_ssl": "Безопасный SSL",
-      "hero_trust_stripe": "Stripe",
-      "hero_trust_paypal": "PayPal",
-      "offer_stripe_paypal": "Stripe / PayPal",
       "offer_invoice": "Счет включен",
       "footer_cookies": "Файлы cookie",
       "footer_withdrawal": "Отзыв согласия",
@@ -457,5 +454,23 @@
     "ebook_desc": "Прочитайте полное руководство в формате eBook непосредственно из веб-читателя или загрузите автономный PDF.",
     "format_label": "PDF / Web Формат",
     "read_label": "Читать"
+  },
+  "pricing": {
+    "free": {
+      "features": [
+        "1 Product",
+        "3 Languages",
+        "Basic analytics"
+      ]
+    },
+    "pro": {
+      "features": [
+        "Unlimited products",
+        "20 Languages",
+        "AI translations",
+        "Advanced analytics",
+        "International payments"
+      ]
+    }
   }
 }

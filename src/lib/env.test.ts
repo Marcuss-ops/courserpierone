@@ -80,13 +80,14 @@ describe("ENV_DEFINITIONS", () => {
 
   it("contains all major service keys", () => {
     const allKeys = ENV_DEFINITIONS.map((d) => d.key);
-    expect(allKeys).toContain("STRIPE_SECRET_KEY");
     expect(allKeys).toContain("OPENAI_API_KEY");
     expect(allKeys).toContain("LEMONSQUEEZY_API_KEY");
     expect(allKeys).toContain("SUPABASE_URL");
     // After C2 cleanup: GOOGLE_CLIENT_ID/SECRET moved to Supabase Dashboard
     // (Auth → Providers → Google) — no longer in Vercel env registry.
     expect(allKeys).not.toContain("GOOGLE_CLIENT_ID");
+    expect(allKeys).not.toContain("STRIPE_SECRET_KEY");
+    expect(allKeys).not.toContain("STRIPE_WEBHOOK_SECRET");
     expect(allKeys).not.toContain("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY");
     expect(allKeys).not.toContain("ENABLE_STRIPE_CHECKOUT");
   });
@@ -166,8 +167,8 @@ describe("env proxy accessor", () => {
   });
 
   it("returns undefined for optional unset vars", async () => {
-    deleteEnv("STRIPE_SECRET_KEY");
+    deleteEnv("OPENAI_API_KEY");
     const { env } = await import("./env");
-    expect(env.STRIPE_SECRET_KEY).toBeUndefined();
+    expect(env.OPENAI_API_KEY).toBeUndefined();
   });
 });

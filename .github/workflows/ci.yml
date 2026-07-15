@@ -28,7 +28,7 @@
 #     then aggregates via `needs.*.result`.
 #
 # Secrets removed from the legacy single-job ci.yml:
-#   - The e2e-journey job runs ONLY on forks when its required Stripe/Supabase
+#   - The e2e-journey job runs ONLY on forks when its required LS/Supabase
 #     secrets are absent (uses the same skip-if-creds-missing pattern as the
 #     former journey-e2e.yml: Playwright counts skipped tests as non-failure,
 #     so the gate stays green on forks/Open-source contributors).
@@ -231,11 +231,6 @@ jobs:
 
       NEXT_PUBLIC_APP_URL: http://localhost:3000
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-
-      # Stripe test-mode (required for journey)
-      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-      STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
-      TEST_STRIPE_PRICE_ID: ${{ secrets.TEST_STRIPE_PRICE_ID }}
 
       # Supabase test-project (required for journey)
       SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}

@@ -1,6 +1,6 @@
 # Lemon Squeezy — Live Store Setup Operator Runbook
 
-> **Scope.** One-shot operator procedure to bring up a Lemon Squeezy (LS) **live** store for the Courssy codebase post-Phase 7 Stripe-removal. Six independent verticals, each wired end-to-end with Vercel env vars: (1) store live activation, (2) products, (3) variants, (4) webhook endpoint, (5) signing secret, (6) custom data fields contract.
+> **Scope.** One-shot operator procedure to bring up a Lemon Squeezy (LS) **live** store for the Courssy codebase. Six independent verticals, each wired end-to-end with Vercel env vars: (1) store live activation, (2) products, (3) variants, (4) webhook endpoint, (5) signing secret, (6) custom data fields contract.
 >
 > **Audience.** Operator flipping the codebase from LS test-mode (staging) to LS live-mode (production) for the V1.x launch. **Read this BEFORE any production deploy** that touches payments.
 >
@@ -554,7 +554,7 @@ Per [`../../scripts/ops/staging-bootstrap.md` §8.1](../../scripts/ops/staging-b
 
 ```bash
 # 1. Verify env scoping
-npx vercel env ls | grep -E 'LEMONSQUEEZY|STRIPE_'
+npx vercel env ls | grep -E 'LEMONSQUEEZY_'
 # All LEMONSQUEEZY_* lines should appear under Production scope, with
 # staging duplicates under Preview.
 
@@ -577,7 +577,7 @@ curl -sS 'https://<production-domain>/api/health' | jq
 | --- | --- |
 | **LS test mode** setup | [`../../scripts/ops/staging-bootstrap.md` §3](../../scripts/ops/staging-bootstrap.md) |
 | **Vercel Production env wiring** (other env vars beyond LEMONSQUEEZY_*) | [`../../docs/production.md` §2](../../docs/production.md) |
-| **Stripe-removal follow-up** (legacy Stripe drain for existing orders) | [`../../docs/roadmap-current.md` §1.2](../../docs/roadmap-current.md) |
+| **Legacy payment cleanup** | [`../../docs/roadmap-current.md`](../../docs/roadmap-current.md) |
 | **Subscriptions-as-product** (V1.x sells single-shot; subscriptions are post-V1.2) | roadmap §1.2 |
 | **Discount codes** (passed via LS's `discountCode` field, not customData) | [`../../src/lib/commerce/payments/providers/lemonsqueezy/index.ts` L66](../../src/lib/commerce/payments/providers/lemonsqueezy/index.ts) |
 | **Refunds via admin panel** (vs LS-dashboard-driven refunds) | admin/products per-Order refund UI, post-V1.2 |

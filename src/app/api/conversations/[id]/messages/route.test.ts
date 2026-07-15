@@ -48,7 +48,7 @@ vi.mock("@/lib/utils/sanitize", () => ({
 // quindi non c'è alcuna emition del broker dietro le quinte.
 
 const mockSendDmNotificationEmail = vi.fn().mockResolvedValue(undefined);
-vi.mock("@/lib/services/email", () => ({
+vi.mock("@/lib/commerce/shared/email", () => ({
   sendDmNotificationEmail: mockSendDmNotificationEmail,
 }));
 

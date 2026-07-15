@@ -43,7 +43,7 @@ Il middleware risolve il locale e passa la richiesta alla route corretta.
 | `api/analytics/dashboard` | Dashboard analytics |
 | `api/auth/[...nextauth]` | NextAuth handler |
 | `api/certificate/[productId]` | Genera certificato |
-| `api/checkout` | Crea sessione Stripe/LS |
+| `api/checkout` | Crea sessione Lemon Squeezy |
 | `api/cron/abandoned-checkouts` | Cron: recupero carrelli abbandonati |
 | `api/ebook/[slug]/download` | Download ebook PDF |
 | `api/lessons/[lessonId]/assets` | Assets per lezione |
@@ -53,5 +53,4 @@ Il middleware risolve il locale e passa la richiesta alla route corretta.
 | `api/translate` | Traduzione GPT-4o-mini |
 | `api/upload` | Upload file (immagini prodotti) |
 | `api/user/orders` | Ordini utente |
-| `api/webhooks/stripe` | Webhook Stripe |
 | `api/webhooks/lemonsqueezy` | Webhook LemonSqueezy |

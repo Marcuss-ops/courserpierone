@@ -94,10 +94,7 @@ describe("paymentProviderRegistry", () => {
 // distinct from 502 (upstream provider failure) so monitors don't
 // conflate "feature not yet built" with "provider upstream down".
 //
-// C1a cleanup: removed the legacy Stripe new-session provider test
-// surface — only LemonSqueezy is registered for new sessions; the
-// Stripe legacy webhook (`/api/webhooks/stripe`) is regression-tested
-// at the e2e layer separately in tests/e2e/checkout.stripe.spec.ts.
+// C1a cleanup: only LemonSqueezy is registered for new sessions.
 
 describe("payment providers — stub methods (Phase 2/4 follow-up)", () => {
   beforeEach(() => {

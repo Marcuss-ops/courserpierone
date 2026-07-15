@@ -349,9 +349,6 @@
       "hero_secure": "안전한 지불, 즉시 접근",
       "hero_verified": "*verified 자료",
       "hero_trust_ssl": "SSL 보안",
-      "hero_trust_stripe": "Stripe",
-      "hero_trust_paypal": "PayPal",
-      "offer_stripe_paypal": "Stripe / PayPal",
       "offer_invoice": "즉시 송장",
       "footer_cookies": "Cookie",
       "footer_withdrawal": "EU 14일 출금",
@@ -457,5 +454,23 @@
     "ebook_desc": "웹 리더에서 직접 eBook 형식의 완벽한 가이드를 읽고 오프라인 PDF를 다운로드하십시오.",
     "format_label": "PDF / 웹 형식",
     "read_label": "...에서"
+  },
+  "pricing": {
+    "free": {
+      "features": [
+        "1 Product",
+        "3 Languages",
+        "Basic analytics"
+      ]
+    },
+    "pro": {
+      "features": [
+        "Unlimited products",
+        "20 Languages",
+        "AI translations",
+        "Advanced analytics",
+        "International payments"
+      ]
+    }
   }
 }

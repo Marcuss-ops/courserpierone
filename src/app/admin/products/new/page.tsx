@@ -39,8 +39,8 @@ export default function NewProductPage() {
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [translationsByLocale, setTranslationsByLocale] = useState<Record<string, Record<string, string>>>({});
   const [translatedLocales, setTranslatedLocales] = useState<string[]>([]);
-  const [pricesByCurrency, setPricesByCurrency] = useState<Record<string, { price: number; lemonVariantId?: string | null; stripePriceId?: string | null }>>({});
-  const [countryOverrides, setCountryOverrides] = useState<Record<string, { currency: string; price: number; symbol?: string; lemonVariantId?: string | null; stripePriceId?: string | null }>>({});
+  const [pricesByCurrency, setPricesByCurrency] = useState<Record<string, { price: number; lemonVariantId?: string | null }>>({});
+  const [countryOverrides, setCountryOverrides] = useState<Record<string, { currency: string; price: number; symbol?: string; lemonVariantId?: string | null }>>({});
 
   // Form state
   const [slug, setSlug] = useState("");

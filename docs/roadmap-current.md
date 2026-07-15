@@ -1,6 +1,6 @@
 # Courser Roadmap — Current
 
-> **Status:** Pre-V1 GA. Priorità: drenare legacy data (NextAuth tables, Stripe ordini attivi) dal DB di produzione, stabilizzare test/typecheck suite, completare architettura DM/Conversation canonica.
+> **Status:** Pre-V1 GA. Priorità: drenare legacy data (NextAuth tables) dal DB di produzione, stabilizzare test/typecheck suite, completare architettura DM/Conversation canonica.
 >
 > Il vecchio [ROADMAP.md](../ROADMAP.md) è **DEPRECATED** (vedi banner in cima). Per la specifica MVP legacy vedi [docs/archive/MVP-SPEC-initial.md](archive/MVP-SPEC-initial.md).
 
@@ -16,13 +16,7 @@ Questi item sono **gate strict** che impediscono il release V1.x GA. Devono esse
 - **Verify gate:** `npx tsx scripts/audit-v1-readiness.ts` → `orphanProducts` count deve essere `0`.
 - **Drain path:** `scripts/products/backfill-primary-creator.ts` (idempotent) per assegnare ogni prodotto al primary creator.
 
-### 1.2 Active Stripe Orders
-
-- **Why it matters:** Schema dual-provider (`Order.paymentProvider` enum) complica webhook + admin. V1.x vuole solo Lemon Squeezy.
-- **Verify gate:** `npx tsx scripts/audit-v1-readiness.ts` → `activeStripeOrders` deve essere `0`.
-- **Drain path:** Refund active Stripe orders (o migrare manualmente a Lemon Squeezy), poi crollare il codice dual-provider + rimuovere `/api/webhooks/stripe`.
-
-### 1.3 Residual NextAuth Tables (`Account`, `Session`, `VerificationToken`)
+### 1.2 Residual NextAuth Tables (`Account`, `Session`, `VerificationToken`)
 
 - **Why it matters:** Auth ora è 100% Supabase. Le 3 tabelle NextAuth rimaste sono debito puro: occupano spazio + complicano migrations + mascherano regressioni RLS.
 - **Verify gate:** `npx tsx scripts/audit-v1-readiness.ts` → somma `accountCount + sessionCount + verificationTokenCount` deve essere `0`.

@@ -157,8 +157,8 @@
   - Link tracciato per partner
   - Commissione per vendita (% o fisso)
   - Dashboard affiliato (click, conversioni, commissioni)
-  - Payout automatico (Stripe Connect)
-- [ ] **Stripe Connect** per marketplace (creator esterni vendono)
+  - Payout automatico (Lemon Squeezy Affiliates)
+- [ ] **Lemon Squeezy Affiliates** per marketplace (creator esterni vendono)
 
 ---
 
@@ -398,7 +398,7 @@
 - [ ] **Age verification** (COPPA per minori)
 
 ### 🟡 Pagamenti & Tasse
-- [ ] **Stripe Tax** per 100+ paesi
+- [ ] **Gestione automatica tasse** per 100+ paesi
 - [ ] **VAT handling** EU (MOSS, OSS)
 - [ ] **Invoice generation** (fattura PDF per ogni acquisto)
 - [ ] **Receipt** nella lingua dell'utente

@@ -1,6 +1,6 @@
 // ─── AmishHero — Hero section with badge, title, CTAs ─────
 
-import { ArrowRight, Shield, Lock, CreditCard, Check, Star, BookOpen } from "lucide-react";
+import { ArrowRight, Shield, Lock, Check, Star, BookOpen } from "lucide-react";
 import { TrackedCtaButton } from "@/components/course/tracked-cta-button";
 import type { AmishProps, AmishT } from "./types";
 
@@ -111,18 +111,6 @@ export function AmishHero({
                 <div className="flex items-center gap-1.5 text-xs font-medium text-gray-600">
                   <Lock className="w-3.5 h-3.5" style={{ color: accent }} />
                   {t("hero_trust_ssl")}
-                </div>
-              )}
-              {t("hero_trust_stripe") && (
-                <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600">
-                  <CreditCard className="w-3.5 h-3.5" style={{ color: accent }} />
-                  {t("hero_trust_stripe")}
-                </div>
-              )}
-              {t("hero_trust_paypal") && (
-                <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600">
-                  <CreditCard className="w-3.5 h-3.5" style={{ color: accent }} />
-                  {t("hero_trust_paypal")}
                 </div>
               )}
               {t("hero_trust_guarantee") && (

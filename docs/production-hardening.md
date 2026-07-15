@@ -8,11 +8,11 @@
 
 | # | Check | Status | Evidence (file:line) | Verification | Gap class |
 |---|---|---|---|---|---|
-| 1 | Separate test/prod envs | ⚠️ PARTIAL | `src/lib/env.ts` L52-90 (flat STRIPE_SECRET_KEY slot) | `vercel env ls` → preview vs production slots hold different `sk_*` keys; `grep -rn 'sk_test_\|sk_live_' src/` → no code-path discrimination (Vercel is the source of truth) | ACCEPTABLE-AS-IS — Vercel env separation (out-of-repo) |
+| 1 | Separate test/prod envs | ✅ | `src/lib/env.ts` (flat LEMONSQUEEZY_API_KEY slot) | `vercel env ls` → preview vs production slots hold different keys; no code-path discrimination (Vercel is the source of truth) | ACCEPTABLE-AS-IS — Vercel env separation (out-of-repo) |
 | 2 | Confirmed no leaked secrets | ✅ | `.github/workflows/secrets-scan.yml` L41-48 (gitleaks-action@v2 on push + PR to main) | Latest run on main: green. gitleaks uses built-in ruleset (no `.gitleaks.toml` needed) | None |
-| 3 | Rate limits on login/checkout/API | ✅ | `src/lib/utils/rate-limit.ts` L171-204 (`withRateLimit` wrapper) wired on **18 routes** including `checkout`, `account/profile`, `account/avatar`, `messages`, `products`, `upload` | `npx playwright test tests/e2e/checkout.stripe.spec.ts` → expects 429 on burst; `curl -H 'X-Forwarded-For: 1.2.3.4' .../api/checkout` × 31 → expects 429 | None |
+| 3 | Rate limits on login/checkout/API | ✅ | `src/lib/utils/rate-limit.ts` L171-204 (`withRateLimit` wrapper) wired on **18 routes** including `checkout`, `account/profile`, `account/avatar`, `messages`, `products`, `upload` | `npx playwright test tests/e2e/checkout.ls.spec.ts` → expects 429 on burst; `curl -H 'X-Forwarded-For: 1.2.3.4' .../api/checkout` × 31 → expects 429 | None |
 | 4 | Server-enforced admin auth | ✅ | `src/lib/auth/require-admin.ts` L11-24 (`requireAdmin()` via `getServerUser` + `isAdmin(role)`) wired on **9 invocations across 6 distinct route files**: `translate`, `config`, `upload`, `products` (×2 verbs), `products/[id]` (×3 verbs), `products/[id]/duplicate` | `curl -X DELETE /api/products/<id>` unauthenticated → 401; with non-admin session → 403; with admin session → 200 | None |
-| 5 | Signed webhooks verified | ✅ | `src/app/api/webhooks/stripe/route.ts` L23-37 (`Stripe.webhooks.constructEvent`); `src/app/api/webhooks/lemonsqueezy/route.ts` L20-40 (`crypto.createHmac('sha256', ...)` + `crypto.timingSafeEqual`) | `curl -X POST /api/webhooks/stripe` no signature → 400; with bad signature → 400; with valid `whsec_*` test signature → 200 | None |
+| 5 | Signed webhooks verified | ✅ | `src/app/api/webhooks/lemonsqueezy/route.ts` L20-40 (`crypto.createHmac('sha256', ...)` + `crypto.timingSafeEqual`) | `curl -X POST /api/webhooks/lemonsqueezy` no signature → 400; with bad signature → 400; with valid secret → 200 | None |
 | 6 | `ALERT_WEBHOOK_URL` live | ✅ | `src/lib/logging/server-error-sink.ts` L92-114 fires on every server error; `.github/workflows/ci.yml` deploy-gate fires on every red | `curl -X POST -H 'Content-Type: application/json' -d '{"text":"ping"}' "$ALERT_WEBHOOK_URL"` → 2xx; force one server error to confirm payload posts | None |
 | 7 | Uptime check active | ⚠️ PARTIAL | `src/app/api/health/route.ts` L60-99 (`GET` returns 200/503 + DB ping + Redis ping); `vercel.json` L2 has empty `"crons": []` | `curl https://[prod]/api/health` → 200 with `{ services: { database: { status: "up" } } }` | DEPLOY-TIME WIRING — external monitor (BetterStack / UptimeRobot) must ping the endpoint |
 | 8 | Rollback procedure documented | ✅ | `docs/production.md` §2 — 5 scenarios (a-e) incl. code-and-schema interlock; cross-references deploy runbook §1, alert escalation §6 | `grep -c '^### 2\.' docs/production.md` ≥ 5 (5 scenarios present) | None |
@@ -25,28 +25,22 @@
 
 ### 1. Separate test/prod envs ⚠️ PARTIAL
 
-**Architecture.** `src/lib/env.ts` uses a **flat single-slot** model: `STRIPE_SECRET_KEY` (one var, accepts `sk_test_*` OR `sk_live_*`). The same holds for `STRIPE_WEBHOOK_SECRET`, `LEMONSQUEEZY_API_KEY`, `LEMONSQUEEZY_WEBHOOK_SECRET` (NB: `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` was REMOVED in C2a commit `4242f18`; V1.x retains `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` solely for the legacy webhook drain — see README §V1.x warning box). **There is no code path that discriminates `sk_test_*` from `sk_live_*`** — that discrimination lives in Vercel environment config (which is out-of-repo):
+**Architecture.** `src/lib/env.ts` uses a **flat single-slot** model for `LEMONSQUEEZY_API_KEY`, `LEMONSQUEEZY_WEBHOOK_SECRET`, etc. **There is no code path that discriminates test keys from live keys** — that discrimination lives in Vercel environment config (which is out-of-repo):
 
 - **Vercel → Project → Settings → Environment Variables** has three scopes: `Production`, `Preview`, `Development`.
-- Production env holds `STRIPE_SECRET_KEY=sk_live_*`.
-- Preview env holds `STRIPE_SECRET_KEY=sk_test_*`.
-- The same `STRIPE_SECRET_KEY` slot reads different values per deploy.
+- Production env holds live LemonSqueezy keys.
+- Preview env holds test LemonSqueezy keys.
+- The same env slot reads different values per deploy.
 
 **Verification (out-of-repo):**
 
 ```bash
-# 1. Confirm Vercel env separation
-vercel env ls --environment production | grep STRIPE_SECRET_KEY
-# Expect: sk_live_* (no sk_test_* in production)
-vercel env ls --environment preview | grep STRIPE_SECRET_KEY
-# Expect: sk_test_*
-
-# 2. Confirm code doesn't care which mode
-grep -rn 'sk_test_\|sk_live_' src/
-# Expect: 0 matches — no code-path discrimination, by design
+# Confirm Vercel env separation
+vercel env ls --environment production | grep LEMONSQUEEZY_API_KEY
+vercel env ls --environment preview | grep LEMONSQUEEZY_API_KEY
 ```
 
-**Why this is the right architecture.** Test/prod separation at the env-config layer follows the Vercel + 12-factor convention: the application reads a single `STRIPE_SECRET_KEY` slot; the deploy environment chooses the value. Splitting into `STRIPE_LIVE_SECRET_KEY` would force conditional logic in every Stripe call site.
+**Why this is the right architecture.** Test/prod separation at the env-config layer follows the Vercel + 12-factor convention: the application reads a single `LEMONSQUEEZY_API_KEY` slot; the deploy environment chooses the value.
 
 **Gap.** Doc-only infrastructure intent. The risk is operational: an engineer copying test creds to prod. Mitigation = `docs/production.md` §5 secret-rotation procedure already names this as a checklist item.
 
@@ -96,7 +90,7 @@ docker run --rm -v "$PWD:/repo" zricethezav/gitleaks detect \
 | `PUBLIC` | 100 req/min | Public APIs (products/find, config, translate-AI, conversations read) |
 | `AUTH` | 30 req/min | Sensitive endpoints (checkout, profile, avatar upload) |
 | `MESSAGES` | 10 req/min | DM send (anti-spam) |
-| `WEBHOOK` | 200 req/min | Stripe/LS — burst-tolerant, signature-verified |
+| `WEBHOOK` | 200 req/min | LS — burst-tolerant, signature-verified |
 
 `withRateLimit(handler, tier)` wraps each route handler. Backed by Redis (`INCR` + `EXPIRE`) with an in-memory fallback when Redis is offline. Returns `429` with `Retry-After` + `X-RateLimit-*` headers.
 
@@ -124,8 +118,7 @@ withRateLimit wired on 18 API routes:
 
 | Route | Why skipped |
 |---|---|
-| `/api/webhooks/stripe` | Signature-verified; bursts expected from Stripe retry behavior |
-| `/api/webhooks/lemonsqueezy` | Same |
+| `/api/webhooks/lemonsqueezy` | Signature-verified; bursts expected from LS retry behavior |
 | `/api/health` | Uptime monitors must call it continuously; rate limit would block them |
 | `/api/auth/*` (Supabase Auth server) | Supabase Auth enforces its own server-side rate limits. **Verify by reading each `src/app/api/auth/*/route.ts`** — any handler running game logic beyond the Supabase Auth redirect must be wrapped with `withRateLimit(..., 'AUTH')` |
 | `/api/admin/*` | Admin-internal; gated by `requireAdmin` instead |
@@ -210,25 +203,6 @@ curl -i -X DELETE https://[prod]/api/products/abc123 \
 
 ### 5. Signed webhooks verified ✅
 
-**Stripe.** `src/app/api/webhooks/stripe/route.ts` L23-37:
-
-```typescript
-const sig = request.headers.get("stripe-signature");
-if (!sig || !process.env.STRIPE_WEBHOOK_SECRET) {
-  return NextResponse.json({ error: "Missing signature" }, { status: 400 });
-}
-
-try {
-  event = getStripe().webhooks.constructEvent(
-    body, sig, process.env.STRIPE_WEBHOOK_SECRET,
-  );
-} catch (err) {
-  return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
-}
-```
-
-`Stripe.webhooks.constructEvent` performs HMAC-SHA256 of the body using `STRIPE_WEBHOOK_SECRET` and compares against the `stripe-signature` header (which contains `t=<timestamp>,v1=<hmac>`). Wrong/missing → 400.
-
 **Lemon Squeezy.** `src/app/api/webhooks/lemonsqueezy/route.ts` L20-40:
 
 ```typescript
@@ -245,22 +219,20 @@ if (!crypto.timingSafeEqual(Buffer.from(digest), Buffer.from(signature))) {
 
 **Idempotency on both.** Both handlers write to `prisma.processedWebhook` before returning 200. Re-deliveries of the same event are short-circuited at the top of the handler.
 
-**Verification (Stripe CLI is the canonical tool):**
+**Verification:**
 
 ```bash
 # 1. Confirm bad signature → 400
-curl -X POST https://[prod]/api/webhooks/stripe \
-  -H "stripe-signature: t=1234,v1=deadbeef" \
-  -d '{"id":"evt_test","type":"checkout.session.completed"}'
+curl -X POST https://[prod]/api/webhooks/lemonsqueezy \
+  -H "x-signature: invalid" \
+  -d '{"data":{"type":"orders"}}'
 # Expect: HTTP/1.1 400
 
 # 2. Confirm good signature → 200 (or 200+purchase)
-stripe trigger checkout.session.completed
-# Expect: webhook delivery succeeds (200), order appears in DB
+# Use the LS test webhook or manually compute HMAC-SHA256 with LEMONSQUEEZY_WEBHOOK_SECRET.
 
 # 3. Confirm idempotency: replay the same event → no duplicate order
-stripe events resend evt_test_xxx
-# Expect: 200 received:true (already-processed), no new order in DB
+# POST the same LS payload twice; second returns 200 without creating a new order.
 ```
 
 ---
@@ -414,7 +386,6 @@ Use this punch list to declare the production hardening pass complete.
 ### Code-surface (in-repo)
 - [ ] `withRateLimit` wired on checkout, account/profile, account/avatar, messages, products, upload (18 routes total)
 - [ ] `requireAdmin()` wired on every admin mutation (translate, config, upload, products × 2 verbs, products/[id] × 3 verbs, products/[id]/duplicate)
-- [ ] Stripe webhook verifies via `Stripe.webhooks.constructEvent`
 - [ ] LS webhook verifies via `crypto.createHmac('sha256', secret)` + `crypto.timingSafeEqual`
 - [ ] Both handlers call `prisma.processedWebhook.create` for idempotency
 - [ ] `/api/health` returns 200/503 with DB + Redis status
@@ -424,9 +395,6 @@ Use this punch list to declare the production hardening pass complete.
 - [ ] `docs/production.md` §2 has ≥ 5 rollback scenarios + code-and-schema interlock + "what NEVER to do" call-out
 
 ### Deploy-time (out-of-repo)
-- [ ] Vercel Production env holds `STRIPE_SECRET_KEY=sk_live_*` (test in Preview only)
-- [ ] Vercel Production env holds `STRIPE_WEBHOOK_SECRET=whsec_*` (needed for §5 Stripe signature verification — without it §5 400s every stripe trigger)
-- [x] ~~Vercel Production env holds `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_*`~~ — REMOVED in C2a commit `4242f18` (publishable key non più in env registry). `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` restano required (legacy webhook drain — see Fase 8).
 - [ ] Vercel Production env holds `LEMONSQUEEZY_API_KEY=<live>` (test in Preview only)
 - [ ] Vercel Production env holds `LEMONSQUEEZY_WEBHOOK_SECRET=<live>` (needed for §5 LS HMAC verification)
 - [ ] `ALERT_WEBHOOK_URL` set in Vercel Production env + receiver responds 2xx (and must NOT be unset — silent-degradation)
@@ -449,7 +417,6 @@ Use this punch list to declare the production hardening pass complete.
 | `src/app/api/checkout/route.ts` | #3 (AUTH-tier rate limit) |
 | `src/app/api/account/profile/route.ts` | #3 (AUTH-tier rate limit) |
 | `src/app/api/auth/*` | #3 (relies on Supabase Auth server-side limits) |
-| `src/app/api/webhooks/stripe/route.ts` | #5 (Stripe constructEvent + idempotency) |
 | `src/app/api/webhooks/lemonsqueezy/route.ts` | #5 (HMAC + timingSafeEqual + idempotency) |
 | `src/app/api/health/route.ts` | #7 (DB/Redis/uptime probe) |
 | `.github/workflows/secrets-scan.yml` | #2 (gitleaks on push + PR) |

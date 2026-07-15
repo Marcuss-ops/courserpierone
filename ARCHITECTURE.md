@@ -65,7 +65,7 @@ Stack di supporto: **PostgreSQL** + **Prisma 5**, **Upstash Redis** + **ioredis*
 
 - **Lemon Squeezy**: Merchant of Record unico. Gestisce checkout hosted, valuta, tasse (VAT/sales tax) e fatturazione.
 - **Webhook → Order**: `src/app/api/webhooks/lemonsqueezy/route.ts` riceve `order_created` + `subscription_*` events, scrive `Order` row + `AccessGrant` row (MCR Phase 2).
-- **Variant ID**: `Product.lemonVariantId` è il campo canonico (legacy `Product.stripePriceId` è marcato come legacy e scheduled for Fase 8 removal).
+- **Variant ID**: `Product.lemonVariantId` è il campo canonico per il checkout Lemon Squeezy.
 - **Valuta dinamica**: Rilevamento automatico dal browser/posizione utente (`src/lib/i18n/locale-resolver.ts`) → `Product.pricesByCurrency` lookup → override per paese (`Product.countryOverrides`).
 - **Consegna automatica**: Webhook LS → `processOrder` happy path → `AccessGrant.status='active'` → `AccessGate` autorizza accesso al contenuto.
 

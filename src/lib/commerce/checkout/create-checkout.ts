@@ -23,12 +23,7 @@ export type CheckoutProduct = CreateCheckoutInput["product"];
  * twice (e.g., HMR) — that's a programmer error, surfaced loudly.
  *
  * Phase 7 cleanup (LS-only MoR): only Lemon Squeezy is registered for
- * new-session creation. The legacy Stripe webhook at
- * `/api/webhooks/stripe/route.ts` remains for processing pre-cutover
- * refund/dispute events; no new checkout session is ever created via
- * Stripe. The legacy provider module
- * `src/lib/commerce/payments/providers/legacy/stripe/` was removed in
- * the C1a cleanup commit.
+ * new-session creation.
  */
 paymentProviderRegistry.register(lemonSqueezyProvider);
 
@@ -45,7 +40,7 @@ paymentProviderRegistry.register(lemonSqueezyProvider);
  *       succeeds but the redirect is never followed), and shapes the
  *       error surface upstream.
  *
- * Note: this class NO LONGER instantiates Stripe/Lemon Squeezy clients
+ * Note: this class NO LONGER instantiates Lemon Squeezy clients
  * nor constructs checkout requests inline — those concerns have moved
  * into the providers. The orchestrator's only "in-flight" computation
  * is the abandoned-cart side-effect after URL arrives.

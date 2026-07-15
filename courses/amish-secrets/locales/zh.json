@@ -349,9 +349,6 @@
       "hero_secure": "安全付费,即时访问",
       "hero_verified": "* 核实数据",
       "hero_trust_ssl": "SSL 安全",
-      "hero_trust_stripe": "Stripe",
-      "hero_trust_paypal": "PayPal",
-      "offer_stripe_paypal": "Stripe / PayPal",
       "offer_invoice": "即时发票",
       "footer_cookies": "Cookie",
       "footer_withdrawal": "欧盟14天退出权",
@@ -457,5 +454,23 @@
     "ebook_desc": "用eBook格式直接从网络阅读器读取完整指南或下载离线PDF.",
     "format_label": "PDF / 网页格式",
     "read_label": "读取"
+  },
+  "pricing": {
+    "free": {
+      "features": [
+        "1 Product",
+        "3 Languages",
+        "Basic analytics"
+      ]
+    },
+    "pro": {
+      "features": [
+        "Unlimited products",
+        "20 Languages",
+        "AI translations",
+        "Advanced analytics",
+        "International payments"
+      ]
+    }
   }
 }

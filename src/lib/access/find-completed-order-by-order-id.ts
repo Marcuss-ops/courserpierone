@@ -21,7 +21,7 @@ import type { Order } from "@prisma/client";
  *   - Pattern B è una verifica di PRESENZA di un Order.completed per
  *     prodotto, NON una user-relationship. La "ownership" è implicita
  *     nel fatto che l'attaccante conosce l'orderId (cuid Prisma o
- *     Stripe cs_test_...) — entrambi sono randomici crypto-grade.
+ *     provider order id) — entrambi sono randomici crypto-grade.
  *   - Cross-key by orderId usa un indice diverso da userId:
  *     `@@index([providerOrderId])` (per il provider cross-key) e PK
  *     lookup su `Order.id` (per il cuid cross-key). Stesso pattern
@@ -32,12 +32,12 @@ import type { Order } from "@prisma/client";
  *     - `Order.id`            (PK lookup, formato cuid "ckxxx...")
  *     - `Order.providerOrderId` (`@@unique([paymentProvider, providerOrderId])`
  *       composito + `@@index([providerOrderId])` denormalizzato,
- *       namespace-prefixed "cs_test_..." / "cs_live_..." per Stripe)
+ *       e.g. LS order_...)
  *
  *   Collision-free: i formati sono strutturalmente disjoint
- *   (cuid `ck*` vs Stripe `cs_*`) — lo stesso query plan NON può
+ *   (cuid `ck*` vs provider id) — lo stesso query plan NON può
  *   matchare due row diverse con lo stesso orderId perché lo stesso
- *   valore non può essere sia un cuid che uno Stripe session ID.
+ *   valore non può essere sia un cuid che un provider order ID.
  *
  *   Note Prisma: `prisma.order.findFirst` ritorna la prima row che
  *   matcha l'OR. Per le due chiavi indicizzate, la latenza è
@@ -67,7 +67,7 @@ import type { Order } from "@prisma/client";
  *   - NON verifica user-membership (Pattern B ha bypass esplicito,
  *     perché è l'utente GUEST, non loggato).
  *   - NON verifica payment-provider integrity (la verifica della
- *     firma Stripe/LemonSqueezy sta nei webhook handlers).
+ *     firma LemonSqueezy sta nei webhook handlers).
  *   - NON gestisce admin bypass (per Pattern B l'admin non c'è —
  *     l'admin ha un suo path loggato tramite Pattern A).
  *
@@ -85,8 +85,7 @@ import type { Order } from "@prisma/client";
 export interface FindCompletedOrderByOrderIdInput {
   /**
    * Order identifier. AMBIGUOUS by design: può essere l'internal
-   * Prisma `Order.id` (cuid, formato "ckxxx...") OPPURE l'external
-   * `Order.providerOrderId` (Stripe cs_test_..., LemonSqueezy
+   * Prisma `Order.id` (cuid, formato "ckxxx...") OPPURE l'external *   `Order.providerOrderId` (LemonSqueezy
    * order_...). Il caller passa il valore verbatim dal URL/query;
    * il helper fa l'OR internamente. REQUIRED (falsy → null).
    */

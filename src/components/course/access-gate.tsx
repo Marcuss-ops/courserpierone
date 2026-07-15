@@ -71,7 +71,7 @@ export async function AccessGate({
   if (!hasAccess && orderId) {
     const order = await prisma.order.findFirst({
       where: {
-        OR: [{ id: orderId }, { providerOrderId: orderId }, { stripeSessionId: orderId }],
+        OR: [{ id: orderId }, { providerOrderId: orderId }],
         productId: product.id,
       },
     });

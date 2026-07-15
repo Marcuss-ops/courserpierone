@@ -349,9 +349,6 @@
       "hero_secure": "Bezpečná platba, okamžitý prístup",
       "hero_verified": "*overené údaje",
       "hero_trust_ssl": "SSL zabezpečené",
-      "hero_trust_stripe": "Stripe",
-      "hero_trust_paypal": "PayPal",
-      "offer_stripe_paypal": "Stripe / PayPal",
       "offer_invoice": "Okamžitá faktúra",
       "footer_cookies": "Cookie",
       "footer_withdrawal": "14-dňové právo EÚ na odstúpenie od zmluvy",
@@ -457,5 +454,23 @@
     "ebook_desc": "Prečítajte si kompletný sprievodca vo formáte eBook priamo z webovej čítačky alebo si stiahnite offline PDF.",
     "format_label": "PDF / Web Format",
     "read_label": "Čítanie"
+  },
+  "pricing": {
+    "free": {
+      "features": [
+        "1 Product",
+        "3 Languages",
+        "Basic analytics"
+      ]
+    },
+    "pro": {
+      "features": [
+        "Unlimited products",
+        "20 Languages",
+        "AI translations",
+        "Advanced analytics",
+        "International payments"
+      ]
+    }
   }
 }

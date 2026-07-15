@@ -37,7 +37,7 @@ export interface CourseConfig {
   /** Locale-keyed chapter titles + page number. Access titles via `chapter[lang]`. */
   ebookChapters: { page: number; [locale: string]: string | number }[];
   /** Country-specific price overrides: { "BR": { currency: "BRL", price: 9900, symbol: "R$", ... } } */
-  countryOverrides?: Record<string, { currency: string; price: number; symbol?: string; lemonVariantId?: string; stripePriceId?: string }> | string;
+  countryOverrides?: Record<string, { currency: string; price: number; symbol?: string; lemonVariantId?: string }> | string;
 }
 
 export interface LanguageEntry {

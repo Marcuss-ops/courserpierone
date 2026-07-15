@@ -349,9 +349,6 @@
       "hero_secure": "Коопсуз төлөм, дароо кирүү",
       "hero_verified": "* текшерилген маалыматтар",
       "hero_trust_ssl": "SSL коопсуз",
-      "hero_trust_stripe": "Stripe",
-      "hero_trust_paypal": "PayPal",
-      "offer_stripe_paypal": "Stripe / PayPal",
       "offer_invoice": "Тез эсеп-фактура",
       "footer_cookies": "Cookie",
       "footer_withdrawal": "14 күндүк артка чегинүү укугу",
@@ -457,5 +454,23 @@
     "ebook_desc": "Толук колдонмону веб-окуучудан түздөн-түз электрондук китеп форматында окуңуз же оффлайн PDF жүктөп алыңыз.",
     "format_label": "PDF веб форматы",
     "read_label": "Окууну окуңуз"
+  },
+  "pricing": {
+    "free": {
+      "features": [
+        "1 Product",
+        "3 Languages",
+        "Basic analytics"
+      ]
+    },
+    "pro": {
+      "features": [
+        "Unlimited products",
+        "20 Languages",
+        "AI translations",
+        "Advanced analytics",
+        "International payments"
+      ]
+    }
   }
 }

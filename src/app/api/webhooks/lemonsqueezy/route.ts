@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { processOrder } from "@/lib/services/order-service";
+import { processOrder } from "@/lib/commerce/orders/complete-order";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import { prisma } from "@/lib/db/prisma";
 import { Prisma } from "@prisma/client";
@@ -13,13 +13,29 @@ import type {
 // Force dynamic — webhook non può essere statico
 export const dynamic = "force-dynamic";
 
+function safeStringify(value: unknown): string {
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return "[unserializable]";
+  }
+}
+
 async function POST_IMPL(request: NextRequest) {
   const body = await request.text();
   const signature = request.headers.get("x-signature");
+  const requestId = crypto.randomUUID();
 
   const webhookSecret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET;
 
+  console.log(`[LS Webhook ${requestId}] Received request`, {
+    contentType: request.headers.get("content-type"),
+    contentLength: request.headers.get("content-length"),
+    hasSignature: !!signature,
+  });
+
   if (!webhookSecret) {
+    console.error(`[LS Webhook ${requestId}] LEMONSQUEEZY_WEBHOOK_SECRET is not configured`);
     return NextResponse.json({ error: "Webhook secret not configured" }, { status: 500 });
   }
 
@@ -42,14 +58,21 @@ async function POST_IMPL(request: NextRequest) {
   let payload: LsWebhookPayload;
   try {
     payload = JSON.parse(body);
-  } catch {
+  } catch (parseError) {
+    console.error(`[LS Webhook ${requestId}] Invalid JSON body:`, parseError);
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
   const eventName = payload.meta?.event_name;
   const data = payload.data;
 
+  console.log(`[LS Webhook ${requestId}] Parsed payload`, {
+    eventName,
+    dataId: data?.id,
+  });
+
   if (!eventName || !data) {
+    console.log(`[LS Webhook ${requestId}] Missing eventName or data, acknowledging`);
     return NextResponse.json({ received: true });
   }
 
@@ -110,7 +133,7 @@ async function POST_IMPL(request: NextRequest) {
       const attributes = data.attributes;
       const orderId = String(data.id);
 
-      console.log(`[LS Webhook] order_created: ${orderId}, email: ${attributes?.user_email ?? attributes?.customer_email}`);
+      console.log(`[LS Webhook ${requestId}] order_created: ${orderId}, email: ${attributes?.user_email ?? attributes?.customer_email}`);
 
       await handleLsOrder(payload.meta, attributes, orderId);
     }
@@ -172,7 +195,7 @@ async function POST_IMPL(request: NextRequest) {
 
     // ── subscription_payment_failed → revoke access (Order + AccessGrant atomically) ──
     // Same pattern as subscription_cancelled above. Conceptually a
-    // payment-processor-driven revocation (Stripe-equivalent for LS).
+    // payment-processor-driven revocation.
     if (eventName === "subscription_payment_failed") {
       const { count } = await revokeCompletedLsOrders(String(data.id), "failed");
       console.log(
@@ -269,8 +292,30 @@ async function POST_IMPL(request: NextRequest) {
     }
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    const isTransient = msg.includes("ECONNREFUSED") || msg.includes("timeout") || msg.includes("rate limit");
-    console.error(`[LS Webhook] Failed to process event (${isTransient ? "retryable" : "permanent"}):`, error);
+    const stack = error instanceof Error ? error.stack : undefined;
+    const isTransient = msg.includes("ECONNREFUSED") || msg.includes("timeout") || msg.includes("rate limit");    const payloadSummary = safeStringify({
+      meta: payload?.meta,
+      data: {
+        id: data?.id,
+        attributes: data?.attributes
+          ? {
+              variant_id: data.attributes.variant_id,
+              product_variant_id: data.attributes.product_variant_id,
+              total: data.attributes.total,
+              currency: data.attributes.currency,
+              customer_country: data.attributes.customer_country,
+              country: data.attributes.country,
+            }
+          : undefined,
+      },
+    });
+
+    console.error(
+      `[LS Webhook ${requestId}] Failed to process event (${isTransient ? "retryable" : "permanent"}): ${msg}\n` +
+        `Stack: ${stack ?? "N/A"}\n` +
+        `Payload summary: ${payloadSummary}`,
+    );
+
     if (isTransient) {
       return NextResponse.json({ error: "Temporary failure" }, { status: 503 });
     }

@@ -349,9 +349,6 @@
       "hero_secure": "Pagamento seguro, acesso instantâneo",
       "hero_verified": "* Dados verificados",
       "hero_trust_ssl": "Segurança SSL",
-      "hero_trust_stripe": "Stripe",
-      "hero_trust_paypal": "PayPal",
-      "offer_stripe_paypal": "Stripe / PayPal",
       "offer_invoice": "Factura instantânea",
       "footer_cookies": "Cookie",
       "footer_withdrawal": "Direito de retirada de 14 dias da UE",
@@ -457,5 +454,23 @@
     "ebook_desc": "Leia o guia completo em formato eBook diretamente do web reader ou baixe o PDF offline.",
     "format_label": "PDF / Formato Web",
     "read_label": "Ler"
+  },
+  "pricing": {
+    "free": {
+      "features": [
+        "1 Product",
+        "3 Languages",
+        "Basic analytics"
+      ]
+    },
+    "pro": {
+      "features": [
+        "Unlimited products",
+        "20 Languages",
+        "AI translations",
+        "Advanced analytics",
+        "International payments"
+      ]
+    }
   }
 }

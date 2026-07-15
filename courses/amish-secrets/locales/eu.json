@@ -349,9 +349,6 @@
       "hero_secure": "Ordainketa segurua, berehalako sarbidea",
       "hero_verified": "* Egiaztatutako datuak",
       "hero_trust_ssl": "SSL segurua",
-      "hero_trust_stripe": "Stripe",
-      "hero_trust_paypal": "PayPal",
-      "offer_stripe_paypal": "Stripe / PayPal",
       "offer_invoice": "Berehalako faktura",
       "footer_cookies": "Cookie",
       "footer_withdrawal": "EBko 14 eguneko atzera egiteko eskubidea",
@@ -457,5 +454,23 @@
     "ebook_desc": "Irakurri gida osoa eBook formatuan web-irakurletik zuzenean edo deskargatu lineaz kanpoko PDFa.",
     "format_label": "PDF / Web formatua",
     "read_label": "Irakurri"
+  },
+  "pricing": {
+    "free": {
+      "features": [
+        "1 Product",
+        "3 Languages",
+        "Basic analytics"
+      ]
+    },
+    "pro": {
+      "features": [
+        "Unlimited products",
+        "20 Languages",
+        "AI translations",
+        "Advanced analytics",
+        "International payments"
+      ]
+    }
   }
 }

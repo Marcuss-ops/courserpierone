@@ -349,9 +349,6 @@
       "hero_secure": "सुरक्षित भुगतान, तत्काल पहुंच",
       "hero_verified": "* सत्यापित डेटा",
       "hero_trust_ssl": "SSL सुरक्षित",
-      "hero_trust_stripe": "Stripe",
-      "hero_trust_paypal": "PayPal",
-      "offer_stripe_paypal": "Stripe / PayPal",
       "offer_invoice": "तत्काल चालान",
       "footer_cookies": "Cookie",
       "footer_withdrawal": "यूरोपीय संघ 14-day वापसी का अधिकार",
@@ -457,5 +454,23 @@
     "ebook_desc": "वेब रीडर से सीधे ईबुक प्रारूप में पूर्ण गाइड पढ़ें या ऑफ़लाइन पीडीएफ डाउनलोड करें।",
     "format_label": "पीडीएफ / वेब प्रारूप",
     "read_label": "पढ़ें"
+  },
+  "pricing": {
+    "free": {
+      "features": [
+        "1 Product",
+        "3 Languages",
+        "Basic analytics"
+      ]
+    },
+    "pro": {
+      "features": [
+        "Unlimited products",
+        "20 Languages",
+        "AI translations",
+        "Advanced analytics",
+        "International payments"
+      ]
+    }
   }
 }

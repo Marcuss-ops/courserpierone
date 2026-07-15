@@ -5,7 +5,6 @@ import { Globe, MapPin } from "lucide-react";
 interface CurrencyPrice {
   price: number;
   lemonVariantId?: string | null;
-  stripePriceId?: string | null;
 }
 
 type PricesByCurrency = Record<string, CurrencyPrice>;
@@ -15,7 +14,6 @@ interface CountryOverride {
   price: number;
   symbol?: string;
   lemonVariantId?: string | null;
-  stripePriceId?: string | null;
 }
 
 type CountryOverrides = Record<string, CountryOverride>;
@@ -50,8 +48,6 @@ export function CurrencyPricesSection({
       updated[code].price = value as number;
     } else if (field === "lemonVariantId") {
       updated[code].lemonVariantId = value as string | null;
-    } else if (field === "stripePriceId") {
-      updated[code].stripePriceId = value as string | null;
     }
     onChange(updated);
   };
@@ -81,8 +77,6 @@ export function CurrencyPricesSection({
       updated[countryCode].symbol = value as string | undefined;
     } else if (field === "lemonVariantId") {
       updated[countryCode].lemonVariantId = value as string | null;
-    } else if (field === "stripePriceId") {
-      updated[countryCode].stripePriceId = value as string | null;
     }
     onCountryOverridesChange?.(updated);
   };
@@ -122,16 +116,6 @@ export function CurrencyPricesSection({
                     type="text"
                     value={pricesByCurrency[c.code]?.lemonVariantId ?? ""}
                     onChange={(e) => setCurrency(c.code, "lemonVariantId", e.target.value || null)}
-                    placeholder="opzionale"
-                    className="bg-zinc-800/50 border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white w-full"
-                  />
-                </div>
-                <div>
-                  <label className="text-[9px] text-zinc-600 font-bold uppercase tracking-wider mb-1 block">Stripe Price ID</label>
-                  <input
-                    type="text"
-                    value={pricesByCurrency[c.code]?.stripePriceId ?? ""}
-                    onChange={(e) => setCurrency(c.code, "stripePriceId", e.target.value || null)}
                     placeholder="opzionale"
                     className="bg-zinc-800/50 border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white w-full"
                   />

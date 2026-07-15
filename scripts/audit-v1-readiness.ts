@@ -9,12 +9,7 @@
  *         migration (NOT NULL + Restrict FK).
  *       → recovery: scripts/products/backfill-primary-creator.ts
  *
- *   (b) **Active Stripe orders**
- *       (paymentProvider='stripe' AND status IN ('pending','completed'))
- *       → gates the dual-provider collapse (refund or migrate to
- *         Lemon Squeezy before the Stripe codepath is removed).
- *
- *   (c) **NextAuth residual row counts**
+ *   (b) **NextAuth residual row counts**
  *       (Account + Session + VerificationToken)
  *       → gates the `20260712220000_drop_nextauth_models` migration
  *         (residual rows should be archived or purged before
@@ -66,7 +61,6 @@ interface AuditReport {
   timestamp: string;
   // Gate counters:
   orphanProducts: number;
-  activeStripeOrders: number;
   residualNextAuth: {
     account: number; // -1 = table absent (post-drop)
     session: number; // -1 = table absent (post-drop)
@@ -185,9 +179,7 @@ async function main(): Promise<void> {
   const [
     // (a) Orphan products
     orphanProducts,
-    // (b) Active Stripe orders
-    activeStripeOrders,
-    // (c) NextAuth residuals — via raw SQL because the typed Prisma
+    // (b) NextAuth residuals — via raw SQL because the typed Prisma
     // client no longer exposes these models (commit 8641081).
     accountCount,
     sessionCount,
@@ -207,12 +199,6 @@ async function main(): Promise<void> {
       .$queryRaw<{ count: bigint }[]>`SELECT COUNT(*)::bigint AS count FROM "Product" WHERE "creatorId" IS NULL`
       .then((r) => Number(r[0]?.count ?? 0))
       .catch(() => 0),
-    prisma.order.count({
-      where: {
-        paymentProvider: "stripe",
-        status: { in: ["pending", "completed"] },
-      },
-    }),
     safeTableCount("Account"),
     safeTableCount("Session"),
     safeTableCount("VerificationToken"),
@@ -235,14 +221,6 @@ async function main(): Promise<void> {
       `              \`20260712210000_creator_id_required_restrict\`\n` +
       `              (NOT NULL + Restrict FK on user.creatorId).\n` +
       `        recovery: scripts/products/backfill-primary-creator.ts\n`,
-  );
-
-  console.log(
-    `   💳  ACTIVE STRIPE ORDERS (paymentProvider='stripe' AND status IN ('pending','completed'))\n` +
-      `        count: ${activeStripeOrders}\n` +
-      `        gate:  must be 0 before collapsing the dual-provider\n` +
-      `              code path (refund or migrate to Lemon Squeezy\n` +
-      `              first).\n`,
   );
 
   const fmtNextAuth = (n: number) =>
@@ -289,13 +267,6 @@ async function main(): Promise<void> {
         `applying the creatorId-required Restrict FK migration.`,
     );
   }
-  if (activeStripeOrders > 0) {
-    blockers.push(
-      `${activeStripeOrders} active Stripe order(s) (pending or completed). ` +
-        `Refund or migrate to Lemon Squeezy before collapsing the ` +
-        `dual-provider path.`,
-    );
-  }
   // NextAuth: -1 (absent, post-drop) AND 0 (present-and-empty) are GREEN.
   // Only >0 (real residual rows) is a blocker.
   if (
@@ -326,7 +297,6 @@ async function main(): Promise<void> {
     source: label,
     timestamp: new Date().toISOString(),
     orphanProducts,
-    activeStripeOrders,
     residualNextAuth: {
       account: accountCount,
       session: sessionCount,

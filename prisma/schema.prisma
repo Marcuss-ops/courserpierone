@@ -31,13 +31,12 @@ model Product {
   creator          User     @relation("CreatorProducts", fields: [creatorId], references: [id], onDelete: Restrict)
 
   templateId       String   @default("lumio") // lumio | h612 | horizon
-  stripePriceId    String? // ID prezzo Stripe (legacy)
   lemonVariantId   String? // ID variante Lemon Squeezy
   lemonStoreId     String? // Store ID Lemon Squeezy (opzionale, per override)
   price            Int      @default(0) // in centesimi
   currency         String   @default("eur")
   status           String   @default("draft") // draft | published | archived
-  pricesByCurrency String? // JSON: { "USD": { "price": 5500, "symbol": "$", "stripePriceId": "...", "lemonVariantId": "..." }, ... }
+  pricesByCurrency String? // JSON: { "USD": { "price": 5500, "symbol": "$", "lemonVariantId": "..." }, ... }
   countryOverrides String? // JSON: { "BR": { "currency": "BRL", "price": 9900, "symbol": "R$", "lemonVariantId": "123456" }, ... }
   defaultLanguage  String   @default("it") // Lingua default prodotto (per resume locale / content fallback)
   createdAt        DateTime @default(now())
@@ -110,9 +109,7 @@ model Order {
   id                   String   @id @default(cuid())
   userId               String
   productId            String
-  paymentProvider      String   @default("stripe") // stripe | lemonsqueezy
-  stripeSessionId      String?  @unique // Stripe session ID (legacy)
-  stripeSubscriptionId String?  // Stripe subscription ID (per targeted revoke)
+  paymentProvider      String   @default("lemonsqueezy") // lemonsqueezy
   providerOrderId      String? // Order ID dal provider (Lemon Squeezy order ID)
   amount          Int // in centesimi
   currency        String
@@ -124,7 +121,6 @@ model Order {
   product Product @relation(fields: [productId], references: [id])
 
   @@unique([paymentProvider, providerOrderId])
-  @@index([stripeSubscriptionId])
   @@index([createdAt])
   @@index([userId, status])
   @@index([userId, productId, status])
@@ -388,7 +384,7 @@ model AbandonedCheckout {
   email           String
   productId       String
   locale          String    @default("it")
-  paymentProvider String // stripe | lemonsqueezy
+  paymentProvider String // lemonsqueezy
   checkoutUrl     String? // URL del checkout esterno
   status          String    @default("pending") // pending | recovered | expired
   reminderSentAt  DateTime?
@@ -463,12 +459,12 @@ model Conversation {
 }
 
 // ─── Webhook Idempotency ──────────────────────────────────
-// Previene ordini duplicati quando Stripe/LemonSqueezy
-// inviano lo stesso webhook più di una volta.
+// Previene ordini duplicati quando LemonSqueezy invia
+// lo stesso webhook più di una volta.
 model ProcessedWebhook {
   id         String   @id @default(cuid())
-  provider   String   // stripe | lemonsqueezy
-  deliveryId String   @unique // Stripe event.id | LS composite ID
+  provider   String   // lemonsqueezy
+  deliveryId String   @unique // LS composite ID
   eventType  String   // checkout.session.completed, order_created, etc.
   processedAt DateTime @default(now())
   createdAt  DateTime  @default(now())

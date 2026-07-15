@@ -19,7 +19,7 @@ Trasformare il traffico generato dai canali YouTube multilingua in una macchina 
 3. **Il traffico YouTube è il vantaggio competitivo**
    La piattaforma non deve dipendere da marketplace esterni. Deve convertire direttamente il traffico dei tuoi canali in clienti, dati e margini.
 
-4. **Stripe e pricing dinamico diventano centrali**
+4. **Lemon Squeezy e pricing dinamico diventano centrali**
    Prezzi, valute, lingua, tasse, offerte e checkout devono adattarsi al paese dell'utente.
 
 5. **Il contenuto deve essere archiviato in modo intelligente**
@@ -38,4 +38,4 @@ Trasformare il traffico generato dai canali YouTube multilingua in una macchina 
 
 - Il MVP parte con 3 lingue (italiano, inglese, spagnolo)
 - Il contenuto video è ospitato esternamente (YouTube/Vimeo) per il MVP
-- Stripe gestisce tasse e valute; la piattaforma delega questo calcolo
+- Lemon Squeezy gestisce tasse e valute; la piattaforma delega questo calcolo

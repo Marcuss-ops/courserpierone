@@ -4,8 +4,7 @@
  * Phase 1 of MCR — Payment Provider types.
  *
  * Defines the canonical PaymentProvider interface and the DTOs that
- * flow through it. Both providers (Lemon Squeezy and the legacy
- * Stripe fallback) implement this contract.
+ * flow through it. Lemon Squeezy implements this contract.
  *
  * Surface scope:
  *   - `createCheckout`  — fully implemented for both providers in this PR.
@@ -37,7 +36,6 @@ export interface CreateCheckoutInput {
   /** Pricing/pricing-identifier resolved upstream by PricingService. */
   pricing: {
     lemonVariantId?: string | null;
-    stripePriceId?: string | null;
     discountCode?: string;
   };
   /** Locale at time of checkout, e.g. "it-it", "en-us". */
@@ -52,9 +50,7 @@ export interface CreateCheckoutInput {
 
 export interface CheckoutSession {
   url: string;
-  /** Sole new-session provider as of Phase 7 (C1a cleanup). legacy
-   *  Stripe webhook events still flow through the registry but do not
-   *  produce new CheckoutSessions. */
+  /** Sole new-session provider as of Phase 7 (C1a cleanup). */
   provider: "lemonsqueezy";
 }
 
@@ -66,8 +62,8 @@ export interface CheckoutSession {
 // immediately call business logic" anti-pattern.
 
 export interface RawWebhook {
-  provider: "lemonsqueezy" | "stripe";
-  /** Provider-computed delivery id (LS: data.id + event_name, Stripe: event.id). */
+  provider: "lemonsqueezy";
+  /** Provider-computed delivery id (LS: data.id + event_name). */
   deliveryId: string;
   /** Raw request body string — provider implements HMAC verification itself. */
   rawBody: string;
@@ -76,10 +72,10 @@ export interface RawWebhook {
 }
 
 export interface PaymentEvent {
-  provider: "lemonsqueezy" | "stripe";
+  provider: "lemonsqueezy";
   eventType: string;
   deliveryId: string;
-  /** Unique provider identifier (LS order id, Stripe payment_intent/session id). */
+  /** Unique provider identifier (LS order id). */
   correlationKey: string;
   payload: Record<string, unknown>;
 }
@@ -87,7 +83,7 @@ export interface PaymentEvent {
 // ─── Phase 4 (future): retrievePayment for admin reconciliation ───────
 
 export interface ProviderPayment {
-  provider: "lemonsqueezy" | "stripe";
+  provider: "lemonsqueezy";
   reference: string;
   status: "pending" | "completed" | "refunded" | "failed";
   email: string;

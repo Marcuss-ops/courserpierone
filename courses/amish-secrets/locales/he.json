@@ -349,9 +349,6 @@
       "hero_secure": "תשלום מאובטח, גישה מיידית",
       "hero_verified": "* מידע רלוונטי",
       "hero_trust_ssl": "SSL מאובטח",
-      "hero_trust_stripe": "Stripe",
-      "hero_trust_paypal": "PayPal",
-      "offer_stripe_paypal": "Stripe / PayPal",
       "offer_invoice": "חשבונית מיידית",
       "footer_cookies": "Cookie",
       "footer_withdrawal": "זכות השיבה של האיחוד האירופי 14 יום",
@@ -457,5 +454,23 @@
     "ebook_desc": "קרא את המדריך המלא בפורמט eBook ישירות מהקורא האינטרנט או להוריד את ה- PDF הלא מקוון.",
     "format_label": "PDF / Web Format",
     "read_label": "Read Read Read"
+  },
+  "pricing": {
+    "free": {
+      "features": [
+        "1 Product",
+        "3 Languages",
+        "Basic analytics"
+      ]
+    },
+    "pro": {
+      "features": [
+        "Unlimited products",
+        "20 Languages",
+        "AI translations",
+        "Advanced analytics",
+        "International payments"
+      ]
+    }
   }
 }

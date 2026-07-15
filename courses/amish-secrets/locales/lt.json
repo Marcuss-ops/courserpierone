@@ -349,9 +349,6 @@
       "hero_secure": "Saugus mokėjimas, tiesioginė prieiga",
       "hero_verified": "* patikrinti duomenys",
       "hero_trust_ssl": "SSL saugus",
-      "hero_trust_stripe": "Stripe",
-      "hero_trust_paypal": "PayPal",
-      "offer_stripe_paypal": "Stripe / PayPal",
       "offer_invoice": "Momentinė sąskaita faktūra",
       "footer_cookies": "Cookie",
       "footer_withdrawal": "ES 14 dienų sutarties atsisakymo teisė",
@@ -457,5 +454,23 @@
     "ebook_desc": "Skaityti visą vadovą eBook formatu tiesiogiai iš interneto skaitytuvo arba atsisiųsti offline PDF.",
     "format_label": "PDF / Web formatas",
     "read_label": "Skaityti"
+  },
+  "pricing": {
+    "free": {
+      "features": [
+        "1 Product",
+        "3 Languages",
+        "Basic analytics"
+      ]
+    },
+    "pro": {
+      "features": [
+        "Unlimited products",
+        "20 Languages",
+        "AI translations",
+        "Advanced analytics",
+        "International payments"
+      ]
+    }
   }
 }

@@ -11,6 +11,9 @@ interface HorizonPricingProps {
 }
 
 export function HorizonPricing({ data, lc }: HorizonPricingProps) {
+  const freeFeatures = lc?.pricing?.free?.features ?? [];
+  const proFeatures = lc?.pricing?.pro?.features ?? [];
+
   return (
     <section id="pricing" className="py-20">
       <div className="mx-auto max-w-4xl px-6">
@@ -22,7 +25,10 @@ export function HorizonPricing({ data, lc }: HorizonPricingProps) {
               color: "#1d1c15",
             }}
           >
-            {lc?.nav?.pricing || lc?.ui?.labels?.pricing || "Pricing"}
+            {lc?.pricing?.title ??
+              lc?.nav?.pricing ??
+              lc?.ui?.labels?.pricing ??
+              "Pricing"}
           </h2>
         </div>
         <div className="grid gap-6 md:grid-cols-2">
@@ -36,33 +42,42 @@ export function HorizonPricing({ data, lc }: HorizonPricingProps) {
             }}
           >
             <h3 className="text-lg font-bold" style={{ color: "#1d1c15" }}>
-              {lc?.ui?.labels?.free_tier || "Free"}
+              {lc?.pricing?.free?.name ??
+                lc?.ui?.labels?.free_tier ??
+                "Free"}
             </h3>
             <p className="mt-2 text-sm" style={{ color: "#555555" }}>
-              {lc?.ui?.labels?.free_title || "Per iniziare"}
+              {lc?.pricing?.free?.description ??
+                lc?.ui?.labels?.free_title ??
+                "To get started"}
             </p>
             <p
               className="mt-4 text-4xl font-extrabold"
               style={{ color: "#1d1c15" }}
             >
               $0
-              <span className="text-sm font-normal" style={{ color: "#89726b" }}>
-                {lc?.ui?.labels?.per_month || "/mo"}
+              <span
+                className="text-sm font-normal"
+                style={{ color: "#89726b" }}
+              >
+                {lc?.ui?.labels?.per_month ?? "/mo"}
               </span>
             </p>
             <ul
               className="mt-6 flex flex-col gap-3 text-sm"
               style={{ color: "#555555" }}
             >
-              <li>✓ 1 Prodotto</li>
-              <li>✓ 3 Lingue</li>
-              <li>✓ Analytics base</li>
+              {freeFeatures.map((feature, i) => (
+                <li key={i}>✓ {feature}</li>
+              ))}
             </ul>
             <button
               className="mt-8 w-full rounded-xl border py-3 text-sm font-semibold transition hover:bg-black/5"
               style={{ borderColor: "#ddc0b8", color: "#1d1c15" }}
             >
-              {lc?.ui?.labels?.start_free || "Inizia Gratis"}
+              {lc?.pricing?.free?.cta ??
+                lc?.ui?.labels?.start_free ??
+                "Start Free"}
             </button>
           </div>
           {/* Pro tier */}
@@ -77,35 +92,40 @@ export function HorizonPricing({ data, lc }: HorizonPricingProps) {
               className="absolute right-4 top-4 rounded-full px-3 py-1 text-xs font-bold"
               style={{ background: "#FF5E3A", color: "white" }}
             >
-              {lc?.ui?.labels?.popular || "Popular"}
+              {lc?.pricing?.pro?.badge ??
+                lc?.ui?.labels?.popular ??
+                "Popular"}
             </span>
             <h3 className="text-lg font-bold text-white">
-              {lc?.ui?.labels?.pro_tier || "Pro"}
+              {lc?.pricing?.pro?.name ??
+                lc?.ui?.labels?.pro_tier ??
+                "Pro"}
             </h3>
             <p className="mt-2 text-sm text-gray-400">
-              {lc?.ui?.labels?.pro_title || "Per crescere"}
+              {lc?.pricing?.pro?.description ??
+                lc?.ui?.labels?.pro_title ??
+                "To grow"}
             </p>
             <p className="mt-4 text-4xl font-extrabold text-white">
               {data.prezzo ?? "$20"}
               <span className="text-sm font-normal text-gray-400">
-                {lc?.ui?.labels?.per_month || "/mo"}
+                {lc?.ui?.labels?.per_month ?? "/mo"}
               </span>
             </p>
             <ul className="mt-6 flex flex-col gap-3 text-sm text-gray-300">
-              <li>✓ Prodotti illimitati</li>
-              <li>✓ 20 Lingue</li>
-              <li>✓ Traduzioni AI</li>
-              <li>✓ Analytics avanzati</li>
-              <li>✓ Stripe integrato</li>
+              {proFeatures.map((feature, i) => (
+                <li key={i}>✓ {feature}</li>
+              ))}
             </ul>
             <button
               className="mt-8 w-full rounded-xl py-3 text-sm font-semibold text-white transition hover:opacity-90"
               style={{ background: "#FF5E3A" }}
             >
-              {data.cta ||
-                lc?.hero?.cta ||
-                lc?.ui?.labels?.buy_now ||
-                "Acquista Ora"}
+              {data.cta ??
+                lc?.pricing?.pro?.cta ??
+                lc?.hero?.cta ??
+                lc?.ui?.labels?.buy_now ??
+                "Buy Now"}
             </button>
           </div>
         </div>
