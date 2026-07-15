@@ -11,7 +11,7 @@
  *     using `course.slug` as `defaultLandingSlug`.
  *
  * Add a new course:
- *   1. Drop folder at `courses/<new-slug>/{locales,components,config.json}` (mirroring amish-secrets).
+ *   1. Drop folder at `courses/<new-slug>/{locales,components,config.json}` (mirroring a previously-shipped course plugin).
  *   2. Add an entry to `COURSES` below.
  *   3. `npx tsx scripts/products/sync-local-config.ts <new-slug>` → upserts DB.
  *   4. Commit + push. Zero core-code changes.
@@ -51,26 +51,10 @@ export interface CourseMeta {
  * First entry is the canonical incoming-traffic landing (used for YouTube
  * default URL when no channel specifies otherwise).
  */
-export const COURSES: CourseMeta[] = [
-  {
-    slug: "amish-secrets",
-    title: "I Segreti degli Amish",
-    tagline:
-      "Come vivere risparmiando e gestire il denaro, adattato alla vita nel 2026.",
-    templateId: "amish",
-    coverImage: "/images/amish-secrets-cover.png",
-    locales: [
-      "it", "en", "es", "fr", "de", "pt", "nl", "pl", "ro", "ru",
-      "ja", "zh", "ko", "ar", "hi", "tr", "sv", "no", "fi", "da",
-      "cs", "hu", "sk", "uk", "el", "bn", "id", "ms", "tl", "vi",
-    ],
-    accentColor: "#D4A056",
-    status: "active",
-  },
-];
+export const COURSES: CourseMeta[] = [];
 
 /** The canonical landing slug for incoming traffic attribution (YouTube defaults, etc). */
-export const DEFAULT_LANDING_SLUG: string = COURSES[0].slug;
+export const DEFAULT_LANDING_SLUG: string = COURSES[0]?.slug ?? "default-slug";
 
 /** All active courses — convenience export for SSG catalogs. */
 export const ACTIVE_COURSES: CourseMeta[] = COURSES.filter(

@@ -308,7 +308,7 @@ export default function EditProductPage() {
         <section className="glass-card p-6 rounded-3xl border border-white/5">
           <div className="text-white font-semibold mb-4">Template Landing Page</div>
           <div className="flex gap-4">
-            {(["lumio", "h612", "horizon", "book-claude", "amish"] as TemplateId[]).map((t) => (
+            {(["lumio", "h612", "horizon"] as TemplateId[]).map((t) => (
               <button key={t} onClick={() => setTemplateId(t)}
                 className={`flex-1 p-4 rounded-2xl border transition text-left ${
                   templateId === t
@@ -320,8 +320,6 @@ export default function EditProductPage() {
                   {t === "lumio" && "Minimal ivory, sunset, glassmorphism"}
                   {t === "h612" && "Dark monochrome, serif, liquid orbs"}
                   {t === "horizon" && "Airy, atmospheric, cursor glow"}
-                  {t === "book-claude" && "Modern white, editorial, minimal"}
-                  {t === "amish" && "Warm orange, Playfair serif, storytelling"}
                 </div>
               </button>
             ))}

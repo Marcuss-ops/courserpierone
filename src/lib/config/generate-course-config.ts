@@ -7,7 +7,7 @@ const IS_VERCEL = process.env.VERCEL === "1";
 export interface CourseConfig {
   slug: string;
   productId: string;
-  template: "lumio" | "h612" | "horizon" | "book-claude" | "amish";
+  template: "lumio" | "h612" | "horizon";
   defaultLanguage: string;
   cover: string;
   authorImageUrl?: string;
@@ -145,7 +145,7 @@ export async function generateCourseConfig(slug: string) {
   const config: CourseConfig = {
     slug: product.slug,
     productId: product.id,
-    template: (product.templateId as "lumio" | "h612" | "horizon" | "book-claude" | "amish") || "lumio",
+    template: (product.templateId as "lumio" | "h612" | "horizon") || "lumio",
     defaultLanguage: existingConfig.defaultLanguage || "it",
     cover: product.coverUrl || existingConfig.cover || "/placeholder-cover.jpg",
     authorImageUrl: existingConfig.authorImageUrl || undefined,

@@ -15,7 +15,7 @@
  * L'admin `TemplateSelector` consuma solo name + description.
  */
 
-export type TemplateId = "lumio" | "h612" | "horizon" | "book-claude" | "amish";
+export type TemplateId = "lumio" | "h612" | "horizon";
 
 export interface TemplateMeta {
   id: TemplateId;
@@ -48,19 +48,5 @@ export const TEMPLATES: Record<TemplateId, TemplateMeta> = {
     description: "Airy minimalism, glassmorphism, gradienti atmosferici, cursor glow",
     preview: "bg-[#fff9ee]",
     accent: "#FF5E3A",
-  },
-  "book-claude": {
-    id: "book-claude",
-    name: "Book Claude",
-    description: "Libro/funnel editoriale con cover 3D, tabs estratti, arancione caldo",
-    preview: "bg-white",
-    accent: "#FF6B00",
-  },
-  amish: {
-    id: "amish",
-    name: "Amish Editorial",
-    description: "Design editoriale caldo, tonalità avorio/salvia/marrone, serif Playfair Display",
-    preview: "bg-[#FFFBF5]",
-    accent: "#C9840D",
   },
 };

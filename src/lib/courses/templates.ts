@@ -14,13 +14,13 @@
  * consumer's runtime logic (renderer in courses/<slug>/components/, meta
  * entry in courses.config.ts, audit-list if needed).
  *
- * NOTE on the 6-value shape (vs the 5-value `TemplateId` in
+ * NOTE on the 4-value shape (vs the 3-value `TemplateId` in
  * `src/components/funnel/types.ts`): the registry/source-of-truth union
  * includes `"default"` because that's the smoke-test / no-custom-
  * components fallback. `TemplateId` (`funnel/types.ts`) intentionally
  * omits it because it's the UI admin SELECTOR for shipped templates —
  * defaulting to "default" wouldn't render anything visible in
- * `TemplateSelector`. The two unions overlap on 5 values but serve
+ * `TemplateSelector`. The two unions overlap on 3 values but serve
  * different purposes; do NOT collapse them.
  */
 
@@ -40,8 +40,6 @@
  *      registry; this id is intentionally the 5-value subset).
  */
 export type CourseTemplateId =
-  | "amish"
-  | "book-claude"
   | "lumio"
   | "h612"
   | "horizon"

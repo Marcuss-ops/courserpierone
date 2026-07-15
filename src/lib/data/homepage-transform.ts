@@ -22,8 +22,6 @@ const CATEGORY_MAP: Record<string, string> = {
   lumio: "course",
   h612: "ebook",
   horizon: "course",
-  "book-claude": "ebook",
-  amish: "course",
 };
 
 /**
