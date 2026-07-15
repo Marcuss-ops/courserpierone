@@ -150,6 +150,9 @@ export const ENV_DEFINITIONS: EnvVarDef[] = [
       "Slugs (separati da virgola) di prodotti con price=0 che sono accessibili a chiunque senza login o pagamento. Usato da AccessGate come SSOT bypass (vedi src/components/course/access-gate.tsx — aggiorna il path qui se rinominato). Se vuoto/non impostato, nessun prodotto è bypass-ato. Esempio: 'test-course-e2e' oppure 'test-course-e2e,other-free-slug'.",
     optional: true,
   },
+  // IMPORTANTE: il bypass richiede SIA lo slug in FREE_COURSE_SLUGS SIA product.price === 0
+  // nel DB (controllo in src/components/course/access-gate.tsx). Senza la condizione
+  // price=0, un refuso accidentale qui non rende liberamente accessibile un prodotto a pagamento.
 ];
 
 // ─── Validazione eseguita all'import ───────────────────────
