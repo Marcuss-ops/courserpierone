@@ -4,6 +4,21 @@ import type { Order } from "@prisma/client";
 /**
  * src/lib/access/find-completed-order.ts
  *
+ * @deprecated
+ * Replaced post-MCR Phase 2/3 by `resolveProductAccess` in
+ * `src/lib/commerce/access/resolve-product-access.ts` — the new
+ * central resolver routes BOTH the legacy Order-based path and the
+ * canonical AccessGrant-based path through a single function and
+ * feature-flag (`USE_ACCESS_GRANT_RESOLVER`).
+ *
+ * Keep this helper only for legacy consumers that read the full
+ * `Order` row (e.g., `locale` on the certificate route). New
+ * authorization checks MUST go through `resolveProductAccess`. V2
+ * cleanup target — remove once every consumer reads only the
+ * boolean/grant-id answer that the central resolver returns.
+ *
+ * -------------------------------------------------------------------
+ *
  * Single-source-of-truth per il predicato "questo User ha un Order
  * COMPLETED per questo Product". V2 DRY refactor che consolida 5
  * AccessGate paths in un solo helper di DB:

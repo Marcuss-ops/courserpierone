@@ -102,7 +102,10 @@
  */
 
 import { prisma } from "@/lib/db/prisma";
-import { env } from "@/lib/env";
+import {
+  resolveProductAccess,
+  ProductAccessDenyReason,
+} from "@/lib/commerce/access/resolve-product-access";
 
 /**
  * Esito del permission resolver.
@@ -245,58 +248,43 @@ export async function resolveMessagingPermission(
   // ── 4. Identifica lo student effettivo nel pair ────────────
   const customerId = actorIsCreator ? targetId : actorId;
 
-  // ── 5. Lo student deve avere un grant attivo (PR 3) o, in
-  // legacy mode, un Order.completed per il prodotto. Il branch è
-  // pilotato da USE_ACCESS_GRANT_RESOLVER (default 'false' → legacy).
+  // ── 5. Lo student deve avere un accesso al prodotto.
   //
-  // Entrambi i path usano lo stesso indice composito ottimale:
-  //   - legacy:    @@index([userId, productId, status]) su Order
-  //   - grant:     @@index([userId, productId, status]) su AccessGrant
-  //   Stesso piano di esecuzione PG → il flip del flag non cambia la
-  //   performance del resolver.
-  const useGrantResolver = env.USE_ACCESS_GRANT_RESOLVER === "true";
+  // Delegate al central commerce access resolver (che gestisce
+  // autonomamente il flip USE_ACCESS_GRANT_RESOLVER — legacy Order
+  // read vs AccessGrant read). Manteniamo i deny reason canonici
+  // del dominio messaging mappando i due `ProductAccessDenyReason`
+  // del commerce ai corrispondenti `MessagingDenyReason` esposti
+  // `api-authorize.ts` REASON_TO_STATUS.
+  //
+  // Il path Order/AccessGrant usa lo stesso indice composito ottimale:
+  //   - legacy: @@index([userId, productId, status]) su Order
+  //   - grant:  @@index([userId, productId, status]) su AccessGrant
+  // Lo stesso piano di esecuzione PG → il flip del flag non cambia
+  // la performance del resolver. Vedi
+  // src/lib/commerce/access/resolve-product-access.ts per i dettagli
+  // del cutover (PR 3 of MCR, runbook in cima a quel file).
+  const access = await resolveProductAccess({
+    userId: customerId,
+    productId,
+  });
 
-  if (useGrantResolver) {
-    // PR 3 of MCR — AccessGrant-based path (canonical post-cutover).
-    const grant = await prisma.accessGrant.findFirst({
-      where: {
-        userId: customerId,
-        productId,
-        status: "active",
-      },
-      select: { id: true },
-    });
-    if (!grant) {
-      return {
-        allowed: false,
-        creatorId,
-        customerId,
-        productId,
-        reason: MessagingDenyReason.NoValidAccessGrant,
-      };
-    }
-  } else {
-    // Legacy Order-based path (in use during the rollout window).
-    // Mantenuto per backward compat; verrà rimosso in V2 cleanup
-    // (post 7d prod monitoring) insieme al flag e al deny reason
-    // `NoCompletedOrderForStudent`. Vedi commento in cima al file.
-    const completedOrder = await prisma.order.findFirst({
-      where: {
-        userId: customerId,
-        productId,
-        status: "completed",
-      },
-      select: { id: true },
-    });
-    if (!completedOrder) {
-      return {
-        allowed: false,
-        creatorId,
-        customerId,
-        productId,
-        reason: MessagingDenyReason.NoCompletedOrderForStudent,
-      };
-    }
+  if (!access.allowed) {
+    // Map dei due ProductAccessDenyReason ai MessagingDenyReason esposti
+    // (api-authorize.ts li traduce in HTTP status 403 + IT error message).
+    // `NoCompletedOrder` → `NoCompletedOrderForStudent` (legacy path).
+    // `NoValidAccessGrant` → `NoValidAccessGrant` (post-cutover path).
+    const reason =
+      access.reason === ProductAccessDenyReason.NoValidAccessGrant
+        ? MessagingDenyReason.NoValidAccessGrant
+        : MessagingDenyReason.NoCompletedOrderForStudent;
+    return {
+      allowed: false,
+      creatorId,
+      customerId,
+      productId,
+      reason,
+    };
   }
 
   // ── Tutto verde — la DM è autorizzata ────────────────────────
