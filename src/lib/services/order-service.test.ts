@@ -27,6 +27,13 @@ vi.mock("@/lib/db/prisma", () => {
     accessGrant: {
       upsert: vi.fn(),
     },
+    // MCR Phase 2 — $transaction wrapper for atomic Order+AccessGrant
+    // creation. Default mock (set in resetMocks) invokes the callback with
+    // the same prisma client as the `tx` handle, mirroring real Prisma
+    // behavior (tx is a scoped view of the same client). Tests that need
+    // to exercise rollback semantics override the implementation in-place
+    // to make a specific tx operation reject.
+    $transaction: vi.fn(),
   };
   return { prisma: mockPrisma };
 });
@@ -46,6 +53,16 @@ import { NotFoundError } from "@/lib/errors";
 function resetMocks() {
   vi.clearAllMocks();
 
+  // Default: $transaction invokes its callback with the same prisma
+  // client as the `tx` handle. Mirrors real Prisma semantics — in
+  // production, `tx` is a scoped view of the same client, not a
+  // separate connection. This default lets every success-path test
+  // run unchanged; tests that need to verify rollback (failure on a
+  // tx-scoped op) override this mockImplementation to inject a throw.
+  vi.mocked(prisma.$transaction).mockImplementation(
+    async (cb) => (cb as (client: typeof prisma) => Promise<unknown>)(prisma),
+  );
+
   // Default: user resolved by email
   vi.mocked(prisma.user.findUnique).mockResolvedValue({
     id: "user_123",
@@ -54,7 +71,7 @@ function resetMocks() {
     role: "student",
   } as never);
 
-  // Default: product resolved by id (Stripe path)
+  // Default: product resolved by id
   vi.mocked(prisma.product.findUnique).mockResolvedValue({
     id: "prod_abc",
     slug: "test-course",
@@ -82,7 +99,7 @@ function resetMocks() {
     id: "order_test_id",
     userId: "user_123",
     productId: "prod_abc",
-    paymentProvider: "stripe",
+    paymentProvider: "lemonsqueezy",
     amount: 4900,
     currency: "eur",
     locale: "it-it",
@@ -100,22 +117,7 @@ function resetMocks() {
   } as never);
 }
 
-function buildStripeInput(overrides: Partial<ProcessOrderInput> = {}): ProcessOrderInput {
-  return {
-    email: "buyer@example.com",
-    customerName: "Buyer",
-    productId: "prod_abc",
-    paymentProvider: "stripe",
-    amount: 4900,
-    currency: "eur",
-    locale: "it-it",
-    customerCountry: "IT",
-    stripeSessionId: `cs_test_${Math.random().toString(36).slice(2)}`,
-    ...overrides,
-  };
-}
-
-function buildLsInput(overrides: Partial<ProcessOrderInput> = {}): ProcessOrderInput {
+function buildInput(overrides: Partial<ProcessOrderInput> = {}): ProcessOrderInput {
   return {
     email: "buyer@example.com",
     customerName: "Buyer",
@@ -132,29 +134,28 @@ function buildLsInput(overrides: Partial<ProcessOrderInput> = {}): ProcessOrderI
 }
 
 // ─── Tests ─────────────────────────────────────────────────
-// ─── Stripe success path ──────────────────────────────────
+// ─── Order success path ───────────────────────────────────
 
-describe("processOrder — Stripe success path", () => {
+describe("processOrder — success path", () => {
   beforeEach(resetMocks);
 
   it("creates a completed order on first call (scenario 1)", async () => {
     // Default mock already returns a valid order with userId/productId.
     // No override needed — assertion on the input shape works.
 
-    await processOrder(buildStripeInput());
+    await processOrder(buildInput());
 
     expect(prisma.order.create).toHaveBeenCalledOnce();
     const createArg = vi.mocked(prisma.order.create).mock.calls[0][0];
     expect(createArg.data).toMatchObject({
       userId: "user_123",
       productId: "prod_abc",
-      paymentProvider: "stripe",
+      paymentProvider: "lemonsqueezy",
       status: "completed",
       amount: 4900,
-      currency: "eur",
-      locale: "it-it",
+      currency: "usd",
+      locale: "en-us",
     });
-    expect(createArg.data.stripeSessionId).toMatch(/^cs_test_/);
   });
 
   it("calls find-or-create user by email and falls back name to email local-part", async () => {
@@ -169,13 +170,13 @@ describe("processOrder — Stripe success path", () => {
       id: "order_new",
       userId: "user_new",
       productId: "prod_abc",
-      paymentProvider: "stripe",
+      paymentProvider: "lemonsqueezy",
       status: "completed",
     } as never);
 
     // Override customerName to undefined so production code falls back to email.split('@')[0]
     await processOrder({
-      ...buildStripeInput(),
+      ...buildInput(),
       email: "newbuyer@example.com",
       customerName: undefined,
     });
@@ -185,12 +186,12 @@ describe("processOrder — Stripe success path", () => {
     });
     // Phase 1.2 addendum: preferredLocale backfill al signup — guest
     // checkout valorizza User.preferredLocale dal parametro `locale`
-    // dell'ordine. Input default: locale="it-it" → preferredLocale="it".
+    // dell'ordine. Input default: locale="en-us" → preferredLocale="en".
     expect(prisma.user.create).toHaveBeenCalledWith({
       data: {
         email: "newbuyer@example.com",
         name: "newbuyer",
-        preferredLocale: "it",
+        preferredLocale: "en",
       },
     });
   });
@@ -202,17 +203,17 @@ describe("processOrder — Stripe success path", () => {
       id: "order_en_us",
       userId: "user_123",
       productId: "prod_abc",
-      paymentProvider: "stripe",
+      paymentProvider: "lemonsqueezy",
       status: "completed",
     } as never);
 
-    await processOrder(buildStripeInput({ locale: "en-us", customerCountry: "US" }));
+    await processOrder(buildInput({ locale: "it-it", customerCountry: "IT" }));
 
     const emailArgs = vi.mocked(sendPurchaseConfirmation).mock.calls[0];
     expect(emailArgs[0]).toBe("buyer@example.com");
     expect(emailArgs[1]).toBe("test-course");
-    expect(emailArgs[2]).toMatch(/\/en-us\/test-course\/portal/);
-    expect(emailArgs[3]).toBe("en-us");
+    expect(emailArgs[2]).toMatch(/\/it-it\/test-course\/portal/);
+    expect(emailArgs[3]).toBe("it-it");
     expect(emailArgs[4]).toMatch(/\/dashboard/);
   });
 });
@@ -222,16 +223,16 @@ describe("processOrder — Stripe success path", () => {
 describe("processOrder — MCR Phase 2 AccessGrant dual-write", () => {
   beforeEach(resetMocks);
 
-  it("upserts an active AccessGrant alongside the Order on Stripe success", async () => {
+  it("upserts an active AccessGrant alongside the Order on success", async () => {
     vi.mocked(prisma.order.create).mockResolvedValue({
       id: "order_dual_write",
       userId: "user_123",
       productId: "prod_abc",
-      paymentProvider: "stripe",
+      paymentProvider: "lemonsqueezy",
       status: "completed",
     } as never);
 
-    await processOrder(buildStripeInput());
+    await processOrder(buildInput());
 
     expect(prisma.accessGrant.upsert).toHaveBeenCalledOnce();
 
@@ -253,82 +254,50 @@ describe("processOrder — MCR Phase 2 AccessGrant dual-write", () => {
     expect(upsertArg.update).toEqual({});
   });
 
-  it("upserts an active AccessGrant alongside the Order on LemonSqueezy success", async () => {
-    vi.mocked(prisma.order.create).mockResolvedValue({
-      id: "order_ls_dual",
-      userId: "user_123",
-      productId: "prod_abc",
-      paymentProvider: "lemonsqueezy",
-      status: "completed",
-    } as never);
-
-    await processOrder(buildLsInput());
-
-    expect(prisma.accessGrant.upsert).toHaveBeenCalledOnce();
-    const upsertArg = vi.mocked(prisma.accessGrant.upsert).mock.calls[0][0];
-    expect(upsertArg.create).toMatchObject({
-      sourceType: "order",
-      sourceId: "order_ls_dual",
-      status: "active",
-    });
-  });
-
-  it("tolerates AccessGrant.upsert failure (does NOT throw)", async () => {
+  it("rolls back the order when AccessGrant.upsert throws (atomicity contract)", async () => {
+    // MCR Phase 2 atomicity guarantee: if the upsert fails, the order
+    // create is rolled back inside the same $transaction, and the
+    // reorder of side-effects (email + analytics + recovery) MUST
+    // NOT run — those are post-commit fire-and-forget and must be
+    // skipped so we don't send a "congratulations on your purchase"
+    // email for an order that never persisted.
     vi.mocked(prisma.accessGrant.upsert).mockRejectedValue(
       new Error("dual-write boom"),
     );
 
-    await expect(
-      processOrder(buildStripeInput())
-    ).resolves.toBeUndefined();
+    await expect(processOrder(buildInput())).rejects.toThrow(/dual-write boom/);
 
+    // Tx callback DID invoke order.create then accessGrant.upsert
+    // before the throw. Side-effects after the tx commit MUST NOT
+    // have run since the tx aborted.
     expect(prisma.order.create).toHaveBeenCalledOnce();
-    expect(prisma.analyticEvent.create).toHaveBeenCalledOnce();
+    expect(prisma.accessGrant.upsert).toHaveBeenCalledOnce();
+    expect(prisma.analyticEvent.create).not.toHaveBeenCalled();
+    expect(prisma.abandonedCheckout.updateMany).not.toHaveBeenCalled();
+    expect(sendPurchaseConfirmation).not.toHaveBeenCalled();
   });
 
-  it("does NOT upsert a grant when the order already exists (idempotency)", async () => {
-    vi.mocked(prisma.order.findUnique).mockResolvedValue({
-      id: "order_existing",
-    } as never);
-
-    await processOrder(buildStripeInput());
-
-    expect(prisma.order.create).not.toHaveBeenCalled();
-    expect(prisma.accessGrant.upsert).not.toHaveBeenCalled();
-  });
-
-  it("does NOT upsert a grant when the LS provider order id already exists (idempotency)", async () => {
+  it("does NOT upsert a grant when the LS provider order id already exists (MCR idempotency)", async () => {
+    const existingOrderId = "ls_order_existing";
     vi.mocked(prisma.order.findFirst).mockResolvedValue({
-      id: "order_ls_existing",
+      id: "order_existing",
+      paymentProvider: "lemonsqueezy",
+      providerOrderId: existingOrderId,
     } as never);
 
-    await processOrder(buildLsInput());
+    await processOrder(buildInput({ providerOrderId: existingOrderId }));
 
     expect(prisma.order.create).not.toHaveBeenCalled();
     expect(prisma.accessGrant.upsert).not.toHaveBeenCalled();
   });
+
+
 });
 
 // ─── Idempotency (already-shipped behavior, now also covering grant) ──
 
 describe("processOrder — idempotency (scenario 3)", () => {
   beforeEach(resetMocks);
-
-  it("skips creation when stripeSessionId already exists (Stripe)", async () => {
-    const existingSession = "cs_test_existing";
-    vi.mocked(prisma.order.findUnique).mockResolvedValue({
-      id: "order_existing",
-      stripeSessionId: existingSession,
-    } as never);
-
-    await processOrder(buildStripeInput({ stripeSessionId: existingSession }));
-
-    expect(prisma.order.create).not.toHaveBeenCalled();
-    expect(prisma.accessGrant.upsert).not.toHaveBeenCalled();
-    expect(sendPurchaseConfirmation).not.toHaveBeenCalled();
-    expect(prisma.analyticEvent.create).not.toHaveBeenCalled();
-    expect(prisma.abandonedCheckout.updateMany).not.toHaveBeenCalled();
-  });
 
   it("skips creation when providerOrderId already exists (LemonSqueezy)", async () => {
     const existingOrderId = "ls_order_existing";
@@ -338,19 +307,24 @@ describe("processOrder — idempotency (scenario 3)", () => {
       providerOrderId: existingOrderId,
     } as never);
 
-    await processOrder(buildLsInput({ providerOrderId: existingOrderId }));
+    await processOrder(buildInput({ providerOrderId: existingOrderId }));
 
     expect(prisma.order.create).not.toHaveBeenCalled();
     expect(prisma.accessGrant.upsert).not.toHaveBeenCalled();
     expect(sendPurchaseConfirmation).not.toHaveBeenCalled();
+    expect(prisma.analyticEvent.create).not.toHaveBeenCalled();
+    expect(prisma.abandonedCheckout.updateMany).not.toHaveBeenCalled();
   });
 
   it("does NOT trigger side effects on duplicate call (defensive)", async () => {
-    vi.mocked(prisma.order.findUnique).mockResolvedValue({
+    const existingOrderId = "ls_order_existing";
+    vi.mocked(prisma.order.findFirst).mockResolvedValue({
       id: "order_existing",
+      paymentProvider: "lemonsqueezy",
+      providerOrderId: existingOrderId,
     } as never);
 
-    await processOrder(buildStripeInput());
+    await processOrder(buildInput({ providerOrderId: existingOrderId }));
 
     expect(prisma.user.create).not.toHaveBeenCalled();
     expect(prisma.abandonedCheckout.updateMany).not.toHaveBeenCalled();
@@ -370,7 +344,7 @@ describe("processOrder — email failure tolerance (scenario 9)", () => {
     );
 
     await expect(
-      processOrder(buildStripeInput())
+      processOrder(buildInput())
     ).resolves.toBeUndefined();
 
     expect(prisma.order.create).toHaveBeenCalledOnce();
@@ -380,7 +354,7 @@ describe("processOrder — email failure tolerance (scenario 9)", () => {
   it("still records analytics event even when email fails", async () => {
     vi.mocked(sendPurchaseConfirmation).mockRejectedValue(new Error("mail 421"));
 
-    await processOrder(buildStripeInput());
+    await processOrder(buildInput());
 
     expect(prisma.analyticEvent.create).toHaveBeenCalledOnce();
     const analyticsArg = vi.mocked(prisma.analyticEvent.create).mock.calls[0][0];
@@ -396,7 +370,7 @@ describe("processOrder — email failure tolerance (scenario 9)", () => {
     vi.mocked(prisma.abandonedCheckout.updateMany)
       .mockResolvedValueOnce({ count: 1 });
 
-    await processOrder(buildStripeInput());
+    await processOrder(buildInput());
 
     expect(prisma.abandonedCheckout.updateMany).toHaveBeenCalledOnce();
     const updateArg = vi.mocked(prisma.abandonedCheckout.updateMany).mock.calls[0][0];
@@ -417,7 +391,7 @@ describe("processOrder — abandoned checkout recovery (scenario 6)", () => {
   it("marks matching pending abandoned checkouts as recovered", async () => {
     vi.mocked(prisma.abandonedCheckout.updateMany).mockResolvedValue({ count: 2 });
 
-    await processOrder(buildStripeInput());
+    await processOrder(buildInput());
 
     expect(prisma.abandonedCheckout.updateMany).toHaveBeenCalledWith({
       where: {
@@ -435,7 +409,7 @@ describe("processOrder — abandoned checkout recovery (scenario 6)", () => {
     );
 
     await expect(
-      processOrder(buildStripeInput())
+      processOrder(buildInput())
     ).resolves.toBeUndefined();
 
     expect(prisma.order.create).toHaveBeenCalledOnce();
@@ -448,16 +422,16 @@ describe("processOrder — abandoned checkout recovery (scenario 6)", () => {
 describe("processOrder — product resolution", () => {
   beforeEach(resetMocks);
 
-  it("resolves product via direct productId when provided (Stripe)", async () => {
+  it("resolves product via direct productId when provided", async () => {
     vi.mocked(prisma.order.create).mockResolvedValue({
       id: "order_direct",
       userId: "user_123",
       productId: "prod_direct",
-      paymentProvider: "stripe",
+      paymentProvider: "lemonsqueezy",
       status: "completed",
     } as never);
 
-    await processOrder(buildStripeInput({ productId: "prod_direct" }));
+    await processOrder(buildInput({ productId: "prod_direct" }));
 
     expect(prisma.product.findUnique).toHaveBeenCalledWith({
       where: { id: "prod_direct" },
@@ -474,7 +448,7 @@ describe("processOrder — product resolution", () => {
     } as never);
 
     // LS path defaults: no productId, productSlug="test-course"
-    await processOrder(buildLsInput());
+    await processOrder(buildInput());
 
     expect(prisma.product.findUnique).toHaveBeenCalledWith({
       where: { slug: "test-course" },
@@ -498,7 +472,7 @@ describe("processOrder — product resolution", () => {
     } as never);
 
     await processOrder(
-      buildLsInput({
+      buildInput({
         productId: "prod_unknown",
         productSlug: "unknown-slug",
       })
@@ -515,7 +489,7 @@ describe("processOrder — product resolution", () => {
     vi.mocked(prisma.product.findFirst).mockResolvedValue(null);
 
     const promise = processOrder(
-      buildLsInput({
+      buildInput({
         productId: "prod_unknown",
         productSlug: "unknown-slug",
         variantId: "unknown_variant",
@@ -525,10 +499,10 @@ describe("processOrder — product resolution", () => {
     await expect(promise).rejects.toThrow(/not resolvable/i);
 
     // Webhook handler relies on this exact subclass to ack gracefully (see
-    // src/app/api/webhooks/stripe/route.ts and .../lemonsqueezy/route.ts).
+    // src/app/api/webhooks/lemonsqueezy/route.ts).
     await expect(
       processOrder(
-        buildLsInput({
+        buildInput({
           productId: "prod_unknown",
           productSlug: "unknown-slug",
           variantId: "unknown_variant",
@@ -546,10 +520,10 @@ describe("processOrder — product resolution", () => {
 describe("processOrder — analytics & metadata", () => {
   beforeEach(resetMocks);
 
-  it("stores provider/session/amount/currency in analytics metadata", async () => {
+  it("stores provider/order/amount/currency in analytics metadata", async () => {
     await processOrder(
-      buildStripeInput({
-        stripeSessionId: "cs_metadata_test",
+      buildInput({
+        providerOrderId: "ls_metadata_test",
         amount: 9900,
         currency: "usd",
       })
@@ -559,17 +533,17 @@ describe("processOrder — analytics & metadata", () => {
     expect(call.data.eventType).toBe("purchase");
     const metadata = JSON.parse(call.data.metadata!);
     expect(metadata).toMatchObject({
-      provider: "stripe",
+      provider: "lemonsqueezy",
       amount: 9900,
       currency: "usd",
-      stripeSessionId: "cs_metadata_test",
+      providerOrderId: "ls_metadata_test",
     });
   });
 
   it("tolerates analytics failure (does not throw)", async () => {
     vi.mocked(prisma.analyticEvent.create).mockRejectedValue(new Error("analytics down"));
 
-    await expect(processOrder(buildStripeInput())).resolves.toBeUndefined();
+    await expect(processOrder(buildInput())).resolves.toBeUndefined();
   });
 });
 
@@ -578,16 +552,20 @@ describe("processOrder — analytics & metadata", () => {
 describe("processOrder — full idempotency proof (defence in depth)", () => {
   beforeEach(resetMocks);
 
-  it("two identical Stripe calls → exactly one order, one email, one analytics event, one grant", async () => {
-    vi.mocked(prisma.order.findUnique).mockResolvedValueOnce(null).mockResolvedValueOnce({
-      id: "order_existing",
-    } as never);
+  it("two identical LS calls → exactly one order, one email, one analytics event, one grant", async () => {
+    vi.mocked(prisma.order.findFirst)
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        id: "order_existing",
+        paymentProvider: "lemonsqueezy",
+        providerOrderId: "ls_replay_test",
+      } as never);
 
-    const sessionId = "cs_replay_test";
-    const first = buildStripeInput({ stripeSessionId: sessionId });
+    const providerOrderId = "ls_replay_test";
+    const first = buildInput({ providerOrderId });
 
     await processOrder(first);
-    await processOrder({ ...first, stripeSessionId: sessionId });
+    await processOrder({ ...first, providerOrderId });
 
     expect(prisma.order.create).toHaveBeenCalledOnce();
     expect(prisma.accessGrant.upsert).toHaveBeenCalledOnce();

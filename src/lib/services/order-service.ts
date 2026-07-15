@@ -7,22 +7,16 @@ export interface ProcessOrderInput {
   email: string;
   /** Optional customer display name */
   customerName?: string;
-  /** Direct Prisma product ID (from Stripe session metadata) */
+  /** Direct Prisma product ID (from checkout metadata) */
   productId?: string;
   /** Product slug (from LS custom_data) */
   productSlug?: string;
   /** LemonSqueezy variant ID */
   variantId?: string;
-  /** Stripe price ID */
-  stripePriceId?: string;
-  /** Stripe session ID (unique constraint on Order.stripeSessionId) */
-  stripeSessionId?: string;
-  /** Stripe subscription ID (for targeted revoke on payment failure/cancellation) */
-  stripeSubscriptionId?: string;
   /** Provider's own order ID (unique per provider via @@unique) */
   providerOrderId?: string;
   /** Payment provider identifier */
-  paymentProvider: "stripe" | "lemonsqueezy";
+  paymentProvider: "lemonsqueezy";
   /** Amount in cents */
   amount: number;
   /** Currency code (eur, usd, etc.) */
@@ -40,7 +34,7 @@ export interface ProcessOrderInput {
  *
  * Flow:
  * 1. Find or create user by email
- * 2. Resolve product via productId / slug / variantId / stripePriceId
+ * 2. Resolve product via productId / slug / variantId
  * 3. Idempotency check (skip if order already exists)
  * 4. Create order
  * 5. Send purchase confirmation email
@@ -53,9 +47,6 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
     productId: directProductId,
     productSlug,
     variantId,
-    stripePriceId,
-    stripeSessionId,
-    stripeSubscriptionId,
     providerOrderId,
     paymentProvider,
     amount,
@@ -63,7 +54,7 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
     locale,
     // _customerCountry is the underscore-prefixed binding (varsIgnorePattern: "^_"
     // in eslint.config.mjs handles it without a per-line disable). The interface
-    // field is still `customerCountry` — LS + Stripe webhooks + tests pass the
+    // field is still `customerCountry` — LS webhooks + tests pass the
     // original key.
     customerCountry: _customerCountry,
     channelId,
@@ -113,15 +104,9 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
     });
   }
 
-  if (!product && stripePriceId) {
-    product = await prisma.product.findFirst({
-      where: { stripePriceId },
-    });
-  }
-
   if (!product) {
     console.error(
-      `[OrderService] Product not found — directId: ${directProductId ?? "—"}, slug: ${productSlug ?? "—"}, variantId: ${variantId ?? "—"}, stripePriceId: ${stripePriceId ?? "—"}`
+      `[OrderService] Product not found — directId: ${directProductId ?? "—"}, slug: ${productSlug ?? "—"}, variantId: ${variantId ?? "—"}`
     );
     throw new NotFoundError(
       `Product not resolvable from provided identifiers`
@@ -129,17 +114,11 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
   }
 
   // ── 3. Idempotency check ────────────────────────────────────
-  if (stripeSessionId) {
-    const existing = await prisma.order.findUnique({
-      where: { stripeSessionId },
-    });
-    if (existing) {
-      console.log(`[OrderService] Order for Stripe session ${stripeSessionId} already exists, skipping`);
-      return;
-    }
-  }
-
-  if (paymentProvider === "lemonsqueezy" && providerOrderId) {
+  // LS provides a unique providerOrderId for every completed checkout.
+  // We de-duplicate on that id. If a future provider does not supply a
+  // providerOrderId, this guard is skipped and the caller is responsible
+  // for idempotency (e.g. via ProcessedWebhook).
+  if (providerOrderId) {
     const existing = await prisma.order.findFirst({
       where: { paymentProvider: "lemonsqueezy", providerOrderId },
     });
@@ -149,64 +128,82 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
     }
   }
 
-  // ── 4. Create order ─────────────────────────────────────────
-  const order = await prisma.order.create({
-    data: {
-      userId: user.id,
-      productId: product.id,
-      paymentProvider,
-      stripeSessionId: stripeSessionId ?? null,
-      stripeSubscriptionId: stripeSubscriptionId ?? null,
-      providerOrderId: providerOrderId ?? null,
-      amount,
-      currency,
-      locale,
-      status: "completed",
-    },
-  });
-
-  // ── 4b. MCR Phase 2 — dual-write AccessGrant ───────────────────
+  // ── 4. Create order + AccessGrant ATOMICALLY via $transaction ──
   // The grant is the new source of truth for "is this user authorized
-  // to access this product". The resolver cutover (PR 3 of MCR) will
-  // swap `Order.status='completed'` reads to `AccessGrant.active` reads
-  // behind a feature flag `USE_ACCESS_GRANT_RESOLVER`.
+  // to access this product" (MCR Phase 2). The resolver cutover (PR 3
+  // of MCR) will swap `Order.status='completed'` reads to
+  // `AccessGrant.status='active'` reads behind the feature flag
+  // `USE_ACCESS_GRANT_RESOLVER`.
   //
-  // Idempotency strategy: upsert + @@unique([sourceType, sourceId,
-  // productId]). Concurrent retries and the explicit backfill
-  // (`scripts/migrate-grants-from-orders.ts`) are safe by construction
-  // — no `$transaction` needed. The Order is still authoritative until
-  // PR 3 ships, so a missed grant does NOT block the user (graceful
-  // degradation via the existing Order fallback in
-  // resolve-message-permission.ts).
+  // ATOMICITY: order.create + accessGrant.upsert are wrapped in a
+  // single `prisma.$transaction`. If the upsert fails for any reason
+  // (unique violation, deadlock, conn timeout), the WHOLE transaction
+  // is rolled back — no orphan `Order.status='completed'` row without
+  // matching AccessGrant can exist. The webhook route catches the
+  // propagated error, classifies transient vs permanent, and either
+  // returns 503 (LS will retry → idempotency check on retry prevents
+  // double-creation) or returns 200 + ack for permanent faults
+  // (NotFoundError / ValidationError).
   //
-  // Failure tolerance: matches the existing patterns for analytics
-  // and abandoned-checkout — log loudly, do NOT throw. The consumers
-  // are the course portal / DM / downloads UI, none of which can
-  // tolerate a 5xx because of an internal access-record glitch.
-  await prisma.accessGrant
-    .upsert({
+  // Idempotency strategy inside the tx: upsert + @@unique([sourceType,
+  // sourceId, productId]) means concurrent retries from the explicit
+  // backfill (scripts/migrate-grants-from-orders.ts) or LS re-delivery
+  // safely no-op via the `update: {}` clause.
+  //
+  // Things OUTSIDE the transaction by design:
+  //   - User find-or-create (step 1): a User created for an order
+  //     that later fails to commit is harmless — User is unique by
+  //     email anyway, no constraint violation possible. Keeping it
+  //     outside prevents holding user-row locks during the tx.
+  //   - Product resolve (step 2): read-only lookup, no point inside tx.
+  //   - Idempotency check (step 3): outside so concurrent webhook
+  //     retries don't waste a tx slot on what's a duplicate. The
+  //     Order @@unique([paymentProvider, providerOrderId]) is the
+  //     authoritative dedupe; step 3 is a fast-path early-return.
+  //   - Email send / Analytics create / AbandonedCheckout.updateMany
+  //     (steps 5+): fire-and-forget side-effects (network or non-
+  //     critical writes). Their failures must NOT roll back the order
+  //     — the order is the canonical record. They keep their per-step
+  //     try/catch + console.error pattern.
+  // tx returns the created Order, but the post-commit side-effects
+  // (email, analytics, abandoned-checkout recovery) don't need it —
+  // they read from `user`, `product`, `email`, and `channelId`. We
+  // discard the return value to keep the linter quiet (`'order' is
+  // assigned but never used` would otherwise fire since the only
+  // reader was the in-callback `tx.accessGrant.upsert` we're now
+  // wrapping here).
+  await prisma.$transaction(async (tx) => {
+    const o = await tx.order.create({
+      data: {
+        userId: user.id,
+        productId: product.id,
+        paymentProvider,
+        providerOrderId: providerOrderId ?? null,
+        amount,
+        currency,
+        locale,
+        status: "completed",
+      },
+    });
+    await tx.accessGrant.upsert({
       where: {
         sourceType_sourceId_productId: {
           sourceType: "order",
-          sourceId: order.id,
-          productId: order.productId,
+          sourceId: o.id,
+          productId: o.productId,
         },
       },
       create: {
-        userId: order.userId,
-        productId: order.productId,
+        userId: o.userId,
+        productId: o.productId,
         sourceType: "order",
-        sourceId: order.id,
+        sourceId: o.id,
         status: "active",
       },
       update: {}, // no-op: idempotent re-runs are safe
-    })
-    .catch((err: unknown) => {
-      console.error(
-        `[OrderService] MCR Phase 2 — failed to dual-write AccessGrant for order ${order.id}:`,
-        err,
-      );
     });
+    return o;
+  });
 
   // ── 5. Ebook locale resolution: deferred to dashboard-side ─────
   // We intentionally do NOT pre-compute the ebook language here. The
@@ -251,7 +248,6 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
           provider: paymentProvider,
           amount,
           currency,
-          ...(stripeSessionId ? { stripeSessionId } : {}),
           ...(providerOrderId ? { providerOrderId } : {}),
         }),
         userId: user.id,
