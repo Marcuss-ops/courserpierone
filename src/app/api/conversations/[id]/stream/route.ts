@@ -4,6 +4,14 @@ import { getServerUser } from "@/lib/supabase/get-user";
 import { authorizeDmRequest } from "@/lib/messaging/api-authorize";
 import { getPartnerId } from "@/lib/messaging/get-partner-id";
 
+// Hoisted constants — single allocation lifetime per process. Avoids
+// re-allocating a fresh TextEncoder + UInt8Array on every per-tick
+// heartbeat encode. Multiplied by N open SSE connections × 4
+// heartbeats/min, this is meaningful GC pressure reduction on the
+// Vercel Edge runtime.
+const encoder = new TextEncoder();
+const HEARTBEAT_BYTES = encoder.encode(": heartbeat\n\n");
+
 /**
  * GET /api/conversations/[id]/stream?since=<ISO timestamp>
  *
@@ -144,16 +152,26 @@ export async function GET(
     return new Response("Invalid 'since' timestamp", { status: 400 });
   }
 
-  const encoder = new TextEncoder();
   let stopped = false;
 
   const stream = new ReadableStream({
     start(controller) {
       let lastSeen = since;
+      // Hoisted `where` object — mutated in-place each tick so the
+      // shape stays cached and Prisma receives only the updated
+      // timestamp. Avoids 1 object-literal allocation per 2s tick.
+      // Step 9 code-reviewer nit-1: type annotation OMITTED so TS
+      // infers Prisma's `MessageWhereInput` structural shape at the
+      // findMany call site (over-specifying would drift on Prisma
+      // upgrades — narrowing was brittle).
+      const findManyWhere = {
+        conversationId,
+        createdAt: { gt: lastSeen },
+      };
 
       const heartbeat = setInterval(() => {
         try {
-          controller.enqueue(encoder.encode(": heartbeat\n\n"));
+          controller.enqueue(HEARTBEAT_BYTES);
         } catch {
           clearInterval(heartbeat);
           stopped = true;
@@ -165,10 +183,7 @@ export async function GET(
 
         try {
           const newMessages = await prisma.message.findMany({
-            where: {
-              conversationId,
-              createdAt: { gt: lastSeen },
-            },
+            where: findManyWhere,
             include: {
               sender: {
                 select: { id: true, name: true, image: true, role: true },
@@ -181,6 +196,9 @@ export async function GET(
           if (newMessages.length > 0) {
             const lastMsg = newMessages[newMessages.length - 1];
             lastSeen = lastMsg.createdAt;
+            // Mutate the cached where.createdAt.gt rather than
+            // re-allocating the literal each tick.
+            findManyWhere.createdAt.gt = lastSeen;
 
             controller.enqueue(
               encoder.encode(
@@ -189,7 +207,11 @@ export async function GET(
             );
           }
         } catch (err) {
-          console.error("[sse] poll error:", err);
+          // Defer the error log to the next macrotask so a synchronous
+          // console.error doesn't block the SSE poll loop on an
+          // unrelated tick. The error is observation-only — no I/O
+          // fan-out, just dev/prod visibility.
+          setTimeout(() => console.error("[sse] poll error:", err), 0);
         }
 
         if (!stopped) {

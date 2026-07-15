@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 
 interface MessageData {
   id: string;
@@ -76,6 +76,14 @@ export function useRealtimeChat({
   useEffect(() => {
     onConnectionChange?.(connected);
   }, [connected, onConnectionChange]);
+
+  // Memoized SSE URL — stable identity across re-renders unless
+  // conversationId changes. Keeps the EventSource construction in
+  // connectSse from re-allocating the URL string on every effect tick.
+  const esUrl = useMemo(
+    () => `/api/conversations/${encodeURIComponent(conversationId)}/stream`,
+    [conversationId],
+  );
 
   const cleanup = useCallback(() => {
     if (esRef.current) {
@@ -187,8 +195,6 @@ export function useRealtimeChat({
     cleanup();
     modeRef.current = "sse";
 
-    const esUrl = `/api/conversations/${encodeURIComponent(conversationId)}/stream`;
-
     try {
       const es = new EventSource(esUrl);
       esRef.current = es;
@@ -232,7 +238,7 @@ export function useRealtimeChat({
         safeStartPolling();
       }
     }
-  }, [conversationId, onMessages, cleanup, safeSetConnected, safeStartPolling]);
+  }, [esUrl, onMessages, cleanup, safeSetConnected, safeStartPolling]);
 
   // ── Initialize / teardown based on enabled flag ────────────
   useEffect(() => {
@@ -246,11 +252,22 @@ export function useRealtimeChat({
       // the synchronous effect-call has unwound.
       safeSetConnected(false);
     }
+  }, [enabled, connectSse, cleanup, safeSetConnected]);
+
+  // ── Defensive unmount-only effect (Step 9) ────────────────
+  // Splits out the cleanup-so-on-unmount guarantee so React 18
+  // StrictMode's rapid mount→unmount→mount cycle doesn't race the
+  // deps-driven effect's own cleanup. The deps-driven effect's
+  // cleanup today also tears down on unmount; this isolated second
+  // effect GROUNDS the unmount-only contract so a future PR can't
+  // accidentally drop it (e.g. by changing the deps-driven effect's
+  // return to void).
+  useEffect(() => {
     return () => {
       mountedRef.current = false;
       cleanup();
     };
-  }, [enabled, connectSse, cleanup, safeSetConnected]);
+  }, [cleanup]);
 
   // ── Typing indicator stubs (no WS = no cross-client typing) ─────
   // Pre-C3, typing was forwarded via the WS broker's typing/stopTyping
