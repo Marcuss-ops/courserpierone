@@ -143,6 +143,13 @@ export const ENV_DEFINITIONS: EnvVarDef[] = [
     description: "Ambiente (development | production | test)",
     defaultValue: "development",
   },
+  {
+    key: "FREE_COURSE_SLUGS",
+    category: "optional",
+    description:
+      "Slugs (separati da virgola) di prodotti con price=0 che sono accessibili a chiunque senza login o pagamento. Usato da AccessGate come SSOT bypass (vedi src/components/course/access-gate.tsx — aggiorna il path qui se rinominato). Se vuoto/non impostato, nessun prodotto è bypass-ato. Esempio: 'test-course-e2e' oppure 'test-course-e2e,other-free-slug'.",
+    optional: true,
+  },
 ];
 
 // ─── Validazione eseguita all'import ───────────────────────
