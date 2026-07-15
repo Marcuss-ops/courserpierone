@@ -9,6 +9,12 @@ vi.mock("@/lib/access", () => ({
   findCompletedOrder: mockFindCompletedOrder,
 }));
 
+// ─── Mock isFreeCourse (so tests don't depend on env vars) ──
+const mockIsFreeCourse = vi.fn();
+vi.mock("@/lib/courses/is-free-course", () => ({
+  isFreeCourse: (...args: unknown[]) => mockIsFreeCourse(...args),
+}));
+
 // ─── Mock Prisma (product + lessonTranslation) ─────────────
 const mockPrisma = {
   product: {
@@ -75,8 +81,14 @@ describe("GET /api/videos/stream — admin bypass + customer order check", () =>
   });
 
   // ── Anonymous ────────────────────────────────────────────
-  it("anonymous: returns 401 Non autenticato", async () => {
+  it("anonymous on PAID course: returns 401 Non autenticato", async () => {
     mockAnon();
+    // Product lookup happens BEFORE the auth check (needed to evaluate
+    // the FREE_COURSE_SLUGS bypass). The mock returns no `price` field,
+    // and isFreeCourse is mocked to return false (paid course).
+    mockIsFreeCourse.mockReturnValueOnce(false);
+    mockPrisma.product.findUnique.mockResolvedValueOnce({ id: PRODUCT_ID, slug: SLUG });
+
     const { GET } = await import("./route");
     const response = await GET(
       createMockRequest("/api/videos/stream", { query: { lessonId: LESSON_ID, productSlug: SLUG } })
@@ -86,7 +98,43 @@ describe("GET /api/videos/stream — admin bypass + customer order check", () =>
     expect(response.status).toBe(401);
     expect(body.error).toMatch(/Non autenticato/);
     expect(mockFindCompletedOrder).not.toHaveBeenCalled();
-    expect(mockPrisma.product.findUnique).not.toHaveBeenCalled();
+    expect(mockPrisma.product.findUnique).toHaveBeenCalled();
+  });
+
+  // ── Anonymous on FREE course: 200 (bypass) ────────────────
+  it("anonymous on FREE course: returns 200 (NEXT_PUBLIC_FREE_COURSE_SLUGS bypass)", async () => {
+    mockAnon();
+    mockIsFreeCourse.mockReturnValueOnce(true);
+    mockPrisma.product.findUnique.mockResolvedValueOnce({ id: PRODUCT_ID, slug: SLUG, price: 0 });
+    mockVideoFound();
+
+    const { GET } = await import("./route");
+    const response = await GET(
+      createMockRequest("/api/videos/stream", { query: { lessonId: LESSON_ID, productSlug: SLUG } })
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.videoUrl).toBe(VIDEO_URL);
+    // Free course bypass: auth not required, findCompletedOrder not called.
+    expect(mockFindCompletedOrder).not.toHaveBeenCalled();
+  });
+
+  // ── Anonymous on FREE course but product NOT in FREE_COURSE_SLUGS: 401 ──
+  it("anonymous on FREE-priced course NOT in FREE_COURSE_SLUGS: returns 401", async () => {
+    mockAnon();
+    // price=0 but isFreeCourse returns false (slug not in env var).
+    mockIsFreeCourse.mockReturnValueOnce(false);
+    mockPrisma.product.findUnique.mockResolvedValueOnce({ id: PRODUCT_ID, slug: SLUG, price: 0 });
+
+    const { GET } = await import("./route");
+    const response = await GET(
+      createMockRequest("/api/videos/stream", { query: { lessonId: LESSON_ID, productSlug: SLUG } })
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(401);
+    expect(body.error).toMatch(/Non autenticato/);
   });
 
   // ── Missing required params : 400 ───────────────────────

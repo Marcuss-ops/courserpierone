@@ -4,6 +4,7 @@ import { getServerUser } from "@/lib/supabase/get-user";
 import { withRateLimit } from "@/lib/utils/rate-limit";
 import { apiErrorResponse } from "@/lib/errors";
 import { findCompletedOrder } from "@/lib/access";
+import { isFreeCourse } from "@/lib/courses/is-free-course";
 
 /**
  * GET /api/videos/stream?lessonId=xxx&productSlug=xxx&lang=it
@@ -26,9 +27,6 @@ import { findCompletedOrder } from "@/lib/access";
 export const GET = withRateLimit(async function GET(request: NextRequest) {
   try {
     const { user, dbUser } = await getServerUser();
-    if (!user?.email || !dbUser) {
-      return NextResponse.json({ error: "Non autenticato" }, { status: 401 });
-    }
 
     const { searchParams } = new URL(request.url);
     const lessonId = searchParams.get("lessonId");
@@ -42,21 +40,33 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
       );
     }
 
-    // Resolve product
+    // Resolve product + free course check (defense-in-depth: both
+    // NEXT_PUBLIC_FREE_COURSE_SLUGS env var AND product.price === 0).
+    // Free courses (e.g. test-course-e2e) are open-access to anyone,
+    // matching the AccessGate + middleware + /api/ebook/download bypass
+    // for the same slug. See src/lib/courses/is-free-course.ts.
     const product = await prisma.product.findUnique({
       where: { slug: productSlug },
-      select: { id: true, slug: true },
+      select: { id: true, slug: true, price: true },
     });
 
     if (!product) {
       return NextResponse.json({ error: "Prodotto non trovato" }, { status: 404 });
     }
 
-    // Check access: admin or completed order (V2 DRY: helper consolidato,
-    // admin bypass resta inline).
-    let hasAccess = dbUser.role === "admin";
+    const isFree = isFreeCourse(productSlug, product.price);
 
-    if (!hasAccess) {
+    if (!isFree && (!user?.email || !dbUser)) {
+      return NextResponse.json({ error: "Non autenticato" }, { status: 401 });
+    }
+
+    // Check access: free course OR admin OR completed order.
+    // For non-free courses, we already required `dbUser` above, so the
+    // `dbUser.role` / `findCompletedOrder` paths always have a user.
+    // For free courses `dbUser` may be null (guest), hence the `?.`.
+    let hasAccess = isFree || dbUser?.role === "admin";
+
+    if (!hasAccess && dbUser) {
       const order = await findCompletedOrder({
         userId: dbUser.id,
         productId: product.id,
