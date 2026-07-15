@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 // IMPORTANT: This middleware runs in Vercel Edge runtime. The `env` Proxy
 // in src/lib/env.ts uses dynamic `process.env[prop]` access, which
 // Next.js Webpack cannot statically replace at build time — it evaluates
-// to `undefined` in Edge. We use `process.env.FREE_COURSE_SLUGS` directly
+// to `undefined` in Edge. We use `process.env.NEXT_PUBLIC_FREE_COURSE_SLUGS` directly
 // (literal access IS statically replaced by Webpack).
 // See https://nextjs.org/docs/app/building-your-application/optimizing/package-bundling#middleware
 
@@ -51,7 +51,7 @@ function isFreeCourseSlug(slug: string): boolean {
   // comment above. Webpack statically replaces this at build time,
   // so it works in Edge runtime. The env Proxy uses dynamic
   // process.env[prop] which does NOT.
-  const freeSlugs = (process.env.FREE_COURSE_SLUGS ?? "")
+  const freeSlugs = (process.env.NEXT_PUBLIC_FREE_COURSE_SLUGS ?? "")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
@@ -105,7 +105,7 @@ export function checkProtectedAccess(
   // ── Product sub-paths (require auth, EXCEPT free courses) ──
   if (isProductSubPath(pathname) && !hasSession) {
     // Free course bypass: extract the slug from the path and check if
-    // it's in FREE_COURSE_SLUGS. The full defense-in-depth check (slug
+    // it's in NEXT_PUBLIC_FREE_COURSE_SLUGS. The full defense-in-depth check (slug
     // + price === 0) happens in the AccessGate + API handlers via the
     // isFreeCourse helper — see src/lib/courses/is-free-course.ts.
     const slug = extractSlugFromPath(pathname);

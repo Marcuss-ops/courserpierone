@@ -15,7 +15,7 @@ export async function GET(
   const { slug } = await params;
 
   // Check access:
-  //   1. Free courses (slug in FREE_COURSE_SLUGS + price === 0): anyone,
+  //   1. Free courses (slug in NEXT_PUBLIC_FREE_COURSE_SLUGS + price === 0): anyone,
   //      no auth required. Defense-in-depth via the isFreeCourse helper.
   //   2. Paid courses: user must be authenticated AND have a completed order.
   const { user, dbUser } = await getServerUser();

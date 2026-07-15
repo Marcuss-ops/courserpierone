@@ -13,7 +13,7 @@ interface VideoPaywallProps {
   lessonId: string;
   isAuthenticated: boolean;
   /**
-   * True if this is a free/open-access course (slug in FREE_COURSE_SLUGS
+   * True if this is a free/open-access course (slug in NEXT_PUBLIC_FREE_COURSE_SLUGS
    * + price === 0). Bypasses the isAuthenticated check and renders the
    * video for any guest. See src/lib/courses/is-free-course.ts.
    */

@@ -144,7 +144,7 @@ export const ENV_DEFINITIONS: EnvVarDef[] = [
     defaultValue: "development",
   },
   {
-    key: "FREE_COURSE_SLUGS",
+    key: "NEXT_PUBLIC_FREE_COURSE_SLUGS",
     category: "optional",
     description:
       "Slugs (separati da virgola) di prodotti con price=0 che sono accessibili a chiunque senza login o pagamento. Usato da AccessGate come SSOT bypass (vedi src/components/course/access-gate.tsx — aggiorna il path qui se rinominato). Se vuoto/non impostato, nessun prodotto è bypass-ato. Esempio: 'test-course-e2e' oppure 'test-course-e2e,other-free-slug'. NOTA: il bypass è defense-in-depth — richiede SIA lo slug in questa lista SIA product.price === 0 nel DB (un refuso accidentale qui NON rende liberamente accessibile un prodotto a pagamento). Per utenti autenticati, l'AccessGate upserta anche un AccessGrant sourceType='free_enrollment' (necessario per progress tracking + ebook download).",

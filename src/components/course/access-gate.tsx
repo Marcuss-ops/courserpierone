@@ -19,7 +19,7 @@ interface AccessGateProps {
  * Server-side access gate.
  *
  * Grants access if any of the following is true:
- * - Product is in FREE_COURSE_SLUGS AND price === 0 (open-access test/free course)
+ * - Product is in NEXT_PUBLIC_FREE_COURSE_SLUGS AND price === 0 (open-access test/free course)
  * - User is an admin
  * - User has a completed order for the product
  * - A valid completed order ID is provided in the query string
@@ -56,12 +56,12 @@ export async function AccessGate({
 
   let hasAccess = false;
 
-  // 0. FREE COURSE BYPASS — courses listed in FREE_COURSE_SLUGS env var
+  // 0. FREE COURSE BYPASS — courses listed in NEXT_PUBLIC_FREE_COURSE_SLUGS env var
   // with price=0 are accessible to anyone (no login, no payment).
   // This is the SSOT for "test/free" courses. Adding a slug here makes
   // it open-access without touching the access resolver.
   //
-  // Defense-in-depth: BOTH `FREE_COURSE_SLUGS` env var AND `price === 0`
+  // Defense-in-depth: BOTH `NEXT_PUBLIC_FREE_COURSE_SLUGS` env var AND `price === 0`
   // must be true. A real product whose price is accidentally set to 0
   // is NOT bypassed unless its slug is also explicitly listed.
   // The check itself lives in src/lib/courses/is-free-course.ts (DRY).

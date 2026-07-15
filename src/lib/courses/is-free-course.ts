@@ -8,12 +8,12 @@
  *   (per passare `isFreeCourse` ai Client Components che altrimenti
  *   bailoutano su `!isAuthenticated`)
  *
- * Logica: defense-in-depth — richiede SIA lo slug in FREE_COURSE_SLUGS
+ * Logica: defense-in-depth — richiede SIA lo slug in NEXT_PUBLIC_FREE_COURSE_SLUGS
  * SIA `price === 0` nel DB. Un refuso accidentale qui NON rende
  * liberamente accessibile un prodotto a pagamento.
  *
  * Vedi anche:
- * - src/lib/env.ts (FREE_COURSE_SLUGS schema)
+ * - src/lib/env.ts (NEXT_PUBLIC_FREE_COURSE_SLUGS schema)
  * - src/components/course/access-gate.tsx (consumer server-side)
  */
 import { env } from "@/lib/env";
@@ -22,7 +22,7 @@ export function isFreeCourse(slug: string | null | undefined, price?: number | n
   if (!slug) return false;
   if (price !== 0) return false;
 
-  const freeSlugs = (env.FREE_COURSE_SLUGS ?? "")
+  const freeSlugs = (env.NEXT_PUBLIC_FREE_COURSE_SLUGS ?? "")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
