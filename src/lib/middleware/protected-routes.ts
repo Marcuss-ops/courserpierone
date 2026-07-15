@@ -2,12 +2,15 @@
 
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { getFreeCourseSlugs } from "@/lib/env";
 
-// IMPORTANT: This middleware runs in Vercel Edge runtime. The `env` Proxy
-// in src/lib/env.ts uses dynamic `process.env[prop]` access, which
-// Next.js Webpack cannot statically replace at build time — it evaluates
-// to `undefined` in Edge. We use `process.env.NEXT_PUBLIC_FREE_COURSE_SLUGS` directly
-// (literal access IS statically replaced by Webpack).
+// IMPORTANT: This middleware runs in Vercel Edge runtime. Free-course
+// slug lookups use `getFreeCourseSlugs()` from src/lib/env.ts — the single
+// source of truth for parsed `NEXT_PUBLIC_FREE_COURSE_SLUGS` (replaces
+// the historical edge/node duplication, see commit history: 4 prior
+// patches on this var alone). Because the underlying env var has the
+// `NEXT_PUBLIC_` prefix, Webpack statically replaces it at build time
+// even in Edge, so this works without runtime env lookups.
 // See https://nextjs.org/docs/app/building-your-application/optimizing/package-bundling#middleware
 
 // ─── Known non-landing paths (skip locale handling) ────────
@@ -53,16 +56,12 @@ function isProductSubPath(pathname: string): boolean {
 // (both use the isFreeCourse helper which checks price === 0).
 // A product with a matching slug but non-zero price would pass the
 // middleware check but still be denied at the page/API level.
+// Edge-bound consumer of `getFreeCourseSlugs()` (the typed accessor
+// from src/lib/env.ts). Webpack statically replaces the NEXT_PUBLIC_
+// env literal in env.ts at build time, so this function works in Edge
+// without runtime env lookups.
 function isFreeCourseSlug(slug: string): boolean {
-  // Direct process.env access (NOT via the env Proxy) — see import
-  // comment above. Webpack statically replaces this at build time,
-  // so it works in Edge runtime. The env Proxy uses dynamic
-  // process.env[prop] which does NOT.
-  const freeSlugs = (process.env.NEXT_PUBLIC_FREE_COURSE_SLUGS ?? "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  return freeSlugs.includes(slug);
+  return getFreeCourseSlugs().includes(slug);
 }
 
 // Extract the course slug from product sub-paths.

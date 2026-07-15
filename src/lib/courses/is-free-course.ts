@@ -16,16 +16,11 @@
  * - src/lib/env.ts (NEXT_PUBLIC_FREE_COURSE_SLUGS schema)
  * - src/components/course/access-gate.tsx (consumer server-side)
  */
-import { env } from "@/lib/env";
+import { getFreeCourseSlugs } from "@/lib/env";
 
 export function isFreeCourse(slug: string | null | undefined, price?: number | null): boolean {
   if (!slug) return false;
   if (price !== 0) return false;
 
-  const freeSlugs = (env.NEXT_PUBLIC_FREE_COURSE_SLUGS ?? "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-
-  return freeSlugs.includes(slug);
+  return getFreeCourseSlugs().includes(slug);
 }

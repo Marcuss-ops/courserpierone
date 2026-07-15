@@ -15,6 +15,8 @@
  */
 
 // ─── Definizione degli schemi ──────────────────────────────
+import { z } from "zod";
+
 export interface EnvVarDef {
   key: string;
   category: "critical" | "required" | "optional" | "auto";
@@ -266,6 +268,47 @@ export const env = new Proxy(
     },
   }
 );
+
+// ═══ Typed Computed Accessors (Edge + Node) ═════════════════
+
+/** Slug format: lowercase alphanumeric + hyphens, 1–64 chars. */
+const PRODUCT_SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,63}$/;
+
+/**
+ * Parsed list of product slugs that bypass the login+payment gate
+ * (defense-in-depth — combined with `product.price === 0` in
+ * src/lib/courses/is-free-course.ts and src/components/course/access-gate.tsx).
+ *
+ * Single source of truth: replaces the historical edge/node duplication
+ * of `(process.env.X ?? "").split(",").map(trim).filter(Boolean)` that
+ * lived inline in both `src/lib/middleware/protected-routes.ts`
+ * (Edge runtime) and `src/lib/courses/is-free-course.ts` (Node runtime).
+ *
+ * **Edge runtime**: Webpack statically replaces
+ * `process.env.NEXT_PUBLIC_FREE_COURSE_SLUGS` at build time (because of
+ * the NEXT_PUBLIC_ prefix). Each call returns an identical, baked-in
+ * list — no runtime env lookup.
+ *
+ * **Node runtime**: per-call reading means dev hot-reload picks up
+ * fresh env values without restarting the server.
+ *
+ * **Empty default**: when the var is unset / empty, returns `[]`. The
+ * AccessGate will then deny anonymous access to all courses — the
+ * expected prod posture.
+ *
+ * **Throws on malformed input**: SchemaError surfaces operator typos
+ * (e.g. uppercase / underscores) at the first call site, not silently
+ * accepting them.
+ */
+const FREE_COURSE_SLUGS_SCHEMA = z
+  .string()
+  .optional()
+  .transform((s) => (s ?? "").split(",").map((v) => v.trim()).filter(Boolean))
+  .pipe(z.array(z.string().regex(PRODUCT_SLUG_REGEX, "Invalid ProductSlug format")));
+
+export function getFreeCourseSlugs(): string[] {
+  return FREE_COURSE_SLUGS_SCHEMA.parse(process.env.NEXT_PUBLIC_FREE_COURSE_SLUGS);
+}
 
 // ─── Utility: formato leggibile ────────────────────────────
 

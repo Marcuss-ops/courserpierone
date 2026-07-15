@@ -172,3 +172,65 @@ describe("env proxy accessor", () => {
     expect(env.OPENAI_API_KEY).toBeUndefined();
   });
 });
+
+describe("getFreeCourseSlugs", () => {
+  // After Step 6: getFreeCourseSlugs() is the single source of truth.
+  // It replaces inline `(env.X ?? "").split(",").filter(Boolean)` that
+  // used to live in both Edge (protected-routes.ts) AND Node (is-free-course.ts).
+  // Schema: lowercase alphanumeric + hyphens, 1–64 chars per slug.
+
+  it("returns empty array when env is unset", async () => {
+    deleteEnv("NEXT_PUBLIC_FREE_COURSE_SLUGS");
+    const { getFreeCourseSlugs } = await import("./env");
+    expect(getFreeCourseSlugs()).toEqual([]);
+  });
+
+  it("returns empty array when env is empty string", async () => {
+    setEnv("NEXT_PUBLIC_FREE_COURSE_SLUGS", "");
+    const { getFreeCourseSlugs } = await import("./env");
+    expect(getFreeCourseSlugs()).toEqual([]);
+    deleteEnv("NEXT_PUBLIC_FREE_COURSE_SLUGS");
+  });
+
+  it("parses a single slug", async () => {
+    setEnv("NEXT_PUBLIC_FREE_COURSE_SLUGS", "test-course-e2e");
+    const { getFreeCourseSlugs } = await import("./env");
+    expect(getFreeCourseSlugs()).toEqual(["test-course-e2e"]);
+    deleteEnv("NEXT_PUBLIC_FREE_COURSE_SLUGS");
+  });
+
+  it("parses CSV with whitespace and trims each segment", async () => {
+    setEnv("NEXT_PUBLIC_FREE_COURSE_SLUGS", "  foo  ,  bar  ,  baz  ");
+    const { getFreeCourseSlugs } = await import("./env");
+    expect(getFreeCourseSlugs()).toEqual(["foo", "bar", "baz"]);
+    deleteEnv("NEXT_PUBLIC_FREE_COURSE_SLUGS");
+  });
+
+  it("filters empty CSV segments", async () => {
+    setEnv("NEXT_PUBLIC_FREE_COURSE_SLUGS", "foo,,bar,,");
+    const { getFreeCourseSlugs } = await import("./env");
+    expect(getFreeCourseSlugs()).toEqual(["foo", "bar"]);
+    deleteEnv("NEXT_PUBLIC_FREE_COURSE_SLUGS");
+  });
+
+  it("accepts short names and multi-hyphen slugs", async () => {
+    setEnv("NEXT_PUBLIC_FREE_COURSE_SLUGS", "a,b-c,d-e-f,free-course-123");
+    const { getFreeCourseSlugs } = await import("./env");
+    expect(getFreeCourseSlugs()).toEqual(["a", "b-c", "d-e-f", "free-course-123"]);
+    deleteEnv("NEXT_PUBLIC_FREE_COURSE_SLUGS");
+  });
+
+  it("throws SchemaError on uppercase slug (operator typo at boot)", async () => {
+    setEnv("NEXT_PUBLIC_FREE_COURSE_SLUGS", "BadSlug");
+    const { getFreeCourseSlugs } = await import("./env");
+    expect(() => getFreeCourseSlugs()).toThrow();
+    deleteEnv("NEXT_PUBLIC_FREE_COURSE_SLUGS");
+  });
+
+  it("throws SchemaError on underscore or other invalid chars", async () => {
+    setEnv("NEXT_PUBLIC_FREE_COURSE_SLUGS", "slug_with_underscore");
+    const { getFreeCourseSlugs } = await import("./env");
+    expect(() => getFreeCourseSlugs()).toThrow();
+    deleteEnv("NEXT_PUBLIC_FREE_COURSE_SLUGS");
+  });
+});
