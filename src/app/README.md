@@ -41,7 +41,6 @@ Il middleware risolve il locale e passa la richiesta alla route corretta.
 | `api/admin/users` | CRUD utenti admin |
 | `api/analytics` | Registrazione eventi |
 | `api/analytics/dashboard` | Dashboard analytics |
-| `api/auth/[...nextauth]` | NextAuth handler |
 | `api/certificate/[productId]` | Genera certificato |
 | `api/checkout` | Crea sessione Lemon Squeezy |
 | `api/cron/abandoned-checkouts` | Cron: recupero carrelli abbandonati |

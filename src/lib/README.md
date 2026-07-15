@@ -6,7 +6,7 @@
 
 ```
 lib/
-├── auth/          # NextAuth configuration
+├── auth/          # Admin-guard helper (requireAdmin)
 ├── config/        # Course config generation & reading
 ├── db/            # Prisma & Supabase clients
 ├── i18n/          # Internationalization (locale, player-locale, visitor-session)
@@ -23,7 +23,7 @@ Ogni subdirectory esporta il proprio contenuto. Per importare:
 
 ```ts
 // ✅ Consigliato — path specifico
-import { authOptions } from "@/lib/auth/auth";
+import { requireAdmin } from "@/lib/auth/require-admin";
 import { prisma } from "@/lib/db/prisma";
 import { initLS } from "@/lib/payment/lemonsqueezy";
 
@@ -38,7 +38,7 @@ openai.ts          → (standalone, no deps)
 utils/             → (standalone)
 db/prisma.ts       → (standalone)
 i18n/              → (standalone)
-auth/auth.ts       → db/prisma.ts
+auth/require-admin.ts       → supabase/get-user.ts
 config/            → db/prisma.ts
 payment/           → (standalone, reads env)
 services/
@@ -51,10 +51,6 @@ services/
 ```env
 # Database
 DATABASE_URL=postgresql://...
-
-# Auth
-NEXTAUTH_SECRET=
-NEXTAUTH_URL=
 
 # Payment
 LEMONSQUEEZY_API_KEY=
