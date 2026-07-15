@@ -203,7 +203,7 @@ function main() {
       const missing: string[] = [];
       const discrepancies: string[] = [];
 
-      const SOFT_SUBTREES = ["portal."];
+      const SOFT_SUBTREES = ["portal.", "pricing."];
 
       for (const key of referenceKeys) {
         if (!localeKeys.has(key)) {

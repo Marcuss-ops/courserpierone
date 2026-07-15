@@ -455,22 +455,5 @@
     "format_label": "PDF / Web-format",
     "read_label": "Les"
   },
-  "pricing": {
-    "free": {
-      "features": [
-        "1 Product",
-        "3 Languages",
-        "Basic analytics"
-      ]
-    },
-    "pro": {
-      "features": [
-        "Unlimited products",
-        "20 Languages",
-        "AI translations",
-        "Advanced analytics",
-        "International payments"
-      ]
-    }
-  }
+  "pricing": {}
 }
