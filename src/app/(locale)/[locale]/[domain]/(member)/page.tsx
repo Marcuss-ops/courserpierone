@@ -9,7 +9,6 @@ import {
   BookOpen,
   Download,
   ChevronRight,
-  Check,
   Sparkles,
 } from "lucide-react";
 import { getCourseConfig } from "@/lib/config/white-label-data";
@@ -17,6 +16,7 @@ import { getServerUser } from "@/lib/supabase/get-user";
 import { loadLocaleContentCached } from "@/lib/i18n/load-locale-content";
 import { prisma } from "@/lib/db/prisma";
 import { extractYouTubeId, youTubeThumbnailUrl } from "@/lib/youtube/id";
+import { LessonThumbnail } from "@/components/course/lesson-thumbnail";
 
 export async function generateMetadata({
   params,
@@ -252,41 +252,18 @@ export default async function CourseCorsoTab({
                 className="group block bg-cream-dark-surface border border-cream-dark-border rounded-2xl overflow-hidden hover:border-cream-dark-gold/40 hover:bg-cream-dark-surface/80 hover:-translate-y-0.5 transition-all shadow-md shadow-black/20"
               >
                 <div className="flex flex-col sm:flex-row items-stretch">
-                  {/* YouTube-style thumbnail (left) — 16:9 on mobile, fixed
-                      width on desktop. Shows YT hqdefault.jpg when the
-                      lesson has a YouTube URL; falls back to a dark
-                      placeholder with a play icon for non-YouTube videos. */}
-                  <div className="relative w-full sm:w-44 md:w-56 shrink-0 aspect-video sm:aspect-auto bg-black overflow-hidden">
-                    {thumbnailUrl ? (
-                      // Using <img> intentionally (not next/image): the
-                      // thumbnail is served from Google's CDN, which
-                      // doesn't need our image optimizer. `unoptimized`
-                      // would also work with next/image but adds a
-                      // processing hop for a 3rd-party URL.
-                      <img
-                        src={thumbnailUrl}
-                        alt={lessonTitle}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="w-full h-full min-h-[140px] flex items-center justify-center bg-cream-dark-bg">
-                        <Play className="w-12 h-12 text-cream-dark-text-soft/30 fill-current" />
-                      </div>
-                    )}
-                    {/* Duration badge (YouTube-style bottom-right overlay) */}
-                    {lesson.duration && (
-                      <span className="absolute bottom-2 right-2 bg-black/85 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
-                        {lesson.duration}
-                      </span>
-                    )}
-                    {/* Completion checkmark (top-left overlay) */}
-                    {isCompleted && (
-                      <span className="absolute top-2 left-2 inline-flex items-center justify-center w-7 h-7 rounded-full bg-cream-dark-gold text-cream-dark-bg shadow-lg">
-                        <Check className="w-3.5 h-3.5" />
-                      </span>
-                    )}
-                  </div>
+                  {/* YouTube-style thumbnail (left) — extracted to a Client
+                      Component (LessonThumbnail) so we can use useState
+                      for the onError fallback when hqdefault.jpg 404s
+                      (deleted/private video). The placeholder div +
+                      duration badge + completion checkmark all live in
+                      the component now. */}
+                  <LessonThumbnail
+                    thumbnailUrl={thumbnailUrl}
+                    title={lessonTitle}
+                    duration={lesson.duration}
+                    isCompleted={isCompleted}
+                  />
 
                   {/* Title + description (middle) */}
                   <div className="flex-1 p-5 flex flex-col justify-center min-w-0">
