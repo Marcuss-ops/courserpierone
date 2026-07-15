@@ -1,8 +1,18 @@
-// ─── Middleware — Thin orchestrator ────────────────────────
+// ─── Proxy — Thin orchestrator (Next.js 16 migration) ──────
+// Migrated from middleware.ts → proxy.ts on 2026-07-15 (Next.js 16
+// convention deprecation). Behavior is identical; the file path and
+// function name follow the new "proxy" convention.
+//
 // Delegates to src/lib/middleware/ for:
 //   - protected route checks (protected-routes.ts)
 //   - locale redirect logic (locale-redirects.ts)
 //   - cookie helpers (locale-cookie.ts)
+//
+// `updateSession` from `@/lib/supabase/middleware` keeps its helper
+// file path (filename) unchanged — only the GLOBAL app convention
+// (this file) was renamed. The next.config.mjs `outputFileTracingIncludes`
+// for courses/**/*.json bundles the per-course config.json files
+// needed by the proxy chain.
 
 import { type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
@@ -15,7 +25,7 @@ import {
   handleNoPrefix,
 } from "@/lib/middleware/locale-redirects";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // ── 1. Refresh Supabase session (cookie only) ──
