@@ -207,7 +207,7 @@ courser/
 | Comando | Descrizione |
 |---|---|
 | `npm run dev` | Dev server (Next.js 16) |
-| `npm run build` | Build produzione (prisma generate + validate:locales + generate:locales + next build) |
+| `npm run build` | Build produzione (`validate:locales + next build`; `prisma generate` e `generate:locales` girano in `postinstall`) |
 | `npm start` | Server produzione (Next.js) |
 | `npm run typecheck` | TypeScript check (`tsc --noEmit`) |
 | `npm run lint` | ESLint (read-only) |

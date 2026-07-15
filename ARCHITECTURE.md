@@ -59,7 +59,7 @@ Stack di supporto: **PostgreSQL** + **Prisma 5**, **Upstash Redis** + **ioredis*
 - **Tracce audio**: File MP3 collegati alla lezione, selezionabili per lingua
 - **PDF localizzati**: Un file per lingua, generato o caricato manualmente (`LessonAsset` table)
 - **Metadata**: Titolo, descrizione, tags — tutti tradotti
-- **Content source of truth**: `ProductTranslation` (DB) + `data/<slug>/<locale>.json` (derived build artifact via `extract-locales.ts`). Vedi `docs/content-source-map.md` per la matrice completa e `docs/adr/0009-content-source-canonical.md` per il design canonical.
+- **Content source of truth**: `ProductTranslation` (DB) + `courses/<slug>/locales/<locale>.json` (canonical path, ADR-0011; `next.config.mjs` `outputFileTracingIncludes` bundla in Lambda). Vedi `docs/content-source-map.md` per la matrice completa e `docs/adr/0009-content-source-canonical.md` per il design canonical.
 
 ### 3. Checkout & Pagamenti (LS-only)
 
@@ -113,7 +113,7 @@ Carica PDF/Audio (per lingua) → LessonAsset
 Compila ProductTranslation (titolo, storia, problema, cta, recensioni, ui_all)
     │
     ▼
-extract-locales.ts → data/<slug>/<locale>.json (build artifact)
+extract-locales.ts → `courses/<slug>/locales/<locale>.json` (build artifact, ADR-0011 canonical)
     │
     ▼
 Pubblica ──── generateCourseConfig(slug) → CourseConfigCache DB row
