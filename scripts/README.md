@@ -17,13 +17,13 @@ scripts/
 
 ```bash
 # Prodotti
-npx tsx scripts/products/generate.ts amish-secrets
+npx tsx scripts/products/generate.ts <slug>
 
 # Database seed
 npx tsx scripts/db/seed-locales.ts
 
 # Traduzioni white-label
-npx tsx scripts/translate/extract-locales.ts amish-secrets
+npx tsx scripts/translate/extract-locales.ts <slug>
 npx tsx scripts/translate/argos-bridge.ts it en fr de es
 
 # V1 readiness audit (read-only, no mutations)
