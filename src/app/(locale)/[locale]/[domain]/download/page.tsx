@@ -7,10 +7,12 @@ import type { Metadata } from "next";
 import { Download, BookOpen, ArrowLeft, CheckCircle } from "lucide-react";
 import { getCourseConfig } from "@/lib/config/white-label-data";
 import { AccessGate } from "@/components/course/access-gate";
+import { isFreeCourse } from "@/lib/courses/is-free-course";
 import { loadLocaleContentSafe } from "@/lib/i18n/load-locale-content";
 import { getAvailableEbookBooks } from "@/lib/books/ebook-catalog";
 import { SaveAccess } from "@/components/course/save-access";
 import { getUiTranslations } from "@/lib/i18n/ui-translations";
+import { prisma } from "@/lib/db/prisma";
 
 const LANGUAGE_NAMES: Record<string, string> = {
   it: "Italiano",
@@ -106,6 +108,17 @@ export default async function DownloadPage({
   const course = await getCourseConfig(domain);
   if (!course) return notFound();
 
+  // Defense-in-depth: same logic as access-gate.tsx. Pass to <SaveAccess>
+  // for consistency with other pages + use to bypass the auth requirement
+  // on the /api/ebook/[slug]/download endpoint for free-course guests.
+  // Lightweight product lookup (only `price` field) — the full course
+  // config is already loaded above.
+  const downloadProduct = await prisma.product.findUnique({
+    where: { slug: domain },
+    select: { price: true },
+  });
+  const freeCourse = isFreeCourse(domain, downloadProduct?.price);
+
   const availableBooks = getAvailableEbookBooks(domain);
   const currentLang = lang || availableBooks[0]?.code || locale.split("-")[0] || course.defaultLanguage || "en";
   const content = course.languages[currentLang] || course.languages[course.defaultLanguage];
@@ -132,7 +145,7 @@ export default async function DownloadPage({
   return (
     <AccessGate productSlug={domain} courseTitle={ebookTitle} callbackUrl={`/${locale}/${domain}/download?${downloadQs.toString()}`} orderId={activeOrderId}>
     <div className="min-h-screen bg-[#070709] text-zinc-100 font-sans relative overflow-x-hidden flex flex-col justify-between">
-      <SaveAccess productSlug={domain} />
+      <SaveAccess productSlug={domain} isFreeCourse={freeCourse} />
       {/* Background radial glows */}
       <div
         className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full blur-[120px] -z-10 opacity-30"
@@ -241,15 +254,19 @@ export default async function DownloadPage({
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-center gap-4 pt-6 border-t border-white/5">
-                <a
-                  href={downloadUrl}
-                  download
-                  className="w-full sm:w-auto px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest text-white flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
-                  style={{
-                    background: `linear-gradient(135deg, ${accent} 0%, ${accent}CC 100%)`,
-                    boxShadow: `0 4px 20px ${accent}40`,
-                  }}
-                >
+      <a
+        href={downloadUrl}
+        download
+        className="w-full sm:w-auto px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest text-white flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
+        style={{
+          background: `linear-gradient(135deg, ${accent} 0%, ${accent}CC 100%)`,
+          boxShadow: `0 4px 20px ${accent}40`,
+        }}
+        // Free courses: the /api/ebook/[slug]/download endpoint allows
+        // public access (route.ts updated to honor isFreeCourse). Paid
+        // courses: user must be authenticated with a completed order
+        // (enforced server-side in the API handler).
+      >
                   <Download className="w-4 h-4" />
                   {lc.download_button || t.download_button}
                 </a>

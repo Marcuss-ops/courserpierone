@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { jsPDF } from "jspdf";
 import { getCourseConfig } from "@/lib/config/white-label-data";
 import { getServerUser } from "@/lib/supabase/get-user";
+import { isFreeCourse } from "@/lib/courses/is-free-course";
+import { prisma } from "@/lib/db/prisma";
 import fs from "fs";
 import path from "path";
 import { findCompletedOrder } from "@/lib/access";
@@ -12,13 +14,26 @@ export async function GET(
 ) {
   const { slug } = await params;
 
-  // Check access: user must be authenticated AND have purchased this product
+  // Check access:
+  //   1. Free courses (slug in FREE_COURSE_SLUGS + price === 0): anyone,
+  //      no auth required. Defense-in-depth via the isFreeCourse helper.
+  //   2. Paid courses: user must be authenticated AND have a completed order.
   const { user, dbUser } = await getServerUser();
   const url = new URL(request.url);
 
   let hasAccess = false;
 
-  if (user?.email && dbUser) {
+  // Lightweight product lookup for the price (defense-in-depth).
+  // Only `price` field — the full course config is loaded further below.
+  const downloadProduct = await prisma.product.findUnique({
+    where: { slug },
+    select: { price: true },
+  });
+  if (isFreeCourse(slug, downloadProduct?.price)) {
+    hasAccess = true;
+  }
+
+  if (!hasAccess && user?.email && dbUser) {
     // V2 DRY: helper consolidato (slug variant via relation filter).
     // 1 round-trip. Mantiene la shape booleana del check.
     const hasOrder = await findCompletedOrder({

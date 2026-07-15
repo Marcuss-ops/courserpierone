@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 
-export function SaveAccess({ productSlug }: { productSlug: string }) {
+export function SaveAccess({ productSlug, isFreeCourse: _isFreeCourse }: { productSlug: string; isFreeCourse?: boolean }) {
   const searchParams = useSearchParams();
 
   useEffect(() => {
