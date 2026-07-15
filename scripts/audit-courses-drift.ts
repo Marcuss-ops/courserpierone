@@ -27,6 +27,7 @@
 import { existsSync, readdirSync, statSync } from "fs";
 import { resolve } from "path";
 import process from "process";
+import type { CourseTemplateId } from "../src/lib/courses/templates";
 
 // ─── Step 1: load COURSES registry via tsx ─────────────────
 async function loadRegistry(): Promise<unknown[]> {
@@ -62,7 +63,7 @@ function scanCoursesDir(root: string): string[] {
 interface CourseMeta {
   slug: string;
   status: "active" | "draft" | "archived";
-  templateId: "amish" | "book-claude" | "lumio" | "h612" | "horizon" | "default";
+  templateId: CourseTemplateId;
   [k: string]: unknown;
 }
 

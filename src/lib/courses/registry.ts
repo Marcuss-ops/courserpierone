@@ -24,7 +24,11 @@ import {
   type CourseMeta,
 } from "../../../courses.config";
 
+// CourseMeta passthrough — still lives in courses.config.ts (registry source).
 export type { CourseMeta };
+// CourseTemplateId re-exported here so server components that pull the
+// façade (registry) don't need a second import path for the template id.
+export type { CourseTemplateId } from "@/lib/courses/templates";
 export { COURSES, ACTIVE_COURSES, DEFAULT_LANDING_SLUG, findCourseMeta };
 
 /** All known slugs (active + draft + archived) — used by CI registry vs DB audit. */

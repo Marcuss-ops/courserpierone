@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { prisma } from "../db/prisma";
 import { cacheGet, cacheSet } from "../redis";
+import type { CourseTemplateId } from "@/lib/courses/templates";
 
 export interface LessonConfig {
   number: number;
@@ -21,7 +22,12 @@ export interface PriceByLocale {
 export interface CourseConfig {
   slug: string;
   productId?: string;
-  template?: "lumio" | "h612" | "horizon" | "book-claude" | "amish" | "default";
+  /**
+   * Rendering template — selects the components/ folder at runtime.
+   * Optional because smoke-test / non-custom courses omit it.
+   * See `src/lib/courses/templates.ts` for the canonical 6-value union.
+   */
+  template?: CourseTemplateId;
   defaultLanguage: string;
   cover: string;
   authorImageUrl?: string;
@@ -142,5 +148,3 @@ export async function getCourseConfig(slug: string): Promise<CourseConfig | null
 
   return config;
 }
-
-

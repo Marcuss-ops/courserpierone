@@ -19,6 +19,8 @@
  * Removing this file is NOT possible — it is the import target for ALL course-aware scripts.
  */
 
+import type { CourseTemplateId } from "./src/lib/courses/templates";
+
 export interface CourseMeta {
   /** URL slug — must match `Product.slug` (Postgres @unique). */
   slug: string;
@@ -31,10 +33,10 @@ export interface CourseMeta {
    *
    * Includes `default` for smoke-tests and placeholder courses that ship
    * without a dedicated components/ folder: `[domain]/page.tsx` falls
-   * through to inline JSX when this templateId is rendered. Mirrors the
-   * `template` union in `CourseConfig` (src/lib/config/white-label-data.ts).
+   * through to inline JSX when this templateId is rendered. Single
+   * source of truth: `src/lib/courses/templates.ts`.
    */
-  templateId: "amish" | "book-claude" | "lumio" | "h612" | "horizon" | "default";
+  templateId: CourseTemplateId;
   /** Cover image path (served from /public). */
   coverImage: string;
   /** Locales this course ships content for. Used for the /courses filter chips. */
