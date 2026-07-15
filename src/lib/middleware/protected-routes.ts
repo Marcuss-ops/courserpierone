@@ -36,7 +36,14 @@ export function isKnownPath(pathname: string): boolean {
 const PRODUCT_SUB_PATHS = ["/portal", "/download", "/curso"];
 
 function isProductSubPath(pathname: string): boolean {
-  return PRODUCT_SUB_PATHS.some((p) => pathname.endsWith(p));
+  // Must catch both exact matches (`/download`) AND nested paths
+  // (`/curso/lesson-1`). Using only `endsWith` would let lesson pages
+  // (`/curso/...`) bypass the middleware entirely, which is a security
+  // hole: unauthenticated users could view lessons without going
+  // through the free course bypass or the AccessGate.
+  return PRODUCT_SUB_PATHS.some(
+    (p) => pathname === p || pathname.endsWith(p) || pathname.includes(`${p}/`)
+  );
 }
 
 // ─── Free course bypass (slug-only, no DB call) ────────────
