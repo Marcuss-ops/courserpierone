@@ -1,0 +1,10 @@
+
+> courser@0.1.0 start
+> next start
+
+▲ Next.js 16.2.10
+- Local:         http://localhost:3000
+- Network:       http://51.91.11.36:3000
+✓ Ready in 138ms
+⚠ turbopack.root should be absolute, using: /home/pierone/Projects/company/courserpierone
+[redis] Connected to Upstash
