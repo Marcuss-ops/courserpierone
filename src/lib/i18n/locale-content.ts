@@ -210,7 +210,9 @@ export interface LocaleContent {
     tab_corso?: string;
     tab_community?: string;
     tab_chat?: string;
-    tab_about_course?: string;
+    // (2026-07-15) Removed `tab_about_course` — the top-nav link to
+    // /[locale]/[domain]/about was retired per production feedback.
+    // The /about page itself remains accessible via direct URL.
     tab_chat_subtitle?: string;
     tab_chat_connecting?: string;
     tab_corso_lessons_title?: string;
@@ -291,7 +293,7 @@ export function createEmptyLocale(locale: string, defaults?: Partial<LocaleConte
       footer_brand: "", footer_rights: "", footer_privacy: "",
       footer_terms: "", footer_refund: "", chat_title: "", chat_subtitle: "", chat_empty_hint: "",
       chat_offline_creator: "", chat_offline_self: "", lang_label: "",
-      tab_corso: "", tab_community: "", tab_chat: "", tab_about_course: "",
+      tab_corso: "", tab_community: "", tab_chat: "",
       tab_chat_subtitle: "", tab_chat_connecting: "",
       tab_corso_lessons_title: "", tab_corso_lessons_subtitle: "",
       tab_corso_ebook_title: "", tab_corso_ebook_desc: "",

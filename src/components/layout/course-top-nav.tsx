@@ -21,12 +21,11 @@ interface CourseTopNavProps {
   /** Course slug (e.g. "amish-secrets") + locale (e.g. "it-it"). */
   courseSlug: string;
   locale: string;
-  /** Localized labels for tabs + auxiliary link. */
+  /** Localized labels for the 3 main tabs. */
   labels: {
     course: string;
     community: string;
     chat: string;
-    aboutCourse: string;
   };
   /** Notifiche bell props attive quando l'utente è autenticato. */
   notifications?: {
@@ -151,14 +150,12 @@ export function CourseTopNav({
           </Link>
         </div>
 
-        {/* Right cluster: about link + ThemeToggle + NotificationBell + User profile dropdown */}
+        {/* Right cluster: ThemeToggle + NotificationBell + User profile dropdown.
+            (2026-07-15) Removed "Info corso" / `/about` link from the nav per
+            production feedback — the marketing landing was demoted to sub-page
+            status and the link was redundant with the funnel page CTA. The
+            `/about` page itself is still accessible via direct URL. */}
         <div className="flex items-center gap-2 shrink-0">
-          <Link
-            href={`${basePath}/about`}
-            className="hidden md:inline text-[11px] font-bold text-cream-dark-text-soft hover:text-cream-dark-gold transition-colors uppercase tracking-wider"
-          >
-            {labels.aboutCourse}
-          </Link>
           {/* Theme toggle — visible to ALL (logged in or not) so users can
               flip to dark mode even on login / marketing pages. The course */}
           <ThemeToggle variant="dark" />

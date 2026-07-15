@@ -74,9 +74,9 @@ export default async function CourseLayout({
     chat:
       lc.tab_chat ||
       (lang2 === "it" ? "Chat con il Creator" : "Chat with Creator"),
-    aboutCourse:
-      lc.tab_about_course ||
-      (lang2 === "it" ? "Info corso" : "About this course"),
+    // (2026-07-15) Removed `aboutCourse` / "Info corso" label — the top-nav
+    // link to /[locale]/[domain]/about was retired per production feedback.
+    // The /about page itself remains accessible via direct URL.
   };
 
   return (

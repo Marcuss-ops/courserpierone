@@ -11,7 +11,6 @@ import { loadLocaleContentCached } from "@/lib/i18n/load-locale-content";
 import { getDmContext } from "@/lib/messaging/get-dm-context";
 import { findOrCreateConversation } from "@/lib/messaging/find-or-create-conversation";
 import { ChatView } from "@/components/chat/chat-view";
-import Link from "next/link";
 
 export async function generateMetadata({
   params,
@@ -115,7 +114,6 @@ export default async function CourseChatTab({
     }
   }
 
-  const basePath = `/${locale}/${domain}`;
   const accent = course.accentColor ?? "#C9840D";
 
   return (
@@ -214,12 +212,9 @@ export default async function CourseChatTab({
               : "Write in the box above — we reply within 24h."}
           </p>
         </div>
-        <Link
-          href={`${basePath}/about`}
-          className="px-4 py-2 bg-cream-dark-bg border border-cream-dark-border rounded-xl text-xs font-bold text-cream-dark-text-soft hover:text-cream-dark-gold hover:border-cream-dark-gold/40 transition-all"
-        >
-          {lang2 === "it" ? "Info corso" : "Course info"}
-        </Link>
+        {/* (2026-07-15) Removed "Info corso" / "Course info" button per
+            production feedback. The /about page is still accessible via
+            direct URL; the funnel page CTA is the primary entry point. */}
       </div>
     </div>
   );
