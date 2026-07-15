@@ -12,6 +12,12 @@ interface VideoPaywallProps {
   productSlug: string;
   lessonId: string;
   isAuthenticated: boolean;
+  /**
+   * True if this is a free/open-access course (slug in FREE_COURSE_SLUGS
+   * + price === 0). Bypasses the isAuthenticated check and renders the
+   * video for any guest. See src/lib/courses/is-free-course.ts.
+   */
+  isFreeCourse?: boolean;
   locale?: string;
   /** Seconds before showing the paywall overlay (default: 120 = 2 min) */
   previewDuration?: number;
@@ -35,12 +41,13 @@ export function VideoPaywall({
   productSlug,
   lessonId,
   isAuthenticated,
+  isFreeCourse = false,
   locale = "it",
   previewDuration = 120,
 }: VideoPaywallProps) {
   const router = useRouter();
   const [hasAccess, setHasAccess] = useState<boolean | null>(
-    isAuthenticated ? null : false
+    isFreeCourse ? true : isAuthenticated ? null : false
   );
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [timeElapsed, setTimeElapsed] = useState(0);
@@ -69,13 +76,20 @@ export function VideoPaywall({
       }
     }
 
+    // Free courses: guests have full access without any API check.
+    // Short-circuit BEFORE the isAuthenticated guard so the video renders.
+    if (isFreeCourse) {
+      setHasAccess(true);
+      setChecking(false);
+      return;
+    }
     if (!isAuthenticated) {
       setHasAccess(false); // eslint-disable-line react-hooks/set-state-in-effect -- TODO: refactor (FASE 1.10)
       setChecking(false);
       return;
     }
     void checkAccess();
-  }, [productSlug, isAuthenticated]);
+  }, [productSlug, isAuthenticated, isFreeCourse]);
 
   // Timer countdown — starts 3s after page load for preview duration
   useEffect(() => {

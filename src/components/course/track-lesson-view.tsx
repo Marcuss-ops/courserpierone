@@ -5,13 +5,19 @@ import { useEffect } from "react";
 interface TrackLessonViewProps {
   lessonId: string;
   isAuthenticated: boolean;
+  /**
+   * True if this is a free/open-access course. Even free-course guests
+   * are NOT tracked (the API requires an authenticated user); the prop
+   * is accepted for consistency with other lesson components.
+   */
+  isFreeCourse?: boolean;
 }
 
 /**
  * Client component that tracks when a user views a lesson.
  * Updates lastWatchedAt on LessonProgress for "Continue Learning" feature.
  */
-export function TrackLessonView({ lessonId, isAuthenticated }: TrackLessonViewProps) {
+export function TrackLessonView({ lessonId, isAuthenticated, isFreeCourse: _isFreeCourse }: TrackLessonViewProps) {
   useEffect(() => {
     if (!isAuthenticated) return;
 

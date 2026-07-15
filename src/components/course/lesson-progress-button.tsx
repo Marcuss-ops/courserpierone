@@ -10,12 +10,20 @@ interface LessonProgressButtonProps {
   lessonId: string;
   productSlug: string;
   isAuthenticated: boolean;
+  /**
+   * True if this is a free/open-access course. The button still
+   * requires authentication to toggle progress (API requires a user);
+   * for free-course guests the button stays in the "Login to complete"
+   * disabled state, matching the non-authenticated behavior.
+   */
+  isFreeCourse?: boolean;
 }
 
 export function LessonProgressButton({
   lessonId,
   productSlug,
   isAuthenticated,
+  isFreeCourse: _isFreeCourse,
 }: LessonProgressButtonProps) {
   const [completed, setCompleted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -126,12 +134,18 @@ interface ProgressBarProps {
   productSlug: string;
   totalLessons: number;
   isAuthenticated: boolean;
+  /**
+   * True if this is a free/open-access course. Free-course guests
+   * don't see the progress bar (API requires auth to fetch stats).
+   */
+  isFreeCourse?: boolean;
 }
 
 export function ProgressBar({
   productSlug,
   totalLessons,
   isAuthenticated,
+  isFreeCourse: _isFreeCourse,
 }: ProgressBarProps) {
   const [percent, setPercent] = useState(0);
   const searchParams = useSearchParams();

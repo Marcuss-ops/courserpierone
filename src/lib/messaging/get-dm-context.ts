@@ -59,8 +59,12 @@ export interface DmContext {
     image: string | null;
     role: string;
   } | null;
-  /** ID del prodotto (per costruire `?productId=...` URL). Null se `shouldQuery=false`. */
-  product: { id: string } | null;
+  /**
+   * ID del prodotto (per costruire `?productId=...` URL). Null se `shouldQuery=false`.
+   * `price` è esposto anche per il check `isFreeCourse` (FREE_COURSE_SLUGS bypass)
+   * nelle pagine post-acquisto. Vedere src/lib/courses/is-free-course.ts.
+   */
+  product: { id: string; price: number } | null;
 }
 
 /**
@@ -88,7 +92,11 @@ export async function getDmContext(
     }),
     prisma.product.findUnique({
       where: { slug: domainSlug },
-      select: { id: true },
+      // V1.x: also exposed for the FREE_COURSE_SLUGS bypass in
+      // /curso/[lessonId]/page.tsx + /portal/page.tsx (isFreeCourse helper).
+      // V2.x will rewrite this whole helper via product.creator join
+      // (see header comment), and price will still be in the select.
+      select: { id: true, price: true },
     }),
   ]);
 

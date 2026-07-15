@@ -8,9 +8,15 @@ interface LessonNotesProps {
   lessonId: string;
   locale: string;
   isAuthenticated: boolean;
+  /**
+   * True if this is a free/open-access course. Even free-course guests
+   * cannot save notes (the API requires an authenticated user); the prop
+   * is accepted for consistency with other lesson components.
+   */
+  isFreeCourse?: boolean;
 }
 
-export function LessonNotes({ lessonId, locale, isAuthenticated }: LessonNotesProps) {
+export function LessonNotes({ lessonId, locale, isAuthenticated, isFreeCourse: _isFreeCourse }: LessonNotesProps) {
   const [content, setContent] = useState("");
   const [savedContent, setSavedContent] = useState("");
   const [loading, setLoading] = useState(true);

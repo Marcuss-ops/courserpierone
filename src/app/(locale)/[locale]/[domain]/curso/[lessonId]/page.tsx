@@ -20,6 +20,7 @@ import { TrackLessonView } from "@/components/course/track-lesson-view";
 import { MobileSidebar } from "@/components/layout/mobile-sidebar";
 import { SidebarToggleBtn } from "@/components/layout/sidebar-toggle-btn";
 import { AccessGate } from "@/components/course/access-gate";
+import { isFreeCourse } from "@/lib/courses/is-free-course";
 import { loadLocaleContentSafe } from "@/lib/i18n/load-locale-content";
 import { ContactCreatorButton } from "@/components/chat/contact-creator-button";
 import { getDmContext } from "@/lib/messaging/get-dm-context";
@@ -104,6 +105,12 @@ export default async function CoursePage({
     isAuthenticated && dbUser?.role !== "admin",
   );
 
+  // Defense-in-depth: same logic as access-gate.tsx (centralized in
+  // src/lib/courses/is-free-course.ts). Pass this flag to Client Components
+  // so they don't bail/redirect guests for free courses. See
+  // video-paywall.tsx, track-lesson-view.tsx, lesson-assets.tsx.
+  const freeCourse = isFreeCourse(domain, lessonProduct?.price);
+
   const currentLang = lang || course.defaultLanguage || "en";
   const content = course.languages[currentLang] || course.languages[course.defaultLanguage] || Object.values(course.languages)[0];
   const currentLesson = course.lessons.find((l) => l.id === lessonId) || course.lessons[0];
@@ -125,7 +132,7 @@ export default async function CoursePage({
   return (
     <AccessGate productSlug={domain} courseTitle={content.title} callbackUrl={`/${locale}/${domain}/curso/${lessonId}?${lessonQs.toString()}`} orderId={activeOrderId}>
       <AnalyticsTracker productSlug={domain} />
-      <TrackLessonView lessonId={currentLesson.id} isAuthenticated={isAuthenticated} />
+      <TrackLessonView lessonId={currentLesson.id} isAuthenticated={isAuthenticated} isFreeCourse={freeCourse} />
       
       <div className={`flex h-screen font-sans overflow-hidden transition-colors duration-300 ${
         isLight ? "bg-[#f5f5f7] text-[#1d1d1f]" : "bg-[#1c1c1e] text-[#f5f5f7]"
@@ -150,6 +157,7 @@ export default async function CoursePage({
                   productSlug={domain}
                   lessonId={currentLesson.id}
                   isAuthenticated={isAuthenticated}
+                  isFreeCourse={freeCourse}
                   locale={currentLang}
                   previewDuration={120}
                 />
@@ -216,11 +224,13 @@ export default async function CoursePage({
                       lessonId={currentLesson.id}
                       locale={currentLang}
                       isAuthenticated={isAuthenticated}
+                      isFreeCourse={freeCourse}
                     />
                     <LessonProgressButton
                       lessonId={currentLesson.id}
                       productSlug={domain}
                       isAuthenticated={isAuthenticated}
+                      isFreeCourse={freeCourse}
                     />
                     {isAuthenticated && dbUser && creator && lessonProduct?.id && (
                       <ContactCreatorButton
@@ -252,10 +262,11 @@ export default async function CoursePage({
               <h2 className={`text-xl font-black leading-tight ${isLight ? "text-zinc-900" : "text-white text-contrast"}`}>
                 {content.title}
               </h2>
-              <ProgressBar 
-                productSlug={domain} 
-                totalLessons={course.lessons.length} 
+              <ProgressBar
+                productSlug={domain}
+                totalLessons={course.lessons.length}
                 isAuthenticated={isAuthenticated}
+                isFreeCourse={freeCourse}
               />
             </div>
 

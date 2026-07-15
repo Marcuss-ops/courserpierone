@@ -17,9 +17,16 @@ interface LessonAssetsProps {
   lessonId: string;
   locale: string;
   isAuthenticated: boolean;
+  /**
+   * True if this is a free/open-access course. Guests can see and
+   * download assets without authentication. The /api/lessons/:id/assets
+   * endpoint must allow public reads for free courses — if it returns
+   * 401 for guests, the UI will gracefully render nothing.
+   */
+  isFreeCourse?: boolean;
 }
 
-export function LessonAssets({ lessonId, locale, isAuthenticated }: LessonAssetsProps) {
+export function LessonAssets({ lessonId, locale, isAuthenticated, isFreeCourse = false }: LessonAssetsProps) {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
@@ -42,7 +49,8 @@ export function LessonAssets({ lessonId, locale, isAuthenticated }: LessonAssets
     void fetchAssets();
   }, [lessonId, locale]);
 
-  if (!isAuthenticated || loading) return null;
+  // Free-course guests can see assets. For paid courses, require auth.
+  if ((!isAuthenticated && !isFreeCourse) || loading) return null;
 
   if (assets.length === 0) return null;
 

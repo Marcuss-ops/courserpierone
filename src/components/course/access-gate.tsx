@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { prisma } from "@/lib/db/prisma";
 import { Lock, ArrowRight, Sparkles } from "lucide-react";
-import { env } from "@/lib/env";
+import { isFreeCourse } from "@/lib/courses/is-free-course";
 import { PendingOrderScreen } from "./pending-order-screen";
 
 interface AccessGateProps {
@@ -64,11 +64,8 @@ export async function AccessGate({
   // Defense-in-depth: BOTH `FREE_COURSE_SLUGS` env var AND `price === 0`
   // must be true. A real product whose price is accidentally set to 0
   // is NOT bypassed unless its slug is also explicitly listed.
-  const freeSlugs = (env.FREE_COURSE_SLUGS ?? "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  if (freeSlugs.includes(product.slug) && product.price === 0) {
+  // The check itself lives in src/lib/courses/is-free-course.ts (DRY).
+  if (isFreeCourse(product.slug, product.price)) {
     hasAccess = true;
 
     // For authenticated users, upsert a free_enrollment AccessGrant so
