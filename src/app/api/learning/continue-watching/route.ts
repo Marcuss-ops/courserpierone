@@ -46,9 +46,14 @@ import { prismaContinueWatchingRepository } from "@/lib/learning/prisma-continue
  * Query params:
  *   - locale?: string  (e.g., "it", "en", "fr-fr")
  *   - limit?:  number  (default 5, clamped to MAX 10)
+ *   - cursor?: string  (ISO-8601 timestamp; opaque cursor from a previous
+ *                       page's `nextCursor`. Invalid input is silently
+ *                       treated as null — matches the `limit` fallback
+ *                       pattern, keeps the UI moving forward.)
  *
  * Responses:
- *   - 200 → { items: ContinueWatchingItem[] }
+ *   - 200 → { items: ContinueWatchingItem[], nextCursor: string | null }
+ *            (nextCursor non-null iff items.length === limit)
  *   - 401 → { error: "Unauthorized" }     (no session)
  *   - 500 → { error, code }                (via apiErrorResponse)
  */
@@ -67,21 +72,27 @@ export async function GET(request: NextRequest) {
       typeof rawLimit === "number" && Number.isFinite(rawLimit)
         ? rawLimit
         : undefined;
+    const cursor = searchParams.get("cursor") ?? undefined;
 
-    const items = await buildContinueWatchingHistory(
-      { userId: dbUser.id, locale, limit },
+    const { items, nextCursor } = await buildContinueWatchingHistory(
+      { userId: dbUser.id, locale, limit, cursor },
       { repo: prismaContinueWatchingRepository },
     );
 
-    // Browser-only cache: 30s private cache avoids re-hitting Prisma
-    // on every dashboard re-render. Vercel CDN will not cache per-user
-    // responses (uses Authorization/cookies), so the browser cache is
-    // the only effective layer. Disable during local dev to keep things
-    // honest (the route can be tested with cache disabled).
+    // Browser-only cache:
+    //   - First-page responses (no cursor): 30s private cache avoids
+    //     re-hitting Prisma on every dashboard re-render.
+    //   - Paginated responses (?cursor=...): 5s only — progress updates
+    //     between pages should appear quickly, not after 30s.
+    //   - Dev: no-store always (route should be testable without cache).
+    // Vercel CDN will not cache per-user responses (uses Authorization/
+    // cookies), so the browser cache is the only effective layer.
     const cacheControl =
-      process.env.NODE_ENV === "production"
-        ? "private, max-age=30"
-        : "no-store";
+      process.env.NODE_ENV !== "production"
+        ? "no-store"
+        : cursor
+          ? "private, max-age=5"
+          : "private, max-age=30";
 
     return NextResponse.json(
       {
@@ -90,6 +101,7 @@ export async function GET(request: NextRequest) {
           lesson: item.lesson,
           lastWatchedAt: item.lastWatchedAt.toISOString(),
         })),
+        nextCursor,
       },
       { headers: { "Cache-Control": cacheControl } },
     );

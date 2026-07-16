@@ -61,6 +61,7 @@ export const prismaContinueWatchingRepository: ContinueWatchingRepository = {
     userId,
     locale,
     take,
+    cursorDate,
   }: ContinueWatchingFetchInput): Promise<RawContinueWatchingProgress[]> {
     // Locale-aware nested translation config. When locale is provided,
     // it's a WHERE filter (1 row max). When not, we pick the FIRST
@@ -70,11 +71,27 @@ export const prismaContinueWatchingRepository: ContinueWatchingRepository = {
         ? { where: { locale, ...whereExtra }, take: 1 }
         : { orderBy: { locale: "asc" as const }, take: 1 };
 
+    // Cursor pagination: when a cursorDate is provided, restrict the
+    // SQL to rows strictly older than that date. First page uses
+    // `{ not: null }` so legacy rows with null lastWatchedAt are
+    // still dropped. Subsequent pages use `{ lt: cursorDate }`.
+    //
+    // NOTE: strict-less-than (`lt`, NOT `lte`) is what makes cursor
+    // pagination safe — items with the exact timestamp of the
+    // anchor would otherwise be re-fetched indefinitely. The current
+    // timestamp anchor comes from the last VISIBLE (deduplicated)
+    // item, not the last raw row, so the dedupe map + lt filter
+    // together cover the "strictly older than visible page tail"
+    // invariant.
+    const lastWatchedAtFilter = cursorDate
+      ? { lt: cursorDate }
+      : { not: null };
+
     const progresses = await prisma.lessonProgress.findMany({
       where: {
         userId,
         completed: false,
-        lastWatchedAt: { not: null },
+        lastWatchedAt: lastWatchedAtFilter,
       },
       orderBy: { lastWatchedAt: "desc" },
       take,

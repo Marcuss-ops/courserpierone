@@ -14,6 +14,16 @@
  *   - `src/lib/learning/prisma-continue-watching-repository.ts` — adapter
  *   - `src/lib/learning/continue-watching.test.ts`         — port stub
  *   - `src/app/api/learning/continue-watching/route.ts`    — wire-up
+ *
+ * Cursor pagination (added Phase 2 step 2 v2):
+ *   - Cursor = ISO-8601 timestamp string encoding the
+ *     `lastWatchedAt` of the LAST visible (deduplicated) item in
+ *     the current page. The adapter fetches rows strictly older
+ *     than this timestamp on the next page (`{ lt: cursorDate }`).
+ *   - nextCursor is present iff `items.length === limit` (room for
+ *     another page). Otherwise null = end-of-feed.
+ *   - Matches the FeedContext cursor pattern in
+ *     `src/domains/discovery/feed/build-feed.ts`.
  */
 
 export const DEFAULT_CONTINUE_WATCHING_LIMIT = 5;
@@ -68,6 +78,30 @@ export interface BuildContinueWatchingInput {
   locale?: string;
   /** Max items returned (after dedupe). Default = 5, max = 10. */
   limit?: number;
+  /**
+   * Opaque cursor (from previous page's `nextCursor`). null/undefined
+   * = first page. Malformed input (non-ISO string) is silently
+   * treated as null (defensive — matches route's `limit` handling).
+   */
+  cursor?: string | null;
+}
+
+/**
+ * Result of `buildContinueWatchingHistory` — a page of items plus
+ * an opaque cursor for fetching the next page.
+ *
+ * `nextCursor` semantics:
+ *   - non-null when `items.length === limit` (room for another page)
+ *   - null when fewer items than the limit (end-of-feed reached)
+ *
+ * The cursor encodes the `lastWatchedAt` of the LAST item in
+ * `items`. The use case picks the LAST of the DEDUPLICATED items
+ * (not the last Prisma row) — the dedupe map is what determines
+ * page size, so its tail is the correct cursor anchor.
+ */
+export interface BuildContinueWatchingResult {
+  items: ContinueWatchingItem[];
+  nextCursor: string | null;
 }
 
 // ─── Port contract ────────────────────────────────────────────────────
@@ -100,6 +134,12 @@ export interface ContinueWatchingFetchInput {
   locale: string | undefined;
   /** Pre-dedupe upper bound. Use case passes `limit * 2`. */
   take: number;
+  /**
+   * Optional cursor timestamp — if present, the adapter restricts
+   * the SQL to rows strictly older than this date (`{ lt: cursorDate }`).
+   * null = first page.
+   */
+  cursorDate: Date | null;
 }
 
 /**

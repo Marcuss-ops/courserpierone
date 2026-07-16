@@ -17,8 +17,8 @@
  *   - adapter        → ./prisma-continue-watching-repository
  *
  * Coverage:
- *   - Empty userId             → []
- *   - Empty progress           → []
+ *   - Empty userId             → empty page + null nextCursor
+ *   - Empty progress           → empty page + null nextCursor
  *   - Single progress          → 1 item, lastWatchedAt preserved
  *   - Two progress same product → 1 item (first occurrence wins, the
  *                                 later one is dropped because BOTH
@@ -31,12 +31,17 @@
  *   - Title fallback when translation missing
  *   - VideoUrl fallback to null when missing
  *   - Adapter file importable + port-shape sanity
+ *   - Cursor pagination: full page → nextCursor non-null
+ *   - Cursor pagination: partial page → nextCursor null
+ *   - Cursor pagination: cursorDate forwarded to repo on next page
+ *   - Cursor pagination: malformed cursor silently treated as null
  */
 
 import { describe, expect, it, vi } from "vitest";
 
 import {
   buildContinueWatchingHistory,
+  decodeContinueWatchingCursor,
   normalizeContinueWatchingLimit,
   DEFAULT_CONTINUE_WATCHING_LIMIT,
   MAX_CONTINUE_WATCHING_LIMIT,
@@ -106,24 +111,26 @@ function mkStubRepo(rows: RawContinueWatchingProgress[]): {
 // ─── Tests ────────────────────────────────────────────────────────────
 
 describe("buildContinueWatchingHistory — input guards", () => {
-  it("returns [] when userId is empty string", async () => {
+  it("returns empty page when userId is empty string", async () => {
     const { repo, state } = mkStubRepo([]);
     const result = await buildContinueWatchingHistory(
       { userId: "" },
       { repo },
     );
-    expect(result).toEqual([]);
+    expect(result.items).toEqual([]);
+    expect(result.nextCursor).toBeNull();
     // Repo MUST NOT be called when userId is empty (defensive DB skip).
     expect(state.lastFetchInput).toBeUndefined();
   });
 
-  it("returns [] when no progress exists for the user", async () => {
+  it("returns empty page when no progress exists for the user", async () => {
     const { repo } = mkStubRepo([]);
     const result = await buildContinueWatchingHistory(
       { userId: "user_1" },
       { repo },
     );
-    expect(result).toEqual([]);
+    expect(result.items).toEqual([]);
+    expect(result.nextCursor).toBeNull();
   });
 });
 
@@ -156,11 +163,11 @@ describe("buildContinueWatchingHistory — happy path", () => {
       { userId: "user_1" },
       { repo },
     );
-    expect(result).toHaveLength(2);
-    expect(result[0]?.product.id).toBe("prod_a"); // most recent first
-    expect(result[1]?.product.id).toBe("prod_b");
-    expect(result[0]?.lesson.title).toBe("A1");
-    expect(result[0]?.lastWatchedAt.toISOString()).toBe(
+    expect(result.items).toHaveLength(2);
+    expect(result.items[0]?.product.id).toBe("prod_a"); // most recent first
+    expect(result.items[1]?.product.id).toBe("prod_b");
+    expect(result.items[0]?.lesson.title).toBe("A1");
+    expect(result.items[0]?.lastWatchedAt.toISOString()).toBe(
       "2026-07-15T10:00:00.000Z",
     );
   });
@@ -194,10 +201,10 @@ describe("buildContinueWatchingHistory — happy path", () => {
       { userId: "user_1" },
       { repo },
     );
-    expect(result).toHaveLength(1);
-    expect(result[0]?.product.id).toBe("prod_a");
-    expect(result[0]?.lesson.id).toBe("l_a2"); // most recent wins
-    expect(result[0]?.lesson.title).toBe("A2");
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.product.id).toBe("prod_a");
+    expect(result.items[0]?.lesson.id).toBe("l_a2"); // most recent wins
+    expect(result.items[0]?.lesson.title).toBe("A2");
   });
 
   it("respects explicit limit after dedupe", async () => {
@@ -238,8 +245,8 @@ describe("buildContinueWatchingHistory — happy path", () => {
       { userId: "user_1", limit: 2 },
       { repo },
     );
-    expect(result).toHaveLength(2);
-    expect(result.map((r) => r.product.id)).toEqual(["prod_a", "prod_b"]);
+    expect(result.items).toHaveLength(2);
+    expect(result.items.map((r) => r.product.id)).toEqual(["prod_a", "prod_b"]);
   });
 });
 
@@ -298,7 +305,7 @@ describe("buildContinueWatchingHistory — limit normalization", () => {
 });
 
 describe("buildContinueWatchingHistory — repo contract", () => {
-  it("passes userId + locale + take to the repo", async () => {
+  it("passes userId + locale + take + cursorDate=null to the repo", async () => {
     const { repo, state } = mkStubRepo([]);
     await buildContinueWatchingHistory(
       { userId: "user_42", locale: "it", limit: 3 },
@@ -308,6 +315,7 @@ describe("buildContinueWatchingHistory — repo contract", () => {
       userId: "user_42",
       locale: "it",
       take: 6,
+      cursorDate: null,
     });
   });
 
@@ -315,6 +323,7 @@ describe("buildContinueWatchingHistory — repo contract", () => {
     const { repo, state } = mkStubRepo([]);
     await buildContinueWatchingHistory({ userId: "user_42" }, { repo });
     expect(state.lastFetchInput?.locale).toBeUndefined();
+    expect(state.lastFetchInput?.cursorDate).toBeNull();
   });
 });
 
@@ -346,7 +355,8 @@ describe("buildContinueWatchingHistory — defensive row shape", () => {
       { userId: "user_1" },
       { repo },
     );
-    expect(result).toEqual([]);
+    expect(result.items).toEqual([]);
+    expect(result.nextCursor).toBeNull();
   });
 });
 
@@ -377,6 +387,194 @@ describe("BuildContinueWatchingDeps — type contract", () => {
       { userId: "user_1" },
       deps,
     );
-    expect(result).toEqual([]);
+    expect(result.items).toEqual([]);
+    expect(result.nextCursor).toBeNull();
+  });
+});
+
+// ─── Cursor pagination (Phase 2 step 2 v2) ─────────────────────────────
+
+describe("buildContinueWatchingHistory — cursor pagination", () => {
+  it("emits nextCursor (non-null) when the page fills to limit", async () => {
+    // Build MAX_LIMIT (10) unique products so the page fills exactly.
+    const rows = Array.from({ length: MAX_CONTINUE_WATCHING_LIMIT }, (_, i) =>
+      mkRow({
+        id: `p_${i}`,
+        lastWatchedAtIso: new Date(
+          Date.UTC(2026, 6, 15, 10 - i, 0, 0),
+        ).toISOString(),
+        productId: `prod_${i}`,
+        productSlug: `slug-${i}`,
+        productTitle: `Title ${i}`,
+        lessonId: `l_${i}`,
+        lessonPosition: 1,
+        lessonTitle: `L${i}`,
+      }),
+    );
+    const { repo } = mkStubRepo(rows);
+    const result = await buildContinueWatchingHistory(
+      { userId: "user_1", limit: MAX_CONTINUE_WATCHING_LIMIT },
+      { repo },
+    );
+    expect(result.items).toHaveLength(MAX_CONTINUE_WATCHING_LIMIT);
+    // nextCursor encodes the lastWatchedAt of the LAST visible item.
+    expect(result.nextCursor).toBe(
+      result.items[result.items.length - 1]!.lastWatchedAt.toISOString(),
+    );
+  });
+
+  it("emits nextCursor=null when the page is partial (fewer items than limit)", async () => {
+    // Only 2 rows; default limit is 5 → end-of-feed.
+    const { repo } = mkStubRepo([
+      mkRow({
+        id: "p_a",
+        lastWatchedAtIso: "2026-07-15T10:00:00.000Z",
+        productId: "prod_a",
+        productSlug: "alpha",
+        productTitle: "Alpha",
+        lessonId: "l_a1",
+        lessonPosition: 1,
+        lessonTitle: "A1",
+      }),
+      mkRow({
+        id: "p_b",
+        lastWatchedAtIso: "2026-07-15T09:00:00.000Z",
+        productId: "prod_b",
+        productSlug: "beta",
+        productTitle: "Beta",
+        lessonId: "l_b1",
+        lessonPosition: 1,
+        lessonTitle: "B1",
+      }),
+    ]);
+    const result = await buildContinueWatchingHistory(
+      { userId: "user_1" },
+      { repo },
+    );
+    expect(result.items).toHaveLength(2);
+    expect(result.nextCursor).toBeNull();
+  });
+
+  it("forwards cursorDate to the repo when a valid cursor is provided", async () => {
+    const { repo, state } = mkStubRepo([]);
+    const cursor = "2026-07-15T10:00:00.000Z";
+    await buildContinueWatchingHistory(
+      { userId: "user_1", cursor },
+      { repo },
+    );
+    expect(state.lastFetchInput?.cursorDate?.toISOString()).toBe(cursor);
+  });
+
+  it("silently treats malformed cursor as null (no throw, no 400)", async () => {
+    const { repo, state } = mkStubRepo([]);
+    await buildContinueWatchingHistory(
+      { userId: "user_1", cursor: "not-a-date" },
+      { repo },
+    );
+    // Repo receives cursorDate=null — defensive fallback.
+    expect(state.lastFetchInput?.cursorDate).toBeNull();
+  });
+
+  it("silently treats empty / null cursor as no cursor", async () => {
+    const { repo, state } = mkStubRepo([]);
+    for (const badCursor of ["", null, undefined]) {
+      await buildContinueWatchingHistory(
+        // @ts-expect-error — intentionally testing runtime null/undefined
+        { userId: "user_1", cursor: badCursor },
+        { repo },
+      );
+      expect(state.lastFetchInput?.cursorDate).toBeNull();
+    }
+  });
+
+  it("nextCursor reflects the last DEDUPLICATED item, not the last Prisma row", async () => {
+    // 5 raw rows that dedupe to 3 unique products (limit=3, full page).
+    // Two rows share prod_a (most-recent first), two share prod_b.
+    const rows = [
+      mkRow({
+        id: "p_a1",
+        lastWatchedAtIso: "2026-07-15T12:00:00.000Z",
+        productId: "prod_a",
+        productSlug: "alpha",
+        productTitle: "Alpha",
+        lessonId: "l_a1",
+        lessonPosition: 1,
+        lessonTitle: "A1",
+      }),
+      mkRow({
+        id: "p_a2",
+        lastWatchedAtIso: "2026-07-15T11:00:00.000Z",
+        productId: "prod_a",
+        productSlug: "alpha",
+        productTitle: "Alpha",
+        lessonId: "l_a2",
+        lessonPosition: 2,
+        lessonTitle: "A2",
+      }),
+      mkRow({
+        id: "p_b1",
+        lastWatchedAtIso: "2026-07-15T10:00:00.000Z",
+        productId: "prod_b",
+        productSlug: "beta",
+        productTitle: "Beta",
+        lessonId: "l_b1",
+        lessonPosition: 1,
+        lessonTitle: "B1",
+      }),
+      mkRow({
+        id: "p_b2",
+        lastWatchedAtIso: "2026-07-15T09:00:00.000Z",
+        productId: "prod_b",
+        productSlug: "beta",
+        productTitle: "Beta",
+        lessonId: "l_b2",
+        lessonPosition: 2,
+        lessonTitle: "B2",
+      }),
+      mkRow({
+        id: "p_c1",
+        lastWatchedAtIso: "2026-07-15T08:00:00.000Z",
+        productId: "prod_c",
+        productSlug: "gamma",
+        productTitle: "Gamma",
+        lessonId: "l_c1",
+        lessonPosition: 1,
+        lessonTitle: "C1",
+      }),
+    ];
+    const { repo } = mkStubRepo(rows);
+    const result = await buildContinueWatchingHistory(
+      { userId: "user_1", limit: 3 },
+      { repo },
+    );
+    expect(result.items).toHaveLength(3);
+    expect(result.items.map((r) => r.product.id)).toEqual([
+      "prod_a",
+      "prod_b",
+      "prod_c",
+    ]);
+    // nextCursor = lastWatchedAt of prod_c (the 3rd and LAST deduplicated
+    // item), NOT the last raw Prisma row (which is also prod_c here, but
+    // the invariant is what matters: always last deduped item).
+    expect(result.nextCursor).toBe("2026-07-15T08:00:00.000Z");
+  });
+});
+
+describe("decodeContinueWatchingCursor", () => {
+  it("parses valid ISO-8601 timestamp", () => {
+    const date = decodeContinueWatchingCursor("2026-07-15T10:00:00.000Z");
+    expect(date?.toISOString()).toBe("2026-07-15T10:00:00.000Z");
+  });
+
+  it("returns null for null / undefined / empty string", () => {
+    expect(decodeContinueWatchingCursor(null)).toBeNull();
+    expect(decodeContinueWatchingCursor(undefined)).toBeNull();
+    expect(decodeContinueWatchingCursor("")).toBeNull();
+  });
+
+  it("returns null for non-ISO garbage", () => {
+    expect(decodeContinueWatchingCursor("not-a-date")).toBeNull();
+    expect(decodeContinueWatchingCursor("2026-13-99")).toBeNull();
+    expect(decodeContinueWatchingCursor("hello world")).toBeNull();
   });
 });
