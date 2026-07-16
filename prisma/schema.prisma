@@ -537,7 +537,7 @@ model Message {
 //
 // Composizione della chiave unica `@@unique([sourceType, sourceId,
 // productId])`:
-//   - sourceType ∈ { "order", "free_enrollment", "admin", "bundle" }
+//   - sourceType ∈ { "order", "free_enrollment", "admin", "bundle", "watchlist" }
 //   - sourceId   = Order.id | enrollment_request.id | grant_audit.id | bundle.id
 //   - productId  = Product.id
 // La tripletà dedupa naturalmente sia i dual-write idempotenti (Order +
