@@ -14,6 +14,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { AppError, apiErrorResponse } from "@/lib/errors";
 import { getRedis } from "@/lib/redis";
 
 // ─── Tiers ──────────────────────────────────────────────────
@@ -97,7 +98,18 @@ export async function rateLimitAsync(
 ): Promise<RateLimitResult> {
   const r = getRedis();
   if (!r) {
-    // Fallback in-memory
+    // Fail-closed in production: degrade to per-instance `hits` Map would
+    // be BYPASSABLE on Vercel multi-instance (each cold start sees a fresh
+    // in-memory Map → token-consuming clients rotate through instances).
+    // Refuse the rate-limit check entirely (503) so the request 500’s via
+    // the wrapper's catch path — better than silent degradation. In dev
+    // we keep the warn + degrade so single-machine dev iteration is smooth.
+    if (process.env.NODE_ENV === "production") {
+      throw new AppError(
+        "Rate-limit Redis backend not configured; refusing to degrade to per-instance in-memory (would be bypassable on Vercel multi-instance)",
+        { statusCode: 503, code: "RATE_LIMIT_NO_BACKEND" }
+      );
+    }
     return rateLimit(key, maxRequests, windowMs);
   }
 
@@ -148,8 +160,23 @@ export function withRateLimit<TArgs extends unknown[]>(
       ? keyFn(req)
       : `${tier}:${req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "unknown"}`;
 
-    // Usa Redis-backed async rate limiting quando disponibile
-    const result = await rateLimitAsync(identifier, max, windowMs);
+    // Usa Redis-backed async rate limiting quando disponibile.
+    // CRITICAL: catch AppError (es. RATE_LIMIT_NO_BACKEND in produzione) e
+    // mappalo a NextResponse con lo statusCode dell'AppError (503). Senza
+    // questo catch, AppError propagherebbe al Next.js error boundary
+    // restituendo 500 generico — il client vedrebbe 500 invece del 503
+    // semanticamente corretto per "Service Unavailable: rate-limit backend
+    // missing".
+    let result: RateLimitResult;
+    try {
+      result = await rateLimitAsync(identifier, max, windowMs);
+    } catch (error) {
+      // AppError path propagates inner message + AppError.statusCode (e.g.
+      // 503 per RATE_LIMIT_NO_BACKEND) per `apiErrorResponse` in
+      // `@/lib/errors.ts`; fallbackMessage arg ignored for AppError, so no
+      // need to pass it.
+      return apiErrorResponse(error);
+    }
 
     if (!result.allowed) {
       return NextResponse.json(
