@@ -127,3 +127,9 @@ Pubblica ──── generateCourseConfig(slug) → CourseConfigCache DB row
   - **Edge proxy (Next.js 16+)**: il file convenzione globale è `src/proxy.ts` che esporta la funzione `proxy` (era `middleware` in Next.js ≤15). `config.matcher` invariato. `updateSession` da `@/lib/supabase/middleware` (helper internal, NON rinominato) continua a girare come Step 1 della catena: `proxy → updateSession (Supabase session refresh) → checkProtectedAccess → handleFullLocale → handleShortLang → handleLangParam → handleRootLocale → handleNoPrefix → fallback response`. Il vecchio `src/middleware.ts` è stato rimosso (deprecation Next 16).
 - **Typecheck + lint**: `npm run check` (typecheck + eslint + vitest). Vedi `docs/roadmap-current.md` §1.5 per il baseline degli errori pre-esistenti.
 - **DB locale**: `docker compose up -d db redis` (Postgres 16 + Redis). Lo stack include `pgbackups` per i backup automatici (PITR per Supabase prod).
+
+## Architecture Decision Records (cross-cutting)
+
+ADRs che attraversano più domini del codebase (`commerce/*` × `access/*` × webhook reliability) e quindi non trovano posto naturale nei singoli file di `docs/adr/`. Riferimento rapido:
+
+- [`docs/architecture/001-db-migrations.md`](./docs/architecture/001-db-migrations.md) — **Migration policy**. Vincola `Order` / `AccessGrant` / `ProcessedWebhook` / `Product` / `User` (colonne lette/scritte dal LS webhook processor di Lemon Squeezy). Fino a v2: SOLO additive changes (`DROP`/`RENAME` vietati sullo strict-addictive zone); ogni nuova colonna non-null deve avere `@default(...)` esplicito o essere nullable per almeno una release.
