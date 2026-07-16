@@ -44,8 +44,13 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
     return () => document.removeEventListener("mousedown", handler);
   }, [showSpeedMenu]);
 
-  // Genera una chiave unica per localStorage
-  const storageKey = `courser-progress-${productSlug}-${videoUrl}`;
+  // Dual-key localStorage during the 30-day brand migration window (ADR-0015
+  // §Migration plan commit 3): read NEW key with OLD as fallback; write to
+  // BOTH keys during the window so users on a mixed-version bundle (rolling
+  // deploy) keep their video resume progress. After 2026-08-15 the dual-write
+  // can be dropped and storageKey becomes the single source of truth.
+  const storageKey = `courssy-progress-${productSlug}-${videoUrl}`;
+  const legacyStorageKey = `courser-progress-${productSlug}-${videoUrl}`;
 
   useEffect(() => {
     setIsReady(false); // eslint-disable-line react-hooks/set-state-in-effect -- TODO: refactor (FASE 1.10)
@@ -103,7 +108,13 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
                 setIsReady(true);
                 setIsPlaying(false);
                 ytPlayer.setVolume(75);
-                const savedTime = localStorage.getItem(storageKey);
+                // Read with new-key priority, fall back to legacy if the
+                // bundle was opened from a pre-rename version that wrote
+                // to "courser-progress-*". If we find it on legacy, write
+                // it forward to the new key so the next session uses the
+                // new key and the dual-key window converges.
+                const savedTime = localStorage.getItem(storageKey)
+                  ?? localStorage.getItem(legacyStorageKey);
                 if (savedTime) {
                   const time = parseFloat(savedTime);
                   if (time > 5) {
@@ -111,6 +122,11 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
                     setResumedTime(time);
                     setShowResumeToast(true);
                     setTimeout(() => setShowResumeToast(false), 5000);
+                    if (savedTime === localStorage.getItem(legacyStorageKey)) {
+                      // Migrate forward: legacy → new key, keep legacy
+                      // too so old tabs can still see it.
+                      localStorage.setItem(storageKey, savedTime);
+                    }
                   }
                 }
 
@@ -125,11 +141,16 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
                 setInterval(() => {
                   const currentTime = ytPlayer.getCurrentTime();
                   const duration = ytPlayer.getDuration();
+                  const timeStr = currentTime.toString();
                   if (currentTime > 0 && currentTime < duration - 10) {
-                    localStorage.setItem(storageKey, currentTime.toString());
+                    // Dual-write during the 30-day migration window. After
+                    // 2026-08-15, drop the legacyStorageKey line.
+                    localStorage.setItem(storageKey, timeStr);
+                    localStorage.setItem(legacyStorageKey, timeStr);
                   } else if (currentTime >= duration - 10) {
-                    // Se è quasi finito, rimuovi il progresso
+                    // Se è quasi finito, rimuovi il progresso da entrambe le chiavi
                     localStorage.removeItem(storageKey);
+                    localStorage.removeItem(legacyStorageKey);
                   }
                 }, 2000);
               },
@@ -169,26 +190,35 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
 
           player.ready().then(() => {
             setIsReady(true);
-            const savedTime = localStorage.getItem(storageKey);
-            if (savedTime) {
-              const time = parseFloat(savedTime);
-              if (time > 5) {
-                // Best-effort resume: Vimeo's setCurrentTime returns a Promise we don't need to await.
-                void player.setCurrentTime(time);
-                setResumedTime(time);
-                setShowResumeToast(true);
-                setTimeout(() => setShowResumeToast(false), 5000);
-              }
-            }
+      // Read with new-key priority, fall back to legacy if pre-rename.
+      const savedTime = localStorage.getItem(storageKey)
+        ?? localStorage.getItem(legacyStorageKey);
+      if (savedTime) {
+        const time = parseFloat(savedTime);
+        if (time > 5) {
+          // Best-effort resume: Vimeo's setCurrentTime returns a Promise we don't need to await.
+          void player.setCurrentTime(time);
+          setResumedTime(time);
+          setShowResumeToast(true);
+          setTimeout(() => setShowResumeToast(false), 5000);
+          if (savedTime === localStorage.getItem(legacyStorageKey)) {
+            localStorage.setItem(storageKey, savedTime);
+          }
+        }
+      }
 
-            player.on("timeupdate", (data: VimeoTimeUpdateData) => {
-              player.getDuration().then((duration: number) => {
-                if (data.seconds > 0 && data.seconds < duration - 10) {
-                  localStorage.setItem(storageKey, data.seconds.toString());
-                } else if (data.seconds >= duration - 10) {
-                  localStorage.removeItem(storageKey);
-                }
-              }).catch((err) => {
+      player.on("timeupdate", (data: VimeoTimeUpdateData) => {
+        player.getDuration().then((duration: number) => {
+          const timeStr = data.seconds.toString();
+          if (data.seconds > 0 && data.seconds < duration - 10) {
+            // Dual-write during the 30-day migration window.
+            localStorage.setItem(storageKey, timeStr);
+            localStorage.setItem(legacyStorageKey, timeStr);
+          } else if (data.seconds >= duration - 10) {
+            localStorage.removeItem(storageKey);
+            localStorage.removeItem(legacyStorageKey);
+          }
+        }).catch((err) => {
                 // Swallow single-fetch errors so a transient duration failure does not break tracking,
                 // but log so Vimeo SDK issues remain observable in DevTools.
                 if (typeof console !== "undefined") {
@@ -227,7 +257,9 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
         // Best-effort reset: Vimeo's setCurrentTime returns a Promise we don't need to await.
         void playerRef.current.setCurrentTime(0);
       }
+      // Dual-remove during the 30-day migration window.
       localStorage.removeItem(storageKey);
+      localStorage.removeItem(legacyStorageKey);
       setShowResumeToast(false);
     }
   };

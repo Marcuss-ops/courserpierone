@@ -55,7 +55,13 @@ interface InboxProviderProps {
   children: React.ReactNode;
 }
 
-const BROADCAST_CHANNEL_NAME = "courser-inbox";
+// Dual-listen during the 30-day brand migration window (ADR-0015 §Migration
+// plan commit 3): receive on BOTH old + new channel names so cross-tab
+// sync continues to work for users with mixed-version tabs (rolling deploy).
+// Publish on both too so the old tab can still hear the new one. After
+// the migration window closes (target: 2026-08-15), drop the legacy
+// "courser-inbox" entries and tighten the array to a single name.
+const BROADCAST_CHANNEL_NAMES = ["courser-inbox", "courssy-inbox"] as const;
 
 export function InboxProvider({
   initialTotalUnread,
@@ -68,7 +74,18 @@ export function InboxProvider({
     useState<InboxConversationState>(initialByConversation);
   const [isConnected] = useState<boolean>(false);
 
-  const channelRef = useRef<BroadcastChannel | null>(null);
+  const channelsRef = useRef<BroadcastChannel[]>([]);
+// Dedup tokens for dual-publish (Step 3 of ADR-0015 rename): when the same
+// tab publishes on BOTH 'courser-inbox' and 'courssy-inbox' for cross-tab
+// sync, sibling tabs receive two messages with identical logical meaning.
+// Without dedupe, setTotalUnread would decrement twice for a single
+// markRead event (e.g., total=5 would go 5→4→3 instead of 5→4). Each
+// publish call generates a per-markRead `token` and reuses it on BOTH
+// channels; siblings dedupe by `seenTokensRef`. The Set is capped at 100
+// with sliding-window trim (most-recent 50 retained) so long-running tabs
+// don't leak memory — 50 dedupe keys covers a workload of dozens of
+// marks-per-second sustained, and stale entries evict naturally.
+const seenTokensRef = useRef<Set<string>>(new Set());
   const mountedRef = useRef<boolean>(true);
 
   // ── markRead: dispatch locale + BroadcastChannel per altre tab ────
@@ -80,18 +97,31 @@ export function InboxProvider({
       delete next[conversationId];
       return next;
     });
-    setTotalUnread((prev) => Math.max(0, prev - (byConversation[conversationId] ?? 0)));
-
-    // Sincronizza con altre tab della stessa app via BroadcastChannel.
+    setTotalUnread((prev) => Math.max(0, prev - (byConversation[conversationId] ?? 0)));    // Sincronizza con altre tab della stessa app via BroadcastChannel.
     // È una API nativa del browser, zero overhead, no socket.
     if (typeof BroadcastChannel !== "undefined") {
-      try {
-        channelRef.current?.postMessage({
-          type: "messagesRead",
-          conversationId,
-        });
-      } catch {
-        /* BroadcastChannel non disponibile (SSR/test): skip */
+      // Dual-publish during the 30-day migration window (ADR-0015
+      // migration plan, target close: 2026-08-15): post on BOTH
+      // old ("courser-inbox") and new ("courssy-inbox") so that legacy
+      // tabs (still on the pre-rename build) continue to hear the
+      // "messagesRead" event and drop their local unread counter. Use a
+      // single shared `token` per logical markRead action; siblings
+      // dedupe both channels via seenTokensRef (see comment above).
+      const token =
+        typeof crypto !== "undefined" &&
+        typeof crypto.randomUUID === "function"
+          ? crypto.randomUUID()
+          : `t-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+      for (const channel of channelsRef.current) {
+        try {
+          channel.postMessage({
+            type: "messagesRead",
+            conversationId,
+            token,
+          });
+        } catch {
+          /* BroadcastChannel chiuso durante teardown: skip */
+        }
       }
     }
   }, [byConversation]);
@@ -107,39 +137,63 @@ export function InboxProvider({
     }
 
     // ── BroadcastChannel listener per cross-tab mark-read sync ──
+    // Dual-subscribe: opens a listener on each name in BROADCAST_CHANNEL_NAMES
+    // (legacy + canonical). Both listeners feed the same handler, so
+    // a "messagesRead" event from either channel triggers the same
+    // decrement. After the 30-day migration window, drop the legacy name.
     if (typeof BroadcastChannel !== "undefined") {
-      try {
-        const channel = new BroadcastChannel(BROADCAST_CHANNEL_NAME);
-        channelRef.current = channel;
-        channel.onmessage = (event) => {
-          if (!mountedRef.current) return;
-          const data = event.data as { type?: string; conversationId?: string };
-          if (data.type === "messagesRead" && data.conversationId) {
-            setByConversation((prev) => {
-              const cur = prev[data.conversationId!] ?? 0;
-              if (cur <= 0) return prev;
-              const next = { ...prev };
-              delete next[data.conversationId!];
-              return next;
-            });
-            setTotalUnread((prev) => Math.max(0, prev - 1));
-          }
-        };
-      } catch {
-        /* BroadcastChannel non disponibile */
+      const channels: BroadcastChannel[] = [];
+      for (const name of BROADCAST_CHANNEL_NAMES) {
+        try {
+          const channel = new BroadcastChannel(name);
+          channel.onmessage = (event) => {
+            if (!mountedRef.current) return;
+            const data = event.data as {
+              type?: string;
+              conversationId?: string;
+              token?: string;
+            };
+            if (data && data.type === "messagesRead" && data.conversationId) {
+              // Dedupe identical logical events arriving on both
+              // channels (see seenTokensRef declaration above). Cap the
+              // Set at 100, sliding-trim to 50 stale entries to keep
+              // long-running tabs bounded.
+              if (data.token) {
+                if (seenTokensRef.current.has(data.token)) return;
+                seenTokensRef.current.add(data.token);
+                if (seenTokensRef.current.size > 100) {
+                  const arr = Array.from(seenTokensRef.current);
+                  seenTokensRef.current = new Set(arr.slice(-50));
+                }
+              }
+              setByConversation((prev) => {
+                const cur = prev[data.conversationId!] ?? 0;
+                if (cur <= 0) return prev;
+                const next = { ...prev };
+                delete next[data.conversationId!];
+                return next;
+              });
+              setTotalUnread((prev) => Math.max(0, prev - 1));
+            }
+          };
+          channels.push(channel);
+        } catch {
+          /* BroadcastChannel non disponibile per questo canale: skip */
+        }
       }
+      channelsRef.current = channels;
     }
 
     return () => {
       mountedRef.current = false;
-      if (channelRef.current) {
+      for (const channel of channelsRef.current) {
         try {
-          channelRef.current.close();
+          channel.close();
         } catch {
           /* ignore */
         }
-        channelRef.current = null;
       }
+      channelsRef.current = [];
     };
   }, [enabled]);
 
