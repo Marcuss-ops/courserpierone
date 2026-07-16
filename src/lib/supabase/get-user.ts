@@ -40,9 +40,10 @@ import { headers } from "next/headers";
  *   La colonna memorizza il LINGUAGE-ONLY code ("en", "it", "fr", ...)
  *   non il locale canonico "xx-xx" — coerente con `@default("en")` e
  *   con la catena di fallback di `src/lib/services/email.ts` che
- *   estrae il primo segmento via `extractLang`. Questo evita mismatch
- *   tra il valore di default (literal "en" per spec compliance) e i
- *   valori runtime (canonical "en-us" prodotti da resolveLocale).
+ *   estrae il primo segmento via `localeToLanguage()`. Questo evita
+ *   mismatch tra il valore di default (literal "en" per spec
+ *   compliance) e i valori runtime (canonical "en-us" prodotti da
+ *   resolveLocale).
  */
 export async function getServerUser() {
   // Gracefully handle missing Supabase env vars (e.g. local dev without .env)
