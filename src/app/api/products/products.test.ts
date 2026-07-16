@@ -50,7 +50,7 @@ vi.mock("@/lib/config/generate-course-config", () => ({
 vi.mock("@/lib/supabase/get-user", () => ({
   getServerUser: vi.fn().mockResolvedValue({
     user: { email: "admin@test.com" },
-    dbUser: { role: "admin" },
+    dbUser: { id: "user-1", role: "admin" },
   }),
 }));
 
@@ -353,6 +353,7 @@ describe("PUT /api/products/[id]", () => {
     mockPrisma.$transaction.mockImplementation(<T>(fn: (tx: typeof mockPrisma) => Promise<T>) =>
       fn(mockPrisma),
     );
+    mockPrisma.product.findUnique.mockResolvedValue({ id: "p1", slug: "test", creatorId: "user-1" });
     mockPrisma.product.update.mockResolvedValue({ id: "p1", slug: "test" });
   });
 

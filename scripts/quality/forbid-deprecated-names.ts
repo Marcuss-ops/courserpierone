@@ -26,6 +26,13 @@ const ALLOWED_PATHS: ReadonlySet<string> = new Set([
   "scripts/_inline-disable-react-hooks.mjs",
   "scripts/quality/forbid-deprecated-names.ts",
   "scripts/quality/forbid-deprecated-names.test.ts",
+  // Legacy migration-window keys intentionally keep the old brand name
+  // so pre-rename clients can still sync progress/inbox state.
+  // See ADR-0015 §Migration plan (target close: 2026-08-15).
+  "src/components/course/premium-video-player.tsx",
+  "src/components/layout/inbox-provider.tsx",
+  "src/lib/brand/brand-migration-keys.ts",
+  "src/lib/brand/brand-migration-keys.test.ts",
 ]);
 
 const FORBIDDEN_PATTERNS: ReadonlyArray<{ name: string; regex: RegExp }> = [

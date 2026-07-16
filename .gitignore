@@ -42,3 +42,4 @@ tmp/deps-checker.json
 # Local log/output artifacts
 server.log
 typecheck_output.txt
+tmp/dod-check.json

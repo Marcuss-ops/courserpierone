@@ -101,7 +101,11 @@ export function countComplexity(content: string): number {
   const stripped = content
     .replace(/\/\*[\s\S]*?\*\//g, "") // block comments
     .replace(/\/\/[^\n]*/g, "") // line comments
-    .replace(/(['"`])(?:\\.|(?!\1).)*\1/g, ""); // string literals
+    .replace(/(['"`])(?:\\.|(?!\1).)*\1/g, "") // string literals
+    // Nullish coalescing (`??`) is a binary operator, not a conditional
+    // branch, but the ternary regex below would count its second `?`.
+    // Strip it before counting so complexity reflects real control flow.
+    .replace(/\?\?/g, "  ");
   let count = 1; // McCabe base
   const patterns: RegExp[] = [
     /\bif\b/g,

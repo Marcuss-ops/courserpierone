@@ -17,6 +17,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
+// Baseline of pre-existing dead exports. This file must only shrink over
+// time; new exports should be used or removed, not baselined.
 const BASELINE_PATH = path.join(SCRIPT_DIR, "dead-exports-baseline.json");
 
 interface KnipIssue {
@@ -44,9 +46,30 @@ function runKnip(): Finding[] {
       stdio: ["ignore", "pipe", "pipe"],
     });
   } catch (err) {
-    const stderr = err instanceof Error && "stderr" in err ? String(err.stderr) : "";
-    console.error("✗ Failed to run knip:", stderr);
-    process.exit(2);
+    // knip exits with a non-zero code when it finds issues, but it still
+    // writes the JSON report to stdout. Re-use that output so we can diff
+    // against the baseline rather than failing the gate.
+    interface ExecError extends Error {
+      stdout?: string | Buffer;
+      stderr?: string | Buffer;
+    }
+    const execError = err instanceof Error ? (err as ExecError) : undefined;
+    const stdout = Buffer.isBuffer(execError?.stdout)
+      ? execError.stdout.toString("utf-8")
+      : typeof execError?.stdout === "string"
+        ? execError.stdout
+        : "";
+    if (stdout.trim().startsWith("{")) {
+      output = stdout;
+    } else {
+      const stderr = execError?.stderr
+        ? Buffer.isBuffer(execError.stderr)
+          ? execError.stderr.toString("utf-8")
+          : String(execError.stderr)
+        : "";
+      console.error("✗ Failed to run knip:", stderr);
+      process.exit(2);
+    }
   }
 
   let report: KnipReport;
