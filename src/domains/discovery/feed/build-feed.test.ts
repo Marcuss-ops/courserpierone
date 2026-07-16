@@ -147,11 +147,52 @@ describe("buildFeed (Courssy — Fase 1 rule-based MVP)", () => {
     expect(result.nextCursor).toBeNull();
   });
 
-  it("within-tier tie-break ranks newer items first (DESC)", async () => {
-    // Two continue_learning items:
-    //   - cl1 (newer, 2026-07-16T10:00:00Z)
-    //   - cl2 (older, 2026-07-15T14:30:00Z)
-    // Both same priority → expect newer (cl1) first.
+  it("boost-driven within-tier reordering — higher course-progress boost wins", async () => {
+    // Phase 1 step 2: applyPolicies makes boostScore the PRIMARY within-tier
+    // tie-break (not timestamp). Two continue_learning items, both same tier
+    // (1) and same kind, but DIFFERENT boost scores via rank-by-course-progress:
+    //   - lp-older (p1 ∈ mkContext().startedCourseIds)  → boost = 100
+    //   - lp-newer  (p2 ∉ mkContext().startedCourseIds) → boost = 0
+    // Higher boost wins regardless of timestamp. This is the headline
+    // behavior of the applyPolicies integration.
+    const repo: FeedRepository = {
+      async fetchContinueLearning() {
+        return [
+          {
+            kind: "continue_learning",
+            id: "lp-older",
+            productId: "p1",
+            productSlug: "course-1",
+            lessonId: "l-old",
+            title: "older-but-started",
+            lastWatchedAt: FIXED_DATES.cl2,
+          },
+          {
+            kind: "continue_learning",
+            id: "lp-newer",
+            productId: "p2",
+            productSlug: "course-2",
+            lessonId: "l-new",
+            title: "newer-but-unstarted",
+            lastWatchedAt: FIXED_DATES.cl1,
+          },
+        ];
+      },
+      async fetchRecentLessons() {
+        return [];
+      },
+    };
+    const result = await buildFeed(repo, { context: mkContext() });
+    // Higher course-progress boost wins, even though it's older.
+    expect(result.items[0]?.id).toBe("lp-older");
+    expect(result.items[1]?.id).toBe("lp-newer");
+  });
+
+  it("timestamp DESC tie-break applies when boost scores are equal", async () => {
+    // Phase 1 step 2: after boost, the SECONDARY tie-break is timestamp
+    // DESC (most recent first). When two items have identical boost
+    // scores (here: both productId in startedCourseIds → both +100),
+    // the newer lastWatchedAt wins.
     const repo: FeedRepository = {
       async fetchContinueLearning() {
         return [
@@ -167,8 +208,8 @@ describe("buildFeed (Courssy — Fase 1 rule-based MVP)", () => {
           {
             kind: "continue_learning",
             id: "lp-newer",
-            productId: "p2",
-            productSlug: "course-2",
+            productId: "p1",
+            productSlug: "course-1",
             lessonId: "l-new",
             title: "newer",
             lastWatchedAt: FIXED_DATES.cl1,
@@ -198,5 +239,49 @@ describe("buildFeed (Courssy — Fase 1 rule-based MVP)", () => {
     expect(result.nextCursor).toBeNull();
     // Verify internal cap: PER_SOURCE_LIMIT (10) is what we pass to repo;
     //   we only care here that no items leaked.
+  });
+
+  // ─── Policy-registry integration (Phase 1 step 2) ───────────────────
+  // Verifies that applyPolicies is engaged end-to-end through buildFeed:
+  // the exclude-already-purchased filter must drop items the user owns
+  // (here: a lesson whose productId is in ctx.ownedProductIds). Without
+  // the applyPolicies step, the lesson would survive and be returned.
+  it("excludes already-purchased lessons via the policy registry", async () => {
+    const repo: FeedRepository = {
+      async fetchContinueLearning() {
+        return [];
+      },
+      async fetchRecentLessons() {
+        return [
+          // productId "p1" is in mkContext().ownedProductIds → filter drops it.
+          {
+            kind: "lesson",
+            id: "l-owned",
+            productId: "p1",
+            productSlug: "course-1",
+            lessonId: "l-owned",
+            creatorId: "c-unknown",
+            title: "Should be filtered out (already owned)",
+            createdAt: FIXED_DATES.l1,
+          },
+          // productId "p3" is NOT owned → must survive the filter.
+          {
+            kind: "lesson",
+            id: "l-new",
+            productId: "p3",
+            productSlug: "course-3",
+            lessonId: "l-new",
+            creatorId: "c1",
+            title: "Should survive (not owned)",
+            createdAt: FIXED_DATES.l2,
+          },
+        ];
+      },
+    };
+    const result = await buildFeed(repo, { context: mkContext() });
+    // Only the not-owned lesson survives the exclude-already-purchased filter.
+    expect(result.items.map((i) => i.id)).toEqual(["l-new"]);
+    // End-of-feed (1 item < default pageSize 20) → no next cursor.
+    expect(result.nextCursor).toBeNull();
   });
 });

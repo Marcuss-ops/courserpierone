@@ -10,10 +10,22 @@
  * "Niente AI, embeddings o machine learning. Regole deterministiche e
  * testabili, ranking pure-function, max 4-6 query aggregate."
  *
+ * Two-stage ranking pipeline (ADR-0016 §Domain separation):
+ *   Stage 1 — `rankItems` (feed-ranking-policy.ts): tier-priority order
+ *             (continue_learning < lesson < community_post < free_course <
+ *              premium_course). Within-tier tie-break: timestamp DESC.
+ *   Stage 2 — `applyPolicies` (policies/policy-registry.ts): WITHIN-tier
+ *             refinement. Filter chain (exclude owned), boost accumulation
+ *             (course-progress / language / creator / topic), sort tie-break
+ *             (free-before-upsell). Composition is pure of (items, ctx).
+ *
  * Cursor strategy:
  *   - nextCursor = ISO timestamp of the OLDEST item in the current page.
  *   - Repository filter is "items strictly older than cursor".
  *   - When items.length < requested pageSize, end-of-feed reached.
+ *   - If `applyPolicies` filters the oldest item out, the cursor advances
+ *     to the next-oldest visible item — the dropped item is NOT re-fetched
+ *     on subsequent pages. Correctness preserved.
  *
  * Performance budget per strategy doc §Fase 1:
  *   - 2 parallel Prisma queries (bounded per repo contract).
@@ -34,6 +46,7 @@ import type {
 } from "./feed-types";
 import type { FeedRepository, FeedSourceContext } from "./feed-repository";
 import { rankItems } from "./feed-ranking-policy";
+import { applyPolicies } from "../policies/policy-registry";
 
 const DEFAULT_PAGE_SIZE = 20;
 const PER_SOURCE_LIMIT = 10;
@@ -47,9 +60,10 @@ const PER_SOURCE_LIMIT = 10;
  * Steps:
  *   1. Build source-context from FeedContext.
  *   2. Parallel fetch from 2 sources via Promise.all (≤ 200ms typical).
- *   3. Merge + deterministic rank.
- *   4. Cap to pageSize.
- *   5. Compute nextCursor (null when fewer items than requested).
+ *   3. Merge + deterministic tier-rank (`rankItems`).
+ *   4. Within-tier refinement (`applyPolicies`).
+ *   5. Cap to pageSize.
+ *   6. Compute nextCursor (null when fewer items than requested).
  */
 export async function buildFeed(
   repo: FeedRepository,
@@ -74,8 +88,12 @@ export async function buildFeed(
   ]);
 
   const allItems: FeedItem[] = [...continueLearning, ...recentLessons];
+  // Stage 1: tier-priority ordering (deterministic, pure).
   const ranked = rankItems(allItems, input.context);
-  const capped = ranked.slice(0, pageSize);
+  // Stage 2: within-tier refinement — filter / boost / sort tie-break
+  // via the policy registry. Pure of (items, ctx).
+  const refined = applyPolicies(ranked, input.context);
+  const capped = refined.slice(0, pageSize);
 
   // nextCursor: present only if page was exactly full (room for another
   // page). The cursor references the OLDEST item in this page; the
