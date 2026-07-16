@@ -92,6 +92,16 @@ export const prismaContinueWatchingRepository: ContinueWatchingRepository = {
         userId,
         completed: false,
         lastWatchedAt: lastWatchedAtFilter,
+        // AccessGrant is the single source of truth for product access.
+        // Only surface progress for products with an active grant (free,
+        // order, admin, bundle). Revoked/expired grants are excluded.
+        lesson: {
+          product: {
+            accessGrants: {
+              some: { userId, status: "active" },
+            },
+          },
+        },
       },
       orderBy: { lastWatchedAt: "desc" },
       take,
