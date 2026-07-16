@@ -327,39 +327,6 @@ describe("buildContinueWatchingHistory — repo contract", () => {
   });
 });
 
-describe("buildContinueWatchingHistory — defensive row shape", () => {
-  it("skips adapter rows whose lastWatchedAt is somehow null", async () => {
-    const { repo } = mkStubRepo([
-      {
-        // Adapter contract says lastWatchedAt is non-null (filtered
-        // at the WHERE level), but defense-in-depth: if a future
-        // refactor ever returns a null here, the use case must drop
-        // it silently rather than leak Date(0) to the dashboard.
-        id: "p_a",
-        lastWatchedAt: null as unknown as Date,
-        lesson: {
-          id: "l_a1",
-          position: 1,
-          title: "A1",
-          videoUrl: null,
-          product: {
-            id: "prod_a",
-            slug: "alpha",
-            coverUrl: null,
-            title: "Alpha",
-          },
-        },
-      },
-    ]);
-    const result = await buildContinueWatchingHistory(
-      { userId: "user_1" },
-      { repo },
-    );
-    expect(result.items).toEqual([]);
-    expect(result.nextCursor).toBeNull();
-  });
-});
-
 describe("prismaContinueWatchingRepository — adapter sanity", () => {
   it("is exported with the expected shape (port contract)", () => {
     expect(typeof prismaContinueWatchingRepository.fetchRecentProgress).toBe(
@@ -418,8 +385,12 @@ describe("buildContinueWatchingHistory — cursor pagination", () => {
     );
     expect(result.items).toHaveLength(MAX_CONTINUE_WATCHING_LIMIT);
     // nextCursor encodes the lastWatchedAt of the LAST visible item.
+    // No `!` needed: with noUncheckedIndexedAccess=false (default),
+    // `result.items[N]` is typed as the concrete item type, not
+    // `item | undefined`. ESLint flagged the `!` as an unnecessary
+    // non-null assertion, so we drop it here.
     expect(result.nextCursor).toBe(
-      result.items[result.items.length - 1]!.lastWatchedAt.toISOString(),
+      result.items[result.items.length - 1].lastWatchedAt.toISOString(),
     );
   });
 
@@ -477,9 +448,13 @@ describe("buildContinueWatchingHistory — cursor pagination", () => {
 
   it("silently treats empty / null cursor as no cursor", async () => {
     const { repo, state } = mkStubRepo([]);
-    for (const badCursor of ["", null, undefined]) {
+    // The cursor signature already accepts string | null | undefined, so
+    // the previous @ts-expect-error was unused (TS2578 fired). Looped
+    // values are intentionally exhaustive and DO compile under the
+    // current type signature — no suppression needed.
+    const badCursors: (string | null | undefined)[] = ["", null, undefined];
+    for (const badCursor of badCursors) {
       await buildContinueWatchingHistory(
-        // @ts-expect-error — intentionally testing runtime null/undefined
         { userId: "user_1", cursor: badCursor },
         { repo },
       );

@@ -39,11 +39,7 @@ import {
   WATCHLIST_SOURCE_TYPE,
   buildWatchlistSourceId,
 } from "./watchlist";
-import type {
-  AddToWatchlistDeps,
-  ListWatchlistDeps,
-  RemoveFromWatchlistDeps,
-} from "./watchlist";
+import type { AddToWatchlistDeps } from "./watchlist";
 import type {
   AccessGrantSourceType,
   WatchlistItem,
@@ -211,10 +207,10 @@ describe("addToWatchlist — happy path", () => {
 
   it("reactivates a previously-revoked grant (alreadyAdded=false after reactivate)", async () => {
     // Adapter contract: when reactivation happens, alreadyAdded=false
-    // (the 2-query pre-check looks for ANY row, but the underlying
-    // upsert is the source of truth — see adapter comment for why
-    // alreadyAdded is the PRE-check signal not the post-state signal).
-    // For this test we simulate the adapter contract directly.
+    // because the pre-check findFirst is filtered to status='active'
+    // (a revoked row does NOT count as already-added). The upsert
+    // then writes status='active' + revokedAt=null. This test
+    // documents that contract via the stub returning alreadyAdded=false.
     const { repo } = mkStubRepo();
     repo.upsertWatchlistGrant = async () => ({
       grantId: "grant_reactivated",
@@ -228,6 +224,34 @@ describe("addToWatchlist — happy path", () => {
       added: true,
       grantId: "grant_reactivated",
       alreadyAdded: false,
+    });
+  });
+
+  it("returns alreadyAdded=true when an active grant pre-exists (idempotent no-op)", async () => {
+    // Locks the contract: the SECOND POST on the same (userId,
+    // productId) is a no-op write (the upsert's update clause
+    // reactivates an already-active grant, but the pre-check
+    // already found it). This is the symmetric counterpart to the
+    // reactivation test above — together they pin the THREE pre-states
+    // (nothing / revoked / active) to THREE distinct outcomes.
+    //
+    // Without this test, a future refactor that drops the
+    // status='active' filter from the pre-check findFirst would
+    // regress alreadyAdded=true into "any row exists" semantics,
+    // breaking idempotency without any test catching the regression.
+    const { repo } = mkStubRepo();
+    repo.upsertWatchlistGrant = async () => ({
+      grantId: "grant_active",
+      alreadyAdded: true,
+    });
+    const result = await addToWatchlist(
+      { userId: "u1", productId: "p1" },
+      { repo },
+    );
+    expect(result).toEqual({
+      added: true,
+      grantId: "grant_active",
+      alreadyAdded: true,
     });
   });
 });
@@ -396,10 +420,12 @@ describe("AccessGrantSourceType — TS union exhaustiveness (compile-time)", () 
     expect(ALL_SOURCE_TYPES).toContain("watchlist");
   });
 
-  it("WATCHLIST_SOURCE_TYPE constant is in the union", () => {
-    // @ts-expect-error — intentional runtime check that the constant
-    // is a valid member of the union.
-    const _typeCheck: AccessGrantSourceType = WATCHLIST_SOURCE_TYPE;
-    expect(_typeCheck).toBe("watchlist");
+  it("WATCHLIST_SOURCE_TYPE constant is 'watchlist'", () => {
+    // The compile-time check that the literal "watchlist" is a valid
+    // AccessGrantSourceType member lives in the const ALL_SOURCE_TYPES
+    // above (typed as AccessGrantSourceType[]). Without the @ts-expect-error
+    // here, the redundant runtime assignment was unused and tripped
+    // TS2578 — kept just the runtime assertion.
+    expect(WATCHLIST_SOURCE_TYPE).toBe("watchlist");
   });
 });

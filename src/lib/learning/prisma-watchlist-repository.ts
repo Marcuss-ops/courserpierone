@@ -99,8 +99,9 @@ export const prismaWatchlistRepository: WatchlistRepository = {
     // (idempotent no-op write). A previously-revoked grant does NOT
     // count as already-added — its reactivation is a real state
     // change that the caller should know about. Without this filter,
-    // the UI would incorrectly show "already added" when the user
-    // just re-added a previously-revoked product. (Per Phase 2 step 3
+    // the pre-check would return true for ANY row (active or revoked),
+    // misrepresenting post-state to the caller as "already added"
+    // when in fact a state transition happened. (Per Phase 2 step 3
     // code-reviewer feedback.)
     const existing = await prisma.accessGrant.findFirst({
       where: {
