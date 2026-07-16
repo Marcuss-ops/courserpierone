@@ -131,7 +131,7 @@ Ogni refactor che tocca codice esistente segue questa sequenza atomica su main:
 - **Nessuna retrofit immediata dei file V1.x**: il refactor è incrementale. I file in `src/lib/*` migrano ai domini V2 uno alla volta seguendo il 5-commit workflow. Durante la transizione entrambi i layout coesistono.
 - **Anti-barrel-rule rompe alcuni pattern V1**: `index.ts` re-export è usato in molti posti V1 per ridurre gli import path. Rimuoverli è un follow-up di Fase 0.
 - **CI guardrail dipendente da `eslint-plugin-import` + custom rule**: la regola dependency rule richiede una custom ESLint rule. Non-blocking per ADR-0016 ma obbligatoria per i prossimi PR che migrano file V1 → V2.
-- **9-domini è V2, non V1**: il codebase V1 continua con `src/lib/`, `src/app/`, `src/components/`. La migrazione è incrementale e dura mesi. ADR-0015 + ADR-0016 sono i due PRAMI che vincolano le scelte future.
+- **10-domini è V2, non V1**: il codebase V1 continua con `src/lib/`, `src.app/`, `src/components/`. La migrazione è incrementale e dura mesi. ADR-0015 + ADR-0016 + ADR-0018 sono i tre pilastri che vincolano le scelte future.
 
 ---
 

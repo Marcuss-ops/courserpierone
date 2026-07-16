@@ -39,6 +39,53 @@ ADR-0016 ha fissato la V2 come **monolith-modular** con 9 domini e la regola can
 
 > **Nota**: Analytics è ora un dominio separato (non più read-model di creator-ops). La nota in ADR-0016 §b che lo collassava è esplicitamente invalidata da questo ADR; entrambi gli ADRs cross-linkgano la decisione.
 
+#### Domain-to-domain dependency matrix
+
+Oltre alla layer rule di cui sopra, i 10 domini formano un DAG topologico. Un dominio può dipendere solo da domini **più vicini alla radice** (upstream) o dal proprio interno; mai da domini a valle.
+
+*Nella tabella: riga = dominio che importa, colonna = dominio importato.*
+
+| Domain ↓ | Identity | Catalog | Learning | Community | Messaging | Commerce | Creator Ops | Automation | Discovery | Analytics |
+|---|---|---|---|---|---|---|---|---|---|---|
+| **Identity & Access** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Catalog** | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Messaging** | ✅ | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Learning** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Community** | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Commerce** | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Creator Operations** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| **Automation** | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ |
+| **Discovery** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ | ❌ |
+| **Analytics** | ✅ (events) | ✅ (events) | ✅ (events) | ✅ (events) | ✅ (events) | ✅ (events) | ✅ (events) | ✅ (events) | ✅ (events) | ✅ |
+
+*Legenda:* ✅ import consentito (solo via Port/UseCase, mai Domain rule → Domain rule); ❌ import vietato. La diagonale ✅ indica import all'interno dello stesso dominio. Analytics è uno **sink read-only**: consuma solo eventi/read-models, non importa regole di altri domini e non può causare side-effect in domini upstream.
+
+**Ordine topologico canonico (radice → foglie):**
+
+```text
+Identity & Access
+        ↓
+   Catalog
+        ↓
+   ┌────────┬──────────┬─────────┐
+   ↓        ↓          ↓         ↓
+Learning  Community  Messaging  Commerce
+   ↓        ↓          ↓         ↓
+   └────────┴──────────┴─────────┘
+              ↓
+   ┌───────────────────────┐
+   ↓                       ↓
+Creator Operations    Automation
+   ↓                       ↓
+   └──────────┬──────────────┘
+              ↓
+    ┌─────────────────┐
+    ↓                 ↓
+Discovery         Analytics (sink)
+```
+
+*Note:* Creator Operations e Automation sono allo stesso livello topologico; Automation non dipende da Creator Operations ma dagli stessi domini core (Catalog, Commerce, Messaging).
+
 ### (b) Canonical Dependency Rule (5-layer stack, direzione obbligatoria)
 
 ```mermaid
@@ -158,7 +205,9 @@ Il **route** non interroga mai Prisma direttamente. Il **domain rule** non impor
 
 *Legend:* ✅ allowed import; ❌ forbidden import; eccezioni documentate solo tramite ADR analogo a [ADR-0013](0013-template-amish-direct-import.md).
 
-### Canonical folder shape (per domain)
+### Canonical folder shape (applies to every domain)
+
+Lo stesso layout minimale si applica a tutti i 10 domini. Non esistono folder anticipatori per dominio (YAGNI — vedi ADR-0016 §No-anticipatory-folders); il folder si crea quando la prima feature reale lo richiede.
 
 ```text
 src/domains/<domain>/
@@ -168,6 +217,23 @@ src/domains/<domain>/
   usecases/<usecase>.usecase.ts   # Application UseCase: orchestration
 src/app/<route>/page.tsx          # UI / Route: thin, calls one UseCase
 ```
+
+#### Esempio concreto — Commerce domain
+
+```text
+src/domains/commerce/
+  rules/
+    calculate-order-total.ts        # Domain rule: pure pricing logic
+  ports/
+    payment-provider.port.ts        # Port: contratto per provider di pagamento
+  adapters/
+    lemonsqueezy-payment.ts         # Adapter: implementazione Lemon Squeezy
+  usecases/
+    create-checkout.usecase.ts      # UseCase: orchestrazione checkout
+src/app/api/commerce/checkout/route.ts  # UI/Route: thin, chiama il UseCase
+```
+
+Nessun altro folder (`factories/`, `services/`, `dtos/`) finché una feature reale non lo richiede.
 
 ### Worked example — Catalog domain
 
