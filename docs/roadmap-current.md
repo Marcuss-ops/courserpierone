@@ -1,4 +1,4 @@
-# Courser Roadmap — Current
+# Courssy Roadmap — Current
 
 > **Status:** Pre-V1 GA. Priorità: drenare legacy data (NextAuth tables) dal DB di produzione, stabilizzare test/typecheck suite, completare architettura DM/Conversation canonica.
 >

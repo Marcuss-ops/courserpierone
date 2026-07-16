@@ -38,10 +38,10 @@
 
 | Probe                              | Result                                                   |
 |------------------------------------|----------------------------------------------------------|
-| Databases (non-template)           | `courser`, `postgres`                                    |
-| Tables in `courser` (public)       | only `_prisma_migrations`                                |
+| Databases (non-template)           | `courssy`, `postgres`                                    |
+| Tables in `courssy` (public)       | only `_prisma_migrations`                                |
 | Tables in `postgres` (public)      | none                                                     |
-| Last applied Prisma migration      | `20260712210000_drop_creator_id_index` (in `courser`)    |
+| Last applied Prisma migration      | `20260712210000_drop_creator_id_index` (in `courssy`)    |
 | `Product`/`User`/`AccessGrant` rows | 0 each (tables don't even exist locally)                |
 | NextAuth tables                    | not present (no `Account`/`Session`/`VerificationToken`) |
 

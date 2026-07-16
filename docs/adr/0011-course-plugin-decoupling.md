@@ -8,7 +8,7 @@
 
 ## Context
 
-The Courser platform shipped V1 with **one course** (Amish Secrets — slug `amish-secrets`). During the build-out, course-specific assets accumulated at project-root paths:
+The Courssy platform shipped V1 with **one course** (Amish Secrets — slug `amish-secrets`). During the build-out, course-specific assets accumulated at project-root paths:
 
 | What | Where it lived (pre-ADR-0011) |
 |---|---|

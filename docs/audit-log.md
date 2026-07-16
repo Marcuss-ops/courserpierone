@@ -35,11 +35,11 @@
   `docker-compose.yml`).
 - Auth: `postgres:postgres` → **FATAL: password authentication failed
   for user "postgres"**. The `pgbackups` container is a backup sidecar
-  and does NOT expose the actual `courser` schema — the real database
+  and does NOT expose the actual `courssy` schema — the real database
   lives in the `db` container on the internal docker network
   (`db:5432`).
 - Conclusion: a local dry-run is not possible from this environment
-  because the Courser schema is not exposed on the public PG port.
+  because the Courssy schema is not exposed on the public PG port.
   The script's SQL correctness was verified in the PR 2 code-review
   (commit `afc288d`): idempotent `CREATE TABLE IF NOT EXISTS` +
   `DO $$` FK guards, `upsert + @@unique([sourceType, sourceId,

@@ -7,7 +7,7 @@
 **Implements:** V2 monolith-modular strategy §1 (Fase 0 step 1 "scegliere il nome definitivo")
 
 > **Decision (1-line):** Il nome canonico del brand è **"Courssy"** (6 lettere, spelling `C-o-u-r-s-s-y`).
-> Tutti i 12 layer del progetto (codice, infra, marketing, email, dominio, npm, UI, storage keys, db container, doc interni, automazioni) devono convergere su `"Courssy"/"courssy"`. Ogni reference residua a `"Courser"/"courser"` o `"Coursy"/"coursy"` è debris da drenare nei follow-up di Fase 0.
+> Tutti i 12 layer del progetto (codice, infra, marketing, email, dominio, npm, UI, storage keys, db container, doc interni, automazioni) devono convergere su `"Courssy"/"courssy"`. Ogni reference residua a `"Courssy"/"courssy"` o `"Coursy"/"coursy"` è debris da drenare nei follow-up di Fase 0.
 
 ---
 
@@ -17,14 +17,14 @@ Il V2 (monolith-modular) richiede che **moduli, package name, GitHub repo, domin
 
 | Layer | Stato attuale (drift) | Canonical (post-ADR-0015) |
 |---|---|---|
-| `package.json` `name` | `"courser"` | `"courssy"` |
-| `README.md` H1 | `# Courser` | `# Courssy` |
+| `package.json` `name` | `"courssy"` | `"courssy"` |
+| `README.md` H1 | `# Courssy` | `# Courssy` |
 | Production URL (env) | `https://www.courssy.com` ✅ | invariato |
-| Email FROM (env) | `noreply@courser.app` | `noreply@courssy.com` (follow-up) |
+| Email FROM (env) | `noreply@courssy.app` | `noreply@courssy.com` (follow-up) |
 | UI catalog title | `"Catalogo Courssy"` ✅ | invariato |
-| BroadcastChannel name | `"courser-inbox"` | `"courssy-inbox"` |
-| next-themes `storageKey` | `"courser-theme"` | `"courssy-theme"` |
-| Docker db container (dev) | `courserpierone-db-1` (`courser` DB) | `courssy-db-1` (`courssy` DB) |
+| BroadcastChannel name | `"courssy-inbox"` | `"courssy-inbox"` |
+| next-themes `storageKey` | `"courssy-theme"` | `"courssy-theme"` |
+| Docker db container (dev) | `courserpierone-db-1` (`courssy` DB) | `courssy-db-1` (`courssy` DB) |
 | Test DB (CI) | `courser_test` | `courssy_test` |
 
 Senza ADR-0015, la convergenza avviene per caso (multi-PR conflittuali, regression in CI, marketing discontinuity).
@@ -33,12 +33,12 @@ Senza ADR-0015, la convergenza avviene per caso (multi-PR conflittuali, regressi
 
 ## Comparison matrix
 
-| Criterio | Coursy | Courser | **Courssy (scelto)** |
+| Criterio | Coursy | Courssy | **Courssy (scelto)** |
 |---|---|---|---|
 | **USPTO trademark** (classi 9/41/42) | match attivi classi correlate | match attivi (Palmetto class 42, NJM Packaging class 7) | **0 match live** ✅ |
 | **EUIPO trademark** (classi 9/41/42) | attivo: **"Coursy Technology OÜ"** Estonia in classi 9 + 41 (edtech LMS) | alcuni match internazionali | **0 match live** ✅ |
 | **Industry confusion** | "Coursy.io" è LMS enterprise attivo (mid-sized EU) | **alta prossimità con "Coursera"** (Coursera difende aggressivamente contro homophonic variants in classes 9/41) | nessun brand attivo con questo spelling ✅ |
-| **Domain availability** (`.com/.io/.co/.app/.dev/.net`) | tutti registrati (~$2k-5k) | tutti registrati + `courser.io` attivo | tutti registrati, acquisibili (~$500-2k, prob. domain investor) ✅ |
+| **Domain availability** (`.com/.io/.co/.app/.dev/.net`) | tutti registrati (~$2k-5k) | tutti registrati + `courssy.io` attivo | tutti registrati, acquisibili (~$500-2k, prob. domain investor) ✅ |
 | **Alignment con production URL esistente** (`courssy.com` DNS + cert emesso) | richiede migrazione | richiede migrazione | **già allineato** ✅ |
 | **Alignment con UI esistente** (`"Catalogo Courssy"` in `courses-catalog.tsx`) | richiede UI rewrite | richiede UI rewrite | **già adottato parzialmente** ✅ |
 | **Pronunciabilità + spelling** | ambiguous ("coursey"? "korsy"?) | ambiguity + confusione con "Coursera" | distinct (tripla "s" foneticamente unica) |
@@ -54,7 +54,7 @@ Senza ADR-0015, la convergenza avviene per caso (multi-PR conflittuali, regressi
 |---|---|
 | `Courssy` / `courssy` | ✅ canonical display + lowercase |
 | `COURSSY` | solo constants UPPERCASE in env |
-| `Courser` / `courser` | ❌ deprecated (drift) |
+| `Courssy` / `courssy` | ❌ deprecated (drift) |
 | `Coursy` / `coursy` | ❌ deprecated (EU trademark risk) |
 | `Courserpierone` | legacy project codename (GitHub repo, fuori scope — ADR separato) |
 | `Courssyy` / varianti | ❌ bandite |
@@ -65,12 +65,12 @@ Senza ADR-0015, la convergenza avviene per caso (multi-PR conflittuali, regressi
 
 Sequenza consigliata (7 commit dopo questa ADR) — ogni commit con typecheck + vitest verde:
 
-1. `package.json`: `"courser"` → `"courssy"` + lockfile via `npm install`. Typecheck verde (no import ref).
-2. `README.md` H1 → `# Courssy` + replace `courser`-only references in `MISSION.md`/`docs/`/`scripts/`.
+1. `package.json`: `"courssy"` → `"courssy"` + lockfile via `npm install`. Typecheck verde (no import ref).
+2. `README.md` H1 → `# Courssy` + replace `courssy`-only references in `MISSION.md`/`docs/`/`scripts/`.
 3. `BroadcastChannel` + `storageKey`: dual-read/write per backward-compat con `localStorage` pre-deploy (no flickering al primo login post-deploy).
-4. Docker/CI: `courserpierone-db-1` → `courssy-db-1`, db `courser` → `courssy`, `courser_test` → `courssy_test`.
-5. UI strings grep `Courser\|courser` in `src/components/**/*.tsx` → canonicalize (closer pass on documents opera).
-6. Email infra (separato): `noreply@courser.app` → `noreply@courssy.com` o dual MX per 30 giorni. Touches `EMAIL_FROM` env + DNS + Vercel.
+4. Docker/CI: `courserpierone-db-1` → `courssy-db-1`, db `courssy` → `courssy`, `courser_test` → `courssy_test`.
+5. UI strings grep `Courssy\|courssy` in `src/components/**/*.tsx` → canonicalize (closer pass on documents opera).
+6. Email infra (separato): `noreply@courssy.app` → `noreply@courssy.com` o dual MX per 30 giorni. Touches `EMAIL_FROM` env + DNS + Vercel.
 7. Email/Marketing/glue surfaces esterno al repo — coordinazione asincrona (ownership mista).
 
 ---
@@ -108,7 +108,7 @@ Sequenza consigliata (7 commit dopo questa ADR) — ogni commit con typecheck + 
 ## Future work
 
 1. Migration chain (7 commit §Migration plan).
-2. CI guardrail `scripts/quality/forbid-deprecated-names.ts` — fail se `Courser\b|Coursy\b` matched nei nuovi commit (escludendo `Courserpierone` + questo ADR).
+2. CI guardrail `scripts/quality/forbid-deprecated-names.ts` — fail se `Courssy\b|Coursy\b` matched nei nuovi commit (escludendo `Courserpierone` + questo ADR).
 3. Email infra alignment (sep PR dopo migration chain).
 4. Marketing surfaces alignment (blog/SEO/social) — coordinazione esterna (docs/ops/marketing-naming-alignment.md).
 5. GitHub repo rename (ADR di Fase 0 separato): `Marcuss-ops/courserpierone` → `courssy`.

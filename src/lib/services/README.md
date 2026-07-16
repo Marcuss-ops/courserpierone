@@ -85,7 +85,7 @@ EMAIL_SERVER_HOST=smtp.gmail.com
 EMAIL_SERVER_PORT=587
 EMAIL_SERVER_USER=
 EMAIL_SERVER_PASSWORD=
-EMAIL_FROM=noreply@courser.app
+EMAIL_FROM=noreply@courssy.app
 ```
 
 Se SMTP non è configurato, le email vengono loggate in console invece di essere inviate (utile in dev).

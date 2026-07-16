@@ -1,7 +1,7 @@
 # i18n Coverage & "Add a New Locale" Checklist
 
 This document is the audit companion for IT/EN/ES parity across the
-Courser V1 customer-facing surfaces. It establishes the contract that
+Courssy V1 customer-facing surfaces. It establishes the contract that
 **adding a new locale is a configuration-only operation** — no code
 changes are required when you add a new language to the language-selector
 and that language isn't already in any of the per-locale maps.

@@ -284,7 +284,7 @@ Vedi `FUTURE.md` per catalogo completo (16 sezioni).
 ```bash
 # === VERCEL ===
 npx vercel login
-npx vercel link --project courser
+npx vercel link --project courssy
 npx vercel env add <KEY> production
 npx vercel env ls production
 npx vercel --prod --yes              # Force deploy

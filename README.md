@@ -1,4 +1,4 @@
-# Courser
+# Courssy
 
 > **V1.x status:** Pre-GA. Vedi [docs/roadmap-current.md](docs/roadmap-current.md) per V1 blockers + post-V1 + tech debt.
 
@@ -27,7 +27,7 @@ analytics, protezione accessi e gestione progressi.
 
 ```bash
 # 1. Clona il repository
-git clone <repo-url> courser && cd courser
+git clone <repo-url> courssy && cd courssy
 
 # 2. Installa le dipendenze
 npm install
@@ -80,11 +80,11 @@ Senza NextAuth env: nessuna (Supabase Auth non le richiede).
 ### Docker locale (dev)
 
 ```bash
-docker run --name courser-db -e POSTGRES_PASSWORD=postgres \
-  -e POSTGRES_DB=courser -p 5432:5432 -d postgres:16-alpine
+docker run --name courssy-db -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=courssy -p 5432:5432 -d postgres:16-alpine
 ```
 
-Poi `DATABASE_URL=postgresql://postgres:postgres@localhost:5432/courser` in `.env`.
+Poi `DATABASE_URL=postgresql://postgres:postgres@localhost:5432/courssy` in `.env`.
 
 ---
 
@@ -152,7 +152,7 @@ Senza: la traduzione manuale funziona comunque (upload JSON per lingua).
 Dettaglio completo in [ARCHITECTURE.md](ARCHITECTURE.md). Stack V1.x: Next.js 16 + React 19 + Supabase + REST + Lemon Squeezy + Tailwind 4.
 
 ```
-courser/
+courssy/
 ├── prisma/
 │   ├── schema.prisma
 │   └── migrations/         # versionate (migrate dev → migrate deploy)

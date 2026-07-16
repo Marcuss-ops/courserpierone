@@ -132,7 +132,7 @@ Supabase Dashboard → New Project.
 
 | Field | Value |
 | --- | --- |
-| Name | `courser-staging` (or any memorable name) |
+| Name | `courssy-staging` (or any memorable name) |
 | Database password | generate via `openssl rand -base64 32`, save to 1Password |
 | Region | same region as your production project (to minimize latency mismatch with Vercel Preview) |
 | Plan | Free for staging-no-traffic; Pro if you need PITR or staging backups |
@@ -273,7 +273,7 @@ Upstash Console → Create Database.
 
 | Field | Value |
 | --- | --- |
-| Name | `courser-staging` (or any memorable name) |
+| Name | `courssy-staging` (or any memorable name) |
 | Region | same region as your Supabase staging project (latency minimization) |
 | Type | Global for production-like replication, OR Regional for staging-lite |
 | TLS | enabled (default — leave on) |
@@ -357,7 +357,7 @@ Mailtrap.io → Sign up → Sandbox → Create Inbox.
 
 | Field | Value |
 | --- | --- |
-| Inbox name | `courser-staging` |
+| Inbox name | `courssy-staging` |
 | SMTP credentials | shown in the inbox page; copy to Vercel Preview env |
 
 > Mailtrap.io's sandbox inbox **catches all email** sent from staging

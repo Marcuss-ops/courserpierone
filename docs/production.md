@@ -563,7 +563,7 @@ This playbook is one of four docs. Do not duplicate — link instead.
 
 | Check | Evidence | How observed |
 |---|---|---|
-| **Daily cron** (`@daily`) | `./backups/daily/courser-<TIMESTAMP>.sql.gz` file written after `/backup.sh` | Sandbox run (§C.5) |
+| **Daily cron** (`@daily`) | `./backups/daily/courssy-<TIMESTAMP>.sql.gz` file written after `/backup.sh` | Sandbox run (§C.5) |
 | **Weekly retention** | `BACKUP_KEEP_WEEKS=4` env var present in container; rename-sweep per upstream image (verified-by-design, see C.6) | `docker exec src-pgbackups env \| grep BACKUP_KEEP` |
 | **Monthly retention** | `BACKUP_KEEP_MONTHS=3` env var present in container; rename-sweep per upstream image (verified-by-design, see C.6) | `docker exec src-pgbackups env \| grep BACKUP_KEEP` |
 | **Manual trigger** | `docker exec src-pgbackups /backup.sh` — **not** `/etc/periodic/daily/backup.sh` (image uses `go-cron` calling `/backup.sh`) | `ps aux` inside container shows `go-cron -s @daily -p 8080 -- /backup.sh` as PID 1 |
@@ -581,7 +581,7 @@ After one `/backup.sh` invocation, the on-host `./backups/` is organized:
 └── last/       # mirror of the most-recent backup (canonical restore source)
 ```
 
-Filename format: `courser-<YYYY-MM-DDTHH-MM-SS>.sql.gz` — a gzipped SQL text dump (NOT a custom-format `pg_dump`). Pipeable via `zcat | psql`.
+Filename format: `courssy-<YYYY-MM-DDTHH-MM-SS>.sql.gz` — a gzipped SQL text dump (NOT a custom-format `pg_dump`). Pipeable via `zcat | psql`.
 
 > C.3 gotcha worth flagging: a naive `ls -t ./backups/ | head -1` returns a directory name (e.g. `weekly`) and your `zcat` will fail. Use **either** `find ./backups/ -type f -name '*.sql.gz' | head -1` (works) or pin to `./backups/last/` (canonical; image-managed).
 
@@ -680,7 +680,7 @@ Backup → restore round trip **preserves the orders, products, lessons, and pro
 ### D.3 Snapshot semantic inventory
 
 - **Production:** Supabase Dashboard → Source Project → Database → Backups → Point-in-time recovery → "Restore to a new project" (avoids overwriting live DB). Choose a restore point within retention window.
-- **Sandbox:** A single custom-format `*.pitr.dump` (output of `pg_dump -U postgres -d courser -Fc`) containing the schema + T0 row snapshot. Format: `PostgreSQL custom database dump - v1.15-0`. Restored via `pg_restore --no-owner --clean --if-exists` against `courser_restored` on the ephemeral container.
+- **Sandbox:** A single custom-format `*.pitr.dump` (output of `pg_dump -U postgres -d courssy -Fc`) containing the schema + T0 row snapshot. Format: `PostgreSQL custom database dump - v1.15-0`. Restored via `pg_restore --no-owner --clean --if-exists` against `courser_restored` on the ephemeral container.
 
 ### D.4 Reproducible runbook
 
@@ -694,7 +694,7 @@ Backup → restore round trip **preserves the orders, products, lessons, and pro
 # Choose a restore point timestamp (any instant within 7d/14d/28d retention).
 
 # 2. Pick the target — "Restore to a new project" (NEVER overwrite source).
-#    Name the new project e.g. "courser-pitr-restore-2026-07-12".
+#    Name the new project e.g. "courssy-pitr-restore-2026-07-12".
 #    Confirm; Supabase creates the ephemeral project + spins the new DB up to the chosen timestamp.
 
 # 3. Once the new project is provisioned (~5–10 min), capture its connection strings:
@@ -739,17 +739,17 @@ docker network rm pitr-net 2>/dev/null || true
 mkdir -p ./pitr-snapshots
 
 docker run -d --name pitr-src-db -p 55432:5432 \
-  -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=courser \
+  -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=courssy \
   postgres:16-alpine
 sleep 5
 docker exec pitr-src-db pg_isready -U postgres
 
-DATABASE_URL='postgresql://postgres:postgres@localhost:55432/courser' \
-DIRECT_URL='postgresql://postgres:postgres@localhost:55432/courser' \
+DATABASE_URL='postgresql://postgres:postgres@localhost:55432/courssy' \
+DIRECT_URL='postgresql://postgres:postgres@localhost:55432/courssy' \
   npx prisma db push --skip-generate --accept-data-loss | tail -5
 
 # T0 seed (IDs prefixed `pitr-` to disambiguate from Appendix C's `hk-` IDs)
-docker exec -i pitr-src-db psql -U postgres -d courser <<'SQL'
+docker exec -i pitr-src-db psql -U postgres -d courssy <<'SQL'
 INSERT INTO "Product" (id, slug, "templateId", price, currency, status, "defaultLanguage", "updatedAt")
   VALUES ('pitr-prod-1', 'pitr-restore-test', 'lumio', 4900, 'EUR', 'published', 'it', NOW());
 INSERT INTO "Lesson" (id, "productId", position, "createdAt") VALUES
@@ -767,11 +767,11 @@ SELECT 'seed-T0-ok' as marker;
 SQL
 
 # ─── 2. T1 snapshot (PITR semantic timestamp) ─────────────────────
-docker exec pitr-src-db pg_dump -U postgres -d courser -Fc > ./pitr-snapshots/courser-T1.pitr.dump
-ls -lah ./pitr-snapshots/courser-T1.pitr.dump
+docker exec pitr-src-db pg_dump -U postgres -d courssy -Fc > ./pitr-snapshots/courssy-T1.pitr.dump
+ls -lah ./pitr-snapshots/courssy-T1.pitr.dump
 
 # ─── 3. Post-T1 mutations (these MUST be absent in restored target) ─
-docker exec -i pitr-src-db psql -U postgres -d courser <<'SQL'
+docker exec -i pitr-src-db psql -U postgres -d courssy <<'SQL'
 INSERT INTO "Order" (id, "userId", "productId", "paymentProvider", amount, currency, locale, status, "createdAt") VALUES
   ('pitr-ord-2', 'pitr-user-1', 'pitr-prod-1', 'lemonsqueezy', 4900, 'EUR', 'it', 'completed', NOW()),
   ('pitr-ord-3', 'pitr-user-1', 'pitr-prod-1', 'lemonsqueezy', 4900, 'USD', 'en-us', 'completed', NOW());
@@ -790,7 +790,7 @@ docker exec pitr-test-restore createdb -U postgres courser_restored
 
 # ─── 5. Restore T1 snapshot from inside the container ────────────
 # (docker cp + docker exec pg_restore avoids host-TCP auth issues with postgres:16-alpine default pg_hba.conf)
-docker cp ./pitr-snapshots/courser-T1.pitr.dump pitr-test-restore:/tmp/T1.dump.fc
+docker cp ./pitr-snapshots/courssy-T1.pitr.dump pitr-test-restore:/tmp/T1.dump.fc
 docker exec pitr-test-restore pg_restore -U postgres -d courser_restored \
   --no-owner --clean --if-exists /tmp/T1.dump.fc
 echo "pg_restore exit: $?"    # expect: 0
@@ -840,7 +840,7 @@ Source state changes across the experiment:
 
 ### D.6 Conclusion
 
-The Courser schema successfully survives a complete snapshot rewind — `Product → Lesson → LessonTranslation`, plus `User → Order` and `User → Lesson → LessonProgress` — without foreign-key cascade failures and with all referential identities preserved. This is verified-by-sandbox-simulation today; for production execution, the documented Supabase Dashboard flow (D.4.a) provides the same semantic guarantee via Supabase's continuous WAL replay (verified-by-design by the Supabase platform itself).
+The Courssy schema successfully survives a complete snapshot rewind — `Product → Lesson → LessonTranslation`, plus `User → Order` and `User → Lesson → LessonProgress` — without foreign-key cascade failures and with all referential identities preserved. This is verified-by-sandbox-simulation today; for production execution, the documented Supabase Dashboard flow (D.4.a) provides the same semantic guarantee via Supabase's continuous WAL replay (verified-by-design by the Supabase platform itself).
 
 **Known operational gap:** Production PITR-to-ephemeral execution relies on manual GUI clicks in the Supabase Dashboard, requires a Pro plan, and is not yet scripted via `supabase` CLI. **Followups (not yet tracked in `FUTURE.md`):** (a) verify the current Pro-plan retention window against https://supabase.com/docs/guides/backups and update the D.2 row if Supabase has changed since this commit; (b) create a ticket in the ops issue tracker (label: ops, priority: P1 per §3.1 fail-recovery semantics) tracking the need to script the Dashboard PITR-to-ephemeral flow — no `supabase db restore --to-new-project` subcommand exists in the Supabase CLI today (the `supabase db` group only exposes `push` / `pull` / `dump` / `remote commit` / `reset` / `diff`, not `restore`; see https://supabase.com/docs/reference/cli/supabase-db), so script via dashboard automation until CLI parity ships; (c) **WIRED in this commit:** a weekly synthetic-ping (`/api/cron/check-supabase-pitr` via cron expression `"0 9 * * 1"` in `vercel.json` `crons`, Sundays at 09:00 UTC) now periodically validates the Dashboard restore prompt proxy reachability — see [Appendix E — Synthetic-ping Run Log](#appendix-e--synthetic-ping-run-log) for the live evidence + reproduction runbook.
 
