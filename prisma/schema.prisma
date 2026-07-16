@@ -54,6 +54,9 @@ model Product {
   // query "tutti i grant attivi su questo prodotto".
   accessGrants    AccessGrant[]      @relation("ProductAccessGrants")
 
+  // Phase 4: Offer Cards created for this product (upsell target).
+  offerCards      OfferCard[]
+
   // Compound index per inbox creator queries che filtrano pubblicati.
   // Query tipica: ``WHERE creatorId = X AND status = 'published'`` —
   // il compound permette un B-tree seek diretto invece di un filter
@@ -168,6 +171,10 @@ model User {
   // permette query `WHERE userId = X AND status='active'` per il
   // resolver `resolve-product-access` (PR 3 of MCR).
   accessGrants    AccessGrant[]      @relation("UserAccessGrants")
+
+  // Phase 4: Offer Cards sent/received by this user.
+  offerCardsSent     OfferCard[] @relation("OfferCardCreator")
+  offerCardsReceived OfferCard[] @relation("OfferCardRecipient")
 
   // Centro Notifiche (Bell feature): ogni utente può ricevere
   // notifiche in-app (compaiono nella campanella in CourseTopNav) e
@@ -490,6 +497,7 @@ model Conversation {
   userTwo  User      @relation("ConversationUserTwo", fields: [userTwoId], references: [id], onDelete: Cascade)
   product  Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   messages Message[]
+  offerCards OfferCard[]
 
   @@unique([userOneId, userTwoId, productId])
   @@index([userOneId, updatedAt])
@@ -563,4 +571,39 @@ model AccessGrant {
 
   @@unique([sourceType, sourceId, productId])
   @@index([userId, productId, status])
+}
+
+// ─── Offer Cards (Phase 4 — DM upsell) ────────────────────────────────
+// Offerte commerciali inviate da un creator a un destinatario in una
+// conversation esistente. Lo stato segue la state machine canonica in
+// src/domains/messaging/offer-card/offer-card-discriminator.ts.
+// Il linkToken opaco impedisce URL commerciali liberi nei messaggi.
+model OfferCard {
+  id                    String   @id @default(cuid())
+  creatorId             String
+  recipientId           String
+  conversationId        String?
+  conversationProductId String
+  productId             String
+  status                String   @default("draft") // draft | sent | viewed | clicked | converted | expired | withdrawn
+  reason                String
+  currency              String
+  amountCents           Int
+  couponCode            String?
+  couponType            String?
+  couponValue           Int?
+  linkToken             String   @unique
+  sentAt                DateTime?
+  convertedAt           DateTime?
+  convertedOrderId      String?
+  createdAt             DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  conversation Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  creator      User         @relation("OfferCardCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  recipient    User         @relation("OfferCardRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  product      Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId, createdAt])
+  @@index([creatorId, productId])
 }
