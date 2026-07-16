@@ -4,9 +4,9 @@
 **Deciders:** Platform architecture review
 **Parent:** [ADR-0015 — Courssy naming canonical](0015-courssy-naming-decision.md)
 **Supersedes:** —
-**Implements:** V2 monolith-modular strategy §1 (depenency rule + 9-domain map + no-anticipatory-folders + 5-commit workflow)
+**Implements:** V2 monolith-modular strategy §1 (depenency rule + 10-domain map + no-anticipatory-folders + 5-commit workflow)
 
-> **Decision (1-line):** Courssy evolve come **monolith-modular** su un singolo repository, organizzato in 9 domini (Identity, Catalog, Learning, Community, Messaging, Discovery, Creator Ops, Automation, Commerce). La dipendenza obbligatoria è **`UI/Route → Application UseCase → Domain rule → Port → Adapter`**; nessun folder anticipatorio vuoto; ogni refactor stream segue il **5-commit workflow canonico**. Microservizi e marketplace aperto sono esplicitamente **out of scope** V2.
+> **Decision (1-line):** Courssy evolve come **monolith-modular** su un singolo repository, organizzato in 10 domini (see [ADR-0018 §a](0018-ten-domain-boundaries.md) for the canonical domain map). La dipendenza obbligatoria è **`UI/Route → Application UseCase → Domain rule → Port → Adapter`**; nessun folder anticipatorio vuoto; ogni refactor stream segue il **5-commit workflow canonico**. Microservizi e marketplace aperto sono esplicitamente **out of scope** V2.
 
 ---
 
@@ -138,10 +138,11 @@ Ogni refactor che tocca codice esistente segue questa sequenza atomica su main:
 ## Cross-references
 
 - **[ADR-0015 — Courssy naming canonical](0015-courssy-naming-decision.md)** — il namespace V2 è `courssy/<domain>`. ADR-0015 fissa che la stringa canonica è "Courssy".
+- **[ADR-0018 — V2 Ten-Domain Boundaries](0018-ten-domain-boundaries.md)** — canonical 10-domain map, dependency matrix, and canonical folder shape. ADR-0016 delegates the domain map and dependency rule details to ADR-0018.
 - **[ADR-0014 — Atomicity boundary for Order+AccessGrant](0014-atomicity-boundary.md)** — `Order` ↔ `AccessGrant` è canonicalmente in `src/domains/commerce/orders/` + `src/domains/identity/access-grants/` V2.
 - **[ADR-0013 — Template-amish direct-import workaround](0013-template-amish-direct-import.md)** — esempio canonico di "eccezione documenta". Ogni leak boundary futuro deve avere ADR analogo.
 - **[ADR-0011 — Course plugin decoupling](0011-course-plugin-decoupling.md)** — il pattern plugin-folder per `courses/<slug>/` è ortogonale ai domini V2: i plugin di course restano dove sono, ma i domain types che li descrivono vivono in `src/domains/catalog/`.
-- **[docs/architecture/001-db-migrations.md](../architecture/001-db-migrations.md)** — la migration policy vincola il DBA-side dei 9 domini (in particolare Commerce + Identity dove `Order` + `AccessGrant` sono il cuore del write-path).
+- **[docs/architecture/001-db-migrations.md](../architecture/001-db-migrations.md)** — la migration policy vincola il DBA-side dei 10 domini (in particolare Commerce + Identity dove `Order` + `AccessGrant` sono il cuore del write-path).
 - **[ARCHITECTURE.md](../../ARCHITECTURE.md)** — snapshot del V1.x stack. V2 refactor avviene sotto questo snapshot senza sostituirlo retroattivamente.
 
 ---
@@ -158,18 +159,18 @@ Ogni refactor che tocca codice esistente segue questa sequenza atomica su main:
 
 ## Future work
 
-1. **CI guardrail dependency rule**: implementare custom ESLint rule (basata su `eslint-plugin-import` + `dependency-cruiser`) che fallisce la build se un layer importa da uno "sbagliato" secondo la matrice di §a. Blocker per il primo refactor V1.x → V2.
+1. **CI guardrail dependency rule**: implementare custom ESLint rule (basata su `eslint-plugin-import` + `dependency-cruiser`) che fallisce la build se un layer importa da uno "sbagliato" secondo la matrice di ADR-0018 §c. Blocker per il primo refactor V1.x → V2.
 2. **Migrazione incrementale V1.x lib → V2 domains**: refactor `src/lib/payment/*`, `src/lib/messaging/*`, `src/lib/supabase/*` verso `src/domains/{commerce,messaging,identity}/` seguendo 5-commit template. ~15-20 commit in main, Ognuno con test caratterization.
 3. **`src/lib/i18n/` resta come shared infra** (non è un dominio V2 — è port-anchored locale/currency resolution). Documentare in ADR-0017 (planned).
 4. **Anti-barrel-rule enforcement**: rimuovere `index.ts` re-export sparsi (es. `src/components/index.ts`). Segue lo stesso 5-commit workflow.
-5. **Discovery feed MVP** (Fase 1) come primo feature V2: usa questo ADR + ADR-0015 per namespace + dependency rule. ADR-0018 (planned) documenterà il primo feature ship-to-prod V2.
+5. **Discovery feed MVP** (Fase 1) come primo feature V2: usa questo ADR + ADR-0015 per namespace + dependency rule. ADR-0018 already documents the 10-domain boundaries and canonical dependency rule.
 
-6. **Microservizi V3+ (marker)**: post-V2-GA revisit se MRR × X giustifica service-deploy separato; il 9-domain boundary già canonico agevola il refactor quando arriva.
+6. **Microservizi V3+ (marker)**: post-V2-GA revisit se MRR × X giustifica service-deploy separato; il 10-domain boundary già canonico agevola il refactor quando arriva.
 
 ---
 
 ## Implementation log
 
-- 2026-07-16: ADR-0016 accettato. `docs/adr/0016-courssy-monolith-modular.md` committato via questo commit. Decision 1-line "Courssy è monolith-modular con dependency rule UI→UseCase→Domain→Port→Adapter + 9-domain map + no-anticipatory-folders + 5-commit workflow" in cima.
+- 2026-07-16: ADR-0016 accettato. `docs/adr/0016-courssy-monolith-modular.md` committato via questo commit. Decision 1-line "Courssy è monolith-modular con dependency rule UI→UseCase→Domain→Port→Adapter + 10-domain map + no-anticipatory-folders + 5-commit workflow" in cima.
 - Follow-up: implementare custom ESLint dependency-cruiser rule (Future work §1) — blocca il primo refactor V1 → V2.
 - Follow-up: Migration chain (Future work §2) pianificata ma NON in questo commit. Ogni migration sarà un set di 5 commit canonici.
