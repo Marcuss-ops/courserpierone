@@ -44,12 +44,12 @@ vi.mock("@/lib/utils/rate-limit", () => ({
 
 // ─── Helpers ────────────────────────────────────────────────
 
-type FileStub = {
+interface FileStub {
   size: number;
   type: string;
   name: string;
   arrayBuffer: () => Promise<ArrayBuffer>;
-};
+}
 
 function makeFileStub(opts: {
   size?: number;

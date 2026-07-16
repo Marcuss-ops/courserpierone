@@ -95,7 +95,7 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body className="bg-white dark:bg-cream-dark-bg text-gray-900 dark:text-cream-dark-text antialiased min-h-screen flex flex-col transition-colors duration-300">
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem storageKey="courser-theme">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem storageKey="courssy-theme">
           <div className="flex-1 flex flex-col">{children}</div>
           <Footer currentLocale={locale} />
         </ThemeProvider>

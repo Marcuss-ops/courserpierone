@@ -33,8 +33,6 @@ import {
 import type {
   CheckoutSession,
   CreateCheckoutInput,
-  OrderCreatedEvent,
-  OrderRevokedEvent,
   PaymentDomainAction,
   PaymentEvent,
   PaymentProvider,

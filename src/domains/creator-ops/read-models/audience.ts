@@ -29,7 +29,6 @@ import type {
   AudienceByProduct,
   AudienceRepository,
   AudienceRecentSignup,
-  AudienceTotals,
   AudienceView,
   BuildAudienceInput,
   RawAudienceGrant,

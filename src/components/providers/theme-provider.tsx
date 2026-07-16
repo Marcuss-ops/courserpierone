@@ -10,7 +10,7 @@ import type { ComponentProps } from "react";
  *   - `attribute="class"`  : adds `class="dark"` to <html> when dark mode is on.
  *                            This is what Tailwind's `darkMode: "class"` reads.
  *   - `defaultTheme="system"` + `enableSystem` : first-paint respects OS pref.
- *   - `storageKey="courser-theme"`            : dedicated localStorage key so the
+ *   - `storageKey="courssy-theme"`            : dedicated localStorage key so the
  *                                               preference doesn't collide with
  *                                               other Next.js projects sharing
  *                                               the same domain (rare but possible).

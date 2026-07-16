@@ -59,7 +59,6 @@ function mkCtx(overrides: Partial<FeedContext> = {}): FeedContext {
 }
 
 const T_NOW = new Date("2026-07-16T12:00:00Z");
-const T_YESTERDAY = new Date("2026-07-15T12:00:00Z");
 
 function mkLesson(overrides: Partial<Extract<FeedItem, { kind: "lesson" }>> = {}): FeedItem {
   return {
@@ -161,12 +160,12 @@ describe("rankByLanguageCompat", () => {
   it("boosts items with 'lang' field matching ctx.lang (+50)", () => {
     // Fake the dynamic `lang` field on the item (current MVP variants
     // do not declare it — simulates the V2 activation path).
-    const item = { ...mkLesson(), lang: "it" } as FeedItem & { lang: string };
+    const item = { ...mkLesson(), lang: "it" };
     expect(rankByLanguageCompat.score(item as FeedItem, mkCtx({ lang: "it" }))).toBe(50);
   });
 
   it("returns 0 when 'lang' field mismatches ctx.lang", () => {
-    const item = { ...mkLesson(), lang: "en" } as FeedItem & { lang: string };
+    const item = { ...mkLesson(), lang: "en" };
     expect(rankByLanguageCompat.score(item as FeedItem, mkCtx({ lang: "it" }))).toBe(0);
   });
 
@@ -207,12 +206,12 @@ describe("rankBySameTopic", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("boosts items with topics intersecting observedTopics (+20)", () => {
-    const item = { ...mkLesson(), topics: ["marketing"] } as FeedItem & { topics: string[] };
+    const item = { ...mkLesson(), topics: ["marketing"] };
     expect(rankBySameTopic.score(item as FeedItem, mkCtx())).toBe(20);
   });
 
   it("applies cardinality-weighted boost (2 matches → 25)", () => {
-    const item = { ...mkLesson(), topics: ["marketing", "growth"] } as FeedItem & { topics: string[] };
+    const item = { ...mkLesson(), topics: ["marketing", "growth"] };
     expect(rankBySameTopic.score(item as FeedItem, mkCtx())).toBe(25);
   });
 
@@ -220,7 +219,7 @@ describe("rankBySameTopic", () => {
     // Force a 3-way intersection so the cardinality bonus caps at its
     // +10 ceiling (vs. the BASE_CTX 2-way default which only yields +25).
     const ctx = mkCtx({ observedTopics: ["marketing", "growth", "extra"] });
-    const item = { ...mkLesson(), topics: ["marketing", "growth", "extra"] } as FeedItem & { topics: string[] };
+    const item = { ...mkLesson(), topics: ["marketing", "growth", "extra"] };
     // matches=3 → 20 + min(3-1, 2)*5 = 20 + 10 = 30 (matches cap).
     expect(rankBySameTopic.score(item as FeedItem, ctx)).toBe(30);
   });
@@ -229,7 +228,7 @@ describe("rankBySameTopic", () => {
     // With BASE_CTX observedTopics=["marketing","growth"], an item
     // carrying both plus a non-overlapping "extra" tag still has only
     // 2 intersections → score lands at +25 (20 base + 1×5 bonus).
-    const item = { ...mkLesson(), topics: ["marketing", "growth", "extra"] } as FeedItem & { topics: string[] };
+    const item = { ...mkLesson(), topics: ["marketing", "growth", "extra"] };
     expect(rankBySameTopic.score(item as FeedItem, mkCtx())).toBe(25);
   });
 
@@ -314,7 +313,7 @@ describe("RANKING_POLICIES", () => {
   });
 
   it("all entries match {kind, name} contracts", () => {
-    const expected: Array<{ kind: string; name: string }> = [
+    const expected: { kind: string; name: string }[] = [
       { kind: "boost", name: "rank-by-course-progress" },
       { kind: "boost", name: "rank-by-language-compat" },
       { kind: "boost", name: "rank-by-same-creator" },

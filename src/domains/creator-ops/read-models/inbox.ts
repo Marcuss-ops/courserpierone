@@ -26,7 +26,6 @@
 
 import type {
   CreatorInboxResult,
-  CreatorInboxUser,
   GetCreatorInboxInput,
   InboxRepository,
   RawInboxConversation,

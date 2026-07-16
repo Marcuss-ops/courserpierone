@@ -80,10 +80,10 @@ function mkConversation(
 
 interface StubState {
   fetchedProductsArgs?: { userId: string; role: string };
-  fetchedConvArgs?: { userId: string; productIds: ReadonlyArray<string> };
+  fetchedConvArgs?: { userId: string; productIds: readonly string[] };
   fetchedUnreadArgs?: {
     userId: string;
-    conversationIds: ReadonlyArray<string>;
+    conversationIds: readonly string[];
   };
 }
 
@@ -166,7 +166,7 @@ describe("getCreatorInbox — happy path (creator scope)", () => {
 
     // Preview shape preserved
     expect(result.previews).toHaveLength(1);
-    const preview = result.previews[0]!;
+    const preview = result.previews[0];
     expect(preview.id).toBe("conv_1");
     expect(preview.productId).toBe("prod_abc");
     expect(preview.productLabel).toBe("test-course");
@@ -236,8 +236,8 @@ describe("getCreatorInbox — lastMessage null cases", () => {
       { repo },
     );
     expect(result.previews).toHaveLength(1);
-    expect(result.previews[0]!.lastMessage).toBeNull();
-    expect(result.previews[0]!.unreadCount).toBe(0);
+    expect(result.previews[0].lastMessage).toBeNull();
+    expect(result.previews[0].unreadCount).toBe(0);
   });
 });
 
@@ -263,7 +263,7 @@ describe("getCreatorInbox — content truncation", () => {
       { userId: CREATOR_ID, role: "creator" },
       { repo },
     );
-    const content = result.previews[0]!.lastMessage?.content ?? "";
+    const content = result.previews[0].lastMessage?.content ?? "";
     expect(content.length).toBe(INBOX_PREVIEW_MAX + 1); // 80 + ellipsis
     expect(content).toBe("a".repeat(INBOX_PREVIEW_MAX) + "…");
   });

@@ -50,7 +50,7 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
   // deploy) keep their video resume progress. After 2026-08-15 the dual-write
   // can be dropped and storageKey becomes the single source of truth.
   const storageKey = `courssy-progress-${productSlug}-${videoUrl}`;
-  const legacyStorageKey = `courser-progress-${productSlug}-${videoUrl}`;
+  const legacyStorageKey = `courssy-progress-${productSlug}-${videoUrl}`;
 
   useEffect(() => {
     setIsReady(false); // eslint-disable-line react-hooks/set-state-in-effect -- TODO: refactor (FASE 1.10)
@@ -110,7 +110,7 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
                 ytPlayer.setVolume(75);
                 // Read with new-key priority, fall back to legacy if the
                 // bundle was opened from a pre-rename version that wrote
-                // to "courser-progress-*". If we find it on legacy, write
+                // to "courssy-progress-*". If we find it on legacy, write
                 // it forward to the new key so the next session uses the
                 // new key and the dual-key window converges.
                 const savedTime = localStorage.getItem(storageKey)
@@ -246,7 +246,7 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
         iframeRef.current.src = videoUrl;
       }
     }
-  }, [videoUrl, storageKey]);
+  }, [videoUrl, storageKey, legacyStorageKey]);
 
   const resetToStart = () => {
     if (playerRef.current) {

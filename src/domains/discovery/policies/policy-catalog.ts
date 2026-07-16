@@ -60,7 +60,7 @@ export type PolicyCatalogEntry = z.infer<typeof policyCatalogEntrySchema>;
  * accumulates boost from each policy.score(). The hint here is for
  * docs + dashboards (how much does this policy typically boost?).
  */
-export const POLICY_CATALOG: ReadonlyArray<PolicyCatalogEntry> = [
+export const POLICY_CATALOG: readonly PolicyCatalogEntry[] = [
   {
     name: "rank-by-course-progress",
     kind: "boost",
@@ -136,6 +136,6 @@ export function getCatalogEntry(name: string): PolicyCatalogEntry | undefined {
 /** Lookup by kind: returns all entries of the given kind. */
 export function getCatalogEntriesByKind(
   kind: PolicyKind,
-): ReadonlyArray<PolicyCatalogEntry> {
+): readonly PolicyCatalogEntry[] {
   return POLICY_CATALOG.filter((entry) => entry.kind === kind);
 }

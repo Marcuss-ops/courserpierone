@@ -44,7 +44,7 @@ function mkStubRepo(state: StubState): ContentRepository {
     ): Promise<RawContentItem[]> {
       return state.scheduled
         .filter((s) => productIds.includes(s.productId))
-        .filter((s) => s.scheduledAt !== null && s.scheduledAt!.getTime() >= windowStart.getTime())
+        .filter((s) => s.scheduledAt !== null && s.scheduledAt.getTime() >= windowStart.getTime())
         .slice(0, take);
     },
     async fetchRecent(productIds: readonly string[], take: number): Promise<RawContentItem[]> {
@@ -59,7 +59,7 @@ const SMALL_PRODUCT: MinimalProduct = { id: "p1", slug: "course-1" };
 
 const RAW_DRAFT: RawContentItem = {
   id: "draft-1",
-  kind: "lesson" as RawContentItem["kind"],
+  kind: "lesson",
   status: "draft",
   title: "Lesson draft",
   productId: "p1",
@@ -71,7 +71,7 @@ const RAW_DRAFT: RawContentItem = {
 
 const RAW_SCHEDULED: RawContentItem = {
   id: "sc-1",
-  kind: "post" as RawContentItem["kind"],
+  kind: "post",
   status: "scheduled",
   title: "Roadmap post",
   productId: "p1",
@@ -83,7 +83,7 @@ const RAW_SCHEDULED: RawContentItem = {
 
 const RAW_RECENT: RawContentItem = {
   id: "pub-1",
-  kind: "lesson" as RawContentItem["kind"],
+  kind: "lesson",
   status: "published",
   title: "Lesson 1",
   productId: "p1",

@@ -32,13 +32,11 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   buildAudience,
-  DEFAULT_INACTIVE_DAYS,
   DEFAULT_RECENT_SIGNUPS_LIMIT,
 } from "./audience";
 import { prismaAudienceRepository } from "./prisma-audience-repository";
 import type { BuildAudienceDeps } from "./audience";
 import type {
-  AccessGrantSourceType,
   AudienceRepository,
   RawAudienceGrant,
   RawAudienceRecentGrant,
@@ -56,7 +54,7 @@ const T_31_DAYS_AGO = new Date("2026-06-15T12:00:00.000Z");
 function mkGrant(overrides: Partial<RawAudienceGrant>): RawAudienceGrant {
   return {
     id: "grant_default",
-    sourceType: "order" as AccessGrantSourceType,
+    sourceType: "order",
     productId: P_A,
     productSlug: "alpha",
     productTitle: "Alpha Course",
@@ -73,7 +71,7 @@ function mkRecentGrant(
 ): RawAudienceRecentGrant {
   return {
     id: "grant_recent_default",
-    sourceType: "order" as AccessGrantSourceType,
+    sourceType: "order",
     productId: P_A,
     productSlug: "alpha",
     grantedAt: T_NOW,
@@ -85,14 +83,14 @@ function mkRecentGrant(
 }
 
 interface StubState {
-  fetchedProducts?: ReadonlyArray<{ id: string; slug: string; defaultLanguage: string }>;
+  fetchedProducts?: readonly { id: string; slug: string; defaultLanguage: string }[];
   fetchedProductsForCreator?: string;
-  fetchedGrantsArgs?: ReadonlyArray<string>;
-  fetchedRecentArgs?: { productIds: ReadonlyArray<string>; take: number };
+  fetchedGrantsArgs?: readonly string[];
+  fetchedRecentArgs?: { productIds: readonly string[]; take: number };
 }
 
 function mkStubRepo(opts: {
-  products?: Array<{ id: string; slug: string; defaultLanguage: string }>;
+  products?: { id: string; slug: string; defaultLanguage: string }[];
   grants?: RawAudienceGrant[];
   recent?: RawAudienceRecentGrant[];
 }): { repo: AudienceRepository; state: StubState } {

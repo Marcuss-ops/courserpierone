@@ -24,8 +24,8 @@
  * (strict-interface) and `mocks` (MockedFunction handles) \u2014 canonical
  * vitest idiom for interface-coupled SUTs.
  *
- * Determinism: fixed date literals (`T_NOW`, `T_5_DAYS_AGO`,
- * `T_8_DAYS_AGO`) throughout \u2014 no `new Date()` in test setup.
+ * Determinism: fixed date literals (`T_NOW`, `T_5_DAYS_AGO`)
+ * throughout \u2014 no `new Date()` in test setup.
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
@@ -49,7 +49,6 @@ import {
 
 const T_NOW = new Date("2026-07-16T12:00:00Z");
 const T_5_DAYS_AGO = new Date("2026-07-11T12:00:00Z");
-const T_8_DAYS_AGO = new Date("2026-07-08T12:00:00Z");
 
 // Test fixtures use TYPE-ONLY casts (not runtime validators) because
 // the literal strings ("creator_1" etc.) don't match the CUID pattern

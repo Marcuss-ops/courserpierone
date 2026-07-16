@@ -1,4 +1,4 @@
-// Cache name bumped from "courser-v2" → "courssy-v3" as part of the
+// Cache name bumped from "courssy-v2" → "courssy-v3" as part of the
 // Courssy brand canonical migration (ADR-0015 §Migration plan commit 4).
 // The version digit bump (v2 → v3) ensures the activate handler below
 // `caches.keys().then(keys => keys.filter(k => k !== CACHE_NAME).map(caches.delete))`

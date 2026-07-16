@@ -59,7 +59,6 @@ import {
   type BuildContinueWatchingResult,
   type ContinueWatchingItem,
   type ContinueWatchingRepository,
-  type RawContinueWatchingProgress,
 } from "./continue-watching-types";
 
 // Re-export constants and types so callers can keep importing from
@@ -189,7 +188,7 @@ export async function buildContinueWatchingHistory(
   // the visible (deduplicated) page — not the last Prisma row.
   const nextCursor =
     items.length === limit && items.length > 0
-      ? items[items.length - 1]!.lastWatchedAt.toISOString()
+      ? items[items.length - 1].lastWatchedAt.toISOString()
       : null;
 
   return { items, nextCursor };

@@ -100,9 +100,9 @@ export interface AgentManifest<I = unknown, O = unknown> {
   /** Human-readable label for the UI. */
   displayName: string;
   /** What the agent does — one or more actions. */
-  actions: ReadonlyArray<AgentAction>;
+  actions: readonly AgentAction[];
   /** Supported output locales. Empty array = locale-agnostic. */
-  langs: ReadonlyArray<string>;
+  langs: readonly string[];
   /** Approval requirement before publishing. */
   needsApproval: ApprovalRequirement;
   /** Which provider executes the agent. */
@@ -149,7 +149,7 @@ export function registerAgent<I, O>(
         `Use _resetAgentRegistryForTests() in test setup if you intend to re-register.`,
     );
   }
-  _registry.set(manifest.id, manifest as unknown as AgentManifest);
+  _registry.set(manifest.id, manifest);
 }
 
 /** Lookup an agent by id. Returns undefined if not registered. */
@@ -163,12 +163,12 @@ export function isAgentRegistered(id: AgentId): boolean {
 }
 
 /** Snapshot of all registered agent ids (snapshot, not live view). */
-export function listAgentIds(): ReadonlyArray<AgentId> {
+export function listAgentIds(): readonly AgentId[] {
   return Array.from(_registry.keys());
 }
 
 /** Snapshot of all registered manifests (snapshot, not live view). */
-export function listAgents(): ReadonlyArray<AgentManifest> {
+export function listAgents(): readonly AgentManifest[] {
   return Array.from(_registry.values());
 }
 

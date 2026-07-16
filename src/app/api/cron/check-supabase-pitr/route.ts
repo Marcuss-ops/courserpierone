@@ -172,7 +172,7 @@ async function probeDocsPage(signal: AbortSignal): Promise<ProbeResult> {
       signal,
       headers: {
         "User-Agent":
-          "courser-cron/1.0 (Supabase PITR reachability ping; +https://www.courssy.com)",
+          "courssy-cron/1.0 (Supabase PITR reachability ping; +https://www.courssy.com)",
       },
     });
     const latencyMs = Date.now() - start;
@@ -217,7 +217,7 @@ async function probeStatuspage(signal: AbortSignal): Promise<ProbeResult> {
       {
         method: "GET",
         signal,
-        headers: { "User-Agent": "courser-cron/1.0" },
+        headers: { "User-Agent": "courssy-cron/1.0" },
       }
     );
     const latencyMs = Date.now() - start;

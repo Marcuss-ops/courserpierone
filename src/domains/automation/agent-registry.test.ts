@@ -188,8 +188,8 @@ describe("registerAgent — generic type preservation", () => {
       needsApproval: "always",
       provider: "openai",
       retryPolicy: { maxAttempts: 3, defaultDelayMs: 5_000 },
-      inputSchema: z.object({ topic: z.string() }) as unknown as AgentManifest<MyInput, MyOutput>["inputSchema"],
-      outputSchema: z.object({ body: z.string() }) as unknown as AgentManifest<MyInput, MyOutput>["outputSchema"],
+      inputSchema: z.object({ topic: z.string() }),
+      outputSchema: z.object({ body: z.string() }),
     };
     registerAgent(manifest);
     expect(isAgentRegistered(asAgentId("typed-agent"))).toBe(true);

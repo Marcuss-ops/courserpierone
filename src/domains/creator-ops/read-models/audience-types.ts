@@ -167,11 +167,11 @@ export interface RawAudienceRecentGrant {
  */
 export interface AudienceRepository {
   fetchCreatorProducts(creatorId: string): Promise<
-    Array<{
+    {
       id: string;
       slug: string;
       defaultLanguage: string;
-    }>
+    }[]
   >;
   fetchActiveGrantsWithUsers(
     productIds: readonly string[],

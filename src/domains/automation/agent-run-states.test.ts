@@ -25,7 +25,7 @@ import {
   type AgentRunState,
 } from "./agent-run-states";
 
-const ALL_STATES: ReadonlyArray<AgentRunState> = [
+const ALL_STATES: readonly AgentRunState[] = [
   "queued",
   "running",
   "awaiting_approval",

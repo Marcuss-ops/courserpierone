@@ -58,7 +58,7 @@ export type FeedSourceKind =
   | "premium_course"
   | "creator_update";
 
-export const FEED_SOURCE_KINDS: ReadonlyArray<FeedSourceKind> = [
+export const FEED_SOURCE_KINDS: readonly FeedSourceKind[] = [
   "continue_learning",
   "lesson",
   "community_post",
@@ -98,7 +98,7 @@ export interface FeedSourceDescriptor {
  * Different sources may consume different fields (e.g., follow-list
  * for community_post; ownedProductIds for continue_learning).
  */
-export type SourceContext = {
+export interface SourceContext {
   userId: string;
   ownedProductIds: string[];
   followedCreatorIds: string[];
@@ -108,7 +108,7 @@ export type SourceContext = {
   cursor: string | null;
   /** Per-source max items (caller-controlled budget). */
   limit: number;
-};
+}
 
 // ─── Registry singleton ───────────────────────────────────────────
 
@@ -140,11 +140,11 @@ export function isFeedSourceRegistered(id: FeedSourceId): boolean {
   return _registry.has(id);
 }
 
-export function listFeedSourceIds(): ReadonlyArray<FeedSourceId> {
+export function listFeedSourceIds(): readonly FeedSourceId[] {
   return Array.from(_registry.keys());
 }
 
-export function listFeedSources(): ReadonlyArray<FeedSourceDescriptor> {
+export function listFeedSources(): readonly FeedSourceDescriptor[] {
   return Array.from(_registry.values());
 }
 

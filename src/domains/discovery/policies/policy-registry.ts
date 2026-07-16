@@ -56,7 +56,7 @@ import { freeBeforeUpsell } from "./free-before-upsell";
 // overloads unify tuple value types with the FIRST overload match
 // (BoostPolicy here), which rejects the FilterPolicy/SortPolicy variants.
 // Individual `.set()` calls are monomorphic per call — TS stays happy.
-export const RANKING_POLICIES: Map<PolicyName, RankingPolicy> = new Map();
+export const RANKING_POLICIES = new Map<PolicyName, RankingPolicy>();
 
 // Order: 4 boosts (accumulate) → 1 filter (early drop) → 1 sort (tie-break).
 RANKING_POLICIES.set(rankByCourseProgress.name, rankByCourseProgress);

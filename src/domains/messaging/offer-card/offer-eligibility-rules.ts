@@ -30,14 +30,12 @@
 import type {
   OfferCardDraft,
   ConversationAnchor,
-  ProductId,
   CreatorId,
-  RecipientId,
 } from "./offer-card-types";
 import type {
   EligibilityDenialReason,
   EligibilityPolicyDeps,
-} from "./offer-eligibility-policy";
+} from "./offer-eligibility-types";
 
 // Per-rule guard return shape (inlined here to avoid circular type import
 // from policy.ts; rules.ts is leaf, policy.ts imports them).
@@ -165,7 +163,7 @@ export async function checkOptIn(
   // 'allow DM engagement' toggle until V2 schema migration introduces
   // a granular `inappOfferCard` column.
   const pref = await deps.findPreference(input.recipientId);
-  if (!pref || !pref.inappChatReply) {
+  if (!pref?.inappChatReply) {
     return { ok: false, reason: "ELIGIBILITY_OPT_OUT" };
   }
   return { ok: true };

@@ -139,7 +139,7 @@ export function deriveIdempotencyKey(input: {
  */
 function stableStringify(
   value: unknown,
-  seen: WeakSet<object> = new WeakSet(),
+  seen = new WeakSet<object>(),
 ): string {
   if (value === null) return "null";
   if (typeof value === "undefined") return "null";

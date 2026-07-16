@@ -60,8 +60,8 @@ interface InboxProviderProps {
 // sync continues to work for users with mixed-version tabs (rolling deploy).
 // Publish on both too so the old tab can still hear the new one. After
 // the migration window closes (target: 2026-08-15), drop the legacy
-// "courser-inbox" entries and tighten the array to a single name.
-const BROADCAST_CHANNEL_NAMES = ["courser-inbox", "courssy-inbox"] as const;
+// "courssy-inbox" entries and tighten the array to a single name.
+const BROADCAST_CHANNEL_NAMES = ["courssy-inbox", "courssy-inbox"] as const;
 
 export function InboxProvider({
   initialTotalUnread,
@@ -76,7 +76,7 @@ export function InboxProvider({
 
   const channelsRef = useRef<BroadcastChannel[]>([]);
 // Dedup tokens for dual-publish (Step 3 of ADR-0015 rename): when the same
-// tab publishes on BOTH 'courser-inbox' and 'courssy-inbox' for cross-tab
+// tab publishes on BOTH 'courssy-inbox' and 'courssy-inbox' for cross-tab
 // sync, sibling tabs receive two messages with identical logical meaning.
 // Without dedupe, setTotalUnread would decrement twice for a single
 // markRead event (e.g., total=5 would go 5→4→3 instead of 5→4). Each
@@ -102,7 +102,7 @@ const seenTokensRef = useRef<Set<string>>(new Set());
     if (typeof BroadcastChannel !== "undefined") {
       // Dual-publish during the 30-day migration window (ADR-0015
       // migration plan, target close: 2026-08-15): post on BOTH
-      // old ("courser-inbox") and new ("courssy-inbox") so that legacy
+      // old ("courssy-inbox") and new ("courssy-inbox") so that legacy
       // tabs (still on the pre-rename build) continue to hear the
       // "messagesRead" event and drop their local unread counter. Use a
       // single shared `token` per logical markRead action; siblings
@@ -153,7 +153,7 @@ const seenTokensRef = useRef<Set<string>>(new Set());
               conversationId?: string;
               token?: string;
             };
-            if (data && data.type === "messagesRead" && data.conversationId) {
+            if (data?.type === "messagesRead" && data.conversationId) {
               // Dedupe identical logical events arriving on both
               // channels (see seenTokensRef declaration above). Cap the
               // Set at 100, sliding-trim to 50 stale entries to keep

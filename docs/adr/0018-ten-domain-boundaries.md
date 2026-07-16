@@ -144,10 +144,54 @@ Il **route** non interroga mai Prisma direttamente. Il **domain rule** non impor
 
 ---
 
+## Quick reference
+
+### Layer dependency matrix
+
+| From ↓ → | UI/Route | UseCase | Domain rule | Port | Adapter |
+|---|---|---|---|---|---|
+| **UI/Route** | ✅ | ✅ | ❌ | ❌ | ❌ |
+| **UseCase** | ❌ | ✅ | ✅ | ✅ | ❌ |
+| **Domain rule** | ❌ | ❌ | ✅ | ❌ | ❌ |
+| **Port** | ❌ | ❌ | ❌ | ✅ | ❌ |
+| **Adapter** | ❌ | ❌ | ✅ (reads Domain types) | ❌ | ✅ |
+
+*Legend:* ✅ allowed import; ❌ forbidden import; eccezioni documentate solo tramite ADR analogo a [ADR-0013](0013-template-amish-direct-import.md).
+
+### Canonical folder shape (per domain)
+
+```text
+src/domains/<domain>/
+  rules/<rule>.ts                 # Domain rule: pure logic, no I/O
+  ports/<port>.port.ts            # Port: interface TS, no implementation
+  adapters/<impl>.ts              # Adapter: Prisma, OpenAI, LS, Email, Redis
+  usecases/<usecase>.usecase.ts   # Application UseCase: orchestration
+src/app/<route>/page.tsx          # UI / Route: thin, calls one UseCase
+```
+
+### Worked example — Catalog domain
+
+```text
+src/domains/catalog/
+  rules/filter-by-locale.ts
+  ports/feed-repository.port.ts
+  adapters/prisma-feed-repository.ts
+  usecases/get-catalog-for-user.usecase.ts
+src/app/catalog/page.tsx
+```
+
+Flow:
+1. `src/app/catalog/page.tsx` calls `getCatalogForUserUseCase`.
+2. `getCatalogForUserUseCase` calls `filterByLocaleRule` (Catalog rule) and `feedRepository.listFeedItems()` (Catalog port, implemented by Prisma adapter).
+3. No layer imports upward or skips a layer.
+
 ## Verification
 
 - **Scope**: this ADR is docs-only; no TypeScript surface under `src/` is touched.
-- `npx tsc --noEmit` & `npx vitest run` are intentionally **deferred** to the next non-docs atomic commit (per the Phase 0 quality gate rule "no green gate, no push"). The docs-only nature of this commit does not require a green TypeScript or test gate at push time — that gate is the responsibility of the next src/-touching commit.
+- `npx tsc --noEmit` — must pass (any pre-existing drift is tracked separately).
+- `npx vitest run` — must pass.
+- `npm run lint` — must pass.
+- `npm run check:naming` — must pass.
 - `git grep -n "src/domains/creator-ops/.*analytics" -- src/` — da verificare prima del primo commit V2 che tocca Analytics (legacy uses under creator-ops/ possono ancora esistere; questo ADR non li rimuove).
 - `wc -l docs/adr/0018-ten-domain-boundaries.md` — full-ADR shape (~290 LOC).
 
@@ -167,7 +211,6 @@ Il **route** non interroga mai Prisma direttamente. Il **domain rule** non impor
 
 - **2026-07-16 (commit `90c843e`)**: ADR-0018 accettato. `docs/adr/0018-ten-domain-boundaries.md` + `docs/adr/0016-courssy-monolith-modular.md` committati via `docs(adr): 0016+0018 bidirezionale cross-link + honest verification scope`. Cross-link bidirezionale marcato in entrambi gli ADRs: ADR-0016 §b SUPERSEDED NOTICE + ADR-0018 §a nota esplicita.
 - **2026-07-16 (fix-up commit, TBD-SHA)**: post-review cleanup di `90c843e`. Risolve (a) grammatica italiana §d point 1, (b) §Verification framing per evitare claim non-verificati, (c) ADR-0016 §b residuo forward-reference ("ADR-0017+" → ADR-0018 §a). Messaggio: `docs(adr): 0018 grammar + verification-scope + 0016 anchor`.
-- **Pre-existing drift**: questo commit è docs-only e non include source modifications. Una `tsc --noEmit` eseguita su questo commit restituisce un fallimento pre-esistente in `src/domains/discovery/policies/policy-catalog.ts` (committed nel registry sprint, ~8120b82). Il drift è tracciato come follow-up separato; **non blocca** ADR-0018 perché ADR-0018 non modifica sorgenti.
 - **Pre-existing drift**: questo commit è docs-only e non include source modifications. Una `tsc --noEmit` eseguita su questo commit restituisce un fallimento pre-esistente in `src/domains/discovery/policies/policy-catalog.ts` (committed nel registry sprint, ~8120b82). Il drift è tracciato come follow-up separato; **non blocca** ADR-0018 perché ADR-0018 non modifica sorgenti.
 - **Follow-up**: implementare custom ESLint dependency-cruiser rule (Future work §1).
 - **Follow-up**: estrarre shared-kernel types (Future work §2) prima delle prime feature V2 cross-domain.

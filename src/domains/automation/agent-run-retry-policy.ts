@@ -89,7 +89,7 @@ const REASON_DEFAULT_DELAY_MS: Readonly<Record<AgentErrorReason, number>> = {
 export function classifyAgentError(error: unknown): AgentErrorClassification {
   // Path 1: structured `code` field
   if (typeof error === "object" && error !== null && "code" in error) {
-    const code = (error as { code: unknown }).code;
+    const code = (error).code;
     if (typeof code === "string") {
       const reason = mapCodeToReason(code);
       if (reason !== null) {

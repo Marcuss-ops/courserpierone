@@ -79,12 +79,13 @@ export function VideoPaywall({
     // Free courses: guests have full access without any API check.
     // Short-circuit BEFORE the isAuthenticated guard so the video renders.
     if (isFreeCourse) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- initial access bootstrap for free courses
       setHasAccess(true);
       setChecking(false);
       return;
     }
     if (!isAuthenticated) {
-      setHasAccess(false); // eslint-disable-line react-hooks/set-state-in-effect -- TODO: refactor (FASE 1.10)
+      setHasAccess(false);  
       setChecking(false);
       return;
     }

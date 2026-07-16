@@ -29,13 +29,6 @@
  * Determinism: pure of (input, deps). `now()` injection for tests.
  */
 
-import type {
-  OfferCardDraft,
-  ConversationAnchor,
-  ProductId,
-  CreatorId,
-  RecipientId,
-} from "./offer-card-types";
 import {
   checkConversation,
   checkEngagement,
@@ -45,6 +38,15 @@ import {
   checkFrequency,
   checkOptIn,
 } from "./offer-eligibility-rules";
+import type {
+  EligibilityDenialReason,
+  EligibilityResult,
+  EligibilityPolicyDeps,
+  EvaluateOfferEligibilityInput,
+} from "./offer-eligibility-types";
+
+// Re-export shared types so consumers can still import from the policy entry point.
+export type { EligibilityDenialReason, EligibilityResult, EligibilityPolicyDeps, EvaluateOfferEligibilityInput };
 
 // \u2500\u2500\u2500\u2500 Public constants (Limits) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
@@ -52,22 +54,6 @@ export const DEFAULT_FREQUENCY_WINDOW_DAYS = 7;
 export const MAX_OFFERS_PER_WINDOW = 1;
 
 // \u2500\u2500\u2500\u2500 Public types \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-
-/**
- * 7 typed denial reasons, one per mandatory rule.
- */
-export type EligibilityDenialReason =
-  | "ELIGIBILITY_NO_CONVERSATION"
-  | "ELIGIBILITY_NO_ENGAGEMENT"
-  | "ELIGIBILITY_OFFER_NOT_FROM_CREATOR"
-  | "ELIGIBILITY_PRODUCT_NOT_PUBLISHED"
-  | "ELIGIBILITY_USER_ALREADY_OWNS"
-  | "ELIGIBILITY_FREQUENCY_EXCEEDED"
-  | "ELIGIBILITY_OPT_OUT";
-
-export type EligibilityResult =
-  | { eligible: true; conversationAnchor: ConversationAnchor }
-  | { eligible: false; reason: EligibilityDenialReason };
 
 // \u2500\u2500\u2500\u2500 Port interface (Prisma adapter implements against DB) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
@@ -79,43 +65,7 @@ export type EligibilityResult =
  *   - findActiveGrant MUST filter server-side on status='active'.
  *   - findSentOfferCardsInWindow MUST filter server-side by date.
  */
-export interface EligibilityPolicyDeps {
-  findConversation(input: {
-    userIdA: string;
-    userIdB: string;
-    productId: ProductId;
-  }): Promise<{ id: string; userOneId: string; userTwoId: string; productId: string } | null>;
-
-  findActiveGrant(input: {
-    userId: string;
-    productId: ProductId;
-  }): Promise<{ id: string; sourceType: string } | null>;
-
-  findProduct(productId: ProductId): Promise<{
-    id: string;
-    creatorId: CreatorId;
-    status: string;
-  } | null>;
-
-  findPreference(userId: string): Promise<{
-    inappChatReply: boolean;
-    emailNewLesson: boolean;
-  } | null>;
-
-  findSentOfferCardsInWindow(input: {
-    recipientId: RecipientId;
-    windowDays: number;
-    now: Date;
-  }): Promise<readonly Date[]>;
-}
-
 // \u2500\u2500\u2500\u2500 Public API: evaluateOfferEligibility (composer) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-
-export interface EvaluateOfferEligibilityInput {
-  draft: OfferCardDraft;
-  /** Injectable for deterministic tests. Defaults to `new Date()`. */
-  now?: Date;
-}
 
 /**
  * Run the 7-rule eligibility check. FIRST DENIAL WINS (short-circuit

@@ -25,56 +25,13 @@ V2 vuole invertire la rotta: ogni dominio di business è owner di una porzione d
 
 ## Decision
 
-### (a) Dependency rule (unica direzione ammessa)
+### (a) Dependency rule
 
-```
-UI / Route (Next.js page, RSC, route handler)
-              ↓ può importare
-Application UseCase (orchestrazione: validate input, authn, side effects)
-              ↓ può importare
-Domain rule (pure logic, no I/O, no framework imports)
-              ↓ può importare
-Port (interfaccia TS, contratto puro, no implementation)
-              ↓ implementato da
-Adapter (Prisma, OpenAI, Lemon Squeezy, email, iframe, Redis)
-```
+See [ADR-0018 — V2 Ten-Domain Boundaries](0018-ten-domain-boundaries.md) for the canonical 5-layer dependency rule (`UI → UseCase → Domain rule → Port → Adapter`) and the import matrix.
 
-Regole di import (in CI via `eslint-plugin-import` + custom rule):
+### (b) Domain map
 
-| From → To | Allowed | Forbidden |
-|---|---|---|
-| UI/Route → Application UseCase | ✅ | |
-| UI/Route → Domain rule | ❌ (UI chiama UseCase, non Domain direttamente) | unless UI = dedicated "domain-rule-runner" (es. admin tools) |
-| UI/Route → Port | ❌ (noleak in UI) | UI chiama UseCase |
-| UI/Route → Adapter | ❌ (mai) | UI chiama UseCase che chiama Port |
-| Application UseCase → Domain rule | ✅ | |
-| Application UseCase → Port | ✅ | |
-| Application UseCase → Adapter | ❌ (controverso; eccezione solo se Adapter è triviale e il Port aggiunge rumore) | Adapter alignment via Port in 99% casi |
-| Domain rule → UseCase / Port / Adapter | ❌ | puro logic |
-| Port → Implementation | ❌ | definition only |
-| Adapter → Domain rule | ✅ (legge + scrive via Domain types) | |
-| Adapter → Application UseCase | ❌ | Adapter è invocabile da UseCase, non il contrario |
-| Adapter → UI/Route | ❌ | no upward leaks |
-
-**Eccezioni documentate:** vedi [ADR-0013 — Template-amish direct-import workaround](0013-template-amish-direct-import.md) come esempio di leak intenzionale boundary. Ogni eccezione deve avere un ADR o una nota in code comment cross-ref.
-
-### (b) 9-domain map (V2 namespaces)
-
-| # | Domain | Responsibility (1-line) | V2 namespace (root) |
-|---|---|---|---|
-| 1 | **Identity & Access** | Auth, users, ruoli, permessi, `AccessGrant` come single source of truth per "user X ha accesso a product Y" | `src/domains/identity/` |
-| 2 | **Catalog** | Products, courses, lessons, translations, asset delivery (PDF/audio/video) | `src/domains/catalog/` |
-| 3 | **Learning** | Progress, history, completions, notes, watchlist | `src/domains/learning/` |
-| 4 | **Community** | Posts, resources, future comments (V2 minimal: just posts + resources) | `src/domains/community/` |
-| 5 | **Messaging** | Conversations user↔user, messages, notifications, **offer cards** (V2 MVP) | `src/domains/messaging/` |
-| 6 | **Discovery** | Feed rule-based (V2 MVP), recommendations, "continue watching" | `src/domains/discovery/` |
-| 7 | **Creator Operations** | Creator dashboard, audience, content mgmt, inbox, analytics (read-model) | `src/domains/creator-ops/` |
-| 8 | **Automation** | Agents (draft-first, V2 MVP), jobs, approvals, publishing, retry policy canonica | `src/domains/automation/` |
-| 9 | **Commerce** | Prices, checkout (`Lemon Squeezy` only), orders, coupons, access grant admission | `src/domains/commerce/` |
-
-> **Nota:** "Analytics" menzionato in alcune fonti esterne è consolidato come **read-model** dentro `creator-ops/` (non un dominio separato V2). Se in futuro diventa un dominio separato (cross-creator analytics), vedi la decisione canonica in [ADR-0018 — V2 Ten-Domain Boundaries](0018-ten-domain-boundaries.md) §a (Analytics è ora dominio V2 standalone #10).
-
-> **SUPERSEDED NOTICE (2026-07-16, ADR-0018):** la nota precedente è **invalidata**. Analytics è ora un **dominio V2 standalone** (`#10` nella 10-domain map). Vedi [ADR-0018 — V2 Ten-Domain Boundaries §a](0018-ten-domain-boundaries.md) per la tabella canonica aggiornata.
+See [ADR-0018 — V2 Ten-Domain Boundaries §a](0018-ten-domain-boundaries.md) for the canonical 10-domain map. ADR-0016 focuses on the modular-monolith shape, no-anticipatory-folders rule, and 5-commit workflow.
 
 ### Domain folder minimal shape (YAGNI)
 

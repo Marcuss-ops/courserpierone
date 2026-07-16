@@ -48,7 +48,7 @@ export default function AdminShell({
         <div className="p-8 flex items-center justify-between">
           <Link href="/admin" className="flex items-center gap-3" onClick={() => setIsMobileMenuOpen(false)}>
             <div className="w-10 h-10 premium-glass rounded-xl flex items-center justify-center font-bold text-xl border border-white/10 text-white shadow-lg">C</div>
-            <span className="text-2xl font-bold tracking-tight text-white text-contrast">Courser</span>
+            <span className="text-2xl font-bold tracking-tight text-white text-contrast">Courssy</span>
           </Link>
           <button className="lg:hidden p-2 text-zinc-400" onClick={() => setIsMobileMenuOpen(false)}>
             <X className="w-6 h-6" />
@@ -176,7 +176,7 @@ export default function AdminShell({
         <header className="lg:hidden flex items-center justify-between px-6 py-4 border-b border-white/5 bg-dashboard-bg/80 backdrop-blur-md">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 premium-glass rounded-lg flex items-center justify-center font-bold text-sm border border-white/10 text-white">C</div>
-            <span className="text-lg font-bold tracking-tight text-white">Courser</span>
+            <span className="text-lg font-bold tracking-tight text-white">Courssy</span>
           </div>
           <button className="p-2 premium-glass rounded-xl text-white" onClick={() => setIsMobileMenuOpen(true)}>
             <Menu className="w-6 h-6" />

@@ -61,7 +61,6 @@
  */
 
 import {
-  WATCHLIST_SOURCE_TYPE,
   buildWatchlistSourceId,
   type AddToWatchlistInput,
   type AddToWatchlistResult,
