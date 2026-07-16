@@ -14,6 +14,7 @@
     "check:dead-exports": "npx ts-prune",
     "check:migration": "bash scripts/ci/migration-test.sh",
     "check:e2e:sse": "playwright test --grep @sse --project=chromium --reporter=line",
+    "check:hotspots": "npx tsx scripts/quality/hotspot-score.ts",
     "check:full": "npm run typecheck && npm run lint && npm run test && npm run build && npm run check:size && npm run check:dead-exports && npm run check:migration && npm run check:e2e:sse && npm run audit:courses-drift",
     "check:messaging": "npx tsx scripts/diagnose-messaging-extended.ts",
     "db:push": "npx prisma db push",

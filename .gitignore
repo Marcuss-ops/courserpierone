@@ -34,3 +34,6 @@ yarn-error.log*
 # Local backups from env rotation workflows (created via scripts/ops/push-env-to-vercel.sh)
 .env.backup-*
 docs/ops/vercel-secrets-reference.md
+
+# Local hotspot scorer output (also uploaded as CI artifact)
+tmp/hotspots/

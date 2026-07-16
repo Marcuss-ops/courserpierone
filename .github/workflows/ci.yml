@@ -514,6 +514,24 @@ jobs:
       # se violation.
       - name: File size budget (src/domains/** only)
         run: npm run check:size
+
+      # ── (g) Hotspot scorer check (master plan §5) ─────────────────────────────────
+      # Per-file risk score = freq × complexity × size × deps × regressions.
+      # Classification: top-25% percentile per signal; 2x2 matrix maps to
+      # refactor_obbligatorio / non_toccare / manutenzione_ordinaria / lasciare.
+      # Domain special-case: any src/domains/** file in refactor_obbligatorio
+      # FAILS the gate. Non-domain files are informational.
+      # Output: top-20 ANSI table on stdout + hotspot-score.json artifact.
+      - name: Hotspot scorer (block-on-domain)
+        run: npm run check:hotspots
+      - name: Upload hotspot report (artifact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hotspot-report
+          path: tmp/hotspots/hotspot-score.json
+          retention-days: 14
+
       - name: Upload size-violation context (if any)
         if: failure()
         uses: actions/upload-artifact@v4
