@@ -38,7 +38,12 @@ import {
   MAX_OFFERS_PER_WINDOW,
   type EligibilityPolicyDeps,
 } from "./offer-eligibility-policy";
-import type { OfferCardDraft } from "./offer-card-types";
+import {
+  type CreatorId,
+  type OfferCardDraft,
+  type ProductId,
+  type RecipientId,
+} from "./offer-card-types";
 
 // \u2500\u2500\u2500\u2500 Test fixtures \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
@@ -46,10 +51,16 @@ const T_NOW = new Date("2026-07-16T12:00:00Z");
 const T_5_DAYS_AGO = new Date("2026-07-11T12:00:00Z");
 const T_8_DAYS_AGO = new Date("2026-07-08T12:00:00Z");
 
-const CREATOR_ID = "creator_1";
-const RECIPIENT_ID = "user_recipient";
-const CHAT_PRODUCT_ID = "prod_chat_free";      // chat is on a free course
-const OFFERED_PRODUCT_ID = "prod_offered_premium";  // offer is the premium upgrade
+// Test fixtures use TYPE-ONLY casts (not runtime validators) because
+// the literal strings ("creator_1" etc.) don't match the CUID pattern
+// enforced by asCreatorId/asRecipientId/asProductId. Tests have
+// KNOWN-VALID fixtures; runtime validation is for trust boundaries
+// (API input, DB reads). The brand still provides compile-time safety
+// against accidental cross-use at field assignments.
+const CREATOR_ID = "creator_1" as CreatorId;
+const RECIPIENT_ID = "user_recipient" as RecipientId;
+const CHAT_PRODUCT_ID = "prod_chat_free" as ProductId;      // chat is on a free course
+const OFFERED_PRODUCT_ID = "prod_offered_premium" as ProductId;  // offer is the premium upgrade
 const CONVERSATION_ID = "conv_1";
 
 /**
@@ -226,7 +237,7 @@ describe("Rule 3: ELIGIBILITY_OFFER_NOT_FROM_CREATOR", () => {
     const { deps, mocks } = mkAllowAllDeps();
     mocks.findProduct.mockResolvedValueOnce({
       id: OFFERED_PRODUCT_ID,
-      creatorId: "creator_other", // mismatch
+      creatorId: "creator_other" as CreatorId, // mismatch
       status: "published",
     });
     const result = await evaluateOfferEligibility({ draft: BASE_DRAFT, now: T_NOW }, deps);

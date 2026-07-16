@@ -46,9 +46,43 @@ import type { OfferCardStatus, LinkToken } from "./offer-card-discriminator";
 
 // \u2500\u2500\u2500\u2500 Identifier aliases (plain strings, zero-cost) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
-export type ProductId = string;
-export type CreatorId = string;
-export type RecipientId = string;
+// Phase 6 cross-cut (ADR-0016 §8 primitives): the 3 canonical ID brands
+// live in `src/lib/domain-types.ts`. This file re-exports them so the
+// rest of the offer-card module keeps its existing import surface
+// (`import type { ProductId, CreatorId, RecipientId } from "./offer-card-types"`).
+// Branded types are TYPE-SAFETY-ADDITIVE: structurally still `string`
+// at runtime (zero-cost phantom), but the compiler now distinguishes
+// `CreatorId` from `RecipientId` from `ProductId` so accidental cross-use
+// (e.g., passing a recipient where a creator is expected) is a type error.
+// Validation lives in `domain-types.ts` (`asProductId`, `asCreatorId`).
+import type { CreatorId, ProductId } from "@/lib/domain-types";
+import { asCreatorId as asCreatorIdFromDomain, asProductId as asProductIdFromDomain } from "@/lib/domain-types";
+export type { CreatorId, ProductId };
+// Re-export so consumers can do `import { asCreatorId, asProductId } from "./offer-card-types"`
+// instead of reaching into domain-types directly. Mirrors the type re-exports above.
+export const asCreatorId = asCreatorIdFromDomain;
+export const asProductId = asProductIdFromDomain;
+
+// Local RecipientId brand (Phase 6 spec: only ProductId/CreatorId get
+// global brands; RecipientId stays local until a second consumer needs it).
+// asRecipientId mirrors the asCreatorId validation contract (CUID format
+// + non-empty) so the test fixtures can mint branded values consistently.
+export function asRecipientId(value: string): RecipientId {
+  if (!value) {
+    throw new Error("Invalid RecipientId: empty");
+  }
+  if (!/^c[a-z0-9]{20,}$/.test(value)) {
+    throw new Error(`Invalid RecipientId format: "${value}" (expected CUID)`);
+  }
+  return value as RecipientId;
+}
+
+// RecipientId is the offer-card-specific third brand. Kept as a local
+// brand (zero-cost phantom) because it doesn't yet have a global
+// domain-types entry — Phase 6 spec only listed ProductId/CreatorId.
+// Migration to domain-types.ts is deferred until a second consumer
+// needs it.
+export type RecipientId = string & { readonly __brand: "RecipientId" };
 
 // \u2500\u2500\u2500\u2500 Conversation anchor (required for valid offer) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
