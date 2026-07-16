@@ -17,6 +17,7 @@ import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
 import type { LocaleContent } from "./locale-content";
 import { createEmptyLocale } from "./locale-content";
+import { localeToLanguage } from "./locale-resolver";
 import { cacheGet, cacheSet } from "../redis";
 
 // ─── ADR-0011: per-course plugin folder at courses/<slug>/ ───
@@ -44,7 +45,7 @@ function loadLocaleContent(slug: string, locale: string): LocaleContent | null {
   if (!existsSync(productDir)) return null;
 
   // Costruisci chain di fallback
-  const lang = locale.split("-")[0]?.toLowerCase() ?? locale;
+  const lang = localeToLanguage(locale);
   const chain = LOCALE_FALLBACK_CHAIN[locale] ?? [locale, lang];
 
   for (const code of chain) {

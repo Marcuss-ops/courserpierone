@@ -10,6 +10,7 @@
 //   - src/app/api/checkout/route.ts (checkout API)
 
 import { LOCALE_CURRENCY } from "./_generated/locale-data";
+import { localeToLanguage } from "./locale-resolver";
 
 /**
  * Returns the currency code (ISO 4217) for a given locale string.
@@ -24,7 +25,7 @@ export function getCurrencyFromLocale(locale: string): string {
   const normalized = normalizeLocale(locale);
   return (
     LOCALE_CURRENCY[normalized] ??
-    LOCALE_CURRENCY[languageOnly(normalized)] ??
+    LOCALE_CURRENCY[localeToLanguage(normalized)] ??
     "EUR"
   );
 }
@@ -37,8 +38,4 @@ function normalizeLocale(code: string): string {
     return `${parts[0].toLowerCase()}-${parts[1].toLowerCase()}`;
   }
   return parts[0].toLowerCase();
-}
-
-function languageOnly(locale: string): string {
-  return locale.split("-")[0]?.toLowerCase() ?? locale;
 }

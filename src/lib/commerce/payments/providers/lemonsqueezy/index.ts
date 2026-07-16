@@ -24,6 +24,7 @@ import { env } from "@/lib/env";
 import { CheckoutError, NotImplementedError } from "@/lib/errors";
 import { initLS, getStoreId, getWebhookSecret } from "@/lib/payment/lemonsqueezy";
 import { getUiTranslations } from "@/lib/i18n/ui-translations";
+import { localeToLanguage } from "@/lib/i18n/locale-resolver";
 import { verifyHmacSignature } from "@/lib/commerce/webhooks/verifier";
 import {
   InvalidJsonError,
@@ -147,7 +148,7 @@ export class LemonSqueezyPaymentProvider implements PaymentProvider {
     // buyers see "Descargar tu libro" / "Téléchargez votre livre" instead
     // of the previous hardcoded Italian. Falls back to English via the
     // FALLBACK chain in getUiTranslations.
-    const lang = locale.split("-")[0];
+    const lang = localeToLanguage(locale);
     const receiptButtonText = getUiTranslations(lang).dlTitle;
 
     const checkout = await lsCreateCheckout(storeId, variantId, {

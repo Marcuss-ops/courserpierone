@@ -11,6 +11,7 @@ import nodemailer from "nodemailer";
 import fs from "fs";
 import path from "path";
 import { AppError } from "@/lib/errors";
+import { localeToLanguage } from "@/lib/i18n/locale-resolver";
 
 // ─── Mail Transport ─────────────────────────────────────────
 let _transporter: nodemailer.Transporter | null = null;
@@ -40,11 +41,6 @@ function getTransporter(): nodemailer.Transporter | null {
   });
 
   return _transporter;
-}
-
-// ─── Locale helpers ─────────────────────────────────────────
-function extractLang(locale: string): string {
-  return locale.split("-")[0]?.toLowerCase() ?? "en";
 }
 
 // ════════════════════════════════════════════════════════════
@@ -403,7 +399,7 @@ function buildTextEmail(bodyLines: string[], buttonText: string, buttonUrl: stri
 }
 
 function resolveTemplate<T extends EmailContent>(locale: string, templates: Record<string, T>): T {
-  const lang = extractLang(locale);
+  const lang = localeToLanguage(locale) || "en";
   return templates[locale] ?? templates[lang] ?? templates.en ?? templates.it ?? templates[Object.keys(templates)[0]];
 }
 
@@ -639,7 +635,7 @@ export async function sendPurchaseConfirmation(
     pl: { html: `Twoja ebook jest gotowy do pobrania — dostępny w Twoim preferowanym języku.<br/><a href="${ebookDownloadUrl}" style="color:#ddb7ff;text-decoration:underline;">📖 Pobierz swój eBook (PDF)</a>`, text: `📖 Pobierz swój eBook (PDF): ${ebookDownloadUrl}` },
   };
 
-  const ebookLang = extractLang(locale);
+  const ebookLang = localeToLanguage(locale) || "en";
   const ebookLines = EBOOK_LINES[ebookLang] ?? EBOOK_LINES.en;
 
   // Add ebook download link to body if available

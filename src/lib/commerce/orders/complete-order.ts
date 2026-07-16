@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db/prisma";
 import { sendPurchaseConfirmation } from "@/lib/commerce/shared/email";
+import { localeToLanguage } from "@/lib/i18n/locale-resolver";
 import { NotFoundError } from "@/lib/errors";
 import type { PaymentProviderSlug } from "@/lib/commerce/payments/types";
 // NOTE: Step 7 keeps ProcessOrderInput shape 1:1 with the prior
@@ -81,7 +82,7 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
     // fallback di src/lib/services/email.ts. `locale` è required
     // in ProcessOrderInput (mai null), nessun fallback defensivo
     // necessario qui.
-    const signupLang = locale.split("-")[0]?.toLowerCase();
+    const signupLang = localeToLanguage(locale);
     user = await prisma.user.create({
       data: {
         email,

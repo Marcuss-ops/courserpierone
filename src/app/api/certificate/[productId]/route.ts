@@ -4,6 +4,7 @@ import { getServerUser } from "@/lib/supabase/get-user";
 import { prisma } from "@/lib/db/prisma";
 import { apiErrorResponse } from "@/lib/errors";
 import { getCertificateTranslations } from "@/lib/i18n/certificate-translations";
+import { localeToLanguage } from "@/lib/i18n/locale-resolver";
 import { getUiTranslations, interpolate } from "@/lib/i18n/ui-translations";
 import { findCompletedOrder } from "@/lib/access";
 
@@ -22,7 +23,7 @@ export async function GET(
     // Derive user lang for localized error messages (Accept-Language is best-
     // effort here because the order isn't loaded yet for the no-purchase path).
     const acceptLang = request.headers.get("accept-language") ?? "en";
-    const errLang = acceptLang.split(",")[0]?.split("-")[0]?.toLowerCase() ?? "en";
+    const errLang = localeToLanguage(acceptLang.split(",")[0]) || "en";
 
     // Verify the user has purchased the product (V2 DRY: helper consolidato)
     const order = await findCompletedOrder({
@@ -60,7 +61,7 @@ export async function GET(
     });
 
     const locale = order.locale ?? "it";
-    const lang = locale.split("-")[0];
+    const lang = localeToLanguage(locale);
     const ui = getUiTranslations(lang);
 
     if (totalLessons === 0) {
