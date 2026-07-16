@@ -523,14 +523,17 @@ model Message {
   conversationId String
   senderId       String   // chi ha inviato QUESTO messaggio
   content        String   @db.Text
+  offerCardId    String?  // Phase 4: riferimento opaco a un'offerta commerciale
   read           Boolean  @default(false)
   createdAt      DateTime @default(now())
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender       User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  offerCard    OfferCard?   @relation(fields: [offerCardId], references: [id], onDelete: SetNull)
 
   @@index([conversationId, createdAt])
   @@index([senderId])
+  @@index([offerCardId])
 }
 
 // ─── AccessGrant (MCR Phase 2) ─────────────────────────────────────
@@ -603,6 +606,7 @@ model OfferCard {
   creator      User         @relation("OfferCardCreator", fields: [creatorId], references: [id], onDelete: Cascade)
   recipient    User         @relation("OfferCardRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
   product      Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  messages     Message[]
 
   @@index([recipientId, createdAt])
   @@index([creatorId, productId])
