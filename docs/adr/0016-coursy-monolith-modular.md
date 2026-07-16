@@ -74,6 +74,8 @@ Regole di import (in CI via `eslint-plugin-import` + custom rule):
 
 > **Nota:** "Analytics" menzionato in alcune fonti esterne è consolidato come **read-model** dentro `creator-ops/` (non un dominio separato V2). Se in futuro diventa un dominio separato (cross-creator analytics), sarà un ADR-0017+.
 
+> **SUPERSEDED NOTICE (2026-07-16, ADR-0018):** la nota precedente è **invalidata**. Analytics è ora un **dominio V2 standalone** (`#10` nella 10-domain map). Vedi [ADR-0018 — V2 Ten-Domain Boundaries](0018-ten-domain-boundaries.md) §a per la tabella canonica aggiornata.
+
 ### Domain folder minimal shape (YAGNI)
 
 Quando arriva la prima feature in un dominio, il folder segue questo layout minimale:
