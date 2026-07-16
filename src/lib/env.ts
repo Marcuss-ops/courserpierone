@@ -310,6 +310,32 @@ export function getFreeCourseSlugs(): string[] {
   return FREE_COURSE_SLUGS_SCHEMA.parse(process.env.NEXT_PUBLIC_FREE_COURSE_SLUGS);
 }
 
+/**
+ * Maximum upload size in bytes (admin upload endpoint at
+ * `src/app/api/upload/route.ts`).
+ *
+ * Parses `UPLOAD_MAX_BYTES` from process.env as a positive integer.
+ * Throws on malformed input (NaN, negative, non-integer) — operator typo
+ * surfaces at first call site, not silently degrading the cap.
+ *
+ * Empty string is treated as unset: it pre-processes to `undefined` so
+ * the `.default(10 MB)` kicks in. Rationale: shell scripts often set
+ * `UPLOAD_MAX_BYTES=""` to "disable" the var; without this, `Number("")`
+ * returns `0` in JS → `.positive()` throws → app fails to load. Operator
+ * removing the env var entirely (unset) gets the same default.
+ *
+ * Default: 10 MB. Conservatively tighter than legacy hardcoded 50 MB;
+ * admin uploads are infrequent, the lower cap reduces DoS surface.
+ */
+const UPLOAD_MAX_BYTES_SCHEMA = z.preprocess(
+  (v) => (v === "" ? undefined : v),
+  z.coerce.number().int().positive().default(10 * 1024 * 1024)
+);
+
+export function getUploadMaxBytes(): number {
+  return UPLOAD_MAX_BYTES_SCHEMA.parse(process.env.UPLOAD_MAX_BYTES);
+}
+
 // ─── Utility: formato leggibile ────────────────────────────
 
 function formatEnvStatus(result: ValidationResult): string {

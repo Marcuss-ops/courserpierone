@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/db/supabase";
 import { apiErrorResponse } from "@/lib/errors";
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { getUploadMaxBytes } from "@/lib/env";
 import { withRateLimit } from "@/lib/utils/rate-limit";
 
 const ALLOWED_TYPES = [
@@ -18,7 +19,7 @@ const ALLOWED_TYPES = [
   "audio/ogg",
   "video/mp4",
 ];
-const MAX_SIZE = 50 * 1024 * 1024; // 50 MB
+const MAX_UPLOAD_BYTES = getUploadMaxBytes(); // typed number, default 10 MB (override via UPLOAD_MAX_BYTES env).
 const BUCKET_NAME = "covers";
 
 export const POST = withRateLimit(async function POST(request: NextRequest) {
@@ -41,11 +42,22 @@ export const POST = withRateLimit(async function POST(request: NextRequest) {
       );
     }
 
-    // Validazione dimensione
-    if (file.size > MAX_SIZE) {
+    // Validazione dimensione (env-driven: `UPLOAD_MAX_BYTES`, default 10 MB).
+    // Check BEFORE `file.arrayBuffer()` per evitare buffer-allocation su
+    // payload oversized che sarebbero rifiutati. 413 Payload Too Large è
+    // semanticamente corretto rispetto al 400 used for input validation.
+    if (file.size > MAX_UPLOAD_BYTES) {
+      // KPI: oversized upload rejects help tuning del default 10MB.
+      console.warn("[upload] Rejected oversized file", {
+        size: file.size,
+        max: MAX_UPLOAD_BYTES,
+        contentType: file.type,
+      });
+      const sizeMB = (file.size / 1024 / 1024).toFixed(1);
+      const maxMB = (MAX_UPLOAD_BYTES / 1024 / 1024).toFixed(0);
       return NextResponse.json(
-        { error: `File troppo grande (${(file.size / 1024 / 1024).toFixed(1)} MB). Massimo ${MAX_SIZE / 1024 / 1024} MB.` },
-        { status: 400 }
+        { error: `File troppo grande (${sizeMB} MB). Massimo ${maxMB} MB (cap configurabile tramite UPLOAD_MAX_BYTES).` },
+        { status: 413 }
       );
     }
 
