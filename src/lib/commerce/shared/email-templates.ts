@@ -302,64 +302,64 @@ export const ABANDONED_TEMPLATES: Record<string, EmailContent> = {
 
 export const DM_NOTIFICATION_TEMPLATES: Record<string, EmailContent> = {
   it: {
-    subject: `💬 Nuovo messaggio da {sender} su Courser`,
+    subject: `💬 Nuovo messaggio da {sender} su Courssy`,
     heading: "Hai un nuovo messaggio!",
     body: [
       '<strong style="color:#e5e2e1;">{sender}</strong> ti ha inviato un messaggio.',
       "Accedi alla tua dashboard per leggere e rispondere.",
     ],
     buttonText: "Vai ai Messaggi",
-    footer: "Ricevi questa email perché hai una conversazione attiva su Courser.",
+    footer: "Ricevi questa email perché hai una conversazione attiva su Courssy.",
   },
   en: {
-    subject: `💬 New message from {sender} on Courser`,
+    subject: `💬 New message from {sender} on Courssy`,
     heading: "You have a new message!",
     body: [
       '<strong style="color:#e5e2e1;">{sender}</strong> sent you a message.',
       "Log in to your dashboard to read and reply.",
     ],
     buttonText: "Go to Messages",
-    footer: "You're receiving this because you have an active conversation on Courser.",
+    footer: "You're receiving this because you have an active conversation on Courssy.",
   },
   es: {
-    subject: `💬 Nuevo mensaje de {sender} en Courser`,
+    subject: `💬 Nuevo mensaje de {sender} en Courssy`,
     heading: "¡Tienes un nuevo mensaje!",
     body: [
       '<strong style="color:#e5e2e1;">{sender}</strong> te ha enviado un mensaje.',
       "Accede a tu dashboard para leer y responder.",
     ],
     buttonText: "Ir a Mensajes",
-    footer: "Recibes este correo porque tienes una conversación activa en Courser.",
+    footer: "Recibes este correo porque tienes una conversación activa en Courssy.",
   },
   fr: {
-    subject: `💬 Nouveau message de {sender} sur Courser`,
+    subject: `💬 Nouveau message de {sender} sur Courssy`,
     heading: "Vous avez un nouveau message !",
     body: [
       '<strong style="color:#e5e2e1;">{sender}</strong> vous a envoyé un message.',
       "Connectez-vous à votre tableau de bord pour lire et répondre.",
     ],
     buttonText: "Voir les Messages",
-    footer: "Vous recevez cet email car vous avez une conversation active sur Courser.",
+    footer: "Vous recevez cet email car vous avez une conversation active sur Courssy.",
   },
   de: {
-    subject: `💬 Neue Nachricht von {sender} auf Courser`,
+    subject: `💬 Neue Nachricht von {sender} auf Courssy`,
     heading: "Sie haben eine neue Nachricht!",
     body: [
       '<strong style="color:#e5e2e1;">{sender}</strong> hat Ihnen eine Nachricht gesendet.',
       "Melden Sie sich in Ihrem Dashboard an, um zu lesen und zu antworten.",
     ],
     buttonText: "Zu Nachrichten",
-    footer: "Sie erhalten diese E-Mail, weil Sie eine aktive Konversation auf Courser haben.",
+    footer: "Sie erhalten diese E-Mail, weil Sie eine aktive Konversation auf Courssy haben.",
   },
   pt: {
-    subject: `💬 Nova mensagem de {sender} no Courser`,
+    subject: `💬 Nova mensagem de {sender} no Courssy`,
     heading: "Você tem uma nova mensagem!",
     body: [
       '<strong style="color:#e5e2e1;">{sender}</strong> enviou uma mensagem para você.',
       "Acesse seu painel para ler e responder.",
     ],
     buttonText: "Ir para Mensagens",
-    footer: "Você está recebendo este e-mail porque tem uma conversa ativa no Courser.",
+    footer: "Você está recebendo este e-mail porque tem uma conversa ativa no Courssy.",
   },
 };
 
@@ -435,7 +435,7 @@ export function buildHtmlEmail(
                 <td align="center" style="padding-bottom:24px;">
                   <p style="color:#555;font-size:12px;line-height:1.5;margin:0;">
                     ${footer}
-                    <br/>© ${new Date().getFullYear()} Courser
+                    <br/>© ${new Date().getFullYear()} Courssy
                   </p>
                 </td>
               </tr>
@@ -443,7 +443,7 @@ export function buildHtmlEmail(
                 <td align="center">
                   <div style="height:1px;width:100%;background:rgba(255,255,255,0.05);margin-bottom:16px;"></div>
                   <p style="color:#444;font-size:11px;margin:0;">
-                    <span style="color:${accentColor};">Courser</span> — Piattaforma di corsi digitali multilingua
+                    <span style="color:${accentColor};">Courssy</span> — Piattaforma di corsi digitali multilingua
                   </p>
                 </td>
               </tr>

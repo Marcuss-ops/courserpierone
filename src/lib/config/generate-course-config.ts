@@ -90,7 +90,7 @@ export async function generateCourseConfig(slug: string) {
       const ui = safeParseUi(t.ui_all) ?? safeParseUi(translationsByLocale.en?.ui_all) ?? undefined;
 
       // SEO metadata: usa sezioni dedicate se presenti, altrimenti costruiscile dal contenuto
-      const seoTitle = t.seo_title || `${t.titolo ?? product.slug} — Courser`;
+      const seoTitle = t.seo_title || `${t.titolo ?? product.slug} — Courssy`;
       const seoDescription = t.seo_description || (t.sottotitolo || t.problema || "").slice(0, 160);
       const ogImage = t.og_image || product.coverUrl || undefined;
 

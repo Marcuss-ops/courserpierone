@@ -41,7 +41,7 @@ function getTransporter(): nodemailer.Transporter | null {
   const from = process.env.EMAIL_FROM;
 
   // C1e/C2b cleanup: defaults removed from env.ts (smtp.gmail.com / 587 /
-  // noreply@courser.app) — every required email env must be set explicitly.
+  // noreply@courssy.app) — every required email env must be set explicitly.
   // If any is missing, return null so callers can short-circuit (they log
   // a dev-friendly summary instead of sending).
   if (!host || !port || !user || !pass || !from) {
@@ -78,7 +78,7 @@ export async function sendDmNotificationEmail(
   const from = process.env.EMAIL_FROM;
   if (!from) return false;
   const tpl = resolveTemplate(locale, DM_NOTIFICATION_TEMPLATES);
-  const inboxUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://courser.app"}/dashboard/messages`;
+  const inboxUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://courssy.app"}/dashboard/messages`;
 
   const filled: EmailContent = {
     subject: tpl.subject.replace(/{sender}/g, senderName),

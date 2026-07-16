@@ -568,6 +568,10 @@ jobs:
   # protection. Aggregates the 4 jobs above; alerts via ALERT_WEBHOOK_URL
   # on any red.
   # ════════════════════════════════════════════════════════════════════════
+      - name: Check for deprecated brand names
+        run: npm run check:naming
+
+
   deploy-gate:
     name: 🚦 deploy-gate
     runs-on: ubuntu-latest
