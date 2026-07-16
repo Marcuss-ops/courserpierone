@@ -163,8 +163,10 @@ export async function GET(request: NextRequest) {
       });
     });
 
-    // Sort by most recent
-    events.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    // Sort by most recent — `+createdAt` coerces Date → number senza
+    // allocare un nuovo Date wrapper (l'originale `new Date(...).getTime()`
+    // allocava n Date object per n log n comparison del sort).
+    events.sort((a, b) => +b.createdAt - +a.createdAt);
 
     return NextResponse.json({ events });
   } catch (error) {
