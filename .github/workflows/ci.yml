@@ -355,7 +355,176 @@ jobs:
           retention-days: 7
 
   # ════════════════════════════════════════════════════════════════════════
-  # Job 5 — deploy-gate (aggregator)
+  # Job 5 — quality-gate (Fase 0 step 4: build + size + migration + SSE + dead-exports)
+  # Complements the existing 4 quality jobs. Runs AFTER typecheck to keep
+  # the typecheck job fast (~3min). Aggregated by deploy-gate below.
+  # Wired into deploy-gate via `needs: [..., quality-gate]`.
+  #
+  # Implements:
+  #   - Real build (`npm run build` = validate:locales + next build)
+  #   - Migration apply-test against ephemeral Postgres (service container)
+  #   - E2E chat SSE smoke (Playwright `--grep @sse`)
+  #   - Circular-dependency detection (defense-in-depth: also runs in typecheck job)
+  #   - Dead-exports scan (`ts-prune`) — informational/warn by default
+  #   - File size budget (scripts/quality/check-file-size.ts):
+  #       250 LOC applicativo / 150 LOC route / 400 LOC eccezione
+  #       SOLO su `src/domains/**/*.{ts,tsx}` (V2 namespace; legacy V1 esente).
+  #
+  # Aligned with ADR-0016 §Future §1 (CI guardrail dependency rule: blocca
+  # il primo refactor V1 → V2) — qui introduciamo i guardrail di size +
+  # migration che accompagnano il dependency-rule guardrail.
+  # ════════════════════════════════════════════════════════════════════════
+  quality-gate:
+    name: quality-gate (build + size + migration + sse + dead-exports)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+
+    services:
+      # Ephemeral Postgres for migration apply-test + (future) per-job fixtures.
+      # Distinct from the e2e-journey service so both can run in parallel.
+      postgres-quality:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: mig_quality_gate
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mig_quality_gate
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/mig_quality_gate
+      SUPABASE_URL: https://ci-dummy.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: ci-dummy-service-role-key
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-dummy.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-dummy-anon-key
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      CI: "true"
+      NODE_ENV: test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js + npm cache
+        uses: actions/setup-node@39370e3970a6d050c480008ad58aa19be4ef98bb # v4.1.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies (postinstall runs prisma generate + locale resolver)
+        run: npm ci --no-audit --no-fund
+
+      # ── (a) Real build (`npm run build` = validate:locales + next build) ──
+      # Faster than typecheck-with-build.sh because it inlines validate:locales
+      # AND the dedicated build cache below avoids re-running next from scratch.
+      # Complements typecheck: typecheck-with-build.sh regenerates
+      # `.next/types/validator.ts`; `npm run build` does the FULL production
+      # build (incl. validation, locale generation, prisma prepare, etc.).
+      - name: Cache Next.js build cache (quality-gate)
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-nextjs-qg-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**/*.ts', 'src/**/*.tsx', 'next.config.mjs', 'tsconfig.json', 'courses/**/locales/**/*.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-qg-${{ hashFiles('package-lock.json') }}-
+      - name: Real build (validate:locales + next build)
+        run: npm run build
+
+      # ── (b) Migration apply-test (cumulative `prisma migrate deploy`) ──
+      # Service container `postgres-quality` defined above. Verifies every
+      # migration in `prisma/migrations/*` applies cleanly from-scratch — catches
+      # malformed SQL, dependency drift (table referenced before create),
+      # cumulative drift. Complements the in-line "Schema migration safety"
+      # (content-based keyword scan in typecheck job) with execution-based proof.
+      - name: Wait for ephemeral Postgres readiness
+        run: |
+          for i in $(seq 1 60); do
+            if pg_isready -h localhost -p 5432 -U postgres > /dev/null 2>&1; then
+              echo "✓ Postgres ephemeral ready"
+              break
+            fi
+            if [ "$i" -eq 60 ]; then
+              echo "::error::Postgres did not become ready within 60s"
+              exit 1
+            fi
+            sleep 1
+          done
+      - name: Migration apply-test (prisma migrate deploy)
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mig_quality_gate
+          DIRECT_URL: postgresql://postgres:postgres@localhost:5432/mig_quality_gate
+        run: |
+          npx prisma migrate deploy
+          # Sanity: ≥5 tables in public schema post-migration
+          TABLE_COUNT=$(psql -U postgres -d mig_quality_gate -At -c "SELECT count(*) FROM information_schema.tables WHERE table_schema='public';")
+          if [ -z "${TABLE_COUNT}" ] || [ "${TABLE_COUNT}" -lt 5 ]; then
+            echo "::error::Migration applied but only ${TABLE_COUNT} tables in public schema (expected ≥5)"
+            exit 1
+          fi
+          echo "✓ Migration apply-test passed: ${TABLE_COUNT} tables in public schema"
+
+      # ── (c) E2E chat SSE smoke ──────────────────────────────────────
+      # Playwright subset `--grep @sse` picks only tests/e2e/chat-sse.spec.ts.
+      # Skip-if-creds-missing pattern handled INSIDE the spec (see
+      # tests/e2e/chat-sse.spec.ts). Chromium-only install (no firefox/webkit).
+      - name: Cache Playwright browsers (quality-gate)
+        id: cache-playwright-qg
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-qg-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - name: Install Playwright chromium
+        if: steps.cache-playwright-qg.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E chat SSE smoke (--grep @sse)
+        run: npx playwright test --grep "@sse" --project=chromium --reporter=line
+
+      # ── (d) Circular dependencies (defense-in-depth vs typecheck job) ──
+      # Already runs in typecheck job; re-running after the build step ensures
+      # `.next/` artifacts are factored in. Cheap (~2s). Defense-in-depth.
+      - name: Detect circular dependencies (post-build)
+        run: npx madge --circular src/ --ts-config ./tsconfig.json
+
+      # ── (e) Dead exports scan (ts-prune) ─────────────────────────────
+      # Informational by default: converts exit 1 → exit 0 with ::warning::
+      # annotation. Tighten to exit 1 once V2 layout freezes (post-ADR-0016
+      # migration chain lands). Ignores generated/fixture/test files.
+      - name: Dead exports scan (ts-prune, informational)
+        run: |
+          npx ts-prune --ignore 'node_modules|.next|prisma/migrations|test-results|playwright-report|coverage|\.test\.|\.spec\.|\.prisma\.client' && exit 0
+          echo "::warning::ts-prune found dead exports (informational; tighten to fail-gate post-V2)."
+          echo "(V2 domains require strict ownership — remove unused exports when migrating.)"
+          exit 0
+
+      # ── (f) File size budget (src/domains/** only) ───────────────────
+      # Per ADR-0016 + Fase 0 step 4. Budgets: 250 applicativo / 150 route /
+      # 400 eccezione. SOLO `src/domains/**/*.{ts,tsx}` (V2 namespace; V1
+      # legacy in src/lib/, src/components/, src/app/ è esente). Fail-the-gate
+      # se violation.
+      - name: File size budget (src/domains/** only)
+        run: npm run check:size
+      - name: Upload size-violation context (if any)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: size-violations
+          path: |
+            scripts/quality/check-file-size.ts
+          retention-days: 7
+
+  # ════════════════════════════════════════════════════════════════════════
+  # Job 6 — deploy-gate (aggregator)
   # This is the SINGLE required status check name to mark in branch
   # protection. Aggregates the 4 jobs above; alerts via ALERT_WEBHOOK_URL
   # on any red.
@@ -364,7 +533,7 @@ jobs:
     name: 🚦 deploy-gate
     runs-on: ubuntu-latest
     timeout-minutes: 2
-    needs: [typecheck, lint, unit-tests, e2e-journey]
+    needs: [typecheck, lint, unit-tests, e2e-journey, quality-gate]
     if: always()
     permissions:
       contents: read
