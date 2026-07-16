@@ -117,7 +117,7 @@ POLICY_CATALOG.forEach((entry, i) => {
   if (!result.success) {
     throw new Error(
       `POLICY_CATALOG[${i}] = "${entry.name}" fails schema validation: ` +
-        JSON.stringify(result.error.errors),
+        JSON.stringify(result.error.issues),
     );
   }
 });

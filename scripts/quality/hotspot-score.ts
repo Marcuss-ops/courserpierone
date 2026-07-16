@@ -128,7 +128,7 @@ export function isCodeFile(name: string): boolean {
 }
 
 export function isDomainFile(file: string): boolean {
-  return file.replace(/\\/g, "/").includes(`/${DOMAIN_PREFIX}`);
+  return file.replace(/\\/g, "/").startsWith(DOMAIN_PREFIX);
 }
 
 // ─── IO: data collection ────────────────────────────────────────────────────
