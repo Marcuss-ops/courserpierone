@@ -10,7 +10,7 @@
 # Soluzione: un bash script che gira PRIMA di ogni `git commit`, esegue
 # le 3 verifiche minime (typecheck, vitest, size-budget) ed exit 1 se
 # una qualsiasi RED. Skip automatico opzionale con `--no-verify` su
-# git commit (bypass esplicito).
+# git commit (bypass esplicito) o env var `SHORT_CIRCUIT_PRE_COMMIT=1`.
 #
 # Runtime: ~10s totale per la prima run (typecheck 5s + vitest 3s +
 # size-budget ms). Accettabile per un pre-commit hook.
@@ -20,12 +20,18 @@
 #   chmod +x scripts/ci/pre-commit-gate.sh
 #
 # Bypass (solo per wip/quick-fix):
-#   git commit --no-verify
-#   SHORT_CIRCUIT_PRE_COMMIT=1 git commit
+#   git commit --no-verify                  (built-in git bypass)
+#   SHORT_CIRCUIT_PRE_COMMIT=1 git commit  (gate shortcut)
 #
 # Husky / lint-staged wrapper: YAGNI per V1. Symlink basta.
 
 set -euo pipefail
+
+# ── Bypass esplicito (wip/quick-fix) ─────────────────────────────────
+if [[ -n "${SHORT_CIRCUIT_PRE_COMMIT:-}" ]]; then
+  echo "── Pre-commit gate SHORT-CIRCUITED (SHORT_CIRCUIT_PRE_COMMIT set) ──"
+  exit 0
+fi
 
 echo "── Pre-commit gate (Courssy) ──────────────────────────────────────"
 echo "Bypass: --no-verify o SHORT_CIRCUIT_PRE_COMMIT=1"
