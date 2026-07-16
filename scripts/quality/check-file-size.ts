@@ -7,7 +7,7 @@
  *   - route       (Next.js route handler, page):   150 LOC
  *   - eccezione   (files excused via marker comment): 400 LOC
  *
- * Scope:  SOLO `src/domains/**/*.{ts,tsx}` (V2 namespace; ADR-0016 §b).
+ * Scope:  SOLO src/domains/ TypeScript files (V2 namespace; ADR-0016 §b).
  * V1 legacy in `src/lib/`, `src/components/`, `src/app/` è esente:
  * questa regola irrigidisce SOLO il nuovo codice V2. Niente shock
  * legacy in un colpo (per-user-spec Fase 0 §req).
