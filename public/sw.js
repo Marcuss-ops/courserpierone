@@ -1,4 +1,9 @@
-const CACHE_NAME = "courser-v2";
+// Cache name bumped from "courser-v2" → "courssy-v3" as part of the
+// Courssy brand canonical migration (ADR-0015 §Migration plan commit 4).
+// The version digit bump (v2 → v3) ensures the activate handler below
+// `caches.keys().then(keys => keys.filter(k => k !== CACHE_NAME).map(caches.delete))`
+// invalidates the pre-rename cache automatically on the next SW lifecycle.
+const CACHE_NAME = "courssy-v3";
 const OFFLINE_PAGE = "/offline.html";
 
 // ─── Risorse da pre-cachare all'install ──────────────────
