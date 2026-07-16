@@ -176,6 +176,11 @@ model User {
   offerCardsSent     OfferCard[] @relation("OfferCardCreator")
   offerCardsReceived OfferCard[] @relation("OfferCardRecipient")
 
+  // Phase 5: Agent jobs created/approved/cancelled by this user.
+  agentJobsCreated   AgentJob[] @relation("AgentJobCreator")
+  agentJobsApproved  AgentJob[] @relation("AgentJobApprover")
+  agentJobsCancelled AgentJob[] @relation("AgentJobCanceller")
+
   // Centro Notifiche (Bell feature): ogni utente può ricevere
   // notifiche in-app (compaiono nella campanella in CourseTopNav) e
   // può avere preferenze di delivery per categoria. CASCADE su entrambi
@@ -610,4 +615,38 @@ model OfferCard {
 
   @@index([recipientId, createdAt])
   @@index([creatorId, productId])
+}
+
+// ─── Agent Jobs (Phase 5 — draft-first agent flow) ───────────────────
+// Rappresenta un run di un agente generativo. Stati canonici in
+// src/domains/automation/agent-run-states.ts. Il campo input/output è
+// JSON; la validazione avviene application-side tramite gli schema Zod
+// dichiarati nel manifesto dell'agente.
+model AgentJob {
+  id                  String    @id @default(cuid())
+  idempotencyKey      String    @unique
+  agentId             String
+  status              String    @default("queued")
+  attemptCount        Int       @default(0)
+  maxAttempts         Int
+  input               Json
+  output              Json?
+  verifiableOutput    Json?
+  lastError           Json?
+  nextAttemptAt       DateTime?
+  externalOperationId String?
+  createdBy           String
+  approvedBy          String?
+  approvedAt          DateTime?
+  cancelledBy         String?
+  cancelledAt         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  creator   User  @relation("AgentJobCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  approver  User? @relation("AgentJobApprover", fields: [approvedBy], references: [id], onDelete: SetNull)
+  canceller User? @relation("AgentJobCanceller", fields: [cancelledBy], references: [id], onDelete: SetNull)
+
+  @@index([agentId, status])
+  @@index([status, nextAttemptAt])
 }
