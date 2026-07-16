@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: courser
+      POSTGRES_DB: courssy
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -44,7 +44,7 @@ services:
       POSTGRES_HOST: db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: courser
+      POSTGRES_DB: courssy
       SCHEDULE: "@daily"
       BACKUP_KEEP_DAYS: "7"
       BACKUP_KEEP_WEEKS: "4"
