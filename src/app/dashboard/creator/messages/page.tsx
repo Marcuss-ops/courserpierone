@@ -3,10 +3,9 @@ import { redirect } from "next/navigation";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { CreatorInbox } from "./creator-inbox";
 import { InboxProvider } from "@/components/layout/inbox-provider";
-import {
-  getCreatorInbox,
-  type CreatorConversationPreview,
-} from "@/domains/insights/customer-profile/get-creator-inbox";
+import { getCreatorInbox } from "@/domains/creator-ops/read-models/inbox";
+import { prismaInboxRepository } from "@/domains/creator-ops/read-models/prisma-inbox-repository";
+import type { CreatorConversationPreview } from "@/domains/creator-ops/read-models/inbox-types";
 
 // Re-export for backward compat with the existing import site
 // (src/app/dashboard/creator/messages/creator-inbox.tsx imports
@@ -62,10 +61,10 @@ export default async function CreatorMessagesPage({ searchParams }: PageProps) {
   // The 3-query plan (products + conversations + message groupBy)
   // lives in `getCreatorInbox()`. See that file for the full
   // rationale and the Phase 5 extension plan.
-  const { previews, productOptions, totalUnread } = await getCreatorInbox({
-    id: dbUser.id,
-    role: dbUser.role,
-  });
+  const { previews, productOptions, totalUnread } = await getCreatorInbox(
+    { userId: dbUser.id, role: dbUser.role },
+    { repo: prismaInboxRepository },
+  );
 
   // Security/UX: validate `c` server-side against THIS user's previews.
   // Without this guard, an attacker could probe arbitrary conversationIds
