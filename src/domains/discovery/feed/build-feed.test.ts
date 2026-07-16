@@ -112,8 +112,8 @@ describe("buildFeed (Courssy — Fase 1 rule-based MVP)", () => {
   });
 
   it("propagates cursor to repository source-context", async () => {
-    let capturedContinueCtx: FeedSourceContext | null = null;
-    let capturedLessonCtx: FeedSourceContext | null = null;
+    let capturedContinueCtx = null as FeedSourceContext | null;
+    let capturedLessonCtx = null as FeedSourceContext | null;
     const repo: FeedRepository = {
       async fetchContinueLearning(ctx: FeedSourceContext) {
         capturedContinueCtx = ctx;
