@@ -154,7 +154,7 @@ Ogni refactor che tocca codice esistente segue questa sequenza atomica su main:
 
 - Commit 1: `test(orders): caract test per helper `processOrder` (pre-refactor)` → cattura status quo.
 - Commit 2: `refactor(commerce): estraggo `processOrder` in `src/domains/commerce/orders/complete-order.ts` (no behavior change)` → uso-case estratto.
-- Commit 3: `feat(commerce): trocoupon field added to Orderivi complection` → nuova feature.
+- Commit 3: `feat(commerce): coupon discount field on Order completion` → nuova feature.
 - Commit 4: `test(commerce): edge cases (LS rate-limit retry, idempotency under concurrent retry) + audit log hook` → test + obs.
 - Commit 5: `refactor(commerce): rimuovo `src/lib/services/order-service.ts` (vecchia posizione) dopo che tutti i consumer migrano` → chiusura.
 
@@ -204,7 +204,8 @@ Ogni refactor che tocca codice esistente segue questa sequenza atomica su main:
 3. **`src/lib/i18n/` resta come shared infra** (non è un dominio V2 — è port-anchored locale/currency resolution). Documentare in ADR-0017 (planned).
 4. **Anti-barrel-rule enforcement**: rimuovere `index.ts` re-export sparsi (es. `src/components/index.ts`). Segue lo stesso 5-commit workflow.
 5. **Discovery feed MVP** (Fase 1) come primo feature V2: usa questo ADR + ADR-0015 per namespace + dependency rule. ADR-0018 (planned) documenterà il primo feature ship-to-prod V2.
-6. **9-domini è V2, eventuale V3 split**: se in futuro MRR × X giustifica microservizi, il refactor V2→V3 sarà "estrai domain X in servizio separato" usando il domain boundary già canonico. ADR-0019+ se/quando accade.
+
+6. **Microservizi V3+ (marker)**: post-V2-GA revisit se MRR × X giustifica service-deploy separato; il 9-domain boundary già canonico agevola il refactor quando arriva.
 
 ---
 
