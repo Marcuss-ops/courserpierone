@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { INBOX_CHANNEL, INBOX_CHANNEL_LEGACY } from "@/lib/brand/brand-migration-keys";
 
 /**
  * InboxProvider — global client-side store per il badge "non letti".
@@ -61,7 +62,7 @@ interface InboxProviderProps {
 // Publish on both too so the old tab can still hear the new one. After
 // the migration window closes (target: 2026-08-15), drop the legacy
 // "courssy-inbox" entries and tighten the array to a single name.
-const BROADCAST_CHANNEL_NAMES = ["courssy-inbox", "courssy-inbox"] as const;
+const BROADCAST_CHANNEL_NAMES = [INBOX_CHANNEL, INBOX_CHANNEL_LEGACY] as const;
 
 export function InboxProvider({
   initialTotalUnread,

@@ -10,6 +10,10 @@ import {
   type YTOnStateChangeEvent,
 } from "./video-player-sdks";
 import { extractYouTubeId } from "@/lib/youtube/id";
+import {
+  VIDEO_PROGRESS_KEY,
+  VIDEO_PROGRESS_LEGACY_KEY,
+} from "@/lib/brand/brand-migration-keys";
 
 interface PremiumVideoPlayerProps {
   videoUrl: string;
@@ -49,8 +53,8 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
   // BOTH keys during the window so users on a mixed-version bundle (rolling
   // deploy) keep their video resume progress. After 2026-08-15 the dual-write
   // can be dropped and storageKey becomes the single source of truth.
-  const storageKey = `courssy-progress-${productSlug}-${videoUrl}`;
-  const legacyStorageKey = `courssy-progress-${productSlug}-${videoUrl}`;
+  const storageKey = `${VIDEO_PROGRESS_KEY}-${productSlug}-${videoUrl}`;
+  const legacyStorageKey = `${VIDEO_PROGRESS_LEGACY_KEY}-${productSlug}-${videoUrl}`;
 
   useEffect(() => {
     setIsReady(false); // eslint-disable-line react-hooks/set-state-in-effect -- TODO: refactor (FASE 1.10)
@@ -110,7 +114,7 @@ export function PremiumVideoPlayer({ videoUrl, productSlug, title: _title }: Pre
                 ytPlayer.setVolume(75);
                 // Read with new-key priority, fall back to legacy if the
                 // bundle was opened from a pre-rename version that wrote
-                // to "courssy-progress-*". If we find it on legacy, write
+                // to "courser-progress-*". If we find it on legacy, write
                 // it forward to the new key so the next session uses the
                 // new key and the dual-key window converges.
                 const savedTime = localStorage.getItem(storageKey)
