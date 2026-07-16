@@ -74,8 +74,12 @@ export const FEED_SOURCE_KINDS: readonly FeedSourceKind[] = [
  * Each descriptor wires a FeedSourceKind to its fetch function and
  * declaratively carries an enabled flag for kill-switching at runtime
  * without removing the registration (rare ops-driven).
+ *
+ * This is the canonical `FeedCandidateSource` from the strategy doc:
+ * a source whose only job is to produce candidates, leaving the final
+ * ranking to `FeedRankingPolicy`.
  */
-export interface FeedSourceDescriptor {
+export interface FeedCandidateSource {
   /** Stable identifier (slug, e.g., "continue-learning-v1"). */
   id: FeedSourceId;
   /** The FeedItem kind this source emits. */
@@ -92,6 +96,9 @@ export interface FeedSourceDescriptor {
   /** Whether this source is currently active. */
   enabled: boolean;
 }
+
+/** Backward-compatible alias for code that predates the canonical name. */
+export type FeedSourceDescriptor = FeedCandidateSource;
 
 /**
  * Source-level context (subset of FeedContext that&rsquo;s source-stable).
@@ -112,9 +119,9 @@ export interface SourceContext {
 
 // ─── Registry singleton ───────────────────────────────────────────
 
-const _registry = new Map<FeedSourceId, FeedSourceDescriptor>();
+const _registry = new Map<FeedSourceId, FeedCandidateSource>();
 
-export const FEED_SOURCE_REGISTRY: ReadonlyMap<FeedSourceId, FeedSourceDescriptor> =
+export const FEED_SOURCE_REGISTRY: ReadonlyMap<FeedSourceId, FeedCandidateSource> =
   _registry;
 
 /**
@@ -122,7 +129,7 @@ export const FEED_SOURCE_REGISTRY: ReadonlyMap<FeedSourceId, FeedSourceDescripto
  * be deterministic; idempotent register-twice would silently mask
  * any config drift).
  */
-export function registerFeedSource(descriptor: FeedSourceDescriptor): void {
+export function registerFeedSource(descriptor: FeedCandidateSource): void {
   if (_registry.has(descriptor.id)) {
     throw new Error(
       `Feed source "${descriptor.id}" is already registered. ` +

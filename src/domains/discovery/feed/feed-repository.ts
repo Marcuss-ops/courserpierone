@@ -15,7 +15,7 @@
  * Opaque to the caller. Decode via `decodeCursor()` below.
  */
 
-import type { ContinueLearningItem, LessonItem } from "./feed-types";
+import type { ContinueLearningItem, FeedContext, LessonItem } from "./feed-types";
 
 // ─── Source-context (passed to each fetch method) ────────────────────
 export interface FeedSourceContext {
@@ -46,6 +46,20 @@ export function encodeCursor(date: Date): string {
 
 // ─── Port interface ──────────────────────────────────────────────────
 export interface FeedRepository {
+  /**
+   * buildContext: derive the FeedContext for a given user.
+   *
+   * V1 implementation is a Prisma adapter responsibility: it resolves
+   * ownedProductIds (active AccessGrant), startedCourseIds (any
+   * LessonProgress), and followedCreatorIds (creators of owned products
+   * — proxy until a real Follow table lands in V2).
+   */
+  buildContext(
+    userId: string,
+    lang: string,
+    country: string | null,
+  ): Promise<FeedContext>;
+
   /**
    * fetchContinueLearning: in-progress lessons for products the user owns.
    * Returns continue_learning FeedItems ordered by lastWatchedAt DESC,

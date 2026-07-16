@@ -50,6 +50,9 @@ function mkStubRepo(
   extraLessons: LessonItem[] = [],
 ): FeedRepository {
   return {
+    async buildContext() {
+      return mkContext();
+    },
     async fetchContinueLearning(_ctx: FeedSourceContext) {
       return [
         {
@@ -115,6 +118,9 @@ describe("buildFeed (Courssy — Fase 1 rule-based MVP)", () => {
     let capturedContinueCtx = null as FeedSourceContext | null;
     let capturedLessonCtx = null as FeedSourceContext | null;
     const repo: FeedRepository = {
+      async buildContext() {
+        return mkContext();
+      },
       async fetchContinueLearning(ctx: FeedSourceContext) {
         capturedContinueCtx = ctx;
         return [];
@@ -135,6 +141,9 @@ describe("buildFeed (Courssy — Fase 1 rule-based MVP)", () => {
 
   it("returns empty FeedResult when repository yields no items", async () => {
     const repo: FeedRepository = {
+      async buildContext() {
+        return mkContext();
+      },
       async fetchContinueLearning() {
         return [];
       },
@@ -156,6 +165,9 @@ describe("buildFeed (Courssy — Fase 1 rule-based MVP)", () => {
     // Higher boost wins regardless of timestamp. This is the headline
     // behavior of the applyPolicies integration.
     const repo: FeedRepository = {
+      async buildContext() {
+        return mkContext();
+      },
       async fetchContinueLearning() {
         return [
           {
@@ -194,6 +206,9 @@ describe("buildFeed (Courssy — Fase 1 rule-based MVP)", () => {
     // scores (here: both productId in startedCourseIds → both +100),
     // the newer lastWatchedAt wins.
     const repo: FeedRepository = {
+      async buildContext() {
+        return mkContext();
+      },
       async fetchContinueLearning() {
         return [
           {
@@ -227,6 +242,9 @@ describe("buildFeed (Courssy — Fase 1 rule-based MVP)", () => {
 
   it("uses DEFAULT_PAGE_SIZE (20) when pageSize omitted", async () => {
     const repo: FeedRepository = {
+      async buildContext() {
+        return mkContext();
+      },
       async fetchContinueLearning() {
         return [];
       },
@@ -248,6 +266,9 @@ describe("buildFeed (Courssy — Fase 1 rule-based MVP)", () => {
   // the applyPolicies step, the lesson would survive and be returned.
   it("excludes already-purchased lessons via the policy registry", async () => {
     const repo: FeedRepository = {
+      async buildContext() {
+        return mkContext();
+      },
       async fetchContinueLearning() {
         return [];
       },

@@ -35,7 +35,55 @@ import type {
   LessonItem,
 } from "./feed-types";
 
-export class PrismaFeedRepository implements FeedRepository {
+// V1 context derivation: 3 bounded aggregate queries.
+//   - active AccessGrant → ownedProductIds
+//   - LessonProgress → startedCourseIds
+//   - Product creators of owned products → followedCreatorIds proxy
+const CONTEXT_LIMIT = 1000;
+
+class PrismaFeedRepository implements FeedRepository {
+  async buildContext(
+    userId: string,
+    lang: string,
+    country: string | null,
+  ): Promise<FeedContext> {
+    const [grants, progressRows, products] = await prisma.$transaction([
+      prisma.accessGrant.findMany({
+        where: { userId, status: "active" },
+        take: CONTEXT_LIMIT,
+        select: { productId: true },
+      }),
+      prisma.lessonProgress.findMany({
+        where: { userId },
+        take: CONTEXT_LIMIT,
+        select: { lesson: { select: { productId: true } } },
+      }),
+      prisma.product.findMany({
+        where: { accessGrants: { some: { userId, status: "active" } } },
+        take: CONTEXT_LIMIT,
+        select: { creatorId: true },
+      }),
+    ]);
+
+    const ownedProductIds = Array.from(new Set(grants.map((g) => g.productId)));
+    const startedCourseIds = Array.from(
+      new Set(progressRows.map((p) => p.lesson.productId).filter(Boolean)),
+    );
+    const followedCreatorIds = Array.from(
+      new Set(products.map((p) => p.creatorId).filter((id): id is string => Boolean(id))),
+    );
+
+    return {
+      userId,
+      lang,
+      country,
+      ownedProductIds,
+      startedCourseIds,
+      followedCreatorIds,
+      observedTopics: [],
+    };
+  }
+
   /**
    * fetchContinueLearning: 1 aggregate query.
    * Filters: userId (LessonProgress) + completed=false + lesson.productId IN ownedProductIds.
@@ -132,18 +180,9 @@ export class PrismaFeedRepository implements FeedRepository {
 }
 
 /**
- * Adapter factory — convenience to wire the Adapter.
- * Renders the discovery/feed/ UseCase eligible for direct invocation
- * from route handlers without DI ceremony.
- *
- * Usage: `buildFeed(new PrismaFeedRepository(), { context, pageSize })`.
+ * Adapter factory — convenience to wire the Adapter without exposing
+ * the class constructor in route handlers.
  */
 export function prismaFeedRepository(): FeedRepository {
   return new PrismaFeedRepository();
 }
-
-/**
- * Re-export FeedContext type so callers don't have to import from
- * two files when constructing an input.
- */
-export type { FeedContext };
