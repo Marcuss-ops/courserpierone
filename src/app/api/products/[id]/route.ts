@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { apiErrorResponse } from "@/lib/errors";
-import { requireAdmin } from "@/lib/auth/require-admin";
 import { revalidateProduct } from "@/lib/admin/revalidate-product";
 import { withRateLimit } from "@/lib/utils/rate-limit";
+import { requireAdmin } from "@/lib/auth/require-admin";
+import { requireCreatorOrAdmin } from "@/lib/auth/require-creator-or-admin";
 
 // GET — Dettaglio singolo prodotto
 export const GET = withRateLimit(async function GET(
@@ -45,8 +46,19 @@ export const PUT = withRateLimit(async function PUT(
   const { id } = await params;
 
   try {
-    const authError = await requireAdmin();
+    const { response: authError, user: authorized } = await requireCreatorOrAdmin("publish");
     if (authError) return authError;
+    if (!authorized) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const existingProduct = await prisma.product.findUnique({ where: { id } });
+    if (!existingProduct) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+    if (authorized.role !== "admin" && existingProduct.creatorId !== authorized.userId) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     const body = await request.json();
     const { slug, price, coverUrl, status, templateId, lemonVariantId, translations, lessons, sourceLocale, translationsByLocale, pricesByCurrency, countryOverrides } = body;

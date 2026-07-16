@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { apiErrorResponse } from "@/lib/errors";
-import { requireAdmin } from "@/lib/auth/require-admin";
 import { revalidateProduct } from "@/lib/admin/revalidate-product";
 import { withRateLimit } from "@/lib/utils/rate-limit";
-import { getServerUser } from "@/lib/supabase/get-user";
+import { requireAdmin } from "@/lib/auth/require-admin";
+import { requireCreatorOrAdmin } from "@/lib/auth/require-creator-or-admin";
 
-// GET — Lista tutti i prodotti
+// GET — Lista tutti i prodotti (admin only)
 export const GET = withRateLimit(
   async function GET() {
     try {
@@ -60,14 +60,9 @@ export const GET = withRateLimit(
 // POST — Crea un nuovo prodotto
 export const POST = withRateLimit(async function POST(request: NextRequest) {
   try {
-    const authError = await requireAdmin();
+    const { response: authError, user: authorized } = await requireCreatorOrAdmin("create");
     if (authError) return authError;
-    // Phase 4 hardening: `Product.creatorId` è REQUIRED (NOT NULL +
-    // FK Restrict). L'admin autenticato diventa il creator canonico
-    // del nuovo prodotto. Richiamiamo getServerUser separatamente
-    // perché requireAdmin non espone `dbUser` al caller.
-    const { dbUser } = await getServerUser();
-    if (!dbUser) {
+    if (!authorized) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const body = await request.json();
@@ -92,9 +87,9 @@ export const POST = withRateLimit(async function POST(request: NextRequest) {
           lemonVariantId: lemonVariantId ?? null,
           pricesByCurrency: pricesByCurrency ? JSON.stringify(pricesByCurrency) : null,
           countryOverrides: countryOverrides ? JSON.stringify(countryOverrides) : null,
-          // Phase 4: creatorId è REQUIRED. L'admin che crea il prodotto
-          // è il creator canonico — coerente con il pattern "creator = owner del prodotto".
-          creatorId: dbUser.id,
+          // Phase 6: creatorId è REQUIRED. L'utente autorizzato diventa
+          // il creator canonico del prodotto.
+          creatorId: authorized.userId,
         },
       });
 

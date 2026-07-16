@@ -19,9 +19,6 @@ ADD COLUMN     "revenueCents" INTEGER;
 ALTER TABLE "Message" ALTER COLUMN "conversationId" SET NOT NULL;
 
 -- AlterTable
-ALTER TABLE "NotificationPreference" ALTER COLUMN "updatedAt" DROP DEFAULT;
-
--- AlterTable
 ALTER TABLE "Order" DROP COLUMN "stripeSessionId",
 DROP COLUMN "stripeSubscriptionId",
 ALTER COLUMN "paymentProvider" SET DEFAULT 'lemonsqueezy';

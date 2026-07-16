@@ -112,3 +112,19 @@ BEGIN
     END IF;
 END
 $$;
+
+-- Drop the default on updatedAt if it still exists (moved from
+-- 20260714164120_remove_stripe so the migration order is correct for
+-- fresh shadow databases).
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'NotificationPreference'
+          AND column_name = 'updatedAt'
+          AND column_default IS NOT NULL
+    ) THEN
+        ALTER TABLE "NotificationPreference" ALTER COLUMN "updatedAt" DROP DEFAULT;
+    END IF;
+END
+$$;
