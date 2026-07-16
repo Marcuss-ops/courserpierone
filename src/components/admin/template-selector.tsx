@@ -119,7 +119,9 @@ export default function TemplateSelector({
           </div>
           <div className="flex items-center gap-0 rounded-2xl border border-white/5 bg-white/[0.02] transition-all focus-within:border-accent-primary/40 focus-within:ring-4 focus-within:ring-accent-primary/5 premium-glass group">
             <span className="pl-6 text-sm text-zinc-600 font-bold group-focus-within:text-accent-primary/50 transition-colors">
-              courser.app/
+              {/* Courssy production domain is www.courssy.com (per ADR-0015);
+                  this placeholder previews the custom-slug landing URL. */}
+              courssy.com/
             </span>
             <input
               type="text"
