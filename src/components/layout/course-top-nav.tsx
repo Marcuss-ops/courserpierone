@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Home } from "lucide-react";
 import { UserNav } from "@/components/user-nav";
 import { NotificationBell } from "@/components/layout/notification-bell";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -79,6 +80,8 @@ export function CourseTopNav({
   }, [lastY, hidden]);
 
   const basePath = `/${locale}/${courseSlug}`;
+  const lang2 = locale.split("-")[0]?.toLowerCase() ?? "en";
+  const homeLabel = lang2 === "it" ? "Torna alla home" : "Back to home";
   const tabClass = (active: boolean) =>
     [
       "px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap shrink-0",
@@ -108,21 +111,21 @@ export function CourseTopNav({
       aria-label="Course navigation"
     >
       <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-3">
-        {/* Brand */}
+        {/* Home — leaves the course area and returns to the per-locale
+            course catalog (`/[locale]/courses`), so the student can
+            discover / re-enter their other enrolled courses.
+            Replaces the previous "[C] {courseSlug}." brand block per
+            product feedback (2026-07-15): the slug in the corner
+            duplicated the in-tab welcome headline ("Bentornato" /
+            course title) and was visually noisy, especially on tablet
+            where space is tight between the brand block and the 3
+            in-course tabs. */}
         <Link
-          href={basePath}
-          className="flex items-center gap-2 hover:opacity-70 transition-opacity shrink-0"
+          href={`/${locale}/courses`}
+          aria-label={homeLabel}
+          className="flex items-center justify-center w-10 h-10 rounded-xl text-cream-dark-text-soft hover:text-cream-dark-gold hover:bg-cream-dark-surface/60 border border-cream-dark-border/60 hover:border-cream-dark-gold/40 active:scale-[0.96] transition-all shrink-0"
         >
-          <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-sm"
-            style={{ background: "linear-gradient(135deg, #1a1a1a 0%, #444 100%)" }}
-            aria-hidden
-          >
-            C
-          </div>
-          <span className="font-serif italic text-[20px] sm:text-[22px] leading-none tracking-[-0.2px] text-cream-dark-text lowercase hidden sm:inline">
-            {courseSlug}.
-          </span>
+          <Home className="w-[18px] h-[18px]" strokeWidth={2.25} />
         </Link>
 
         {/* Tabs (center) */}
