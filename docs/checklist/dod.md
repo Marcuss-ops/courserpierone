@@ -1,4 +1,4 @@
-# Definition of Done (DoD) — Coursy
+# Definition of Done (DoD) — Courssy
 
 > **Canonical reference for what "done" means on this codebase.**
 >

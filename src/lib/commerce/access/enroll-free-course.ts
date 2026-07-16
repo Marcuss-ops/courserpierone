@@ -2,7 +2,7 @@
  * src/lib/commerce/access/enroll-free-course.ts
  *
  * Phase 2 — Free layer + retention. Step 1 of 5 in the Phase 2
- * sequencing (per Coursyy plan ADR-0016):
+ * sequencing (per Courssy plan ADR-0016):
  *   feat(access)     : free enrollment         ← this file (commit 1/5)
  *   feat(learning)   : continue watching       (commit 2/5)
  *   feat(learning)   : watchlist               (commit 3/5)

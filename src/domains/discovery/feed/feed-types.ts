@@ -6,8 +6,8 @@
  * fs / redis imports below — keep the type stratum cleanly separated
  * from the Adapter (prisma-feed-repository.ts).
  *
- * Naming canonical "Courssy" per ADR-0015 — no "Courser"/"Coursy"
- * string in any branch consumer, file name, or comment.
+ * Naming canonical "Courssy" per ADR-0015 — no deprecated brand
+ * strings in any branch consumer, file name, or comment.
  *
  * 6-tipi FeedItem union:
  *   - continue_learning   (priority 1: corso iniziato)

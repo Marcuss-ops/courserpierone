@@ -557,7 +557,7 @@ This playbook is one of four docs. Do not duplicate — link instead.
 |---|---|---|
 | Source DB | `postgres:16-alpine` (name `src-db`) | Source of truth, schema applied via `prisma db push`, seeded with 6 reference rows |
 | Backup service | `prodrigestivill/postgres-backup-local:16-alpine` (name `src-pgbackups`) | Daily cron + retention-sweep, manual trigger via `/backup.sh` |
-| Throwaway restore DB | `postgres:16-alpine` (name `restore-db`) | Fresh `courser_restored` DB, isolated from source |
+| Throwaway restore DB | `postgres:16-alpine` (name `restore-db`) | Fresh `courssy_restored` DB, isolated from source |
 
 ### C.2 Cadence verification
 
@@ -598,16 +598,16 @@ echo "Restoring from: $LATEST"
 docker run -d --name restore-db \
   -e POSTGRES_USER=postgres \
   -e POSTGRES_PASSWORD=postgres \
-  -e POSTGRES_DB=courser_restored \
+  -e POSTGRES_DB=courssy_restored \
   -p 55433:5432 postgres:16-alpine
 sleep 5
 docker exec restore-db pg_isready -U postgres
 
 # 3. Restore (zcat | psql into the throwaway)
-zcat "$LATEST" | docker exec -i restore-db psql -U postgres -d courser_restored
+zcat "$LATEST" | docker exec -i restore-db psql -U postgres -d courssy_restored
 
 # 4. Verify (run these on the throwaway, not the source)
-docker exec restore-db psql -U postgres -d courser_restored -c "
+docker exec restore-db psql -U postgres -d courssy_restored -c "
   SELECT 'Product' as tbl, count(*) FROM \"Product\"
   UNION ALL SELECT 'Lesson', count(*) FROM \"Lesson\"
   UNION ALL SELECT 'LessonTranslation', count(*) FROM \"LessonTranslation\"
@@ -680,7 +680,7 @@ Backup → restore round trip **preserves the orders, products, lessons, and pro
 ### D.3 Snapshot semantic inventory
 
 - **Production:** Supabase Dashboard → Source Project → Database → Backups → Point-in-time recovery → "Restore to a new project" (avoids overwriting live DB). Choose a restore point within retention window.
-- **Sandbox:** A single custom-format `*.pitr.dump` (output of `pg_dump -U postgres -d courssy -Fc`) containing the schema + T0 row snapshot. Format: `PostgreSQL custom database dump - v1.15-0`. Restored via `pg_restore --no-owner --clean --if-exists` against `courser_restored` on the ephemeral container.
+- **Sandbox:** A single custom-format `*.pitr.dump` (output of `pg_dump -U postgres -d courssy -Fc`) containing the schema + T0 row snapshot. Format: `PostgreSQL custom database dump - v1.15-0`. Restored via `pg_restore --no-owner --clean --if-exists` against `courssy_restored` on the ephemeral container.
 
 ### D.4 Reproducible runbook
 
@@ -786,17 +786,17 @@ docker run -d --name pitr-test-restore -p 55436:5432 \
   postgres:16-alpine
 sleep 5
 docker exec pitr-test-restore pg_isready -U postgres
-docker exec pitr-test-restore createdb -U postgres courser_restored
+docker exec pitr-test-restore createdb -U postgres courssy_restored
 
 # ─── 5. Restore T1 snapshot from inside the container ────────────
 # (docker cp + docker exec pg_restore avoids host-TCP auth issues with postgres:16-alpine default pg_hba.conf)
 docker cp ./pitr-snapshots/courssy-T1.pitr.dump pitr-test-restore:/tmp/T1.dump.fc
-docker exec pitr-test-restore pg_restore -U postgres -d courser_restored \
+docker exec pitr-test-restore pg_restore -U postgres -d courssy_restored \
   --no-owner --clean --if-exists /tmp/T1.dump.fc
 echo "pg_restore exit: $?"    # expect: 0
 
 # ─── 6. Verify (literal output below, see D.5) ─────────────────────
-docker exec pitr-test-restore psql -U postgres -d courser_restored -c '\dt'
+docker exec pitr-test-restore psql -U postgres -d courssy_restored -c '\dt'
 # Run the row-count + spot-check queries from D.5.
 
 # ─── 7. Cleanup ────────────────────────────────────────────────────

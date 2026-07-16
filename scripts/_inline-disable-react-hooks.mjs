@@ -17,7 +17,7 @@
 import fs from "node:fs";
 import { execSync } from "node:child_process";
 
-process.chdir("C:\\Users\\pater\\Pyt\\Courser");
+process.chdir("C:\\Users\\pater\\Pyt\\Courssy");
 
 const TARGET = new Set([
   "react-hooks/set-state-in-effect",

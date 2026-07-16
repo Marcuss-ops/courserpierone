@@ -2,8 +2,8 @@
 
 **Status:** Accepted · 2026-07-16
 **Deciders:** Platform architecture review
-**Parent:** [ADR-0015 — Courssy naming canonical](0015-coursy-naming-decision.md), [ADR-0016 — Courssy monolith-modular](0016-coursy-monolith-modular.md)
-**Supersedes:** [ADR-0016 §b nota — "Analytics consolidato come read-model in creator-ops/"](0016-coursy-monolith-modular.md) (re-elevates Analytics to a standalone V2 domain)
+**Parent:** [ADR-0015 — Courssy naming canonical](0015-courssy-naming-decision.md), [ADR-0016 — Courssy monolith-modular](0016-courssy-monolith-modular.md)
+**Supersedes:** [ADR-0016 §b nota — "Analytics consolidato come read-model in creator-ops/"](0016-courssy-monolith-modular.md) (re-elevates Analytics to a standalone V2 domain)
 **Implements:** V2 monolith-modular strategy §1 (canonical dependency rule + domain map)
 
 > **Decision (1-line):** Courssy V2 è organizzato in **10 domini** (Identity & Access, Catalog, Learning, Community, Messaging, Discovery, Creator Operations, Automation, Commerce, **Analytics**) con la regola di dipendenza canonica **`UI/Route → Application UseCase → Domain rule → Port → Adapter`**; la comunicazione cross-domain passa solo via UseCase orchestration, event grid, o un **bounded shared kernel** collocato in `src/lib/shared-kernel/`.
@@ -134,8 +134,8 @@ Il **route** non interroga mai Prisma direttamente. Il **domain rule** non impor
 
 ## Cross-references
 
-- **[ADR-0015 — Courssy naming canonical](0015-coursy-naming-decision.md)** — namespace V2 è `courssy/<domain>`.
-- **[ADR-0016 — Courssy monolith-modular](0016-coursy-monolith-modular.md)** — parent: definisce 5-commit workflow + no-anticipatory-folders rule. **§b nota su Analytics è SUPERSEDED by this ADR**.
+- **[ADR-0015 — Courssy naming canonical](0015-courssy-naming-decision.md)** — namespace V2 è `courssy/<domain>`.
+- **[ADR-0016 — Courssy monolith-modular](0016-courssy-monolith-modular.md)** — parent: definisce 5-commit workflow + no-anticipatory-folders rule. **§b nota su Analytics è SUPERSEDED by this ADR**.
 - **[ADR-0017 — Dependency policy](0017-dependency-policy.md)** — operationalizza la directional rule via `check:deps`.
 - **[ADR-0014 — Atomicity boundary for Order+AccessGrant](0014-atomicity-boundary.md)** — Order ↔ AccessGrant canonicalmente nei domini Commerce + Identity.
 - **[ADR-0013 — Template-amish direct-import workaround](0013-template-amish-direct-import.md)** — esempio canonico di eccezione boundary documentata.
@@ -165,7 +165,7 @@ Il **route** non interroga mai Prisma direttamente. Il **domain rule** non impor
 
 ## Implementation log
 
-- **2026-07-16 (commit `90c843e`)**: ADR-0018 accettato. `docs/adr/0018-ten-domain-boundaries.md` + `docs/adr/0016-coursy-monolith-modular.md` committati via `docs(adr): 0016+0018 bidirezionale cross-link + honest verification scope`. Cross-link bidirezionale marcato in entrambi gli ADRs: ADR-0016 §b SUPERSEDED NOTICE + ADR-0018 §a nota esplicita.
+- **2026-07-16 (commit `90c843e`)**: ADR-0018 accettato. `docs/adr/0018-ten-domain-boundaries.md` + `docs/adr/0016-courssy-monolith-modular.md` committati via `docs(adr): 0016+0018 bidirezionale cross-link + honest verification scope`. Cross-link bidirezionale marcato in entrambi gli ADRs: ADR-0016 §b SUPERSEDED NOTICE + ADR-0018 §a nota esplicita.
 - **2026-07-16 (fix-up commit, TBD-SHA)**: post-review cleanup di `90c843e`. Risolve (a) grammatica italiana §d point 1, (b) §Verification framing per evitare claim non-verificati, (c) ADR-0016 §b residuo forward-reference ("ADR-0017+" → ADR-0018 §a). Messaggio: `docs(adr): 0018 grammar + verification-scope + 0016 anchor`.
 - **Pre-existing drift**: questo commit è docs-only e non include source modifications. Una `tsc --noEmit` eseguita su questo commit restituisce un fallimento pre-esistente in `src/domains/discovery/policies/policy-catalog.ts` (committed nel registry sprint, ~8120b82). Il drift è tracciato come follow-up separato; **non blocca** ADR-0018 perché ADR-0018 non modifica sorgenti.
 - **Pre-existing drift**: questo commit è docs-only e non include source modifications. Una `tsc --noEmit` eseguita su questo commit restituisce un fallimento pre-esistente in `src/domains/discovery/policies/policy-catalog.ts` (committed nel registry sprint, ~8120b82). Il drift è tracciato come follow-up separato; **non blocca** ADR-0018 perché ADR-0018 non modifica sorgenti.

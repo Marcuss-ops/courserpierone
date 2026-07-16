@@ -2,7 +2,7 @@
 
 **Status:** Accepted · 2026-07-16
 **Deciders:** Platform architecture review
-**Parent:** [ADR-0015 — Courssy naming canonical](0015-coursy-naming-decision.md)
+**Parent:** [ADR-0015 — Courssy naming canonical](0015-courssy-naming-decision.md)
 **Supersedes:** —
 **Implements:** V2 monolith-modular strategy §1 (depenency rule + 9-domain map + no-anticipatory-folders + 5-commit workflow)
 
@@ -180,7 +180,7 @@ Ogni refactor che tocca codice esistente segue questa sequenza atomica su main:
 
 ## Cross-references
 
-- **[ADR-0015 — Courssy naming canonical](0015-coursy-naming-decision.md)** — il namespace V2 è `courssy/<domain>`. ADR-0015 fissa che la stringa canonica è "Courssy".
+- **[ADR-0015 — Courssy naming canonical](0015-courssy-naming-decision.md)** — il namespace V2 è `courssy/<domain>`. ADR-0015 fissa che la stringa canonica è "Courssy".
 - **[ADR-0014 — Atomicity boundary for Order+AccessGrant](0014-atomicity-boundary.md)** — `Order` ↔ `AccessGrant` è canonicalmente in `src/domains/commerce/orders/` + `src/domains/identity/access-grants/` V2.
 - **[ADR-0013 — Template-amish direct-import workaround](0013-template-amish-direct-import.md)** — esempio canonico di "eccezione documenta". Ogni leak boundary futuro deve avere ADR analogo.
 - **[ADR-0011 — Course plugin decoupling](0011-course-plugin-decoupling.md)** — il pattern plugin-folder per `courses/<slug>/` è ortogonale ai domini V2: i plugin di course restano dove sono, ma i domain types che li descrivono vivono in `src/domains/catalog/`.
@@ -194,7 +194,7 @@ Ogni refactor che tocca codice esistente segue questa sequenza atomica su main:
 - `npx tsc --noEmit` — 0 errors (ADR = docs-only, nessun type impact).
 - `npx vitest run` — 725/725 PASS (no test code modified).
 - `npm run lint` — 0 errors / 0 warnings (no source touched).
-- `wc -l docs/adr/0016-coursy-monolith-modular.md` — mini-ADR shape (~200 LOC).
+- `wc -l docs/adr/0016-courssy-monolith-modular.md` — mini-ADR shape (~200 LOC).
 - Nuova feature V2 (es. feed MVP Fase 1) si appoggia su questo ADR + ADR-0015 per i namespaces.
 
 ---
@@ -213,6 +213,6 @@ Ogni refactor che tocca codice esistente segue questa sequenza atomica su main:
 
 ## Implementation log
 
-- 2026-07-16: ADR-0016 accettato. `docs/adr/0016-coursy-monolith-modular.md` committato via questo commit. Decision 1-line "Courssy è monolith-modular con dependency rule UI→UseCase→Domain→Port→Adapter + 9-domain map + no-anticipatory-folders + 5-commit workflow" in cima.
+- 2026-07-16: ADR-0016 accettato. `docs/adr/0016-courssy-monolith-modular.md` committato via questo commit. Decision 1-line "Courssy è monolith-modular con dependency rule UI→UseCase→Domain→Port→Adapter + 9-domain map + no-anticipatory-folders + 5-commit workflow" in cima.
 - Follow-up: implementare custom ESLint dependency-cruiser rule (Future work §1) — blocca il primo refactor V1 → V2.
 - Follow-up: Migration chain (Future work §2) pianificata ma NON in questo commit. Ogni migration sarà un set di 5 commit canonici.

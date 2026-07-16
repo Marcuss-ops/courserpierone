@@ -119,3 +119,5 @@ Sequenza consigliata (7 commit dopo questa ADR) — ogni commit con typecheck + 
 ## Implementation log
 
 - 2026-07-16: ADR-0015 accettato. `docs/adr/0015-coursy-naming-decision.md` committato via questo commit. Migration chain NON in questo commit (docs-only, blast-radius limitato). Decision 1-line "Il nome canonico del brand è 'Courssy'" in cima al file + footer ripetuto per visibilità reviewer.
+- 2026-07-16: Migration chain completata su main. Normalizzate tutte le occorrenze di `Courser`/`Coursy` → `Courssy` in UI, certificati, cookie visitor, ebook PDF, commenti e documentazione; `courser_restored` → `courssy_restored`; `courser_vid` → `courssy_vid`; aggiunto `container_name: courssy-db-1` in `docker-compose.yml`.
+  - Side effect accettato: il rename del cookie visitor (`courser_vid` → `courssy_vid`) resetta gli ID visitatore esistenti. Analytics continuity è interrotta per il cookie first-party; eventuali report che dipendono dal cookie dovranno gestire il gap.

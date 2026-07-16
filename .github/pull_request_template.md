@@ -1,5 +1,5 @@
 <!--
-Coursy Pull Request Template
+Courssy Pull Request Template
 ============================
 
 This template enforces the canonical Definition of Done (DoD).

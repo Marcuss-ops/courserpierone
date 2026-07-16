@@ -1,4 +1,4 @@
-const COOKIE_NAME = "courser_vid";
+const COOKIE_NAME = "courssy_vid";
 const COOKIE_DAYS = 365;
 
 function generateId(): string {

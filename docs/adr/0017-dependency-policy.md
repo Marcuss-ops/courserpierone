@@ -10,7 +10,7 @@
 
 ## Context
 
-The Coursy platform grows. New features (feed, agents, creator studio, DM
+The Courssy platform grows. New features (feed, agents, creator studio, DM
 commerce) introduce temptations to add libraries: vector DBs, agent
 frameworks, message brokers, second cache layers, recommendation engines,
 new ORMs. Without a written policy, dependencies accumulate, the bundle

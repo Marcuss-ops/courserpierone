@@ -38,3 +38,7 @@ docs/ops/vercel-secrets-reference.md
 # Local hotspot scorer output (also uploaded as CI artifact)
 tmp/hotspots/
 tmp/deps-checker.json
+
+# Local log/output artifacts
+server.log
+typecheck_output.txt

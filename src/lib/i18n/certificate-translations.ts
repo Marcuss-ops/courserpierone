@@ -15,7 +15,7 @@ export interface CertificateStrings {
   certHasCompleted: string;
   certDateLabel: string;
   certLessonsCompleted: string;
-  brandLabel: string; // "COURSER" — same in all languages, exposed for completeness
+  brandLabel: string; // "COURSSY" — same in all languages, exposed for completeness
 }
 
 const certificateTranslations: Record<string, CertificateStrings> = {
@@ -25,7 +25,7 @@ const certificateTranslations: Record<string, CertificateStrings> = {
     certHasCompleted: "ha completato con successo il corso",
     certDateLabel: "Completato il:",
     certLessonsCompleted: "{n} lezioni completate",
-    brandLabel: "COURSER",
+    brandLabel: "COURSSY",
   },
   en: {
     certTitle: "CERTIFICATE OF COMPLETION",
@@ -33,7 +33,7 @@ const certificateTranslations: Record<string, CertificateStrings> = {
     certHasCompleted: "has successfully completed the course",
     certDateLabel: "Completed on:",
     certLessonsCompleted: "{n} lessons completed",
-    brandLabel: "COURSER",
+    brandLabel: "COURSSY",
   },
   es: {
     certTitle: "CERTIFICADO DE FINALIZACIÓN",
@@ -41,7 +41,7 @@ const certificateTranslations: Record<string, CertificateStrings> = {
     certHasCompleted: "ha completado con éxito el curso",
     certDateLabel: "Completado el:",
     certLessonsCompleted: "{n} lecciones completadas",
-    brandLabel: "COURSER",
+    brandLabel: "COURSSY",
   },
 };
 

@@ -117,7 +117,7 @@ export async function GET(
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(77, 142, 255);
-  doc.text("COURSER", margin, y);
+  doc.text("COURSSY", margin, y);
   y += 5;
 
   // Spacer
