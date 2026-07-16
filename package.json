@@ -27,7 +27,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "postinstall": "prisma generate && npx tsx scripts/generate/generate-locale-resolver.ts"
+    "postinstall": "prisma generate && npx tsx scripts/generate/generate-locale-resolver.ts",
+    "check:deps": "npx tsx scripts/quality/check-deps.ts"
   },
   "dependencies": {
     "@lemonsqueezy/lemonsqueezy.js": "^4.0.0",

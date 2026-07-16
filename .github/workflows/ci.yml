@@ -532,6 +532,27 @@ jobs:
           path: tmp/hotspots/hotspot-score.json
           retention-days: 14
 
+      # Phase 9 (ADR-0017): dependency audit. Analyzes package.json +
+      # package-lock.json + src/ import usages. Flags deps with count == 1
+      # as candidate-to-remove (informational), truly-unused runtime deps
+      # (count == 0) as exit 1 + ::warning::, and manifest-vs-lockfile
+      # drift (declared but not installed) as exit 1.
+      - name: Dependency audit (ADR-0017)
+        run: |
+          OUTPUT=$(npm run check:deps 2>&1) && EXIT=0 || EXIT=$?
+          echo "$OUTPUT"
+          if [ $EXIT -ne 0 ]; then
+            echo "::warning::check:deps found truly-unused deps or manifest/lockfile drift. Run npm install or remove from package.json."
+            exit 1
+          fi
+      - name: Upload dep audit (artifact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deps-audit
+          path: tmp/deps-checker.json
+          retention-days: 14
+
       - name: Upload size-violation context (if any)
         if: failure()
         uses: actions/upload-artifact@v4

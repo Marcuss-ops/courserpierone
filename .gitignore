@@ -37,3 +37,4 @@ docs/ops/vercel-secrets-reference.md
 
 # Local hotspot scorer output (also uploaded as CI artifact)
 tmp/hotspots/
+tmp/deps-checker.json
