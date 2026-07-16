@@ -8,6 +8,13 @@
 
 ## 1. V1 blockers
 
+> **STATUS 2026-07-16:** all 4 V1 blockers (§1.1, §1.2, §1.4, §1.5) are **CLOSED**. `npx tsx scripts/audit-v1-readiness.ts` returns GREEN. Evidence captured in commit `docs(v1): close all 4 V1 blockers per audit-v1-readiness (GREEN)`:
+>
+> - §1.1 Orphan Products = 0 rows. DB-direct psql `SELECT count(*) FROM "Product" WHERE "creatorId" IS NULL` → 0.
+> - §1.2 NextAuth tables absent. Migration `prisma/migrations/20260712220000_drop_nextauth_models/migration.sql` applied; tables `Account` / `Session` / `VerificationToken` no longer present.
+> - §1.4 SSE Stream Test Gap closed. `src/app/api/conversations/[id]/stream/route.test.ts` exists (402 lines). Vitest dispatch (`npx vitest run src/app/api/conversations/[id]/stream/route.test.ts`) → 15/15 PASS, exit 0.
+> - §1.5 TypeScript baseline = 0 errors. `npx tsc --noEmit` → TSC_EXIT=0.
+
 Questi item sono **gate strict** che impediscono il release V1.x GA. Devono essere a zero prima che il `prisma/schema.prisma` venga locked.
 
 ### 1.1 Orphan Products (`Product.creatorId IS NULL`)
