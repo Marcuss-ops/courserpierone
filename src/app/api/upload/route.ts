@@ -77,44 +77,36 @@ export const POST = withRateLimit(async function POST(request: NextRequest) {
       });
 
     if (uploadError) {
-      // Se il bucket non esiste, prova a crearlo
-      if (uploadError.message?.includes("bucket") || uploadError.message?.includes("not found")) {
-        const { error: createError } = await supabase.storage.createBucket(BUCKET_NAME, {
-          public: true,
-          fileSizeLimit: MAX_SIZE,
-          allowedMimeTypes: ALLOWED_TYPES,
-        });
-
-        if (createError) {
-          console.error("Errore creazione bucket:", createError);
-          return NextResponse.json(
-            { error: `Impossibile creare il bucket di storage: ${createError.message}` },
-            { status: 500 }
-          );
-        }
-
-        // Riprova upload
-        const { error: retryError } = await supabase.storage
-          .from(BUCKET_NAME)
-          .upload(filePath, buffer, {
-            contentType: file.type,
-            cacheControl: "31536000",
-          });
-
-        if (retryError) {
-          console.error("Errore upload dopo creazione bucket:", retryError);
-          return NextResponse.json(
-            { error: `Errore nell'upload: ${retryError.message}` },
-            { status: 500 }
-          );
-        }
-      } else {
-        console.error("Errore upload:", uploadError);
-        return NextResponse.json(
-          { error: `Errore nell'upload: ${uploadError.message}` },
-          { status: 500 }
-        );
-      }
+      // Fail-fast: il bucket deve esistere in produzione, pre-creato via
+      // `scripts/supabase/setup-storage.sql` (eseguito al deploy, non a
+      // runtime). Mai `createBucket` runtime: su Vercel sarebbe race-prone
+      // e maschererebbe bug di deploy. Hint configurazione solo per 404
+      // bucket-missing; `message` resta off-client per evitare info-
+      // disclosure di path/region interni dell'SDK Supabase.
+      console.error("[upload] Storage upload failed:", {
+        name: uploadError.name,
+        statusCode: uploadError.statusCode,
+        message: uploadError.message,
+        bucket: BUCKET_NAME,
+        filePath,
+        size: file.size,
+      });
+      // Detection: `statusCode === "404"` (campo stabile del Supabase
+      // Storage SDK, esposto come `string` cross-version) è la marker
+      // primaria; `"bucket"` nel message è fallback safety-net se il campo
+      // dovesse mancare. Evitiamo keyword più generiche come "not found"
+      // perché matchano falsi positivi ("Object not found", "JWT not found",
+      // ecc.) non legati al bucket mancante.
+      const isBucketMissing =
+        uploadError.statusCode === "404" ||
+        uploadError.message?.toLowerCase().includes("bucket");
+      const hint = isBucketMissing
+        ? ` Bucket '${BUCKET_NAME}' deve essere pre-creato via scripts/supabase/setup-storage.sql (errore di CONFIGURAZIONE, non di runtime).`
+        : " Dettagli nei logs server-side.";
+      return NextResponse.json(
+        { error: `Storage upload fallito.${hint}` },
+        { status: 500 }
+      );
     }
 
     // Ottieni URL pubblico
