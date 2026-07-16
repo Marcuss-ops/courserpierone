@@ -55,6 +55,8 @@ export interface CreateMessageInput {
   partnerId: string;
   /** Testo del messaggio (già trimmed e validato 1 ≤ len ≤ 5000). */
   content: string;
+  /** Phase 4: optional OfferCard attached to this message. */
+  offerCardId?: string;
 }
 
 export interface CreatedMessage {
@@ -86,7 +88,7 @@ export interface CreatedMessage {
 export async function createMessageAndNotify(
   input: CreateMessageInput,
 ): Promise<CreatedMessage> {
-  const { conversation, sender, partnerId, content } = input;
+  const { conversation, sender, partnerId, content, offerCardId } = input;
 
   // ── 1. Persist message ─────────────────────────────────────
   const created = await prisma.message.create({
@@ -96,6 +98,7 @@ export async function createMessageAndNotify(
       // sanitizeHtml rimuove tag pericolosi ma mantiene quelli safe
       // (b/i/em/strong/br/p/ul/ol/li/a/code/pre/blockquote + h1-h6).
       content: sanitizeHtml(content.trim()),
+      offerCardId,
     },
     include: {
       sender: {
