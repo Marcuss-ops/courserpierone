@@ -109,6 +109,14 @@ jobs:
       - name: Typecheck (with App Router type generation)
         run: bash scripts/ci/typecheck-with-build.sh
 
+      # ── Detect circular dependencies (fail-the-gate) ──
+      # Static, type-aware cycle detection via madge v8. Runs after the
+      # typecheck step so a new cycle introduced by a refactor is caught
+      # before merge. Exits non-zero on any cycle → typecheck job red →
+      # deploy-gate red → branch protection blocks the merge.
+      - name: Detect circular dependencies
+        run: npx madge --circular src/ --ts-config ./tsconfig.json
+
   # ════════════════════════════════════════════════════════════════════════
   # Job 2 — Lint
   # ════════════════════════════════════════════════════════════════════════
