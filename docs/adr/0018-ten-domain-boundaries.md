@@ -84,7 +84,7 @@ graph TD
 
 I domini **non possono** importarsi l'un l'altro direttamente a livello di domain rule. Tre meccanismi ammessi per la comunicazione cross-domain:
 
-1. **UseCase orchestration** (preferito): un UseCase in Domain A chiama un UseCase in Domain B **attraverso il suo port**. Esempio canonico (post-migration V2): una UseCase che deve verificare che il viewer abbia un grant valido chiama la UseCase di accesso del Domain Identity via il port esposto da Identity, **mai** importando direttamente la regola o l'adapter di Identity.
+1. **UseCase orchestration** (preferito): un UseCase in Domain A chiama un UseCase in Domain B **attraverso il suo port**. Esempio canonico (post-migration V2): **quando** una UseCase deve verificare che il viewer possieda un grant valido, **delega** la verifica a una UseCase del Domain Identity via il port esposto da Identity, **mai** importando direttamente la regola o l'adapter di Identity.
 2. **Event grid** (async / eventual consistency): un UseCase in Domain A emette un evento; un UseCase in Domain B subscribe via il suo event-adapter. Lo schema evento è owned da Domain A. Backed by Postgres LISTEN/NOTIFY + Redis pub/sub per V2. La **taxonomy canonica** degli eventi + payload schemas è documentata in un Future ADR (event-grid ADR, TBD — non ancora scritto).
 3. **Bounded shared kernel** (raro): due domini condividono un piccolo modulo immutabile di value-objects collocato in `src/lib/shared-kernel/`. Il shared kernel contiene **solo** types + pure constructors (no domain rules). Value-objects ammessi: `Money`, `Locale`, `ProductId`, `CreatorId`, `RecommendationScore`, `AgentRunStatus`, `OfferEligibility`, `ExternalOperationId`.
 
@@ -148,7 +148,7 @@ Il **route** non interroga mai Prisma direttamente. Il **domain rule** non impor
 
 - **Scope**: this ADR is docs-only; no TypeScript surface under `src/` is touched.
 - `npx tsc --noEmit` & `npx vitest run` are intentionally **deferred** to the next non-docs atomic commit (per the Phase 0 quality gate rule "no green gate, no push"). The docs-only nature of this commit does not require a green TypeScript or test gate at push time — that gate is the responsibility of the next src/-touching commit.
-- `git grep -n "src/domains/creator-ops/.*analytics" -- src/` — 0 hits required (Analytics is now a separate domain; legacy uses under creator-ops/ are not yet rewritten).
+- `git grep -n "src/domains/creator-ops/.*analytics" -- src/` — da verificare prima del primo commit V2 che tocca Analytics (legacy uses under creator-ops/ possono ancora esistere; questo ADR non li rimuove).
 - `wc -l docs/adr/0018-ten-domain-boundaries.md` — full-ADR shape (~290 LOC).
 
 ---
@@ -165,7 +165,9 @@ Il **route** non interroga mai Prisma direttamente. Il **domain rule** non impor
 
 ## Implementation log
 
-- **2026-07-16**: ADR-0018 accettato. `docs/adr/0018-ten-domain-boundaries.md` committato via questo commit. Cross-link bidirezionale con ADR-0016 §b aggiunto in entrambi gli ADRs (la nota "Analytics consolidato come read-model in creator-ops/" in ADR-0016 §b è marcata come SUPERSEDED in un commit separato `docs(adr): 0016 mark §b Analytics note as superseded by 0018`).
+- **2026-07-16 (commit `90c843e`)**: ADR-0018 accettato. `docs/adr/0018-ten-domain-boundaries.md` + `docs/adr/0016-coursy-monolith-modular.md` committati via `docs(adr): 0016+0018 bidirezionale cross-link + honest verification scope`. Cross-link bidirezionale marcato in entrambi gli ADRs: ADR-0016 §b SUPERSEDED NOTICE + ADR-0018 §a nota esplicita.
+- **2026-07-16 (fix-up commit, TBD-SHA)**: post-review cleanup di `90c843e`. Risolve (a) grammatica italiana §d point 1, (b) §Verification framing per evitare claim non-verificati, (c) ADR-0016 §b residuo forward-reference ("ADR-0017+" → ADR-0018 §a). Messaggio: `docs(adr): 0018 grammar + verification-scope + 0016 residue cleanup`.
+- **Pre-existing drift**: questo commit è docs-only e non include source modifications. Una `tsc --noEmit` eseguita su questo commit restituisce un fallimento pre-esistente in `src/domains/discovery/policies/policy-catalog.ts` (committed nel registry sprint, ~8120b82). Il drift è tracciato come follow-up separato; **non blocca** ADR-0018 perché ADR-0018 non modifica sorgenti.
 - **Pre-existing drift**: questo commit è docs-only e non include source modifications. Una `tsc --noEmit` eseguita su questo commit restituisce un fallimento pre-esistente in `src/domains/discovery/policies/policy-catalog.ts` (committed nel registry sprint, ~8120b82). Il drift è tracciato come follow-up separato; **non blocca** ADR-0018 perché ADR-0018 non modifica sorgenti.
 - **Follow-up**: implementare custom ESLint dependency-cruiser rule (Future work §1).
 - **Follow-up**: estrarre shared-kernel types (Future work §2) prima delle prime feature V2 cross-domain.

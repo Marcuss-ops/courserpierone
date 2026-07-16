@@ -72,9 +72,9 @@ Regole di import (in CI via `eslint-plugin-import` + custom rule):
 | 8 | **Automation** | Agents (draft-first, V2 MVP), jobs, approvals, publishing, retry policy canonica | `src/domains/automation/` |
 | 9 | **Commerce** | Prices, checkout (`Lemon Squeezy` only), orders, coupons, access grant admission | `src/domains/commerce/` |
 
-> **Nota:** "Analytics" menzionato in alcune fonti esterne è consolidato come **read-model** dentro `creator-ops/` (non un dominio separato V2). Se in futuro diventa un dominio separato (cross-creator analytics), sarà un ADR-0017+.
+> **Nota:** "Analytics" menzionato in alcune fonti esterne è consolidato come **read-model** dentro `creator-ops/` (non un dominio separato V2). Se in futuro diventa un dominio separato (cross-creator analytics), vedi la decisione canonica in [ADR-0018 — V2 Ten-Domain Boundaries](0018-ten-domain-boundaries.md) §a (Analytics è ora dominio V2 standalone #10).
 
-> **SUPERSEDED NOTICE (2026-07-16, ADR-0018):** la nota precedente è **invalidata**. Analytics è ora un **dominio V2 standalone** (`#10` nella 10-domain map). Vedi [ADR-0018 — V2 Ten-Domain Boundaries](0018-ten-domain-boundaries.md) §a per la tabella canonica aggiornata.
+> **SUPERSEDED NOTICE (2026-07-16, ADR-0018):** la nota precedente è **invalidata**. Analytics è ora un **dominio V2 standalone** (`#10` nella 10-domain map). Vedi [ADR-0018 — V2 Ten-Domain Boundaries §a](0018-ten-domain-boundaries.md#a) per la tabella canonica aggiornata.
 
 ### Domain folder minimal shape (YAGNI)
 
