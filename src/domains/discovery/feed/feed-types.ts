@@ -24,8 +24,6 @@
  * tiers; we honor the type count without forcing an unused emit.
  */
 
-import type { Date } from "node:timers";
-
 // ─── FeedContext ──────────────────────────────────────────────────────
 // Snapshots derivati una volta dall'upstream (route handler);
 // non derivare dentro buildFeed (would create hidden DB calls in
