@@ -7,6 +7,7 @@ export default defineConfig({
     environment: "node",
     include: [
       "src/**/*.test.ts",
+      "src/**/*.test.tsx",
       // Quality-script unit tests (DoD, hotspot-score, deps, etc.).
       // Kept separate from src/ so quality-gate tooling doesn't pollute
       // domain-code coverage stats.
