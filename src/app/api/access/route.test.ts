@@ -1,20 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { NextRequest } from "next/server";
-import { fakeOrder } from "@/app/api/__test-helpers__/fake-order";
 
 // ─── Mock helpers (SSOT seam) ──────────────────────────────
-// Step 9 — MCR Phase 3 cutover: the session-keyed read goes through
-// resolveProductAccess (canonical AccessGrant SSOT). findCompletedOrder
-// is no longer imported by the route, so its mock is removed here.
+// Step 9 — MCR Phase 3 cutover: BOTH the session-keyed AND the
+// orderId-keyed (Pattern B) reads go through AccessGrant. The route:
+//   - session-keyed → `resolveProductAccess` resolver (helper).
+//   - orderId-keyed → `prisma.accessGrant.findFirst` directly (Pattern B).
+//
+// `findCompletedOrderByOrderId` is REMOVED — its prior Order.status
+// read is replaced by the canonical grant query keyed by
+// `(sourceType='order' AND sourceId=orderId AND productId)`.
 const mockResolveProductAccess = vi.fn();
-const mockFindCompletedOrderByOrderId = vi.fn();
 
 vi.mock("@/lib/commerce/access/resolve-product-access", () => ({
   resolveProductAccess: mockResolveProductAccess,
-}));
-
-vi.mock("@/lib/access", () => ({
-  findCompletedOrderByOrderId: mockFindCompletedOrderByOrderId,
 }));
 
 // ─── Mock Supabase user ────────────────────────────────────
@@ -24,9 +23,15 @@ vi.mock("@/lib/supabase/get-user", () => ({
   getServerUser: mockGetServerUser,
 }));
 
-// ─── Mock Prisma (prisma.product.findFirst only — used by access route) ─
+// ─── Mock Prisma (product.findFirst + accessGrant.findFirst) ───
+//
+// V2 — Pattern B reads `prisma.accessGrant.findFirst` directly. Both
+// queries surface in this mock; tests use the appropriate one.
 const mockPrisma = {
   product: {
+    findFirst: vi.fn(),
+  },
+  accessGrant: {
     findFirst: vi.fn(),
   },
 };
@@ -148,11 +153,12 @@ describe("GET /api/access — auth semantics probe", () => {
   it("anonymous with valid orderId (Pattern B): returns hasAccess:true", async () => {
     mockAnonymous();
     mockProductFound();
-    // Pattern B is preserved — it's a payment-receipt concern, not
-    // an access-control concern.
-    mockFindCompletedOrderByOrderId.mockResolvedValueOnce(
-      fakeOrder({ providerOrderId: FAKE_PROVIDER_ORDER_ID }),
-    );
+    // V2 — Pattern B reads `prisma.accessGrant.findFirst` keyed by
+    // (sourceType='order' AND sourceId=orderId AND productId). The
+    // grant row IS the SSOT link between the Order and authorization.
+    mockPrisma.accessGrant.findFirst.mockResolvedValueOnce({
+      id: FAKE_GRANT_ID,
+    });
 
     const { GET } = await import("./route");
     const response = await GET(
@@ -164,16 +170,30 @@ describe("GET /api/access — auth semantics probe", () => {
     expect(body.hasAccess).toBe(true);
     // Note: guest (Pattern B) does NOT receive userId in response shape.
     expect(body.userId).toBeUndefined();
-    expect(mockFindCompletedOrderByOrderId).toHaveBeenCalledWith({
-      orderId: FAKE_PROVIDER_ORDER_ID,
-      productId: FAKE_PRODUCT_ID,
-    });
+    // V2 invariant — the read queries AccessGrant (canonical SSOT),
+    // not Order. Verify the WHERE clause shape explicitly.
+    expect(mockPrisma.accessGrant.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          sourceType: "order",
+          sourceId: FAKE_PROVIDER_ORDER_ID,
+          productId: FAKE_PRODUCT_ID,
+          status: "active",
+          OR: expect.arrayContaining([
+            expect.objectContaining({ expiresAt: null }),
+            expect.objectContaining({ expiresAt: expect.any(Object) }),
+          ]),
+        }),
+      }),
+    );
   });
 
   it("anonymous with valid orderId but WRONG productId (cross-product exploit): hasAccess:false", async () => {
     mockAnonymous();
     mockProductFound();
-    mockFindCompletedOrderByOrderId.mockResolvedValueOnce(null);
+    // Wrong productId means different productId in the WHERE → SQL
+    // filter excludes the grant. findFirst returns null.
+    mockPrisma.accessGrant.findFirst.mockResolvedValueOnce(null);
 
     const { GET } = await import("./route");
     const response = await GET(
@@ -183,10 +203,46 @@ describe("GET /api/access — auth semantics probe", () => {
 
     expect(response.status).toBe(200);
     expect(body.hasAccess).toBe(false);
-    expect(mockFindCompletedOrderByOrderId).toHaveBeenCalledWith({
-      orderId: FAKE_PROVIDER_ORDER_ID,
-      productId: FAKE_PRODUCT_ID,
-    });
+    // Verify the WHERE clause carries the correct productId (defense
+    // against cross-product scope-leak on Pattern B).
+    expect(mockPrisma.accessGrant.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          sourceType: "order",
+          sourceId: FAKE_PROVIDER_ORDER_ID,
+          productId: FAKE_PRODUCT_ID,
+        }),
+      }),
+    );
+  });
+
+  // ── Pattern B sourceType-uniform matrix ─────────────────
+  // V2 — Pattern B reads the canonical grant table, not the Order.
+  // The read is keyed by (sourceType='order' + sourceId), which is
+  // invariant across all grant sourceTypes EXCEPT 'order' (Pattern B
+  // IS the post-checkout orderId-keyed receipt).\n  // We assert the strict sourceType='order' boundary in the WHERE — a\n  // free_enrollment/admin/bundle grant with the same sourceId
+  // (collision-test) MUST NOT satisfy Pattern B (defense against
+  // accidental sourceId reuse).
+  it("Pattern B requires sourceType='order' (collision with free_enrollment grant = deny)", async () => {
+    mockAnonymous();
+    mockProductFound();
+    mockPrisma.accessGrant.findFirst.mockResolvedValueOnce(null);
+
+    const { GET } = await import("./route");
+    const response = await GET(
+      createMockRequest({ productId: FAKE_PRODUCT_SLUG, orderId: FAKE_PROVIDER_ORDER_ID })
+    );
+    expect(response.status).toBe(200);
+    expect((await response.json()).hasAccess).toBe(false);
+
+    // The filter MUST pin sourceType='order' so that an arbitrary grant
+    // with the same sourceId (e.g. a free_enrollment or admin grant
+    // mistakenly sharing the id) cannot satisfy Pattern B.
+    expect(mockPrisma.accessGrant.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ sourceType: "order" }),
+      }),
+    );
   });
 
   // ── Admin (inline bypass — different shape from customer) ──
@@ -272,9 +328,10 @@ describe("GET /api/access — auth semantics probe", () => {
     expect(response.status).toBe(200);
     expect(body.hasAccess).toBe(true);
     expect(body.userId).toBe(FAKE_USER_ID);
-    // Resolver was attempted and succeeded — Pattern B never reached.
+    // Resolver was attempted and succeeded — Pattern B (V2: the
+    // accessGrant.findFirst query) never reached.
     expect(mockResolveProductAccess).toHaveBeenCalledTimes(1);
-    expect(mockFindCompletedOrderByOrderId).not.toHaveBeenCalled();
+    expect(mockPrisma.accessGrant.findFirst).not.toHaveBeenCalled();
   });
 
   // ── Crash safety: unhandled error returns hasAccess:false (NOT 500) ──

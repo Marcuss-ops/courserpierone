@@ -3,20 +3,25 @@ import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { withRateLimit } from "@/lib/utils/rate-limit";
 import { resolveProductAccess } from "@/lib/commerce/access/resolve-product-access";
-import { findCompletedOrderByOrderId } from "@/lib/access";
 
 /**
  * GET /api/access - auth semantics probe.
  *
  * Step 9 - MCR Phase 3 cutover: the session-keyed comparison reads
  * from `AccessGrant.status="active"` via `resolveProductAccess` (the
- * post-cutover SSOT path). The orderId-keyed Pattern B branch is
- * preserved: that path validates a guest's payment receipt
- * immediately after checkout (LS webhook settles the order
- * synchronously with the grant dual-write, so the order row IS the
- * canonical proof of receipt for a guest redirect from the
- * checkout page). The orderId-keyed path is a payment-receipt
- * concern, not an access-control concern.
+ * post-cutover SSOT path).
+ *
+ * Pattern B - anonymous post-checkout orderId-keyed access:
+ * the guest path also reads `AccessGrant` directly, keyed by
+ * `(sourceType='order' AND sourceId=orderId AND productId)` + the
+ * canonical `status='active' + non-expired` filter. The grant row IS
+ * the post-cutover SSOT link between the Order and the
+ * authorization decision — the orderId ITSELF is the `sourceId` on
+ * the `'order'` grant written by `processOrder` in the LS webhook
+ * handler. Reading AccessGrant here keeps the route's behavior (anon
+ * guest sees `{hasAccess: true}` immediately after a successful
+ * checkout) without leaking the `Order.status === 'completed'` filter
+ * into the access-control surface.
  */
 export const GET = withRateLimit(async function GET(request: NextRequest) {
   try {
@@ -55,13 +60,27 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
       }
     }
 
-    // Pattern B - orderId-keyed check (payment-receipt semantics).
+    // Pattern B - orderId-keyed check (V2 AccessGrant SSOT).
+    //
+    // Reads `AccessGrant` directly, NOT `Order.status`. The grant row
+    // written by `processOrder` in the LS webhook handler has
+    // `sourceType='order' AND sourceId=Order.id` (which equals the
+    // providerOrderId passed to the webhook). Resolving by these two
+    // keys is structural-equivalent to the prior Order.status read but
+    // surfaces the SAME SQL shape as `resolveProductAccess` (status +
+    // expiresAt or) — no separate code path leaks through the SSOT.
     if (orderId) {
-      const order = await findCompletedOrderByOrderId({
-        orderId,
-        productId: dbProductId,
+      const grant = await prisma.accessGrant.findFirst({
+        where: {
+          sourceType: "order",
+          sourceId: orderId,
+          productId: dbProductId,
+          status: "active",
+          OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+        },
+        select: { id: true },
       });
-      if (order) {
+      if (grant) {
         return NextResponse.json({ hasAccess: true });
       }
     }

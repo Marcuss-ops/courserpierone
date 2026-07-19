@@ -59,10 +59,23 @@ export async function GET(
     // captures the user's intent and is the more semantically correct
     // source for "which language should the PDF use?".
     //
-    // Fallback chain (defensive — `preferredLocale` is @default("en")
-    // in schema so this is mostly belt-and-suspenders):
-    //   dbUser.preferredLocale ??. + -> "it"
-    const userLocale = dbUser.preferredLocale ?? "it";
+    // Defense-in-depth via `localeToLanguage`: legend reports show
+    // legacy accounts whose `preferredLocale` column carries the raw
+    // BCP-47 shape (`"it-it"`, `"en-US"`) — either because they were
+    // created before the `processOrder` snapshot normalized it, OR
+    // because they were migrated with the BCP-47 string intact.
+    //
+    // `localeToLanguage(...)` is idempotent: it handles both shapes
+    // (BCP-47 AND language-only) and returns the canonical
+    // language-only code used by `ProductTranslation.locale` rows AND
+    // by `getUiTranslations(lang)`. Wrapping the read here means:
+    //   - the SQL `WHERE translations.locale = ?` matches the canonical
+    //     ProductTranslation row whether the legacy BCP-47 OR the new
+    //     language-only shape is stored in `preferredLocale`.
+    //   - The downstream `localeToLanguage(userLocale)` call is now
+    //     redundant (no-op on language-only strings) — we read `lang`
+    //     directly from `userLocale`.
+    const userLocale = localeToLanguage(dbUser.preferredLocale ?? "it");
 
     // Verify all lessons are completed
     const product = await prisma.product.findUnique({
@@ -84,7 +97,8 @@ export async function GET(
       where: { userId: dbUser.id, lessonId: { in: product.lessons.map(l => l.id) }, completed: true },
     });
 
-    const lang = localeToLanguage(userLocale);
+    // `userLocale` is already a language-only code after `localeToLanguage`.
+    const lang = userLocale;
     const ui = getUiTranslations(lang);
 
     if (totalLessons === 0) {
