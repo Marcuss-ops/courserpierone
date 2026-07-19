@@ -7,29 +7,23 @@
  *
  * Responsibilities:
  *   1. Build a tree (root nodes + nested children) from a flat
- *      server-supplied array. The construction is O(N) via a
- *      Map<id, node>; nested children are appended to their
- *      parent's `children[]` via parentId lookup.
+ *      server-supplied array — DELEGATED to the shared
+ *      `buildTree` utility in `@/lib/shared/build-tree` (so
+ *      the public reader's `ReaderSidebar` shares the same
+ *      algorithm).
  *   2. Render the tree as nested <ul>/<li> elements with the
- *      current page highlighted, depth-based indentation, and
- *      up/down buttons on hover.
- *   3. Wire a simple re-order action: clicking "Up" or "Down"
- *      on a row optimistically swaps the position with the
- *      adjacent sibling, then POSTs the FULL updated sibling
- *      set to `/api/creator/products/{productId}/reorder-pages`.
+ *      current page highlighted, depth-based indentation,
+ *      and up/down buttons on hover.
+ *   3. Wire a simple re-order action: clicking "Up" or
+ *      "Down" on a row optimistically swaps the position
+ *      with the adjacent sibling, then POSTs the FULL
+ *      updated sibling set to
+ *      `/api/creator/products/{productId}/reorder-pages`.
  *      The route enforces "full sibling set" + `[1..N]`
- *      contiguous positions (matches the existing
- *      `reorderContentPages` invariant). On HTTP failure, the
+ *      contiguous positions. On HTTP failure, the
  *      optimistic state is reverted.
  *   4. Show the saving state (Loader2, polite aria-live) and
  *      the error state (inline red badge with `role="alert"`).
- *
- * The component is mounted by the editor's
- * `src/app/creator/products/[productId]/pages/[pageId]/page.tsx`
- * Server Component shell, which supplies a flat
- * `SidebarPageRow[]` fetched via the `listCreatorPages` use
- * case (single roundtrip with denormalized default-language
- * title via Prisma LEFT JOIN LATERAL).
  *
  * ─── Why no @dnd-kit here (deliberate) ─────────────────────────
  *
@@ -39,11 +33,6 @@
  * slim. The dnd-kit investment lives in the block editor
  * (where cross-block reordering is the editor's primary
  * affordance); the page-tree reorder is a sidebar-only action.
- *
- * Future improvement: swap in `Tree` from dnd-kit for cross-
- * parent drag (sticky nesting, nested subtree moves). This
- * component deliberately stays readable for the simple
- * "swap two siblings" path.
  */
 
 import {
@@ -56,6 +45,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
+
+import {
+  buildTree,
+  type TreeNode,
+} from "@/lib/shared/build-tree";
 
 // ─── Server → Client props ─────────────────────────────────────
 
@@ -86,49 +80,11 @@ export interface SidebarTreeProps {
   locale?: string;
 }
 
-// ─── Tree shape ───────────────────────────────────────────────
-
-interface SidebarNode {
-  row: SidebarPageRow;
-  children: SidebarNode[];
-}
-
-/**
- * Convert the flat list to a forest of trees, sorted
- * (recursively) by `position`. Construction is O(N) via Map
- * lookup; children are linked to their parents in a single
- * pass.
- *
- * Defensive orphan handling: a page whose `parentId` does
- * NOT resolve to any page in the flat list is treated as a
- * root. This avoids phantom empty trees on data drift (e.g.
- * a deleted parent page whose children were not cascaded
- * — orphan forwarding is the soft-failure mode).
- */
-function buildTree(pages: SidebarPageRow[]): SidebarNode[] {
-  const byId = new Map<string, SidebarNode>();
-  for (const row of pages) {
-    byId.set(row.id, { row, children: [] });
-  }
-  const roots: SidebarNode[] = [];
-  for (const node of byId.values()) {
-    const parentId = node.row.parentId;
-    if (parentId && byId.has(parentId)) {
-      byId.get(parentId)!.children.push(node);
-    } else {
-      roots.push(node);
-    }
-  }
-  // Sort by position ASC at every level (parentId ASC +
-  // position ASC was the SQL ORDER BY, but the optimistic
-  // local state can re-order anything).
-  const sortRec = (nodes: SidebarNode[]) => {
-    nodes.sort((a, b) => a.row.position - b.row.position);
-    for (const n of nodes) sortRec(n.children);
-  };
-  sortRec(roots);
-  return roots;
-}
+// Local alias for the shared tree node type so existing
+// call sites stay legible. The implementation of the build
+// itself lives in `@/lib/shared/build-tree` (one source of
+// truth shared with the public reader's `ReaderSidebar`).
+type SidebarNode = TreeNode<SidebarPageRow>;
 
 // ─── Tiny client wrappers (stable references for callbacks) ─────
 

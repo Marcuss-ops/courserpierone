@@ -107,9 +107,15 @@ function ParagraphBlock({
 }
 
 function HeadingBlock({
+  id,
   level,
   content,
 }: {
+  /** Stable block id. When provided, used as the DOM id so
+   *  public-reader TOC anchor links (`#{HEADING_ANCHOR_PREFIX}{id}`)
+   *  land on the right element. Editor-side this is optional
+   *  (unused; harmless if set). */
+  id?: string;
   level: 1 | 2 | 3;
   content: Array<{ text: string }>;
 }) {
@@ -121,7 +127,17 @@ function HeadingBlock({
         ? "font-serif text-2xl font-semibold tracking-tight text-cream-espresso dark:text-cream-dark-text mt-8"
         : "font-serif text-xl font-semibold tracking-tight text-cream-espresso dark:text-cream-dark-text mt-6";
   const Tag = (`h${level}`) as "h1" | "h2" | "h3";
-  return <Tag className={className}>{text}</Tag>;
+  // Convention: `id="heading-{blockId}"`. Mirrored by
+  // `TableOfContents.headingAnchor(blockId)` and
+  // `ReaderContent.READER_HEADING_ANCHOR_PREFIX`.
+  return (
+    <Tag
+      id={id ? `heading-${id}` : undefined}
+      className={className}
+    >
+      {text}
+    </Tag>
+  );
 }
 
 function BulletListBlock({
