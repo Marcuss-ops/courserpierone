@@ -43,6 +43,28 @@ export class CheckoutError extends AppError {
   }
 }
 
+/**
+ * Thrown by the canonical `CheckoutService.createCheckout` orchestrator
+ * when the buyer attempts to check out a product whose `status` is
+ * not `"published"`. Centralizes the gate so future callers (cron
+ * replay, webhook replay, queue workers, admin reconciliation) are
+ * uniformly blocked from generating a checkout session for a draft
+ * or archived product.
+ *
+ * Matches the `CheckoutPricingError` precedent (see
+ * `src/lib/commerce/checkout/pricing.ts`): a typed subclass with a
+ * specific `code` so downstream `apiErrorResponse(error)` callers
+ * can branch on `instanceof` without string-matching messages.
+ */
+export class ProductNotPublishedError extends CheckoutError {
+  constructor(
+    message = "Questo prodotto non è disponibile per l'acquisto al momento.",
+  ) {
+    super(message, { code: "PRODUCT_NOT_PUBLISHED" });
+    this.name = "ProductNotPublishedError";
+  }
+}
+
 /** Not found errors (404) */
 export class NotFoundError extends AppError {
   constructor(message = "Resource not found") {

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
-import { CheckoutError } from "@/lib/errors";
+import { CheckoutError, NotFoundError, ProductNotPublishedError } from "@/lib/errors";
 // Step 7: import the registry from payments/init.ts so the LS-provider
 // registration side-effect runs exactly once, regardless of which
 // module pulls the registry into the bundle (route, orchestrator,
@@ -38,9 +38,52 @@ export type CheckoutProduct = CreateCheckoutInput["product"];
  * nor constructs checkout requests inline — those concerns have moved
  * into the providers. The orchestrator's only "in-flight" computation
  * is the abandoned-cart side-effect after URL arrives.
+ *
+ * ─── Step 10 — Product.status SSOT gate ──────────────────────────────
+ *
+ * `createCheckout` re-reads `Product.status` via a defensive Prisma
+ * select BEFORE any provider call or side-effect. This mirrors the
+ * SSOT pattern used by `resolve-product-access.ts` (MCR Phase 3):
+ * no caller is trusted to pass a current `status`; the orchestrator
+ * enforces the invariant on its own.
+ *
+ * Rationale:
+ *   - Future callers (cron replay, webhook replay, queue workers,
+ *     admin reconciliation) inherit the gate for free.
+ *   - The route no longer needs a scattered `if (product.status !==
+ *     "published")` check — it just calls `createCheckout` and lets
+ *     `apiErrorResponse(error)` surface the typed error.
+ *   - The `select: { status: true }` projection keeps the extra
+ *     query cheap (<5ms; checkout is a low-rate operation).
+ *
+ * Side-effect guarantee:
+ *   - The abandoned-cart write happens AFTER the provider call.
+ *   - This guard runs BEFORE the provider call.
+ *   - Therefore unpublished products never trigger a real LS API call
+ *     AND never write an `AbandonedCheckout` row.
  */
 export class CheckoutService {
   async createCheckout(input: CreateCheckoutInput): Promise<CheckoutSession> {
+    // ─── SSOT gate: re-read product.status defensively ────────────
+    // Race-condition-safe: between the route's product load and this
+    // call, the product could have been archived. We trust our own
+    // single source of truth (the DB column), not the caller's claim.
+    const dbProduct = await prisma.product.findUnique({
+      where: { id: input.product.id },
+      select: { status: true },
+    });
+
+    if (!dbProduct) {
+      // The route already throws NotFoundError on missing product,
+      // so reaching this branch implies a race (e.g. product deleted
+      // between route's load and this re-read). Fail closed.
+      throw new NotFoundError("Product not found");
+    }
+
+    if (dbProduct.status !== "published") {
+      throw new ProductNotPublishedError();
+    }
+
     // ─── Lemon Squeezy (primary MoR) ─────────────────────────────
     // Single active new-session provider as of Phase 7. A product
     // without a `lemonVariantId` cannot be checked out — that's the
