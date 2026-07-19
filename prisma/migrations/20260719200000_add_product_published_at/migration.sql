@@ -1,0 +1,14 @@
+-- MCR Phase 1 — Add Product.publishedAt (publish gate use case).
+-- Mirrors ContentPage.publishedAt semantics: nullable, independent
+-- of status string (for scheduled-publish support). Set when
+-- publishContentProduct.applyPublishTransition commits the
+-- canonical go-live transition. Postgres ≥11 fast ADD COLUMN
+-- (metadata-only, no full-table rewrite).
+--
+-- Existing rows: publishedAt = NULL. Going forward, the publish
+-- use case sets publishedAt at the same instant it sets
+-- status = 'published'. The use case's `already_published`
+-- idempotency branch falls back to `input.now` for the rare
+-- legacy case (a published row with null publishedAt) — soft
+-- handling, audit-log-visible.
+ALTER TABLE "Product" ADD COLUMN "publishedAt" TIMESTAMP(3);
