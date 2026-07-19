@@ -45,6 +45,7 @@ model Product {
 
   translations       ProductTranslation[]
   lessons            Lesson[]
+  pages              ContentPage[]  // Pagine stile Notion (Phase 1, contentKind document_course/ebook)
   orders             Order[]
   abandonedCheckouts AbandonedCheckout[]
   conversations      Conversation[]
@@ -140,7 +141,7 @@ model User {
   role           String   @default("student") // admin | creator | student
   creatorType    String?  // "internal" | "external" — distinguishes external creators admitted via onboarding
   username       String?  @unique // URL pubblico: /u/username
-  bio            String?  @db.Text // Bio pubblica Markdown
+  bio            String?  @db.Text // Bio pubblico Markdown
   socialLinks    String?  // JSON: { "twitter": "...", "instagram": "...", "youtube": "...", "linkedin": "...", "website": "..." }
   coverImageUrl  String?  // URL immagine copertina profilo
   lastSeenAt    DateTime? // ultima attività (WebSocket connect/disconnect)
@@ -513,6 +514,78 @@ model Conversation {
   @@index([userOneId, updatedAt])
   @@index([userTwoId, updatedAt])
   @@index([productId, updatedAt])
+}
+
+// ─── Pagine Contenuto (MCR Phase 1 — Notion-like pages) ─────────
+// Albero di pagine per prodotto (Phase 1). Ogni ContentPage ha slug
+// univoco per prodotto (vedi @@unique([productId, slug])) e può avere
+// un parent self-relation per costruire sotto-alberi. La validazione
+// di `status` e `slug` è applicativa (Zod in src/domains/catalog),
+// NON un Prisma enum — coerente con la convenzione di Product.status.
+//
+// Cascades:
+//   - productId  → Cascade (cancellare un prodotto rimuove l'intero
+//     sotto-albero pagine; coerente con Conversation/CourseConfigCache)
+//   - parentId   → Cascade (cancellare una pagina rimuove silenziosamente
+//     il sotto-albero; standard CMS tree-delete semantics)
+//
+// `position` è richiesto (Int senza default): il caller applicativo
+// calcola `max(position) + 1` all'interno del gruppo (productId, parentId).
+// `publishedAt` è nullable e indipendente da `status` per supportare
+// scheduled-publish (status transizionato manualmente dopo la data).
+//
+// `document` è JSON (PG JSONB): blocco-blocco strutturato secondo il
+// ContentDocumentV1 schema (registrato in un commit successivo).
+// `plainText` è nullable `@db.Text`: derivato lazy per indicizzazione
+// full-text e ricerca; null finché il job di estrazione non l'ha generato.
+//
+// `revision` parte da 1 e incrementa ad ogni save (app-layer optimistic
+// concurrency: writer invia `revision` letta, update rifiuta se DB è
+// già oltre — Prisma non lo fa out-of-the-box, vedi applicativo).
+model ContentPage {
+  id          String    @id @default(cuid())
+  productId   String
+  parentId    String?
+  slug        String    // validated app-side via contentSlugSchema
+  position    Int       // required — application computes max + 1 within scope
+  status      String    @default("draft") // draft | published | archived — validated app-side
+  publishedAt DateTime?  // independent of status string for scheduled-publish support
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  product      Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  parent       ContentPage?  @relation("ContentPageTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children     ContentPage[] @relation("ContentPageTree")
+  translations ContentPageTranslation[]
+
+  @@unique([productId, slug])
+  @@index([productId, parentId, position])
+}
+
+// ─── Traduzioni pagine contenuto (1:N da ContentPage) ─────
+// Una traduzione per coppia (pageId, locale). Il campo `revision`
+// parte da 1 e incrementa ad ogni save, abilitando optimistic
+// concurrency a livello applicativo (writer invia `revision`
+// letta, update rifiuta se DB è già oltre).
+//
+// `document` (JSON/JSONB) è la rappresentazione canonica strutturata
+// (ContentDocumentV1) — schema validato da un modulo Zod dedicato
+// (registrato in un commit successivo). `plainText` è la versione
+// flat per indicizzazione full-text/SEO/AI — nullabile per
+// derivazione lazy lato applicazione.
+model ContentPageTranslation {
+  id        String  @id @default(cuid())
+  pageId    String
+  locale    String
+  title     String
+  document  Json    // PG JSONB column for structured block array
+  plainText String? @db.Text  // pre-extracted searchable text, nullable for lazy derivation
+  revision  Int     @default(1)  // app-layer SSOT for optimistic concurrency control
+
+  page ContentPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@unique([pageId, locale])
+  @@index([pageId])
 }
 
 // ─── Webhook Idempotency ──────────────────────────────────
