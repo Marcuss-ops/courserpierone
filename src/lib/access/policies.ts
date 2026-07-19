@@ -3,45 +3,38 @@
  *
  * Step 8 — typed AccessPolicy discriminated union.
  *
- * Replaces 3 scattered access-check patterns across the codebase with a
- * single typed engine:
- *   1. Edge proxy.ts's checkProtectedAccess (free_course bypass + session_required)
- *   2. RSC AccessGate's free → admin → owned_order → pending_order chain
- *   3. API route require-admin (session_required + admin_role)
+ * ─── Step 9 — MCR Phase 3 cutover (this revision) ─────────────────────
  *
- * Architecture (mirrors Step 7's ports-and-adapters idiom — the same
- * `PaymentDomainAction` discriminated union that runs through a single
- * `switch`):
+ * Renamed AccessContext.hasCompletedOrder → hasActiveAccessGrant.
+ * The semantic regression is small but precise:
+ *   - Before: "a `Order.status === 'completed'` row exists for
+ *     (userId, productId)". This read was an early project-only
+ *     shortcut inherited from the pre-AccessGrant era.
+ *   - After:  "a `AccessGrant.status === 'active'` row exists for
+ *     (userId, productId)" — the post-cutover canonical read.
+ *
+ * The Boolean is filled in by the consumer (AccessGate.tsx, future
+ * migrate-pending-routes) by calling `resolveProductAccess` ONCE at the
+ * top of the route handler — keeping the policy evaluator pure
+ * (test-only fixtures, no Prisma). See `evaluateAccess` doc-comment for
+ * the invariant: "All DB lookups happen BEFORE evaluateAccess".
+ *
+ * Step 8 architecture (ports-and-adapters discriminated union) is
+ * unchanged:
  *   - Pure-function discriminated union with a `kind` tag. No class
  *     hierarchies, no DI containers.
  *   - Each policy `evaluate(policy, ctx) → AccessDecision | null` —
  *     `null` means "I don't apply, continue to the next policy". The
  *     engine iterates and short-circuits on the first definite decision.
- *   - All DB lookups happen BEFORE `evaluateAccess(policies, ctx)` runs.
- *     The policies themselves are pure and testable in isolation with
- *     fixed AccessContext fixtures. NO Prisma mocks needed for unit tests.
- *   - Edge-portable policies: `free_course`, `session_required`. They
- *     work in Vercel Edge runtime (Next.js proxy.ts / middleware).
+ *   - Edge-portable policies: `free_course`, `session_required`.
  *   - Node-only policies (DB-backed): `admin_role`, `owned_grant`,
  *     `pending_order` — explicit `requiresDb: true` discriminator on
- *     the type union. The compiler catches a future PR that adds a
- *     Node-only policy without the marker.
+ *     the type union.
  *
- * Edge/Node composability:
- *   - In Edge (proxy.ts), the policy chain MUST be a subset of
- *     { free_course, session_required } — other variants would 500 on
- *     `ctx.userRole === undefined` and silently fall through.
- *   - In Node (RSC AccessGate, API routes) the full set is available
- *     because getServerUser / Prisma have hydrated the context.
- *
- * Backward-compat:
- *   - `checkProtectedAccess` (Edge) and `requireAdmin` (API) keep
- *     their existing `NextResponse | null` signatures. The new engine
- *     is the internal engine; the public surface is unchanged.
- *   - `AccessGate` (RSC) keeps its JSX render (paywall / verifying /
- *     children) — the policy chain REPLACES the inline if-cascade,
- *     but the prop interface and side-effects (free_enrollment upsert)
- *     are preserved bit-for-bit.
+ * V2 follow-up candidate: collapse `admin_role` + `owned_grant`
+ * into a single `access_resolved` policy whose evaluation reads
+ * directly from resolveProductAccess (removing the typed plumbing).
+ * Out of scope here — see suggest_followups.
  */
 
 export type AccessPolicy =
@@ -94,8 +87,15 @@ export interface AccessContext {
   //    fire without them) ─────────────────────────────────
   userId?: string | null;
   userRole?: string | null;
-  /** True if a `Order.status === "completed"` row exists for (userId, productId). */
-  hasCompletedOrder?: boolean;
+  /**
+   * Step 9 — renamed from `hasCompletedOrder`.
+   * True when `resolveProductAccess({userId, productId})` returns
+   * `allowed: true` (any sourceType, status="active", non-expired).
+   * The consumer fills this in via a single top-of-route call
+   * (`src/components/course/access-gate.tsx`); the policy evaluator
+   * remains pure (no DB).
+   */
+  hasActiveAccessGrant?: boolean;
   /**
    * User.id that owns a `Order.status === "pending"` row matching the
    * `orderId` query-param at the request URL. Compared against
@@ -152,7 +152,12 @@ export function evaluatePolicy(
     }
 
     case "owned_grant": {
-      if (ctx.hasCompletedOrder) {
+      // Step 9 — the policy short-circuits on `hasActiveAccessGrant`,
+      // which the consumer fills via `resolveProductAccess`. Empty
+      // (undefined) is treated as "no" to preserve the existing
+      // chain-passthrough semantics when the consumer hasn't fetched
+      // the verdict yet (legacy callers).
+      if (ctx.hasActiveAccessGrant === true) {
         return { action: "allow", reason: "owned" };
       }
       return null;
@@ -162,6 +167,11 @@ export function evaluatePolicy(
       // Verifying-order screen ONLY for the order's owner. A
       // different user (or no user) sees the paywall via the
       // post-loop default-deny.
+      //
+      // Step 9 — deliberately unchanged. The reading of
+      // `Order.status="pending"` is a payment-lifecycle concern,
+      // NOT an access-control concern. AccessGrant represents
+      // finalized access; "in flight" is a different domain.
       if (
         ctx.pendingOrderOwnerId &&
         ctx.userId &&

@@ -1,7 +1,7 @@
 /**
  * src/lib/messaging/resolve-message-permission.ts
  *
- * Permission resolver per i DM creator↔studente.
+ * Permission resolver per i DM creator<->studente.
  *
  * Questa è L'UNICA FONTE DI VERITÀ per la matrice di autorizzazioni
  * della messaggistica. Tutti i call site (route handler REST, WS
@@ -10,19 +10,15 @@
  *
  * Piano DMs (Fase 1.5):
  *   Permettere il DM quando:
- *     • actor  = creator del prodotto
- *       target = studente con Order.status = 'completed' per quel prodotto
- *     • oppure le parti invertite (studente → creator)
+ *     - actor  = creator del prodotto
+ *       target = studente con AccessGrant.status='active' per quel prodotto
+ *     - oppure le parti invertite (studente -> creator)
  *
  *   Negare il DM quando:
- *     • actor == target (auto-messaggio)
- *     • il prodotto non esiste
- *     • entrambi i partecipanti sono creator (nessuno studente nel pair)
- *     • lo studente non ha Order.status = 'completed' per quel prodotto
- *     • il target user non esiste (best-effort: il check esatto
- *       viene fatto dal chiamante via prisma.user.findUnique; qui
- *       filtriamo solo via il fatto che non può essere creator/studente
- *       del pair prodotto)
+ *     - actor == target (auto-messaggio)
+ *     - il prodotto non esiste
+ *     - entrambi i partecipanti sono creator (nessuno studente nel pair)
+ *     - lo studente non ha un AccessGrant attivo per il prodotto
  *
  * Convenzioni di naming (allineate al prompt originale):
  *   "creator" = l'account che possiede uno o più prodotti
@@ -39,79 +35,34 @@
  *   runtime (la colonna `Product.creatorId` è REQUIRED + FK Restrict a
  *   livello DB). Tuttavia il constant rimane ESPORTATO con tag
  *   `@deprecated` per compatibilità con i consumer già in produzione
- *   (server.ts WS bridge + SSE stream handler + route WS upgrade).
- *   Questi consumer si traducono in "messaggio impossibile" via la
- *   tabella REASON_TO_STATUS in `api-authorize.ts`. Future V2 cleanup:
- *   migrare i consumer ad un deny-reason canonico (es. ProductNotFound
- *   condizionale) e rimuovere il constant.
+ *   (api-authorize.ts HTTP error mapper).
  *
  * ─────────────────────────────────────────────────────────────────────
- * PR 3 of MCR — Feature-flagged AccessGrant resolver cutover
+ * PR 3 of MCR — Step 9 — AccessGrant SSOT cutover (this revision)
  * ─────────────────────────────────────────────────────────────────────
  *
- * When `USE_ACCESS_GRANT_RESOLVER=true`, Step 5 reads from
- * `AccessGrant.status='active'` (the new source of truth, dual-written
- * in PR 2). When the flag is off, the legacy `Order.status='completed'`
- * read remains the authority. The cutover sequence is:
+ * The legacy `Order.status="completed"` read and the
+ * `USE_ACCESS_GRANT_RESOLVER` feature flag have been REMOVED. The
+ * single canonical read is now `resolveProductAccess` (delegates to
+ * `AccessGrant.findFirst({status:"active", OR:expiresAt null/future})`).
+ * SourceType is not branched on — any active grant qualifies access.
  *
- *   1. Staging-only flip on day 0. Monitor `MessagingDenyReason`
- *      counts in the staging log for 1d.
- *   2. If 0 new `NoValidAccessGrant` denies (vs the pre-flip baseline),
- *      proceed to step 3. Otherwise roll back the flag and investigate
- *      the gaps — most likely the backfill script
- *      (`scripts/migrate-grants-from-orders.ts`) didn't complete or a
- *      refund happened post-backfill.
- *   3. Promote flag to production behind a 7d monitoring window. The
- *      baseline for prod is the staging log: `NoValidAccessGrant`
- *      count should be 0 (or in the same low-percentile as
- *      `NoCompletedOrderForStudent`).
- *   4. After 7d of clean prod, remove the legacy Order-based read in
- *      Step 5 (and the `USE_ACCESS_GRANT_RESOLVER` flag, the
- *      `NoCompletedOrderForStudent` deny reason, and the related
- *      `REASON_TO_STATUS` entry in `api-authorize.ts`). Keep the
- *      `MessagingDenyReason.NoValidAccessGrant` constant — it's the
- *      post-cutover canonical reason.
- *
- * The flag is checked at runtime per-call (no module-load caching),
- * so flipping is instantaneous: change env, redeploy, the next
- * request uses the new path. No service restart, no DB migration
- * (the `AccessGrant` table is already in place from PR 2).
- *
- * ─── Known rollout caveat (race window during heavy refund/edit traffic)
- *
- * During the rollout window, when the flag is OFF (legacy), the resolver
- * may transiently deny DM access for orders whose `AccessGrant` was
- * written by PR 2's dual-write but whose `Order.status` hasn't been
- * observed as `'completed'` yet. The narrow window is the time between
- * the `prisma.order.create` and the `prisma.accessGrant.upsert` in
- * `processOrder` (PR 2) — a synchronous sequence in the same handler,
- * so the window is sub-millisecond in practice. The risk surface is:
- *
- *   - heavy refund/edit traffic that re-evaluates `Order.status`
- *     mid-flight (very rare in current product behavior)
- *   - partial-failure scenarios where `Order.create` succeeds but the
- *     `accessGrant.upsert` logs an error and the worker process
- *     crashes (extremely rare — the upsert has a `.catch` defensive
- *     log, see `processOrder` Step 4b)
- *
- * Operationally: monitor `NoCompletedOrderForStudent` (legacy) vs
- * `NoValidAccessGrant` (new) deny counts in the staging log during
- * the 7d rollout. A spike in `NoCompletedOrderForStudent` after the
- * flag flip in staging indicates a backfill gap, not a race — run
- * `scripts/migrate-grants-from-orders.ts` to repair.
+ * The legacy `MessagingDenyReason.NoCompletedOrderForStudent` constant
+ * remains EXPORTED with `@deprecated` tag for backward compat with
+ * existing consumer code that keys on it; new code should use
+ * `MessagingDenyReason.NoValidAccessGrant` (the post-cutover canonical
+ * reason, which is the only "no access" reason returned by this
+ * resolver).
  */
 
 import { prisma } from "@/lib/db/prisma";
-import {
-  resolveProductAccess,
-  ProductAccessDenyReason,
-} from "@/lib/commerce/access/resolve-product-access";
+import { resolveProductAccess } from "@/lib/commerce/access/resolve-product-access";
 
 /**
  * Esito del permission resolver.
  *
- * - `allowed: true`  → la DM è autorizzata tra actor e target su quel prodotto
- * - `allowed: false` → la DM è negata; consultare `reason` per capire perché
+ * - `allowed: true`  -> la DM è autorizzata tra actor e target su quel prodotto
+ * - `allowed: false` -> la DM è negata; consultare `reason` per capire perché
  *
  * `creatorId` e `customerId` sono valorizzati in entrambi i casi (tranne
  * `customerId` quando il pair non è ancora identificabile) — sono utili
@@ -134,13 +85,9 @@ export interface ResolveMessagingPermissionInput {
 /**
  * Motivi di deny — stringhe stabili che le API / UI possono consumare.
  *
- * Post-PR 3: `NoValidAccessGrant` è il deny reason canonico per
- * "l'utente non ha un grant attivo per questo prodotto" quando il flag
- * `USE_ACCESS_GRANT_RESOLVER` è ON. `NoCompletedOrderForStudent` resta
- * ESPORTATO per il path legacy (flag OFF) e per la fase di rollout
- * (entrambi i path sono attivi contemporaneamente). Una V2 cleanup
- * rimuoverà `NoCompletedOrderForStudent` dopo che il flag sarà
- * completamente rimosso.
+ * Step 9: `NoValidAccessGrant` è il deny reason canonico post-cutover.
+ * `NoCompletedOrderForStudent` resta ESPORTATO per il periodo di
+ * transizione (V2 cleanup rimuoverà l'export).
  */
 export const MessagingDenyReason = {
   /** actor == target: nessuno può auto-mandarsi DM */
@@ -151,16 +98,14 @@ export const MessagingDenyReason = {
    * @deprecated Post-fase 4 hardening (migration
    * `20260712210000_creator_id_required_restrict`): `Product.creatorId`
    * è ora REQUIRED + FK Restrict a livello DB, di conseguenza questo
-   * deny-reason non è più raggiungibile dal resolver. Il constant è
+   * deny-reason non è mai più raggiungibile dal resolver. Il constant è
    * mantenuto ESPORTATO per compatibilità con i consumer già in
-   * produzione (~~server.ts WS bridge~~ C3 removed + src/app/api/conversations/[id]/stream/route.ts
-   * SSE handler + src/lib/messaging/api-authorize.ts HTTP error mapper).
+   * produzione (src/lib/messaging/api-authorize.ts HTTP error mapper).
    * Poiché il resolver non lo restituisce mai più, le route lo
    * traducono in stato "irragiungibile" come safety net.
    *
-   * Future V2 cleanup: migrare i consumer ad un deny-reason canonico
-   * (es. un nuovo `ProductIntegrityViolation` per audit purposes) e
-   * rimuovere questo constant.
+   * Future V2 cleanup: rimuovere questo constant + l'entry
+   * REASON_TO_STATUS corrispondente in api-authorize.ts.
    */
   NoCreatorForProduct: "no_creator_for_product",
   /**
@@ -169,25 +114,32 @@ export const MessagingDenyReason = {
    * utenti random senza alcun legame con il prodotto.
    */
   NotCreatorStudentPair: "not_creator_student_pair",
-  /** Lo studente identificato non ha un Order.completed per il prodotto */
+  /**
+   * @deprecated Post-Step 9 (MCR Phase 3 cutover): the canonical
+   * "no access" reason is NoValidAccessGrant. This constant is kept
+   * exported for backward compat with api-authorize.ts REASON_TO_STATUS
+   * during transition; new code MUST use NoValidAccessGrant.
+   *
+   * V2 cleanup: remove this constant + REASON_TO_STATUS entry.
+   */
   NoCompletedOrderForStudent: "no_completed_order_for_student",
   /**
-   * PR 3 of MCR — l'utente non ha un AccessGrant.status='active' per
-   * il prodotto. È il deny reason canonico post-cutover, attivo solo
-   * quando `USE_ACCESS_GRANT_RESOLVER=true`. Convivente con
-   * `NoCompletedOrderForStudent` per tutta la durata del rollout.
+   * Step 9 — canonical post-cutover deny reason: lo studente non ha
+   * un AccessGrant.status='active' per il prodotto. Questo è il deny
+   * reason canonico post-MCR Phase 3 (ex-pre-cutover era
+   * NoCompletedOrderForStudent).
    */
   NoValidAccessGrant: "no_valid_access_grant",
 } as const;
 
 /**
- * Risolve i permessi di una DM creator↔studente su un prodotto specifico.
+ * Risolve i permessi di una DM creator<->studente su un prodotto specifico.
  *
  * Pattern "creator/student":
  *   - creator = User.id === Product.creatorId (REQUIRED post-fase 4 hardening,
  *     enforciato dalla migration `20260712210000_creator_id_required_restrict`)
- *   - student = l'altro partecipante, che DEVE avere un Order.completed
- *     per quel prodotto (legacy) o un AccessGrant.status='active' (PR 3)
+ *   - student = l'altro partecipante, che DEVE avere un
+ *     AccessGrant.status='active' per quel prodotto (post-Step 9 SSOT)
  *
  * Casi particolari (auto-invio, prodotto inesistente) sono gestiti con
  * `allowed: false` + `reason` valorizzato.
@@ -197,7 +149,7 @@ export async function resolveMessagingPermission(
 ): Promise<MessagingPermission> {
   const { actorId, targetId, productId } = input;
 
-  // ── 0. Sanity: actor == target → self-message ───────────────
+  // 0. Sanity: actor == target -> self-message
   if (actorId === targetId) {
     return {
       allowed: false,
@@ -206,7 +158,7 @@ export async function resolveMessagingPermission(
     };
   }
 
-  // ── 1. Product esiste? ─────────────────────────────────────
+  // 1. Product esiste?
   const product = await prisma.product.findUnique({
     where: { id: productId },
     select: { id: true, creatorId: true },
@@ -219,7 +171,7 @@ export async function resolveMessagingPermission(
     };
   }
 
-  // ── 2. Resolve the creator ─────────────────────────────────
+  // 2. Resolve the creator
   // Post-fase 4 hardening: `Product.creatorId` è REQUIRED (NOT NULL +
   // FK Restrict, migration `20260712210000_creator_id_required_restrict`).
   // Il legacy fallback al "primo admin" per prodotti senza creator è
@@ -229,7 +181,7 @@ export async function resolveMessagingPermission(
   // se si tratta di un DB legacy pre-migration).
   const creatorId = product.creatorId;
 
-  // ── 3. Identifica chi è creator e chi è student nel pair ───
+  // 3. Identifica chi è creator e chi è student nel pair
   const actorIsCreator = actorId === creatorId;
   const targetIsCreator = targetId === creatorId;
 
@@ -245,49 +197,41 @@ export async function resolveMessagingPermission(
     };
   }
 
-  // ── 4. Identifica lo student effettivo nel pair ────────────
+  // 4. Identifica lo student effettivo nel pair
   const customerId = actorIsCreator ? targetId : actorId;
 
-  // ── 5. Lo student deve avere un accesso al prodotto.
+  // 5. Lo student deve avere un accesso al prodotto.
   //
-  // Delegate al central commerce access resolver (che gestisce
-  // autonomamente il flip USE_ACCESS_GRANT_RESOLVER — legacy Order
-  // read vs AccessGrant read). Manteniamo i deny reason canonici
-  // del dominio messaging mappando i due `ProductAccessDenyReason`
-  // del commerce ai corrispondenti `MessagingDenyReason` esposti
-  // `api-authorize.ts` REASON_TO_STATUS.
+  // Step 9: delega a `resolveProductAccess` (AccessGrant SSOT,
+  // post-cutover canonical path). The resolver returns a single deny
+  // reason (NoActiveAccessGrant) which we map 1:1 to the messaging
+  // domain's NoValidAccessGrant (the canonical post-cutover reason).
   //
-  // Il path Order/AccessGrant usa lo stesso indice composito ottimale:
-  //   - legacy: @@index([userId, productId, status]) su Order
-  //   - grant:  @@index([userId, productId, status]) su AccessGrant
-  // Lo stesso piano di esecuzione PG → il flip del flag non cambia
-  // la performance del resolver. Vedi
-  // src/lib/commerce/access/resolve-product-access.ts per i dettagli
-  // del cutover (PR 3 of MCR, runbook in cima a quel file).
+  // Performance:
+  //   - AccessGrant @@index([userId, productId, status]) — B-tree seek +
+  //     OR expiresAt null/future served by the same index, no extra
+  //     round-trip. Equivalent performance to the legacy Order read;
+  //     see src/lib/commerce/access/resolve-product-access.ts top-of-
+  //     file JSDoc for the index plan + OR-clause analysis.
   const access = await resolveProductAccess({
     userId: customerId,
     productId,
   });
 
   if (!access.allowed) {
-    // Map dei due ProductAccessDenyReason ai MessagingDenyReason esposti
-    // (api-authorize.ts li traduce in HTTP status 403 + IT error message).
-    // `NoCompletedOrder` → `NoCompletedOrderForStudent` (legacy path).
-    // `NoValidAccessGrant` → `NoValidAccessGrant` (post-cutover path).
-    const reason =
-      access.reason === ProductAccessDenyReason.NoValidAccessGrant
-        ? MessagingDenyReason.NoValidAccessGrant
-        : MessagingDenyReason.NoCompletedOrderForStudent;
+    // Step 9 — single canonical deny reason. NoCompletedOrderForStudent
+    // (legacy) is removed from the active deny surface; the constant
+    // remains EXPORTED @deprecated for backward compat only.
     return {
       allowed: false,
       creatorId,
       customerId,
       productId,
-      reason,
+      reason: MessagingDenyReason.NoValidAccessGrant,
     };
   }
 
-  // ── Tutto verde — la DM è autorizzata ────────────────────────
+  // Tutto verde - la DM è autorizzata
   return {
     allowed: true,
     creatorId,

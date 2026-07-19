@@ -2,8 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { withRateLimit } from "@/lib/utils/rate-limit";
-import { findCompletedOrder, findCompletedOrderByOrderId } from "@/lib/access";
+import { resolveProductAccess } from "@/lib/commerce/access/resolve-product-access";
+import { findCompletedOrderByOrderId } from "@/lib/access";
 
+/**
+ * GET /api/access - auth semantics probe.
+ *
+ * Step 9 - MCR Phase 3 cutover: the session-keyed comparison reads
+ * from `AccessGrant.status="active"` via `resolveProductAccess` (the
+ * post-cutover SSOT path). The orderId-keyed Pattern B branch is
+ * preserved: that path validates a guest's payment receipt
+ * immediately after checkout (LS webhook settles the order
+ * synchronously with the grant dual-write, so the order row IS the
+ * canonical proof of receipt for a guest redirect from the
+ * checkout page). The orderId-keyed path is a payment-receipt
+ * concern, not an access-control concern.
+ */
 export const GET = withRateLimit(async function GET(request: NextRequest) {
   try {
     const { user, dbUser } = await getServerUser();
@@ -26,29 +40,22 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
     if (!product) return NextResponse.json({ hasAccess: false });
     const dbProductId = product.id;
 
-    // Check user by session
+    // Session-keyed read: AccessGrant SSOT via resolveProductAccess.
     if (user?.email && dbUser) {
-      // Grant access if they are admin or have a completed order
+      // Inline admin bypass (admin does not need a grant row to access).
       if (dbUser.role === "admin") {
         return NextResponse.json({ hasAccess: true, userId: dbUser.id });
       }
-      // V2 DRY: helper consolidato. Admin bypass inline (pattern admin
-      // del route è diverso dalle altre route: ritorna shape con userId).
-      const hasOrder = await findCompletedOrder({
+      const granted = await resolveProductAccess({
         userId: dbUser.id,
         productId: dbProductId,
       });
-      if (hasOrder) {
+      if (granted.allowed) {
         return NextResponse.json({ hasAccess: true, userId: dbUser.id });
       }
     }
 
-    // Check order ID directly (useful for immediate redirect access from checkouts)
-    // V3.1 DRY: migrato al sibling SSO `findCompletedOrderByOrderId` per
-    // chiudere l'ultimo scattered variant. La query interna rimane
-    // semanticamente identica (OR su `id`/providerOrderId, productId
-    // scope check, status="completed") ma è ora testata e documentata
-    // in `src/lib/access/find-completed-order-by-order-id.test.ts`.
+    // Pattern B - orderId-keyed check (payment-receipt semantics).
     if (orderId) {
       const order = await findCompletedOrderByOrderId({
         orderId,

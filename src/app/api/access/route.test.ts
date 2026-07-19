@@ -1,12 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { NextRequest } from "next/server";
 import { fakeOrder } from "@/app/api/__test-helpers__/fake-order";
+
 // ─── Mock helpers (SSOT seam) ──────────────────────────────
-const mockFindCompletedOrder = vi.fn();
+// Step 9 — MCR Phase 3 cutover: the session-keyed read goes through
+// resolveProductAccess (canonical AccessGrant SSOT). findCompletedOrder
+// is no longer imported by the route, so its mock is removed here.
+const mockResolveProductAccess = vi.fn();
 const mockFindCompletedOrderByOrderId = vi.fn();
 
+vi.mock("@/lib/commerce/access/resolve-product-access", () => ({
+  resolveProductAccess: mockResolveProductAccess,
+}));
+
 vi.mock("@/lib/access", () => ({
-  findCompletedOrder: mockFindCompletedOrder,
   findCompletedOrderByOrderId: mockFindCompletedOrderByOrderId,
 }));
 
@@ -38,6 +45,7 @@ const FAKE_PRODUCT_ID = "cp-product-1";
 const FAKE_PRODUCT_SLUG = "test-course";
 const FAKE_USER_ID = "cu-user-1";
 const FAKE_PROVIDER_ORDER_ID = "cs_test_aBc123";
+const FAKE_GRANT_ID = "grant-1";
 
 function createMockRequest(query: Record<string, string> = {}) {
   const url = new URL("http://localhost:3000/api/access");
@@ -51,7 +59,7 @@ function createMockRequest(query: Record<string, string> = {}) {
   } as unknown as NextRequest;
 }
 
-// ─── fakeOrder factory → @/app/api/__test-helpers__/fake-order (V3.3.2) ─────
+// ─── Test fixtures ──────────────────────────────────────────
 
 const mockAdmin = () =>
   mockGetServerUser.mockResolvedValueOnce({
@@ -75,7 +83,10 @@ const mockAnonymous = () =>
   });
 
 const mockProductFound = () =>
-  mockPrisma.product.findFirst.mockResolvedValueOnce({ id: FAKE_PRODUCT_ID, slug: FAKE_PRODUCT_SLUG });
+  mockPrisma.product.findFirst.mockResolvedValueOnce({
+    id: FAKE_PRODUCT_ID,
+    slug: FAKE_PRODUCT_SLUG,
+  });
 
 // ─── Tests ───────────────────────────────────────────────────
 describe("GET /api/access — auth semantics probe", () => {
@@ -100,9 +111,13 @@ describe("GET /api/access — auth semantics probe", () => {
   it("returns hasAccess:false when product slug/id is not found", async () => {
     mockLoggedInCustomer();
     mockPrisma.product.findFirst.mockResolvedValueOnce(null);
-    // findCompletedOrder would have been called if we reached that point,
-    // so ensure it ISN'T called for unknown products.
-    mockFindCompletedOrder.mockResolvedValueOnce(fakeOrder());
+    // resolveProductAccess would have been called if we reached that
+    // point, so ensure it ISN'T called for unknown products.
+    mockResolveProductAccess.mockResolvedValueOnce({
+      allowed: true,
+      grantId: FAKE_GRANT_ID,
+      source: "grant",
+    });
 
     const { GET } = await import("./route");
     const response = await GET(createMockRequest({ productId: "ghost-product" }));
@@ -110,7 +125,7 @@ describe("GET /api/access — auth semantics probe", () => {
 
     expect(response.status).toBe(200);
     expect(body.hasAccess).toBe(false);
-    expect(mockFindCompletedOrder).not.toHaveBeenCalled();
+    expect(mockResolveProductAccess).not.toHaveBeenCalled();
   });
 
   // ── Anonymous (Pattern B may still grant via valid orderId) ──
@@ -125,16 +140,16 @@ describe("GET /api/access — auth semantics probe", () => {
     expect(response.status).toBe(200);
     expect(body.hasAccess).toBe(false);
     expect(body.userId).toBeUndefined();
-    expect(mockFindCompletedOrder).not.toHaveBeenCalled(); // no user → no Pattern A
+    // No user -> resolveProductAccess is not called; Pattern B
+    // requires an explicit orderId query param.
+    expect(mockResolveProductAccess).not.toHaveBeenCalled();
   });
 
   it("anonymous with valid orderId (Pattern B): returns hasAccess:true", async () => {
     mockAnonymous();
     mockProductFound();
-    // V3.3.5 — helper's DEFAULTS don't include `providerOrderId`; Pattern B
-    // semantically references the provider-session id (query `orderId` =
-    // order's `providerOrderId`), so restore the field here for parity
-    // with the previous local factory.
+    // Pattern B is preserved — it's a payment-receipt concern, not
+    // an access-control concern.
     mockFindCompletedOrderByOrderId.mockResolvedValueOnce(
       fakeOrder({ providerOrderId: FAKE_PROVIDER_ORDER_ID }),
     );
@@ -156,10 +171,8 @@ describe("GET /api/access — auth semantics probe", () => {
   });
 
   it("anonymous with valid orderId but WRONG productId (cross-product exploit): hasAccess:false", async () => {
-    // Critical security test: a real orderId for product A must NOT unlock product B.
     mockAnonymous();
     mockProductFound();
-    // The helper itself enforces this: returns null when scope mismatches.
     mockFindCompletedOrderByOrderId.mockResolvedValueOnce(null);
 
     const { GET } = await import("./route");
@@ -178,7 +191,7 @@ describe("GET /api/access — auth semantics probe", () => {
 
   // ── Admin (inline bypass — different shape from customer) ──
 
-  it("admin: returns hasAccess:true with userId (inline bypass, no helper call)", async () => {
+  it("admin: returns hasAccess:true with userId (inline bypass, no resolver call)", async () => {
     mockAdmin();
     mockProductFound();
 
@@ -189,16 +202,20 @@ describe("GET /api/access — auth semantics probe", () => {
     expect(response.status).toBe(200);
     expect(body.hasAccess).toBe(true);
     expect(body.userId).toBe(FAKE_USER_ID);
-    // Admin bypass is INLINE — must not delegate to the helper.
-    expect(mockFindCompletedOrder).not.toHaveBeenCalled();
+    // Admin bypass is INLINE — must not delegate to the resolver.
+    expect(mockResolveProductAccess).not.toHaveBeenCalled();
   });
 
-  // ── Customer with completed order (Pattern A via session) ──
+  // ── Customer with active AccessGrant (post-cutover canonical) ──
 
-  it("customer with completed order (Pattern A): returns hasAccess:true with userId", async () => {
+  it("customer with active AccessGrant: returns hasAccess:true with userId", async () => {
     mockLoggedInCustomer();
     mockProductFound();
-    mockFindCompletedOrder.mockResolvedValueOnce(fakeOrder());
+    mockResolveProductAccess.mockResolvedValueOnce({
+      allowed: true,
+      grantId: FAKE_GRANT_ID,
+      source: "grant",
+    });
 
     const { GET } = await import("./route");
     const response = await GET(createMockRequest({ productId: FAKE_PRODUCT_SLUG }));
@@ -207,18 +224,21 @@ describe("GET /api/access — auth semantics probe", () => {
     expect(response.status).toBe(200);
     expect(body.hasAccess).toBe(true);
     expect(body.userId).toBe(FAKE_USER_ID);
-    expect(mockFindCompletedOrder).toHaveBeenCalledWith({
+    expect(mockResolveProductAccess).toHaveBeenCalledWith({
       userId: FAKE_USER_ID,
       productId: FAKE_PRODUCT_ID,
     });
   });
 
-  // ── Customer with pending order (order NOT completed) ──────
+  // ── Customer with no active grant ─────────────────────────
 
-  it("customer with PENDING order (not completed): hasAccess:false", async () => {
+  it("customer with NO active grant: hasAccess:false", async () => {
     mockLoggedInCustomer();
     mockProductFound();
-    mockFindCompletedOrder.mockResolvedValueOnce(null);
+    mockResolveProductAccess.mockResolvedValueOnce({
+      allowed: false,
+      reason: "no_active_access_grant",
+    });
 
     const { GET } = await import("./route");
     const response = await GET(createMockRequest({ productId: FAKE_PRODUCT_SLUG }));
@@ -229,30 +249,19 @@ describe("GET /api/access — auth semantics probe", () => {
     expect(body.userId).toBeUndefined();
   });
 
-  // ── Customer with no order ────────────────────────────────
+  // ── Hierarchy: resolver wins over Pattern B orderId ────────
+  // V3.1 invariant: when logged in AND an access check is needed,
+  // resolveProductAccess runs first and decides. Pattern B is
+  // only a fallback for guests.
 
-  it("customer with NO order ever: hasAccess:false", async () => {
+  it("logged-in customer: resolver takes precedence over Pattern B orderId", async () => {
     mockLoggedInCustomer();
     mockProductFound();
-    mockFindCompletedOrder.mockResolvedValueOnce(null);
-
-    const { GET } = await import("./route");
-    const response = await GET(createMockRequest({ productId: FAKE_PRODUCT_SLUG }));
-    const body = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(body.hasAccess).toBe(false);
-  });
-
-  // ── Hierarchy test: Pattern A wins over Pattern B ────────
-  // V3.1 invariant: when logged in AND order exists AND orderId
-  // is also passed, Pattern A (user-keyed) is checked first and
-  // it wins. Pattern B is only a fallback for guests.
-
-  it("logged-in customer: Pattern A takes precedence over Pattern B orderId", async () => {
-    mockLoggedInCustomer();
-    mockProductFound();
-    mockFindCompletedOrder.mockResolvedValueOnce(fakeOrder());
+    mockResolveProductAccess.mockResolvedValueOnce({
+      allowed: true,
+      grantId: FAKE_GRANT_ID,
+      source: "grant",
+    });
 
     const { GET } = await import("./route");
     const response = await GET(
@@ -263,8 +272,8 @@ describe("GET /api/access — auth semantics probe", () => {
     expect(response.status).toBe(200);
     expect(body.hasAccess).toBe(true);
     expect(body.userId).toBe(FAKE_USER_ID);
-    // Pattern A was attempted first and succeeded — Pattern B never reached.
-    expect(mockFindCompletedOrder).toHaveBeenCalledTimes(1);
+    // Resolver was attempted and succeeded — Pattern B never reached.
+    expect(mockResolveProductAccess).toHaveBeenCalledTimes(1);
     expect(mockFindCompletedOrderByOrderId).not.toHaveBeenCalled();
   });
 
@@ -272,7 +281,6 @@ describe("GET /api/access — auth semantics probe", () => {
 
   it("returns hasAccess:false when getServerUser throws unhandled error", async () => {
     mockGetServerUser.mockRejectedValueOnce(new Error("supabase down"));
-    // Suppress expected console.error from the route's catch block.
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const { GET } = await import("./route");
     const response = await GET(createMockRequest({ productId: FAKE_PRODUCT_SLUG }));

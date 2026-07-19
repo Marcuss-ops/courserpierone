@@ -9,6 +9,11 @@
  *   - default-deny fallback
  *   - order-doesn't-matter invariants (admin_role skipped when
  *     free_course fires, etc.)
+ *
+ * Step 9 — MCR Phase 3 cutover: `hasCompletedOrder` field on
+ * AccessContext is renamed to `hasActiveAccessGrant`. The boolean is
+ * filled by `resolveProductAccess` (canonical AccessGrant SSOT path).
+ * Tests updated accordingly.
  */
 import { describe, it, expect } from "vitest";
 import {
@@ -119,25 +124,29 @@ describe("evaluatePolicy — admin_role (Node-only, requiresDb)", () => {
 
 // ── owned_grant ─────────────────────────────────────────────────
 describe("evaluatePolicy — owned_grant (Node-only, requiresDb)", () => {
-  it("allows when hasCompletedOrder=true", () => {
+  // Step 9 — MCR Phase 3 cutover: the `owned_grant` policy short-
+  // circuits on `hasActiveAccessGrant` (true when resolveProductAccess
+  // verdict is allowed). The consumer fills the boolean via a single
+  // top-of-route call. Policy evaluator itself is pure (no Prisma).
+  it("allows when hasActiveAccessGrant=true (Step 9 SSOT verdict)", () => {
     expect(
       evaluatePolicy(
         { kind: "owned_grant", requiresDb: true },
-        { ...baseCtx, hasCompletedOrder: true },
+        { ...baseCtx, hasActiveAccessGrant: true },
       ),
     ).toEqual({ action: "allow", reason: "owned" });
   });
 
-  it("returns null when hasCompletedOrder=false", () => {
+  it("returns null when hasActiveAccessGrant=false", () => {
     expect(
       evaluatePolicy(
         { kind: "owned_grant", requiresDb: true },
-        { ...baseCtx, hasCompletedOrder: false },
+        { ...baseCtx, hasActiveAccessGrant: false },
       ),
     ).toBeNull();
   });
 
-  it("returns null when hasCompletedOrder undefined (no DB hydration)", () => {
+  it("returns null when hasActiveAccessGrant undefined (no DB hydration)", () => {
     expect(
       evaluatePolicy(
         { kind: "owned_grant", requiresDb: true },
@@ -277,7 +286,7 @@ describe("evaluateAccess — first-match short-circuit", () => {
         ...baseCtx,
         isFreeCourseSlug: true,
         userRole: "student",
-        hasCompletedOrder: false,
+        hasActiveAccessGrant: false,
       }),
     ).toEqual({ action: "allow", reason: "free_course_bypass" });
 
@@ -290,13 +299,13 @@ describe("evaluateAccess — first-match short-circuit", () => {
       }),
     ).toEqual({ action: "allow", reason: "admin" });
 
-    // Scenario C: not free, not admin, completed order wins
+    // Scenario C: not free, not admin, AccessGrant active wins
     expect(
       evaluateAccess(policies, {
         ...baseCtx,
         isFreeCourseSlug: false,
         userRole: "student",
-        hasCompletedOrder: true,
+        hasActiveAccessGrant: true,
       }),
     ).toEqual({ action: "allow", reason: "owned" });
   });

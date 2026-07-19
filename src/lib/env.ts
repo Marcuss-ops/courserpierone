@@ -94,14 +94,6 @@ export const ENV_DEFINITIONS: EnvVarDef[] = [
     description: "Mittente delle email. Required — set explicitly (e.g. 'Courssy <no-reply@courssy.com>').",
   },
   {
-    key: "USE_ACCESS_GRANT_RESOLVER",
-    category: "optional",
-    description:
-      "Feature flag (PR 3 of MCR) — se 'true', resolve-message-permission legge da AccessGrant.active invece di Order.status='completed'. Default 'false': Order.status resta l'autorità finché la rollout non è completa. Cadence di flip: 1d zero denies in staging → 7d monitoring in staging → flip prod → monitor 7d → rimuovere il legacy read.",
-    defaultValue: "false",
-    optional: true,
-  },
-  {
     key: "LEMONSQUEEZY_API_KEY",
     category: "required",
     description: "Lemon Squeezy API key",
