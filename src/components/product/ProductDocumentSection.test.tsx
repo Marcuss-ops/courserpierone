@@ -52,16 +52,20 @@ import type {
 // the mock factory doesn't suffer a TDZ violation when it tries
 // to reference `stubRenderFn` during module resolution.
 
-const { stubRenderFn } = vi.hoisted(() => ({
-  stubRenderFn: vi.fn(),
-}));
-
-const stubRender = (props: { id: string; content?: unknown }): null => {
-  stubRenderFn(props);
-  // Return null instead of JSX — RTL doesn't need real DOM for
-  // our assertions (we read the section wrapper only).
-  return null;
-};
+const { stubRenderFn, stubRender } = vi.hoisted(() => {
+  // Both `stubRenderFn` and `stubRender` MUST be hoisted because
+  // the `vi.mock` factory below references them at the time the
+  // mocked module is evaluated. Vitest hoists `vi.mock` AND the
+  // factory's referenced variables via `vi.hoisted`.
+  const stubRenderFn = vi.fn();
+  const stubRender = (props: { id: string; content?: unknown }): null => {
+    stubRenderFn(props);
+    // Return null instead of JSX — RTL doesn't need real DOM for
+    // our assertions (we read the section wrapper only).
+    return null;
+  };
+  return { stubRenderFn, stubRender };
+});
 
 vi.mock("@/lib/blocks/CONTENT_BLOCK_REGISTRY", () => ({
   BLOCK_REGISTRY: {
