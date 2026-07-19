@@ -559,9 +559,9 @@ describe("POST .../pages — 409 slug_taken", () => {
   });
 });
 
-// ─── 6. 200 SUCCESS ─────────────────────────────────────────────
+// ─── 6. 201 SUCCESS ─────────────────────────────────────────────
 
-describe("POST .../pages — 200 success", () => {
+describe("POST .../pages — 201 success", () => {
   it("happy path → 200 with full ContentPageRecord", async () => {
     mockSessionAs("u_audit_actor_1", "creator");
     const { pageRepoPort } = configureRoute({
@@ -576,7 +576,7 @@ describe("POST .../pages — 200 success", () => {
       mkRequest({ slug: "new-section", status: "draft" }),
       CTX,
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(201);
     const body = await res.json();
     expect(body.ok).toBe(true);
     expect(body.page).toEqual({
@@ -614,7 +614,7 @@ describe("POST .../pages — 200 success", () => {
       mkRequest({ slug: "abc" }),
       CTX,
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(201);
     const body = await res.json();
     expect(body).not.toHaveProperty("source");
     expect(body).not.toHaveProperty("requiredAction");
@@ -641,7 +641,7 @@ describe("POST .../pages — plumbing", () => {
       mkRequest({ slug: "abc" }),
       { params: { productId: "prod_xyz_42" } },
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(201);
     expect(accessPort.spy.called).toEqual([
       {
         actorId: "u_audit_actor_1",
@@ -669,7 +669,7 @@ describe("POST .../pages — plumbing", () => {
       }),
       CTX,
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(201);
     expect(pageRepoPort.spy.lastCreateInput).toEqual({
       productId: "product_1",
       parentId: "parent_page_1",
