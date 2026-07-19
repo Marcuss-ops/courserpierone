@@ -40,10 +40,11 @@
 import { existsSync, readdirSync, statSync } from "fs";
 import { resolve } from "path";
 import process from "process";
+import type { CourseMeta } from "../courses.config";
 import type { CourseTemplateId } from "../src/lib/courses/templates";
 
 // ─── Step 1: load registry via tsx ───────────────────────────────
-async function loadRegistry(): Promise<{ bundled: unknown[]; all: unknown[] }> {
+async function loadRegistry(): Promise<{ bundled: CourseMeta[]; all: CourseMeta[] }> {
   // courses.config.ts lives at project root. This script is at scripts/
   // (one level below root), so the import path is `../courses.config`.
   // The `tsx` runtime transparently loads TypeScript imports.
@@ -74,14 +75,6 @@ function scanCoursesDir(root: string): string[] {
     /* directory missing → empty list (registry↔disk check will fail loudly) */
   }
   return out;
-}
-
-interface CourseMeta {
-  slug: string;
-  status: "active" | "draft" | "archived";
-  templateId: CourseTemplateId;
-  kind?: "bundled" | "user-published";
-  [k: string]: unknown;
 }
 
 async function main() {
@@ -139,10 +132,12 @@ async function main() {
   }
 
   // ── Drift (b): folder on disk but slug not registered ──────
-  // A folder is "orphan" if it's neither bundled nor user-published.
-  // For user-published entries, the folder is allowed (declared
-  // intent) but the script still flags the slug if it doesn't appear
-  // in COURSES[] at all — that's the actual orphan case.
+  // A folder is "orphan" iff its slug is absent from COURSES[] —
+  // whether bundled or user-published, the registry is the only
+  // declared source of intent. So a slug present in COURSES[]
+  // (bundled OR user-published) is allowed to have a folder;
+  // a slug absent from COURSES[] but present on disk is the
+  // real orphan case.
   for (const folderSlug of onDiskSlugs) {
     if (!registeredBundledSlugs.has(folderSlug)) {
       const isUserPublished = ALL_COURSES.some(

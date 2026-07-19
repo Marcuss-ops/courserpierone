@@ -118,14 +118,16 @@ async function resolveCreatorId(): Promise<string> {
 }
 
 async function main() {
+  // Precompute bundled-slugs list once for error messages (reused in 2 branches).
+  const bundledSlugsList = BUNDLED_COURSES.map((c) => c.slug).join(", ");
+
   // ─── 1. Argument validation (no implicit defaults post-ADR-0011) ───
   const slug = process.argv[2];
   if (!slug) {
     console.error(
       "❌ Usage: npx tsx scripts/products/sync-local-config.ts <slug>\n" +
         "   The slug MUST be declared in courses.config.ts (COURSES registry).\n" +
-        "   Bundled slugs: " +
-        BUNDLED_COURSES.map((c) => c.slug).join(", "),
+        `   Bundled slugs: ${bundledSlugsList}`,
     );
     process.exit(1);
   }
@@ -136,8 +138,7 @@ async function main() {
     console.error(
       `❌ Slug "${slug}" is NOT in the courses.config.ts registry.\n` +
         `   Add an entry to COURSES[] first, then re-run this script.\n` +
-        `   Bundled slugs: ` +
-        BUNDLED_COURSES.map((c) => c.slug).join(", "),
+        `   Bundled slugs: ${bundledSlugsList}`,
     );
     process.exit(1);
   }

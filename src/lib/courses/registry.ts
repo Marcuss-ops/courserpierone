@@ -79,8 +79,3 @@ const _SLUG_SET: ReadonlySet<string> = new Set(COURSES.map((c) => c.slug));
 export function isRegisteredCourse(slug: string): boolean {
   return _SLUG_SET.has(slug);
 }
-
-/** Returns true iff the slug is bundled (or absent — falls through as bundled). */
-export function isBundledCourseSlug(slug: string): boolean {
-  return isBundledCourse(slug);
-}
