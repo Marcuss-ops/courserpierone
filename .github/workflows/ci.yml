@@ -514,6 +514,28 @@ jobs:
           echo "(V2 domains require strict ownership — remove unused exports when migrating.)"
           exit 0
 
+      # ── (e.1) Check for deprecated brand names ────────────────────────
+      # Moved here from its previous misplaced position (`# Job 6 — deploy-gate`
+      # comment block) per the P0 repo-hardening audit. Runs alongside the
+      # other cheap structural guards below; brand strings have repeatedly
+      # resurfaced via search/replace greps and need to stay nailed down.
+      - name: Check for deprecated brand names
+        run: npm run check:naming
+
+      # ── (e.2) Regression guard: deploy-gate structure (P0 hardening) ──
+      # Closes the P0 deploy-gate bypass from the repo-hardening audit
+      # (ADR-0001 §Future §1): if anyone copy-paste refactors `ci.yml` and
+      # (a) removes `quality-gate` from `needs:`, or (b) drops the
+      # `[ "$QG" = "success" ]` row from the aggregator bash, or (c) drops
+      # the `${{ needs.quality-gate.result }}` env binding, or (d) breaks
+      # the `- name: Fail the gate` step (or its `exit 1`), main would turn
+      # green with quality actually red — bypassing branch protection.
+      # This guard fails `quality-gate` (which in turn fails `deploy-gate`)
+      # before that regression can merge. Source: scripts/quality/
+      # check-deploy-gate-shape.ts (15 unit tests cover each invariant).
+      - name: Regression guard: deploy-gate structure
+        run: npm run check:deploy-gate-shape
+
       # ── (f) File size budget (src/domains/** only) ───────────────────
       # Per ADR-0016 + Fase 0 step 4. Budgets: 250 applicativo / 150 route /
       # 400 eccezione. SOLO `src/domains/**/*.{ts,tsx}` (V2 namespace; V1
@@ -575,10 +597,6 @@ jobs:
   # protection. Aggregates the 4 jobs above; alerts via ALERT_WEBHOOK_URL
   # on any red.
   # ════════════════════════════════════════════════════════════════════════
-      - name: Check for deprecated brand names
-        run: npm run check:naming
-
-
   deploy-gate:
     name: 🚦 deploy-gate
     runs-on: ubuntu-latest
