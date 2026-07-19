@@ -36,6 +36,7 @@ model Product {
   price            Int      @default(0) // in centesimi
   currency         String   @default("eur")
   status           String   @default("draft") // draft | published | archived
+  contentKind      String   @default("video_course") // video_course | document_course | ebook | post | lesson | (validated app-side, NOT a Prisma enum — see src/domains/catalog/content-type-registry.ts)
   pricesByCurrency String? // JSON: { "USD": { "price": 5500, "symbol": "$", "lemonVariantId": "..." }, ... }
   countryOverrides String? // JSON: { "BR": { "currency": "BRL", "price": 9900, "symbol": "R$", "lemonVariantId": "123456" }, ... }
   defaultLanguage  String   @default("it") // Lingua default prodotto (per resume locale / content fallback)

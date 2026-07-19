@@ -34,6 +34,7 @@ export const CONTENT_KINDS = [
   "free_course",
   "lesson",
   "offer_card",
+  "video_course",
 ] as const;
 
 export type ContentKind = (typeof CONTENT_KINDS)[number];

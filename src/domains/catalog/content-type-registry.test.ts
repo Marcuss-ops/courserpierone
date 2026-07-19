@@ -4,7 +4,7 @@
  * Caratterizzazione del Content Type Registry (Courssy — registries sprint).
  *
  * Coverage:
- *  - 7 spec&rsquo;d kinds: each parses cleanly + unknown values throw.
+ *  - 8 spec&rsquo;d kinds: each parses cleanly + unknown values throw.
  *  - 5 spec&rsquo;d statuses: each parses cleanly + unknown values throw.
  *  - Runtime helpers isContentKind/isContentStatus: type-narrowing
  *    accept only valid values, reject undefined/null/numbers/objects.
@@ -32,10 +32,15 @@ import {
 // ─── contentKind ─────────────────────────────────────────────────
 
 describe("contentKindSchema", () => {
-  it("accepts all 7 spec&rsquo;d kinds", () => {
+  it("accepts all 8 spec&rsquo;d kinds", () => {
     for (const k of CONTENT_KINDS) {
       expect(contentKindSchema.parse(k)).toBe(k);
     }
+
+    // MCR Step 12 — `video_course` is the canonical Product.contentKind
+    // default. The pattern: registry values are STRICT lowercased strings,
+    // matching the Prisma @default literal so round-trip parse works.
+    expect(contentKindSchema.parse("video_course")).toBe("video_course");
   });
 
   it("rejects unknown values", () => {
@@ -47,9 +52,9 @@ describe("contentKindSchema", () => {
     expect(() => contentKindSchema.parse(42)).toThrow();
   });
 
-  it("CONTENT_KINDS contains exactly 7 unique entries", () => {
-    expect(CONTENT_KINDS.length).toBe(7);
-    expect(new Set(CONTENT_KINDS).size).toBe(7);
+  it("CONTENT_KINDS contains exactly 8 unique entries", () => {
+    expect(CONTENT_KINDS.length).toBe(8);
+    expect(new Set(CONTENT_KINDS).size).toBe(8);
   });
 });
 
