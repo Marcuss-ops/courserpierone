@@ -4,9 +4,20 @@
  * Per ADR-0011 (course plugin decoupling): synced from courses.config.ts
  * registry + the per-course source-of-truth `courses/<slug>/config.json`.
  *
+ * Post-Phase 3 split (bundled vs user-published):
+ *   - This script handles BUNDLED courses only. Creator-driven products
+ *     (kind === "user-published") are LOUDLY REFUSED — they live
+ *     exclusively in `Product` and are surfaced via the standard
+ *     Product resolvers / the studio UI publish flow.
+ *   - Unknown slugs (not in `COURSES[]` at all) continue to be rejected
+ *     with the same loud UX as before.
+ *   - Drafts/archived continue to be silently skipped (no DB write).
+ *
  * Behavior:
  *   - REQUIRES an explicit slug argv (no implicit amish-secrets default).
- *   - REJECTS slugs not present in `courses.config.ts` registry (sanity).
+ *   - REJECTS slugs not present in `courses.config.ts` registry.
+ *   - REJECTS slugs declared `kind: "user-published"` — explicit UX
+ *     message points the operator to the studio publish flow.
  *   - Silently skips drafts/archived (no DB write, exit 0).
  *   - Reads `courses/<slug>/config.json` (the single source-of-truth).
  *   - Upserts BOTH:
@@ -18,16 +29,17 @@
  *
  * Exit codes:
  *   0 = success (or silent skip on draft/archived)
- *   1 = missing/invalid argument, missing slug in registry, missing config file
+ *   1 = missing/invalid argument, missing slug in registry, user-published slug refused
  *   2 = DB write failed
  */
 
-import { readFileSync, existsSync, mkdirSync, copyFileSync } from "fs";
-import { resolve, dirname } from "path";
+import { readFileSync, existsSync } from "fs";
+import { resolve } from "path";
 import { prisma } from "../../src/lib/db/prisma";
 import {
-  COURSES,
+  BUNDLED_COURSES,
   findCourseMeta,
+  isBundledCourse,
   type CourseMeta,
 } from "../../courses.config";
 
@@ -112,8 +124,8 @@ async function main() {
     console.error(
       "❌ Usage: npx tsx scripts/products/sync-local-config.ts <slug>\n" +
         "   The slug MUST be declared in courses.config.ts (COURSES registry).\n" +
-        "   Available slugs: " +
-        COURSES.map((c) => c.slug).join(", "),
+        "   Bundled slugs: " +
+        BUNDLED_COURSES.map((c) => c.slug).join(", "),
     );
     process.exit(1);
   }
@@ -124,8 +136,35 @@ async function main() {
     console.error(
       `❌ Slug "${slug}" is NOT in the courses.config.ts registry.\n` +
         `   Add an entry to COURSES[] first, then re-run this script.\n` +
-        `   Current registered slugs: ` +
-        COURSES.map((c) => c.slug).join(", "),
+        `   Bundled slugs: ` +
+        BUNDLED_COURSES.map((c) => c.slug).join(", "),
+    );
+    process.exit(1);
+  }
+
+  // ─── 2b. BUNDLED-ONLY GATE (Phase 3 split) ───────────────────────
+  //
+  // The sync script exists to promote BUNDLED config-on-disk to the
+  // DB (Product + CourseConfigCache). Creator-driven products
+  // (kind: "user-published") live exclusively in `Product` and are
+  // surfaced through the studio/UI publish flow — they MUST NOT be
+  // written via this script. Loud refusal (exit 1) is intentional:
+  // silent skip would mask accidental ops against a creator's slug.
+  if (!isBundledCourse(slug)) {
+    console.error(
+      `❌ Slug "${slug}" is declared kind="user-published" in the registry.\n` +
+        `   This sync script is BUNDLED-ONLY — it does not touch creator-driven products.\n` +
+        `\n` +
+        `   Creator-driven products are managed exclusively in the ` +
+        `Product table:\n` +
+        `     • They are authored + published via the studio UI / direct DB writes.\n` +
+        `     • Their data is read via src/lib/data/... resolvers (ProductDocument,\n` +
+        `       resolvePublishedContent, etc.), not through this registry.\n` +
+        `\n` +
+        `   Action: either remove the entry from COURSES[] (let it be DB-only),\n` +
+        `   or change ` +
+        `kind` +
+        ` to "bundled" if you DO want this script to manage it.\n`,
     );
     process.exit(1);
   }

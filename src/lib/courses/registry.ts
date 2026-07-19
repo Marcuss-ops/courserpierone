@@ -14,31 +14,57 @@
  *
  * IMPORTANT: for ORDER / ACCESS / AUTH state, query Prisma `Product` directly.
  * This registry holds MARKETING METADATA only — no payment, no permissions.
+ *
+ * Post-Phase 3 split (bundled vs user-published):
+ *   - `BUNDLED_COURSES` / `ACTIVE_BUNDLED_COURSES` / `isBundledCourse` are
+ *     the new bundled-only surface; prefer these in new code.
+ *   - `ACTIVE_COURSES` is preserved as a back-compat alias of
+ *     `ACTIVE_BUNDLED_COURSES`; old callers transparently get the
+ *     bundled-only view (user-published entries are filtered out).
+ *   - For creator-driven product reads, use `Product` directly via
+ *     `src/lib/data/...` — never through this registry.
  */
 
 import {
-  COURSES,
+  BUNDLED_COURSES,
+  ACTIVE_BUNDLED_COURSES,
   ACTIVE_COURSES,
+  COURSES,
   DEFAULT_LANDING_SLUG,
   findCourseMeta,
+  isBundledCourse,
+  type CourseKind,
   type CourseMeta,
 } from "../../../courses.config";
 
 // CourseMeta passthrough — still lives in courses.config.ts (registry source).
-export type { CourseMeta };
+export type { CourseMeta, CourseKind };
 // CourseTemplateId re-exported here so server components that pull the
 // façade (registry) don't need a second import path for the template id.
 export type { CourseTemplateId } from "@/lib/courses/templates";
-export { COURSES, ACTIVE_COURSES, DEFAULT_LANDING_SLUG, findCourseMeta };
+export {
+  BUNDLED_COURSES,
+  ACTIVE_BUNDLED_COURSES,
+  ACTIVE_COURSES,
+  COURSES,
+  DEFAULT_LANDING_SLUG,
+  findCourseMeta,
+  isBundledCourse,
+};
 
-/** All known slugs (active + draft + archived) — used by CI registry vs DB audit. */
+/** All known slugs (bundled + user-published, regardless of status). */
 export function getAllSlugs(): string[] {
   return COURSES.map((c) => c.slug);
 }
 
-/** Active slugs only — used by marketing catalog. */
+/** Bundled-only slugs (active + draft + archived). */
+export function getBundledSlugs(): string[] {
+  return BUNDLED_COURSES.map((c) => c.slug);
+}
+
+/** Active slugs only — used by marketing catalog. Bundled-only view. */
 export function getActiveSlugs(): string[] {
-  return ACTIVE_COURSES.map((c) => c.slug);
+  return ACTIVE_BUNDLED_COURSES.map((c) => c.slug);
 }
 
 /** Slug → status map — used by sync audit & dashboards. */
@@ -49,7 +75,12 @@ export function getCoursesByStatus(): Record<string, CourseMeta["status"]> {
 /** Marker constant for log/audit lines. Cheap O(1) membership check. */
 const _SLUG_SET: ReadonlySet<string> = new Set(COURSES.map((c) => c.slug));
 
-/** Returns true if the slug is registered. O(1). */
+/** Returns true if the slug is registered (bundled OR user-published). O(1). */
 export function isRegisteredCourse(slug: string): boolean {
   return _SLUG_SET.has(slug);
+}
+
+/** Returns true iff the slug is bundled (or absent — falls through as bundled). */
+export function isBundledCourseSlug(slug: string): boolean {
+  return isBundledCourse(slug);
 }
