@@ -245,10 +245,28 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
   // dedicated column is the source of truth) rather than on Order —
   // attribution is an analytics concern, not a transactional one.
   // See V1 acceptance-test criterion #10.
+  //
+  // productId: MCR Step 11 — SSOT analytics identifier reconciliation.
+  // We write `product.slug` (NOT `product.id` cuid) so that the
+  // analytics column matches the convention already used by every
+  // other write site:
+  //   - Client pageview (`src/components/course/analytics-tracker.tsx`)
+  //     passes `productId: productSlug`.
+  //   - The dashboard + funnel + admin/products routes filter on
+  //     `productId: p.slug` (slugs).
+  // Mixing slug and cuid in the same column breaks the funnel
+  // conversion rate — pageview rows match the WHERE, purchase rows
+  // don't. The fix is unified on slug (the user's preference and
+  // the pageview convention) so existing admin queries keep working.
+  // Historical rows with cuid were migrated by
+  // scripts/analytics/backfill-purchase-productids.ts (one-shot).
+  // See also the SSOT slug-shape guard in /api/analytics/dashboard
+  // and /api/analytics/funnel that rejects cuid-shaped input from
+  // the dashboard query string.
   await prisma.analyticEvent
     .create({
       data: {
-        productId: product.id,
+        productId: product.slug,
         eventType: "purchase",
         ...(channelId ? { channelId } : {}),
         metadata: JSON.stringify({

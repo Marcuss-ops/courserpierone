@@ -358,8 +358,11 @@ describe("processOrder — email failure tolerance (scenario 9)", () => {
 
     expect(prisma.analyticEvent.create).toHaveBeenCalledOnce();
     const analyticsArg = vi.mocked(prisma.analyticEvent.create).mock.calls[0][0];
+    // MCR Step 11: analytics productId is the SSOT slug (not cuid).
+    // Matches the pageview writer convention so funnel conversion
+    // rates work end-to-end. See complete-order.ts §8 for context.
     expect(analyticsArg.data).toMatchObject({
-      productId: "prod_abc",
+      productId: "test-course",
       eventType: "purchase",
     });
   });

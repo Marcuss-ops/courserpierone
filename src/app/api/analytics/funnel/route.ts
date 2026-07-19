@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { apiErrorResponse } from "@/lib/errors";
+import { isCuidShape } from "@/lib/analytics/ssot-identifier";
 
 const FUNNEL_STEPS = [
   "pageview",
@@ -14,11 +15,29 @@ const FUNNEL_STEPS = [
 
 const FUNNEL_STEP_VALUES: string[] = [...FUNNEL_STEPS];
 
+// ── MCR Step 11: SSOT analytics identifier ─────────────────────
+// Same guard as dashboard/route: reject cuid-shaped productId
+// (the column stores Product.slug). See the SSOT predicate at
+// `@/lib/analytics/ssot-identifier` for the kebab-case-slug
+// trust assumption.
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl;
     const productId = searchParams.get("productId");
     const days = parseInt(searchParams.get("days") ?? "30");
+
+    // ── SSOT guard: reject cuid-shaped productId ────────────────
+    if (isCuidShape(productId)) {
+      return NextResponse.json(
+        {
+          error:
+            "Expected Product slug, got cuid. AnalyticEvent.productId is the Product.slug string; pass /<locale>/<slug> or just <slug>.",
+        },
+        { status: 400 },
+      );
+    }
+
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
     const baseWhere = {
