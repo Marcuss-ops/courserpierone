@@ -5,6 +5,10 @@ export default defineConfig({
   test: {
     // Pure unit tests — no DOM needed
     environment: "node",
+    // Global setup runs BEFORE any test file imports its
+    // SUT — this is where browser-only polyfills are registered
+    // so jsdom-mode tests mount cleanly.
+    setupFiles: ["./vitest.setup.ts"],
     include: [
       "src/**/*.test.ts",
       "src/**/*.test.tsx",

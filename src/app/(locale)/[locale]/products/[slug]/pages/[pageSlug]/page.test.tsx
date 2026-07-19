@@ -12,40 +12,14 @@
  *   - 404 (notFound) when pageSlug doesn't match any published page
  *
  * Mocks `resolvePublishedContent` via vi.mock to control
- * the data layer without a real DB connection.
- *
- * ─── IntersectionObserver polyfill (jsdom) ─────────────────
- * The TOC uses an `IntersectionObserver` for active-section
- * tracking; jsdom does NOT ship with one. We define a
- * no-op stub BEFORE importing the page (or the TOC) so the
- * mount doesn't crash. The polyfill satisfies the API
- * shape (`observe` / `disconnect` / `unobserve` / `takeRecords`)
- * without doing anything — the active-section logic is
- * exercised separately, not in this unit test.
+ * the data layer without a real DB connection. The
+ * IntersectionObserver stub lives in the global
+ * `vitest.setup.ts` (registered via `setupFiles`) so the
+ * TOC's mount doesn't crash in jsdom — no per-test polyfill
+ * noise here.
  */
 
-// 1. IntersectionObserver polyfill BEFORE any component import.
-class StubIntersectionObserver {
-  readonly root: Element | null = null;
-  readonly rootMargin = "";
-  readonly thresholds: ReadonlyArray<number> = [];
-  observe(): void {
-    /* noop */
-  }
-  unobserve(): void {
-    /* noop */
-  }
-  disconnect(): void {
-    /* noop */
-  }
-  takeRecords(): IntersectionObserverEntry[] {
-    return [];
-  }
-}
-(globalThis as unknown as { IntersectionObserver: typeof IntersectionObserver }).IntersectionObserver =
-  StubIntersectionObserver as unknown as typeof IntersectionObserver;
-
-// 2. mock next/navigation's notFound BEFORE component import.
+// Mocks BEFORE component import.
 const notFoundMock = vi.fn(() => {
   throw new Error("NOT_FOUND");
 });
@@ -53,7 +27,6 @@ vi.mock("next/navigation", () => ({
   notFound: notFoundMock,
 }));
 
-// 3. mock the data-layer usecase + adapter BEFORE component import.
 vi.mock(
   "@/domains/catalog/content-pages/resolve-published-content",
   () => ({
@@ -68,13 +41,13 @@ vi.mock(
   }),
 );
 
-// 4. mock the layout — vitest can't render the App Router
+// Mock the layout — vitest can't render the App Router
 // layout chain from a unit test; render the page directly.
 vi.mock("@/app/(locale)/[locale]/products/[slug]/layout.tsx", () => ({
   default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-// 5. Now safe to import the component under test.
+// Import AFTER mocks take effect.
 import { render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
