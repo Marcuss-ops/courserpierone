@@ -207,6 +207,17 @@ it for review like any other schema migration.
   - Process order: `src/lib/commerce/orders/complete-order.ts`
   - Revoke order: `src/lib/commerce/orders/revoke-order.ts`
   - LS adapter: `src/lib/commerce/payments/providers/lemonsqueezy/index.ts`
+- Tooling (enforcement of Regola 1 + Regola 2):
+  - `scripts/ci/check-destructive-migrations.sh` — content-based scanner
+    that fails the gate on `DROP COLUMN`, `DROP TABLE`, `RENAME COLUMN`,
+    `RENAME TO`, `TRUNCATE` in any modified `migration.sql`. Replaces the
+    legacy `ci.yml` inline regex on pathnames (which matched folder
+    NAMES — not SQL content — and silently let destructive migrations
+    through). Run via `bash scripts/ci/check-destructive-migrations.sh`,
+    `npm run check:migrations`, or `--self-test` (12 fixture cases).
+  - `scripts/ci/migration-test.sh` — execution-based complement:
+    applies every migration to a fresh `postgres:16-alpine` to catch
+    malformed SQL and cumulative drift (not just keyword shapes).
 
 ---
 

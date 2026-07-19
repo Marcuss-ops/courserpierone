@@ -152,19 +152,20 @@ jobs:
       # the underlying step will still surface the ref-not-found as part
       # of the workflow log).
       #
-      # Implementation note: uses an explicit `if ... && grep -q` instead
-      # of a `&& exit 1 || exit 0` chain. The chain has subtle edge cases
-      # when xargs itself fails independently of grep (different xargs
-      # versions return different non-zero codes). The explicit form is
-      # unambiguous and `grep -q` short-circuits on first match.
-      - name: Schema migration safety
-        run: |
-          CHANGED=$(git diff --name-only origin/main...HEAD -- prisma/migrations/ || true)
-          if [ -n "$CHANGED" ] && echo "$CHANGED" | grep -qiE "\b(drop|rename)\b"; then
-            echo "::error::Destructive migration keyword detected (DROP or RENAME in prisma/migrations/). See ADR 001: docs/architecture/001-db-migrations.md"
-            exit 1
-          fi
-          exit 0
+      # Implementation note: replaced inline `git diff --name-only` +
+      # `\b(drop|rename)\b` regex on pathnames with a dedicated
+      # `scripts/ci/check-destructive-migrations.sh` step. The legacy
+      # inline check matched ONLY folder names — a migration named
+      # `20260719_update_product/migration.sql` containing
+      # `DROP TABLE "X"` slipped through silently because the path
+      # did not contain the keyword. The new scanner reads the actual
+      # SQL content (after stripping `--` and `/* */` comments) and
+      # matches against the ADR 001 forbidden statement set:
+      #   DROP COLUMN / DROP TABLE / RENAME COLUMN / RENAME TO / TRUNCATE
+      # DROP INDEX and DROP CONSTRAINT are allowed (operational).
+      # Self-test mode (`--self-test`) runs 12 fixture cases.
+      - name: Schema migration safety (real-content scanner; ADR 001)
+        run: bash scripts/ci/check-destructive-migrations.sh
 
   # ════════════════════════════════════════════════════════════════════════
   # Job 2 — Lint
