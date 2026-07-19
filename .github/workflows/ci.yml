@@ -2,13 +2,19 @@
 # CI — "main verde = deploy" gate
 # ═══════════════════════════════════════════════════════════════════════════════
 #
-# Four independent quality jobs + one aggregator that posts to ALERT_WEBHOOK_URL
+# Five independent quality jobs + one aggregator that posts to ALERT_WEBHOOK_URL
 # when ANY job is red. This is the deploy-gate:
 #
 #   ┌─ typecheck    ─┐
 #   ├─ lint         ─┤
-#   ├─ unit-tests   ─┼─► deploy-gate ─► ALERT_WEBHOOK_URL (if red)
-#   └─ e2e-journey  ─┘      (aggregator)
+#   ├─ unit-tests   ─┤
+#   ├─ e2e-journey  ─┼─► deploy-gate ─► ALERT_WEBHOOK_URL (if red)
+#   └─ quality-gate ─┘      (aggregator)
+#
+# CRITICAL: the aggregator MUST consult `needs.quality-gate.result` and
+# combine it with the other four results. Otherwise a red `quality-gate`
+# with the other four green produces a green `deploy-gate`, which would
+# unblock branch protection and re-introduce the P0 bypass.
 #
 # Required-status-check setup (manual, one-time):
 #   GitHub → Settings → Branches → main → "Require status checks to pass
@@ -596,17 +602,20 @@ jobs:
           LN: ${{ needs.lint.result }}
           UT: ${{ needs.unit-tests.result }}
           E2E: ${{ needs.e2e-journey.result }}
+          QG: ${{ needs.quality-gate.result }}
         run: |
           echo "typecheck=$TC"
           echo "lint=$LN"
           echo "vitest=$UT"
           echo "e2e=$E2E"
+          echo "quality-gate=$QG"
           if [ "$TC" = "success" ] \
             && [ "$LN" = "success" ] \
             && [ "$UT" = "success" ] \
-            && [ "$E2E" = "success" ]; then
+            && [ "$E2E" = "success" ] \
+            && [ "$QG" = "success" ]; then
             echo "gate=green" >> "$GITHUB_OUTPUT"
-            echo "✅ deploy-gate GREEN — all 4 jobs passed."
+            echo "✅ deploy-gate GREEN — all 5 jobs passed."
             exit 0
           else
             echo "gate=red" >> "$GITHUB_OUTPUT"
@@ -631,6 +640,7 @@ jobs:
           LN: ${{ needs.lint.result }}
           UT: ${{ needs.unit-tests.result }}
           E2E: ${{ needs.e2e-journey.result }}
+          QG: ${{ needs.quality-gate.result }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           # NOTE: bash substring slicing uses ${VAR:OFFSET:LENGTH}.
@@ -646,6 +656,7 @@ jobs:
             --arg ln      "$LN" \
             --arg ut      "$UT" \
             --arg e2e     "$E2E" \
+            --arg qg      "$QG" \
             --arg url     "$RUN_URL" \
             '{
               text: ("🚨 deploy-gate RED on *\($ref)* (" + $sha + ")"),
@@ -660,6 +671,7 @@ jobs:
                            "• lint: `\($ln)`\n" +
                            "• vitest: `\($ut)`\n" +
                            "• e2e-journey: `\($e2e)`\n" +
+                           "• quality-gate: `\($qg)`\n" +
                            "• Run: <\($url)|open in GitHub>")
                   }
                 }
