@@ -52,7 +52,8 @@ model Product {
   translations       ProductTranslation[]
   lessons            Lesson[]
   pages              ContentPage[]  // Pagine stile Notion (Phase 1, contentKind document_course/ebook)
-  orders             Order[]
+  documents          ProductDocument[]  // MCR Phase 2 — long-form product description (Notion-like blocks, fed by the same BLOCK_REGISTRY)
+  orders             Order[]     
   abandonedCheckouts AbandonedCheckout[]
   conversations      Conversation[]
   communityPosts     CommunityPost[]
@@ -592,6 +593,48 @@ model ContentPageTranslation {
 
   @@unique([pageId, locale])
   @@index([pageId])
+}
+
+// ─── ProductDocument (MCR Phase 2 — Notion-like long description) ───
+//
+// One canonical `ContentDocumentV1` row per (productId, locale).
+// Conceptually separate from `ContentPage`/`ContentPageTranslation`:
+//
+//   - `ContentPage` — the per-product page tree that enrolled students
+//     traverse after purchase (student-side content).
+//   - `ProductDocument` — the marketing long-form description shown
+//     on the public product landing page (above the funnel),
+//     allowing the seller to attach a rich Notion-like block document
+//     instead of a plain "storia"/"description" string.
+//
+// Both feed off `ContentDocumentV1` (PG JSONB column) and render via
+// the canonical `BLOCK_REGISTRY` (`src/lib/blocks/CONTENT_BLOCK_REGISTRY`).
+//
+// Cascades:
+//   - productId → Cascade (matches ContentPage + Conversation posture)
+//     — deleting a product removes its long description too.
+//
+// `plainText` is nullable @db.Text — denormalized for FTS/SEO/AI
+// indexing; populated by a future extraction job (mirrors
+// ContentPageTranslation.plainText semantics).
+//
+// `revision` starts at 1 and increments on each save — app-layer
+// optimistic concurrency. Future commit adds a write use case
+// mirroring `SaveContentDocument`.
+model ProductDocument {
+  id        String   @id @default(cuid())
+  productId String
+  locale    String
+  document  Json     // PG JSONB — ContentDocumentV1 shape (validated app-side via parseContentDocumentV1)
+  plainText String?  @db.Text  // nullable — denormalized plain text for FTS/SEO/AI; lazy-derived
+  revision  Int      @default(1)  // app-layer SSOT for optimistic concurrency control
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, locale])
+  @@index([productId])
 }
 
 // ─── Webhook Idempotency ──────────────────────────────────
