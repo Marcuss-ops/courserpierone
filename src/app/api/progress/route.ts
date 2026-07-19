@@ -4,7 +4,7 @@ import { getServerUser } from "@/lib/supabase/get-user";
 import { progressSchema } from "@/lib/utils/validations";
 import { apiErrorResponse } from "@/lib/errors";
 import type { Prisma } from "@prisma/client";
-import { findCompletedOrder } from "@/lib/access";
+import { resolveProductAccess } from "@/lib/commerce/access/resolve-product-access";
 
 export async function GET(request: NextRequest) {
   try {
@@ -77,11 +77,16 @@ export async function POST(request: NextRequest) {
     }
 
     if (dbUser.role !== "admin") {
-      const order = await findCompletedOrder({
+      // V2 cutover — AccessGrant SSOT: `resolveProductAccess` is the
+      // canonical resolver. Honors all sourceTypes (order, free_enrollment,
+      // admin, bundle, watchlist) uniformly with status="active" + non-
+      // expired. The legacy `findCompletedOrder` (Order.status read) is
+      // no longer called on this path.
+      const granted = await resolveProductAccess({
         userId: dbUser.id,
         productId: lesson.productId,
       });
-      if (!order) {
+      if (!granted.allowed) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
     }

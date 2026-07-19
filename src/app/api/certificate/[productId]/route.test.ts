@@ -1,12 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createMockRequest } from "@/app/api/__test-helpers__/mock-request";
-import { fakeOrder } from "@/app/api/__test-helpers__/fake-order";
 
-// ─── Mock SSOT helper ───────────────────────────────────────
-const mockFindCompletedOrder = vi.fn();
+// ─── Mock SSOT resolver ─────────────────────────────────────
+//
+// V2 cutover — AccessGrant SSOT: the route now reads from
+// `resolveProductAccess` (AccessGrant.status="active" + non-expired,
+// sourceType-agnostic). The legacy `findCompletedOrder`
+// (Order.status="completed") mock contract is gone.
+//
+// Certificate route has NO inline admin bypass (mirrors the prior
+// in-test contract) — admin must hold an explicit grant to download
+// a certificate.
+const mockResolveProductAccess = vi.fn();
 
-vi.mock("@/lib/access", () => ({
-  findCompletedOrder: mockFindCompletedOrder,
+vi.mock("@/lib/commerce/access/resolve-product-access", () => ({
+  resolveProductAccess: mockResolveProductAccess,
 }));
 
 // ─── Mock Prisma (product.findUnique + lessonProgress.count) ───
@@ -71,20 +79,31 @@ const mockAdmin = () =>
   mockGetServerUser.mockResolvedValueOnce({
     supabase: null,
     user: { email: "admin@test.com" },
-    dbUser: { id: ADMIN_ID, role: "admin", name: "Admin" },
+    dbUser: { id: ADMIN_ID, role: "admin", name: "Admin", preferredLocale: "en" },
   });
 
-const mockCustomer = (id = USER_ID) =>
+const mockCustomer = (id = USER_ID, preferredLocale = "it") =>
   mockGetServerUser.mockResolvedValueOnce({
     supabase: null,
     user: { email: "cust@test.com" },
-    dbUser: { id, role: "student", name: "Customer" },
+    dbUser: { id, role: "student", name: "Customer", preferredLocale },
   });
 
+// Convenience helpers for the post-cutover AccessGrant verdict.
+const mockAllowedGrant = (sourceType: "order" | "free_enrollment" | "admin" | "bundle" | "watchlist" = "order") =>
+  mockResolveProductAccess.mockResolvedValueOnce({ allowed: true, grantId: `grant-${sourceType}-1`, source: "grant" });
+
+const mockDeniedGrant = () =>
+  mockResolveProductAccess.mockResolvedValueOnce({ allowed: false, reason: "no_active_access_grant" });
+
 // ─── fakeOrder factory → @/app/api/__test-helpers__/fake-order (V3.3.2) ─────
+//
+// Note: fakeOrder is still imported for legacy compatibility but the
+// route no longer reads `Order.locale` directly — locale for the
+// certificate template now comes from `dbUser.preferredLocale`.
 
 // ─── Tests ───────────────────────────────────────────────────
-describe("GET /api/certificate/[productId] — auth + completion-gate", () => {
+describe("GET /api/certificate/[productId] — auth + completion-gate (AccessGrant SSOT)", () => {
   beforeEach(() => {
     vi.resetAllMocks();
   });
@@ -98,13 +117,13 @@ describe("GET /api/certificate/[productId] — auth + completion-gate", () => {
     expect(response.status).toBe(401);
     const body = await response.json();
     expect(body.error).toBe("Unauthorized");
-    expect(mockFindCompletedOrder).not.toHaveBeenCalled();
+    expect(mockResolveProductAccess).not.toHaveBeenCalled();
   });
 
-  // ── Admin WITHOUT order: NO admin bypass in this route ──
-  it("admin (no completed order): returns 403 (no admin bypass on this route)", async () => {
+  // ── Admin WITHOUT grant: NO admin bypass in this route ──
+  it("admin (no active grant): returns 403 (no admin bypass on this route)", async () => {
     mockAdmin();
-    mockFindCompletedOrder.mockResolvedValueOnce(null);
+    mockDeniedGrant();
     const { GET } = await import("./route");
     const response = await GET(createMockRequest("/api/certificate/" + PRODUCT_ID), { params });
 
@@ -113,10 +132,10 @@ describe("GET /api/certificate/[productId] — auth + completion-gate", () => {
     expect(body.error).toMatch(/not-purchased-error/i);
   });
 
-  // ── Customer PENDING (order not completed) ────────────────
-  it("customer pending order: returns 403 with localized message", async () => {
+  // ── Customer PENDING (no grant) ─────────────────────────
+  it("customer no active grant: returns 403 with localized message", async () => {
     mockCustomer();
-    mockFindCompletedOrder.mockResolvedValueOnce(null);
+    mockDeniedGrant();
     const { GET } = await import("./route");
     const response = await GET(
       createMockRequest("/api/certificate/" + PRODUCT_ID, { headers: { "accept-language": "it-IT" } }),
@@ -129,9 +148,9 @@ describe("GET /api/certificate/[productId] — auth + completion-gate", () => {
   });
 
   // ── Localization: Accept-Language negotiates error string ──
-  it("customer pending order with Accept-Language en: returns localized English message", async () => {
+  it("customer no active grant with Accept-Language en: returns localized English message", async () => {
     mockCustomer();
-    mockFindCompletedOrder.mockResolvedValueOnce(null);
+    mockDeniedGrant();
     const { GET } = await import("./route");
     const response = await GET(
       createMockRequest("/api/certificate/" + PRODUCT_ID, { headers: { "accept-language": "en-US,en;q=0.9" } }),
@@ -144,19 +163,19 @@ describe("GET /api/certificate/[productId] — auth + completion-gate", () => {
     expect(body.error).toMatch(/\[en\] not-purchased-error/);
   });
 
-  // ── Customer NO order ever ────────────────────────────────
-  it("customer with NO order: returns 403", async () => {
+  // ── Customer no grant ever ───────────────────────────────
+  it("customer with NO grant: returns 403", async () => {
     mockCustomer();
-    mockFindCompletedOrder.mockResolvedValueOnce(null);
+    mockDeniedGrant();
     const { GET } = await import("./route");
     const response = await GET(createMockRequest("/api/certificate/" + PRODUCT_ID), { params });
     expect(response.status).toBe(403);
   });
 
-  // ── Customer completed, but product NOT found in DB ─────
-  it("customer completed order but product UUID missing: returns 404", async () => {
+  // ── Customer with grant, but product NOT found in DB ─────
+  it("customer with active grant but product UUID missing: returns 404", async () => {
     mockCustomer();
-    mockFindCompletedOrder.mockResolvedValueOnce(fakeOrder());
+    mockAllowedGrant("order");
     mockPrisma.product.findUnique.mockResolvedValueOnce(null);
     const { GET } = await import("./route");
     const response = await GET(createMockRequest("/api/certificate/" + PRODUCT_ID), { params });
@@ -166,10 +185,10 @@ describe("GET /api/certificate/[productId] — auth + completion-gate", () => {
     expect(body.error).toBe("Product not found");
   });
 
-  // ── Customer completed, NO lessons attached to product ──
-  it("customer completed but product has zero lessons: returns 400 with localized message", async () => {
+  // ── Customer with grant, NO lessons attached to product ──
+  it("customer with active grant but product has zero lessons: returns 400 with localized message", async () => {
     mockCustomer();
-    mockFindCompletedOrder.mockResolvedValueOnce(fakeOrder());
+    mockAllowedGrant("order");
     mockPrisma.product.findUnique.mockResolvedValueOnce({
       id: PRODUCT_ID,
       slug: PRODUCT_SLUG,
@@ -186,10 +205,10 @@ describe("GET /api/certificate/[productId] — auth + completion-gate", () => {
     expect(body.error).toMatch(/no-lessons-error/);
   });
 
-  // ── Customer completed, lessons INCOMPLETE → 400 with X/Y ──
-  it("customer completed but lessons incomplete: returns 400 with {completed}/{total}", async () => {
+  // ── Customer with grant, lessons INCOMPLETE → 400 with X/Y ──
+  it("customer with active grant but lessons incomplete: returns 400 with {completed}/{total}", async () => {
     mockCustomer();
-    mockFindCompletedOrder.mockResolvedValueOnce(fakeOrder());
+    mockAllowedGrant("order");
     mockPrisma.product.findUnique.mockResolvedValueOnce({
       id: PRODUCT_ID,
       slug: PRODUCT_SLUG,
@@ -206,10 +225,10 @@ describe("GET /api/certificate/[productId] — auth + completion-gate", () => {
     expect(body.error).toMatch(/\(1\/3\)/);
   });
 
-  // ── Customer completed, ALL lessons done → 200 PDF ───────
-  it("customer completed with all lessons done: returns 200 with PDF", async () => {
+  // ── Customer with grant, ALL lessons done → 200 PDF ───────
+  it("customer with active grant + all lessons done: returns 200 with PDF", async () => {
     mockCustomer();
-    mockFindCompletedOrder.mockResolvedValueOnce(fakeOrder());
+    mockAllowedGrant("order");
     mockPrisma.product.findUnique.mockResolvedValueOnce({
       id: PRODUCT_ID,
       slug: PRODUCT_SLUG,

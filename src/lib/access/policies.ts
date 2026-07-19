@@ -27,14 +27,25 @@
  *     `null` means "I don't apply, continue to the next policy". The
  *     engine iterates and short-circuits on the first definite decision.
  *   - Edge-portable policies: `free_course`, `session_required`.
- *   - Node-only policies (DB-backed): `admin_role`, `owned_grant`,
+ *   - Node-only policies (DB-backed): `admin_role`, `access_resolved`,
  *     `pending_order` — explicit `requiresDb: true` discriminator on
  *     the type union.
  *
- * V2 follow-up candidate: collapse `admin_role` + `owned_grant`
- * into a single `access_resolved` policy whose evaluation reads
- * directly from resolveProductAccess (removing the typed plumbing).
- * Out of scope here — see suggest_followups.
+ * V2 follow-up — EXECUTED (this revision): the prior `owned_grant`
+ * pseudo-policy has been RENAMED to `access_resolved`. The rename is
+ * intentional honesty: the policy no longer "simulates a grant" — it
+ * reads the boolean `ctx.hasActiveAccessGrant` that the consumer
+ * filled upstream via `resolveProductAccess` (the canonical AccessGrant
+ * SSOT path). The discriminator name reflects the actual semantics
+ * ("access was resolved upstream") instead of misleading call sites
+ * into thinking the policy itself checks ownership.
+ *
+ * The `admin_role` collapse was left out of scope by design:
+ *   - `admin_role` reads `ctx.userRole` (User.role column, not AccessGrant).
+ *   - `access_resolved` reads `ctx.hasActiveAccessGrant` (filled by the
+ *   -                                 resolver from AccessGrant rows).
+ *   - Conflating them would re-leak `User.role` into a column that
+ *     AccessGrant SSOT should not depend on for the customer path.
  */
 
 export type AccessPolicy =
@@ -43,7 +54,13 @@ export type AccessPolicy =
   | { kind: "session_required" }
   // ── Node-only (DB-backed) ──────────────────────────────────
   | { kind: "admin_role"; requiresDb: true }
-  | { kind: "owned_grant"; requiresDb: true }
+  // `access_resolved` is the renamed, onesta-policy successor to
+  // the prior `owned_grant` pseudo-policy. It reads the boolean
+  // `ctx.hasActiveAccessGrant`, filled by the consumer via
+  // `resolveProductAccess` (read of `AccessGrant.status="active"` +
+  // non-expired, sourceType-agnostic). The rename removes the
+  // misleading implication that this policy itself decides ownership.
+  | { kind: "access_resolved"; requiresDb: true }
   | { kind: "pending_order"; requiresDb: true };
 
 export type AccessDecision =
@@ -151,12 +168,17 @@ export function evaluatePolicy(
       return null;
     }
 
-    case "owned_grant": {
-      // Step 9 — the policy short-circuits on `hasActiveAccessGrant`,
-      // which the consumer fills via `resolveProductAccess`. Empty
-      // (undefined) is treated as "no" to preserve the existing
+    case "access_resolved": {
+      // The renamed successor of `owned_grant`. Policy short-circuits
+      // on `hasActiveAccessGrant` (true when `resolveProductAccess`
+      // verdict is allowed). The boolean is filled by the consumer via
+      // a single top-of-route call to the resolver — the policy
+      // evaluator itself is pure (no Prisma inside).
+      //
+      // Empty (undefined) is treated as "no" to preserve the existing
       // chain-passthrough semantics when the consumer hasn't fetched
-      // the verdict yet (legacy callers).
+      // the verdict yet (legacy callers). This deliberate null-check
+      // prevents a missing consumer from silently granting access.
       if (ctx.hasActiveAccessGrant === true) {
         return { action: "allow", reason: "owned" };
       }

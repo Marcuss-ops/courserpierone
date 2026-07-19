@@ -97,10 +97,14 @@ function extractSlugFromPath(pathname: string): string | null {
  * `isFreeCourseSlug` boolean (slug extracted from the URL).
  *
  * Edge-portable policies only: `free_course` + `session_required`.
- * `requiresDb: true` policies (admin_role / owned_grant /
+ * `requiresDb: true` policies (admin_role / access_resolved /
  * pending_order) live in Node runtime — the RSC AccessGate
  * (`src/components/course/access-gate.tsx`) and the API
  * require-admin (`src/lib/auth/require-admin.ts`) cover those.
+ *
+ * V2 note: `access_resolved` is the renamed successor of `owned_grant`.
+ * The Edge runtime never executes this policy (no DB hydration here);
+ * it's listed only to document the full Node-side discriminator set.
  *
  * Status-code semantics preserved bit-for-bit:
  *   - /api/{translate,config,upload} → 403 with the original

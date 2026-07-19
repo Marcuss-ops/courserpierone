@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { withRateLimit } from "@/lib/utils/rate-limit";
 import { apiErrorResponse } from "@/lib/errors";
-import { findCompletedOrder } from "@/lib/access";
+import { resolveProductAccess } from "@/lib/commerce/access/resolve-product-access";
 import { isFreeCourse } from "@/lib/courses/is-free-course";
 
 /**
@@ -16,8 +16,14 @@ import { isFreeCourse } from "@/lib/courses/is-free-course";
  * Flow:
  * 1. Verifica autenticazione (401 se non autenticato)
  * 2. Verifica che il prodotto esista (404)
- * 3. Verifica accesso: admin OR ordine completed (403)
+ * 3. Verifica accesso: admin OR AccessGrant attivo (403)
  * 4. Restituisce il video URL dal database
+ *
+ * Access control — V2 AccessGrant cutover: la verifica d'accesso
+ * passa per `resolveProductAccess` (read di `AccessGrant.status="active"`
+ * + non-scaduto, sourceType-agnostico). L'helper deprecato
+ * `findCompletedOrder` (basato su `Order.status="completed"`) NON
+ * viene più chiamato.
  *
  * TODO: Quando i video saranno migrati da YouTube/Vimeo a Supabase Storage,
  *       generare signed URL con TTL breve (5 min) via createSignedUrl().
@@ -60,18 +66,24 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Non autenticato" }, { status: 401 });
     }
 
-    // Check access: free course OR admin OR completed order.
+    // Check access: free course OR admin OR AccessGrant attivo.
     // For non-free courses, we already required `dbUser` above, so the
-    // `dbUser.role` / `findCompletedOrder` paths always have a user.
+    // `dbUser.role` / `resolveProductAccess` paths always have a user.
     // For free courses `dbUser` may be null (guest), hence the `?.`.
+    //
+    // V2 — AccessGrant SSOT: `resolveProductAccess` is the canonical
+    // resolver. It honors all sourceTypes (order, free_enrollment,
+    // admin, bundle, watchlist) uniformly with status="active" + non-
+    // expired. The legacy `findCompletedOrder` (Order.status read) is
+    // no longer called on this path.
     let hasAccess = isFree || dbUser?.role === "admin";
 
     if (!hasAccess && dbUser) {
-      const order = await findCompletedOrder({
+      const granted = await resolveProductAccess({
         userId: dbUser.id,
         productId: product.id,
       });
-      hasAccess = !!order;
+      hasAccess = granted.allowed;
     }
 
     if (!hasAccess) {

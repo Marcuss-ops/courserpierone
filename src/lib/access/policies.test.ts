@@ -14,6 +14,11 @@
  * AccessContext is renamed to `hasActiveAccessGrant`. The boolean is
  * filled by `resolveProductAccess` (canonical AccessGrant SSOT path).
  * Tests updated accordingly.
+ *
+ * V2 — `owned_grant` policy renamed to `access_resolved`. Cases
+ * migrated to assert the renamed kind. The renamed policy reads the
+ * `ctx.hasActiveAccessGrant` boolean UPSTREAM-filled by the consumer
+ * via `resolveProductAccess` — it does NOT itself decide ownership.
  */
 import { describe, it, expect } from "vitest";
 import {
@@ -74,7 +79,7 @@ describe("evaluatePolicy — session_required", () => {
   it("returns null when hasSession=true (defer to next policy)", () => {
     // session_required is ORTHOGONAL to admin/owned — it just gates
     // the "have a cookie?" check. A subsequent admin_role or
-    // owned_grant policy in the chain decides the final verdict.
+    // access_resolved policy in the chain decides the final verdict.
     expect(
       evaluatePolicy({ kind: "session_required" }, {
         ...baseCtx,
@@ -122,16 +127,20 @@ describe("evaluatePolicy — admin_role (Node-only, requiresDb)", () => {
   });
 });
 
-// ── owned_grant ─────────────────────────────────────────────────
-describe("evaluatePolicy — owned_grant (Node-only, requiresDb)", () => {
-  // Step 9 — MCR Phase 3 cutover: the `owned_grant` policy short-
-  // circuits on `hasActiveAccessGrant` (true when resolveProductAccess
-  // verdict is allowed). The consumer fills the boolean via a single
-  // top-of-route call. Policy evaluator itself is pure (no Prisma).
-  it("allows when hasActiveAccessGrant=true (Step 9 SSOT verdict)", () => {
+// ── access_resolved ──────────────────────────────────────────────
+//
+// V2 — renamed from `owned_grant`. The rename is intentional honesty:
+// this policy does NOT "own" the decision. It reads the
+// `ctx.hasActiveAccessGrant` boolean that the consumer filled
+// upstream via `resolveProductAccess`. The discriminator name
+// reflects the actual semantics ("access was resolved upstream")
+// instead of misleading call sites into thinking the policy itself
+// checks ownership.
+describe("evaluatePolicy — access_resolved (Node-only, requiresDb)", () => {
+  it("allows when hasActiveAccessGrant=true (SSOT verdict from resolveProductAccess)", () => {
     expect(
       evaluatePolicy(
-        { kind: "owned_grant", requiresDb: true },
+        { kind: "access_resolved", requiresDb: true },
         { ...baseCtx, hasActiveAccessGrant: true },
       ),
     ).toEqual({ action: "allow", reason: "owned" });
@@ -140,7 +149,7 @@ describe("evaluatePolicy — owned_grant (Node-only, requiresDb)", () => {
   it("returns null when hasActiveAccessGrant=false", () => {
     expect(
       evaluatePolicy(
-        { kind: "owned_grant", requiresDb: true },
+        { kind: "access_resolved", requiresDb: true },
         { ...baseCtx, hasActiveAccessGrant: false },
       ),
     ).toBeNull();
@@ -149,7 +158,7 @@ describe("evaluatePolicy — owned_grant (Node-only, requiresDb)", () => {
   it("returns null when hasActiveAccessGrant undefined (no DB hydration)", () => {
     expect(
       evaluatePolicy(
-        { kind: "owned_grant", requiresDb: true },
+        { kind: "access_resolved", requiresDb: true },
         baseCtx,
       ),
     ).toBeNull();
@@ -271,12 +280,12 @@ describe("evaluateAccess — first-match short-circuit", () => {
     });
   });
 
-  it("RSC-style chain: free → admin → owned → pending, returns first allow", () => {
+  it("RSC-style chain: free → admin → access_resolved → pending, returns first allow", () => {
     // Mirrors the AccessGate policy chain used in production.
     const policies: AccessPolicy[] = [
       { kind: "free_course" },
       { kind: "admin_role", requiresDb: true },
-      { kind: "owned_grant", requiresDb: true },
+      { kind: "access_resolved", requiresDb: true },
       { kind: "pending_order", requiresDb: true },
     ];
 

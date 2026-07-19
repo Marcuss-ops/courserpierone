@@ -110,10 +110,11 @@ export async function AccessGate({
   // (e.g., `userRole === null` -> opt out) is symmetric with "DB says
   // no user".
   //
-  // Step 9 - `hasActiveAccessGrant` replaces `hasCompletedOrder`. The
-  // boolean is filled by `resolveProductAccess` ONLY for authenticated
-  // users (anonymous visitors leave it undefined, which the
-  // `owned_grant` policy treats as "no - continue to next policy").
+  // Step 9/V2 - `hasActiveAccessGrant` replaces `hasCompletedOrder`.
+  // The boolean is filled by `resolveProductAccess` ONLY for
+  // authenticated users (anonymous visitors leave it undefined, which
+  // the `access_resolved` policy treats as "no - continue to next
+  // policy").
   const ctx: AccessContext = {
     pathname: callbackUrl,
     hasSession: !!user,
@@ -128,12 +129,17 @@ export async function AccessGate({
   };
 
   // RSC chain - full Node-side AccessPolicy set. Order matters:
-  // free_course runs first (no DB needed), then admin/owned/
+  // free_course runs first (no DB needed), then admin/access_resolved/
   // pending_order with requiresDb. first-match wins.
+  //
+  // V2 — `owned_grant` renamed to `access_resolved`. The policy reads
+  // the `ctx.hasActiveAccessGrant` boolean filled upstream by
+  // `resolveProductAccess`. The new name is honest: this policy does
+  // NOT "own" the decision, it consumes a pre-resolved verdict.
   const policies: AccessPolicy[] = [
     { kind: "free_course" },
     { kind: "admin_role", requiresDb: true },
-    { kind: "owned_grant", requiresDb: true },
+    { kind: "access_resolved", requiresDb: true },
     { kind: "pending_order", requiresDb: true },
   ];
   const decision = evaluateAccess(policies, ctx);

@@ -6,7 +6,7 @@ import { apiErrorResponse } from "@/lib/errors";
 import { getCertificateTranslations } from "@/lib/i18n/certificate-translations";
 import { localeToLanguage } from "@/lib/i18n/locale-resolver";
 import { getUiTranslations, interpolate } from "@/lib/i18n/ui-translations";
-import { findCompletedOrder } from "@/lib/access";
+import { resolveProductAccess } from "@/lib/commerce/access/resolve-product-access";
 
 export async function GET(
   request: NextRequest,
@@ -25,12 +25,19 @@ export async function GET(
     const acceptLang = request.headers.get("accept-language") ?? "en";
     const errLang = localeToLanguage(acceptLang.split(",")[0]) || "en";
 
-    // Verify the user has purchased the product (V2 DRY: helper consolidato)
-    const order = await findCompletedOrder({
+    // Verify the user has an active AccessGrant for this product.
+    //
+    // V2 cutover — AccessGrant SSOT: `resolveProductAccess` reads
+    // `AccessGrant.status="active"` + non-expired, sourceType-agnostic.
+    // The legacy `findCompletedOrder` (Order.status="completed" read)
+    // is no longer called on this path. The certificate route does NOT
+    // have an inline admin bypass (mirrors the prior in-test contract)
+    // — admin must hold an explicit grant to download a certificate.
+    const granted = await resolveProductAccess({
       userId: dbUser.id,
       productId,
     });
-    if (!order) {
+    if (!granted.allowed) {
       // Localized "you haven't purchased yet" error. Falls back to English
       // automatically when errLang isn't a registered key.
       const t = getUiTranslations(errLang);
@@ -40,13 +47,30 @@ export async function GET(
       );
     }
 
+    // Locale source for the certificate template — switched from
+    // `order.locale` (the legacy purchase-locale metadata) to
+    // `dbUser.preferredLocale` (User-level preference set at signup;
+    // snapshot by `processOrder` in `src/lib/commerce/orders/`).
+    //
+    // Why not re-fetch Order: the SSOT cutover's intent is to remove
+    // the Order.status dependency from access checks. Keeping an
+    // Order.locale read here would re-introduce the same coupling for
+    // metadata-only purposes. `dbUser.preferredLocale` already
+    // captures the user's intent and is the more semantically correct
+    // source for "which language should the PDF use?".
+    //
+    // Fallback chain (defensive — `preferredLocale` is @default("en")
+    // in schema so this is mostly belt-and-suspenders):
+    //   dbUser.preferredLocale ??. + -> "it"
+    const userLocale = dbUser.preferredLocale ?? "it";
+
     // Verify all lessons are completed
     const product = await prisma.product.findUnique({
       where: { id: productId },
       include: {
         lessons: { select: { id: true } },
         translations: {
-          where: { locale: order.locale ?? "it", section: "titolo" },
+          where: { locale: userLocale, section: "titolo" },
           select: { content: true },
         },
       },
@@ -60,8 +84,7 @@ export async function GET(
       where: { userId: dbUser.id, lessonId: { in: product.lessons.map(l => l.id) }, completed: true },
     });
 
-    const locale = order.locale ?? "it";
-    const lang = localeToLanguage(locale);
+    const lang = localeToLanguage(userLocale);
     const ui = getUiTranslations(lang);
 
     if (totalLessons === 0) {

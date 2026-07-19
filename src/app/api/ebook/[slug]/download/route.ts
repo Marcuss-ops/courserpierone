@@ -6,7 +6,7 @@ import { isFreeCourse } from "@/lib/courses/is-free-course";
 import { prisma } from "@/lib/db/prisma";
 import fs from "fs";
 import path from "path";
-import { findCompletedOrder } from "@/lib/access";
+import { resolveProductAccess } from "@/lib/commerce/access/resolve-product-access";
 
 export async function GET(
   request: NextRequest,
@@ -17,30 +17,38 @@ export async function GET(
   // Check access:
   //   1. Free courses (slug in NEXT_PUBLIC_FREE_COURSE_SLUGS + price === 0): anyone,
   //      no auth required. Defense-in-depth via the isFreeCourse helper.
-  //   2. Paid courses: user must be authenticated AND have a completed order.
+  //   2. Paid courses: user must be authenticated AND have an active AccessGrant.
   const { user, dbUser } = await getServerUser();
   const url = new URL(request.url);
 
   let hasAccess = false;
 
   // Lightweight product lookup for the price (defense-in-depth).
-  // Only `price` field — the full course config is loaded further below.
+  // Also grabs the `id` for `resolveProductAccess` (canonical AccessGrant
+  // resolver accepts productId only — no need to extend its surface).
+  //
+  // V2 note: the legacy `findCompletedOrder({userId, productSlug})` shape
+  // is gone. The single round-trip below replaces 2 separate reads
+  // (price + slug→id lookup) with one `select: {id, price}` query.
   const downloadProduct = await prisma.product.findUnique({
     where: { slug },
-    select: { price: true },
+    select: { id: true, price: true },
   });
   if (isFreeCourse(slug, downloadProduct?.price)) {
     hasAccess = true;
   }
 
-  if (!hasAccess && user?.email && dbUser) {
-    // V2 DRY: helper consolidato (slug variant via relation filter).
-    // 1 round-trip. Mantiene la shape booleana del check.
-    const hasOrder = await findCompletedOrder({
+  if (!hasAccess && user?.email && dbUser && downloadProduct) {
+    // V2 AccessGrant cutover: `resolveProductAccess` is the canonical
+    // resolver. Honors all sourceTypes (order, free_enrollment, admin,
+    // bundle, watchlist) uniformly with status="active" + non-expired.
+    // The legacy `findCompletedOrder` (Order.status="completed" read)
+    // is no longer called on this path.
+    const granted = await resolveProductAccess({
       userId: dbUser.id,
-      productSlug: slug,
+      productId: downloadProduct.id,
     });
-    if (hasOrder) {
+    if (granted.allowed) {
       hasAccess = true;
     }
   }

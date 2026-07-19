@@ -1,12 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createMockRequest } from "@/app/api/__test-helpers__/mock-request";
-import { fakeOrder } from "@/app/api/__test-helpers__/fake-order";
 
-// ─── Mock SSOT helper ───────────────────────────────────────
-const mockFindCompletedOrder = vi.fn();
+// ─── Mock SSOT resolver ─────────────────────────────────────
+//
+// V2 cutover — AccessGrant SSOT: the POST handler now reads from
+// `resolveProductAccess` (AccessGrant.status="active" + non-expired,
+// sourceType-agnostic). The legacy `findCompletedOrder`
+// (Order.status="completed") mock contract is gone.
+//
+// Critical invariant — GET /api/progress DOES NOT check access (it
+// returns the *authenticated* user's own lessonProgress rows). POST
+// /api/progress DOES check access (admin bypass + resolveProductAccess).
+const mockResolveProductAccess = vi.fn();
 
-vi.mock("@/lib/access", () => ({
-  findCompletedOrder: mockFindCompletedOrder,
+vi.mock("@/lib/commerce/access/resolve-product-access", () => ({
+  resolveProductAccess: mockResolveProductAccess,
 }));
 
 // ─── Mock Prisma ────────────────────────────────────────────
@@ -60,6 +68,13 @@ const mockCustomer = () =>
     dbUser: { id: USER_ID, role: "student" },
   });
 
+// Convenience helpers for the post-cutover AccessGrant verdict.
+const mockAllowedGrant = (sourceType: "order" | "free_enrollment" | "admin" | "bundle" | "watchlist" = "order") =>
+  mockResolveProductAccess.mockResolvedValueOnce({ allowed: true, grantId: `grant-${sourceType}-1`, source: "grant" });
+
+const mockDeniedGrant = () =>
+  mockResolveProductAccess.mockResolvedValueOnce({ allowed: false, reason: "no_active_access_grant" });
+
 // ─── fakeOrder factory → @/app/api/__test-helpers__/fake-order (V3.3.2) ─────
 
 // ─── Tests ───────────────────────────────────────────────────
@@ -81,7 +96,7 @@ describe("GET /api/progress — auth-only (no access gate)", () => {
     expect(response.status).toBe(401);
     const body = await response.json();
     expect(body.error).toBe("Unauthorized");
-    expect(mockFindCompletedOrder).not.toHaveBeenCalled();
+    expect(mockResolveProductAccess).not.toHaveBeenCalled();
   });
 
   it("authenticated customer with productId: returns 200 {progress, lessons}", async () => {
@@ -101,7 +116,7 @@ describe("GET /api/progress — auth-only (no access gate)", () => {
     expect(body.progress).toHaveLength(1);
     expect(body.lessons).toHaveLength(1);
     // GET has no access gate — admin bypass not invoked.
-    expect(mockFindCompletedOrder).not.toHaveBeenCalled();
+    expect(mockResolveProductAccess).not.toHaveBeenCalled();
   });
 
   it("authenticated customer with KNOWN productSlug: resolves to productId and returns progress", async () => {
@@ -151,11 +166,11 @@ describe("GET /api/progress — auth-only (no access gate)", () => {
     const response = await GET(createMockRequest("/api/progress", { query: { productId: PRODUCT_ID } }));
     expect(response.status).toBe(200);
     // GET has no access gate — verified independently of role.
-    expect(mockFindCompletedOrder).not.toHaveBeenCalled();
+    expect(mockResolveProductAccess).not.toHaveBeenCalled();
   });
 });
 
-describe("POST /api/progress — admin bypass + customer access gate", () => {
+describe("POST /api/progress — admin bypass + customer AccessGrant gate", () => {
   beforeEach(() => {
     vi.resetAllMocks();
   });
@@ -215,15 +230,15 @@ describe("POST /api/progress — admin bypass + customer access gate", () => {
     expect(response.status).toBe(404);
     const body = await response.json();
     expect(body.error).toBe("Lesson not found");
-    expect(mockFindCompletedOrder).not.toHaveBeenCalled();
+    expect(mockResolveProductAccess).not.toHaveBeenCalled();
     expect(mockPrisma.lessonProgress.upsert).not.toHaveBeenCalled();
   });
 
-  // ── Customer PENDING / NO order → 403 ──────────────────
-  it("customer NO order: returns 403 Forbidden", async () => {
+  // ── Customer no grant → 403 ─────────────────────────────
+  it("customer no active grant: returns 403 Forbidden", async () => {
     mockCustomer();
     mockPrisma.lesson.findUnique.mockResolvedValueOnce({ productId: PRODUCT_ID });
-    mockFindCompletedOrder.mockResolvedValueOnce(null);
+    mockDeniedGrant();
     const { POST } = await import("./route");
     const response = await POST(
       createMockRequest("/api/progress", { method: "POST", body: { lessonId: LESSON_ID, completed: true } })
@@ -232,19 +247,20 @@ describe("POST /api/progress — admin bypass + customer access gate", () => {
     expect(response.status).toBe(403);
     const body = await response.json();
     expect(body.error).toBe("Forbidden");
-    expect(mockFindCompletedOrder).toHaveBeenCalledWith({
+    expect(mockResolveProductAccess).toHaveBeenCalledWith({
       userId: USER_ID,
       productId: PRODUCT_ID,
     });
     expect(mockPrisma.lessonProgress.upsert).not.toHaveBeenCalled();
   });
 
-  it("customer with pending order: returns 403 Forbidden", async () => {
-    // Same as "no order" — pending doesn't satisfy the findCompletedOrder helper
-    // (helper returns null for non-completed orders).
+  it("customer with revoked grant: returns 403 Forbidden", async () => {
+    // V2 — AccessGrant.status="revoked" → resolver denies. Same shape
+    // as the "no grant at all" branch — the resolver's SQL filter
+    // (status="active") blocks revoked rows at the WHERE clause.
     mockCustomer();
     mockPrisma.lesson.findUnique.mockResolvedValueOnce({ productId: PRODUCT_ID });
-    mockFindCompletedOrder.mockResolvedValueOnce(null);
+    mockDeniedGrant();
     const { POST } = await import("./route");
     const response = await POST(
       createMockRequest("/api/progress", { method: "POST", body: { lessonId: LESSON_ID, completed: true } })
@@ -269,15 +285,15 @@ describe("POST /api/progress — admin bypass + customer access gate", () => {
     expect(response.status).toBe(200);
     expect(body.success).toBe(true);
     // Admin bypass: helper MUST NOT have been called.
-    expect(mockFindCompletedOrder).not.toHaveBeenCalled();
+    expect(mockResolveProductAccess).not.toHaveBeenCalled();
     expect(mockPrisma.lessonProgress.upsert).toHaveBeenCalledOnce();
   });
 
-  // ── Customer with completed order: 200 success ────────
-  it("customer with completed order: returns 200 success", async () => {
+  // ── Customer with active grant: 200 success ───────────────
+  it("customer with active grant: returns 200 success", async () => {
     mockCustomer();
     mockPrisma.lesson.findUnique.mockResolvedValueOnce({ productId: PRODUCT_ID });
-    mockFindCompletedOrder.mockResolvedValueOnce(fakeOrder());
+    mockAllowedGrant("order");
     mockPrisma.lessonProgress.upsert.mockResolvedValueOnce({
       id: "lp1", userId: USER_ID, lessonId: LESSON_ID, completed: true,
     });
@@ -289,10 +305,39 @@ describe("POST /api/progress — admin bypass + customer access gate", () => {
 
     expect(response.status).toBe(200);
     expect(body.success).toBe(true);
-    expect(mockFindCompletedOrder).toHaveBeenCalledWith({
+    expect(mockResolveProductAccess).toHaveBeenCalledWith({
       userId: USER_ID,
       productId: PRODUCT_ID,
     });
     expect(mockPrisma.lessonProgress.upsert).toHaveBeenCalledOnce();
   });
+
+  // ── sourceType-uniform matrix ──────────────────────────
+  // V2 — AccessGrant SSOT honors ALL grant sourceTypes. A student
+  // with free_enrollment / admin / bundle grant can equally save
+  // progress (admin grant is the V2 manual-grant milestone; bundle
+  // grant is the V2 bundles milestone; free_enrollment is the free
+  // course access path).
+  it.each([
+    ["order", "grant-order-1"],
+    ["free_enrollment", "grant-free-1"],
+    ["admin", "grant-admin-1"],
+    ["bundle", "grant-bundle-1"],
+  ] as const)(
+    "customer with sourceType='%s' grant + lesson: returns 200 success",
+    async (sourceType, _grantId) => {
+      mockCustomer();
+      mockPrisma.lesson.findUnique.mockResolvedValueOnce({ productId: PRODUCT_ID });
+      mockAllowedGrant(sourceType);
+      mockPrisma.lessonProgress.upsert.mockResolvedValueOnce({
+        id: "lp1", userId: USER_ID, lessonId: LESSON_ID, completed: true,
+      });
+
+      const { POST } = await import("./route");
+      const response = await POST(
+        createMockRequest("/api/progress", { method: "POST", body: { lessonId: LESSON_ID, completed: true } })
+      );
+      expect(response.status).toBe(200);
+    },
+  );
 });
