@@ -17,9 +17,34 @@
 #
 #   * DROP COLUMN            — Regola 1 (column drop on webhook-locked tables)
 #   * DROP TABLE             — fleet-wide: any DROP TABLE must clear ADR exceptions
-#   * RENAME COLUMN          — Regola 1 (column rename on webhook-locked tables)
+#   * RENAME COLUMN          — column rename on webhook-locked tables
 #   * RENAME TO              — ALTER TABLE ... RENAME TO ... (table rename)
+#   * RENAME TABLE           — native Postgres variant: RENAME TABLE x TO y
 #   * TRUNCATE [TABLE]       — wipes rows the webhook may replay against
+#
+# Known (documented) limitations on operational RENAME branches:
+#   * `ALTER FUNCTION x RENAME TO y` matches `RENAME TO` and is flagged
+#     (false positive). Operational hygiene for function renames must
+#     add an ADR-001 exception and run the migration out-of-band.
+#   * `ALTER VIEW x RENAME TO y` and `ALTER TYPE ... RENAME TO ...` suffer
+#     the same false positive. Same remedy: ADR exception + out-of-band.
+# These result in CI noise, NOT in missed destructive migrations.
+# Tightening the regex to lookbehind `TABLE|VIEW|FUNCTION|TYPE` requires
+# PCRE; the current POSIX grep -E keeps macOS bash-3 portability. Tracked
+# separately; refactor only if false positives become a release blocker.
+#
+# Known (documented) gap on STATEMENT-LINE SCOPE:
+#   * grep -E is line-by-line. A statement that spans multiple lines
+#     with `RENAME` on one line and `TABLE` on the next (rare Postgres
+#     hand-authored syntax; Prisma never emits this) is NOT detected.
+#     Example form that slips through today:
+#         RENAME
+#         TABLE "OldName" TO "NewName";
+#     Pinned by CASE 18 (expects exit=0 today). When a PCRE refactor
+#     replaces the regex with line-aware scanning, CASE 18 should be
+#     updated to expect exit=1. Until then, hand-authored migrations
+#     MUST keep RENAME + keyword on the SAME line; add an ADR-001
+#     exception if a multi-line variant is genuinely required.
 #
 # Allowed (operational hygiene; the historical repo DROP INDEXes
 # freely per `20260712210000_drop_creator_id_index/migration.sql`):
@@ -27,6 +52,7 @@
 #   * DROP INDEX
 #   * DROP CONSTRAINT
 #   * DROP VIEW / FUNCTION / TRIGGER / POLICY / EXTENSION
+#   * RENAME INDEX / CONSTRAINT / POLICY / VIEW / TYPE / FUNCTION
 #   * CREATE / ALTER / ADD COLUMN / SET DEFAULT / SET NOT NULL
 #
 # Usage:
@@ -34,7 +60,7 @@
 #                                            # explicit list of .sql files
 #   bash scripts/ci/check-destructive-migrations.sh    # auto: git diff origin/main...HEAD
 #   bash scripts/ci/check-destructive-migrations.sh --self-test
-#                                            # run 12 fixture cases against tmpdir
+#                                            # run 18 fixture cases against tmpdir
 #
 # Exit codes:
 #   0 — no destructive SQL detected (or empty change-set)
@@ -182,6 +208,75 @@ SQL
   ec=$(run_and_capture_exit "$TMPDIR/12_alter_table_only.sql")
   assert_exit "ALTER TABLE ONLY ... DROP COLUMN (Postgres-only)" "1" "$ec"
 
+  # CASE 13: RENAME TABLE "x" TO "y" (Postgres native syntax variant).
+  # Adjacent to CASE 9 (ALTER TABLE x RENAME TO y), this catches the
+  # alternative syntax `RENAME TABLE` which the keyword-after-RENAME
+  # alternation `(COLUMN|TO)` would MISS. Closes the audit gap that
+  # RENAME TABLE could pass through undetected.
+  cat > "$TMPDIR/13_rename_table.sql" <<'SQL'
+RENAME TABLE "OldName" TO "NewName";
+SQL
+  ec=$(run_and_capture_exit "$TMPDIR/13_rename_table.sql")
+  assert_exit "RENAME TABLE native syntax (Postgres)" "1" "$ec"
+
+  # CASE 14: identifier containing 'rename' (false-positive guard).
+  # Regression-protection: adding `TABLE` to the alternation must NOT
+  # cause the regex to match column names like `rename_count`. Word
+  # boundaries on both sides of the alternation ensure this.
+  cat > "$TMPDIR/14_rename_identifier.sql" <<'SQL'
+CREATE TABLE "versioning" (
+  "id" TEXT PRIMARY KEY,
+  "rename_count" INTEGER NOT NULL DEFAULT 0,
+  "last_rename_at" TIMESTAMPTZ
+);
+ALTER TABLE "versioning" ALTER COLUMN "rename_count" SET DEFAULT 0;
+COMMENT ON COLUMN "versioning"."rename_count" IS 'counter for rename operations';
+SQL
+  ec=$(run_and_capture_exit "$TMPDIR/14_rename_identifier.sql")
+  assert_exit "identifier containing 'rename' (false-positive guard)" "0" "$ec"
+
+  # CASE 15: ALTER FUNCTION ... RENAME TO  (documented false positive).
+  # Pins the documented behavior so a future PCRE refactor that
+  # differentiates TABLE-rename from FUNCTION-rename cannot regress
+  # silently. Today: exit=1 (false positive, expected). Future PCRE
+  # fix: exit=0.
+  cat > "$TMPDIR/15_function_rename.sql" <<'SQL'
+ALTER FUNCTION "old_func"(TEXT) RENAME TO "new_func";
+SQL
+  ec=$(run_and_capture_exit "$TMPDIR/15_function_rename.sql")
+  assert_exit "ALTER FUNCTION ... RENAME TO (documented false positive)" "1" "$ec"
+
+  # CASE 16: ALTER TABLE ... RENAME CONSTRAINT  (operational, PASS).
+  # Pins that post-RENAME keywords like CONSTRAINT are NOT in the
+  # alternation and therefore correctly emit exit=0 (operational
+  # hygiene). Defense against an over-eager regex tightening that
+  # accidentally flags this.
+  cat > "$TMPDIR/16_constraint_rename.sql" <<'SQL'
+ALTER TABLE "Order" RENAME CONSTRAINT "Order_old_fkey" TO "Order_new_fkey";
+SQL
+  ec=$(run_and_capture_exit "$TMPDIR/16_constraint_rename.sql")
+  assert_exit "ALTER TABLE ... RENAME CONSTRAINT (operational, PASS)" "0" "$ec"
+
+  # CASE 17: ALTER VIEW ... RENAME TO  (documented false positive).
+  # Same rationale as CASE 15 but for VIEW. Future PCRE fix: exit=0.
+  cat > "$TMPDIR/17_view_rename.sql" <<'SQL'
+ALTER VIEW "v_old" RENAME TO "v_new";
+SQL
+  ec=$(run_and_capture_exit "$TMPDIR/17_view_rename.sql")
+  assert_exit "ALTER VIEW ... RENAME TO (documented false positive)" "1" "$ec"
+
+  # CASE 18: RENAME / TABLE on separate lines (documented gap).
+  # grep is line-by-line; a hand-authored multi-line
+  # `RENAME\nTABLE ...` passes through today. Pins current behavior
+  # so the contract is preserved across refactors. Update to expect
+  # exit=1 when the script is migrated to a line-aware scanner.
+  cat > "$TMPDIR/18_multiline_rename_table.sql" <<'SQL'
+RENAME
+  TABLE "OldName" TO "NewName";
+SQL
+  ec=$(run_and_capture_exit "$TMPDIR/18_multiline_rename_table.sql")
+  assert_exit "multi-line RENAME\\nTABLE (documented gap, currently PASS)" "0" "$ec"
+
   echo "─────────────────────────────────────────────"
   echo "self-test: $pass pass / $fail fail"
   if [ "$fail" -gt 0 ]; then
@@ -279,7 +374,7 @@ strip_comments() {
 # Word-boundary lookarounds via `(^|[^A-Za-z0-9_])...([^A-Za-z0-9_]|$)` —
 # avoids reliance on GNU-only `\<\>` (BSD grep / macOS compatibility).
 # Case-insensitive (`grep -i`) — Postgres SQL keywords are case-insensitive.
-DESTRUCTIVE_REGEX='(^|[^A-Za-z0-9_])(DROP[[:space:]]+(COLUMN|TABLE)|RENAME[[:space:]]+(COLUMN|TO)|TRUNCATE([[:space:]]+TABLE)?)([^A-Za-z0-9_]|$)'
+DESTRUCTIVE_REGEX='(^|[^A-Za-z0-9_])(DROP[[:space:]]+(COLUMN|TABLE)|RENAME[[:space:]]+(COLUMN|TO|TABLE)|TRUNCATE([[:space:]]+TABLE)?)([^A-Za-z0-9_]|$)'
 
 # ── Scan loop ────────────────────────────────────────────────────
 Failed=0
