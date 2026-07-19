@@ -18,7 +18,7 @@
  *      "Down" on a row optimistically swaps the position
  *      with the adjacent sibling, then POSTs the FULL
  *      updated sibling set to
- *      `/api/creator/products/{productId}/reorder-pages`.
+ *      `/api/creator/products/{productId}/pages/reorder`.
  *      The route enforces "full sibling set" + `[1..N]`
  *      contiguous positions. On HTTP failure, the
  *      optimistic state is reverted.
@@ -200,7 +200,7 @@ export function SidebarTree({
 
       try {
         const res = await fetch(
-          `/api/creator/products/${encodeURIComponent(productId)}/reorder-pages`,
+          `/api/creator/products/${encodeURIComponent(productId)}/pages/reorder`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },

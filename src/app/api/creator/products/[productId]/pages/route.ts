@@ -49,7 +49,7 @@
  *
  * ─── HTTP status code mapping ─────────────────────────────────
  *
- *   - 200  — success. Body carries the full ContentPageRecord
+ *   - 201  — success. Body carries the full ContentPageRecord
  *     (id, productId, parentId, slug, position, status, publishedAt,
  *     createdAt, updatedAt). position is AUTO-assigned by the
  *     adapter (max+1 within scope); the use case forwards it
@@ -333,7 +333,7 @@ export async function POST(
           updatedAt: p.updatedAt.toISOString(),
         },
       },
-      { status: 200, headers: { "Cache-Control": "no-store" } },
+      { status: 201, headers: { "Cache-Control": "no-store" } },
     );
   }
 

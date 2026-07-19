@@ -1,23 +1,32 @@
 /**
- * src/app/api/creator/products/[productId]/reorder-pages/route.ts
+ * src/app/api/creator/products/[productId]/pages/reorder/route.ts
  *
  * Next.js App Router route handler —
- * `POST /api/creator/products/[productId]/reorder-pages`.
+ * `POST /api/creator/products/[productId]/pages/reorder`.
  *
  * Wraps the existing `reorderContentPages` use case with:
  *   1. Session authentication (`getServerUser`).
  *   2. Product-scoped access resolver
- *      (`resolveCreatorProductAccess({ requiredAction: "edit" })`)
- *      — gates the actor against admin/owner/approved_creator
- *      sources. Admin does NOT bypass for edit (matches the
- *      established pattern from rename/reorder: strict owner
- *      check inline; admin flows through the `approved_creator`
- *      path, not a flag).
+ *      (`resolveCreatorProductAccess({ requiredAction: "edit" })`).
  *   3. STRICT Zod payload validation — accepts
  *      `{ parentId?: string | null; orderedPages: ReorderEntry[] }`
  *      (1..1000 entries, pageId non-empty, newPosition ≥ 0).
  *   4. The discriminated union outcome mapped to status codes:
  *      200 / 400 / 401 / 403 / 404 / 422.
+ *
+ * ─── Migration note (MCR Phase 4) ─────────────────────────────────
+ *
+ * This route REPLACES the legacy
+ * `src/app/api/creator/products/[productId]/reorder-pages/route.ts`
+ * which was removed in commit `<TBD>`. The new path
+ * `/pages/reorder` is structurally consistent with the
+ * sibling `/pages` (create), `/pages/[pageId]/rename`, and
+ * `/pages/[pageId]/translations/[locale]` (PUT) endpoints —
+ * every page-tree mutation is now under the same `/pages`
+ * subtree of `/api/creator/products/[productId]`.
+ *
+ * The semantics, use case composition, and status code mapping
+ * are unchanged from the legacy handler — only the URL moved.
  *
  * ─── Architecture per ADR-0016 §1 ──────────────────────────────
  *
@@ -35,37 +44,19 @@
  * `[productId]` is the dynamic segment from the route directory.
  * The Next.js App Router hands us `ctx.params.productId` as a
  * plain string. The route forwards it as-is to both the
- * resolver AND the use case. No URL decoding for `productId`
- * itself (cuids are ASCII-safe).
- *
- * ─── `bypassOwnership` is NOT wired for `edit` ─────────────────
- *
- * The publish use case introduced the `bypassOwnership?: boolean`
- * flag for admin publish (commit a312d84's doc-comment rationale).
- * The reorder use case does NOT have such a flag (mirrors rename
- * and the original reorder design: strict owner-only inline check).
- *
- * Admin reordering other people's pages IS a future concern —
- * either (a) extend `reorderContentPages` with `bypassOwnership`,
- * or (b) route admin reorders through `resolveCreatorProductAccess`
- * source=`"approved_creator"` (which doesn't apply for edit on
- * non-owned products today). For v1: admin cannot reorder other
- * creators' pages through this route.
+ * resolver AND the use case.
  *
  * ─── HTTP status code mapping ─────────────────────────────────
  *
  *   - 200  — success; `reordered` echoes the new ordering, `scope`
  *            echoes the `(productId, parentId)` of the reorder.
- *   - 400  — invalid JSON OR Zod shape violation. Body carries
- *            ZodError issues for form-level diagnostics.
- *   - 401  — no session OR resolver `actor_not_found` (defensive
- *            401-style collapse).
+ *   - 400  — invalid JSON OR Zod shape violation.
+ *   - 401  — no session OR resolver `actor_not_found`.
  *   - 403  — resolver `forbidden` OR use case `forbidden`.
  *   - 404  — resolver `product_not_found` OR use case `not_found`.
  *   - 422  — semantic invariant failures from the use case
  *            (`duplicate_page_id`, `non_contiguous_positions`,
- *            `scope_mismatch`, `incomplete_set`). Body carries
- *            diagnostic echo (extras, missingFromScope, supplied).
+ *            `scope_mismatch`, `incomplete_set`).
  *
  * All responses include `Cache-Control: no-store` because
  * creator-side mutations must not be cached.
@@ -86,21 +77,9 @@ import { z } from "zod";
 
 // ─── Module-level deps (route composition root) ─────────────────
 
-/**
- * Composition root: assigns ports at startup. Mirrors the
- * pattern from `src/app/api/creator/products/route.ts`. The
- * `__setRouteDeps` indirection enables in-memory stub wiring
- * in unit tests without restructuring the route module.
- */
 let cachedAccessPort: ResolveCreatorProductAccessPort | undefined;
 let cachedReorderPort: ReorderContentPagesPort | undefined;
 
-/**
- * Visible to integration tests so they can swap in in-memory
- * stubs for both the access resolver port AND the reorder port.
- * Production wiring (server startup) assigns the real Prisma
- * adapters.
- */
 export function __setRouteDeps(deps: {
   accessPort: ResolveCreatorProductAccessPort;
   reorderPort: ReorderContentPagesPort;
@@ -111,13 +90,6 @@ export function __setRouteDeps(deps: {
 
 // ─── Zod schema ──────────────────────────────────────────────────
 
-/**
- * Per-entry schema mirrors `reorderEntrySchema` from the use
- * case's types file — we re-declare it here at the route layer
- * (Defense in depth: the route validates BEFORE the use case's
- * own safeParse, surfacing 400 here rather than double-validation
- * at the use case).
- */
 const reorderRouteEntrySchema = z.object({
   pageId: z.string().min(1, "pageId must be non-empty"),
   newPosition: z
@@ -126,16 +98,6 @@ const reorderRouteEntrySchema = z.object({
     .min(0, "newPosition must be a non-negative integer"),
 });
 
-/**
- * The route accepts `{ parentId?: string | null; orderedPages: [{ pageId, newPosition }, ...] }`.
- *
- * `.strict()` rejects any extra fields (including those the use
- * case doesn't read). `parentId` is optional: omitted `parentId`
- * defaults to `null` (top-level scope) at the route layer. Array
- * length is bounded 1..1000 (mirrors `REORDER_BATCH_MAX` from
- * the use case's types — defense in depth on the route layer
- * against a tampered client sending a 100k-entry payload).
- */
 const reorderRouteBodySchema = z
   .object({
     parentId: z.string().nullable().optional(),
@@ -145,6 +107,14 @@ const reorderRouteBodySchema = z
       .max(1000, "orderedPages must be at most 1000 entries"),
   })
   .strict();
+
+// ─── URL param schema ────────────────────────────────────────────
+
+const productIdParamSchema = z
+  .string()
+  .min(1)
+  .max(64)
+  .regex(/^[A-Za-z0-9_-]+$/);
 
 // ─── POST handler ───────────────────────────────────────────────
 
@@ -170,8 +140,17 @@ export async function POST(
     );
   }
 
-  // ─── 2. ACCESS (strict — requiredAction: "edit") ─────────────
-  const productId = ctx.params.productId;
+  // ─── 2. URL param validation ─────────────────────────────────
+  const productIdParse = productIdParamSchema.safeParse(ctx.params.productId);
+  if (!productIdParse.success) {
+    return NextResponse.json(
+      { ok: false, reason: "invalid_request", error: "productId is not a valid identifier" },
+      { status: 400, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+  const productId = productIdParse.data;
+
+  // ─── 3. ACCESS (strict — requiredAction: "edit") ─────────────
   const access = await resolveCreatorProductAccess(
     { actorId: dbUser.id, productId, requiredAction: "edit" },
     { port: cachedAccessPort },
@@ -189,7 +168,7 @@ export async function POST(
     );
   }
 
-  // ─── 3. PARSE — strict Zod body validation ──────────────────
+  // ─── 4. PARSE — strict Zod body validation ──────────────────
   let rawBody: unknown;
   try {
     rawBody = await req.json();
@@ -212,7 +191,7 @@ export async function POST(
     );
   }
 
-  // ─── 4. CALL USE CASE — strict creator (no bypass for edit) ──
+  // ─── 5. CALL USE CASE — strict creator (no bypass for edit) ──
   const result = await reorderContentPages(
     {
       actorId: dbUser.id,
@@ -223,7 +202,7 @@ export async function POST(
     { port: cachedReorderPort },
   );
 
-  // ─── 5. RETURN — translate 9-branch discriminated union ─────
+  // ─── 6. RETURN — translate 9-branch discriminated union ─────
   if (result.success) {
     return NextResponse.json(
       {
@@ -235,9 +214,6 @@ export async function POST(
     );
   }
 
-  // Branch-specific mapping. The order DOES NOT matter at
-  // runtime (TypeScript narrows per branch); we encode the
-  // 9 reasons × (status + body echo payload) explicitly.
   switch (result.reason) {
     case "not_found":
       return NextResponse.json(

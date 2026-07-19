@@ -280,7 +280,7 @@ describe("SidebarTree — reorder click behavior", () => {
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     const [url, init] = fetchMock.mock.calls[0]!;
-    expect(url).toBe("/api/creator/products/prod_test/reorder-pages");
+    expect(url).toBe("/api/creator/products/prod_test/pages/reorder");
     const body = JSON.parse((init as RequestInit).body as string);
     expect(body.parentId).toBeNull();
     expect(body.orderedPages.map((e: { pageId: string }) => e.pageId)).toEqual([

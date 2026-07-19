@@ -1,21 +1,42 @@
 /**
- * src/app/api/creator/pages/[pageId]/route.ts
+ * src/app/api/creator/products/[productId]/pages/[pageId]/rename/route.ts
  *
  * Next.js App Router route handler —
- * `PATCH /api/creator/pages/[pageId]`.
+ * `PATCH /api/creator/products/[productId]/pages/[pageId]/rename`.
  *
  * Wraps the existing `renameContentPage` use case with:
  *   1. Session authentication (`getServerUser`).
- *   2. Page-scoped access resolver
+ *   2. URL param parsing — both `[productId]` and `[pageId]`.
+ *   3. Page-scoped access resolver
  *      (`resolveCreatorPageAccess({ requiredAction: "edit" })`).
  *      The resolver carries the resolved `pageProductId` through
- *      its success branch so the route can forward it into the
- *      use case's `productId` field WITHOUT a second DB read.
- *   3. Strict Zod body validation — accepts ONLY
- *      `{ newTitle: string }` and `{ locale?: string | null }`
- *      (no other fields allowed by `.strict()`).
- *   4. The 5-branch discriminated union outcome mapped to:
+ *      its success branch.
+ *   4. **Defense-in-depth URL `productId` check** — the URL's
+ *      `[productId]` MUST match the page's actual productId
+ *      (resolved from the page access context). Mismatch → 404
+ *      (collapsed, no info leak about cross-product pages).
+ *      This is what gives the new URL `productId` segment
+ *      meaning beyond decoration.
+ *   5. Strict Zod body validation — accepts ONLY
+ *      `{ newTitle: string }` and `{ locale?: string | null }`.
+ *   6. The 5-branch discriminated union outcome mapped to:
  *      200 / 400 / 401 / 403 / 404 / 422.
+ *
+ * ─── Migration note (MCR Phase 4) ─────────────────────────────────
+ *
+ * This route REPLACES the legacy
+ * `src/app/api/creator/pages/[pageId]/route.ts` which was
+ * removed in commit `<TBD>`. The new URL is structurally
+ * consistent with the sibling `/pages` (create), `/pages/reorder`
+ * (POST), and `/pages/[pageId]/translations/[locale]` (PUT)
+ * endpoints. Every page-tree mutation is now under the same
+ * `/pages` subtree of `/api/creator/products/[productId]`.
+ *
+ * Note: the PUT translations endpoint lives at the OLD
+ * `/api/creator/pages/[pageId]/translations/[locale]` path —
+ * it's NOT in scope for this migration (different verb, different
+ * sibling endpoint that doesn't carry `[productId]` semantically
+ * since the locale+pageId pair is already uniquely identifying).
  *
  * ─── Architecture per ADR-0016 §1 ──────────────────────────────
  *
@@ -23,55 +44,41 @@
  * `renameContentPage` AND the access resolver. The route:
  *   - Calls session middleware (auth gate).
  *   - Calls the access resolver (auth policy).
+ *   - Validates URL params (input gate) — including the
+ *     defense-in-depth productId match.
  *   - Validates the JSON body (input gate).
  *   - Delegates to the use case (domain rule).
  *   - Translates the 5-branch discriminated union to HTTP.
  *
  * ─── Strict-owner cascade ─────────────────────────────────────────
  *
- * `renameContentPage` is INTENTIONAL strict-owner-only (the use
- * case file header documents this as a defense-in-depth choice;
- * admin-edit is out of scope for v1). This means:
- *
- *   - Admin resolving → `source: "admin"` here → forwarded to
- *     use case → use case's inline check `productCtx.creatorId
- *     !== input.actorId` → `forbidden` → 403.
- *   - Approved-creator resolving → `source: "approved_creator"`
- *     here → forwarded to use case → same cascade → 403.
- *
- * The cascade is intentional and matches the file-header spec.
- * The route does NOT skip the use case when the resolver returns
- * non-owner `source: ...` — the use case's stake in strict
- * ownership cannot be bypassed without refactoring the use case
- * (which is a deliberate choice for v1).
+ * `renameContentPage` is INTENTIONAL strict-owner-only. The
+ * resolver returns `source: "admin"` or `source: "approved_creator"`
+ * for non-owners with elevated rights, and the use case's inline
+ * check `productCtx.creatorId !== input.actorId` → `forbidden`
+ * → 403. The route does NOT pre-empt the use case.
  *
  * ─── URL params ────────────────────────────────────────────────
  *
- * `[pageId]` is the dynamic segment from the route directory.
- * The Next.js App Router hands us `ctx.params.pageId` as a
- * plain string. We forward verbatim — no URL decoding for
- * the pageId itself (cuids are ASCII-safe).
+ *   - `[productId]` is parsed for the defense-in-depth check.
+ *     If the URL productId doesn't match the page's actual
+ *     productId, the response is collapsed to 404.
+ *   - `[pageId]` is forwarded verbatim into the resolver and
+ *     the use case.
  *
  * ─── HTTP status code mapping ─────────────────────────────────
  *
  *   - 200  — success. Body carries the new title, the
- *            (resolved) locale, the new revision (= old + 1,
- *            mirrors SaveContentDocument's revision contract),
- *            and the updatedAt timestamp.
- *   - 400  — invalid JSON OR Zod shape violation. Body
- *            carries `error: "invalid_request"` + ZodError
- *            issues for form-level diagnostics.
+ *            (resolved) locale, the new revision, and the
+ *            updatedAt timestamp.
+ *   - 400  — invalid JSON OR Zod shape violation.
  *   - 401  — no session OR resolver `actor_not_found`.
  *   - 403  — resolver `forbidden` OR use case `forbidden`
- *            (the latter covers the strict-owner cascade
- *            described above).
- *   - 404  — resolver `page_not_found` OR use case
- *            `not_found` (defensive — usually caught by
- *            the resolver).
- *   - 422  — `invalid_title` (Zod schema violation OR
- *            use case invalid_title denial) OR
- *            `translation_not_found` (semantic: editor must
- *            call SaveContentDocument first).
+ *            (the latter covers the strict-owner cascade).
+ *   - 404  — resolver `page_not_found`, defense-in-depth
+ *            productId mismatch, OR use case `not_found` OR
+ *            use case `translation_not_found` (collapsed).
+ *   - 422  — `invalid_title` (Zod schema violation).
  *
  * All responses include `Cache-Control: no-store` because
  * creator-side mutations must not be cached.
@@ -93,22 +100,9 @@ import { getServerUser } from "@/lib/supabase/get-user";
 
 // ─── Module-level deps (route composition root) ─────────────────
 
-/**
- * Composition root: assigns ports at startup. Mirrors the
- * established pattern from `reorder-pages/route.ts` and
- * `publish/route.ts`. The `__setRouteDeps` indirection enables
- * in-memory stub wiring in unit tests without restructuring
- * the route module.
- */
 let cachedAccessPort: ResolveCreatorPageAccessPort | undefined;
 let cachedRenamePort: RenameContentPagePort | undefined;
 
-/**
- * Visible to integration tests so they can swap in in-memory
- * stubs for both the access resolver port AND the rename port.
- * Production wiring (server startup) assigns the real Prisma
- * adapters.
- */
 export function __setRouteDeps(deps: {
   accessPort: ResolveCreatorPageAccessPort;
   renamePort: RenameContentPagePort;
@@ -119,21 +113,6 @@ export function __setRouteDeps(deps: {
 
 // ─── Zod schema ──────────────────────────────────────────────────
 
-/**
- * Route-layer body schema (defense in depth — the use case's
- * `contentPageTitleSchema.safeParse` already validates newTitle,
- * but we also validate at the route layer so the consumer gets
- * a single 400 with the ZodError rather than two layers of
- * redundant parsing on the happy path).
- *
- * `.strict()` prevents the caller from sneaking in fields the
- * use case doesn't know about (`creatorId`, `revision`,
- * `locale` overrides, etc.). Only `newTitle` and the optional
- * `locale` are accepted.
- *
- * `locale?: string | null` mirrors the use case input shape
- * (the use case handles the `?? product.defaultLanguage` fallback).
- */
 const renamePageBodySchema = z
   .object({
     newTitle: z.string().trim().min(1).max(200),
@@ -147,14 +126,14 @@ const renamePageBodySchema = z
   })
   .strict();
 
-// ─── URL param schema ────────────────────────────────────────────
+// ─── URL param schemas ────────────────────────────────────────────
 
-/**
- * Defensive validation on the URL param. Cuid format is
- * `c{timestamp}{random}` — non-empty ASCII alphanumeric.
- * Anything else → 400 (we don't reveal the error class to avoid
- * leaking format details to attackers scanning the route).
- */
+const productIdParamSchema = z
+  .string()
+  .min(1)
+  .max(64)
+  .regex(/^[A-Za-z0-9_-]+$/);
+
 const pageIdParamSchema = z
   .string()
   .min(1)
@@ -165,7 +144,7 @@ const pageIdParamSchema = z
 
 export async function PATCH(
   req: Request,
-  ctx: { params: { pageId: string } },
+  ctx: { params: { productId: string; pageId: string } },
 ): Promise<NextResponse> {
   // ─── 0. Misconfig guard ──────────────────────────────────────
   if (!cachedAccessPort || !cachedRenamePort) {
@@ -190,6 +169,19 @@ export async function PATCH(
   const actorId = serverUser.dbUser.id;
 
   // ─── 2. URL param validation ───────────────────────────────────
+  const productIdParse = productIdParamSchema.safeParse(ctx.params.productId);
+  if (!productIdParse.success) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "invalid_request",
+        message: "productId is not a valid identifier",
+      },
+      { status: 400, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+  const productId = productIdParse.data;
+
   const pageIdParse = pageIdParamSchema.safeParse(ctx.params.pageId);
   if (!pageIdParse.success) {
     return NextResponse.json(
@@ -229,10 +221,20 @@ export async function PATCH(
     );
   }
 
-  // accessResult.allowed === true; we have pageProductId
-  const productId = accessResult.pageProductId;
+  // ─── 4. Defense-in-depth: URL productId must match page's productId
+  //
+  // The new URL has `[productId]` in the path. Verify it matches
+  // the page's actual productId (resolved via the page access
+  // context). Mismatch → 404 (collapsed, no info leak about
+  // cross-product pages).
+  if (accessResult.pageProductId !== productId) {
+    return NextResponse.json(
+      { ok: false, error: "not_found" },
+      { status: 404, headers: { "Cache-Control": "no-store" } },
+    );
+  }
 
-  // ─── 4. Body parse ────────────────────────────────────────────
+  // ─── 5. Body parse ────────────────────────────────────────────
   let rawBody: unknown;
   try {
     rawBody = await req.json();
@@ -260,22 +262,18 @@ export async function PATCH(
   }
   const { newTitle, locale } = bodyParse.data;
 
-  // ─── 5. Use case — renameContentPage ─────────────────────────
+  // ─── 6. Use case — renameContentPage ─────────────────────────
   //
-  // Note on the strict-owner cascade described in the file
-  // header: when `accessResult.source !== "owner"` (i.e., the
-  // resolver returned admin or approved_creator), the use case's
-  // inline owner check will reject with `forbidden`. We let
-  // that rejection happen via the use case's typed `forbidden`
-  // return rather than pre-empting at the route layer (defense
-  // in depth: the use case is the canonical enforcer of strict
-  // ownership for the edit path).
+  // Strict-owner cascade: when accessResult.source !== "owner",
+  // the use case's inline check rejects with `forbidden`. We let
+  // the use case's typed return propagate rather than pre-empting
+  // at the route layer (defense in depth).
   const useCaseResult = await renameContentPage(
     { actorId, productId, pageId, locale, newTitle },
     { port: cachedRenamePort },
   );
 
-  // ─── 6. Map DU outcome → HTTP ─────────────────────────────────
+  // ─── 7. Map DU outcome → HTTP ─────────────────────────────────
   if (useCaseResult.success) {
     return NextResponse.json(
       {
@@ -289,8 +287,6 @@ export async function PATCH(
     );
   }
 
-  // Use case returned a typed denial. Map to HTTP per the
-  // docstring matrix.
   if (useCaseResult.reason === "not_found") {
     return NextResponse.json(
       { ok: false, error: "not_found" },
@@ -298,9 +294,6 @@ export async function PATCH(
     );
   }
   if (useCaseResult.reason === "forbidden") {
-    // Strict-owner cascade: resolver said admin/approved_creator
-    // but the use case rejected because the actor does not own
-    // the product. Same 403 surface as a direct resolver denial.
     return NextResponse.json(
       { ok: false, error: "forbidden" },
       { status: 403, headers: { "Cache-Control": "no-store" } },
@@ -317,9 +310,6 @@ export async function PATCH(
     );
   }
   // useCaseResult.reason === "translation_not_found"
-  // Semantic 404: the page exists but has no translation row for
-  // the resolved locale yet. Editor flow must call
-  // SaveContentDocument first.
   return NextResponse.json(
     {
       ok: false,
