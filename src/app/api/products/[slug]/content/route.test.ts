@@ -87,7 +87,7 @@ const MINIMAL_DOC = {
       content: [{ type: "text", text: "Welcome to the course.", marks: [] }],
     },
   ],
-});
+};
 
 /**
  * Default published-product fixture.

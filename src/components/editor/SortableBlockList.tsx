@@ -33,7 +33,7 @@ import {
   BLOCK_REGISTRY,
   type Block,
   type BlockType,
-} from "@/lib/blocks/CONTENT_BLOCK_REGISTRY";
+} from "@/lib/blocks/BLOCK_REGISTRY";
 
 import { BlockWrapper } from "./BlockWrapper";
 

@@ -39,7 +39,7 @@ import {
   INSERTABLE_BLOCKS,
   makeBlock,
   type BlockType,
-} from "@/lib/blocks/CONTENT_BLOCK_REGISTRY";
+} from "@/lib/blocks/BLOCK_REGISTRY";
 import { SortableBlockList } from "@/components/editor/SortableBlockList";
 import { useAutosave } from "@/components/editor/use-autosave";
 

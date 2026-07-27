@@ -37,7 +37,7 @@
  * and a JSX runtime import. Consumers import the render functions
  * from their own `.tsx` files and drop them into JSX directly:
  *
- *   import { CONTENT_BLOCK_REGISTRY } from "@/lib/blocks/CONTENT_BLOCK_REGISTRY";
+ *   import { CONTENT_BLOCK_REGISTRY } from "@/lib/blocks/BLOCK_REGISTRY";
  *   const entry = CONTENT_BLOCK_REGISTRY[block.type];
  *   return <div>{entry.render(block)}</div>;
  *

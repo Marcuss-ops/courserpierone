@@ -67,7 +67,7 @@ const { stubRenderFn, stubRender } = vi.hoisted(() => {
   return { stubRenderFn, stubRender };
 });
 
-vi.mock("@/lib/blocks/CONTENT_BLOCK_REGISTRY", () => ({
+vi.mock("@/lib/blocks/BLOCK_REGISTRY", () => ({
   BLOCK_REGISTRY: {
     paragraph: { type: "paragraph", render: stubRender },
     heading: { type: "heading", render: stubRender },

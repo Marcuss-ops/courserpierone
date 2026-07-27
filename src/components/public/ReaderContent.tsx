@@ -39,7 +39,7 @@
 
 import { Fragment } from "react";
 
-import { BLOCK_REGISTRY } from "@/lib/blocks/CONTENT_BLOCK_REGISTRY";
+import { BLOCK_REGISTRY } from "@/lib/blocks/BLOCK_REGISTRY";
 import type { Block, ContentDocumentV1 } from "@/domains/catalog/blocks";
 
 // ─── Public surface ────────────────────────────────────────────

@@ -70,7 +70,7 @@
 import { Fragment } from "react";
 
 import type { ContentDocumentV1 } from "@/domains/catalog/blocks/document";
-import { BLOCK_REGISTRY } from "@/lib/blocks/CONTENT_BLOCK_REGISTRY";
+import { BLOCK_REGISTRY } from "@/lib/blocks/BLOCK_REGISTRY";
 
 export interface ProductDocumentSectionProps {
   /** The ContentDocumentV1 to render. */
