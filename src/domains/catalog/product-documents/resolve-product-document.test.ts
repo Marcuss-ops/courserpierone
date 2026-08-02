@@ -46,7 +46,7 @@ const VALID_DOC = {
 } as unknown as ContentDocumentV1;
 
 interface StubState {
-  calls: Array<{ slug: string; requestedLocale?: string }>;
+  calls: { slug: string; requestedLocale?: string }[];
 }
 
 /** Build a successful "primary matched" lookup. */

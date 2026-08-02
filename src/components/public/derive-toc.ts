@@ -42,9 +42,8 @@ import type { TocHeading } from "./TableOfContents";
  * for the SSR path).
  */
 function headingText(block: Block): string {
-  const props = (block.props ?? {}) as { content?: Array<{ text?: string }> };
-  if (!Array.isArray(props.content)) return "";
-  return props.content.map((c) => c.text ?? "").join("").trim();
+  if (!("content" in block) || !Array.isArray(block.content)) return "";
+  return block.content.map((c) => c.text ?? "").join("").trim();
 }
 
 /**
@@ -59,8 +58,7 @@ export function deriveToc(document: ContentDocumentV1): TocHeading[] {
   for (const block of document.blocks) {
     if (block.type !== "heading") continue;
 
-    const props = (block.props ?? {}) as { level?: number };
-    const level = props.level;
+    const level = block.props.level;
     if (level !== 1 && level !== 2 && level !== 3) continue;
 
     const text = headingText(block);

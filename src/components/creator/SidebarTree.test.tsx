@@ -233,10 +233,12 @@ describe("SidebarTree — up/down enablement", () => {
         currentPageId="alpha"
       />,
     );
-    const upFirst = screen.getByTestId("sidebar-up-alpha") as HTMLButtonElement;
-    const downLast = screen.getByTestId("sidebar-down-delta") as HTMLButtonElement;
-    expect(upFirst.disabled).toBe(true);
-    expect(downLast.disabled).toBe(true);
+    expect(
+      screen.getByTestId<HTMLButtonElement>("sidebar-up-alpha").disabled,
+    ).toBe(true);
+    expect(
+      screen.getByTestId<HTMLButtonElement>("sidebar-down-delta").disabled,
+    ).toBe(true);
   });
 
   it("middle rows have both up and down enabled", () => {
@@ -247,10 +249,12 @@ describe("SidebarTree — up/down enablement", () => {
         currentPageId="alpha"
       />,
     );
-    const upBeta = screen.getByTestId("sidebar-up-beta") as HTMLButtonElement;
-    const downBeta = screen.getByTestId("sidebar-down-beta") as HTMLButtonElement;
-    expect(upBeta.disabled).toBe(false);
-    expect(downBeta.disabled).toBe(false);
+    expect(
+      screen.getByTestId<HTMLButtonElement>("sidebar-up-beta").disabled,
+    ).toBe(false);
+    expect(
+      screen.getByTestId<HTMLButtonElement>("sidebar-down-beta").disabled,
+    ).toBe(false);
   });
 });
 
@@ -276,10 +280,10 @@ describe("SidebarTree — reorder click behavior", () => {
       "sidebar-row-delta",
     ]);
 
-    await fireEvent.click(screen.getByTestId("sidebar-down-beta"));
+    fireEvent.click(screen.getByTestId("sidebar-down-beta"));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
-    const [url, init] = fetchMock.mock.calls[0]!;
+    const [url, init] = fetchMock.mock.calls[0];
     expect(url).toBe("/api/creator/products/prod_test/pages/reorder");
     const body = JSON.parse((init as RequestInit).body as string);
     expect(body.parentId).toBeNull();
@@ -303,10 +307,10 @@ describe("SidebarTree — reorder click behavior", () => {
       />,
     );
 
-    await fireEvent.click(screen.getByTestId("sidebar-up-gamma"));
+    fireEvent.click(screen.getByTestId("sidebar-up-gamma"));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
-    const [, init] = fetchMock.mock.calls[0]!;
+    const [, init] = fetchMock.mock.calls[0];
     const body = JSON.parse((init as RequestInit).body as string);
     expect(body.parentId).toBeNull();
     expect(body.orderedPages.map((e: { pageId: string }) => e.pageId)).toEqual([
@@ -326,10 +330,10 @@ describe("SidebarTree — reorder click behavior", () => {
       />,
     );
 
-    await fireEvent.click(screen.getByTestId("sidebar-down-gamma-1"));
+    fireEvent.click(screen.getByTestId("sidebar-down-gamma-1"));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
-    const [, init] = fetchMock.mock.calls[0]!;
+    const [, init] = fetchMock.mock.calls[0];
     const body = JSON.parse((init as RequestInit).body as string);
     expect(body.parentId).toBe("gamma");
     expect(body.orderedPages.map((e: { pageId: string }) => e.pageId)).toEqual([
@@ -361,7 +365,7 @@ describe("SidebarTree — error & revert", () => {
       (n) => n.getAttribute("data-testid") ?? "",
     );
 
-    await fireEvent.click(screen.getByTestId("sidebar-down-beta"));
+    fireEvent.click(screen.getByTestId("sidebar-down-beta"));
 
     await waitFor(() =>
       expect(screen.getByTestId("sidebar-error")).toBeTruthy(),
@@ -370,10 +374,12 @@ describe("SidebarTree — error & revert", () => {
       "alert",
     );
 
-    const afterIds = queryListItems("sidebar-root-list").map(
-      (n) => n.getAttribute("data-testid") ?? "",
-    );
-    expect(afterIds).toEqual(beforeIds);
+    await waitFor(() => {
+      const afterIds = queryListItems("sidebar-root-list").map(
+        (n) => n.getAttribute("data-testid") ?? "",
+      );
+      expect(afterIds).toEqual(beforeIds);
+    });
   });
 
   it("on HTTP success with server-canonical positions, adopt server positions", async () => {
@@ -400,7 +406,7 @@ describe("SidebarTree — error & revert", () => {
       />,
     );
 
-    await fireEvent.click(screen.getByTestId("sidebar-down-beta"));
+    fireEvent.click(screen.getByTestId("sidebar-down-beta"));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     await new Promise((r) => setTimeout(r, 30));

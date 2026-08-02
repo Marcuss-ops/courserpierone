@@ -1,3 +1,4 @@
+// size-budget-exempt — atomic reorder contract; ADR-0016 §1.
 /**
  * src/domains/catalog/content-pages/reorder-content-pages-types.ts
  *

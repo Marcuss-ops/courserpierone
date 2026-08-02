@@ -1,0 +1,60 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ContentBlockRenderer — full MVP fixture > renders every block in document order and matches snapshot 1`] = `
+<div>
+  <h1
+    class="font-serif text-3xl font-semibold tracking-tight text-cream-espresso dark:text-cream-dark-text"
+    id="heading-snap-h1"
+  >
+    Snapshot heading
+  </h1>
+  <p
+    class="text-[15px] leading-relaxed text-cream-text dark:text-cream-dark-text"
+  >
+    A paragraph for the snapshot.
+  </p>
+  <ul
+    class="list-disc pl-6 space-y-1 text-[15px] leading-relaxed text-cream-text dark:text-cream-dark-text"
+  >
+    <li>
+      <span>
+        Bullet one
+      </span>
+    </li>
+    <li>
+      <span>
+        Bullet two
+      </span>
+    </li>
+  </ul>
+  <ol
+    class="list-decimal pl-6 space-y-1 text-[15px] leading-relaxed text-cream-text dark:text-cream-dark-text"
+  >
+    <li>
+      <span>
+        First
+      </span>
+    </li>
+    <li>
+      <span>
+        Second
+      </span>
+    </li>
+  </ol>
+  <blockquote
+    class="border-l-4 border-cream-gold dark:border-cream-dark-gold pl-4 italic text-cream-text-soft dark:text-cream-dark-text-soft"
+  >
+    A snapshot quote.
+  </blockquote>
+  <aside
+    aria-label="Callout (info)"
+    class="rounded-md border px-4 py-3 text-[14px] bg-cream-border-soft border-cream-gold/30 text-cream-text dark:bg-cream-dark-surface/60 dark:border-cream-dark-border dark:text-cream-dark-text"
+    data-variant="info"
+  >
+    Info callout
+  </aside>
+  <hr
+    class="border-t border-cream-border dark:border-cream-dark-border"
+  />
+</div>
+`;

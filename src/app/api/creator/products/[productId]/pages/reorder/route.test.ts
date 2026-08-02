@@ -37,11 +37,11 @@ import type {
 
 // ─── Test helpers ─────────────────────────────────────────────────
 
-type AccessContext = {
+interface AccessContext {
   actor: { id: string; role: "admin" | "creator" | "student" } | null;
   product: { creatorId: string } | null;
   application: { status: string } | null;
-};
+}
 
 function mkAccessPort(
   ctx: AccessContext,
@@ -79,7 +79,7 @@ function mkSessionUser(actorId: string, role: "admin" | "creator" | "student") {
 }
 
 function mockSessionAs(actorId: string, role: "admin" | "creator" | "student") {
-  getServerUserMock.mockResolvedValue({ dbUser: mkSessionUser(actorId, role) } as any);
+  getServerUserMock.mockResolvedValue({ dbUser: mkSessionUser(actorId, role) });
 }
 
 function mkRequest(body: unknown): Request {
@@ -93,17 +93,7 @@ function mkRequest(body: unknown): Request {
   );
 }
 
-const CTX = { params: { productId: "product_1" } };
-
-function configureRoute(deps: {
-  access: AccessContext;
-  reorder: Parameters<typeof mkReorderPort>[0];
-}) {
-  const accessPort = mkAccessPort(deps.access);
-  const reorderPort = mkReorderPort(deps.reorder);
-  __setRouteDeps({ accessPort, reorderPort });
-  return { accessPort, reorderPort };
-}
+const CTX = { params: Promise.resolve({ productId: "product_1" }) };
 
 // ─── Tests ─────────────────────────────────────────────────────────
 

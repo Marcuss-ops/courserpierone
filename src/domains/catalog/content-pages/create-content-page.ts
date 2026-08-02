@@ -65,7 +65,6 @@ import { contentSlugSchema } from "@/domains/catalog/content-type-registry";
 
 import {
   contentPageStatusSchema,
-  type ContentPageRecord,
   type ContentPageRepository,
   type CreateContentPageInput,
   type CreateContentPageResult,

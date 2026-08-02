@@ -32,7 +32,6 @@ import {
 import {
   BLOCK_REGISTRY,
   type Block,
-  type BlockType,
 } from "@/lib/blocks/BLOCK_REGISTRY";
 
 import { BlockWrapper } from "./BlockWrapper";
@@ -110,7 +109,7 @@ export function SortableBlockList({
  * per block (small perf / clarity win).
  */
 function BlockSwitch({ block }: { block: Block }) {
-  const entry = BLOCK_REGISTRY[block.type as BlockType];
+  const entry = BLOCK_REGISTRY[block.type];
   if (!entry) {
     return (
       <div
@@ -121,5 +120,6 @@ function BlockSwitch({ block }: { block: Block }) {
       </div>
     );
   }
-  return <>{entry.render({ id: block.id, ...(block.props as object) } as never)}</>;
+  const render = entry.render as (value: unknown) => import("react").ReactNode;
+  return <>{render({ id: block.id, ...(block.props), ...( "content" in block ? { content: block.content } : {}) })}</>;
 }

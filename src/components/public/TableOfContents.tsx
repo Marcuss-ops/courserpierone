@@ -51,13 +51,6 @@ export interface TocHeading {
 export interface TableOfContentsProps {
   headings: TocHeading[];
   /**
-   * Optional CSS selector for a sticky header element. The
-   * smooth-scroll cursor uses `scroll-margin-top` on the
-   * target heading equal to the header's offsetHeight so the
-   * heading sticks under the header after scrolling.
-   */
-  stickyHeaderSelector?: string;
-  /**
    * Optional className for the outer `<nav>` element.
    */
   className?: string;
@@ -88,7 +81,6 @@ export function headingAnchor(blockId: string): string {
 
 export function TableOfContents({
   headings,
-  stickyHeaderSelector = "[data-reader-sticky-header]",
   className,
 }: TableOfContentsProps) {
   // ─── Active-section tracking ────────────────────────────────

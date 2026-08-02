@@ -724,18 +724,3 @@ describe("reorderContentPages — architecture guard", () => {
     expect(actualKeys).toEqual(allowedKeys);
   });
 });
-
-// ─── Local helper ─────────────────────────────────────────────────
-
-/**
- * Convenience for tests that need a custom scope result — avoids
- * the awkward `state.scopeResult = { pageIds: [...] }` at every
- * call site. Used by invariant tests above; declared at the BOTTOM
- * of the file so the test ordering reads top-to-bottom.
- */
-function state_set_scope(pageIds: string[]) {
-  // No port or state available here — instead, this is a NO-OP
-  // placeholder kept for future expansion. Tests continue to use
-  // the explicit pattern.
-  void pageIds;
-}

@@ -120,7 +120,7 @@ export function EditorClient({
   const buildDocument = useCallback((list: Block[]): ContentDocumentV1 => {
     return {
       schemaVersion: 1,
-      blocks: list.map((b, i) => ({ ...b, position: i }) as Block),
+      blocks: list.map((b, i) => ({ ...b, position: i })),
     };
   }, []);
 
@@ -154,7 +154,7 @@ export function EditorClient({
       setBlocks((prev) => {
         const idx = prev.findIndex((b) => b.id === id);
         if (idx < 0) return prev;
-        const original = prev[idx]!;
+        const original = prev[idx];
         const copy = makeBlock(original.type, prev.length);
         // Carry props over (excluding id/position which makeBlock assigns).
         const next = [...prev];
@@ -176,7 +176,7 @@ export function EditorClient({
         const toIdx = prev.findIndex((b) => b.id === toId);
         if (fromIdx < 0 || toIdx < 0 || fromIdx === toIdx) return prev;
         const next = [...prev];
-        const moved = next.splice(fromIdx, 1)[0]!;
+        const moved = next.splice(fromIdx, 1)[0];
         next.splice(toIdx, 0, moved);
         triggerSave(buildDocument(next));
         return next;

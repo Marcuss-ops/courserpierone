@@ -182,7 +182,7 @@ const productIdParamSchema = z
 
 export async function POST(
   req: Request,
-  ctx: { params: { productId: string } },
+  ctx: { params: Promise<{ productId: string }> },
 ): Promise<NextResponse> {
   // ─── 0. Misconfig guard ──────────────────────────────────────
   if (!cachedAccessPort || !cachedPageRepoPort) {
@@ -198,7 +198,7 @@ export async function POST(
 
   // ─── 1. Auth — session ───────────────────────────────────────
   const serverUser = await getServerUser();
-  if (!serverUser || !serverUser.dbUser) {
+  if (!serverUser?.dbUser) {
     return NextResponse.json(
       { ok: false, error: "unauthenticated" },
       { status: 401, headers: { "Cache-Control": "no-store" } },
@@ -207,7 +207,8 @@ export async function POST(
   const actorId = serverUser.dbUser.id;
 
   // ─── 2. URL param validation ─────────────────────────────────
-  const productIdParse = productIdParamSchema.safeParse(ctx.params.productId);
+  const { productId: rawProductId } = await ctx.params;
+  const productIdParse = productIdParamSchema.safeParse(rawProductId);
   if (!productIdParse.success) {
     return NextResponse.json(
       {

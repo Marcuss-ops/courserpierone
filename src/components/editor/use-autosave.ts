@@ -136,7 +136,7 @@ export function useAutosave<TValue>(
       if (timerRef.current) clearTimeout(timerRef.current);
       transition("dirty");
       timerRef.current = setTimeout(() => {
-        performSave(value);
+        void performSave(value);
       }, delay);
     },
     [delay, performSave, transition],

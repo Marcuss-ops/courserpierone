@@ -50,7 +50,7 @@
  *         distinction from resolveCreatorProductAccess).
  */
 
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import {
   resolveCreateProductAccess,

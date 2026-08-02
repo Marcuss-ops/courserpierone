@@ -74,7 +74,7 @@ describe("TableOfContents — click handler smoke", () => {
 
     expect(scrollSpy).toHaveBeenCalledTimes(1);
     expect(replaceSpy).toHaveBeenCalled();
-    const lastCall = replaceSpy.mock.calls[replaceSpy.mock.calls.length - 1]!;
+    const lastCall = replaceSpy.mock.calls[replaceSpy.mock.calls.length - 1];
     // The third argument is the URL — should contain #heading-h2.
     expect(String(lastCall[2])).toContain(`#${headingAnchor("h2")}`);
 

@@ -119,7 +119,7 @@ describe("parseContentDocumentV1 — happy path", () => {
     // on DividerBlock; the runtime check disambiguates).
     const firstBlock = result.blocks[0];
     expect(firstBlock?.type).toBe("paragraph");
-    if (firstBlock && firstBlock.type === "paragraph") {
+    if (firstBlock?.type === "paragraph") {
       expect(firstBlock.content[0]?.marks?.[0]).toEqual({
         type: "link",
         href: "https://example.com/page",

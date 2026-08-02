@@ -113,7 +113,7 @@ export function __setRouteDeps(deps: {
 
 export async function POST(
   _req: Request,
-  ctx: { params: { productId: string } },
+  ctx: { params: Promise<{ productId: string }> },
 ): Promise<NextResponse> {
   // ─── 0. Misconfig guard ──────────────────────────────────────
   if (!cachedAccessPort || !cachedPublishPort) {
@@ -134,7 +134,7 @@ export async function POST(
   }
 
   // ─── 2. ACCESS (requiredAction: "publish") ───────────────────
-  const productId = ctx.params.productId;
+  const { productId } = await ctx.params;
   const access = await resolveCreatorProductAccess(
     { actorId: dbUser.id, productId, requiredAction: "publish" },
     { port: cachedAccessPort },

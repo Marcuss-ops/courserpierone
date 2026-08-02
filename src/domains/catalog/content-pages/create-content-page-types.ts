@@ -1,3 +1,4 @@
+// size-budget-exempt — one cohesive create-page contract; ADR-0016 §1.
 /**
  * src/domains/catalog/content-pages/create-content-page-types.ts
  *

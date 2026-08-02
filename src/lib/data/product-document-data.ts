@@ -34,7 +34,6 @@ import { prismaResolveProductDocumentRepository } from "@/domains/catalog/produc
 import type {
   ResolveProductDocumentInput,
   ResolveProductDocumentOutcome,
-  ResolveProductDocumentResult,
 } from "@/domains/catalog/product-documents/resolve-product-document-types";
 
 /**

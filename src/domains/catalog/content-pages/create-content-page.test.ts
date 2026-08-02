@@ -52,7 +52,6 @@ import { z } from "zod";
 
 import {
   createContentPage,
-  type CreateContentPageDeps,
 } from "./create-content-page";
 import type {
   ContentPageRecord,

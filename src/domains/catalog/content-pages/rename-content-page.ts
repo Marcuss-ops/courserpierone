@@ -159,7 +159,7 @@ export async function renameContentPage(
   const pageCtx = await deps.port.findPageProductId({
     pageId: input.pageId,
   });
-  if (!pageCtx || pageCtx.productId !== input.productId) {
+  if (pageCtx?.productId !== input.productId) {
     return {
       success: false,
       reason: RenameContentPageDenialReason.NotFound,

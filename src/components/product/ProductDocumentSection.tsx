@@ -128,7 +128,7 @@ export function ProductDocumentSection({
           return null;
         }
         // `id` is RAW (registry's HeadingBlock prepends "heading-").
-        const props = { ...(block.props ?? {}), id: block.id } as Record<
+        const props = { ...(block.props ?? {}), ...( "content" in block ? { content: block.content } : {}), id: block.id } as Record<
           string,
           unknown
         >;

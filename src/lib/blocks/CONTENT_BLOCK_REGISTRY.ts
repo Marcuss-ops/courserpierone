@@ -625,7 +625,7 @@ export const CONTENT_BLOCK_REGISTRY: {
  * the keyspace.
  */
 export function getBlockEntry<B extends BlockType>(type: B): ContentBlockEntry<B> {
-  return CONTENT_BLOCK_REGISTRY[type] as ContentBlockEntry<B>;
+  return CONTENT_BLOCK_REGISTRY[type];
 }
 
 /**

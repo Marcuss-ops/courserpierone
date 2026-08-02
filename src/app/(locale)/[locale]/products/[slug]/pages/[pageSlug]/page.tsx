@@ -77,7 +77,7 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
   }
 
   const currentPage = result.pages.find((p) => p.slug === params.pageSlug);
-  if (!currentPage || currentPage.document === null) {
+  if (!currentPage?.document) {
     // Page missing OR document null (corrupted/translation
     // missing) — both collapse to a public 404 to avoid
     // leaking the existence of an unpublished/orphan page.
@@ -161,7 +161,6 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
         <aside className="md:sticky md:top-20 md:self-start">
           <TableOfContents
             headings={headings}
-            stickyHeaderSelector="[data-reader-sticky-header]"
           />
         </aside>
       </div>

@@ -1,3 +1,4 @@
+// size-budget-exempt — publication resolver orchestration; ADR-0016 §1.
 /**
  * src/domains/catalog/content-pages/resolve-published-content.ts
  *

@@ -105,16 +105,16 @@ function mockSessionAs(
 ) {
   getServerUserMock.mockResolvedValue({
     dbUser: mkSessionUser(actorId, role),
-  } as any);
+  });
 }
 
 // ─── Access port stub (mirrors the established pattern) ────────
 
-type AccessContext = {
+interface AccessContext {
   actor: { id: string; role: "admin" | "creator" | "student" } | null;
   product: { creatorId: string } | null;
   application: { status: CreatorApplicationStatus } | null;
-};
+}
 
 function mkAccessPort(
   ctx: AccessContext,
@@ -233,7 +233,7 @@ function mkRequest(body: unknown): Request {
   );
 }
 
-const CTX = { params: { productId: "product_1" } };
+const CTX = { params: Promise.resolve({ productId: "product_1" }) };
 
 function configureRoute(deps: {
   access: AccessContext;
@@ -628,7 +628,7 @@ describe("POST .../pages — plumbing", () => {
   it("forwards actorId (from session) + productId (from URL) to the resolver", async () => {
     getServerUserMock.mockResolvedValue({
       dbUser: mkSessionUser("u_audit_actor_1", "creator"),
-    } as any);
+    });
     const { accessPort } = configureRoute({
       access: {
         actor: { id: "u_audit_actor_1", role: "creator" },
@@ -639,14 +639,13 @@ describe("POST .../pages — plumbing", () => {
     });
     const res = await POST(
       mkRequest({ slug: "abc" }),
-      { params: { productId: "prod_xyz_42" } },
+      { params: Promise.resolve({ productId: "prod_xyz_42" }) },
     );
     expect(res.status).toBe(201);
     expect(accessPort.spy.called).toEqual([
       {
         actorId: "u_audit_actor_1",
         productId: "prod_xyz_42",
-        requiredAction: "create",
       },
     ]);
   });

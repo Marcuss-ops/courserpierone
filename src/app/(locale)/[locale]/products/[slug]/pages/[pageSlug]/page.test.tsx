@@ -20,9 +20,11 @@
  */
 
 // Mocks BEFORE component import.
-const notFoundMock = vi.fn(() => {
-  throw new Error("NOT_FOUND");
-});
+const { notFoundMock } = vi.hoisted(() => ({
+  notFoundMock: vi.fn(() => {
+    throw new Error("NOT_FOUND");
+  }),
+}));
 vi.mock("next/navigation", () => ({
   notFound: notFoundMock,
 }));
@@ -62,13 +64,15 @@ const VALID_DOC = {
     {
       id: "h-titolo",
       type: "heading" as const,
-      props: { level: 1 as const, content: [{ text: "Titolo" }] },
+      props: { level: 1 as const },
+      content: [{ type: "text" as const, text: "Titolo" }],
       position: 0,
     },
     {
       id: "p-body",
       type: "paragraph" as const,
-      props: { content: [{ text: "Contenuto del capitolo." }] },
+      props: {},
+      content: [{ type: "text" as const, text: "Contenuto del capitolo." }],
       position: 1,
     },
   ],

@@ -32,6 +32,14 @@
  * mount complete cleanly.
  */
 
+import { cleanup } from "@testing-library/react";
+import { afterEach } from "vitest";
+
+// Ensure DOM state never crosses test boundaries. Without this, jsdom
+// suites accumulate prior renders and produce false duplicate-element
+// failures that only appear in the full test run.
+afterEach(cleanup);
+
 // ─── IntersectionObserver stub ────────────────────────────
 if (typeof globalThis.IntersectionObserver === "undefined") {
   class StubIntersectionObserver {

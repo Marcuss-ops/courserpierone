@@ -44,7 +44,7 @@ import {
   Loader2,
 } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
+import { useCallback, useMemo, useState, useTransition } from "react";
 
 import {
   buildTree,
@@ -114,51 +114,34 @@ export function SidebarTree({
   currentPageId,
   locale,
 }: SidebarTreeProps) {
+  const pagesKey = pages
+    .map(
+      (page) =>
+        `${page.id}:${page.parentId ?? "x"}:${page.position}:${page.slug}:${page.status}:${page.title ?? ""}`,
+    )
+    .join("|");
+
+  return (
+    <SidebarTreeState
+      key={pagesKey}
+      productId={productId}
+      pages={pages}
+      currentPageId={currentPageId}
+      locale={locale}
+    />
+  );
+}
+
+function SidebarTreeState({
+  productId,
+  pages,
+  currentPageId,
+  locale,
+}: SidebarTreeProps) {
   const [optimistic, setOptimistic] = useState<SidebarPageRow[]>(pages);
   const [, startTransition] = useTransition();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Snapshot the original props as a fallback for revert. We
-  // hold a ref-like copy via state (cheap; pages is small).
-  const [baseline, setBaseline] = useState<SidebarPageRow[]>(pages);
-
-  // Reset when the upstream Server Component re-renders with
-  // a new flat list (e.g. navigation between pages, or a
-  // refetch after a router refresh). This keeps the sidebar
-  // honest: server is canonical. The sync lives in
-  // `useEffect` (NOT the render body) so React's "no state
-  // updates during render" invariant is preserved — calling
-  // setState during render triggers warnings under Strict
-  // Mode and can produce an infinite reconcile loop on the
-  // first hydration pass.
-  const incomingKey = useMemo(
-    () =>
-      pages
-        .map((p) => `${p.id}:${p.position}:${p.parentId ?? "x"}`)
-        .join("|"),
-    [pages],
-  );
-  const storedKey = useMemo(
-    () =>
-      optimistic
-        .map((p) => `${p.id}:${p.position}:${p.parentId ?? "x"}`)
-        .join("|"),
-    [optimistic],
-  );
-  useEffect(() => {
-    if (incomingKey !== storedKey && baseline !== pages) {
-      setOptimistic(pages);
-      setBaseline(pages);
-      setError(null);
-    }
-    // We intentionally omit `baseline` / `storedKey` from the
-    // deps: the sync should fire when the UPSTREAM `pages`
-    // prop changes, not on local round-trips of optimistic
-    // state. The captured values inside the effect reflect
-    // the latest commit before the next effect run.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [incomingKey]);
 
   const tree = useMemo(() => buildTree(optimistic), [optimistic]);
 
@@ -217,7 +200,7 @@ export function SidebarTree({
           throw new Error(await safeReadError(res));
         }
         const data = (await res.json()) as {
-          reordered?: Array<{ pageId: string; position: number }>;
+          reordered?: { pageId: string; position: number }[];
         };
         const canonical = Array.isArray(data.reordered) ? data.reordered : [];
         if (canonical.length > 0) {
@@ -264,7 +247,7 @@ export function SidebarTree({
       const idx = scope.findIndex((p) => p.id === pageId);
       if (idx <= 0) return;
       const next = scope.slice();
-      [next[idx - 1], next[idx]] = [next[idx]!, next[idx - 1]!];
+      [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
       void reorderScope(target.parentId, next);
     },
     [optimistic, siblingsInScope, reorderScope],
@@ -278,7 +261,7 @@ export function SidebarTree({
       const idx = scope.findIndex((p) => p.id === pageId);
       if (idx < 0 || idx >= scope.length - 1) return;
       const next = scope.slice();
-      [next[idx], next[idx + 1]] = [next[idx + 1]!, next[idx]!];
+      [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
       void reorderScope(target.parentId, next);
     },
     [optimistic, siblingsInScope, reorderScope],

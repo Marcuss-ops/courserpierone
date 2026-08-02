@@ -44,8 +44,6 @@ import { describe, expect, it } from "vitest";
 
 import {
   saveContentDocument,
-  type SaveContentDocumentDeps,
-  type SaveContentDocumentResult,
 } from "./save-content-document";
 import type {
   ContentPageTranslationRepository,

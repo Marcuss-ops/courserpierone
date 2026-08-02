@@ -82,7 +82,9 @@ const emptyPropsSchema = z
   // object — this is intentional. Future block-specific props
   // (e.g. paragraph.dropCap) must be added explicitly here, never
   // silently accepted via a passthrough bag.
-  .describe("intentionally empty; future props must be added explicitly");
+  .describe("intentionally empty; future props must be added explicitly") as z.ZodType<
+    Record<never, never>
+  >;
 
 const paragraphBlockSchema = z
   .object({
@@ -90,6 +92,7 @@ const paragraphBlockSchema = z
     type: z.literal("paragraph"),
     props: emptyPropsSchema,
     content: z.array(inlineContentSchema),
+    position: z.number().int().nonnegative().optional(),
   })
   // .strict() on the outer object rejects unknown keys — without
   // this, a paragraph block with a stray `children`/`url`/`image`
@@ -108,6 +111,7 @@ const headingBlockSchema = z
       level: z.union([z.literal(1), z.literal(2), z.literal(3)]),
     }),
     content: z.array(inlineContentSchema),
+    position: z.number().int().nonnegative().optional(),
   })
   .strict();
 export type HeadingBlock = z.infer<typeof headingBlockSchema>;
@@ -122,6 +126,7 @@ const bulletListBlockSchema = z
     // Nested lists are deferred to v2 (recursion blows up Zod
     // compile times; documented in Phase 1 plan).
     content: z.array(inlineContentSchema),
+    position: z.number().int().nonnegative().optional(),
   })
   .strict();
 export type BulletListBlock = z.infer<typeof bulletListBlockSchema>;
@@ -132,6 +137,7 @@ const orderedListBlockSchema = z
     type: z.literal("orderedList"),
     props: emptyPropsSchema,
     content: z.array(inlineContentSchema),
+    position: z.number().int().nonnegative().optional(),
   })
   .strict();
 export type OrderedListBlock = z.infer<typeof orderedListBlockSchema>;
@@ -147,6 +153,7 @@ const quoteBlockSchema = z
         .optional(),
     }),
     content: z.array(inlineContentSchema),
+    position: z.number().int().nonnegative().optional(),
   })
   .strict();
 export type QuoteBlock = z.infer<typeof quoteBlockSchema>;
@@ -159,6 +166,7 @@ const calloutBlockSchema = z
       variant: z.enum(["info", "warning", "success", "danger"]),
     }),
     content: z.array(inlineContentSchema),
+    position: z.number().int().nonnegative().optional(),
   })
   .strict();
 export type CalloutBlock = z.infer<typeof calloutBlockSchema>;
@@ -174,6 +182,7 @@ const dividerBlockSchema = z
     id: blockIdSchema,
     type: z.literal("divider"),
     props: emptyPropsSchema,
+    position: z.number().int().nonnegative().optional(),
   })
   .strict();
 export type DividerBlock = z.infer<typeof dividerBlockSchema>;

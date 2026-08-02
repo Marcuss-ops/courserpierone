@@ -27,7 +27,8 @@ function heading(id: string, level: 1 | 2 | 3, text: string): Block {
   return {
     id,
     type: "heading",
-    props: { level, content: [{ text }] },
+    props: { level },
+    content: [{ type: "text", text }],
     position: 0,
   };
 }
@@ -36,7 +37,8 @@ function paragraph(id: string, text: string): Block {
   return {
     id,
     type: "paragraph",
-    props: { content: [{ text }] },
+    props: {},
+    content: [{ type: "text", text }],
     position: 0,
   };
 }
@@ -87,7 +89,8 @@ describe("deriveToc — heading preservation", () => {
     const block4: Block = {
       id: "h4",
       type: "heading",
-      props: { level: 4 as unknown as 2, content: [{ text: "x" }] },
+      props: { level: 4 as unknown as 2 },
+      content: [{ type: "text", text: "x" }],
       position: 0,
     };
     expect(

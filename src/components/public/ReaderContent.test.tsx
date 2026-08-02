@@ -14,12 +14,14 @@
  *   - multiple blocks render in document order
  */
 
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
 
 import type { Block } from "@/domains/catalog/blocks";
 
 import { ReaderContent } from "./ReaderContent";
+
+afterEach(cleanup);
 
 // The DOM-prefix literal `"heading-"` lives in the registry's
 // `HeadingBlock` (single source of truth) and is mirrored by
@@ -38,7 +40,8 @@ function heading(id: string, level: 1 | 2 | 3, text: string): Block {
   return {
     id,
     type: "heading",
-    props: { level, content: [{ text }] },
+    props: { level },
+    content: [{ type: "text", text }],
     position: 0,
   };
 }
@@ -47,7 +50,8 @@ function paragraph(id: string, text: string): Block {
   return {
     id,
     type: "paragraph",
-    props: { content: [{ text }] },
+    props: {},
+    content: [{ type: "text", text }],
     position: 0,
   };
 }
@@ -105,7 +109,7 @@ describe("ReaderContent — block rendering", () => {
         }}
       />,
     );
-    const expectedId = `${READER_HEADING_ANCHOR_PREFIX}${blockId}`;
+    const expectedId = `${HEADING_ANCHOR_PREFIX}${blockId}`;
     const headingEl = document.getElementById(expectedId);
     expect(headingEl).toBeTruthy();
     expect(headingEl?.tagName).toBe("H1");

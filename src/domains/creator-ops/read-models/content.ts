@@ -50,13 +50,15 @@ export interface BuildContentDeps {
 }
 
 function normalizeDays(days: number | undefined, fallback: number): number {
-  if (typeof days !== "number" || !Number.isFinite(days) || days <= 0) return fallback;
-  return Math.floor(days);
+  return typeof days === "number" && Number.isFinite(days) && days > 0
+    ? Math.floor(days)
+    : fallback;
 }
 
 function normalizeLimit(limit: number | undefined, fallback: number): number {
-  if (typeof limit !== "number" || !Number.isFinite(limit) || limit <= 0) return fallback;
-  return Math.floor(limit);
+  return typeof limit === "number" && Number.isFinite(limit) && limit > 0
+    ? Math.floor(limit)
+    : fallback;
 }
 
 function toContentItem(raw: RawContentItem): ContentItem {
@@ -117,7 +119,7 @@ export async function buildContent(
     },
     drafts: Array.from(draftsMap.values()),
     scheduled: Array.from(scheduledMap.values()).sort(
-      (a, b) => (a.scheduledAt?.getTime() ?? 0) - (b.scheduledAt?.getTime() ?? 0),
+      (a, b) => Number(a.scheduledAt) - Number(b.scheduledAt),
     ),
     recent: recentItems,
   };

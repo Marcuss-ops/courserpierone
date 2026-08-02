@@ -144,7 +144,7 @@ const pageIdParamSchema = z
 
 export async function PATCH(
   req: Request,
-  ctx: { params: { productId: string; pageId: string } },
+  ctx: { params: Promise<{ productId: string; pageId: string }> },
 ): Promise<NextResponse> {
   // ─── 0. Misconfig guard ──────────────────────────────────────
   if (!cachedAccessPort || !cachedRenamePort) {
@@ -160,7 +160,7 @@ export async function PATCH(
 
   // ─── 1. Auth — session ─────────────────────────────────────────
   const serverUser = await getServerUser();
-  if (!serverUser || !serverUser.dbUser) {
+  if (!serverUser?.dbUser) {
     return NextResponse.json(
       { ok: false, error: "unauthenticated" },
       { status: 401, headers: { "Cache-Control": "no-store" } },
@@ -169,7 +169,8 @@ export async function PATCH(
   const actorId = serverUser.dbUser.id;
 
   // ─── 2. URL param validation ───────────────────────────────────
-  const productIdParse = productIdParamSchema.safeParse(ctx.params.productId);
+  const { productId: rawProductId, pageId: rawPageId } = await ctx.params;
+  const productIdParse = productIdParamSchema.safeParse(rawProductId);
   if (!productIdParse.success) {
     return NextResponse.json(
       {
@@ -182,7 +183,7 @@ export async function PATCH(
   }
   const productId = productIdParse.data;
 
-  const pageIdParse = pageIdParamSchema.safeParse(ctx.params.pageId);
+  const pageIdParse = pageIdParamSchema.safeParse(rawPageId);
   if (!pageIdParse.success) {
     return NextResponse.json(
       {

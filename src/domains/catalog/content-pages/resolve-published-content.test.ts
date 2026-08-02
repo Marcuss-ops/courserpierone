@@ -93,12 +93,12 @@ import type {
 
 // ─── Test helpers ─────────────────────────────────────────────────
 
-type ProductCtx = {
+interface ProductCtx {
   productId: string;
   slug: string;
   defaultLanguage: string;
   publishedAt: Date;
-};
+}
 
 interface StubState {
   // Recorded inputs.
@@ -707,7 +707,7 @@ describe("resolvePublishedContent — no info leak posture", () => {
     // exactly — no creatorId, no updatedAt, no internal
     // fields.
     type ProductSub = SuccessBranch["product"];
-    const productKeys: Array<keyof ProductSub> = [
+    const productKeys: (keyof ProductSub)[] = [
       "id",
       "slug",
       "defaultLanguage",

@@ -102,7 +102,7 @@ const paraBlock = (id: string, text: string): Block =>
     position: 0,
     props: { content: [{ type: "text", text }] } as never,
     content: [{ type: "text", text }],
-  } as never) as Block;
+  } as never);
 
 const headingBlock = (id: string, text: string, level: 1 | 2 | 3): Block =>
   ({
@@ -114,7 +114,7 @@ const headingBlock = (id: string, text: string, level: 1 | 2 | 3): Block =>
       content: [{ type: "text", text }],
     },
     content: [{ type: "text", text }],
-  } as never) as Block;
+  } as never);
 
 const unknownBlock = (id: string): Block =>
   ({
@@ -123,7 +123,7 @@ const unknownBlock = (id: string): Block =>
     position: 0,
     props: {},
     content: [],
-  } as never) as Block;
+  });
 
 beforeEach(() => {
   stubRenderFn.mockReset();
@@ -198,8 +198,8 @@ describe("ProductDocumentSection — registry dispatch", () => {
     // the props spread. The section does `{ ...block.props, id }` —
     // `content` therefore lands at the top of the render arg.
     const propsArg = stubRenderFn.mock.calls[0]?.[0] as Record<string, unknown>;
-    expect(propsArg["id"]).toBe("p1");
-    expect(propsArg["content"]).toEqual([{ type: "text", text: "content under props" }]);
+    expect(propsArg.id).toBe("p1");
+    expect(propsArg.content).toEqual([{ type: "text", text: "content under props" }]);
   });
 
   it("unknown block type is silently skipped (forward-compat — no render attempt)", () => {

@@ -135,15 +135,22 @@ export function applyPolicies(
 // Mirrors feed-ranking-policy.ts#getTimestamp — duplicated to avoid
 // coupling the policy layer to the rank layer (ADR-0016 §2 registry
 // is data + composition; doesn't import the ranker).
+const TIMESTAMP_READERS: Record<
+  FeedItem["kind"],
+  (item: FeedItem) => Date
+> = {
+  continue_learning: readCreatedAt,
+  lesson: readCreatedAt,
+  community_post: readCreatedAt,
+  free_course: readCreatedAt,
+  premium_course: readCreatedAt,
+  creator_update: readCreatedAt,
+};
+
+function readCreatedAt(item: FeedItem): Date {
+  return item.kind === "continue_learning" ? item.lastWatchedAt : item.createdAt;
+}
+
 function getTimestamp(item: FeedItem): number {
-  switch (item.kind) {
-    case "continue_learning":
-      return item.lastWatchedAt.getTime();
-    case "lesson":
-    case "community_post":
-    case "free_course":
-    case "premium_course":
-    case "creator_update":
-      return item.createdAt.getTime();
-  }
+  return TIMESTAMP_READERS[item.kind](item).getTime();
 }

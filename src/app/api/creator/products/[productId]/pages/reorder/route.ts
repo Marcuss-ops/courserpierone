@@ -120,7 +120,7 @@ const productIdParamSchema = z
 
 export async function POST(
   req: Request,
-  ctx: { params: { productId: string } },
+  ctx: { params: Promise<{ productId: string }> },
 ): Promise<NextResponse> {
   // ─── 0. Misconfig guard ──────────────────────────────────────
   if (!cachedAccessPort || !cachedReorderPort) {
@@ -141,7 +141,8 @@ export async function POST(
   }
 
   // ─── 2. URL param validation ─────────────────────────────────
-  const productIdParse = productIdParamSchema.safeParse(ctx.params.productId);
+  const { productId: rawProductId } = await ctx.params;
+  const productIdParse = productIdParamSchema.safeParse(rawProductId);
   if (!productIdParse.success) {
     return NextResponse.json(
       { ok: false, reason: "invalid_request", error: "productId is not a valid identifier" },

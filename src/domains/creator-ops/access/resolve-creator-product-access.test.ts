@@ -295,7 +295,6 @@ describe("resolveCreatorProductAccess — allow: approved_creator", () => {
   });
 
   it("NOT approved_creator: role=creator × NOT owner × submitted application → forbidden", async () => {
-    const { port } = mkStubPort();
     const stub = await import("./resolve-creator-product-access");
     // Recreate via local fixture:
     const port2 = {

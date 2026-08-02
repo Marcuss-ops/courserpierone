@@ -1,3 +1,4 @@
+// size-budget-exempt — one cohesive publish orchestration; ADR-0016 §1.
 /**
  * src/domains/catalog/content-pages/publish-content-product.ts
  *

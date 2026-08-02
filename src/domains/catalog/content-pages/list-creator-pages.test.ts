@@ -212,8 +212,8 @@ describe("listCreatorPages — list: happy path", () => {
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.pages).toHaveLength(2);
-      expect(result.pages[0]!.id).toBe("page_1");
-      expect(result.pages[1]!.id).toBe("page_2");
+      expect(result.pages[0].id).toBe("page_1");
+      expect(result.pages[1].id).toBe("page_2");
     }
   });
 
@@ -248,7 +248,7 @@ describe("listCreatorPages — list: happy path", () => {
     const result = await listCreatorPages(happyInput(), { repo: port });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.pages[0]!.status).toBe("draft");
+      expect(result.pages[0].status).toBe("draft");
     }
   });
 
@@ -256,8 +256,8 @@ describe("listCreatorPages — list: happy path", () => {
     const { port } = mkStubPort();
     const result = await listCreatorPages(happyInput(), { repo: port });
     if (result.success) {
-      expect(result.pages[0]!.status).toBe("published");
-      expect(result.pages[1]!.status).toBe("draft");
+      expect(result.pages[0].status).toBe("published");
+      expect(result.pages[1].status).toBe("draft");
     }
   });
 
@@ -280,7 +280,7 @@ describe("listCreatorPages — list: happy path", () => {
     });
     const result = await listCreatorPages(happyInput(), { repo: port });
     if (result.success) {
-      expect(result.pages[0]!.defaultLanguage).toBe("es");
+      expect(result.pages[0].defaultLanguage).toBe("es");
     }
   });
 });

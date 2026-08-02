@@ -77,7 +77,7 @@ interface RawPublishedRow {
   position: number;
   publishedAt: Date | null;
   title: string | null;
-  document: ContentDocumentV1 | unknown;
+  document: unknown;
   revision: number | null;
   locale: string | null;
 }
@@ -100,7 +100,7 @@ function isRawPublishedRow(value: unknown): value is RawPublishedRow {
  */
 function safelyParseDocument(raw: unknown): ContentDocumentV1 | null {
   if (raw === null || raw === undefined) return null;
-  if (isContentDocumentV1(raw)) return raw as ContentDocumentV1;
+  if (isContentDocumentV1(raw)) return raw;
   // Last-resort: try to coerce through the Zod safeParse.
   const result = z
     .object({
@@ -154,7 +154,7 @@ export const prismaResolvePublishedContentRepository: ResolvePublishedContentPor
     //
     // Single SQL roundtrip. The locale chain is passed as
     // a `text[]` array via Prisma.sql.
-    async listContentPagesWithOneTranslation({ productId, locales }) {
+    async listPublishedPagesWithOneTranslation({ productId, locales }) {
       if (!productId) return { items: [] };
       const localeList = (locales ?? []).filter(
         (l): l is string => typeof l === "string" && l.length > 0,

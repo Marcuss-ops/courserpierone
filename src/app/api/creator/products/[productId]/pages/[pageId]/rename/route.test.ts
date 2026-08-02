@@ -35,7 +35,7 @@ function mkSessionUser(actorId: string, role: "admin" | "creator" | "student") {
 }
 
 function mockSessionAs(actorId: string, role: "admin" | "creator" | "student") {
-  getServerUserMock.mockResolvedValue({ dbUser: mkSessionUser(actorId, role) } as any);
+  getServerUserMock.mockResolvedValue({ dbUser: mkSessionUser(actorId, role) });
 }
 
 type AccessOutcome =
@@ -46,13 +46,16 @@ function mkAccessPort(outcome: AccessOutcome): ResolveCreatorPageAccessPort {
   return {
     async loadPageAccessContext(): Promise<ResolveCreatorPageAccessContext> {
       if (outcome.kind === "page_not_found") {
-        return { allowed: false, reason: "page_not_found" };
+        return {
+          actor: { role: "creator" },
+          product: null,
+          application: null,
+          pageProductId: null,
+        };
       }
       return {
-        allowed: true,
-        source: "owner",
         pageProductId: outcome.pageProductId,
-        actor: { id: outcome.actorId, role: "creator" },
+        actor: { role: "creator" },
         product: { creatorId: outcome.creatorId },
         application: null,
       };
@@ -69,7 +72,7 @@ function mkRenamePort(opts: {
       if (opts.outcome === "forbidden") {
         return { defaultLanguage: "it", creatorId: "u_other_creator" };
       }
-      return { defaultLanguage: "it", creatorId: "u_owner_1" };
+      return { defaultLanguage: "it", creatorId: "u_owner" };
     },
     async findPageProductId() {
       if (opts.outcome === "not_found") return null;
@@ -100,7 +103,9 @@ function mkRequest(body: unknown): Request {
   );
 }
 
-const CTX = { params: { productId: "product_1", pageId: "page_1" } };
+const CTX = {
+  params: Promise.resolve({ productId: "product_1", pageId: "page_1" }),
+};
 
 describe("PATCH /api/creator/products/[productId]/pages/[pageId]/rename", () => {
   it("exports PATCH as an async function", () => {

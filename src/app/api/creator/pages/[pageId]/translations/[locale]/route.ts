@@ -177,7 +177,7 @@ const localeParamSchema = z
 
 export async function PUT(
   req: Request,
-  ctx: { params: { pageId: string; locale: string } },
+  ctx: { params: Promise<{ pageId: string; locale: string }> },
 ): Promise<NextResponse> {
   // ─── 0. Misconfig guard ─────────────────────────────────────
   if (!cachedAccessPort || !cachedDocRepoPort) {
@@ -193,7 +193,7 @@ export async function PUT(
 
   // ─── 1. Auth — session ───────────────────────────────────────
   const serverUser = await getServerUser();
-  if (!serverUser || !serverUser.dbUser) {
+  if (!serverUser?.dbUser) {
     return NextResponse.json(
       { ok: false, error: "unauthenticated" },
       { status: 401, headers: { "Cache-Control": "no-store" } },
@@ -202,7 +202,8 @@ export async function PUT(
   const actorId = serverUser.dbUser.id;
 
   // ─── 2. URL param validation ─────────────────────────────────
-  const pageIdParse = pageIdParamSchema.safeParse(ctx.params.pageId);
+  const { pageId: rawPageId, locale: rawLocale } = await ctx.params;
+  const pageIdParse = pageIdParamSchema.safeParse(rawPageId);
   if (!pageIdParse.success) {
     return NextResponse.json(
       {
@@ -213,7 +214,7 @@ export async function PUT(
       { status: 400, headers: { "Cache-Control": "no-store" } },
     );
   }
-  const localeParse = localeParamSchema.safeParse(ctx.params.locale);
+  const localeParse = localeParamSchema.safeParse(rawLocale);
   if (!localeParse.success) {
     return NextResponse.json(
       {

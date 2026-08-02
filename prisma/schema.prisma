@@ -588,6 +588,7 @@ model ContentPageTranslation {
   document  Json    // PG JSONB column for structured block array
   plainText String? @db.Text  // pre-extracted searchable text, nullable for lazy derivation
   revision  Int     @default(1)  // app-layer SSOT for optimistic concurrency control
+  updatedAt DateTime @default(now()) @updatedAt
 
   page ContentPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
 

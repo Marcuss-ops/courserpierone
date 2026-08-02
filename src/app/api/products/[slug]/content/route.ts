@@ -156,7 +156,7 @@ function isValidLocale(locale: string): boolean {
 
 export async function GET(
   req: Request,
-  ctx: { params: { slug: string } },
+  ctx: { params: Promise<{ slug: string }> },
 ): Promise<NextResponse> {
   // ─── 0. Misconfig guard ──────────────────────────────────────
   if (!cachedPort) {
@@ -167,7 +167,7 @@ export async function GET(
   }
 
   // ─── 1. URL + QUERY validation ──────────────────────────────
-  const slug = ctx.params.slug;
+  const { slug } = await ctx.params;
   if (!isValidSlug(slug)) {
     return NextResponse.json(
       { ok: false, reason: "invalid_slug" },

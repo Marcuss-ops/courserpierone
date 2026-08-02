@@ -43,7 +43,6 @@
 
 import { z } from "zod";
 import {
-  blockSchema,
   extractBlockText,
   type Block,
   type BlockType,
@@ -72,9 +71,10 @@ export interface BlockEntry<
   /** Factory returning initial props for newly inserted blocks. */
   readonly defaultProps: () => TProps;
   /** React renderer (called with props + block id for keys). */
-  readonly render: (
-    props: TProps & { id: string; locale?: string },
-  ) => React.ReactNode;
+  // Heterogeneous block props are narrowed by each registry entry
+  // and validated before dispatch at the renderer boundary.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  readonly render: (props: any) => React.ReactNode;
   /** Plain-text extraction (delegates to domain when available). */
   readonly extractText: (block: Block) => string;
   /**
@@ -93,15 +93,13 @@ export interface BlockEntry<
 function ParagraphBlock({
   content,
 }: {
-  content: Array<{ text: string }>;
+  content: { text: string }[];
 }) {
   // Render all inline runs verbatim. The schema guarantees
   // no free HTML (sweep at parse time).
   return (
     <p className="text-[15px] leading-relaxed text-cream-text dark:text-cream-dark-text">
-      {content.map((c, i) => (
-        <span key={i}>{c.text}</span>
-      ))}
+      {content.map((c) => c.text).join("")}
     </p>
   );
 }
@@ -117,7 +115,7 @@ function HeadingBlock({
    *  (unused; harmless if set). */
   id?: string;
   level: 1 | 2 | 3;
-  content: Array<{ text: string }>;
+  content: { text: string }[];
 }) {
   const text = content.map((c) => c.text).join("");
   const className =
@@ -126,7 +124,8 @@ function HeadingBlock({
       : level === 2
         ? "font-serif text-2xl font-semibold tracking-tight text-cream-espresso dark:text-cream-dark-text mt-8"
         : "font-serif text-xl font-semibold tracking-tight text-cream-espresso dark:text-cream-dark-text mt-6";
-  const Tag = (`h${level}`) as "h1" | "h2" | "h3";
+  const Tag: "h1" | "h2" | "h3" =
+    level === 1 ? "h1" : level === 2 ? "h2" : "h3";
   // Convention: `id="heading-{blockId}"`. Mirrored by
   // `TableOfContents.headingAnchor(blockId)` and
   // `ReaderContent.READER_HEADING_ANCHOR_PREFIX`.
@@ -142,12 +141,15 @@ function HeadingBlock({
 
 function BulletListBlock({
   items,
+  content,
 }: {
-  items: Array<{ content: Array<{ text: string }> }>;
+  items?: { content: { text: string }[] }[];
+  content?: { text: string }[];
 }) {
+  const rows = items ?? content?.map((entry) => ({ content: [entry] })) ?? [];
   return (
     <ul className="list-disc pl-6 space-y-1 text-[15px] leading-relaxed text-cream-text dark:text-cream-dark-text">
-      {items.map((it, idx) => (
+      {rows.map((it, idx) => (
         <li key={idx}>
           {it.content.map((c, j) => (
             <span key={j}>{c.text}</span>
@@ -160,12 +162,15 @@ function BulletListBlock({
 
 function OrderedListBlock({
   items,
+  content,
 }: {
-  items: Array<{ content: Array<{ text: string }> }>;
+  items?: { content: { text: string }[] }[];
+  content?: { text: string }[];
 }) {
+  const rows = items ?? content?.map((entry) => ({ content: [entry] })) ?? [];
   return (
     <ol className="list-decimal pl-6 space-y-1 text-[15px] leading-relaxed text-cream-text dark:text-cream-dark-text">
-      {items.map((it, idx) => (
+      {rows.map((it, idx) => (
         <li key={idx}>
           {it.content.map((c, j) => (
             <span key={j}>{c.text}</span>
@@ -179,7 +184,7 @@ function OrderedListBlock({
 function QuoteBlock({
   content,
 }: {
-  content: Array<{ text: string }>;
+  content: { text: string }[];
 }) {
   const text = content.map((c) => c.text).join("");
   return (
@@ -193,18 +198,22 @@ function CalloutBlock({
   variant,
   content,
 }: {
-  variant: "info" | "warning" | "success";
-  content: Array<{ text: string }>;
+  variant: "info" | "warning" | "success" | "danger";
+  content: { text: string }[];
 }) {
   const variantClass =
     variant === "info"
       ? "bg-cream-border-soft border-cream-gold/30 text-cream-text"
       : variant === "warning"
         ? "bg-cream-peach/15 border-cream-orange/40 text-cream-espresso"
-        : "bg-cream-gold/10 border-cream-gold/40 text-cream-espresso";
+        : variant === "success"
+          ? "bg-cream-gold/10 border-cream-gold/40 text-cream-espresso"
+          : "bg-cream-orange/10 border-cream-orange/40 text-cream-espresso";
   const text = content.map((c) => c.text).join("");
   return (
     <aside
+      data-variant={variant}
+      aria-label={`Callout (${variant})`}
       className={`rounded-md border px-4 py-3 text-[14px] ${variantClass} dark:bg-cream-dark-surface/60 dark:border-cream-dark-border dark:text-cream-dark-text`}
     >
       {text}
@@ -223,7 +232,7 @@ function DividerBlock() {
 const paragraphPropsSchema = z.object({
   content: z.array(
     z.object({ text: z.string(), marks: z.array(z.unknown()).optional() }),
-  ),
+  ).min(1),
 });
 
 const headingPropsSchema = z.object({
@@ -255,7 +264,7 @@ const quotePropsSchema = z.object({
 });
 
 const calloutPropsSchema = z.object({
-  variant: z.enum(["info", "warning", "success"]),
+  variant: z.enum(["info", "warning", "success", "danger"]),
   content: z.array(
     z.object({ text: z.string(), marks: z.array(z.unknown()).optional() }),
   ),
@@ -272,7 +281,7 @@ export const BLOCK_REGISTRY = {
     defaultProps: () => ({
       content: [{ text: "" }],
     }),
-    render: ({ id, content }: { id: string; content: Array<{ text: string }> }) => (
+    render: ({ id, content }: { id: string; content: { text: string }[] }) => (
       <ParagraphBlock key={id} content={content} />
     ),
     extractText: (block) => extractBlockText(block),
@@ -294,8 +303,8 @@ export const BLOCK_REGISTRY = {
     }: {
       id: string;
       level: 1 | 2 | 3;
-      content: Array<{ text: string }>;
-    }) => <HeadingBlock key={id} level={level} content={content} />,
+      content: { text: string }[];
+    }) => <HeadingBlock key={id} id={id} level={level} content={content} />,
     extractText: (block) => extractBlockText(block),
     insertable: true,
     label: "Heading",
@@ -310,10 +319,12 @@ export const BLOCK_REGISTRY = {
     render: ({
       id,
       items,
+      content,
     }: {
       id: string;
-      items: Array<{ content: Array<{ text: string }> }>;
-    }) => <BulletListBlock key={id} items={items} />,
+      items?: { content: { text: string }[] }[];
+      content?: { text: string }[];
+    }) => <BulletListBlock key={id} items={items} content={content} />,
     extractText: (block) => extractBlockText(block),
     insertable: true,
     label: "Bullet list",
@@ -328,10 +339,12 @@ export const BLOCK_REGISTRY = {
     render: ({
       id,
       items,
+      content,
     }: {
       id: string;
-      items: Array<{ content: Array<{ text: string }> }>;
-    }) => <OrderedListBlock key={id} items={items} />,
+      items?: { content: { text: string }[] }[];
+      content?: { text: string }[];
+    }) => <OrderedListBlock key={id} items={items} content={content} />,
     extractText: (block) => extractBlockText(block),
     insertable: true,
     label: "Numbered list",
@@ -343,7 +356,7 @@ export const BLOCK_REGISTRY = {
     defaultProps: () => ({
       content: [{ text: "" }],
     }),
-    render: ({ id, content }: { id: string; content: Array<{ text: string }> }) => (
+    render: ({ id, content }: { id: string; content: { text: string }[] }) => (
       <QuoteBlock key={id} content={content} />
     ),
     extractText: (block) => extractBlockText(block),
@@ -364,8 +377,8 @@ export const BLOCK_REGISTRY = {
       content,
     }: {
       id: string;
-      variant: "info" | "warning" | "success";
-      content: Array<{ text: string }>;
+      variant: "info" | "warning" | "success" | "danger";
+      content: { text: string }[];
     }) => <CalloutBlock key={id} variant={variant} content={content} />,
     extractText: (block) => extractBlockText(block),
     insertable: true,
@@ -398,9 +411,7 @@ export type { BlockType } from "@/domains/catalog/blocks";
  * "Add block" menu. Sorted alphabetically by label for
  * consistency with the established UX patterns.
  */
-export const INSERTABLE_BLOCKS = (Object.values(BLOCK_REGISTRY) as Array<
-  BlockEntry<BlockType, Record<string, unknown>>
->).filter((b) => b.insertable);
+export const INSERTABLE_BLOCKS = (Object.values(BLOCK_REGISTRY) as BlockEntry<BlockType, Record<string, unknown>>[]).filter((b) => b.insertable);
 
 /**
  * Look up a block's entry by its `type` discriminator.
@@ -424,7 +435,10 @@ export function findInvalidBlocks(doc: ContentDocumentV1): string[] {
   const invalid: string[] = [];
   for (const block of doc.blocks) {
     const entry = getBlockEntry(block.type);
-    const result = entry.schema.safeParse(block.props ?? {});
+    const result = entry.schema.safeParse({
+      ...((block.props) ?? {}),
+      ...( "content" in block ? { content: block.content } : {}),
+    });
     if (!result.success && block.id) {
       invalid.push(block.id);
     }
@@ -450,13 +464,19 @@ export function makeBlock(
   position?: number,
 ): Block {
   const entry = getBlockEntry(type);
-  const props = entry.defaultProps();
+  const defaults = entry.defaultProps();
+  const { content: explicitContent, items, ...props } = defaults;
+  const content = explicitContent ??
+    (Array.isArray(items)
+      ? items.flatMap((item) => Array.isArray(item.content) ? item.content : [])
+      : undefined);
   return {
     id: typeof crypto !== "undefined" && "randomUUID" in crypto
       ? crypto.randomUUID()
       : `block_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
     type,
-    props,
+    props: type === "divider" ? props : { ...props },
+    ...(type === "divider" ? {} : { content }),
     position: position ?? 0,
   } as Block;
 }

@@ -50,6 +50,11 @@ export const DEFAULT_INACTIVE_DAYS = 30;
 export const DEFAULT_RECENT_SIGNUPS_LIMIT = 10;
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const PREMIUM_SOURCES = new Set<AccessGrantSourceType>([
+  "order",
+  "admin",
+  "bundle",
+]);
 
 const EMPTY_AUDIENCE: AudienceView = Object.freeze({
   totals: { enrollments: 0, premiumCustomers: 0, freeEnrollees: 0, activeUsers: 0, inactiveUsers: 0 },
@@ -63,9 +68,7 @@ export interface BuildAudienceDeps {
 }
 
 function isPremiumSource(sourceType: AccessGrantSourceType): boolean {
-  return (
-    sourceType === "order" || sourceType === "admin" || sourceType === "bundle"
-  );
+  return PREMIUM_SOURCES.has(sourceType);
 }
 
 function isFreeSource(sourceType: AccessGrantSourceType): boolean {
@@ -116,10 +119,11 @@ function incrementProduct(
   isActive: boolean,
 ): void {
   acc.enrollments++;
-  if (isPremiumSource(row.sourceType)) acc.premiumCustomers++;
-  else if (isFreeSource(row.sourceType)) acc.freeEnrollees++;
-  if (isActive) acc.activeUsers++;
-  else acc.inactiveUsers++;
+  const premium = isPremiumSource(row.sourceType);
+  acc.premiumCustomers += Number(premium);
+  acc.freeEnrollees += Number(!premium && isFreeSource(row.sourceType));
+  acc.activeUsers += Number(isActive);
+  acc.inactiveUsers += Number(!isActive);
 }
 
 export async function buildAudience(
@@ -174,15 +178,7 @@ export async function buildAudience(
 
     incrementProduct(row, totals, isActive);
 
-    if (isActive) {
-      if (!seenActiveUserIds.has(row.userId)) {
-        seenActiveUserIds.add(row.userId);
-      }
-    } else {
-      if (!seenInactiveUserIds.has(row.userId)) {
-        seenInactiveUserIds.add(row.userId);
-      }
-    }
+    (isActive ? seenActiveUserIds : seenInactiveUserIds).add(row.userId);
   }
 
   totals.activeUsers = seenActiveUserIds.size;

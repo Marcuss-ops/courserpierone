@@ -48,7 +48,6 @@
 
 import {
   afterEach,
-  beforeEach,
   describe,
   expect,
   it,
@@ -60,6 +59,7 @@ import type {
   PublishedPageRow,
   ResolvePublishedContentPort,
 } from "@/domains/catalog/content-pages/resolve-published-content-types";
+import type { ContentDocumentV1 } from "@/domains/catalog/blocks";
 
 // ─── Test fixtures ──────────────────────────────────────────────
 
@@ -87,7 +87,7 @@ const MINIMAL_DOC = {
       content: [{ type: "text", text: "Welcome to the course.", marks: [] }],
     },
   ],
-};
+} as unknown as ContentDocumentV1;
 
 /**
  * Default published-product fixture.
@@ -116,19 +116,19 @@ function mkPort(opts: {
   locales?: readonly string[];
 }): ResolvePublishedContentPort & {
   spy: {
-    findCalls: Array<{ slug: string }>;
-    listCalls: Array<{ productId: string; locales: readonly string[] }>;
+    findCalls: { slug: string }[];
+    listCalls: { productId: string; locales: readonly string[] }[];
   };
 } {
   const spy = {
-    findCalls: [] as Array<{ slug: string }>,
-    listCalls: [] as Array<{ productId: string; locales: readonly string[] }>,
+    findCalls: [] as { slug: string }[],
+    listCalls: [] as { productId: string; locales: readonly string[] }[],
   };
 
   return {
     async findPublishedProductBySlug(input) {
       spy.findCalls.push(input);
-      return opts.product ?? null;
+      return opts.product === undefined ? null : opts.product;
     },
     async listPublishedPagesWithOneTranslation(input) {
       spy.listCalls.push(input);
@@ -157,14 +157,14 @@ const PORT_DEFAULTS = {
 
 function extractSlug(rawUrl: string): string {
   const { pathname } = new URL(rawUrl, "http://localhost");
-  const match = pathname.match(/^\/api\/products\/([^/]+)\/content\/?$/);
+  const match = /^\/api\/products\/([^/]+)\/content\/?$/.exec(pathname);
   return match ? decodeURIComponent(match[1]) : "";
 }
 
 /** Compose a Request + ctx pair the way Next.js App Router does. */
 function mkRequest(url: string): {
   req: Request;
-  ctx: { params: { slug: string } };
+  ctx: { params: Promise<{ slug: string }> };
 } {
   // The route reads req.url via `new URL(req.url)`, so the
   // Request must be a fully-formed string URL.
@@ -172,7 +172,7 @@ function mkRequest(url: string): {
     req: new Request(url, { method: "GET" }),
     // Extract slug from the URL too so the test's ctx matches.
     ctx: {
-      params: { slug: extractSlug(url) },
+      params: Promise.resolve({ slug: extractSlug(url) }),
     },
   };
 }
@@ -189,7 +189,7 @@ describe("GET .../content — 200 success", () => {
   it("happy path returns product + page array with full document", async () => {
     const port = mkPort({
       product: PUBLISHED_PRODUCT_EN,
-      pages: [...PORT_DEFAULTS.pages] as unknown as readonly PublishedPageRow[] as unknown as readonly PublishedPageRow[],
+      pages: [...PORT_DEFAULTS.pages],
     });
     __setRouteDeps({ port });
 
@@ -277,7 +277,7 @@ describe("GET .../content — 200 success", () => {
   it("no locale requested — chain is [default] only, isFallback=false", async () => {
     const port = mkPort({
       product: PUBLISHED_PRODUCT_EN,
-      pages: [...PORT_DEFAULTS.pages] as unknown as readonly PublishedPageRow[] as unknown as readonly PublishedPageRow[],
+      pages: [...PORT_DEFAULTS.pages],
     });
     __setRouteDeps({ port });
 
@@ -327,7 +327,7 @@ describe("GET .../content — 200 success", () => {
   it("200 response has Cache-Control: public, s-maxage=60, stale-while-revalidate=300", async () => {
     const port = mkPort({
       product: PUBLISHED_PRODUCT_EN,
-      pages: [...PORT_DEFAULTS.pages] as unknown as readonly PublishedPageRow[] as unknown as readonly PublishedPageRow[],
+      pages: [...PORT_DEFAULTS.pages],
     });
     __setRouteDeps({ port });
 
@@ -344,7 +344,7 @@ describe("GET .../content — 200 success", () => {
   it("response does NOT leak creatorId, actorId, or internal fields", async () => {
     const port = mkPort({
       product: PUBLISHED_PRODUCT_EN,
-      pages: [...PORT_DEFAULTS.pages] as unknown as readonly PublishedPageRow[] as unknown as readonly PublishedPageRow[],
+      pages: [...PORT_DEFAULTS.pages],
     });
     __setRouteDeps({ port });
 
@@ -359,7 +359,7 @@ describe("GET .../content — 200 success", () => {
     // no DB-shape fields leak through.
     expect(serialized).not.toContain("creatorId");
     expect(serialized).not.toContain("actorId");
-    expect(serialized).not.toContain("defaultLanguage\""); // present, but in a specific shape — just check no extra fields
+    expect(serialized).toContain("defaultLanguage\"");
     expect(serialized).not.toContain("adminUserId");
   });
 });
@@ -434,7 +434,7 @@ describe("GET .../content — 400 invalid input", () => {
       "http://localhost/api/products/InvalidSlug/content",
       { method: "GET" },
     );
-    const ctx = { params: { slug: "InvalidSlug" } };
+    const ctx = { params: Promise.resolve({ slug: "InvalidSlug" }) };
     const res = await GET(req, ctx);
 
     expect(res.status).toBe(400);
@@ -518,7 +518,7 @@ describe("GET .../content — plumbing", () => {
   it("forwards the URL slug verbatim to the port's findPublishedProductBySlug", async () => {
     const port = mkPort({
       product: PUBLISHED_PRODUCT_EN,
-      pages: [...PORT_DEFAULTS.pages] as unknown as readonly PublishedPageRow[] as unknown as readonly PublishedPageRow[],
+      pages: [...PORT_DEFAULTS.pages],
     });
     __setRouteDeps({ port });
 
@@ -533,7 +533,7 @@ describe("GET .../content — plumbing", () => {
   it("forwards the locale query param verbatim to the use case", async () => {
     const port = mkPort({
       product: PUBLISHED_PRODUCT_EN,
-      pages: [...PORT_DEFAULTS.pages] as unknown as readonly PublishedPageRow[] as unknown as readonly PublishedPageRow[],
+      pages: [...PORT_DEFAULTS.pages],
     });
     __setRouteDeps({ port });
 
@@ -557,7 +557,7 @@ describe("GET .../content — plumbing", () => {
   it("omitted locale → listPages receives the chain WITHOUT a second duplicate entry", async () => {
     const port = mkPort({
       product: PUBLISHED_PRODUCT_EN,
-      pages: [...PORT_DEFAULTS.pages] as unknown as readonly PublishedPageRow[] as unknown as readonly PublishedPageRow[],
+      pages: [...PORT_DEFAULTS.pages],
     });
     __setRouteDeps({ port });
 

@@ -1,3 +1,4 @@
+// size-budget-exempt — atomic document-save orchestration; ADR-0016 §1.
 /**
  * src/domains/catalog/content-pages/save-content-document.ts
  *

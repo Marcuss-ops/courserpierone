@@ -74,10 +74,10 @@ import type { ResolveCreateProductAccessPort } from "@/domains/creator-ops/acces
 
 // ─── Test helpers ─────────────────────────────────────────────────
 
-type AccessContext = {
+interface AccessContext {
   role: "admin" | "creator" | "student" | null;
   applicationStatus: "draft" | "submitted" | "under_review" | "approved" | "rejected" | null;
-};
+}
 
 interface TestDeps {
   access: AccessContext;
@@ -157,7 +157,7 @@ function mkSessionUser(actorId: string, role: "admin" | "creator" | "student") {
  * route (it carries `id`).
  */
 function mockSessionAs(actorId: string, role: "admin" | "creator" | "student") {
-  getServerUserMock.mockResolvedValue({ dbUser: mkSessionUser(actorId, role) } as any);
+  getServerUserMock.mockResolvedValue({ dbUser: mkSessionUser(actorId, role) });
 }
 
 function mkRequest(body: unknown): Request {

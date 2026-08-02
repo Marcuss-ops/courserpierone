@@ -66,11 +66,7 @@ describe("ReaderSidebar — render", () => {
     const rootList = screen.getByTestId("reader-sidebar-root-list");
     const rowIds = Array.from(rootList.querySelectorAll(":scope > li"))
       .map((n) => n.getAttribute("data-testid") ?? "");
-    // a is in `<li>` but its children list is nested inside it.
-    // The root list has ONE direct <li> per top-level node.
-    expect(rowIds).toEqual(["reader-sidebar-row-a"]);
-    // Note: 'b' is a sibling root: the root list has TWO direct <li>
-    // entries when there are no children. Verify count below.
+    expect(rowIds).toEqual(["reader-sidebar-row-a", "reader-sidebar-row-b"]);
     const directChildren = rootList.querySelectorAll(":scope > li").length;
     expect(directChildren).toBe(2);
   });

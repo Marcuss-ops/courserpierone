@@ -35,9 +35,9 @@ describe("buildTree — input invariants", () => {
       row("c", null, 3),
     ]);
     expect(tree.map((n) => n.row.id)).toEqual(["b", "a", "c"]);
-    expect(tree[0]!.children).toEqual([]);
-    expect(tree[1]!.children).toEqual([]);
-    expect(tree[2]!.children).toEqual([]);
+    expect(tree[0].children).toEqual([]);
+    expect(tree[1].children).toEqual([]);
+    expect(tree[2].children).toEqual([]);
   });
 
   it("nested children attach to their parentId", () => {
@@ -49,11 +49,11 @@ describe("buildTree — input invariants", () => {
       row("alpha-1-1", "alpha-1", 1),
     ]);
     expect(tree.map((n) => n.row.id)).toEqual(["alpha", "beta"]);
-    expect(tree[0]!.children.map((n) => n.row.id)).toEqual([
+    expect(tree[0].children.map((n) => n.row.id)).toEqual([
       "alpha-1",
       "alpha-2",
     ]);
-    expect(tree[0]!.children[0]!.children.map((n) => n.row.id)).toEqual([
+    expect(tree[0].children[0].children.map((n) => n.row.id)).toEqual([
       "alpha-1-1",
     ]);
   });
@@ -76,7 +76,7 @@ describe("buildTree — defensive orphan handling", () => {
     ]);
     // The parent appears once in roots (not also as an orphan).
     expect(tree).toHaveLength(1);
-    expect(tree[0]!.children.map((n) => n.row.id)).toEqual([
+    expect(tree[0].children.map((n) => n.row.id)).toEqual([
       "child-a",
       "child-b",
     ]);
@@ -91,8 +91,8 @@ describe("buildTree — sort invariants", () => {
       row("r-2", "r", 1),
       row("r-3", "r", 2),
     ]);
-    expect(tree[0]!.row.id).toBe("r");
-    expect(tree[0]!.children.map((n) => n.row.id)).toEqual([
+    expect(tree[0].row.id).toBe("r");
+    expect(tree[0].children.map((n) => n.row.id)).toEqual([
       "r-2",
       "r-3",
       "r-1",
@@ -119,9 +119,9 @@ describe("buildTree — generic row passthrough", () => {
     const tree = buildTree<ExtraRow>([
       row("x", null, 1) as ExtraRow,
     ]);
-    expect(tree[0]!.row.title).toBeUndefined();
+    expect(tree[0].row.title).toBeUndefined();
     // The structural type is preserved.
-    expect(tree[0]!.row).toEqual({
+    expect(tree[0].row).toEqual({
       id: "x",
       parentId: null,
       position: 1,

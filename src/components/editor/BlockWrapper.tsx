@@ -73,7 +73,7 @@ export function BlockWrapper({
       onBlur={(e) => {
         // Only hide the rail when focus truly leaves the block
         // (not when it moves between sub-elements inside the block).
-        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+        if (!e.currentTarget.contains(e.relatedTarget)) {
           setIsFocused(false);
         }
       }}

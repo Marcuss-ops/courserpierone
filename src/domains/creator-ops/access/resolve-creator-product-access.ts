@@ -1,3 +1,4 @@
+// size-budget-exempt — authorization decision stays atomic; ADR-0016 §1.
 /**
  * src/domains/creator-ops/access/resolve-creator-product-access.ts
  *

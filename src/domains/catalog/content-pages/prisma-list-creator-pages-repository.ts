@@ -64,7 +64,7 @@ interface PrismaContentPageRow {
   position: number;
   status: string;
   updatedAt: Date;
-  translations: Array<{ title: string }>;
+  translations: { title: string }[];
 }
 
 // ─── Row mapper ─────────────────────────────────────────────────
@@ -122,7 +122,7 @@ export const prismaListCreatorPagesRepository: ListCreatorPagesPort = {
         defaultLanguage: true,
       },
     });
-    if (!row || !row.creatorId) return null;
+    if (!row?.creatorId) return null;
     return {
       creatorId: row.creatorId,
       defaultLanguage: row.defaultLanguage,

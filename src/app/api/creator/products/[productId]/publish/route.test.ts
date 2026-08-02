@@ -65,11 +65,11 @@ import type {
 
 // ─── Test helpers ─────────────────────────────────────────────────
 
-type AccessContext = {
+interface AccessContext {
   actor: { id: string; role: "admin" | "creator" | "student" } | null;
   product: { creatorId: string } | null;
   application: { status: string } | null;
-};
+}
 
 function mkAccessPort(
   ctx: AccessContext,
@@ -80,7 +80,7 @@ function mkAccessPort(
   return {
     async loadAccessContext(input) {
       spy.called.push(input);
-      return ctx;
+      return ctx as unknown as Awaited<ReturnType<ResolveCreatorProductAccessPort["loadAccessContext"]>>;
     },
     spy,
   };
@@ -100,13 +100,13 @@ function mkPublishPort(opts: {
     publishedAt: Date | null;
   } | null;
   pagesResult?: {
-    items: Array<{ pageId: string; status: "draft" | "published"; translationCount: number }>;
+    items: { pageId: string; status: "draft" | "published"; translationCount: number }[];
   };
   applyResult?: {
     publishedAt: Date;
     slug: string;
   };
-  gateIssues?: Array<{ pageId: string; reason: "draft" | "no_translation" }>;
+  gateIssues?: { pageId: string; reason: "draft" | "no_translation" }[];
 }): PublishContentProductPort & {
   spy: {
     findCallCount: number;
@@ -158,7 +158,7 @@ function mkSessionUser(actorId: string, role: "admin" | "creator" | "student") {
 }
 
 function mockSessionAs(actorId: string, role: "admin" | "creator" | "student") {
-  getServerUserMock.mockResolvedValue({ dbUser: mkSessionUser(actorId, role) } as any);
+  getServerUserMock.mockResolvedValue({ dbUser: mkSessionUser(actorId, role) });
 }
 
 function mkRequest(): Request {
@@ -167,7 +167,7 @@ function mkRequest(): Request {
   });
 }
 
-const CTX = { params: { productId: "product_1" } };
+const CTX = { params: Promise.resolve({ productId: "product_1" }) };
 
 function configureRoute(deps: {
   access: AccessContext;

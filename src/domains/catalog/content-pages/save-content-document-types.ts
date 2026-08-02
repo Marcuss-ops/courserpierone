@@ -55,7 +55,6 @@
 
 import { z } from "zod";
 
-import type { ContentDocumentV1 } from "@/domains/catalog/blocks";
 
 // ─── Use case input ──────────────────────────────────────────────
 

@@ -5,6 +5,10 @@ const config: KnipConfig = {
   entry: [
     "src/app/**/*.ts",
     "src/app/**/*.tsx",
+    "src/components/**/*.ts",
+    "src/components/**/*.tsx",
+    "src/lib/**/*.ts",
+    "src/lib/**/*.tsx",
     "src/**/*.test.ts",
     "src/**/*.test.tsx",
   ],

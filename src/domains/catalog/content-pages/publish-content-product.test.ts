@@ -99,12 +99,12 @@ import type {
 
 // ─── Test helpers ─────────────────────────────────────────────────
 
-type ProductGateCtx = {
+interface ProductGateCtx {
   creatorId: string;
   slug: string;
   status: "draft" | "published" | "archived";
   publishedAt: Date | null;
-};
+}
 
 interface StubState {
   // Recorded inputs.

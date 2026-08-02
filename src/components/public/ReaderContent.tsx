@@ -123,12 +123,14 @@ function BlockRenderer({ block }: { block: Block }) {
   // element creation (h1/h2/h3, p, ul/ol, hr, etc.). For
   // headings, the HeadingBlock appends the `heading-` prefix
   // internally — we never duplicate that work here.
+  const render = entry.render as (value: unknown) => import("react").ReactNode;
   return (
     <Fragment>
-      {entry.render({
-        ...((block.props as Record<string, unknown>) ?? {}),
+      {render({
+        ...(block.props ?? {}),
+        ...( "content" in block ? { content: block.content } : {}),
         id: block.id,
-      } as Parameters<typeof entry.render>[0])}
+      })}
     </Fragment>
   );
 }

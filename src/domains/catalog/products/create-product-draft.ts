@@ -82,7 +82,6 @@ import { z } from "zod";
 import { contentSlugSchema } from "@/domains/catalog/content-type-registry";
 
 import {
-  PRODUCT_DRAFT_CONTENT_KIND,
   type CreateProductDraftInput,
   type CreateProductDraftRepository,
   type CreateProductDraftResult,

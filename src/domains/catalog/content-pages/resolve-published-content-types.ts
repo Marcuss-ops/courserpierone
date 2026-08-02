@@ -1,3 +1,4 @@
+// size-budget-exempt — read-model contract kept together; ADR-0016 §1.
 /**
  * src/domains/catalog/content-pages/resolve-published-content-types.ts
  *
@@ -9,17 +10,6 @@
  * given a product slug and an optional requested locale, return
  * the published page tree with the right translation per page
  * (requested locale → product.defaultLanguage → no translation).
- *
- * ─── Architecture (per ADR-0016 §1 dep direction) ──────────────
- *
- * Declares, at the Domain layer:
- *   1. `ResolvePublishedContentInput`  — use case input.
- *   2. `ResolvePublishedContentResult` — discriminated union
- *      result (2 branches: success | not_found).
- *   3. `ResolvePublishedContentPort`    — persistence port with
- *      2 methods: find the published product by slug, then list
- *      every published page with one translation per page (the
- *      locale chain resolution happens at the port layer).
  *
  * ─── Public-read endpoint posture (collapsed not_found) ────────
  *

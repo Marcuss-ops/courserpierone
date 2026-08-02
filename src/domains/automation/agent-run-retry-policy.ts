@@ -77,6 +77,35 @@ const REASON_DEFAULT_DELAY_MS: Readonly<Record<AgentErrorReason, number>> = {
   unknown: 0,
 };
 
+const PROVIDER_CODE_TO_REASON: Readonly<Record<string, AgentErrorReason>> = {
+  ETIMEDOUT: "timeout",
+  ESOCKETTIMEDOUT: "timeout",
+  ECONNABORTED: "timeout",
+  ECONNRESET: "connection_interrupted",
+  EPIPE: "connection_interrupted",
+  ENETUNREACH: "connection_interrupted",
+  RATE_LIMIT_EXCEEDED: "rate_limit",
+  TOO_MANY_REQUESTS: "rate_limit",
+  INVALID_ARGUMENT: "invalid_input",
+  INVALID_PARAMS: "invalid_input",
+  VALIDATION_ERROR: "invalid_input",
+  PERMISSION_DENIED: "permission_denied",
+  FORBIDDEN: "permission_denied",
+  UNAUTHORIZED: "permission_denied",
+  NOT_FOUND: "missing_product",
+  PRODUCT_NOT_FOUND: "missing_product",
+  CONTENT_REJECTED: "rejected_content",
+  POLICY_VIOLATION: "rejected_content",
+  MODERATION_REJECTED: "rejected_content",
+  MISSING_CONFIG: "missing_config",
+  CONFIGURATION_ERROR: "missing_config",
+  INTERNAL_ERROR: "server_5xx",
+  INTERNAL_SERVER_ERROR: "server_5xx",
+  BAD_GATEWAY: "server_5xx",
+  SERVICE_UNAVAILABLE: "server_5xx",
+  GATEWAY_TIMEOUT: "server_5xx",
+};
+
 /**
  * Classify an unknown error into a canonical retry decision.
  *
@@ -126,54 +155,14 @@ function buildClassification(
 }
 
 function mapCodeToReason(code: string): AgentErrorReason | null {
-  // Direct canonical match (case-sensitive — callers should pass lowercase canonical)
+  const canonical = code as AgentErrorReason;
   if (
-    RETRYABLE_AGENT_ERROR_REASONS.has(code as AgentErrorReason) ||
-    NON_RETRYABLE_AGENT_ERROR_REASONS.has(code as AgentErrorReason)
+    RETRYABLE_AGENT_ERROR_REASONS.has(canonical) ||
+    NON_RETRYABLE_AGENT_ERROR_REASONS.has(canonical)
   ) {
-    return code as AgentErrorReason;
+    return canonical;
   }
-  // Provider-specific codes (uppercase). Add new mappings here when adding
-  // a new provider; the canonical-reason matches above are checked first.
-  switch (code.toUpperCase()) {
-    case "ETIMEDOUT":
-    case "ESOCKETTIMEDOUT":
-    case "ECONNABORTED":
-      return "timeout";
-    case "ECONNRESET":
-    case "EPIPE":
-    case "ENETUNREACH":
-      return "connection_interrupted";
-    case "RATE_LIMIT_EXCEEDED":
-    case "TOO_MANY_REQUESTS":
-      return "rate_limit";
-    case "INVALID_ARGUMENT":
-    case "INVALID_PARAMS":
-    case "VALIDATION_ERROR":
-      return "invalid_input";
-    case "PERMISSION_DENIED":
-    case "FORBIDDEN":
-    case "UNAUTHORIZED":
-      return "permission_denied";
-    case "NOT_FOUND":
-    case "PRODUCT_NOT_FOUND":
-      return "missing_product";
-    case "CONTENT_REJECTED":
-    case "POLICY_VIOLATION":
-    case "MODERATION_REJECTED":
-      return "rejected_content";
-    case "MISSING_CONFIG":
-    case "CONFIGURATION_ERROR":
-      return "missing_config";
-    case "INTERNAL_ERROR":
-    case "INTERNAL_SERVER_ERROR":
-    case "BAD_GATEWAY":
-    case "SERVICE_UNAVAILABLE":
-    case "GATEWAY_TIMEOUT":
-      return "server_5xx";
-    default:
-      return null;
-  }
+  return PROVIDER_CODE_TO_REASON[code.toUpperCase()] ?? null;
 }
 
 /**
@@ -182,55 +171,30 @@ function mapCodeToReason(code: string): AgentErrorReason | null {
  * structured `code` field. Adding new reasons should always go through
  * `mapCodeToReason` first; this helper is the last-resort safety net.
  */
+const MESSAGE_RULES: readonly {
+  reason: AgentErrorReason;
+  pattern: RegExp;
+}[] = [
+  { reason: "timeout", pattern: /aborterror|timeout|timed out/i },
+  { reason: "rate_limit", pattern: /rate limit|too many requests|\b429\b/i },
+  {
+    reason: "server_5xx",
+    pattern: /\b(500|502|503|504)\b|internal server error|bad gateway|service unavailable/i,
+  },
+  {
+    reason: "connection_interrupted",
+    pattern: /econnreset|connection reset|econnrefused|network error/i,
+  },
+  { reason: "invalid_input", pattern: /invalid input|validation failed/i },
+  { reason: "permission_denied", pattern: /permission denied|forbidden|unauthorized/i },
+  { reason: "missing_product", pattern: /product not found|missing product/i },
+  { reason: "rejected_content", pattern: /rejected|policy violation|content policy/i },
+  { reason: "missing_config", pattern: /missing config|configuration error/i },
+];
+
 function mapMessageToReason(error: Error): AgentErrorReason | null {
-  const msg = error.message.toLowerCase();
-  const name = error.name.toLowerCase();
-  if (name === "aborterror" || msg.includes("timeout") || msg.includes("timed out")) {
-    return "timeout";
-  }
-  if (msg.includes("rate limit") || msg.includes("too many requests") || msg.includes(" 429")) {
-    return "rate_limit";
-  }
-  if (
-    /\b(500|502|503|504)\b/.test(msg) ||
-    msg.includes("internal server error") ||
-    msg.includes("bad gateway") ||
-    msg.includes("service unavailable")
-  ) {
-    return "server_5xx";
-  }
-  if (
-    msg.includes("econnreset") ||
-    msg.includes("connection reset") ||
-    msg.includes("econnrefused") ||
-    msg.includes("network error")
-  ) {
-    return "connection_interrupted";
-  }
-  if (msg.includes("invalid input") || msg.includes("validation failed")) {
-    return "invalid_input";
-  }
-  if (
-    msg.includes("permission denied") ||
-    msg.includes("forbidden") ||
-    msg.includes("unauthorized")
-  ) {
-    return "permission_denied";
-  }
-  if (msg.includes("product not found") || msg.includes("missing product")) {
-    return "missing_product";
-  }
-  if (
-    msg.includes("rejected") ||
-    msg.includes("policy violation") ||
-    msg.includes("content policy")
-  ) {
-    return "rejected_content";
-  }
-  if (msg.includes("missing config") || msg.includes("configuration error")) {
-    return "missing_config";
-  }
-  return null;
+  const source = `${error.name} ${error.message}`;
+  return MESSAGE_RULES.find((rule) => rule.pattern.test(source))?.reason ?? null;
 }
 
 function getMessageFromError(error: unknown): string | undefined {

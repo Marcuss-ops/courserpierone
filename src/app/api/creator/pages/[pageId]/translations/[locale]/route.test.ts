@@ -66,7 +66,6 @@ vi.mock("@/lib/supabase/get-user", () => ({
 import { PUT, __setRouteDeps } from "./route";
 import type {
   ContentPageTranslationRepository,
-  FindProductAndPageContextResult,
   UpsertTranslationDocInput,
   UpsertTranslationDocResult,
 } from "@/domains/catalog/content-pages/save-content-document-types";
@@ -82,15 +81,15 @@ function mkSessionUser(actorId: string, role: "admin" | "creator" | "student") {
 }
 
 function mockSessionAs(actorId: string, role: "admin" | "creator" | "student") {
-  getServerUserMock.mockResolvedValue({ dbUser: mkSessionUser(actorId, role) } as any);
+  getServerUserMock.mockResolvedValue({ dbUser: mkSessionUser(actorId, role) });
 }
 
-type AccessContext = {
+interface AccessContext {
   actor: { role: "admin" | "creator" | "student" } | null;
   product: { creatorId: string } | null;
   application: { status: string } | null;
   pageProductId: string | null;
-};
+}
 
 function mkAccessPort(ctx: AccessContext): ResolveCreatorPageAccessPort & {
   spy: { called: { actorId: string; pageId: string }[] };
@@ -99,14 +98,14 @@ function mkAccessPort(ctx: AccessContext): ResolveCreatorPageAccessPort & {
   return {
     async loadPageAccessContext(input) {
       spy.called.push(input);
-      // Widen test fixture's application.status (string-typed)
-      // to the strict CreatorApplicationStatus literal set.
       return {
-        ...ctx,
+        actor: ctx.actor ? { role: ctx.actor.role } : null,
+        product: ctx.product ? { creatorId: ctx.product.creatorId } : null,
         application: ctx.application
           ? { status: ctx.application.status as CreatorApplicationStatus }
           : null,
-      } as unknown as Awaited<ReturnType<ResolveCreatorPageAccessPort["loadPageAccessContext"]>>;
+        pageProductId: ctx.pageProductId,
+      };
     },
     spy,
   };
@@ -216,7 +215,7 @@ const HAPPY_DOCUMENT = {
   ],
 };
 
-const CTX = { params: { pageId: "page_1", locale: "it" } };
+const CTX = { params: Promise.resolve({ pageId: "page_1", locale: "it" }) };
 
 function configureRoute(deps: {
   access: AccessContext;
@@ -251,7 +250,16 @@ describe("PUT /api/creator/pages/[pageId]/translations/[locale] — 401 no sessi
       outcome: { ok: true, revision: 1, updatedAt: new Date("2026-07-19T00:00:00Z") },
     });
     const res = await PUT(
-      mkRequest({ expectedRevision: 0, document: HAPPY_DOCUMENT }),
+      mkRequest({
+        expectedRevision: 0,
+        document: {
+          ...HAPPY_DOCUMENT,
+          blocks: [{
+            ...HAPPY_DOCUMENT.blocks[0],
+            content: [{ type: "text", text: "<script>alert(1)</script>" }],
+          }],
+        },
+      }),
       CTX,
     );
     expect(res.status).toBe(401);
@@ -310,10 +318,13 @@ describe("PUT .../translations/[locale] — 403 forbidden", () => {
     // The docRepo stub: when the cascade hits, the use case's
     // context lookup returns product owned by u_other_creator.
     // We override the context result for this test.
-    docRepoPort.findProductAndPageContext = async () => ({
-      productCreatorId: "u_other_creator",
-      pageExists: true,
-    });
+    docRepoPort.findProductAndPageContext = async () => {
+      docRepoPort.spy.contextCalls++;
+      return {
+        productCreatorId: "u_other_creator",
+        pageExists: true,
+      };
+    };
     const res = await PUT(
       mkRequest({ expectedRevision: 0, document: HAPPY_DOCUMENT }),
       CTX,
@@ -553,7 +564,16 @@ describe("PUT .../translations/[locale] — 422 invalid_document (use case)", ()
       },
     });
     const res = await PUT(
-      mkRequest({ expectedRevision: 0, document: HAPPY_DOCUMENT }),
+      mkRequest({
+        expectedRevision: 0,
+        document: {
+          ...HAPPY_DOCUMENT,
+          blocks: [{
+            ...HAPPY_DOCUMENT.blocks[0],
+            content: [{ type: "text", text: "<script>alert(1)</script>" }],
+          }],
+        },
+      }),
       CTX,
     );
     expect(res.status).toBe(422);
@@ -628,8 +648,8 @@ describe("PUT .../translations/[locale] — plumbing", () => {
   it("forwards actorId (from session) + pageId (from URL) to resolver", async () => {
     getServerUserMock.mockResolvedValue({
       dbUser: mkSessionUser("u_session_42", "creator"),
-    } as any);
-    const { accessPort } = configureRoute({
+    });
+    const { accessPort, docRepoPort } = configureRoute({
       access: {
         actor: { role: "creator" },
         product: { creatorId: "u_session_42" },
@@ -642,9 +662,13 @@ describe("PUT .../translations/[locale] — plumbing", () => {
         updatedAt: new Date("2026-07-19T00:00:00.000Z"),
       },
     });
+    docRepoPort.findProductAndPageContext = async () => ({
+      productCreatorId: "u_session_42",
+      pageExists: true,
+    });
     const res = await PUT(
       mkRequest({ expectedRevision: 0, document: HAPPY_DOCUMENT }),
-      { params: { pageId: "page_xyz_42", locale: "en" } },
+      { params: Promise.resolve({ pageId: "page_xyz_42", locale: "en" }) },
     );
     expect(res.status).toBe(200);
     expect(accessPort.spy.called).toEqual([
