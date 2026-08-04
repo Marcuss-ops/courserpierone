@@ -1,3 +1,10 @@
+> 🚫 **NON è il repo Velox.** Questo documento appartiene a **courserpierone / Courssy**
+> (piattaforma corsi: Next.js + Supabase + Lemon Squeezy) — un progetto separato
+> dalla render farm **Velox**. Per la roadmap/stato di Velox (`VeloxEditiingg`)
+> vedi i file omonimi [`ROADMAP.md`](https://github.com/Marcuss-ops/VeloxEditiingg/blob/main/ROADMAP.md),
+> [`FUTURE.md`](https://github.com/Marcuss-ops/VeloxEditiingg/blob/main/FUTURE.md) e
+> [`DEPLOY-CHECKLIST.md`](https://github.com/Marcuss-ops/VeloxEditiingg/blob/main/DEPLOY-CHECKLIST.md).
+
 > ⚠️ **DEPRECATED — usa [docs/roadmap-current.md](docs/roadmap-current.md) invece.**
 >
 > Questo file è conservato per git history ma non riflette più lo stato del progetto. Le info su **V1 blockers**, **Post-V1** (V1.1, V2), **Tech debt** e **Esplicitamente fuori scope** vivono nel file canonico a `docs/roadmap-current.md`. Per la specifica MVP legacy vedi anche `docs/archive/MVP-SPEC-initial.md`.

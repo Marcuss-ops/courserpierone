@@ -1,5 +1,12 @@
 # 🚀 Deploy Checklist — Going Live on Production (V1.x)
 
+> 🚫 **NON è il repo Velox.** Questo documento appartiene a **courserpierone / Courssy**
+> (piattaforma corsi: Next.js + Supabase + Lemon Squeezy) — un progetto separato
+> dalla render farm **Velox**. Per il deploy di Velox (`VeloxEditiingg`)
+> vedi il file omonimo [`DEPLOY-CHECKLIST.md`](https://github.com/Marcuss-ops/VeloxEditiingg/blob/main/DEPLOY-CHECKLIST.md)
+> (più [`ROADMAP.md`](https://github.com/Marcuss-ops/VeloxEditiingg/blob/main/ROADMAP.md) e
+> [`FUTURE.md`](https://github.com/Marcuss-ops/VeloxEditiingg/blob/main/FUTURE.md)).
+
 > **Status:** V1.x Pre-GA · Generated 2026-07-13 · Reference: see `README.md`, `OAUTH-SETUP.md`, `MISSION.md`, `ARCHITECTURE.md`
 >
 > Questo file è il playbook canonico per portare la piattaforma da 0% a 100% online (primo pagamento reale). Gli step 1-9 sono **bloccanti** — niente live senza. Gli step 10+ sono hardening post-launch.

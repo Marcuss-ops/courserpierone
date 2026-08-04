@@ -1,5 +1,12 @@
 # Future Improvements
 
+> 🚫 **NON è il repo Velox.** Questo documento appartiene a **courserpierone / Courssy**
+> (piattaforma corsi: Next.js + Supabase + Lemon Squeezy) — un progetto separato
+> dalla render farm **Velox**. Per il futuro/migliorie di Velox (`VeloxEditiingg`)
+> vedi il file omonimo [`FUTURE.md`](https://github.com/Marcuss-ops/VeloxEditiingg/blob/main/FUTURE.md)
+> (più [`ROADMAP.md`](https://github.com/Marcuss-ops/VeloxEditiingg/blob/main/ROADMAP.md) e
+> [`DEPLOY-CHECKLIST.md`](https://github.com/Marcuss-ops/VeloxEditiingg/blob/main/DEPLOY-CHECKLIST.md)).
+
 > Catalogo organizzato di tutte le feature, ottimizzazioni e migliorie future per la piattaforma multilingua.
 
 ---
