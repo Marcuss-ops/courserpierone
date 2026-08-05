@@ -29,7 +29,11 @@ LEMONSQUEEZY_WEBHOOK_SECRET=...
 
 **Eventi webhook LS tracciati:**
 - `order_created` → crea ordine + accesso
-- `subscription_created` → gestione ricorrente
+- `subscription_created` → compatibilità legacy: crea un `Order` + `AccessGrant`, non un aggregate subscription
+- `subscription_updated` → `ignored_unsupported`: viene registrato per audit/idempotenza, ma non aggiorna lo stato funzionale
+- `subscription_cancelled` / `subscription_payment_failed` → revoca l'accesso dell'ordine associato
+
+> Le subscription non sono ancora pienamente supportate: lo schema non contiene un modello `Subscription` per stato, rinnovo, periodo o cancellazione. Non interpretare `subscription_created` come sincronizzazione completa della subscription.
 
 ---
 

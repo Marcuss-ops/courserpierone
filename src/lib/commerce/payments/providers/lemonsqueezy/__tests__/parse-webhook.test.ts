@@ -53,12 +53,12 @@ beforeEach(() => {
   mockGetWebhookSecret.mockReturnValue(SECRET);
 });
 
-describe("LemonSqueezyPaymentProvider.parseWebhook — 5 supported events", () => {
-  // The 5 events live in `LS_EVENT_PROCESSABLE` (processor.ts) so the
-  // parse-webhook test list and the processor dispatch list can never
-  // drift. Touching the Set in processor.ts will fail this test.
-  it("LS_EVENT_PROCESSABLE contains exactly 5 events (drift guard)", () => {
-    expect(LS_EVENT_PROCESSABLE.size).toBe(5);
+describe("LemonSqueezyPaymentProvider.parseWebhook — supported and audit-only events", () => {
+  // The six events live in `LS_EVENT_PROCESSABLE` (the provider adapter) so
+  // the parse-webhook test list and the processor dispatch list can never
+  // drift. Touching the Set without updating the contract fails this test.
+  it("LS_EVENT_PROCESSABLE contains exactly 6 events (drift guard)", () => {
+    expect(LS_EVENT_PROCESSABLE.size).toBe(6);
   });
 
   it.each(EVENTS)("parses %s into a normalized PaymentEvent", async (eventName) => {

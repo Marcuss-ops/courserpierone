@@ -111,7 +111,7 @@ curl -H "Authorization: Bearer $CRON_SECRET" https://www.courssy.com/api/diagnos
    - `LEMONSQUEEZY_STORE_ID`
 3. Settings → Webhooks → Create endpoint:
    - URL: `https://www.courssy.com/api/webhooks/lemonsqueezy`
-   - Events: `order_created`, `subscription_created`, `subscription_updated`, `subscription_cancelled`
+   - Events: `order_created`, `subscription_created`, `subscription_cancelled`, `subscription_payment_failed`, `order_refunded`, `subscription_updated` (audit-only: `ignored_unsupported`, no subscription synchronization)
    - Copia `LEMONSQUEEZY_WEBHOOK_SECRET`
 4. **KYC submission** (2-3gg review): Settings → Payout → completa tax/business info
 5. Per ogni prodotto in admin (`/admin/products/new`):

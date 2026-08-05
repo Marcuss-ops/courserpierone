@@ -80,6 +80,7 @@ export const LS_EVENT_PROCESSABLE = new Set([
   "order_refunded",
   "subscription_cancelled",
   "subscription_payment_failed",
+  "subscription_updated",
 ]);
 
 export class LemonSqueezyPaymentProvider implements PaymentProvider {
@@ -107,6 +108,12 @@ export class LemonSqueezyPaymentProvider implements PaymentProvider {
       case "subscription_cancelled":
       case "subscription_payment_failed":
         return translateOrderRevoked(event, "failed");
+      case "subscription_updated":
+        return {
+          type: "ignored_unsupported",
+          reason:
+            "Lemon Squeezy subscription.updated is acknowledged for audit only: subscription synchronization is not supported because the domain has no Subscription aggregate.",
+        };
       default:
         return {
           type: "ignore",

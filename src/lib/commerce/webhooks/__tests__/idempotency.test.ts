@@ -17,6 +17,7 @@ vi.mock("@/lib/db/prisma", () => ({ prisma: mockPrisma }));
 import {
   completeWebhookEvent,
   deriveStableDeliveryId,
+  ignoreUnsupportedWebhookEvent,
   failWebhookEvent,
   hashWebhookPayload,
   reserveWebhookEvent,
@@ -168,10 +169,15 @@ describe("reserveWebhookEvent", () => {
     expect(mockPrisma.processedWebhook.findUnique).toHaveBeenCalled();
   });
 
-  it("acknowledges a completed/processing duplicate without reclaiming it", async () => {
+  it.each([
+    ["completed", "completed"],
+    ["ignored_unsupported", "ignored_unsupported"],
+    ["failed", "failed"],
+    ["processing", "processing"],
+  ] as const)("acknowledges a %s duplicate without reclaiming it", async (status, expectedStatus) => {
     mockPrisma.processedWebhook.create.mockRejectedValue(uniqueViolation());
     mockPrisma.processedWebhook.findUnique.mockResolvedValue({
-      status: "completed",
+      status,
       payloadHash: hashWebhookPayload(input.rawBody),
     });
 
@@ -179,8 +185,33 @@ describe("reserveWebhookEvent", () => {
 
     expect(result).toMatchObject({
       acquired: false,
-      status: "completed",
+      status: expectedStatus,
     });
+    expect(mockPrisma.processedWebhook.updateMany).toHaveBeenCalled();
+  });
+
+  it("does not reclaim an ignored_unsupported duplicate", async () => {
+    mockPrisma.processedWebhook.create.mockRejectedValue(uniqueViolation());
+    mockPrisma.processedWebhook.findUnique.mockResolvedValue({
+      status: "ignored_unsupported",
+      payloadHash: hashWebhookPayload(input.rawBody),
+    });
+
+    const result = await reserveWebhookEvent(input);
+
+    expect(result).toMatchObject({
+      acquired: false,
+      status: "ignored_unsupported",
+    });
+    expect(mockPrisma.processedWebhook.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          OR: expect.arrayContaining([
+            { status: "retryable" },
+          ]),
+        }),
+      }),
+    );
   });
 });
 
@@ -199,6 +230,25 @@ describe("webhook lifecycle", () => {
         processedAt: expect.any(Date),
         completedAt: expect.any(Date),
         lastError: null,
+      }),
+    });
+  });
+
+  it("persists ignored_unsupported without functional completion metadata", async () => {
+    await ignoreUnsupportedWebhookEvent({
+      deliveryId: input.deliveryId,
+      payloadHash: "hash",
+      reason: "subscription synchronization is not supported",
+    });
+
+    expect(mockPrisma.processedWebhook.update).toHaveBeenCalledWith({
+      where: { deliveryId: input.deliveryId },
+      data: expect.objectContaining({
+        status: "ignored_unsupported",
+        payloadHash: "hash",
+        processedAt: expect.any(Date),
+        completedAt: null,
+        lastError: "subscription synchronization is not supported",
       }),
     });
   });

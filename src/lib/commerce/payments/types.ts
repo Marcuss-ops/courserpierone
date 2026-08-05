@@ -167,14 +167,16 @@ export interface OrderRevokedEvent {
  * webhook processor switches on `type` and dispatches:
  *   - `order_created`   → processOrder(event.data)
  *   - `order_revoked`   → revokeOrder(event.data)
- *   - `ignore`          → no-op (warn + log + optional processedWebhook insert)
+ *   - `ignore`          → no-op for an unknown/non-domain event
+ *   - `ignored_unsupported` → terminal audit state without functional completion
  * Adding a new event category means adding a new union variant — the
  * processor's switch will surface the missing case at compile time.
  */
 export type PaymentDomainAction =
   | { type: "order_created"; data: OrderCreatedEvent }
   | { type: "order_revoked"; data: OrderRevokedEvent }
-  | { type: "ignore"; reason: string };
+  | { type: "ignore"; reason: string }
+  | { type: "ignored_unsupported"; reason: string };
 
 // ─── The contract ─────────────────────────────────────────────────────
 

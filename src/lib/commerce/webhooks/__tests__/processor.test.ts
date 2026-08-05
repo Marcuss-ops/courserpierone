@@ -56,7 +56,7 @@ beforeEach(() => {
 });
 
 describe("LS_EVENT_PROCESSABLE export (drift guard)", () => {
-  it("contains exactly the 5 expected LS events", () => {
+  it("contains exactly the 6 expected LS events", () => {
     expect(Array.from(LS_EVENT_PROCESSABLE).sort()).toEqual(
       [
         "order_created",
@@ -64,6 +64,7 @@ describe("LS_EVENT_PROCESSABLE export (drift guard)", () => {
         "subscription_cancelled",
         "subscription_created",
         "subscription_payment_failed",
+        "subscription_updated",
       ].sort(),
     );
   });
@@ -110,6 +111,27 @@ describe("processWebhookEvent — revoke dispatch", () => {
       providerOrderId: "ls-1",
       orderStatus: "failed",
     });
+  });
+});
+
+describe("processWebhookEvent — unsupported subscription event", () => {
+  it("subscription_updated is audit-only and does not mutate order/access state", async () => {
+    const warnSpy = vi
+      .spyOn(console, "warn")
+      .mockImplementation(() => undefined);
+
+    const action = await processWebhookEvent(baseEvent("subscription_updated"));
+
+    expect(action).toEqual({
+      type: "ignored_unsupported",
+      reason: expect.stringContaining("subscription synchronization is not supported"),
+    });
+    expect(mockProcessOrder).not.toHaveBeenCalled();
+    expect(mockRevokeOrder).not.toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Unsupported event"),
+    );
+    warnSpy.mockRestore();
   });
 });
 

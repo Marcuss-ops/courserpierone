@@ -35,12 +35,14 @@ const {
   mockProcessWebhookEvent,
   mockReserveWebhookEvent,
   mockCompleteWebhookEvent,
+  mockIgnoreUnsupportedWebhookEvent,
   mockFailWebhookEvent,
 } = vi.hoisted(() => ({
   mockParseWebhook: vi.fn(),
   mockProcessWebhookEvent: vi.fn(),
   mockReserveWebhookEvent: vi.fn(),
   mockCompleteWebhookEvent: vi.fn(),
+  mockIgnoreUnsupportedWebhookEvent: vi.fn(),
   mockFailWebhookEvent: vi.fn(),
 }));
 
@@ -68,6 +70,7 @@ vi.mock("@/lib/commerce/webhooks/processor", () => ({
 vi.mock("@/lib/commerce/webhooks/idempotency", () => ({
   reserveWebhookEvent: mockReserveWebhookEvent,
   completeWebhookEvent: mockCompleteWebhookEvent,
+  ignoreUnsupportedWebhookEvent: mockIgnoreUnsupportedWebhookEvent,
   failWebhookEvent: mockFailWebhookEvent,
 }));
 
@@ -96,7 +99,22 @@ beforeEach(() => {
   paymentProviderRegistry.__test_only_clearAll();
   paymentProviderRegistry.register(lemonSqueezyProvider);
   mockParseWebhook.mockResolvedValue(sampleEvent);
-  mockProcessWebhookEvent.mockResolvedValue(undefined);
+  mockProcessWebhookEvent.mockResolvedValue({
+    type: "order_created",
+    data: {
+      paymentProvider: "lemonsqueezy",
+      providerOrderId: sampleEvent.correlationKey,
+      email: "test@example.com",
+      customerName: "Test User",
+      productSlug: "test-course",
+      variantId: "variant-1",
+      amount: 9900,
+      currency: "USD",
+      locale: "it",
+      customerCountry: null,
+      channelId: null,
+    },
+  });
   mockReserveWebhookEvent.mockResolvedValue({
     acquired: true,
     deliveryId: sampleEvent.deliveryId,
@@ -104,6 +122,7 @@ beforeEach(() => {
     payloadHash: "hash",
   });
   mockCompleteWebhookEvent.mockResolvedValue(undefined);
+  mockIgnoreUnsupportedWebhookEvent.mockResolvedValue(undefined);
   mockFailWebhookEvent.mockResolvedValue(undefined);
 });
 
@@ -134,6 +153,34 @@ describe("POST /api/webhooks/lemonsqueezy — slim route", () => {
       deliveryId: sampleEvent.deliveryId,
       payloadHash: "hash",
     });
+  });
+
+  it("records subscription.updated as ignored_unsupported, not completed", async () => {
+    const unsupportedEvent = {
+      ...sampleEvent,
+      eventType: "subscription_updated",
+    };
+    mockParseWebhook.mockResolvedValue(unsupportedEvent);
+    mockReserveWebhookEvent.mockResolvedValue({
+      acquired: true,
+      deliveryId: unsupportedEvent.deliveryId,
+      status: "processing",
+      payloadHash: "hash",
+    });
+    mockProcessWebhookEvent.mockResolvedValue({
+      type: "ignored_unsupported",
+      reason: "subscription synchronization is not supported",
+    });
+
+    const res = await POST(makeRequest());
+
+    expect(res.status).toBe(200);
+    expect(mockIgnoreUnsupportedWebhookEvent).toHaveBeenCalledWith({
+      deliveryId: unsupportedEvent.deliveryId,
+      payloadHash: "hash",
+      reason: "subscription synchronization is not supported",
+    });
+    expect(mockCompleteWebhookEvent).not.toHaveBeenCalled();
   });
 
   it("short-circuits to 200 when delivery already processed", async () => {

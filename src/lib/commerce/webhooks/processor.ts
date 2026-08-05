@@ -13,6 +13,7 @@
  *   order_refunded           → revokeOrder({ status: "refunded" })
  *   subscription_cancelled   → revokeOrder({ status: "failed"   })
  *   subscription_payment_failed → revokeOrder({ status: "failed" })
+ *   subscription_updated    → ignored_unsupported (audit-only, no domain write)
  *   (any other eventType)    → ignore (warn-log, no DB write)
  *
  * Provider-specific shape parsing (LS `meta.custom_data` fallback
@@ -24,7 +25,10 @@
 import { processOrder } from "@/lib/commerce/orders/complete-order";
 import { revokeOrder } from "@/lib/commerce/orders/revoke-order";
 import { paymentProviderRegistry } from "@/lib/commerce/payments/init";
-import type { PaymentEvent } from "@/lib/commerce/payments/types";
+import type {
+  PaymentDomainAction,
+  PaymentEvent,
+} from "@/lib/commerce/payments/types";
 
 /**
  * Move a normalized PaymentEvent into the matching domain action.
@@ -39,13 +43,16 @@ import type { PaymentEvent } from "@/lib/commerce/payments/types";
  * calling this function and records the terminal outcome afterward.
  * Idempotency lives at the transport layer, not here.
  */
-export async function processWebhookEvent(event: PaymentEvent): Promise<void> {
+export async function processWebhookEvent(
+  event: PaymentEvent,
+): Promise<PaymentDomainAction> {
   const provider = paymentProviderRegistry.get(event.provider);
   const action = provider.translateEvent(event);
 
   switch (action.type) {
     case "order_created":
-      return processOrder(action.data);
+      await processOrder(action.data);
+      return action;
 
     case "order_revoked": {
       const { count } = await revokeOrder(action.data);
@@ -54,13 +61,19 @@ export async function processWebhookEvent(event: PaymentEvent): Promise<void> {
           ? `[webhook-processor] ${event.eventType}: ${action.data.orderStatus} ${count} order(s) and revoked ${count} AccessGrant(s) for ${action.data.providerOrderId}`
           : `[webhook-processor] ${event.eventType}: no completed orders found for ${action.data.providerOrderId} (already revoked or never existed)`,
       );
-      return;
+      return action;
     }
 
     case "ignore":
       console.warn(
         `[webhook-processor] Ignored event (deliveryId=${event.deliveryId}): ${action.reason}`,
       );
-      return;
+      return action;
+
+    case "ignored_unsupported":
+      console.warn(
+        `[webhook-processor] Unsupported event (deliveryId=${event.deliveryId}): ${action.reason}`,
+      );
+      return action;
   }
 }

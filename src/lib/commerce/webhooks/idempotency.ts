@@ -7,6 +7,7 @@
  *
  * Lifecycle:
  *   processing -> completed
+ *   processing -> ignored_unsupported (audit-only terminal outcome)
  *   processing -> failed      (deterministic/non-retryable failure)
  *   processing -> retryable   (transient failure; next delivery may reserve)
  *   retryable  -> processing  (conditional UPDATE, also atomic)
@@ -20,6 +21,7 @@ export type WebhookProviderId = "lemonsqueezy";
 export type WebhookProcessingStatus =
   | "processing"
   | "completed"
+  | "ignored_unsupported"
   | "failed"
   | "retryable";
 
@@ -176,7 +178,7 @@ export interface CompleteWebhookEventInput {
   payloadHash?: string;
 }
 
-/** Mark the currently reserved delivery as successfully processed. */
+/** Mark the currently reserved delivery as functionally completed. */
 export async function completeWebhookEvent(
   input: CompleteWebhookEventInput,
 ): Promise<void> {
@@ -189,6 +191,33 @@ export async function completeWebhookEvent(
       completedAt: new Date(),
       failedAt: null,
       lastError: null,
+    },
+  });
+}
+
+export interface IgnoreUnsupportedWebhookEventInput {
+  deliveryId: string;
+  payloadHash?: string;
+  reason: string;
+}
+
+/**
+ * Persist an audit-only terminal outcome without claiming functional support.
+ * The provider can stop retrying the delivery, while operators can distinguish
+ * it from a completed order/subscription mutation.
+ */
+export async function ignoreUnsupportedWebhookEvent(
+  input: IgnoreUnsupportedWebhookEventInput,
+): Promise<void> {
+  await prisma.processedWebhook.update({
+    where: { deliveryId: input.deliveryId },
+    data: {
+      status: "ignored_unsupported",
+      payloadHash: input.payloadHash,
+      processedAt: new Date(),
+      completedAt: null,
+      failedAt: null,
+      lastError: input.reason.slice(0, 2000),
     },
   });
 }
@@ -232,5 +261,9 @@ export async function wasAlreadyProcessed(input: {
     where: { deliveryId: input.deliveryId },
     select: { status: true },
   });
-  return row?.status === "completed" || row?.status === "failed";
+  return (
+    row?.status === "completed" ||
+    row?.status === "ignored_unsupported" ||
+    row?.status === "failed"
+  );
 }

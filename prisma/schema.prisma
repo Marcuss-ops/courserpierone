@@ -648,7 +648,7 @@ model ProcessedWebhook {
   provider            String   // lemonsqueezy
   deliveryId          String   @unique // provider delivery/event ID
   eventType           String   // checkout.session.completed, order_created, etc.
-  status              String   @default("processing") // processing | completed | failed | retryable
+  status              String   @default("processing") // processing | completed | ignored_unsupported | failed | retryable
   payloadHash         String?  // SHA-256 of the raw webhook body
   attemptCount        Int      @default(1)
   lastError           String?

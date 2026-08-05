@@ -8,6 +8,7 @@ import { processWebhookEvent } from "@/lib/commerce/webhooks/processor";
 import {
   completeWebhookEvent,
   failWebhookEvent,
+  ignoreUnsupportedWebhookEvent,
   reserveWebhookEvent,
 } from "@/lib/commerce/webhooks/idempotency";
 import {
@@ -50,11 +51,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     try {
-      await processWebhookEvent({ ...event, deliveryId: reservation.deliveryId });
-      await completeWebhookEvent({
+      const action = await processWebhookEvent({
+        ...event,
         deliveryId: reservation.deliveryId,
-        payloadHash: reservation.payloadHash,
       });
+      if (action.type === "ignored_unsupported") {
+        await ignoreUnsupportedWebhookEvent({
+          deliveryId: reservation.deliveryId,
+          payloadHash: reservation.payloadHash,
+          reason: action.reason,
+        });
+      } else {
+        await completeWebhookEvent({
+          deliveryId: reservation.deliveryId,
+          payloadHash: reservation.payloadHash,
+        });
+      }
       return NextResponse.json({ received: true });
     } catch (error) {
       await failWebhookEvent({

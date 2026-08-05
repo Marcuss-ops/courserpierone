@@ -43,7 +43,7 @@
 │
 ├─ V4: Webhook endpoint ───────  • POST https://<prod-domain>/
 │                                    api/webhooks/lemonsqueezy
-│                                  • Subscribe to 5 events:
+│                                  • Subscribe to 6 events:
 │                                    order_created, order_refunded,
 │                                    subscription_created,
 │                                    subscription_cancelled,
@@ -274,9 +274,9 @@ LS Dashboard → **Settings → Webhooks → "Create webhook"**.
 | **Webhook URL** | `https://<production-domain>/api/webhooks/lemonsqueezy` — **NOT** the staging URL. Per [`../../scripts/ops/staging-bootstrap.md` §3.2](../../scripts/ops/staging-bootstrap.md), staging uses the Vercel Preview URL; live uses the custom production domain. |
 | **Signing secret** | user-defined, **6-40 characters** (LS UI enforces). Copy to Vercel Production env as `LEMONSQUEEZY_WEBHOOK_SECRET`. Keep a SECOND copy in 1Password (it's the only thing that authenticates webhooks). |
 
-### 4.2 Subscribe to the canonical 5 events
+### 4.2 Subscribe to the canonical 6 events
 
-The handler in [`../../src/app/api/webhooks/lemonsqueezy/route.ts`](../../src/app/api/webhooks/lemonsqueezy/route.ts) consumes exactly **five** events. Subscribe to all five — anything LS sends that we don't handle is silently acknowledged (returns `200 received:true`) without side effects:
+The handler in [`../../src/app/api/webhooks/lemonsqueezy/route.ts`](../../src/app/api/webhooks/lemonsqueezy/route.ts) recognizes six event names. Five have existing order/access mutations; `subscription_updated` is accepted for audit/idempotency but intentionally has no functional synchronization because the schema has no `Subscription` aggregate:
 
 | Event | Handler behavior | DB side effect |
 | --- | --- | --- |
@@ -285,12 +285,14 @@ The handler in [`../../src/app/api/webhooks/lemonsqueezy/route.ts`](../../src/ap
 | `order_refunded` | `prisma.order.updateMany({ ... status: 'refunded' })` (only completed orders) | UPDATE `Order.status = 'refunded'` → auto-revoke access (Phase 7+) |
 | `subscription_cancelled` | `prisma.order.updateMany({ ... status: 'failed' })` (only completed orders) | UPDATE `Order.status = 'failed'` → auto-revoke access |
 | `subscription_payment_failed` | `prisma.order.updateMany({ ... status: 'failed' })` (only completed orders) | UPDATE `Order.status = 'failed'` → auto-revoke access |
+| `subscription_updated` | `ignored_unsupported` | INSERT/update `ProcessedWebhook` with `status = 'ignored_unsupported'`; no `Order`, `AccessGrant` or subscription state mutation |
 
-> ⚠️ Do NOT subscribe to events the handler doesn't know about (LS
-> 2025 added `subscription_resumed`, `subscription_updated`, etc.).
-> Subscribing means LS fires payloads that the handler acknowledges
-> without processing — wasted vendor traffic + Vercel function invocations
-> + logs.
+> ⚠️ Subscription synchronization is not yet supported. `subscription_created`
+> currently follows the legacy order/access path, while `subscription_updated`
+> is intentionally audit-only. A future full implementation requires a
+> dedicated subscription aggregate with status, billing period, renewal and
+> cancellation fields. Do not describe the current flow as complete recurring
+> billing support.
 
 ### 4.3 Webhook URL is the contract boundary
 
