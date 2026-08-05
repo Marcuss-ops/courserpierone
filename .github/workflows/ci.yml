@@ -533,7 +533,7 @@ jobs:
       # This guard fails `quality-gate` (which in turn fails `deploy-gate`)
       # before that regression can merge. Source: scripts/quality/
       # check-deploy-gate-shape.ts (15 unit tests cover each invariant).
-      - name: Regression guard: deploy-gate structure
+      - name: "Regression guard: deploy-gate structure"
         run: npm run check:deploy-gate-shape
 
       # ── (f) File size budget (src/domains/** only) ───────────────────
