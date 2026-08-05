@@ -84,7 +84,8 @@ export interface PaymentEvent {
 
 export interface ProviderPayment {
   provider: "lemonsqueezy";
-  reference: string;
+  /** Provider-owned order identifier (LS order id) — canonical name. */
+  providerOrderId: string;
   status: "pending" | "completed" | "refunded" | "failed";
   email: string;
   amountCents: number;
@@ -219,8 +220,8 @@ export interface PaymentProvider {
   translateEvent(event: PaymentEvent): PaymentDomainAction;
 
   /**
-   * Fetch a payment by provider reference (admin reconciliation).
+   * Fetch a payment by its provider order id (admin reconciliation).
    * Stub in this PR (Phase 4: reconciliation).
    */
-  retrievePayment(reference: string): Promise<ProviderPayment>;
+  retrievePayment(providerOrderId: string): Promise<ProviderPayment>;
 }

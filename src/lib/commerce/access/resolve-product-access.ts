@@ -85,10 +85,11 @@
  *      resolves to allow (admin bypass semantics).
  *   3. Anonymous post-checkout path — `provider` + `providerOrderId`
  *      resolve the provider-scoped Order, then its internal `Order.id`
- *      is used for the canonical grant lookup. A legacy `orderId` may
- *      still identify an internal Order.id directly. This fixes the
- *      Pattern B mismatch where the provider id never matched the
- *      grant's sourceId (written by `processOrder` as Order.id).
+ *      is used for the canonical grant lookup. An `internalOrderId`
+ *      (explicit, canonical) identifies the internal Order.id
+ *      directly. This fixes the Pattern B mismatch where the provider
+ *      id never matched the grant's sourceId (written by `processOrder`
+ *      as Order.id).
  *
  * Performance:
  *   - Allow path (session): 1 indexed grant seek
@@ -165,10 +166,12 @@ export interface ResolveProductAccessInput {
    */
   providerOrderId?: string;
   /**
-   * Legacy/internal Order.id lookup. Kept for existing callers that
-   * already possess the canonical Prisma id.
+   * INTERNAL Order.id lookup (canonical Prisma cuid). Explicitly
+   * named `internalOrderId` — this field NEVER carries a provider id;
+   * use `providerOrderId` for that. The `/api/access` adapter
+   * (`normalize-access-input.ts`) guarantees this separation.
    */
-  orderId?: string;
+  internalOrderId?: string;
 }
 
 /**
@@ -180,8 +183,8 @@ export interface ResolveProductAccessInput {
  *   3. userRole === "admin" -> allow (no grant required).
  *   4. userId present -> active-grant read; on miss, classify the
  *      deny reason via the user's Order (pending/refunded/none).
- *   5. provider + providerOrderId (or legacy internal orderId) present
- *      -> anonymous order translation + grant read.
+ *   5. providerOrderId (with provider) or internalOrderId present ->
+ *      anonymous order translation + grant read.
  *   6. Otherwise -> deny (not_purchased).
  */
 export async function resolveProductAccess(
@@ -235,11 +238,11 @@ export async function resolveProductAccess(
   // Anonymous post-checkout path: resolve the provider-owned id to the
   // internal Order.id, then read the `sourceType='order'` grant. The
   // provider is part of the lookup so the same providerOrderId cannot
-  // cross provider boundaries. A legacy orderId is accepted only as the
-  // internal primary key. Both paths are scoped to the product and use
-  // sourceType='order' (a free_enrollment/admin/bundle grant sharing the
-  // same sourceId must NOT satisfy this path).
-  if (input.providerOrderId || input.orderId) {
+  // cross provider boundaries. An internalOrderId is accepted only as
+  // the internal primary key. Both paths are scoped to the product and
+  // use sourceType='order' (a free_enrollment/admin/bundle grant sharing
+  // the same sourceId must NOT satisfy this path).
+  if (input.providerOrderId || input.internalOrderId) {
     const order = input.providerOrderId
       ? input.provider
         ? await prisma.order.findFirst({
@@ -252,7 +255,7 @@ export async function resolveProductAccess(
           })
         : null
       : await prisma.order.findFirst({
-          where: { id: input.orderId, productId },
+          where: { id: input.internalOrderId, productId },
           select: { id: true, status: true },
         });
     if (!order) {

@@ -304,7 +304,7 @@ describe("resolveProductAccess — ordine rimborsato (session deny)", () => {
   });
 });
 
-describe("resolveProductAccess — anonymous post-checkout path (orderId)", () => {
+describe("resolveProductAccess — anonymous post-checkout path (order id)", () => {
   it("provider order id translated to the canonical grant -> allow", async () => {
     mockPrisma.order.findFirst.mockResolvedValue({ id: ORDER_ID, status: "completed" });
     mockPrisma.accessGrant.findFirst.mockResolvedValue({
@@ -367,7 +367,7 @@ describe("resolveProductAccess — anonymous post-checkout path (orderId)", () =
 
     const result = await resolveProductAccess({
       productId: PRODUCT_ID,
-      orderId: "unknown-order",
+      internalOrderId: "unknown-order",
     });
 
     expectDeny(result, "order_not_found");
@@ -381,7 +381,7 @@ describe("resolveProductAccess — anonymous post-checkout path (orderId)", () =
 
     const result = await resolveProductAccess({
       productId: PRODUCT_ID,
-      orderId: "order_of_other_product",
+      internalOrderId: "order_of_other_product",
     });
 
     expectDeny(result, "order_not_found");
@@ -398,7 +398,7 @@ describe("resolveProductAccess — anonymous post-checkout path (orderId)", () =
 
     const result = await resolveProductAccess({
       productId: PRODUCT_ID,
-      orderId: ORDER_ID,
+      internalOrderId: ORDER_ID,
     });
 
     expectDeny(result, "payment_pending");
@@ -411,7 +411,7 @@ describe("resolveProductAccess — anonymous post-checkout path (orderId)", () =
 
     const result = await resolveProductAccess({
       productId: PRODUCT_ID,
-      orderId: ORDER_ID,
+      internalOrderId: ORDER_ID,
     });
 
     expectDeny(result, "refunded");
@@ -423,7 +423,7 @@ describe("resolveProductAccess — anonymous post-checkout path (orderId)", () =
 
     const result = await resolveProductAccess({
       productId: PRODUCT_ID,
-      orderId: ORDER_ID,
+      internalOrderId: ORDER_ID,
     });
 
     expect(result.hasAccess).toBe(false);

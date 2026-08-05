@@ -124,7 +124,7 @@ describe("GET /api/access — thin auth semantics probe", () => {
       userId: undefined,
       userRole: undefined,
       productId: FAKE_PRODUCT_SLUG,
-      orderId: undefined,
+      internalOrderId: undefined,
     });
   });
 
@@ -152,7 +152,7 @@ describe("GET /api/access — thin auth semantics probe", () => {
       productId: FAKE_PRODUCT_SLUG,
       provider: FAKE_PROVIDER,
       providerOrderId: FAKE_PROVIDER_ORDER_ID,
-      orderId: undefined,
+      internalOrderId: undefined,
     });
   });
 
@@ -192,7 +192,7 @@ describe("GET /api/access — thin auth semantics probe", () => {
       expect.objectContaining({
         provider: FAKE_PROVIDER,
         providerOrderId: FAKE_PROVIDER_ORDER_ID,
-        orderId: undefined,
+        internalOrderId: undefined,
       }),
     );
   });
@@ -214,7 +214,7 @@ describe("GET /api/access — thin auth semantics probe", () => {
       expect.objectContaining({
         providerOrderId: FAKE_PROVIDER_ORDER_ID,
         provider: undefined,
-        orderId: undefined,
+        internalOrderId: undefined,
       }),
     );
   });
@@ -234,7 +234,7 @@ describe("GET /api/access — thin auth semantics probe", () => {
       expect.objectContaining({
         providerOrderId: FAKE_PROVIDER_ORDER_ID,
         provider: undefined,
-        orderId: undefined,
+        internalOrderId: undefined,
       }),
     );
   });
@@ -275,7 +275,7 @@ describe("GET /api/access — thin auth semantics probe", () => {
     // to providerOrderId by the adapter).
     expect(mockResolveProductAccess).toHaveBeenCalledWith(
       expect.objectContaining({
-        orderId: FAKE_PROVIDER_ORDER_ID,
+        internalOrderId: FAKE_PROVIDER_ORDER_ID,
         providerOrderId: undefined,
         provider: undefined,
       }),
@@ -298,7 +298,7 @@ describe("GET /api/access — thin auth semantics probe", () => {
       userId: FAKE_USER_ID,
       userRole: "student",
       productId: FAKE_PRODUCT_SLUG,
-      orderId: undefined,
+      internalOrderId: undefined,
     });
   });
 

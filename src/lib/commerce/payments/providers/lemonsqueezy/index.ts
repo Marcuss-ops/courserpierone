@@ -232,7 +232,7 @@ export class LemonSqueezyPaymentProvider implements PaymentProvider {
     };
   }
 
-  async retrievePayment(_reference: string): Promise<ProviderPayment> {
+  async retrievePayment(_providerOrderId: string): Promise<ProviderPayment> {
     throw new NotImplementedError(
       "lemonsqueezy.retrievePayment not implemented yet (Phase 4: admin reconciliation).",
       { code: "NOT_IMPLEMENTED_PHASE_4" },

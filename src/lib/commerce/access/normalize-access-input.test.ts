@@ -63,7 +63,7 @@ describe("normalizeAccessInput — canonical order identity adapter", () => {
     const warn = spyWarn();
     expect(
       normalizeAccessInput({ productId: PRODUCT_ID, orderId: CUID_LIKE_ORDER_ID }),
-    ).toEqual({ productId: PRODUCT_ID, orderId: CUID_LIKE_ORDER_ID });
+    ).toEqual({ productId: PRODUCT_ID, internalOrderId: CUID_LIKE_ORDER_ID });
     expect(warn).not.toHaveBeenCalled();
   });
 
@@ -71,7 +71,7 @@ describe("normalizeAccessInput — canonical order identity adapter", () => {
     const warn = spyWarn();
     expect(
       normalizeAccessInput({ productId: PRODUCT_ID, orderId: PROVIDER_ORDER_ID }),
-    ).toEqual({ productId: PRODUCT_ID, orderId: PROVIDER_ORDER_ID });
+    ).toEqual({ productId: PRODUCT_ID, internalOrderId: PROVIDER_ORDER_ID });
     expect(warn).toHaveBeenCalledTimes(1);
     expect(warn.mock.calls[0]?.[0]).toContain("[legacy]");
   });

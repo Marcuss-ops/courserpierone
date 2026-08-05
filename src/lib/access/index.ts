@@ -8,16 +8,22 @@
  *
  * Helpers esposti:
  *   - `findCompletedOrder`       — user-keyed SSO (Pattern A).
- *   - `findCompletedOrderByOrderId` — orderId-keyed SSO sibling (Pattern B).
  *
  * Types esposti:
- *   - `FindCompletedOrderInput` / `FindCompletedOrderByOrderIdInput`
- *     — funzione signature args (per annotare variabili locali).
- *   - `FindCompletedOrderResult` / `FindCompletedOrderByOrderIdResult`
- *     — return type blessed alias `Order | null`. Difesa contro future
- *     refactors che cambiano il return type (es. `Order | undefined`)
- *     silenziosamente: consumer che importano il named type alias dal
- *     barrel ottengono un type-check compile-time.
+ *   - `FindCompletedOrderInput` — funzione signature args (per annotare
+ *     variabili locali).
+ *   - `FindCompletedOrderResult` — return type blessed alias
+ *     `Order | null`. Difesa contro future refactors che cambiano il
+ *     return type (es. `Order | undefined`) silenziosamente: consumer
+ *     che importano il named type alias dal barrel ottengono un
+ *     type-check compile-time.
+ *
+ * NOTA — il vecchio helper orderId-keyed `findCompletedOrderByOrderId`
+ * (Pattern B, che matchava l'input su `id` OR `providerOrderId`) è stato
+ * RIMOSSO: incarnava il contratto ambiguo "orderId può essere interno o
+ * provider". Il flusso anonimo post-checkout passa ora dal resolver
+ * canonico `resolveProductAccess` (providerOrderId / internalOrderId
+ * espliciti, vedi src/lib/commerce/access/).
  *
  * Convenzioni:
  *   - Re-export piatto (no namespace): `import { findCompletedOrder }
@@ -78,11 +84,6 @@ export {
   type FindCompletedOrderInput,
 } from "./find-completed-order";
 
-export {
-  findCompletedOrderByOrderId,
-  type FindCompletedOrderByOrderIdInput,
-} from "./find-completed-order-by-order-id";
-
 /**
  * Blessed Result type aliases — `Order | null` esplicito, NON inferito.
  * Consumer che dichiarano `const order: FindCompletedOrderResult = await
@@ -90,4 +91,3 @@ export {
  * future refactors che cambiano il return type (es. `null → undefined`).
  */
 export type FindCompletedOrderResult = Order | null;
-export type FindCompletedOrderByOrderIdResult = Order | null;

@@ -17,9 +17,9 @@ import { resolveProductAccess } from "@/lib/commerce/access/resolve-product-acce
  * Order-identity normalization happens in ONE place — the adapter
  * `normalizeAccessInput` (`src/lib/commerce/access/normalize-access-input.ts`):
  * `providerOrderId` is forwarded explicitly (canonical); `orderId` is
- * treated as an internal `Order.id` (legacy `console.warn` when it
- * looks like a provider id). Pages/consumers never reimplement this
- * mapping.
+ * treated as an internal `Order.id` and forwarded as `internalOrderId`
+ * (legacy `console.warn` when it looks like a provider id).
+ * Pages/consumers never reimplement this mapping.
  *
  * The resolver owns:
  *   - productId resolution (slug OR cuid)
@@ -68,7 +68,7 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
             : undefined)
         : undefined,
       providerOrderId,
-      orderId: canonical.orderId,
+      internalOrderId: canonical.internalOrderId,
     });
 
     return NextResponse.json({

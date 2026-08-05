@@ -21,42 +21,31 @@ import { describe, it, expect } from "vitest";
 
 import {
   findCompletedOrder,
-  findCompletedOrderByOrderId,
   type FindCompletedOrderInput,
-  type FindCompletedOrderByOrderIdInput,
   type FindCompletedOrderResult,
-  type FindCompletedOrderByOrderIdResult,
 } from "./index";
 
 describe("src/lib/access barrel index.ts — V3.2 discoverability surface", () => {
-  it("re-exports the 2 helper functions as runtime values", () => {
+  it("re-exports the helper function as a runtime value", () => {
     expect(typeof findCompletedOrder).toBe("function");
-    expect(typeof findCompletedOrderByOrderId).toBe("function");
   });
 
-  it("re-exports the 2 Input type names (compile-time type assertions)", () => {
+  it("re-exports the Input type name (compile-time type assertion)", () => {
     // If the barrel dropped `FindCompletedOrderInput`, these assignments
     // would fail at typecheck time (= TS error in vitest run). Pass = OK.
     const minimalUserKeyed: FindCompletedOrderInput = {
       userId: "fixture-user",
       productId: "fixture-product",
     };
-    const minimalOrderIdKeyed: FindCompletedOrderByOrderIdInput = {
-      orderId: "fixture-order",
-      productId: "fixture-product",
-    };
     expect(minimalUserKeyed.userId).toBe("fixture-user");
-    expect(minimalOrderIdKeyed.orderId).toBe("fixture-order");
   });
 
-  it("re-exports the 2 Result type aliases (Order | null blessed layout)", () => {
-    // The Result types are explicitly `Order | null`. A regression that
+  it("re-exports the Result type alias (Order | null blessed layout)", () => {
+    // The Result type is explicitly `Order | null`. A regression that
     // changes the return shape (e.g., `Order | undefined`) would change
     // this blessed alias — the test catches it at compile time.
     const nullResultUser: FindCompletedOrderResult = null;
-    const nullResultOrder: FindCompletedOrderByOrderIdResult = null;
     expect(nullResultUser).toBeNull();
-    expect(nullResultOrder).toBeNull();
   });
 
   it("the barrel exports match the expected runtime inventory (regression snapshot)", async () => {
@@ -68,9 +57,6 @@ describe("src/lib/access barrel index.ts — V3.2 discoverability surface", () =
     // fails and forces an explicit expected-list update (= catches silent
     // renames).
     const mod = await import("./index");
-    expect(Object.keys(mod).sort()).toEqual([
-      "findCompletedOrder",
-      "findCompletedOrderByOrderId",
-    ]);
+    expect(Object.keys(mod).sort()).toEqual(["findCompletedOrder"]);
   });
 });

@@ -5,8 +5,8 @@
  * identity). The route must NOT guess how to key orders — this adapter
  * disambiguates the legacy `orderId` field (which historically could
  * carry EITHER an internal `Order.id` OR a provider order id) into the
- * canonical `{ orderId, providerOrderId }` contract before anything
- * reaches `resolveProductAccess`.
+ * canonical `{ internalOrderId, providerOrderId }` contract before
+ * anything reaches `resolveProductAccess`.
  *
  * Rules (this adapter is the ONLY place that maps legacy → canonical;
  * pages/consumers must never reimplement this logic):
@@ -14,12 +14,13 @@
  *   1. `providerOrderId` present → forwarded explicitly (canonical).
  *      It also WINS when `orderId` is present too (explicit beats
  *      legacy/ambiguous).
- *   2. `orderId` present → treated as an internal `Order.id`. If the
- *      value does NOT look like an internal id (Prisma cuid), a
- *      `console.warn` flags the legacy misuse (a provider id smuggled
- *      through `orderId`). The value is forwarded unchanged — the
- *      resolver treats `orderId` strictly as the internal primary key,
- *      so a provider id passed this way fails closed (`order_not_found`).
+ *   2. `orderId` present → treated as an internal `Order.id` and
+ *      forwarded as `internalOrderId`. If the value does NOT look like
+ *      an internal id (Prisma cuid), a `console.warn` flags the legacy
+ *      misuse (a provider id smuggled through `orderId`). The value is
+ *      forwarded unchanged — the resolver treats `internalOrderId`
+ *      strictly as the internal primary key, so a provider id passed
+ *      this way fails closed (`order_not_found`).
  *   3. Neither → `{ productId }` only.
  *
  * Empty strings are treated as absent (query params can be `""`).
@@ -36,7 +37,8 @@ export interface LegacyAccessInput {
 
 export interface CanonicalAccessInput {
   productId: string;
-  orderId?: string;
+  /** Internal `Order.id` only — never a provider id. */
+  internalOrderId?: string;
   providerOrderId?: string;
 }
 
@@ -59,7 +61,7 @@ export function normalizeAccessInput(
     }
     return {
       productId: input.productId,
-      orderId: input.orderId,
+      internalOrderId: input.orderId,
     };
   }
 

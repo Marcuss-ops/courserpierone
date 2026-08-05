@@ -86,15 +86,15 @@ export async function AccessGate({
   // with status="active" + non-expired. The BOOLEAN verdict is the
   // only signal the policy engine needs - the evaluator itself
   // remains pure (no Prisma inside).
-  const hasOrderReference = Boolean(providerOrderId || orderId);
-  const granted = dbUser || hasOrderReference
+  const hasOrderIdentifier = Boolean(providerOrderId || orderId);
+  const granted = dbUser || hasOrderIdentifier
     ? await resolveProductAccess({
         userId: dbUser?.id,
         userRole: dbUser?.role,
         productId: product.id,
         provider: providerOrderId ? provider : undefined,
         providerOrderId,
-        orderId,
+        internalOrderId: orderId,
       })
     : null;
 
