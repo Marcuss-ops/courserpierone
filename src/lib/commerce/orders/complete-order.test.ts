@@ -27,6 +27,9 @@ vi.mock("@/lib/db/prisma", () => {
     accessGrant: {
       upsert: vi.fn(),
     },
+    outboxEvent: {
+      createMany: vi.fn(),
+    },
     // MCR Phase 2 — $transaction wrapper for atomic Order+AccessGrant
     // creation. Default mock (set in resetMocks) invokes the callback with
     // the same prisma client as the `tx` handle, mirroring real Prisma
@@ -106,6 +109,9 @@ function resetMocks() {
     status: "completed",
   } as never);
 
+  // Default: transactional outbox write succeeds.
+  vi.mocked(prisma.outboxEvent.createMany).mockResolvedValue({ count: 4 });
+
   // Default: AccessGrant.upsert succeeds (MCR Phase 2 dual-write).
   vi.mocked(prisma.accessGrant.upsert).mockResolvedValue({
     id: "grant_test_id",
@@ -115,6 +121,16 @@ function resetMocks() {
     sourceId: "order_test_id",
     status: "active",
   } as never);
+}
+
+function outboxEvents() {
+  const call = vi.mocked(prisma.outboxEvent.createMany).mock.calls[0]?.[0];
+  const data = call?.data;
+  return (Array.isArray(data) ? data : data ? [data] : []) as {
+    eventKey: string;
+    type: string;
+    payload: Record<string, unknown>;
+  }[];
 }
 
 function buildInput(overrides: Partial<ProcessOrderInput> = {}): ProcessOrderInput {
@@ -196,25 +212,22 @@ describe("processOrder — success path", () => {
     });
   });
 
-  it("calls sendPurchaseConfirmation with localized links", async () => {
-    // override order.create to make sure its id/userId/productId align
-    // with the IT-IT locale variant
-    vi.mocked(prisma.order.create).mockResolvedValue({
-      id: "order_en_us",
-      userId: "user_123",
-      productId: "prod_abc",
-      paymentProvider: "lemonsqueezy",
-      status: "completed",
-    } as never);
-
+  it("persists localized purchase email details in the outbox", async () => {
     await processOrder(buildInput({ locale: "it-it", customerCountry: "IT" }));
 
-    const emailArgs = vi.mocked(sendPurchaseConfirmation).mock.calls[0];
-    expect(emailArgs[0]).toBe("buyer@example.com");
-    expect(emailArgs[1]).toBe("test-course");
-    expect(emailArgs[2]).toMatch(/\/it-it\/test-course\/portal/);
-    expect(emailArgs[3]).toBe("it-it");
-    expect(emailArgs[4]).toMatch(/\/dashboard/);
+    const events = outboxEvents();
+    const emailEvent = events.find((event) => event.type === "purchase_email");
+    expect(emailEvent).toMatchObject({
+      eventKey: expect.stringContaining(":email"),
+      type: "purchase_email",
+      payload: {
+        email: "buyer@example.com",
+        productSlug: "test-course",
+        courseUrl: expect.stringContaining("/it-it/test-course/portal"),
+        locale: "it-it",
+        ebookDownloadUrl: expect.stringContaining("/dashboard"),
+      },
+    });
   });
 });
 
@@ -274,6 +287,7 @@ describe("processOrder — MCR Phase 2 AccessGrant dual-write", () => {
     expect(prisma.accessGrant.upsert).toHaveBeenCalledOnce();
     expect(prisma.analyticEvent.create).not.toHaveBeenCalled();
     expect(prisma.abandonedCheckout.updateMany).not.toHaveBeenCalled();
+    expect(prisma.outboxEvent.createMany).not.toHaveBeenCalled();
     expect(sendPurchaseConfirmation).not.toHaveBeenCalled();
   });
 
@@ -351,38 +365,32 @@ describe("processOrder — email failure tolerance (scenario 9)", () => {
     expect(prisma.accessGrant.upsert).toHaveBeenCalledOnce();
   });
 
-  it("still records analytics event even when email fails", async () => {
-    vi.mocked(sendPurchaseConfirmation).mockRejectedValue(new Error("mail 421"));
-
+  it("persists analytics even when email delivery is unavailable", async () => {
     await processOrder(buildInput());
 
-    expect(prisma.analyticEvent.create).toHaveBeenCalledOnce();
-    const analyticsArg = vi.mocked(prisma.analyticEvent.create).mock.calls[0][0];
-    // MCR Step 11: analytics productId is the SSOT slug (not cuid).
-    // Matches the pageview writer convention so funnel conversion
-    // rates work end-to-end. See complete-order.ts §8 for context.
-    expect(analyticsArg.data).toMatchObject({
-      productId: "test-course",
-      eventType: "purchase",
+    const events = outboxEvents();
+    const analyticsEvent = events.find((event) => event.type === "purchase_analytics");
+    expect(analyticsEvent).toMatchObject({
+      type: "purchase_analytics",
+      payload: expect.objectContaining({
+        productSlug: "test-course",
+        userId: "user_123",
+        provider: "lemonsqueezy",
+        amount: 4900,
+        currency: "usd",
+      }),
     });
   });
 
-  it("still recovers abandoned checkouts when email fails", async () => {
-    vi.mocked(sendPurchaseConfirmation).mockRejectedValue(new Error("boom"));
-
-    vi.mocked(prisma.abandonedCheckout.updateMany)
-      .mockResolvedValueOnce({ count: 1 });
-
+  it("persists abandoned-checkout recovery in the outbox", async () => {
     await processOrder(buildInput());
 
-    expect(prisma.abandonedCheckout.updateMany).toHaveBeenCalledOnce();
-    const updateArg = vi.mocked(prisma.abandonedCheckout.updateMany).mock.calls[0][0];
-    expect(updateArg.where).toMatchObject({
-      email: "buyer@example.com",
-      productId: "prod_abc",
-      status: "pending",
+    const events = outboxEvents();
+    const recoveryEvent = events.find((event) => event.type === "purchase_abandoned_recovery");
+    expect(recoveryEvent).toMatchObject({
+      type: "purchase_abandoned_recovery",
+      payload: { email: "buyer@example.com", productId: "prod_abc" },
     });
-    expect(updateArg.data).toEqual({ status: "recovered" });
   });
 });
 
@@ -391,32 +399,19 @@ describe("processOrder — email failure tolerance (scenario 9)", () => {
 describe("processOrder — abandoned checkout recovery (scenario 6)", () => {
   beforeEach(resetMocks);
 
-  it("marks matching pending abandoned checkouts as recovered", async () => {
-    vi.mocked(prisma.abandonedCheckout.updateMany).mockResolvedValue({ count: 2 });
-
+  it("creates recovery work atomically with the order", async () => {
     await processOrder(buildInput());
 
-    expect(prisma.abandonedCheckout.updateMany).toHaveBeenCalledWith({
-      where: {
-        email: "buyer@example.com",
-        productId: "prod_abc",
-        status: "pending",
-      },
-      data: { status: "recovered" },
-    });
+    expect(prisma.$transaction).toHaveBeenCalledOnce();
+    expect(prisma.outboxEvent.createMany).toHaveBeenCalledOnce();
+    expect(outboxEvents()).toHaveLength(4);
   });
 
-  it("tolerates abandoned-checkout recovery failure (does not rollback order)", async () => {
-    vi.mocked(prisma.abandonedCheckout.updateMany).mockRejectedValue(
-      new Error("abandoned table unreachable")
-    );
+  it("does not run recovery before the transaction commits", async () => {
+    await processOrder(buildInput());
 
-    await expect(
-      processOrder(buildInput())
-    ).resolves.toBeUndefined();
-
-    expect(prisma.order.create).toHaveBeenCalledOnce();
-    expect(prisma.accessGrant.upsert).toHaveBeenCalledOnce();
+    expect(prisma.abandonedCheckout.updateMany).not.toHaveBeenCalled();
+    expect(prisma.outboxEvent.createMany).toHaveBeenCalledOnce();
   });
 });
 
@@ -532,10 +527,10 @@ describe("processOrder — analytics & metadata", () => {
       })
     );
 
-    const call = vi.mocked(prisma.analyticEvent.create).mock.calls[0][0];
-    expect(call.data.eventType).toBe("purchase");
-    const metadata = JSON.parse(call.data.metadata!);
-    expect(metadata).toMatchObject({
+    const events = outboxEvents();
+    const analyticsEvent = events.find((event) => event.type === "purchase_analytics");
+    const payload = analyticsEvent?.payload;
+    expect(payload).toMatchObject({
       provider: "lemonsqueezy",
       amount: 9900,
       currency: "usd",
@@ -544,9 +539,8 @@ describe("processOrder — analytics & metadata", () => {
   });
 
   it("tolerates analytics failure (does not throw)", async () => {
-    vi.mocked(prisma.analyticEvent.create).mockRejectedValue(new Error("analytics down"));
-
     await expect(processOrder(buildInput())).resolves.toBeUndefined();
+    expect(prisma.outboxEvent.createMany).toHaveBeenCalledOnce();
   });
 });
 
@@ -572,7 +566,7 @@ describe("processOrder — full idempotency proof (defence in depth)", () => {
 
     expect(prisma.order.create).toHaveBeenCalledOnce();
     expect(prisma.accessGrant.upsert).toHaveBeenCalledOnce();
-    expect(sendPurchaseConfirmation).toHaveBeenCalledOnce();
-    expect(prisma.analyticEvent.create).toHaveBeenCalledOnce();
+    expect(prisma.outboxEvent.createMany).toHaveBeenCalledOnce();
+    expect(outboxEvents()).toHaveLength(4);
   });
 });

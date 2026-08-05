@@ -104,6 +104,7 @@ const PROVIDER_CODE_TO_REASON: Readonly<Record<string, AgentErrorReason>> = {
   BAD_GATEWAY: "server_5xx",
   SERVICE_UNAVAILABLE: "server_5xx",
   GATEWAY_TIMEOUT: "server_5xx",
+  EMAIL_SEND_FAILED: "connection_interrupted",
 };
 
 /**

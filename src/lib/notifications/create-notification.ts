@@ -76,6 +76,10 @@ export interface CreateNotificationInput {
   title: string;
   body?: string;
   link?: string;
+  /** Stable outbox event ID used to prevent duplicate notifications on replay. */
+  outboxEventId?: string;
+  /** Outbox delivery uses this to preserve infrastructure failures for retry. */
+  throwOnError?: boolean;
 }
 
 export interface CreatedNotification {
@@ -160,6 +164,7 @@ export async function createNotification(
         title: input.title,
         body: input.body ?? null,
         link: input.link ?? null,
+        outboxEventId: input.outboxEventId ?? null,
       },
       select: {
         id: true,
@@ -187,9 +192,10 @@ export async function createNotification(
       createdAt: created.createdAt.toISOString(),
     };
   } catch (err) {
-    // Non bloccare il flusso chiamante (es. createMessageAndNotify)
-    // se la INSERT fallisce — log e forward-ignore.
+    // Legacy callers keep the fail-soft behavior; durable outbox delivery
+    // opts into propagation so the processor can retry/dead-letter it.
     console.error("[notif] create failed:", err);
+    if (input.throwOnError) throw err;
     return null;
   }
 }
