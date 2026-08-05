@@ -218,7 +218,7 @@ export async function resolveMessagingPermission(
     productId,
   });
 
-  if (!access.allowed) {
+  if (!access.hasAccess) {
     // Step 9 — single canonical deny reason. NoCompletedOrderForStudent
     // (legacy) is removed from the active deny surface; the constant
     // remains EXPORTED @deprecated for backward compat only.

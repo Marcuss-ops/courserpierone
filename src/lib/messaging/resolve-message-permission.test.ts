@@ -23,24 +23,29 @@
  *     admin (era il deny `no_creator_for_product` pre-fase 4, ora
  *     irraggiungibile; sostituito da test di non-chiamata).
  *
- * ─── Legacy compat (NO legacy Order read in resolver) ─────────────────
+ * ─── Canonical resolver contract (this revision) ─────────────────────
  *
- * `mockPrisma.order` is intentionally undefined here (mirror of the
- * resolver's test mock strategy): if a future regression re-introduces
- * a direct `prisma.order.findFirst` call in
- * `resolve-message-permission.ts`, the test will fail loudly with a
- * TypeError. The legacy `MessagingDenyReason.NoCompletedOrderForStudent`
- * export is kept @deprecated for `api-authorize.ts` backward compat;
- * the resolver NEVER returns it post-cutover.
+ * `resolveProductAccess` returns the uniform `{ hasAccess, reason,
+ * productId, orderId }` shape. The messaging flow only passes `userId`
+ * (never `orderId`), so only the session path is exercised here:
+ *   - grant present -> allow
+ *   - grant missing -> `classifyDenial` reads `prisma.order.findFirst`
+ *     once (pending/refunded/not_purchased) to classify the deny.
+ * `mockPrisma.order` is therefore a REAL mock returning null by
+ * default (no order -> not_purchased -> NoValidAccessGrant). The
+ * legacy `MessagingDenyReason.NoCompletedOrderForStudent` export is
+ * kept @deprecated for `api-authorize.ts` backward compat; the
+ * resolver NEVER returns it post-cutover.
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // ─── Mocks ────────────────────────────────────────────────────
-// Step 9 — `order.findFirst` is intentionally NOT mocked. The
-// resolver path that once delegated to a legacy Order read is gone;
-// if a regression re-introduces it, this test will fail loudly with
-// TypeError because mockPrisma.order is undefined.
+// `order.findFirst` IS mocked: the canonical resolver's deny path
+// (`classifyDenial`) reads the user's latest Order for the product to
+// classify payment_pending / refunded / not_purchased. The messaging
+// flow never passes orderId, so the anonymous order path stays
+// unreachable — only the session-keyed classifyDenial read can fire.
 const mockPrisma = {
   product: {
     findUnique: vi.fn(),
@@ -54,10 +59,9 @@ const mockPrisma = {
   accessGrant: {
     findFirst: vi.fn(),
   },
-  // order intentionally undefined — the session path must never touch
-  // it (the resolver's anonymous orderId path requires an explicit
-  // orderId, which no messaging flow provides).
-  order: undefined as never,
+  order: {
+    findFirst: vi.fn(),
+  },
 };
 
 vi.mock("@/lib/db/prisma", () => ({ prisma: mockPrisma }));
@@ -85,6 +89,9 @@ beforeEach(() => {
   // canonical resolver now owns product lookup: cuid OR slug).
   mockPrisma.product.findFirst.mockResolvedValue({ id: PRODUCT_ID });
   mockPrisma.accessGrant.findFirst.mockResolvedValue({ id: GRANT_ID });
+  // No order for (student, product) by default -> deny classifies as
+  // not_purchased (only reachable when the grant lookup misses).
+  mockPrisma.order.findFirst.mockResolvedValue(null);
 });
 
 // ─── Tests ───────────────────────────────────────────────────
@@ -250,9 +257,8 @@ describe("resolveMessagingPermission (Step 9 — AccessGrant SSOT path)", () => 
     });
     expect(callOrder).toEqual(["product", "product", "accessGrant"]);
     expect(mockPrisma.user.findFirst).not.toHaveBeenCalled();
-    // Legacy path tripwire: prisma.order is undefined on this mock
-    // (TypeError if the session path ever accesses it).
-    expect(mockPrisma.order).toBeUndefined();
+    // Allow path: the deny classifier (order.findFirst) must NOT fire.
+    expect(mockPrisma.order.findFirst).not.toHaveBeenCalled();
   });
 
   it("does NOT require a grant when querying as the creator (creator side)", async () => {

@@ -37,7 +37,7 @@ export async function GET(
       userId: dbUser.id,
       productId,
     });
-    if (!granted.allowed) {
+    if (!granted.hasAccess) {
       // Localized "you haven't purchased yet" error. Falls back to English
       // automatically when errLang isn't a registered key.
       const t = getUiTranslations(errLang);

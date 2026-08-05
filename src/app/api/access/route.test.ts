@@ -69,17 +69,23 @@ const mockAnonymous = () =>
     dbUser: null,
   });
 
-const mockAllowed = (overrides: Partial<{ source: "grant" | "admin"; grantId: string | null }> = {}) =>
+// Post-contract-change shape: the resolver returns a uniform
+// `{ hasAccess, reason, productId, orderId }`. The route only maps
+// `hasAccess` (and exposes `userId` for session-keyed allows).
+const mockAllowed = (overrides: Partial<{ orderId: string | null }> = {}) =>
   mockResolveProductAccess.mockResolvedValueOnce({
-    allowed: true,
-    grantId: overrides.grantId ?? FAKE_GRANT_ID,
-    source: overrides.source ?? "grant",
+    hasAccess: true,
+    reason: "active_purchase",
+    productId: FAKE_PRODUCT_SLUG,
+    orderId: overrides.orderId ?? FAKE_GRANT_ID,
   });
 
 const mockDenied = () =>
   mockResolveProductAccess.mockResolvedValueOnce({
-    allowed: false,
-    reason: "no_active_access_grant",
+    hasAccess: false,
+    reason: "not_purchased",
+    productId: FAKE_PRODUCT_SLUG,
+    orderId: null,
   });
 
 // ─── Tests ───────────────────────────────────────────────────
@@ -204,9 +210,9 @@ describe("GET /api/access — thin auth semantics probe", () => {
     expect(body.userId).toBeUndefined();
   });
 
-  it("maps admin allow (source:'admin') to hasAccess:true WITH userId", async () => {
+  it("maps admin allow (delegated admin bypass) to hasAccess:true WITH userId", async () => {
     mockAdmin();
-    mockAllowed({ source: "admin", grantId: null });
+    mockAllowed();
 
     const { GET } = await import("./route");
     const response = await GET(createMockRequest({ productId: FAKE_PRODUCT_SLUG }));

@@ -37,10 +37,10 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
     });
 
     return NextResponse.json({
-      hasAccess: granted.allowed,
+      hasAccess: granted.hasAccess,
       // Session-keyed grants (and admin bypass) expose the userId in
       // the response; anonymous orderId-keyed grants do not.
-      ...(granted.allowed && dbUser ? { userId: dbUser.id } : {}),
+      ...(granted.hasAccess && dbUser ? { userId: dbUser.id } : {}),
     });
   } catch (error) {
     console.error("GET /api/access error:", error);

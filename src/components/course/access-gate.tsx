@@ -121,7 +121,7 @@ export async function AccessGate({
     isFreeCourseSlug: isFreeCourse(product.slug, product.price),
     userId: dbUser?.id ?? null,
     userRole: dbUser?.role ?? null,
-    hasActiveAccessGrant: granted?.allowed === true,
+    hasActiveAccessGrant: granted?.hasAccess === true,
     pendingOrderOwnerId:
       orderByRef?.status === "pending" ? orderByRef.userId : null,
     pendingOrderId: orderByRef?.status === "pending" ? orderByRef.id : null,

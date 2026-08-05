@@ -7,28 +7,65 @@
  * messaging permission, GET /api/access) routes through this function
  * instead of duplicating Order/AccessGrant queries inline.
  *
- * ─── MCR Phase 3 cutover ───────────────────────────────────────
+ * ─── Result contract (this revision) ──────────────────────────
  *
- * AccessGrant is the source of truth for access. The legacy
- * Order.findFirst branch and the `USE_ACCESS_GRANT_RESOLVER` feature
- * flag have been REMOVED. Every session-keyed call site reads
- * AccessGrant unconditionally:
+ * Uniform result shape:
+ *
+ *   { hasAccess: boolean; reason: ProductAccessReason; productId: string; orderId: string | null }
+ *
+ *   - `hasAccess` is the verdict consumers branch on.
+ *   - `reason` classifies WHY (actionable for UX: show "payment
+ *     pending" screen vs "buy now" vs "your order was refunded").
+ *   - `productId` is the canonical Product.id the verdict applies to
+ *     (the raw input when the product could not be resolved).
+ *   - `orderId` is the Order behind the verdict when one exists
+ *     (grant.sourceId for order grants, the pending/refunded order,
+ *     or the resolved anonymous order) — null otherwise (admin,
+ *     free_enrollment/admin/bundle grants, no order at all).
+ *
+ * Reason vocabulary (canonical):
+ *   - `active_purchase`  — active AccessGrant (any sourceType) OR
+ *                          admin bypass. Access granted. Note: free
+ *                          courses / admin grants also surface here
+ *                          (the vocabulary has no dedicated literals
+ *                          for them; hasAccess is what matters).
+ *   - `subscription_active` — RESERVED. The Order model has no
+ *                          subscription-type flag, so this literal is
+ *                          never emitted today; kept for contract
+ *                          parity with the canonical identity spec.
+ *   - `payment_pending`  — an Order exists with status="pending"
+ *                          (payment in flight — no grant yet).
+ *   - `refunded`         — Order.status="refunded" (the AccessGrant
+ *                          was revoked atomically by revoke-order.ts).
+ *   - `not_purchased`    — no active grant and no pending/refunded
+ *                          order for this user; also covers
+ *                          "order belongs to another buyer",
+ *                          "product does not exist" (fail-closed) and
+ *                          a completed order whose grant was
+ *                          revoked/expired (no dedicated literal; the
+ *                          vocabulary is per the canonical spec).
+ *   - `order_not_found`  — anonymous post-checkout path: the orderId
+ *                          from the URL matched no Order (id OR
+ *                          providerOrderId) for the product.
+ *
+ * ─── Verdict source ───────────────────────────────────────────
+ *
+ * AccessGrant is the source of truth for the ALLOW verdict:
  *   - `status = "active"` is the only accepted status.
  *   - `expiresAt` may be null (no expiry) OR a future timestamp.
- *     Past expiry is treated as a transient denial until the owner
- *     flips the grant to status="revoked" (recommended, persistent).
- *   - All `sourceType` values are honored uniformly: `order` (paid
- *     purchase), `free_enrollment` (no-cost bypass), `admin` (manual
- *     grant by an admin), `bundle` (included in another product),
- *     `watchlist` (forward-looking; not yet written by app code).
- *     The resolver does not branch on sourceType — any active grant
- *     qualifies the user for access.
+ *   - All `sourceType` values are honored uniformly: `order`, `
+ *     free_enrollment`, `admin`, `bundle`, `watchlist`.
  *
- * ─── Access-route consolidation (this revision) ────────────────
+ * Order is read ONLY to classify DENY reasons (payment_pending vs
+ * refunded vs not_purchased) and to translate the anonymous
+ * post-checkout orderId (provider id → internal Order.id). The allow
+ * decision never depends on Order.status.
+ *
+ * ─── Access-route consolidation ───────────────────────────────
  *
  * `GET /api/access` no longer contains access logic: it parses the
  * request and delegates the ENTIRE decision here. To support that,
- * the resolver now also owns:
+ * the resolver also owns:
  *
  *   1. Product resolution — `productId` may be a Prisma cuid OR a
  *      Product.slug. cuid-shaped inputs are canonical ids and skip
@@ -42,33 +79,25 @@
  *      (cuid v1 is 25 lowercase alphanumeric chars starting with "c")
  *      and fail-closed either way.
  *   2. Admin bypass — `userRole === "admin"` short-circuits to allow
- *      WITHOUT requiring a grant row. Previously this lived inline in
- *      the /api/access route (and separately in /api/videos/stream
- *      and /api/progress, which keep their own pre-checks — harmless
- *      double coverage, their short-circuit runs first). For
- *      non-cuid inputs the product existence gate still runs first
- *      (admin + unknown slug -> deny, preserving the prior route
- *      semantics); cuid inputs skip the lookup, so admin + any
- *      well-formed id resolves to allow (admin bypass semantics).
+ *      WITHOUT requiring a grant row. For non-cuid inputs the product
+ *      existence gate still runs first (admin + unknown slug -> deny);
+ *      cuid inputs skip the lookup, so admin + any well-formed id
+ *      resolves to allow (admin bypass semantics).
  *   3. Anonymous post-checkout path — `orderId` (the value Lemon
  *      Squeezy substitutes into `redirectUrl`, i.e. the LS order id
- *      which is stored as `Order.providerOrderId`, OR the internal
- *      `Order.id` cuid) is translated to the canonical grant lookup:
- *      resolve the Order scoped to the product, then read the grant
- *      by `(sourceType='order', sourceId=order.id)`. This is the fix
- *      for the previous Pattern B mismatch: the grant is written by
- *      `processOrder` with `sourceId = Order.id`, so the provider id
- *      MUST be translated before the grant can be found. The verdict
- *      stays AccessGrant-based (Order is used only as a key-
- *      translation step), and refunds are covered because
- *      `revoke-order.ts` flips `AccessGrant.status` atomically.
+ *      stored as `Order.providerOrderId`, OR the internal `Order.id`
+ *      cuid) is translated to the canonical grant lookup: resolve the
+ *      Order scoped to the product, then read the grant by
+ *      `(sourceType='order', sourceId=order.id)`. This fixes the
+ *      Pattern B mismatch where the provider id never matched the
+ *      grant's sourceId (written by `processOrder` as Order.id).
  *
  * Performance:
- *   - Session path (userId + cuid productId): 1 indexed round-trip
- *     (grant seek on `@@index([userId, productId, status])`).
- *   - Session path (userId + slug): +1 indexed OR lookup.
- *   - Anonymous path: +2 indexed seeks (order by
- *     `@@index([providerOrderId])`/PK + grant by sourceType/sourceId).
+ *   - Allow path (session): 1 indexed grant seek
+ *     (`@@index([userId, productId, status])`).
+ *   - Deny path (session): +1 Order seek (status classification).
+ *   - Slug productId: +1 indexed OR lookup.
+ *   - Anonymous path: +2 indexed seeks (order + grant).
  *
  * Error handling:
  *   Prisma errors propagate to the caller. The function does NOT
@@ -86,34 +115,25 @@ import { prisma } from "@/lib/db/prisma";
  */
 const CUID_RE = /^c[0-9a-z]{24}$/;
 
-/**
- * Stable, stringified deny reasons. Single post-cutover reason.
- * Consumers should NOT compare against the hardcoded string —
- * use the named key instead.
- */
-export const ProductAccessDenyReason = {
-  /** No AccessGrant.status='active' row for the given identity/product. */
-  NoActiveAccessGrant: "no_active_access_grant",
-} as const;
+/** Canonical reason vocabulary (see header for semantics). */
+export type ProductAccessReason =
+  | "active_purchase"
+  | "subscription_active"
+  | "not_purchased"
+  | "refunded"
+  | "payment_pending"
+  | "order_not_found";
 
-export type ProductAccessDenyReason =
-  (typeof ProductAccessDenyReason)[keyof typeof ProductAccessDenyReason];
-
-/**
- * Discriminated union (spec-literal shape).
- *
- * - `allowed: true`  carries `grantId` — always set on the 'grant'
- *   branch; `null` on the 'admin' branch (admins bypass grants and
- *   have no grant row). `source` is `"grant"` | `"admin"`.
- * - `allowed: false` exposes `reason` (stable string) that consumers
- *   map to their preferred error UX.
- *
- *   | { allowed: true; grantId: string | null; source: "grant" | "admin" }
- *   | { allowed: false; reason: ProductAccessDenyReason }
- */
-export type ProductAccessResult =
-  | { allowed: true; grantId: string | null; source: "grant" | "admin" }
-  | { allowed: false; reason: ProductAccessDenyReason };
+/** Uniform resolver result. Consumers branch on `hasAccess`. */
+export interface ProductAccessResult {
+  hasAccess: boolean;
+  reason: ProductAccessReason;
+  /** Canonical Product.id the verdict applies to (input when unresolvable). */
+  productId: string;
+  /** Order behind the verdict (grant sourceId / pending / refunded /
+   *  anonymous order) — null when none applies. */
+  orderId: string | null;
+}
 
 export interface ResolveProductAccessInput {
   /**
@@ -138,8 +158,11 @@ export interface ResolveProductAccessInput {
    * Post-checkout order id from the request URL. May be the internal
    * `Order.id` cuid OR the provider's order id (`Order.providerOrderId`,
    * e.g. the Lemon Squeezy id substituted into the checkout redirect).
-   * Enables the anonymous post-checkout path; ignored when `userId`
-   * already resolves a grant.
+   * Enables the anonymous post-checkout path. IMPORTANT: whenever
+   * `userId` is present the session path is authoritative — a session
+   * denial returns immediately (classifyDenial) and NEVER falls
+   * through to this orderId path (fail-closed, no fallback
+   * ambiguity).
    */
   orderId?: string;
 }
@@ -148,13 +171,13 @@ export interface ResolveProductAccessInput {
  * Check whether the caller has access to `productId`.
  *
  * Resolution order (fail-closed):
- *   1. productId falsy -> deny without DB hit.
+ *   1. productId falsy -> deny (not_purchased) without DB hit.
  *   2. Non-cuid productId: resolve product (slug OR id). Unknown -> deny.
  *   3. userRole === "admin" -> allow (no grant required).
- *   4. userId present -> grant read by (userId, productId).
- *   5. orderId present -> anonymous grant read keyed on the resolved
- *      Order (see header for the sourceId translation rationale).
- *   6. Otherwise -> deny.
+ *   4. userId present -> active-grant read; on miss, classify the
+ *      deny reason via the user's Order (pending/refunded/none).
+ *   5. orderId present -> anonymous order translation + grant read.
+ *   6. Otherwise -> deny (not_purchased).
  */
 export async function resolveProductAccess(
   input: ResolveProductAccessInput,
@@ -164,10 +187,7 @@ export async function resolveProductAccess(
   // undefined keys from the WHERE clause (which can leak cross-user
   // data when the identifier accidentally drops).
   if (!input.productId) {
-    return {
-      allowed: false,
-      reason: ProductAccessDenyReason.NoActiveAccessGrant,
-    };
+    return deny("not_purchased", input.productId);
   }
 
   // Product resolution (cuid fast-path OR slug/id lookup).
@@ -177,17 +197,14 @@ export async function resolveProductAccess(
     : await resolveProductId(input.productId);
 
   if (!productId) {
-    return {
-      allowed: false,
-      reason: ProductAccessDenyReason.NoActiveAccessGrant,
-    };
+    return deny("not_purchased", input.productId);
   }
 
   // Admin bypass — explicit role, no grant row needed. Verified AFTER
   // the (non-cuid) product resolution so `admin + unknown slug` stays
   // deny (the pre-consolidation route behaved the same way).
   if (input.userRole === "admin") {
-    return { allowed: true, grantId: null, source: "admin" };
+    return { hasAccess: true, reason: "active_purchase", productId, orderId: null };
   }
 
   // Session-keyed path: any active non-expired grant qualifies.
@@ -197,8 +214,17 @@ export async function resolveProductAccess(
       productId,
     });
     if (grant) {
-      return { allowed: true, grantId: grant.id, source: "grant" };
+      return {
+        hasAccess: true,
+        reason: "active_purchase",
+        productId,
+        // order grants carry the internal Order.id as sourceId.
+        orderId: grant.sourceType === "order" ? grant.sourceId : null,
+      };
     }
+    // No active grant: classify the denial (payment_pending /
+    // refunded / not_purchased) from the user's Order rows.
+    return classifyDenial({ userId: input.userId, productId });
   }
 
   // Anonymous post-checkout path: translate the order id (internal
@@ -213,24 +239,42 @@ export async function resolveProductAccess(
         OR: [{ id: input.orderId }, { providerOrderId: input.orderId }],
         productId,
       },
-      select: { id: true },
+      select: { id: true, status: true },
     });
-    if (order) {
-      const grant = await findActiveGrant({
-        sourceType: "order",
-        sourceId: order.id,
-        productId,
-      });
-      if (grant) {
-        return { allowed: true, grantId: grant.id, source: "grant" };
-      }
+    if (!order) {
+      // No Order matches (id|providerOrderId) for this product —
+      // covers unknown ids AND orders belonging to another product.
+      return deny("order_not_found", productId);
     }
+    const grant = await findActiveGrant({
+      sourceType: "order",
+      sourceId: order.id,
+      productId,
+    });
+    if (grant) {
+      return {
+        hasAccess: true,
+        reason: "active_purchase",
+        productId,
+        orderId: order.id,
+      };
+    }
+    // Order exists but carries no active grant: classify by its status.
+    return {
+      hasAccess: false,
+      reason:
+        order.status === "pending"
+          ? "payment_pending"
+          : order.status === "refunded"
+            ? "refunded"
+            : "not_purchased",
+      productId,
+      orderId: order.id,
+    };
   }
 
-  return {
-    allowed: false,
-    reason: ProductAccessDenyReason.NoActiveAccessGrant,
-  };
+  // No identity at all (anonymous without orderId) — deny.
+  return deny("not_purchased", productId);
 }
 
 /** Resolve a non-cuid product identifier (slug OR id) to the canonical
@@ -253,13 +297,51 @@ async function findActiveGrant(where: {
   sourceType?: string;
   sourceId?: string;
   productId: string;
-}): Promise<{ id: string } | null> {
-  return prisma.accessGrant.findFirst({
+}): Promise<{ id: string; sourceType: string | null; sourceId: string | null } | null> {
+  const grant = await prisma.accessGrant.findFirst({
     where: {
       ...where,
       status: "active",
       OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
     },
-    select: { id: true },
+    select: { id: true, sourceType: true, sourceId: true },
   });
+  return grant;
+}
+
+/** Classify a session-path denial: latest user Order for the product
+ *  determines payment_pending / refunded / not_purchased. */
+async function classifyDenial(input: {
+  userId: string;
+  productId: string;
+}): Promise<ProductAccessResult> {
+  const order = await prisma.order.findFirst({
+    where: {
+      userId: input.userId,
+      productId: input.productId,
+    },
+    orderBy: { createdAt: "desc" },
+    select: { id: true, status: true },
+  });
+
+  if (!order) {
+    // No order at all for (user, product) — includes the
+    // "order belongs to another buyer" case (this user never bought).
+    return deny("not_purchased", input.productId);
+  }
+  if (order.status === "pending") {
+    return { hasAccess: false, reason: "payment_pending", productId: input.productId, orderId: order.id };
+  }
+  if (order.status === "refunded") {
+    return { hasAccess: false, reason: "refunded", productId: input.productId, orderId: order.id };
+  }
+  // completed (but grant revoked/expired) or failed → generic denial.
+  return deny("not_purchased", input.productId);
+}
+
+function deny(
+  reason: ProductAccessReason,
+  productId: string,
+): ProductAccessResult {
+  return { hasAccess: false, reason, productId, orderId: null };
 }

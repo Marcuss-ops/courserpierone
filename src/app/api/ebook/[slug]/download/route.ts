@@ -48,7 +48,7 @@ export async function GET(
       userId: dbUser.id,
       productId: downloadProduct.id,
     });
-    if (granted.allowed) {
+    if (granted.hasAccess) {
       hasAccess = true;
     }
   }

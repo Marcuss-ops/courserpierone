@@ -83,7 +83,7 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
         userId: dbUser.id,
         productId: product.id,
       });
-      hasAccess = granted.allowed;
+      hasAccess = granted.hasAccess;
     }
 
     if (!hasAccess) {

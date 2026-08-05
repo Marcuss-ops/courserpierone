@@ -69,11 +69,23 @@ const mockCustomer = () =>
   });
 
 // Convenience helpers for the post-cutover AccessGrant verdict.
-const mockAllowedGrant = (sourceType: "order" | "free_enrollment" | "admin" | "bundle" | "watchlist" = "order") =>
-  mockResolveProductAccess.mockResolvedValueOnce({ allowed: true, grantId: `grant-${sourceType}-1`, source: "grant" });
+// Post-contract-change shape: uniform `{ hasAccess, reason, productId,
+// orderId }`. The route only branches on `hasAccess`.
+const mockAllowedGrant = (_sourceType: "order" | "free_enrollment" | "admin" | "bundle" | "watchlist" = "order") =>
+  mockResolveProductAccess.mockResolvedValueOnce({
+    hasAccess: true,
+    reason: "active_purchase",
+    productId: PRODUCT_ID,
+    orderId: "ord-1",
+  });
 
 const mockDeniedGrant = () =>
-  mockResolveProductAccess.mockResolvedValueOnce({ allowed: false, reason: "no_active_access_grant" });
+  mockResolveProductAccess.mockResolvedValueOnce({
+    hasAccess: false,
+    reason: "not_purchased",
+    productId: PRODUCT_ID,
+    orderId: null,
+  });
 
 // ─── fakeOrder factory → @/app/api/__test-helpers__/fake-order (V3.3.2) ─────
 

@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
         userId: dbUser.id,
         productId: lesson.productId,
       });
-      if (!granted.allowed) {
+      if (!granted.hasAccess) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
     }
