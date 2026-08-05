@@ -197,6 +197,48 @@ describe("GET /api/access — thin auth semantics probe", () => {
     );
   });
 
+  it("accepts the provider_order_id snake_case alias (forwarded as providerOrderId)", async () => {
+    mockAnonymous();
+    mockAllowed();
+
+    const { GET } = await import("./route");
+    const response = await GET(
+      createMockRequest({ productId: FAKE_PRODUCT_SLUG, provider_order_id: FAKE_PROVIDER_ORDER_ID })
+    );
+
+    expect(response.status).toBe(200);
+    expect((await response.json()).hasAccess).toBe(true);
+    // No `provider` param and no legacy `order_id` -> provider stays
+    // undefined (explicit providerOrderId values must include provider).
+    expect(mockResolveProductAccess).toHaveBeenCalledWith(
+      expect.objectContaining({
+        providerOrderId: FAKE_PROVIDER_ORDER_ID,
+        provider: undefined,
+        orderId: undefined,
+      }),
+    );
+  });
+
+  it("forwards explicit providerOrderId WITHOUT provider param — provider undefined (resolver fails closed)", async () => {
+    mockAnonymous();
+    mockDenied();
+
+    const { GET } = await import("./route");
+    const response = await GET(
+      createMockRequest({ productId: FAKE_PRODUCT_SLUG, providerOrderId: FAKE_PROVIDER_ORDER_ID })
+    );
+
+    expect(response.status).toBe(200);
+    expect((await response.json()).hasAccess).toBe(false);
+    expect(mockResolveProductAccess).toHaveBeenCalledWith(
+      expect.objectContaining({
+        providerOrderId: FAKE_PROVIDER_ORDER_ID,
+        provider: undefined,
+        orderId: undefined,
+      }),
+    );
+  });
+
   it("maps resolver deny (anonymous + wrong providerOrderId) to hasAccess:false", async () => {
     mockAnonymous();
     mockDenied();

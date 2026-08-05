@@ -104,14 +104,16 @@ export async function AccessGate({
   // Pending-order lookup is UNCHANGED: it's a payment-lifecycle read,
   // not an access-control read. AccessGrant represents finalized
   // access; the buyer's verifying screen reads `Order.status` directly.
-  const orderByRef = providerOrderId && provider
-    ? await prisma.order.findFirst({
-        where: {
-          paymentProvider: provider,
-          providerOrderId,
-          productId: product.id,
-        },
-      })
+  const orderByRef = providerOrderId
+    ? provider
+      ? await prisma.order.findFirst({
+          where: {
+            paymentProvider: provider,
+            providerOrderId,
+            productId: product.id,
+          },
+        })
+      : null
     : orderId
       ? await prisma.order.findFirst({
           where: { id: orderId, productId: product.id },

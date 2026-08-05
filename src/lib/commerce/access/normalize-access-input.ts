@@ -17,8 +17,9 @@
  *   2. `orderId` present → treated as an internal `Order.id`. If the
  *      value does NOT look like an internal id (Prisma cuid), a
  *      `console.warn` flags the legacy misuse (a provider id smuggled
- *      through `orderId`). The value is still forwarded so the
- *      resolver's backward-compatibility path keeps the old flow working.
+ *      through `orderId`). The value is forwarded unchanged — the
+ *      resolver treats `orderId` strictly as the internal primary key,
+ *      so a provider id passed this way fails closed (`order_not_found`).
  *   3. Neither → `{ productId }` only.
  *
  * Empty strings are treated as absent (query params can be `""`).

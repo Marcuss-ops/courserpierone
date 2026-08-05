@@ -47,6 +47,18 @@ describe("normalizeAccessInput — canonical order identity adapter", () => {
     expect(warn).not.toHaveBeenCalled();
   });
 
+  it("providerOrderId wins over a provider-looking orderId — NO warn (legacy branch never reached)", () => {
+    const warn = spyWarn();
+    expect(
+      normalizeAccessInput({
+        productId: PRODUCT_ID,
+        orderId: "order_other_xyz",
+        providerOrderId: PROVIDER_ORDER_ID,
+      }),
+    ).toEqual({ productId: PRODUCT_ID, providerOrderId: PROVIDER_ORDER_ID });
+    expect(warn).not.toHaveBeenCalled();
+  });
+
   it("internal cuid-shaped orderId -> treated as internal Order.id, no warn", () => {
     const warn = spyWarn();
     expect(
