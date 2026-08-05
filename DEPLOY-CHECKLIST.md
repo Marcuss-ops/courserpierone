@@ -165,6 +165,22 @@ git push origin main
 
 Vercel avvierà il build. Tempo: ~3min per il primo deploy (cache cold).
 
+> ⚠️ **Push di file `.github/workflows/*` richiede token con scope `workflow`.**
+> Se `git push origin main` viene rifiutato con:
+> ```
+> ! [remote rejected] main -> main (refusing to allow an OAuth App to create
+>   or update workflow `.github/workflows/...` without `workflow` scope)
+> ```
+> il token usato (PAT classico `ghp_...`, OAuth app, ecc.) **non ha lo scope `workflow`**.
+> Fix: rigenera il token spuntando lo scope **workflow** (oppure usa un fine-grained PAT con
+> permission *Workflows: Read and write* sul repo) e poi:
+> ```bash
+> gh auth refresh -h github.com -s workflow
+> git push origin main
+> ```
+> Nota: un push può essere bloccato anche se nel range ci sono **commit altrui recenti** che
+> toccano workflow files — il controllo è sull'intero range, non solo sul tuo ultimo commit.
+
 ---
 
 ## 🛡️ DEPLOY HARDENING #10-16 · 24-48h post-launch
@@ -370,6 +386,19 @@ curl -H "Authorization: Bearer $CRON_SECRET" https://www.courssy.com/api/diagnos
 ```
 
 Se tutti passano: **online ready**.
+
+### Esito verifica finale registrata (2026-08-05 — refactor access canonico)
+
+| Check | Esito |
+|---|---|
+| `npm run typecheck` | ✅ 0 errori (exit 0) |
+| `npm run lint` | ✅ pulito (exit 0) |
+| `npm test` | ⚠️ 2014 passati / 1 fail **noto pre-esistente** (`check-dod.test.ts`, path Windows) / 9 skip |
+| `npm run build` | ✅ completo (exit 0, tutte le route compilate) |
+
+- **HEAD verificato**: `cc4cbf0` (chore ci) — precedenti: `f2e6b8e` (refactor: canonicalize product access and remove legacy paths), `0130110` (docs canonical order identity), `f971dd5` (legacy cleanup)
+- **Push**: completato su `main` il 2026-08-05 (19 commit in un'unica push, range `2c77a8d..cc4cbf0`)
+- **Nota push workflow**: il push iniziale era bloccato dal token OAuth senza scope `workflow` (range includeva `.github/workflows/*`); sbloccato con PAT con scope workflow — vedi sezione #9
 
 ---
 
