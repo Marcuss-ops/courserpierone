@@ -76,19 +76,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
     }
 
-    if (dbUser.role !== "admin") {
-      // V2 cutover — AccessGrant SSOT: `resolveProductAccess` is the
-      // canonical resolver. Honors all sourceTypes (order, free_enrollment,
-      // admin, bundle, watchlist) uniformly with status="active" + non-
-      // expired. The legacy `findCompletedOrder` (Order.status read) is
-      // no longer called on this path.
-      const granted = await resolveProductAccess({
-        userId: dbUser.id,
-        productId: lesson.productId,
-      });
-      if (!granted.hasAccess) {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-      }
+    // AccessGate SSOT: `resolveProductAccess` is the canonical resolver
+    // — the inline `dbUser.role === "admin"` short-circuit is GONE. The
+    // resolver owns the admin rule (userRole === "admin" → allow) and
+    // honors all grant sourceTypes with status="active" + non-expired.
+    const granted = await resolveProductAccess({
+      userId: dbUser.id,
+      userRole: dbUser.role,
+      productId: lesson.productId,
+    });
+    if (!granted.hasAccess) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const progress = await prisma.lessonProgress.upsert({

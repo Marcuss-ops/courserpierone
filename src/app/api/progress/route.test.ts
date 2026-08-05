@@ -261,6 +261,7 @@ describe("POST /api/progress — admin bypass + customer AccessGrant gate", () =
     expect(body.error).toBe("Forbidden");
     expect(mockResolveProductAccess).toHaveBeenCalledWith({
       userId: USER_ID,
+      userRole: "student",
       productId: PRODUCT_ID,
     });
     expect(mockPrisma.lessonProgress.upsert).not.toHaveBeenCalled();
@@ -282,9 +283,17 @@ describe("POST /api/progress — admin bypass + customer AccessGrant gate", () =
   });
 
   // ── Admin (NO order needed) — bypass inline ─────────────
-  it("admin with NO completed order: returns 200 success (admin bypass inline)", async () => {
+  it("admin: resolver is called with userRole=admin and grants access", async () => {
     mockAdmin();
     mockPrisma.lesson.findUnique.mockResolvedValueOnce({ productId: PRODUCT_ID });
+    // The canonical resolver short-circuits on userRole === "admin" —
+    // no inline role check anymore.
+    mockResolveProductAccess.mockResolvedValueOnce({
+      hasAccess: true,
+      reason: "active_purchase",
+      productId: PRODUCT_ID,
+      orderId: null,
+    });
     mockPrisma.lessonProgress.upsert.mockResolvedValueOnce({
       id: "lp1", userId: ADMIN_ID, lessonId: LESSON_ID, completed: true,
     });
@@ -296,8 +305,11 @@ describe("POST /api/progress — admin bypass + customer AccessGrant gate", () =
 
     expect(response.status).toBe(200);
     expect(body.success).toBe(true);
-    // Admin bypass: helper MUST NOT have been called.
-    expect(mockResolveProductAccess).not.toHaveBeenCalled();
+    expect(mockResolveProductAccess).toHaveBeenCalledWith({
+      userId: ADMIN_ID,
+      userRole: "admin",
+      productId: PRODUCT_ID,
+    });
     expect(mockPrisma.lessonProgress.upsert).toHaveBeenCalledOnce();
   });
 
@@ -319,6 +331,7 @@ describe("POST /api/progress — admin bypass + customer AccessGrant gate", () =
     expect(body.success).toBe(true);
     expect(mockResolveProductAccess).toHaveBeenCalledWith({
       userId: USER_ID,
+      userRole: "student",
       productId: PRODUCT_ID,
     });
     expect(mockPrisma.lessonProgress.upsert).toHaveBeenCalledOnce();
