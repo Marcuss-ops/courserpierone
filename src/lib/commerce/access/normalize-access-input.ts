@@ -1,0 +1,66 @@
+/**
+ * src/lib/commerce/access/normalize-access-input.ts
+ *
+ * SINGLE normalizing adapter for `/api/access` inputs (canonical order
+ * identity). The route must NOT guess how to key orders — this adapter
+ * disambiguates the legacy `orderId` field (which historically could
+ * carry EITHER an internal `Order.id` OR a provider order id) into the
+ * canonical `{ orderId, providerOrderId }` contract before anything
+ * reaches `resolveProductAccess`.
+ *
+ * Rules (this adapter is the ONLY place that maps legacy → canonical;
+ * pages/consumers must never reimplement this logic):
+ *
+ *   1. `providerOrderId` present → forwarded explicitly (canonical).
+ *      It also WINS when `orderId` is present too (explicit beats
+ *      legacy/ambiguous).
+ *   2. `orderId` present → treated as an internal `Order.id`. If the
+ *      value does NOT look like an internal id (Prisma cuid), a
+ *      `console.warn` flags the legacy misuse (a provider id smuggled
+ *      through `orderId`). The value is still forwarded so the
+ *      resolver's backward-compatibility path keeps the old flow working.
+ *   3. Neither → `{ productId }` only.
+ *
+ * Empty strings are treated as absent (query params can be `""`).
+ */
+
+/** Prisma cuid v1 shape used for internal Order.id values. */
+const INTERNAL_ID_RE = /^c[0-9a-z]{24}$/;
+
+export interface LegacyAccessInput {
+  productId: string;
+  orderId?: string;
+  providerOrderId?: string;
+}
+
+export interface CanonicalAccessInput {
+  productId: string;
+  orderId?: string;
+  providerOrderId?: string;
+}
+
+export function normalizeAccessInput(
+  input: LegacyAccessInput,
+): CanonicalAccessInput {
+  if (input.providerOrderId) {
+    return {
+      productId: input.productId,
+      providerOrderId: input.providerOrderId,
+    };
+  }
+
+  if (input.orderId) {
+    if (!INTERNAL_ID_RE.test(input.orderId)) {
+      console.warn(
+        `[legacy] External provider identifier received through orderId: ${input.orderId} — ` +
+          "pass providerOrderId explicitly for the canonical path",
+      );
+    }
+    return {
+      productId: input.productId,
+      orderId: input.orderId,
+    };
+  }
+
+  return { productId: input.productId };
+}

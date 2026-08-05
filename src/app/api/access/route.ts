@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { withRateLimit } from "@/lib/utils/rate-limit";
+import { normalizeAccessInput } from "@/lib/commerce/access/normalize-access-input";
 import { resolveProductAccess } from "@/lib/commerce/access/resolve-product-access";
 
 /**
@@ -13,27 +14,61 @@ import { resolveProductAccess } from "@/lib/commerce/access/resolve-product-acce
  * Order reads, no legacy tables, no parallel access logic inside
  * this file.
  *
+ * Order-identity normalization happens in ONE place — the adapter
+ * `normalizeAccessInput` (`src/lib/commerce/access/normalize-access-input.ts`):
+ * `providerOrderId` is forwarded explicitly (canonical); `orderId` is
+ * treated as an internal `Order.id` (legacy `console.warn` when it
+ * looks like a provider id). Pages/consumers never reimplement this
+ * mapping.
+ *
  * The resolver owns:
  *   - productId resolution (slug OR cuid)
  *   - session-keyed grants (userId)
  *   - admin bypass (userRole)
- *   - anonymous post-checkout access (orderId — internal Order.id OR
- *     providerOrderId, translated to the canonical grant lookup)
+ *   - anonymous post-checkout access (provider + providerOrderId,
+ *     translated to the internal Order.id before the grant lookup)
+ *   - legacy internal `orderId` access for callers that already have
+ *     the canonical Prisma Order.id
  */
 export const GET = withRateLimit(async function GET(request: NextRequest) {
   try {
     const { dbUser } = await getServerUser();
     const { searchParams } = request.nextUrl;
     const productId = searchParams.get("productId");
-    const orderId = searchParams.get("orderId") || searchParams.get("order_id");
-
     if (!productId) return NextResponse.json({ hasAccess: false });
 
+    const explicitProviderOrderId =
+      searchParams.get("providerOrderId") ||
+      searchParams.get("provider_order_id") ||
+      undefined;
+    const legacyProviderOrderId = searchParams.get("order_id") || undefined;
+
+    // SINGLE normalizing adapter at the entrance: LegacyAccessInput →
+    // CanonicalAccessInput. The route does not guess how to key orders —
+    // providerOrderId is forwarded explicitly, orderId is treated as an
+    // internal Order.id (legacy console.warn when it carries a provider
+    // id). This mapping lives HERE, in one place.
+    const canonical = normalizeAccessInput({
+      productId,
+      orderId: searchParams.get("orderId") || undefined,
+      providerOrderId: explicitProviderOrderId || legacyProviderOrderId,
+    });
+
+    const providerOrderId = canonical.providerOrderId;
     const granted = await resolveProductAccess({
       userId: dbUser?.id,
       userRole: dbUser?.role,
-      productId,
-      orderId: orderId ?? undefined,
+      productId: canonical.productId,
+      // `order_id` is the legacy Lemon Squeezy-only redirect alias;
+      // explicit providerOrderId values must include their provider.
+      provider: providerOrderId
+        ? searchParams.get("provider") ||
+          (!explicitProviderOrderId && legacyProviderOrderId
+            ? "lemonsqueezy"
+            : undefined)
+        : undefined,
+      providerOrderId,
+      orderId: canonical.orderId,
     });
 
     return NextResponse.json({

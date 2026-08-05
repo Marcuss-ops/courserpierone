@@ -31,6 +31,7 @@ vi.mock("@/lib/utils/rate-limit", () => ({
 // ─── Helpers ─────────────────────────────────────────────────
 const FAKE_PRODUCT_SLUG = "test-course";
 const FAKE_USER_ID = "cu-user-1";
+const FAKE_PROVIDER = "lemonsqueezy";
 const FAKE_PROVIDER_ORDER_ID = "cs_test_aBc123";
 const FAKE_GRANT_ID = "grant-1";
 
@@ -127,13 +128,17 @@ describe("GET /api/access — thin auth semantics probe", () => {
     });
   });
 
-  it("forwards orderId (Pattern B guest) and maps allow WITHOUT userId", async () => {
+  it("forwards provider + providerOrderId (Pattern B guest) and maps allow WITHOUT userId", async () => {
     mockAnonymous();
     mockAllowed();
 
     const { GET } = await import("./route");
     const response = await GET(
-      createMockRequest({ productId: FAKE_PRODUCT_SLUG, orderId: FAKE_PROVIDER_ORDER_ID })
+      createMockRequest({
+        productId: FAKE_PRODUCT_SLUG,
+        provider: FAKE_PROVIDER,
+        providerOrderId: FAKE_PROVIDER_ORDER_ID,
+      })
     );
     const body = await response.json();
 
@@ -145,11 +150,34 @@ describe("GET /api/access — thin auth semantics probe", () => {
       userId: undefined,
       userRole: undefined,
       productId: FAKE_PRODUCT_SLUG,
-      orderId: FAKE_PROVIDER_ORDER_ID,
+      provider: FAKE_PROVIDER,
+      providerOrderId: FAKE_PROVIDER_ORDER_ID,
+      orderId: undefined,
     });
   });
 
-  it("accepts the legacy order_id query param alias", async () => {
+  it("does not let legacy order_id broaden an explicit providerOrderId without provider", async () => {
+    mockAnonymous();
+    mockDenied();
+
+    const { GET } = await import("./route");
+    await GET(
+      createMockRequest({
+        productId: FAKE_PRODUCT_SLUG,
+        providerOrderId: FAKE_PROVIDER_ORDER_ID,
+        order_id: "legacy_ls_order",
+      }),
+    );
+
+    expect(mockResolveProductAccess).toHaveBeenCalledWith(
+      expect.objectContaining({
+        provider: undefined,
+        providerOrderId: FAKE_PROVIDER_ORDER_ID,
+      }),
+    );
+  });
+
+  it("accepts the legacy order_id query param alias with the single configured provider", async () => {
     mockAnonymous();
     mockAllowed();
 
@@ -161,13 +189,35 @@ describe("GET /api/access — thin auth semantics probe", () => {
     expect(response.status).toBe(200);
     expect((await response.json()).hasAccess).toBe(true);
     expect(mockResolveProductAccess).toHaveBeenCalledWith(
-      expect.objectContaining({ orderId: FAKE_PROVIDER_ORDER_ID }),
+      expect.objectContaining({
+        provider: FAKE_PROVIDER,
+        providerOrderId: FAKE_PROVIDER_ORDER_ID,
+        orderId: undefined,
+      }),
     );
   });
 
-  it("maps resolver deny (anonymous + wrong orderId) to hasAccess:false", async () => {
+  it("maps resolver deny (anonymous + wrong providerOrderId) to hasAccess:false", async () => {
     mockAnonymous();
     mockDenied();
+
+    const { GET } = await import("./route");
+    const response = await GET(
+      createMockRequest({
+        productId: FAKE_PRODUCT_SLUG,
+        provider: FAKE_PROVIDER,
+        providerOrderId: FAKE_PROVIDER_ORDER_ID,
+      })
+    );
+
+    expect(response.status).toBe(200);
+    expect((await response.json()).hasAccess).toBe(false);
+  });
+
+  it("treats orderId as an internal Order.id — warns when it looks like a provider id (legacy)", async () => {
+    mockAnonymous();
+    mockDenied();
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
 
     const { GET } = await import("./route");
     const response = await GET(
@@ -175,7 +225,20 @@ describe("GET /api/access — thin auth semantics probe", () => {
     );
 
     expect(response.status).toBe(200);
-    expect((await response.json()).hasAccess).toBe(false);
+    // Legacy misuse surfaced by the adapter: a provider-looking value
+    // arrived through the orderId param.
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(warnSpy.mock.calls[0]?.[0]).toContain("[legacy]");
+    // Forwarded as the INTERNAL orderId field (never silently rewritten
+    // to providerOrderId by the adapter).
+    expect(mockResolveProductAccess).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderId: FAKE_PROVIDER_ORDER_ID,
+        providerOrderId: undefined,
+        provider: undefined,
+      }),
+    );
+    warnSpy.mockRestore();
   });
 
   it("forwards userId + userRole (customer) and maps allow WITH userId", async () => {

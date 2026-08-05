@@ -58,8 +58,8 @@
  *
  * Order is read ONLY to classify DENY reasons (payment_pending vs
  * refunded vs not_purchased) and to translate the anonymous
- * post-checkout orderId (provider id → internal Order.id). The allow
- * decision never depends on Order.status.
+ * post-checkout provider + providerOrderId → internal Order.id. The
+ * allow decision never depends on Order.status.
  *
  * ─── Access-route consolidation ───────────────────────────────
  *
@@ -83,12 +83,10 @@
  *      existence gate still runs first (admin + unknown slug -> deny);
  *      cuid inputs skip the lookup, so admin + any well-formed id
  *      resolves to allow (admin bypass semantics).
- *   3. Anonymous post-checkout path — `orderId` (the value Lemon
- *      Squeezy substitutes into `redirectUrl`, i.e. the LS order id
- *      stored as `Order.providerOrderId`, OR the internal `Order.id`
- *      cuid) is translated to the canonical grant lookup: resolve the
- *      Order scoped to the product, then read the grant by
- *      `(sourceType='order', sourceId=order.id)`. This fixes the
+ *   3. Anonymous post-checkout path — `provider` + `providerOrderId`
+ *      resolve the provider-scoped Order, then its internal `Order.id`
+ *      is used for the canonical grant lookup. A legacy `orderId` may
+ *      still identify an internal Order.id directly. This fixes the
  *      Pattern B mismatch where the provider id never matched the
  *      grant's sourceId (written by `processOrder` as Order.id).
  *
@@ -155,14 +153,20 @@ export interface ResolveProductAccessInput {
    */
   productId: string;
   /**
-   * Post-checkout order id from the request URL. May be the internal
-   * `Order.id` cuid OR the provider's order id (`Order.providerOrderId`,
-   * e.g. the Lemon Squeezy id substituted into the checkout redirect).
-   * Enables the anonymous post-checkout path. IMPORTANT: whenever
-   * `userId` is present the session path is authoritative — a session
-   * denial returns immediately (classifyDenial) and NEVER falls
-   * through to this orderId path (fail-closed, no fallback
-   * ambiguity).
+   * Payment provider slug for the anonymous post-checkout lookup.
+   * Required together with `providerOrderId`; a missing provider never
+   * triggers an unscoped provider-order search.
+   */
+  provider?: string;
+  /**
+   * Provider-owned order identifier from the checkout redirect. It is
+   * resolved with `provider` to an internal `Order.id` before reading
+   * AccessGrant.sourceId.
+   */
+  providerOrderId?: string;
+  /**
+   * Legacy/internal Order.id lookup. Kept for existing callers that
+   * already possess the canonical Prisma id.
    */
   orderId?: string;
 }
@@ -176,7 +180,8 @@ export interface ResolveProductAccessInput {
  *   3. userRole === "admin" -> allow (no grant required).
  *   4. userId present -> active-grant read; on miss, classify the
  *      deny reason via the user's Order (pending/refunded/none).
- *   5. orderId present -> anonymous order translation + grant read.
+ *   5. provider + providerOrderId (or legacy internal orderId) present
+ *      -> anonymous order translation + grant read.
  *   6. Otherwise -> deny (not_purchased).
  */
 export async function resolveProductAccess(
@@ -227,23 +232,31 @@ export async function resolveProductAccess(
     return classifyDenial({ userId: input.userId, productId });
   }
 
-  // Anonymous post-checkout path: translate the order id (internal
-  // cuid OR provider id) to the internal Order.id, then read the
-  // `sourceType='order'` grant. Scoped to the product (cross-product
-  // scope-leak defense) and strictly sourceType='order' (a
-  // free_enrollment/admin/bundle grant sharing the same sourceId must
-  // NOT satisfy this path).
-  if (input.orderId) {
-    const order = await prisma.order.findFirst({
-      where: {
-        OR: [{ id: input.orderId }, { providerOrderId: input.orderId }],
-        productId,
-      },
-      select: { id: true, status: true },
-    });
+  // Anonymous post-checkout path: resolve the provider-owned id to the
+  // internal Order.id, then read the `sourceType='order'` grant. The
+  // provider is part of the lookup so the same providerOrderId cannot
+  // cross provider boundaries. A legacy orderId is accepted only as the
+  // internal primary key. Both paths are scoped to the product and use
+  // sourceType='order' (a free_enrollment/admin/bundle grant sharing the
+  // same sourceId must NOT satisfy this path).
+  if (input.providerOrderId || input.orderId) {
+    const order = input.providerOrderId
+      ? input.provider
+        ? await prisma.order.findFirst({
+            where: {
+              paymentProvider: input.provider,
+              providerOrderId: input.providerOrderId,
+              productId,
+            },
+            select: { id: true, status: true },
+          })
+        : null
+      : await prisma.order.findFirst({
+          where: { id: input.orderId, productId },
+          select: { id: true, status: true },
+        });
     if (!order) {
-      // No Order matches (id|providerOrderId) for this product —
-      // covers unknown ids AND orders belonging to another product.
+      // No provider-scoped or legacy internal Order matches this product.
       return deny("order_not_found", productId);
     }
     const grant = await findActiveGrant({
@@ -273,7 +286,7 @@ export async function resolveProductAccess(
     };
   }
 
-  // No identity at all (anonymous without orderId) — deny.
+  // No identity at all (anonymous without an order reference) — deny.
   return deny("not_purchased", productId);
 }
 

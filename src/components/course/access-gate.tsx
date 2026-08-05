@@ -19,6 +19,8 @@ interface AccessGateProps {
   productSlug: string;
   courseTitle?: string;
   callbackUrl: string;
+  provider?: string;
+  providerOrderId?: string;
   orderId?: string;
   children: ReactNode;
 }
@@ -58,6 +60,8 @@ export async function AccessGate({
   productSlug,
   courseTitle,
   callbackUrl,
+  provider,
+  providerOrderId,
   orderId,
   children,
 }: AccessGateProps) {
@@ -82,10 +86,15 @@ export async function AccessGate({
   // with status="active" + non-expired. The BOOLEAN verdict is the
   // only signal the policy engine needs - the evaluator itself
   // remains pure (no Prisma inside).
-  const granted = dbUser
+  const hasOrderReference = Boolean(providerOrderId || orderId);
+  const granted = dbUser || hasOrderReference
     ? await resolveProductAccess({
-        userId: dbUser.id,
+        userId: dbUser?.id,
+        userRole: dbUser?.role,
         productId: product.id,
+        provider: providerOrderId ? provider : undefined,
+        providerOrderId,
+        orderId,
       })
     : null;
 
@@ -95,14 +104,19 @@ export async function AccessGate({
   // Pending-order lookup is UNCHANGED: it's a payment-lifecycle read,
   // not an access-control read. AccessGrant represents finalized
   // access; the buyer's verifying screen reads `Order.status` directly.
-  const orderByRef = orderId
+  const orderByRef = providerOrderId && provider
     ? await prisma.order.findFirst({
         where: {
-          OR: [{ id: orderId }, { providerOrderId: orderId }],
+          paymentProvider: provider,
+          providerOrderId,
           productId: product.id,
         },
       })
-    : null;
+    : orderId
+      ? await prisma.order.findFirst({
+          where: { id: orderId, productId: product.id },
+        })
+      : null;
 
   // Defensive coalescing: the AccessContext fields are optional, but
   // their semantics are null-vs-undefined-aware in evaluatePolicy.

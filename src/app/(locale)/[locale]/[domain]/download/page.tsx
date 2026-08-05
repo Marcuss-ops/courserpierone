@@ -100,10 +100,17 @@ export default async function DownloadPage({
   searchParams,
 }: {
   params: Promise<{ locale: string; domain: string }>;
-  searchParams: Promise<{ lang?: string; token?: string; order_id?: string; orderId?: string }>;
+  searchParams: Promise<{
+    lang?: string;
+    token?: string;
+    provider?: string;
+    providerOrderId?: string;
+    order_id?: string;
+    orderId?: string;
+  }>;
 }) {
   const { domain, locale } = await params;
-  const { lang, token, order_id, orderId } = await searchParams;
+  const { lang, token, provider, providerOrderId, order_id, orderId } = await searchParams;
 
   const course = await getCourseConfig(domain);
   if (!course) return notFound();
@@ -137,13 +144,26 @@ export default async function DownloadPage({
 
   const downloadUrl = staticBookUrl || `/api/ebook/${domain}/download?lang=${currentLang}&disposition=attachment${token ? `&token=${token}` : ""}`;
 
-  const activeOrderId = order_id || orderId;
+  const activeProviderOrderId = providerOrderId || order_id;
+  const activeOrderId = orderId;
   const downloadQs = new URLSearchParams();
   downloadQs.set("lang", currentLang);
-  if (activeOrderId) downloadQs.set("order_id", activeOrderId);
-
+  if (activeProviderOrderId) {
+    downloadQs.set("provider", provider || "lemonsqueezy");
+    downloadQs.set("providerOrderId", activeProviderOrderId);
+  }
+  if (activeOrderId) downloadQs.set("orderId", activeOrderId);
+  
   return (
-    <AccessGate productSlug={domain} courseTitle={ebookTitle} callbackUrl={`/${locale}/${domain}/download?${downloadQs.toString()}`} orderId={activeOrderId}>
+    <AccessGate
+      productSlug={domain}
+      courseTitle={ebookTitle}
+      callbackUrl={`/${locale}/${domain}/download?${downloadQs.toString()}`}
+      provider={provider || (!providerOrderId && order_id ? "lemonsqueezy" : undefined)}
+      providerOrderId={activeProviderOrderId}
+      orderId={activeOrderId}
+    >
+
     <div className="min-h-screen bg-[#070709] text-zinc-100 font-sans relative overflow-x-hidden flex flex-col justify-between">
       <SaveAccess productSlug={domain} isFreeCourse={freeCourse} />
       {/* Background radial glows */}

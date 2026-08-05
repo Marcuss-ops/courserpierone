@@ -315,17 +315,51 @@ describe("resolveProductAccess — anonymous post-checkout path (orderId)", () =
 
     const result = await resolveProductAccess({
       productId: PRODUCT_ID,
-      orderId: "order_ls_abc123",
+      provider: "lemonsqueezy",
+      providerOrderId: "order_ls_abc123",
     });
 
     expectAllow(result, ORDER_ID);
     expect(mockPrisma.order.findFirst).toHaveBeenCalledWith({
       where: {
-        OR: [{ id: "order_ls_abc123" }, { providerOrderId: "order_ls_abc123" }],
+        paymentProvider: "lemonsqueezy",
+        providerOrderId: "order_ls_abc123",
         productId: PRODUCT_ID,
       },
       select: { id: true, status: true },
     });
+  });
+
+  it("same providerOrderId under a different provider remains isolated", async () => {
+    mockPrisma.order.findFirst.mockResolvedValue(null);
+
+    const result = await resolveProductAccess({
+      productId: PRODUCT_ID,
+      provider: "stripe",
+      providerOrderId: "order_ls_abc123",
+    });
+
+    expectDeny(result, "order_not_found");
+    expect(mockPrisma.order.findFirst).toHaveBeenCalledWith({
+      where: {
+        paymentProvider: "stripe",
+        providerOrderId: "order_ls_abc123",
+        productId: PRODUCT_ID,
+      },
+      select: { id: true, status: true },
+    });
+    expect(mockPrisma.accessGrant.findFirst).not.toHaveBeenCalled();
+  });
+
+  it("providerOrderId without provider -> deny order_not_found without an unscoped lookup", async () => {
+    const result = await resolveProductAccess({
+      productId: PRODUCT_ID,
+      providerOrderId: "order_ls_abc123",
+    });
+
+    expectDeny(result, "order_not_found");
+    expect(mockPrisma.order.findFirst).not.toHaveBeenCalled();
+    expect(mockPrisma.accessGrant.findFirst).not.toHaveBeenCalled();
   });
 
   it("orderId sconosciuto -> deny order_not_found (no grant query)", async () => {
@@ -410,7 +444,8 @@ describe("resolveProductAccess — anonymous post-checkout path (orderId)", () =
     const result = await resolveProductAccess({
       userId: USER_ID,
       productId: PRODUCT_ID,
-      orderId: "order_ls_abc123",
+      provider: "lemonsqueezy",
+      providerOrderId: "order_ls_abc123",
     });
 
     expectAllow(result, ORDER_ID);

@@ -84,10 +84,18 @@ export default async function CoursePage({
   searchParams,
 }: {
   params: Promise<{ locale: string; domain: string; lessonId: string }>;
-  searchParams: Promise<{ lang?: string; token?: string; theme?: string; order_id?: string; orderId?: string }>;
+  searchParams: Promise<{
+    lang?: string;
+    theme?: string;
+    token?: string;
+    provider?: string;
+    providerOrderId?: string;
+    order_id?: string;
+    orderId?: string;
+  }>;
 }) {
   const { locale, domain, lessonId } = await params;
-  const { lang, theme, order_id, orderId } = await searchParams;
+  const { lang, theme, provider, providerOrderId, order_id, orderId } = await searchParams;
   const isDark = theme === "dark";
   const isLight = !isDark;
   const course = await getCourseConfig(domain);
@@ -123,14 +131,27 @@ export default async function CoursePage({
   const localeContent = loadLocaleContentSafe(domain, currentLang);
   const lc = localeContent.course;
 
-  const activeOrderId = order_id || orderId;
+  const activeProviderOrderId = providerOrderId || order_id;
+  const activeOrderId = orderId;
   const lessonQs = new URLSearchParams();
   lessonQs.set("lang", currentLang);
   if (theme) lessonQs.set("theme", theme);
-  if (activeOrderId) lessonQs.set("order_id", activeOrderId);
-
+  if (activeProviderOrderId) {
+    lessonQs.set("provider", provider || "lemonsqueezy");
+    lessonQs.set("providerOrderId", activeProviderOrderId);
+  }
+  if (activeOrderId) lessonQs.set("orderId", activeOrderId);
+  
   return (
-    <AccessGate productSlug={domain} courseTitle={content.title} callbackUrl={`/${locale}/${domain}/curso/${lessonId}?${lessonQs.toString()}`} orderId={activeOrderId}>
+    <AccessGate
+      productSlug={domain}
+      courseTitle={content.title}
+      callbackUrl={`/${locale}/${domain}/curso/${lessonId}?${lessonQs.toString()}`}
+      provider={provider || (!providerOrderId && order_id ? "lemonsqueezy" : undefined)}
+      providerOrderId={activeProviderOrderId}
+      orderId={activeOrderId}
+    >
+
       <AnalyticsTracker productSlug={domain} />
       <TrackLessonView lessonId={currentLesson.id} isAuthenticated={isAuthenticated} isFreeCourse={freeCourse} />
       
