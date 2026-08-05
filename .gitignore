@@ -35,6 +35,18 @@ yarn-error.log*
 .env.backup-*
 docs/ops/vercel-secrets-reference.md
 
+# Database backups and dumps — never commit production or test snapshots
+/backups/
+/pitr-snapshots/
+*.dump
+*.sql.gz
+/backups/**/*.sql
+/pitr-snapshots/**/*.sql
+
+# Keep source SQL migrations and checked-in SQL tooling trackable
+!/prisma/migrations/**/*.sql
+!/scripts/supabase/**/*.sql
+
 # Local hotspot scorer output (also uploaded as CI artifact)
 tmp/hotspots/
 tmp/deps-checker.json
