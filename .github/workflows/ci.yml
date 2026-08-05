@@ -500,7 +500,7 @@ jobs:
           retention-days: 7
 
   # ════════════════════════════════════════════════════════════════════════
-  # Job 7 — Production build
+  # Job 8 — Production build
   # A dedicated required check makes the production build status visible
   # independently from the broader quality-gate job.
   # ════════════════════════════════════════════════════════════════════════
@@ -538,7 +538,7 @@ jobs:
         run: npm run build
 
   # ════════════════════════════════════════════════════════════════════════
-  # Job 8 — quality-gate (size + migration + SSE + dead-exports)
+  # Job 9 — quality-gate (size + migration + SSE + dead-exports)
   # Complements the standalone production build check.
   # ════════════════════════════════════════════════════════════════════════
   # Runs in parallel with typecheck and is aggregated by deploy-gate below.
@@ -752,7 +752,7 @@ jobs:
           retention-days: 7
 
   # ════════════════════════════════════════════════════════════════════════
-  # Job 9 — deploy-gate (aggregator)
+  # Job 10 — deploy-gate (aggregator)
   # This is the required aggregate status check on main. Every underlying
   # job is also required through branch protection; the aggregator provides a
   # single fail-closed deployment signal and alerts via ALERT_WEBHOOK_URL.
