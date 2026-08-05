@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
+import { resolveProductAccess } from "@/lib/commerce/access/resolve-product-access";
 import { ChatView } from "@/components/chat/chat-view";
 import { findOrCreateConversation } from "@/lib/messaging/find-or-create-conversation";
 
@@ -12,9 +13,8 @@ import { findOrCreateConversation } from "@/lib/messaging/find-or-create-convers
  * Stessa motivazione di `/dashboard/messages/page.tsx` (vedi Fase 3.3):
  * la pagina legge cookies via `getServerUser` ed esegue query Prisma
  * in tempo reale. `force-dynamic` garantisce che un cambio di stato
- * `Order.status: completed → refunded` abbia effetto immediato sul
- * prossimo page-load (vedi read-side guard sopra) senza cache
- * Vercel stale.
+ * (grant revocato su refund) abbia effetto immediato sul prossimo
+ * page-load (vedi read-side guard sopra) senza cache Vercel stale.
  */
 export const dynamic = "force-dynamic";
 
@@ -49,12 +49,14 @@ export default async function ConversationPage({ params, searchParams }: ChatPag
   // /dashboard/messages/<creatorId>?productId=<mAIAcquistato>.
   // Verifichiamo che:
   //   (a) il prodotto esista ed abbia un `creatorId` valido pari a `userId`;
-  //   (b) lo studente corrente abbia un Order.completed per quel product.
+  //   (b) lo studente corrente abbia accesso al prodotto via il resolver
+  //       canonico `resolveProductAccess` (AccessGrant SSOT — mai una
+  //       query diretta a Order.completed).
   // In assenza di (a) O (b) → redirect all'inbox (l'empty state
   // differenziato si occuperà del resto della UX).
   //
   // [C2 micro-win] Product.findUnique è sequenziale (il check su
-  // creatorId dipende da questa query); Order.findFirst e
+  // creatorId dipende da questa query); resolveProductAccess e
   // User.findUnique sono invece indipendenti e le eseguiamo in
   // parallelo via Promise.all per risparmiare ~10-20ms di round-trip.
   const product = await prisma.product.findUnique({
@@ -66,17 +68,18 @@ export default async function ConversationPage({ params, searchParams }: ChatPag
     redirect("/dashboard/messages");
   }
 
-  const [hasCompletedOrder, otherUser] = await Promise.all([
-    prisma.order.findFirst({
-      where: { userId: dbUser.id, productId, status: "completed" },
-      select: { id: true },
+  const [accessResult, otherUser] = await Promise.all([
+    resolveProductAccess({
+      userId: dbUser.id,
+      userRole: dbUser.role,
+      productId,
     }),
     prisma.user.findUnique({
       where: { id: userId },
       select: { id: true, name: true, image: true, role: true },
     }),
   ]);
-  if (!hasCompletedOrder || !otherUser) {
+  if (!accessResult.hasAccess || !otherUser) {
     redirect("/dashboard/messages");
   }
 
@@ -100,9 +103,9 @@ export default async function ConversationPage({ params, searchParams }: ChatPag
   // Conversation server-side PRIMA di montare ChatView. Il ChatView
   // canonico richiede un conversationId non-null come prop — non c'è
   // più il fallback "auto-create lazy al primo fetch" sul client.
-  // Authorization (Order.completed + creatorId match) è già effettuata
-  // dal read-side guard sopra, quindi findOrCreateConversation opera
-  // post-authorization (lo helper NON esegue check autorizzativi
+  // Authorization (resolveProductAccess + creatorId match) è già
+  // effettuata dal read-side guard sopra, quindi findOrCreateConversation
+  // opera post-authorization (lo helper NON esegue check autorizzativi
   // propri, vedi JSDoc di @/lib/messaging/find-or-create-conversation).
   const conversation = await findOrCreateConversation(
     dbUser.id,
