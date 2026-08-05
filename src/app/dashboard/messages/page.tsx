@@ -211,7 +211,7 @@ export default async function MessagesPage() {
       )}
     >
       <InboxShell
-        subtitle={`${previews.length} ${previews.length === 1 ? "conversazione" : "conversazioni"} · ${purchasedProductIds.length} ${purchasedProductIds.length === 1 ? "corso" : "corsi"} acquistati`}
+        subtitle={`${previews.length} ${previews.length === 1 ? "conversazione" : "conversazioni"} · ${purchasedProductIds.length} ${purchasedProductIds.length === 1 ? "corso" : "corsi"} disponibili`}
       >
         <ConversationList previews={previews} currentUserId={dbUser.id} />
       </InboxShell>

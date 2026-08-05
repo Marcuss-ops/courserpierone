@@ -98,11 +98,20 @@ export default async function DashboardPage() {
       },
       orderBy: { grantedAt: "desc" },
     });
-    userOrders = grants.map((g) => ({
-      id: g.id,
-      product: g.product,
-      createdAt: g.grantedAt,
-    }));
+    // Dedup per productId: più grant attivi (es. order + free_enrollment)
+    // possono puntare allo stesso prodotto — mostra la card una sola volta.
+    const seen = new Set<string>();
+    userOrders = grants
+      .filter((g) => {
+        if (seen.has(g.productId)) return false;
+        seen.add(g.productId);
+        return true;
+      })
+      .map((g) => ({
+        id: g.id,
+        product: g.product,
+        createdAt: g.grantedAt,
+      }));
   }
 
   // ── Fetch data: 1 query for lessons (used twice), then 3 in parallel ──
