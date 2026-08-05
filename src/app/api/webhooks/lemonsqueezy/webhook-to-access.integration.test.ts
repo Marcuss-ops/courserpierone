@@ -43,11 +43,11 @@ vi.mock("@/lib/utils/rate-limit", () => ({
 }));
 
 const databaseUrl = process.env.TEST_DATABASE_URL ?? process.env.DATABASE_URL;
-// The application Prisma singleton reads DATABASE_URL. Reuse the existing
-// E2E convention when only TEST_DATABASE_URL was supplied, before the route
-// modules are dynamically imported below.
-if (!process.env.DATABASE_URL && process.env.TEST_DATABASE_URL) {
-  process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
+// The application Prisma singleton reads DATABASE_URL. Always point it at
+// the same database selected by this fixture, including when both
+// TEST_DATABASE_URL and DATABASE_URL are present but differ.
+if (databaseUrl) {
+  process.env.DATABASE_URL = databaseUrl;
 }
 
 const webhookSecret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET ?? "integration-test-secret";

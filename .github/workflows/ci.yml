@@ -2,24 +2,29 @@
 # CI — "main verde = deploy" gate
 # ═══════════════════════════════════════════════════════════════════════════════
 #
-# Five independent quality jobs + one aggregator that posts to ALERT_WEBHOOK_URL
+# Eight independent quality jobs + one aggregator that posts to ALERT_WEBHOOK_URL
 # when ANY job is red. This is the deploy-gate:
 #
 #   ┌─ typecheck    ─┐
 #   ├─ lint         ─┤
 #   ├─ unit-tests   ─┤
-#   ├─ e2e-journey  ─┼─► deploy-gate ─► ALERT_WEBHOOK_URL (if red)
-#   └─ quality-gate ─┘      (aggregator)
+#   ├─ integration  ─┤
+#   ├─ migration    ─┤
+#   ├─ e2e-journey  ─┤─► deploy-gate ─► deploy-production
+#   ├─ quality-gate ─┤      (aggregator)
+#   └─ security-scan ┘
 #
 # CRITICAL: the aggregator MUST consult `needs.quality-gate.result` and
-# combine it with the other four results. Otherwise a red `quality-gate`
-# with the other four green produces a green `deploy-gate`, which would
+# combine it with every quality result. Otherwise a red `quality-gate`
+# (or any other required job) with the remaining jobs green produces a green
+# `deploy-gate`, which would
 # unblock branch protection and re-introduce the P0 bypass.
 #
-# Required-status-check setup (manual, one-time):
-#   GitHub → Settings → Branches → main → "Require status checks to pass
-#   before merging" → check `deploy-gate` in the dropdown list. The
-#   aggregator job name is the single user-facing gate name.
+# Required-status-check setup is applied through repository branch protection:
+#   deploy-gate, typecheck, lint, vitest, integration-tests (postgres),
+#   migration-check (prisma deploy), build (production), e2e-journey (chrome),
+#   quality-gate (build + size + migration + sse + dead-exports), and
+#   security-scan (gitleaks) must all pass. Direct pushes are blocked.
 #
 # Alert setup (manual, one-time):
 #   GitHub → Settings → Secrets and variables → Actions → New secret:
@@ -30,7 +35,7 @@
 # Idempotency + Concurrency:
 #   - `cancel-in-progress: false` on main — preserves a clean history even
 #     when multiple pushes race. Old PR runs CAN be cancelled.
-#   - All four quality jobs run in parallel; deploy-gate waits on all of them
+#   - All quality jobs run in parallel; deploy-gate waits on all of them
 #     then aggregates via `needs.*.result`.
 #
 # Secrets removed from the legacy single-job ci.yml:
@@ -244,7 +249,140 @@ jobs:
         run: npm run test -- --reporter=default
 
   # ════════════════════════════════════════════════════════════════════════
-  # Job 4 — Playwright E2E Journey
+  # Job 4 — Real-database integration tests
+  # These tests are intentionally separate from mocked/unit Vitest runs and
+  # execute only after a clean Prisma migration against ephemeral PostgreSQL.
+  # ════════════════════════════════════════════════════════════════════════
+  integration-tests:
+    name: integration-tests (postgres)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: courssy_integration
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d courssy_integration"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/courssy_integration
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/courssy_integration
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/courssy_integration
+      SUPABASE_URL: https://ci-dummy.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: ci-dummy-service-role-key
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-dummy.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-dummy-anon-key
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NODE_ENV: test
+      LEMONSQUEEZY_WEBHOOK_SECRET: integration-test-secret
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Setup Node.js + npm cache
+        uses: actions/setup-node@39370e3970a6d050c480008ad58aa19be4ef98bb # v4.1.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Apply Prisma migrations to integration database
+        run: npx prisma migrate deploy
+
+      - name: Run real-database integration suite
+        run: npx vitest run 'src/**/*.integration.test.ts' --reporter=default
+
+  # ════════════════════════════════════════════════════════════════════════
+  # Job 5 — Migration check
+  # This is a standalone required check in addition to the migration safety
+  # scanner and the build quality job. It proves the complete migration chain
+  # applies from an empty PostgreSQL database before production deployment.
+  # ════════════════════════════════════════════════════════════════════════
+  migration-check:
+    name: migration-check (prisma deploy)
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: read
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: courssy_migration_check
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d courssy_migration_check"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/courssy_migration_check
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/courssy_migration_check
+      NODE_ENV: test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Setup Node.js + npm cache
+        uses: actions/setup-node@39370e3970a6d050c480008ad58aa19be4ef98bb # v4.1.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Apply every Prisma migration from scratch
+        run: npx prisma migrate deploy
+
+      - name: Scan migration SQL for destructive operations
+        run: npm run check:migrations
+
+  # ════════════════════════════════════════════════════════════════════════
+  # Job 6 — Security scan
+  # Gitleaks is part of the same dependency graph as deploy-gate so a green
+  # standalone security workflow can never mask a failed security check.
+  # ════════════════════════════════════════════════════════════════════════
+  security-scan:
+    name: security-scan (gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Scan for exposed secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ════════════════════════════════════════════════════════════════════════
+  # Job 7 — Playwright E2E Journey
   # Mirrors the former journey-e2e.yml — same skip-if-creds-missing pattern.
   # ════════════════════════════════════════════════════════════════════════
   e2e-journey:
@@ -362,13 +500,51 @@ jobs:
           retention-days: 7
 
   # ════════════════════════════════════════════════════════════════════════
-  # Job 5 — quality-gate (Fase 0 step 4: build + size + migration + SSE + dead-exports)
-  # Complements the existing 4 quality jobs. Runs AFTER typecheck to keep
-  # the typecheck job fast (~3min). Aggregated by deploy-gate below.
+  # Job 7 — Production build
+  # A dedicated required check makes the production build status visible
+  # independently from the broader quality-gate job.
+  # ════════════════════════════════════════════════════════════════════════
+  build:
+    name: build (production)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/courssy_build
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/courssy_build
+      SUPABASE_URL: https://ci-dummy.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: ci-dummy-service-role-key
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-dummy.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-dummy-anon-key
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NODE_ENV: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Setup Node.js + npm cache
+        uses: actions/setup-node@39370e3970a6d050c480008ad58aa19be4ef98bb # v4.1.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Build production application
+        run: npm run build
+
+  # ════════════════════════════════════════════════════════════════════════
+  # Job 8 — quality-gate (size + migration + SSE + dead-exports)
+  # Complements the standalone production build check.
+  # ════════════════════════════════════════════════════════════════════════
+  # Runs in parallel with typecheck and is aggregated by deploy-gate below.
   # Wired into deploy-gate via `needs: [..., quality-gate]`.
   #
   # Implements:
-  #   - Real build (`npm run build` = validate:locales + next build)
   #   - Migration apply-test against ephemeral Postgres (service container)
   #   - E2E chat SSE smoke (Playwright `--grep @sse`)
   #   - Circular-dependency detection (defense-in-depth: also runs in typecheck job)
@@ -431,23 +607,7 @@ jobs:
       - name: Install dependencies (postinstall runs prisma generate + locale resolver)
         run: npm ci --no-audit --no-fund
 
-      # ── (a) Real build (`npm run build` = validate:locales + next build) ──
-      # Faster than typecheck-with-build.sh because it inlines validate:locales
-      # AND the dedicated build cache below avoids re-running next from scratch.
-      # Complements typecheck: typecheck-with-build.sh regenerates
-      # `.next/types/validator.ts`; `npm run build` does the FULL production
-      # build (incl. validation, locale generation, prisma prepare, etc.).
-      - name: Cache Next.js build cache (quality-gate)
-        uses: actions/cache@v4
-        with:
-          path: .next/cache
-          key: ${{ runner.os }}-nextjs-qg-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**/*.ts', 'src/**/*.tsx', 'next.config.mjs', 'tsconfig.json', 'courses/**/locales/**/*.json') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-qg-${{ hashFiles('package-lock.json') }}-
-      - name: Real build (validate:locales + next build)
-        run: npm run build
-
-      # ── (b) Migration apply-test (cumulative `prisma migrate deploy`) ──
+      # ── (a) Migration apply-test (cumulative `prisma migrate deploy`) ──
       # Service container `postgres-quality` defined above. Verifies every
       # migration in `prisma/migrations/*` applies cleanly from-scratch — catches
       # malformed SQL, dependency drift (table referenced before create),
@@ -592,16 +752,16 @@ jobs:
           retention-days: 7
 
   # ════════════════════════════════════════════════════════════════════════
-  # Job 6 — deploy-gate (aggregator)
-  # This is the SINGLE required status check name to mark in branch
-  # protection. Aggregates the 4 jobs above; alerts via ALERT_WEBHOOK_URL
-  # on any red.
+  # Job 9 — deploy-gate (aggregator)
+  # This is the required aggregate status check on main. Every underlying
+  # job is also required through branch protection; the aggregator provides a
+  # single fail-closed deployment signal and alerts via ALERT_WEBHOOK_URL.
   # ════════════════════════════════════════════════════════════════════════
   deploy-gate:
     name: 🚦 deploy-gate
     runs-on: ubuntu-latest
     timeout-minutes: 2
-    needs: [typecheck, lint, unit-tests, e2e-journey, quality-gate]
+    needs: [typecheck, lint, unit-tests, integration-tests, migration-check, build, e2e-journey, quality-gate, security-scan]
     if: always()
     permissions:
       contents: read
@@ -620,21 +780,33 @@ jobs:
           TC: ${{ needs.typecheck.result }}
           LN: ${{ needs.lint.result }}
           UT: ${{ needs.unit-tests.result }}
+          IT: ${{ needs.integration-tests.result }}
+          MIG: ${{ needs.migration-check.result }}
+          BLD: ${{ needs.build.result }}
           E2E: ${{ needs.e2e-journey.result }}
           QG: ${{ needs.quality-gate.result }}
+          SEC: ${{ needs.security-scan.result }}
         run: |
           echo "typecheck=$TC"
           echo "lint=$LN"
           echo "vitest=$UT"
+          echo "integration-tests=$IT"
+          echo "migration-check=$MIG"
+          echo "build=$BLD"
           echo "e2e=$E2E"
           echo "quality-gate=$QG"
+          echo "security-scan=$SEC"
           if [ "$TC" = "success" ] \
             && [ "$LN" = "success" ] \
             && [ "$UT" = "success" ] \
+            && [ "$IT" = "success" ] \
+            && [ "$MIG" = "success" ] \
+            && [ "$BLD" = "success" ] \
             && [ "$E2E" = "success" ] \
-            && [ "$QG" = "success" ]; then
+            && [ "$QG" = "success" ] \
+            && [ "$SEC" = "success" ]; then
             echo "gate=green" >> "$GITHUB_OUTPUT"
-            echo "✅ deploy-gate GREEN — all 5 jobs passed."
+            echo "✅ deploy-gate GREEN — all required jobs passed."
             exit 0
           else
             echo "gate=red" >> "$GITHUB_OUTPUT"
@@ -658,8 +830,12 @@ jobs:
           TC: ${{ needs.typecheck.result }}
           LN: ${{ needs.lint.result }}
           UT: ${{ needs.unit-tests.result }}
+          IT: ${{ needs.integration-tests.result }}
+          MIG: ${{ needs.migration-check.result }}
+          BLD: ${{ needs.build.result }}
           E2E: ${{ needs.e2e-journey.result }}
           QG: ${{ needs.quality-gate.result }}
+          SEC: ${{ needs.security-scan.result }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           # NOTE: bash substring slicing uses ${VAR:OFFSET:LENGTH}.
@@ -674,8 +850,12 @@ jobs:
             --arg tc      "$TC" \
             --arg ln      "$LN" \
             --arg ut      "$UT" \
+            --arg it      "$IT" \
+            --arg mig     "$MIG" \
+            --arg bld     "$BLD" \
             --arg e2e     "$E2E" \
             --arg qg      "$QG" \
+            --arg sec     "$SEC" \
             --arg url     "$RUN_URL" \
             '{
               text: ("🚨 deploy-gate RED on *\($ref)* (" + $sha + ")"),
@@ -689,8 +869,12 @@ jobs:
                            "• typecheck: `\($tc)`\n" +
                            "• lint: `\($ln)`\n" +
                            "• vitest: `\($ut)`\n" +
+                           "• integration-tests: `\($it)`\n" +
+                           "• migration-check: `\($mig)`\n" +
+                           "• build: `\($bld)`\n" +
                            "• e2e-journey: `\($e2e)`\n" +
                            "• quality-gate: `\($qg)`\n" +
+                           "• security-scan: `\($sec)`\n" +
                            "• Run: <\($url)|open in GitHub>")
                   }
                 }
@@ -727,3 +911,58 @@ jobs:
           echo "::error::deploy-gate is RED. Branch protection blocks merge/deploy."
           echo "::error::Inspect the failed jobs above and re-run after fixes."
           exit 1
+
+  # ════════════════════════════════════════════════════════════════════════
+  # Production deployment — strictly downstream of the required gate.
+  # No other workflow may deploy on a push to main.
+  # ════════════════════════════════════════════════════════════════════════
+  deploy-production:
+    name: deploy-production (migrate then Vercel)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [deploy-gate]
+    if: github.ref == 'refs/heads/main' && needs.deploy-gate.result == 'success'
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Setup Node.js + npm cache
+        uses: actions/setup-node@39370e3970a6d050c480008ad58aa19be4ef98bb # v4.1.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Apply production Prisma migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL || secrets.DATABASE_URL }}
+        run: |
+          if [ -z "${DATABASE_URL:-}" ]; then
+            echo "::error::DATABASE_URL is not configured for production deployment."
+            exit 1
+          fi
+          npx prisma migrate deploy
+
+      - name: Trigger Vercel production deploy
+        env:
+          VERCEL_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "${VERCEL_DEPLOY_HOOK_URL:-}" ]; then
+            echo "::error::VERCEL_DEPLOY_HOOK_URL is not configured."
+            exit 1
+          fi
+          http_code=$(curl -sS -o /tmp/vercel-resp.json -w '%{http_code}' \
+            -H "Content-Type: application/json" \
+            -X POST "$VERCEL_DEPLOY_HOOK_URL")
+          echo "Vercel deploy hook HTTP status: $http_code"
+          if [ "$http_code" != "200" ] && [ "$http_code" != "201" ]; then
+            echo "::error::Vercel deploy hook failed."
+            head -c 500 /tmp/vercel-resp.json
+            exit 1
+          fi
