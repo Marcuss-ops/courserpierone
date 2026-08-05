@@ -642,12 +642,20 @@ model ProductDocument {
 // Previene ordini duplicati quando LemonSqueezy invia
 // lo stesso webhook più di una volta.
 model ProcessedWebhook {
-  id         String   @id @default(cuid())
-  provider   String   // lemonsqueezy
-  deliveryId String   @unique // LS composite ID
-  eventType  String   // checkout.session.completed, order_created, etc.
-  processedAt DateTime @default(now())
-  createdAt  DateTime  @default(now())
+  id                  String   @id @default(cuid())
+  provider            String   // lemonsqueezy
+  deliveryId          String   @unique // provider delivery/event ID
+  eventType           String   // checkout.session.completed, order_created, etc.
+  status              String   @default("processing") // processing | completed | failed | retryable
+  payloadHash         String?  // SHA-256 of the raw webhook body
+  attemptCount        Int      @default(1)
+  lastError           String?
+  processingStartedAt DateTime?
+  processedAt         DateTime?
+  completedAt         DateTime?
+  failedAt            DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }
 
 // ─── Direct Messages tra studente e creator ────────────────

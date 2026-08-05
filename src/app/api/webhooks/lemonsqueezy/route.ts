@@ -5,8 +5,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { paymentProviderRegistry } from "@/lib/commerce/payments/init";
 import { readWebhookRequest, newRequestId } from "@/lib/commerce/webhooks/adapter";
 import { processWebhookEvent } from "@/lib/commerce/webhooks/processor";
-import { wasAlreadyProcessed, recordDelivery } from "@/lib/commerce/webhooks/idempotency";
-import { classifyWebhookError } from "@/lib/commerce/webhooks/error-classifier";
+import {
+  completeWebhookEvent,
+  failWebhookEvent,
+  reserveWebhookEvent,
+} from "@/lib/commerce/webhooks/idempotency";
+import {
+  classifyWebhookError,
+  isAcknowledgableError,
+} from "@/lib/commerce/webhooks/error-classifier";
 
 // Force dynamic — webhook non può essere statico.
 export const dynamic = "force-dynamic";
@@ -31,21 +38,35 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         rawBody,
         signature,
       });
-    if (
-      await wasAlreadyProcessed({
-        provider: "lemonsqueezy",
-        deliveryId: event.deliveryId,
-      })
-    ) {
-      return NextResponse.json({ received: true });
-    }
-    await processWebhookEvent(event);
-    await recordDelivery({
+    const reservation = await reserveWebhookEvent({
       provider: "lemonsqueezy",
       deliveryId: event.deliveryId,
       eventType: event.eventType,
+      rawBody,
     });
-    return NextResponse.json({ received: true });
+
+    if (!reservation.acquired) {
+      return NextResponse.json({ received: true });
+    }
+
+    try {
+      await processWebhookEvent({ ...event, deliveryId: reservation.deliveryId });
+      await completeWebhookEvent({
+        deliveryId: reservation.deliveryId,
+        payloadHash: reservation.payloadHash,
+      });
+      return NextResponse.json({ received: true });
+    } catch (error) {
+      await failWebhookEvent({
+        deliveryId: reservation.deliveryId,
+        error,
+        // Once a reservation exists, parse/security errors have already
+        // returned above. Any non-deterministic processing error must remain
+        // retryable, including an unexpected 500-class exception.
+        retryable: !isAcknowledgableError(error),
+      });
+      throw error;
+    }
   } catch (error) {
     return classifyWebhookError(error, requestId);
   }

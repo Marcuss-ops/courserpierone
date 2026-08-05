@@ -33,11 +33,11 @@ import type { PaymentEvent } from "@/lib/commerce/payments/types";
  * upstream errors). The route handler is responsible for translating
  * those into HTTP responses; this module never speaks NextResponse.
  *
- * Idempotency: this function does NOT insert a `processedWebhook` row.
+ * Idempotency: this function does NOT mutate `ProcessedWebhook`.
  * The route handler (`/api/webhooks/lemonsqueezy/route.ts` and its
- * future per-provider analogues) gates via `wasAlreadyProcessed` BEFORE
- * calling this function. Idempotency lives at the transport layer,
- * not here.
+ * future per-provider analogues) acquires an atomic reservation BEFORE
+ * calling this function and records the terminal outcome afterward.
+ * Idempotency lives at the transport layer, not here.
  */
 export async function processWebhookEvent(event: PaymentEvent): Promise<void> {
   const provider = paymentProviderRegistry.get(event.provider);

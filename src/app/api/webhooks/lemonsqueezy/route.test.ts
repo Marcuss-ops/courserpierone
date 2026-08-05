@@ -30,13 +30,19 @@ import {
 
 // ─── Mocks ────────────────────────────────────────────────────
 
-const { mockParseWebhook, mockProcessWebhookEvent, mockWasAlreadyProcessed, mockRecordDelivery } =
-  vi.hoisted(() => ({
-    mockParseWebhook: vi.fn(),
-    mockProcessWebhookEvent: vi.fn(),
-    mockWasAlreadyProcessed: vi.fn(),
-    mockRecordDelivery: vi.fn(),
-  }));
+const {
+  mockParseWebhook,
+  mockProcessWebhookEvent,
+  mockReserveWebhookEvent,
+  mockCompleteWebhookEvent,
+  mockFailWebhookEvent,
+} = vi.hoisted(() => ({
+  mockParseWebhook: vi.fn(),
+  mockProcessWebhookEvent: vi.fn(),
+  mockReserveWebhookEvent: vi.fn(),
+  mockCompleteWebhookEvent: vi.fn(),
+  mockFailWebhookEvent: vi.fn(),
+}));
 
 // Step 7: complete stub provider (all required PaymentProvider methods)
 // so the route's `paymentProviderRegistry.get("lemonsqueezy").parseWebhook(...)`
@@ -60,8 +66,9 @@ vi.mock("@/lib/commerce/webhooks/processor", () => ({
 }));
 
 vi.mock("@/lib/commerce/webhooks/idempotency", () => ({
-  wasAlreadyProcessed: mockWasAlreadyProcessed,
-  recordDelivery: mockRecordDelivery,
+  reserveWebhookEvent: mockReserveWebhookEvent,
+  completeWebhookEvent: mockCompleteWebhookEvent,
+  failWebhookEvent: mockFailWebhookEvent,
 }));
 
 // Step 7: import registry + the (mocked) LS adapter so beforeEach
@@ -90,8 +97,14 @@ beforeEach(() => {
   paymentProviderRegistry.register(lemonSqueezyProvider);
   mockParseWebhook.mockResolvedValue(sampleEvent);
   mockProcessWebhookEvent.mockResolvedValue(undefined);
-  mockWasAlreadyProcessed.mockResolvedValue(false);
-  mockRecordDelivery.mockResolvedValue(undefined);
+  mockReserveWebhookEvent.mockResolvedValue({
+    acquired: true,
+    deliveryId: sampleEvent.deliveryId,
+    status: "processing",
+    payloadHash: "hash",
+  });
+  mockCompleteWebhookEvent.mockResolvedValue(undefined);
+  mockFailWebhookEvent.mockResolvedValue(undefined);
 });
 
 function makeRequest(rawBody = '{"ok":true}', signature = "sig") {
@@ -110,24 +123,31 @@ describe("POST /api/webhooks/lemonsqueezy — slim route", () => {
     const res = await POST(makeRequest());
     expect(res.status).toBe(200);
     expect(mockParseWebhook).toHaveBeenCalledTimes(1);
-    expect(mockWasAlreadyProcessed).toHaveBeenCalledWith({
-      provider: "lemonsqueezy",
-      deliveryId: sampleEvent.deliveryId,
-    });
-    expect(mockProcessWebhookEvent).toHaveBeenCalledWith(sampleEvent);
-    expect(mockRecordDelivery).toHaveBeenCalledWith({
+    expect(mockReserveWebhookEvent).toHaveBeenCalledWith({
       provider: "lemonsqueezy",
       deliveryId: sampleEvent.deliveryId,
       eventType: sampleEvent.eventType,
+      rawBody: '{"ok":true}',
+    });
+    expect(mockProcessWebhookEvent).toHaveBeenCalledWith(sampleEvent);
+    expect(mockCompleteWebhookEvent).toHaveBeenCalledWith({
+      deliveryId: sampleEvent.deliveryId,
+      payloadHash: "hash",
     });
   });
 
   it("short-circuits to 200 when delivery already processed", async () => {
-    mockWasAlreadyProcessed.mockResolvedValue(true);
+    mockReserveWebhookEvent.mockResolvedValue({
+      acquired: false,
+      deliveryId: sampleEvent.deliveryId,
+      status: "completed",
+      payloadHash: "hash",
+    });
     const res = await POST(makeRequest());
     expect(res.status).toBe(200);
     expect(mockProcessWebhookEvent).not.toHaveBeenCalled();
-    expect(mockRecordDelivery).not.toHaveBeenCalled();
+    expect(mockCompleteWebhookEvent).not.toHaveBeenCalled();
+    expect(mockFailWebhookEvent).not.toHaveBeenCalled();
   });
 
   it("returns 400 on HmacVerificationError", async () => {
@@ -154,6 +174,9 @@ describe("POST /api/webhooks/lemonsqueezy — slim route", () => {
     mockProcessWebhookEvent.mockRejectedValue(new ValidationError("Invalid metadata"));
     const res = await POST(makeRequest());
     expect(res.status).toBe(200);
+    expect(mockFailWebhookEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ retryable: false }),
+    );
   });
 
   it("returns 200 ack on WebhookAckError (missing eventName ping)", async () => {
@@ -179,6 +202,9 @@ describe("POST /api/webhooks/lemonsqueezy — slim route", () => {
     mockProcessWebhookEvent.mockRejectedValue(new Error("upstream ECONNREFUSED"));
     const res = await POST(makeRequest());
     expect(res.status).toBe(503);
+    expect(mockFailWebhookEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ retryable: true }),
+    );
   });
 
   it("returns 500 on unexpected error", async () => {
@@ -192,8 +218,9 @@ describe("POST /api/webhooks/lemonsqueezy — slim route", () => {
       new HmacVerificationError("INVALID_SIGNATURE", "Invalid signature"),
     );
     await POST(makeRequest());
-    expect(mockWasAlreadyProcessed).not.toHaveBeenCalled();
+    expect(mockReserveWebhookEvent).not.toHaveBeenCalled();
     expect(mockProcessWebhookEvent).not.toHaveBeenCalled();
-    expect(mockRecordDelivery).not.toHaveBeenCalled();
+    expect(mockCompleteWebhookEvent).not.toHaveBeenCalled();
+    expect(mockFailWebhookEvent).not.toHaveBeenCalled();
   });
 });
