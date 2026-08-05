@@ -44,6 +44,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const mockPrisma = {
   product: {
     findUnique: vi.fn(),
+    // findFirst is used by the canonical `resolveProductAccess`
+    // product resolution (cuid OR slug). Kept alongside findUnique.
+    findFirst: vi.fn(),
   },
   user: {
     findFirst: vi.fn(),
@@ -51,7 +54,9 @@ const mockPrisma = {
   accessGrant: {
     findFirst: vi.fn(),
   },
-  // order intentionally undefined.
+  // order intentionally undefined — the session path must never touch
+  // it (the resolver's anonymous orderId path requires an explicit
+  // orderId, which no messaging flow provides).
   order: undefined as never,
 };
 
@@ -76,6 +81,9 @@ beforeEach(() => {
     id: PRODUCT_ID,
     creatorId: CREATOR_ID,
   });
+  // Default product resolution inside `resolveProductAccess` (the
+  // canonical resolver now owns product lookup: cuid OR slug).
+  mockPrisma.product.findFirst.mockResolvedValue({ id: PRODUCT_ID });
   mockPrisma.accessGrant.findFirst.mockResolvedValue({ id: GRANT_ID });
 });
 
@@ -216,14 +224,20 @@ describe("resolveMessagingPermission (Step 9 — AccessGrant SSOT path)", () => 
   });
 
   it("reads only product + access grant (no Order, no admin fallback)", async () => {
-    // Step 9 invariant: the resolver's DB footprint is product +
-    // accessGrant (via resolveProductAccess). No order.findFirst, no
-    // user.findFirst admin fallback.
+    // Canonical footprint: resolve-message-permission reads the
+    // product (findUnique), then `resolveProductAccess` resolves the
+    // product again (findFirst — product resolution is now part of the
+    // canonical resolver) and reads the accessGrant. No order.findFirst
+    // (session path), no user.findFirst admin fallback.
     mockPrisma.accessGrant.findFirst.mockResolvedValue({ id: GRANT_ID });
     const callOrder: string[] = [];
     mockPrisma.product.findUnique.mockImplementation(async () => {
       callOrder.push("product");
       return { id: PRODUCT_ID, creatorId: CREATOR_ID };
+    });
+    mockPrisma.product.findFirst.mockImplementation(async () => {
+      callOrder.push("product");
+      return { id: PRODUCT_ID };
     });
     mockPrisma.accessGrant.findFirst.mockImplementation(async () => {
       callOrder.push("accessGrant");
@@ -234,10 +248,10 @@ describe("resolveMessagingPermission (Step 9 — AccessGrant SSOT path)", () => 
       targetId: CREATOR_ID,
       productId: PRODUCT_ID,
     });
-    expect(callOrder).toEqual(["product", "accessGrant"]);
+    expect(callOrder).toEqual(["product", "product", "accessGrant"]);
     expect(mockPrisma.user.findFirst).not.toHaveBeenCalled();
     // Legacy path tripwire: prisma.order is undefined on this mock
-    // (TypeError if any code accesses it).
+    // (TypeError if the session path ever accesses it).
     expect(mockPrisma.order).toBeUndefined();
   });
 

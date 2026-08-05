@@ -2,14 +2,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { NextRequest } from "next/server";
 
 // ─── Mock helpers (SSOT seam) ──────────────────────────────
-// Step 9 — MCR Phase 3 cutover: BOTH the session-keyed AND the
-// orderId-keyed (Pattern B) reads go through AccessGrant. The route:
-//   - session-keyed → `resolveProductAccess` resolver (helper).
-//   - orderId-keyed → `prisma.accessGrant.findFirst` directly (Pattern B).
-//
-// `findCompletedOrderByOrderId` is REMOVED — its prior Order.status
-// read is replaced by the canonical grant query keyed by
-// `(sourceType='order' AND sourceId=orderId AND productId)`.
+// Post-consolidation contract: the route contains ZERO access logic
+// and ZERO prisma queries. It only parses the request, delegates to
+// `resolveProductAccess`, and maps the verdict to `{ hasAccess }`.
+// Product resolution (slug|id), admin bypass, session grants and the
+// anonymous orderId path all live in the resolver — tested in
+// `resolve-product-access.test.ts`. This suite pins the thin route
+// contract: input parsing, parameter forwarding, response mapping,
+// crash safety.
 const mockResolveProductAccess = vi.fn();
 
 vi.mock("@/lib/commerce/access/resolve-product-access", () => ({
@@ -23,30 +23,12 @@ vi.mock("@/lib/supabase/get-user", () => ({
   getServerUser: mockGetServerUser,
 }));
 
-// ─── Mock Prisma (product.findFirst + accessGrant.findFirst) ───
-//
-// V2 — Pattern B reads `prisma.accessGrant.findFirst` directly. Both
-// queries surface in this mock; tests use the appropriate one.
-const mockPrisma = {
-  product: {
-    findFirst: vi.fn(),
-  },
-  accessGrant: {
-    findFirst: vi.fn(),
-  },
-};
-
-vi.mock("@/lib/db/prisma", () => ({
-  prisma: mockPrisma,
-}));
-
 // ─── Mock rate limit (no-op wrapper) ─────────────────────────
 vi.mock("@/lib/utils/rate-limit", () => ({
   withRateLimit: <T,>(fn: T) => fn,
 }));
 
 // ─── Helpers ─────────────────────────────────────────────────
-const FAKE_PRODUCT_ID = "cp-product-1";
 const FAKE_PRODUCT_SLUG = "test-course";
 const FAKE_USER_ID = "cu-user-1";
 const FAKE_PROVIDER_ORDER_ID = "cs_test_aBc123";
@@ -87,21 +69,26 @@ const mockAnonymous = () =>
     dbUser: null,
   });
 
-const mockProductFound = () =>
-  mockPrisma.product.findFirst.mockResolvedValueOnce({
-    id: FAKE_PRODUCT_ID,
-    slug: FAKE_PRODUCT_SLUG,
+const mockAllowed = (overrides: Partial<{ source: "grant" | "admin"; grantId: string | null }> = {}) =>
+  mockResolveProductAccess.mockResolvedValueOnce({
+    allowed: true,
+    grantId: overrides.grantId ?? FAKE_GRANT_ID,
+    source: overrides.source ?? "grant",
+  });
+
+const mockDenied = () =>
+  mockResolveProductAccess.mockResolvedValueOnce({
+    allowed: false,
+    reason: "no_active_access_grant",
   });
 
 // ─── Tests ───────────────────────────────────────────────────
-describe("GET /api/access — auth semantics probe", () => {
+describe("GET /api/access — thin auth semantics probe", () => {
   beforeEach(() => {
     vi.resetAllMocks();
   });
 
-  // ── Edge cases ────────────────────────────────────────────
-
-  it("returns hasAccess:false when productId query param is missing", async () => {
+  it("returns hasAccess:false when productId query param is missing (resolver not called)", async () => {
     mockAnonymous();
     const { GET } = await import("./route");
     const response = await GET(createMockRequest({}));
@@ -109,35 +96,14 @@ describe("GET /api/access — auth semantics probe", () => {
 
     expect(response.status).toBe(200);
     expect(body.hasAccess).toBe(false);
-    // Critical: NO prisma hit when productId is missing (early return before DB)
-    expect(mockPrisma.product.findFirst).not.toHaveBeenCalled();
-  });
-
-  it("returns hasAccess:false when product slug/id is not found", async () => {
-    mockLoggedInCustomer();
-    mockPrisma.product.findFirst.mockResolvedValueOnce(null);
-    // resolveProductAccess would have been called if we reached that
-    // point, so ensure it ISN'T called for unknown products.
-    mockResolveProductAccess.mockResolvedValueOnce({
-      allowed: true,
-      grantId: FAKE_GRANT_ID,
-      source: "grant",
-    });
-
-    const { GET } = await import("./route");
-    const response = await GET(createMockRequest({ productId: "ghost-product" }));
-    const body = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(body.hasAccess).toBe(false);
+    // Early return BEFORE any delegation — no resolver hit.
     expect(mockResolveProductAccess).not.toHaveBeenCalled();
   });
 
-  // ── Anonymous (Pattern B may still grant via valid orderId) ──
-
-  it("anonymous: returns hasAccess:false without orderId", async () => {
+  it("forwards productId (slug) + anonymous identity to the resolver and maps deny", async () => {
     mockAnonymous();
-    mockProductFound();
+    mockDenied();
+
     const { GET } = await import("./route");
     const response = await GET(createMockRequest({ productId: FAKE_PRODUCT_SLUG }));
     const body = await response.json();
@@ -145,20 +111,19 @@ describe("GET /api/access — auth semantics probe", () => {
     expect(response.status).toBe(200);
     expect(body.hasAccess).toBe(false);
     expect(body.userId).toBeUndefined();
-    // No user -> resolveProductAccess is not called; Pattern B
-    // requires an explicit orderId query param.
-    expect(mockResolveProductAccess).not.toHaveBeenCalled();
+    // The route passes the raw slug — product resolution is the
+    // resolver's job now.
+    expect(mockResolveProductAccess).toHaveBeenCalledWith({
+      userId: undefined,
+      userRole: undefined,
+      productId: FAKE_PRODUCT_SLUG,
+      orderId: undefined,
+    });
   });
 
-  it("anonymous with valid orderId (Pattern B): returns hasAccess:true", async () => {
+  it("forwards orderId (Pattern B guest) and maps allow WITHOUT userId", async () => {
     mockAnonymous();
-    mockProductFound();
-    // V2 — Pattern B reads `prisma.accessGrant.findFirst` keyed by
-    // (sourceType='order' AND sourceId=orderId AND productId). The
-    // grant row IS the SSOT link between the Order and authorization.
-    mockPrisma.accessGrant.findFirst.mockResolvedValueOnce({
-      id: FAKE_GRANT_ID,
-    });
+    mockAllowed();
 
     const { GET } = await import("./route");
     const response = await GET(
@@ -168,110 +133,48 @@ describe("GET /api/access — auth semantics probe", () => {
 
     expect(response.status).toBe(200);
     expect(body.hasAccess).toBe(true);
-    // Note: guest (Pattern B) does NOT receive userId in response shape.
+    // Guest (orderId-keyed) does NOT receive userId in the response.
     expect(body.userId).toBeUndefined();
-    // V2 invariant — the read queries AccessGrant (canonical SSOT),
-    // not Order. Verify the WHERE clause shape explicitly.
-    expect(mockPrisma.accessGrant.findFirst).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({
-          sourceType: "order",
-          sourceId: FAKE_PROVIDER_ORDER_ID,
-          productId: FAKE_PRODUCT_ID,
-          status: "active",
-          OR: expect.arrayContaining([
-            expect.objectContaining({ expiresAt: null }),
-            expect.objectContaining({ expiresAt: expect.any(Object) }),
-          ]),
-        }),
-      }),
-    );
+    expect(mockResolveProductAccess).toHaveBeenCalledWith({
+      userId: undefined,
+      userRole: undefined,
+      productId: FAKE_PRODUCT_SLUG,
+      orderId: FAKE_PROVIDER_ORDER_ID,
+    });
   });
 
-  it("anonymous with valid orderId but WRONG productId (cross-product exploit): hasAccess:false", async () => {
+  it("accepts the legacy order_id query param alias", async () => {
     mockAnonymous();
-    mockProductFound();
-    // Wrong productId means different productId in the WHERE → SQL
-    // filter excludes the grant. findFirst returns null.
-    mockPrisma.accessGrant.findFirst.mockResolvedValueOnce(null);
+    mockAllowed();
 
     const { GET } = await import("./route");
     const response = await GET(
-      createMockRequest({ productId: FAKE_PRODUCT_SLUG, orderId: FAKE_PROVIDER_ORDER_ID })
+      createMockRequest({ productId: FAKE_PRODUCT_SLUG, order_id: FAKE_PROVIDER_ORDER_ID })
     );
-    const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(body.hasAccess).toBe(false);
-    // Verify the WHERE clause carries the correct productId (defense
-    // against cross-product scope-leak on Pattern B).
-    expect(mockPrisma.accessGrant.findFirst).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({
-          sourceType: "order",
-          sourceId: FAKE_PROVIDER_ORDER_ID,
-          productId: FAKE_PRODUCT_ID,
-        }),
-      }),
+    expect((await response.json()).hasAccess).toBe(true);
+    expect(mockResolveProductAccess).toHaveBeenCalledWith(
+      expect.objectContaining({ orderId: FAKE_PROVIDER_ORDER_ID }),
     );
   });
 
-  // ── Pattern B sourceType-uniform matrix ─────────────────
-  // V2 — Pattern B reads the canonical grant table, not the Order.
-  // The read is keyed by (sourceType='order' + sourceId), which is
-  // invariant across all grant sourceTypes EXCEPT 'order' (Pattern B
-  // IS the post-checkout orderId-keyed receipt).\n  // We assert the strict sourceType='order' boundary in the WHERE — a\n  // free_enrollment/admin/bundle grant with the same sourceId
-  // (collision-test) MUST NOT satisfy Pattern B (defense against
-  // accidental sourceId reuse).
-  it("Pattern B requires sourceType='order' (collision with free_enrollment grant = deny)", async () => {
+  it("maps resolver deny (anonymous + wrong orderId) to hasAccess:false", async () => {
     mockAnonymous();
-    mockProductFound();
-    mockPrisma.accessGrant.findFirst.mockResolvedValueOnce(null);
+    mockDenied();
 
     const { GET } = await import("./route");
     const response = await GET(
       createMockRequest({ productId: FAKE_PRODUCT_SLUG, orderId: FAKE_PROVIDER_ORDER_ID })
     );
+
     expect(response.status).toBe(200);
     expect((await response.json()).hasAccess).toBe(false);
-
-    // The filter MUST pin sourceType='order' so that an arbitrary grant
-    // with the same sourceId (e.g. a free_enrollment or admin grant
-    // mistakenly sharing the id) cannot satisfy Pattern B.
-    expect(mockPrisma.accessGrant.findFirst).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({ sourceType: "order" }),
-      }),
-    );
   });
 
-  // ── Admin (inline bypass — different shape from customer) ──
-
-  it("admin: returns hasAccess:true with userId (inline bypass, no resolver call)", async () => {
-    mockAdmin();
-    mockProductFound();
-
-    const { GET } = await import("./route");
-    const response = await GET(createMockRequest({ productId: FAKE_PRODUCT_SLUG }));
-    const body = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(body.hasAccess).toBe(true);
-    expect(body.userId).toBe(FAKE_USER_ID);
-    // Admin bypass is INLINE — must not delegate to the resolver.
-    expect(mockResolveProductAccess).not.toHaveBeenCalled();
-  });
-
-  // ── Customer with active AccessGrant (post-cutover canonical) ──
-
-  it("customer with active AccessGrant: returns hasAccess:true with userId", async () => {
+  it("forwards userId + userRole (customer) and maps allow WITH userId", async () => {
     mockLoggedInCustomer();
-    mockProductFound();
-    mockResolveProductAccess.mockResolvedValueOnce({
-      allowed: true,
-      grantId: FAKE_GRANT_ID,
-      source: "grant",
-    });
+    mockAllowed();
 
     const { GET } = await import("./route");
     const response = await GET(createMockRequest({ productId: FAKE_PRODUCT_SLUG }));
@@ -282,19 +185,15 @@ describe("GET /api/access — auth semantics probe", () => {
     expect(body.userId).toBe(FAKE_USER_ID);
     expect(mockResolveProductAccess).toHaveBeenCalledWith({
       userId: FAKE_USER_ID,
-      productId: FAKE_PRODUCT_ID,
+      userRole: "student",
+      productId: FAKE_PRODUCT_SLUG,
+      orderId: undefined,
     });
   });
 
-  // ── Customer with no active grant ─────────────────────────
-
-  it("customer with NO active grant: hasAccess:false", async () => {
+  it("maps resolver deny (customer without grant) to hasAccess:false, no userId", async () => {
     mockLoggedInCustomer();
-    mockProductFound();
-    mockResolveProductAccess.mockResolvedValueOnce({
-      allowed: false,
-      reason: "no_active_access_grant",
-    });
+    mockDenied();
 
     const { GET } = await import("./route");
     const response = await GET(createMockRequest({ productId: FAKE_PRODUCT_SLUG }));
@@ -305,33 +204,22 @@ describe("GET /api/access — auth semantics probe", () => {
     expect(body.userId).toBeUndefined();
   });
 
-  // ── Hierarchy: resolver wins over Pattern B orderId ────────
-  // V3.1 invariant: when logged in AND an access check is needed,
-  // resolveProductAccess runs first and decides. Pattern B is
-  // only a fallback for guests.
-
-  it("logged-in customer: resolver takes precedence over Pattern B orderId", async () => {
-    mockLoggedInCustomer();
-    mockProductFound();
-    mockResolveProductAccess.mockResolvedValueOnce({
-      allowed: true,
-      grantId: FAKE_GRANT_ID,
-      source: "grant",
-    });
+  it("maps admin allow (source:'admin') to hasAccess:true WITH userId", async () => {
+    mockAdmin();
+    mockAllowed({ source: "admin", grantId: null });
 
     const { GET } = await import("./route");
-    const response = await GET(
-      createMockRequest({ productId: FAKE_PRODUCT_SLUG, orderId: FAKE_PROVIDER_ORDER_ID })
-    );
+    const response = await GET(createMockRequest({ productId: FAKE_PRODUCT_SLUG }));
     const body = await response.json();
 
     expect(response.status).toBe(200);
     expect(body.hasAccess).toBe(true);
     expect(body.userId).toBe(FAKE_USER_ID);
-    // Resolver was attempted and succeeded — Pattern B (V2: the
-    // accessGrant.findFirst query) never reached.
-    expect(mockResolveProductAccess).toHaveBeenCalledTimes(1);
-    expect(mockPrisma.accessGrant.findFirst).not.toHaveBeenCalled();
+    // The admin verdict now comes from the resolver (delegated), not
+    // from an inline role check in the route.
+    expect(mockResolveProductAccess).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: FAKE_USER_ID, userRole: "admin" }),
+    );
   });
 
   // ── Crash safety: unhandled error returns hasAccess:false (NOT 500) ──
