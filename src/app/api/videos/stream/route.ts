@@ -21,9 +21,8 @@ import { isFreeCourse } from "@/lib/courses/is-free-course";
  *
  * Access control — V2 AccessGrant cutover: la verifica d'accesso
  * passa per `resolveProductAccess` (read di `AccessGrant.status="active"`
- * + non-scaduto, sourceType-agnostico). L'helper deprecato
- * `findCompletedOrder` (basato su `Order.status="completed"`) NON
- * viene più chiamato.
+ * + non-scaduto, sourceType-agnostico) — mai una query diretta a
+ * `Order.status="completed"`.
  *
  * TODO: Quando i video saranno migrati da YouTube/Vimeo a Supabase Storage,
  *       generare signed URL con TTL breve (5 min) via createSignedUrl().

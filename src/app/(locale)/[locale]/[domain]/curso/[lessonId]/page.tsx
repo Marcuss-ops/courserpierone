@@ -90,12 +90,11 @@ export default async function CoursePage({
     token?: string;
     provider?: string;
     providerOrderId?: string;
-    order_id?: string;
     orderId?: string;
   }>;
 }) {
   const { locale, domain, lessonId } = await params;
-  const { lang, theme, provider, providerOrderId, order_id, orderId } = await searchParams;
+  const { lang, theme, provider, providerOrderId, orderId } = await searchParams;
   const isDark = theme === "dark";
   const isLight = !isDark;
   const course = await getCourseConfig(domain);
@@ -131,13 +130,16 @@ export default async function CoursePage({
   const localeContent = loadLocaleContentSafe(domain, currentLang);
   const lc = localeContent.course;
 
-  const activeProviderOrderId = providerOrderId || order_id;
+  const activeProviderOrderId = providerOrderId;
   const activeOrderId = orderId;
   const lessonQs = new URLSearchParams();
   lessonQs.set("lang", currentLang);
   if (theme) lessonQs.set("theme", theme);
   if (activeProviderOrderId) {
-    lessonQs.set("provider", provider || "lemonsqueezy");
+    // Provider is explicit from the post-checkout redirect (e.g.
+    // provider=lemonsqueezy&providerOrderId=[order_id]) — no silent
+    // default here.
+    if (provider) lessonQs.set("provider", provider);
     lessonQs.set("providerOrderId", activeProviderOrderId);
   }
   if (activeOrderId) lessonQs.set("orderId", activeOrderId);
@@ -147,7 +149,7 @@ export default async function CoursePage({
       productSlug={domain}
       courseTitle={content.title}
       callbackUrl={`/${locale}/${domain}/curso/${lessonId}?${lessonQs.toString()}`}
-      provider={provider || (!providerOrderId && order_id ? "lemonsqueezy" : undefined)}
+      provider={provider}
       providerOrderId={activeProviderOrderId}
       orderId={activeOrderId}
     >

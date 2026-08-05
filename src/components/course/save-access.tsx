@@ -8,14 +8,12 @@ export function SaveAccess({ productSlug, isFreeCourse: _isFreeCourse }: { produ
 
   useEffect(() => {
     try {
-      // Canonical order reference is providerOrderId (explicit); the
-      // legacy order_id / orderId params are kept as fallbacks so old
-      // redirect URLs keep working during the transition. NOTE: the
-      // stored value may be a provider id OR an internal Order.id
-      // depending on which param supplied it (key is write-only today).
+      // Canonical order reference: providerOrderId (explicit, from the
+      // post-checkout redirect) OR orderId (internal Order.id). The
+      // legacy `order_id` alias is gone — the Lemon Squeezy redirect
+      // now emits provider=lemonsqueezy&providerOrderId=[order_id].
       const orderReference =
         searchParams.get("providerOrderId") ||
-        searchParams.get("order_id") ||
         searchParams.get("orderId");
       const token = searchParams.get("token");
 

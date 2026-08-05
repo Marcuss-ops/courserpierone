@@ -55,3 +55,4 @@ tmp/deps-checker.json
 server.log
 typecheck_output.txt
 tmp/dod-check.json
+tmp/check-deploy-gate-shape.json

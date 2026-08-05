@@ -29,8 +29,7 @@ export async function GET(
     //
     // V2 cutover — AccessGrant SSOT: `resolveProductAccess` reads
     // `AccessGrant.status="active"` + non-expired, sourceType-agnostic.
-    // The legacy `findCompletedOrder` (Order.status="completed" read)
-    // is no longer called on this path. The certificate route does NOT
+    // The certificate route does NOT
     // have an inline admin bypass (mirrors the prior in-test contract)
     // — admin must hold an explicit grant to download a certificate.
     const granted = await resolveProductAccess({

@@ -178,8 +178,8 @@ export interface ResolveProductAccessInput {
   /**
    * INTERNAL Order.id lookup (canonical Prisma cuid). Explicitly
    * named `internalOrderId` — this field NEVER carries a provider id;
-   * use `providerOrderId` for that. The `/api/access` adapter
-   * (`normalize-access-input.ts`) guarantees this separation.
+   * use `providerOrderId` for that. The `/api/access` route maps the
+   * explicit `orderId` wire param straight to this field.
    */
   internalOrderId?: string;
 }

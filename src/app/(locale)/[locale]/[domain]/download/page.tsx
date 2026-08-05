@@ -105,12 +105,11 @@ export default async function DownloadPage({
     token?: string;
     provider?: string;
     providerOrderId?: string;
-    order_id?: string;
     orderId?: string;
   }>;
 }) {
   const { domain, locale } = await params;
-  const { lang, token, provider, providerOrderId, order_id, orderId } = await searchParams;
+  const { lang, token, provider, providerOrderId, orderId } = await searchParams;
 
   const course = await getCourseConfig(domain);
   if (!course) return notFound();
@@ -144,12 +143,15 @@ export default async function DownloadPage({
 
   const downloadUrl = staticBookUrl || `/api/ebook/${domain}/download?lang=${currentLang}&disposition=attachment${token ? `&token=${token}` : ""}`;
 
-  const activeProviderOrderId = providerOrderId || order_id;
+  const activeProviderOrderId = providerOrderId;
   const activeOrderId = orderId;
   const downloadQs = new URLSearchParams();
   downloadQs.set("lang", currentLang);
   if (activeProviderOrderId) {
-    downloadQs.set("provider", provider || "lemonsqueezy");
+    // Provider is explicit from the post-checkout redirect (e.g.
+    // provider=lemonsqueezy&providerOrderId=[order_id]) — no silent
+    // default here.
+    if (provider) downloadQs.set("provider", provider);
     downloadQs.set("providerOrderId", activeProviderOrderId);
   }
   if (activeOrderId) downloadQs.set("orderId", activeOrderId);
@@ -159,7 +161,7 @@ export default async function DownloadPage({
       productSlug={domain}
       courseTitle={ebookTitle}
       callbackUrl={`/${locale}/${domain}/download?${downloadQs.toString()}`}
-      provider={provider || (!providerOrderId && order_id ? "lemonsqueezy" : undefined)}
+      provider={provider}
       providerOrderId={activeProviderOrderId}
       orderId={activeOrderId}
     >

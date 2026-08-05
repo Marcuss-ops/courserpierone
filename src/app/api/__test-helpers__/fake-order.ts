@@ -9,10 +9,9 @@ import type { Order } from "@prisma/client";
  * `FakeOrder` type-alias duplication with a single import.
  *
  * Scope: use this helper ONLY in tests of routes that consume an
- * `Order` read (the deprecated `findCompletedOrder` helper has been
- * removed — access now goes through `resolveProductAccess`, which
+ * `Order` read. Access now goes through `resolveProductAccess`, which
  * never returns an `Order` row; `fakeOrder` remains for test fixtures
- * that still need a raw Order object, e.g. write-side route mocks).
+ * that still need a raw Order object, e.g. write-side route mocks.
  * Routes with a DIFFERENT Order shape (e.g., write-side admin endpoints,
  * refund flows, social-proof canvases) should define their own local
  * factory rather than overloading this one — those Order variants often

@@ -156,69 +156,6 @@ describe("GET /api/access — thin auth semantics probe", () => {
     });
   });
 
-  it("does not let legacy order_id broaden an explicit providerOrderId without provider", async () => {
-    mockAnonymous();
-    mockDenied();
-
-    const { GET } = await import("./route");
-    await GET(
-      createMockRequest({
-        productId: FAKE_PRODUCT_SLUG,
-        providerOrderId: FAKE_PROVIDER_ORDER_ID,
-        order_id: "legacy_ls_order",
-      }),
-    );
-
-    expect(mockResolveProductAccess).toHaveBeenCalledWith(
-      expect.objectContaining({
-        provider: undefined,
-        providerOrderId: FAKE_PROVIDER_ORDER_ID,
-      }),
-    );
-  });
-
-  it("accepts the legacy order_id query param alias with the single configured provider", async () => {
-    mockAnonymous();
-    mockAllowed();
-
-    const { GET } = await import("./route");
-    const response = await GET(
-      createMockRequest({ productId: FAKE_PRODUCT_SLUG, order_id: FAKE_PROVIDER_ORDER_ID })
-    );
-
-    expect(response.status).toBe(200);
-    expect((await response.json()).hasAccess).toBe(true);
-    expect(mockResolveProductAccess).toHaveBeenCalledWith(
-      expect.objectContaining({
-        provider: FAKE_PROVIDER,
-        providerOrderId: FAKE_PROVIDER_ORDER_ID,
-        internalOrderId: undefined,
-      }),
-    );
-  });
-
-  it("accepts the provider_order_id snake_case alias (forwarded as providerOrderId)", async () => {
-    mockAnonymous();
-    mockAllowed();
-
-    const { GET } = await import("./route");
-    const response = await GET(
-      createMockRequest({ productId: FAKE_PRODUCT_SLUG, provider_order_id: FAKE_PROVIDER_ORDER_ID })
-    );
-
-    expect(response.status).toBe(200);
-    expect((await response.json()).hasAccess).toBe(true);
-    // No `provider` param and no legacy `order_id` -> provider stays
-    // undefined (explicit providerOrderId values must include provider).
-    expect(mockResolveProductAccess).toHaveBeenCalledWith(
-      expect.objectContaining({
-        providerOrderId: FAKE_PROVIDER_ORDER_ID,
-        provider: undefined,
-        internalOrderId: undefined,
-      }),
-    );
-  });
-
   it("forwards explicit providerOrderId WITHOUT provider param — provider undefined (resolver fails closed)", async () => {
     mockAnonymous();
     mockDenied();
@@ -239,6 +176,30 @@ describe("GET /api/access — thin auth semantics probe", () => {
     );
   });
 
+  it("forwards orderId as the internal Order.id — never warns (canonical wire contract)", async () => {
+    mockAnonymous();
+    mockDenied();
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+    const { GET } = await import("./route");
+    const response = await GET(
+      createMockRequest({ productId: FAKE_PRODUCT_SLUG, orderId: "c123456789012345678901234" })
+    );
+
+    expect(response.status).toBe(200);
+    // The legacy warn-on-misuse adapter is gone: orderId is the explicit
+    // internal Order.id wire contract now.
+    expect(warnSpy).not.toHaveBeenCalled();
+    expect(mockResolveProductAccess).toHaveBeenCalledWith(
+      expect.objectContaining({
+        internalOrderId: "c123456789012345678901234",
+        providerOrderId: undefined,
+        provider: undefined,
+      }),
+    );
+    warnSpy.mockRestore();
+  });
+
   it("maps resolver deny (anonymous + wrong providerOrderId) to hasAccess:false", async () => {
     mockAnonymous();
     mockDenied();
@@ -254,33 +215,6 @@ describe("GET /api/access — thin auth semantics probe", () => {
 
     expect(response.status).toBe(200);
     expect((await response.json()).hasAccess).toBe(false);
-  });
-
-  it("treats orderId as an internal Order.id — warns when it looks like a provider id (legacy)", async () => {
-    mockAnonymous();
-    mockDenied();
-    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
-
-    const { GET } = await import("./route");
-    const response = await GET(
-      createMockRequest({ productId: FAKE_PRODUCT_SLUG, orderId: FAKE_PROVIDER_ORDER_ID })
-    );
-
-    expect(response.status).toBe(200);
-    // Legacy misuse surfaced by the adapter: a provider-looking value
-    // arrived through the orderId param.
-    expect(warnSpy).toHaveBeenCalledTimes(1);
-    expect(warnSpy.mock.calls[0]?.[0]).toContain("[legacy]");
-    // Forwarded as the INTERNAL orderId field (never silently rewritten
-    // to providerOrderId by the adapter).
-    expect(mockResolveProductAccess).toHaveBeenCalledWith(
-      expect.objectContaining({
-        internalOrderId: FAKE_PROVIDER_ORDER_ID,
-        providerOrderId: undefined,
-        provider: undefined,
-      }),
-    );
-    warnSpy.mockRestore();
   });
 
   it("forwards userId + userRole (customer) and maps allow WITH userId", async () => {

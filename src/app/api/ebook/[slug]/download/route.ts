@@ -27,9 +27,8 @@ export async function GET(
   // Also grabs the `id` for `resolveProductAccess` (canonical AccessGrant
   // resolver accepts productId only — no need to extend its surface).
   //
-  // V2 note: the legacy `findCompletedOrder({userId, productSlug})` shape
-  // is gone. The single round-trip below replaces 2 separate reads
-  // (price + slug→id lookup) with one `select: {id, price}` query.
+  // The single round-trip below replaces 2 separate reads (price +
+  // slug→id lookup) with one `select: {id, price}` query.
   const downloadProduct = await prisma.product.findUnique({
     where: { slug },
     select: { id: true, price: true },
@@ -42,8 +41,6 @@ export async function GET(
     // V2 AccessGrant cutover: `resolveProductAccess` is the canonical
     // resolver. Honors all sourceTypes (order, free_enrollment, admin,
     // bundle, watchlist) uniformly with status="active" + non-expired.
-    // The legacy `findCompletedOrder` (Order.status="completed" read)
-    // is no longer called on this path.
     const granted = await resolveProductAccess({
       userId: dbUser.id,
       productId: downloadProduct.id,
