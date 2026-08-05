@@ -73,9 +73,23 @@ Stack di supporto: **PostgreSQL** + **Prisma 5**, **Upstash Redis** + **ioredis*
 
 - **Auth**: Supabase Auth (Google OAuth + Magic Link). Vedi `docs/OAUTH-SETUP.md` per il setup.
 - **Ruoli**: `admin`, `creator`, `student` (string columns, check inline in route handlers).
-- **MCR Phase 2 (canonical)**: `AccessGrant` table è la single source of truth per "l'utente X ha accesso al prodotto Y". Sostituisce i direct reads su `Order.status='completed'` (legacy path, gated by `USE_ACCESS_GRANT_RESOLVER` env flag).
+- **Canonical (V2/V3)**: `AccessGrant` table è la single source of truth per "l'utente X ha accesso al prodotto Y". Ha sostituito i direct reads su `Order.status='completed'` (legacy path, rimosso insieme al feature flag `USE_ACCESS_GRANT_RESOLVER`).
 - **Dashboard utente**: Lista acquisti, download PDF, progresso corsi
 - **Area admin**: Gestione prodotti, ordini, utenti (in `src/app/admin/*`)
+
+### 5. Canonical Order Identity
+
+Identità degli ordini — regola architetturale vincolante. Ogni riferimento a un acquisto nel codice deve distinguere esplicitamente i due concetti:
+
+- **`orderId`** — identifica un ordine **nel database applicativo** (`Order.id`, Prisma cuid). È la primary key interna, mai un id del provider esterno.
+- **`providerOrderId`** — identifica l'oggetto **nel payment provider esterno** (es. Lemon Squeezy order id). È l'unico campo che può portare un id del provider; a livello di codice interno è esplicitamente nominato `internalOrderId`/`providerOrderId` (mai un generico `id`/`paymentId`/`reference`).
+
+Regole vincolanti:
+
+- **L'autorizzazione al prodotto passa SEMPRE da `resolveProductAccess`** (`src/lib/commerce/access/resolve-product-access.ts`). Ogni consumer — player, portal, download, dashboard, certificate, ebook, progress, messaging, `GET /api/access` — delega la decisione al resolver canonico (AccessGrant SSOT).
+- **Le route UI/content NON devono inferire accesso dai campi di pagamento**: niente query dirette a `Order.status`, niente check inline su `payment_status`/`paid`/`completed` nei player o nelle route che concedono accesso.
+- **Wire contract esplicito** di `GET /api/access`: `{ productId, providerOrderId }` (provider esplicito), oppure `{ productId, orderId }` (ID interno), oppure il solo `productId` con sessione autenticata. Gli alias legacy (`order_id`, `provider_order_id`, adapter `LegacyAccessInput`) sono stati rimossi.
+- **Le query dirette agli ordini restano SOLO nei servizi amministrativi/account**: `api/admin/*`, history pagamenti (`account/payments`, `api/user/orders`), social-proof, e il lato scrittura webhook (`processOrder`/`revoke-order`).
 
 ## Flusso Utente (Funnel)
 
