@@ -22,6 +22,10 @@
  *     (grant.sourceId for order grants, the pending/refunded order,
  *     or the resolved anonymous order) — null otherwise (admin,
  *     free_enrollment/admin/bundle grants, no order at all).
+ *   - `pendingOrderOwnerId` is the Order.userId for `payment_pending`
+ *     verdicts — lets the AccessGate render the verifying-order screen
+ *     only for the order's owner WITHOUT a parallel Order query. Absent
+ *     (undefined) for every other reason.
  *
  * Reason vocabulary (canonical):
  *   - `active_purchase`  — active AccessGrant (any sourceType) OR
@@ -132,6 +136,12 @@ export interface ProductAccessResult {
   /** Order behind the verdict (grant sourceId / pending / refunded /
    *  anonymous order) — null when none applies. */
   orderId: string | null;
+  /**
+   * Order.userId for `payment_pending` verdicts only — the AccessGate
+   * uses it to gate the verifying-order screen to the owner without a
+   * parallel Order query. Undefined for every other reason.
+   */
+  pendingOrderOwnerId?: string | null;
 }
 
 export interface ResolveProductAccessInput {
@@ -251,12 +261,12 @@ export async function resolveProductAccess(
               providerOrderId: input.providerOrderId,
               productId,
             },
-            select: { id: true, status: true },
+            select: { id: true, status: true, userId: true },
           })
         : null
       : await prisma.order.findFirst({
           where: { id: input.internalOrderId, productId },
-          select: { id: true, status: true },
+          select: { id: true, status: true, userId: true },
         });
     if (!order) {
       // No provider-scoped or legacy internal Order matches this product.
@@ -286,6 +296,9 @@ export async function resolveProductAccess(
             : "not_purchased",
       productId,
       orderId: order.id,
+      // Lets the AccessGate render the verifying screen only for the
+      // order's owner (no parallel Order query needed).
+      ...(order.status === "pending" ? { pendingOrderOwnerId: order.userId ?? null } : {}),
     };
   }
 
@@ -337,7 +350,7 @@ async function classifyDenial(input: {
       productId: input.productId,
     },
     orderBy: { createdAt: "desc" },
-    select: { id: true, status: true },
+    select: { id: true, status: true, userId: true },
   });
 
   if (!order) {
@@ -346,7 +359,16 @@ async function classifyDenial(input: {
     return deny("not_purchased", input.productId);
   }
   if (order.status === "pending") {
-    return { hasAccess: false, reason: "payment_pending", productId: input.productId, orderId: order.id };
+    return {
+      hasAccess: false,
+      reason: "payment_pending",
+      productId: input.productId,
+      orderId: order.id,
+      // The pending order belongs to this user (the lookup is
+      // userId-scoped) — expose it so the AccessGate can render the
+      // verifying screen without a second Order query.
+      pendingOrderOwnerId: order.userId ?? null,
+    };
   }
   if (order.status === "refunded") {
     return { hasAccess: false, reason: "refunded", productId: input.productId, orderId: order.id };

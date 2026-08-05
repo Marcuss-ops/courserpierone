@@ -261,9 +261,13 @@ describe("resolveProductAccess — utente diverso dall'acquirente (session deny)
 });
 
 describe("resolveProductAccess — ordine pending (session deny)", () => {
-  it("no grant + latest order pending -> deny payment_pending with orderId", async () => {
+  it("no grant + latest order pending -> deny payment_pending with orderId + owner", async () => {
     mockPrisma.accessGrant.findFirst.mockResolvedValue(null);
-    mockPrisma.order.findFirst.mockResolvedValue({ id: ORDER_ID, status: "pending" });
+    mockPrisma.order.findFirst.mockResolvedValue({
+      id: ORDER_ID,
+      status: "pending",
+      userId: USER_ID,
+    });
 
     const result = await resolveProductAccess({
       userId: USER_ID,
@@ -272,6 +276,9 @@ describe("resolveProductAccess — ordine pending (session deny)", () => {
 
     expectDeny(result, "payment_pending");
     expect(result.orderId).toBe(ORDER_ID);
+    // AccessGate renders the verifying screen only for the owner —
+    // exposed by the resolver, no parallel Order query.
+    expect(result.pendingOrderOwnerId).toBe(USER_ID);
   });
 });
 
@@ -326,7 +333,7 @@ describe("resolveProductAccess — anonymous post-checkout path (order id)", () 
         providerOrderId: "order_ls_abc123",
         productId: PRODUCT_ID,
       },
-      select: { id: true, status: true },
+      select: { id: true, status: true, userId: true },
     });
   });
 
@@ -346,7 +353,7 @@ describe("resolveProductAccess — anonymous post-checkout path (order id)", () 
         providerOrderId: "order_ls_abc123",
         productId: PRODUCT_ID,
       },
-      select: { id: true, status: true },
+      select: { id: true, status: true, userId: true },
     });
     expect(mockPrisma.accessGrant.findFirst).not.toHaveBeenCalled();
   });
@@ -392,8 +399,12 @@ describe("resolveProductAccess — anonymous post-checkout path (order id)", () 
     );
   });
 
-  it("anonymous pending order -> deny payment_pending with orderId", async () => {
-    mockPrisma.order.findFirst.mockResolvedValue({ id: ORDER_ID, status: "pending" });
+  it("anonymous pending order -> deny payment_pending with orderId + owner", async () => {
+    mockPrisma.order.findFirst.mockResolvedValue({
+      id: ORDER_ID,
+      status: "pending",
+      userId: USER_ID,
+    });
     mockPrisma.accessGrant.findFirst.mockResolvedValue(null);
 
     const result = await resolveProductAccess({
@@ -403,6 +414,7 @@ describe("resolveProductAccess — anonymous post-checkout path (order id)", () 
 
     expectDeny(result, "payment_pending");
     expect(result.orderId).toBe(ORDER_ID);
+    expect(result.pendingOrderOwnerId).toBe(USER_ID);
   });
 
   it("anonymous refunded order -> deny refunded", async () => {
