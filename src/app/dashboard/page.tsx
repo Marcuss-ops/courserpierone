@@ -73,30 +73,35 @@ export default async function DashboardPage() {
       createdAt: new Date(),
     }));
   } else {
-    const dbUser2 = await prisma.user.findUnique({
-      where: { email: dbUser.email },
+    // Non-admin: read the canonical AccessGrant rows (status="active"
+    // + non-expired — the same criterion `resolveProductAccess` uses).
+    // This honors every sourceType (order, free_enrollment, admin,
+    // bundle, watchlist), so free courses and granted products show up
+    // in the library too — never a direct Order.status="completed"
+    // read in the frontend.
+    const grants = await prisma.accessGrant.findMany({
+      where: {
+        userId: dbUser.id,
+        status: "active",
+        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+      },
       include: {
-        orders: {
-          where: { status: "completed" },
-          include: {
-            product: {
-              select: {
-                id: true,
-                slug: true,
-                coverUrl: true,
-                defaultLanguage: true,
-                _count: { select: { lessons: true } },
-              },
-            },
+        product: {
+          select: {
+            id: true,
+            slug: true,
+            coverUrl: true,
+            defaultLanguage: true,
+            _count: { select: { lessons: true } },
           },
-          orderBy: { createdAt: "desc" },
         },
       },
+      orderBy: { grantedAt: "desc" },
     });
-    userOrders = (dbUser2?.orders ?? []).map((o) => ({
-      id: o.id,
-      product: o.product,
-      createdAt: o.createdAt,
+    userOrders = grants.map((g) => ({
+      id: g.id,
+      product: g.product,
+      createdAt: g.grantedAt,
     }));
   }
 
