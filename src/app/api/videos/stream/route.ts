@@ -66,21 +66,19 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Non autenticato" }, { status: 401 });
     }
 
-    // Check access: free course OR admin OR AccessGrant attivo.
-    // For non-free courses, we already required `dbUser` above, so the
-    // `dbUser.role` / `resolveProductAccess` paths always have a user.
-    // For free courses `dbUser` may be null (guest), hence the `?.`.
-    //
-    // V2 — AccessGrant SSOT: `resolveProductAccess` is the canonical
-    // resolver. It honors all sourceTypes (order, free_enrollment,
-    // admin, bundle, watchlist) uniformly with status="active" + non-
-    // expired. The legacy `findCompletedOrder` (Order.status read) is
-    // no longer called on this path.
-    let hasAccess = isFree || dbUser?.role === "admin";
+    // Check access: free course OR resolveProductAccess (which handles
+    // admin bypass via `userRole` + any active AccessGrant sourceType).
+    // The old inline `dbUser?.role === "admin"` short-circuit is GONE —
+    // the canonical resolver owns the admin rule. For non-free courses
+    // we already required `dbUser` above, so the resolver path always
+    // has a user. For free courses `dbUser` may be null (guest), hence
+    // the `?.` on the resolver guard.
+    let hasAccess = isFree;
 
     if (!hasAccess && dbUser) {
       const granted = await resolveProductAccess({
         userId: dbUser.id,
+        userRole: dbUser.role,
         productId: product.id,
       });
       hasAccess = granted.hasAccess;

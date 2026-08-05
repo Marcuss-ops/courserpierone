@@ -55,17 +55,24 @@ export default async function HomePage() {
   try {
     const { products } = await fetchPublishedProducts();
 
-    // Determine which products the user already owns
+    // Determine which products the user already owns — canonical
+    // AccessGrant read (status="active" + non-expired, the same
+    // criterion `resolveProductAccess` uses). Never a direct
+    // Order.status="completed" query in the frontend.
     let ownedProductIds = new Set<string>();
     if (dbUser) {
       try {
-        const orders = await prisma.order.findMany({
-          where: { userId: dbUser.id, status: "completed" },
+        const grants = await prisma.accessGrant.findMany({
+          where: {
+            userId: dbUser.id,
+            status: "active",
+            OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+          },
           select: { productId: true },
         });
-        ownedProductIds = new Set(orders.map((o) => o.productId));
+        ownedProductIds = new Set(grants.map((g) => g.productId));
       } catch {
-        // Order lookup failed — treat all as unowned
+        // Grant lookup failed — treat all as unowned
       }
     }
 

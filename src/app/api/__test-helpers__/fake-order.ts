@@ -1,25 +1,22 @@
-import type { findCompletedOrder } from "@/lib/access";
+import type { Order } from "@prisma/client";
 
 /**
  * src/app/api/__test-helpers__/fake-order.ts
  *
- * V3.3.2 — Single typed factory for the `findCompletedOrder` return shape
- * (`Order | null`), shared between the 4 V3.3.1 AccessGate test files
- * (certificate, ebook, progress, videos). Replaces ~24 LOC of per-file
- * `fakeOrder` + `FakeOrder` type-alias duplication with a single import.
+ * V3.3.2 — Single typed factory for the `Order` shape (`Order | null`),
+ * shared between the 4 V3.3.1 AccessGate test files (certificate, ebook,
+ * progress, videos). Replaces ~24 LOC of per-file `fakeOrder` +
+ * `FakeOrder` type-alias duplication with a single import.
  *
- * Scope: use this helper ONLY in tests of routes that consume
- * `@/lib/access`'s `findCompletedOrder` / `findCompletedOrderByOrderId`.
+ * Scope: use this helper ONLY in tests of routes that consume an
+ * `Order` read (the deprecated `findCompletedOrder` helper has been
+ * removed — access now goes through `resolveProductAccess`, which
+ * never returns an `Order` row; `fakeOrder` remains for test fixtures
+ * that still need a raw Order object, e.g. write-side route mocks).
  * Routes with a DIFFERENT Order shape (e.g., write-side admin endpoints,
  * refund flows, social-proof canvases) should define their own local
  * factory rather than overloading this one — those Order variants often
- * include fields not present in the SSOT read-side helper.
- *
- * Type alias is computed from the canonical helper's return shape:
- *   `Awaited<ReturnType<typeof findCompletedOrder>>` resolves to
- *   `Order | null`. This is in lock-step with the actual helper — if
- *   the helper's signature changes, the type alias updates automatically
- *   (no maintenance burden).
+ * include fields not present in the read-side shape.
  *
  * Global defaults (`fakeOrder()` with no args):
  *   - `id: "ck-order-1"`     — matches across all tests
@@ -53,14 +50,13 @@ import type { findCompletedOrder } from "@/lib/access";
  *     `cu-user-1`, `cp-product-1`, `it`) — if any of these need to
  *     change for a future test convention, edit one place
  *   - Reusable for upcoming **read-side** admin route tests (V4+)
- *     which would have the same `findCompletedOrder` mocks; a single
- *     import replaces another ~7 LOC of duplication. Note: write-side
- *     admin endpoints (createOrder / refundOrder flows) use a
- *     DIFFERENT shape and should NOT use this helper — see the
- *     "Scope" block at the top of this docstring.
+ *     which mock raw Order rows; a single import replaces another ~7 LOC
+ *     of duplication. Note: write-side admin endpoints (createOrder /
+ *     refundOrder flows) use a DIFFERENT shape and should NOT use this
+ *     helper — see the "Scope" block at the top of this docstring.
  */
 
-type FakeOrder = Awaited<ReturnType<typeof findCompletedOrder>>;
+type FakeOrder = Order | null;
 
 const DEFAULTS = {
   id: "ck-order-1",
@@ -70,7 +66,7 @@ const DEFAULTS = {
 } as const;
 
 /**
- * Create a fake Order matching the `findCompletedOrder` return shape.
+ * Create a fake Order matching the canonical `Order` row shape.
  * See module docstring for default field values + override pattern.
  */
 export const fakeOrder = (overrides: Partial<FakeOrder> = {}): FakeOrder => ({

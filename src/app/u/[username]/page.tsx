@@ -104,8 +104,11 @@ export default async function PublicProfilePage({
         role: true,
         lastSeenAt: true,
         createdAt: true,
-        orders: {
-          where: { status: "completed" },
+        accessGrants: {
+          where: {
+            status: "active",
+            OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+          },
           select: {
             product: {
               select: {
@@ -115,9 +118,9 @@ export default async function PublicProfilePage({
                 _count: { select: { lessons: true } },
               },
             },
-            createdAt: true,
+            grantedAt: true,
           },
-          orderBy: { createdAt: "desc" },
+          orderBy: { grantedAt: "desc" },
         },
       },
     }),
@@ -147,7 +150,9 @@ export default async function PublicProfilePage({
     Date.now() - profileUser.lastSeenAt.getTime() < ONLINE_THRESHOLD;
 
   // ── Course progress ──────────────────────────────────
-  const productIds = profileUser.orders.map((o) => o.product.id);
+  // Canonical AccessGrant read (same criterion as resolveProductAccess)
+  // — the profile shows courses the user currently has access to.
+  const productIds = profileUser.accessGrants.map((g) => g.product.id);
   const allLessons =
     productIds.length > 0
       ? await prisma.lesson.findMany({
@@ -176,14 +181,14 @@ export default async function PublicProfilePage({
     totalByProduct.set(l.productId, (totalByProduct.get(l.productId) ?? 0) + 1);
   }
 
-  const courses = profileUser.orders
-    .map((o) => {
-      const total = totalByProduct.get(o.product.id) ?? 0;
-      const completed = completedByProduct.get(o.product.id) ?? 0;
+  const courses = profileUser.accessGrants
+    .map((g) => {
+      const total = totalByProduct.get(g.product.id) ?? 0;
+      const completed = completedByProduct.get(g.product.id) ?? 0;
       return {
-        productId: o.product.id,
-        slug: o.product.slug,
-        coverUrl: o.product.coverUrl,
+        productId: g.product.id,
+        slug: g.product.slug,
+        coverUrl: g.product.coverUrl,
         lessonCount: total,
         completedLessons: completed,
         isCompleted: total > 0 && completed >= total,
@@ -417,7 +422,7 @@ export default async function PublicProfilePage({
           {[
             {
               icon: <BookOpen className="w-5 h-5 text-cream-dark-gold" />,
-              value: profileUser.orders.length.toString(),
+              value: profileUser.accessGrants.length.toString(),
               label: "Corsi",
             },
             {

@@ -208,10 +208,13 @@ describe("GET /api/videos/stream — admin bypass + AccessGrant SSOT check", () 
     expect(mockResolveProductAccess).not.toHaveBeenCalled();
   });
 
-  // ── Admin: bypass the resolver (INLINE admin bypass) ─────
-  it("admin with NO grant: returns 200 (admin bypass inline)", async () => {
+  // ── Admin: resolver owns the bypass (userRole="admin" short-circuit) ─
+  it("admin: resolver is called with userRole=admin and grants access", async () => {
     mockAdmin();
     mockProductFound();
+    // The canonical resolver short-circuits on userRole === "admin" —
+    // the route just delegates; no inline role check anymore.
+    mockAllowedGrant("admin");
     mockVideoFound();
 
     const { GET } = await import("./route");
@@ -222,8 +225,11 @@ describe("GET /api/videos/stream — admin bypass + AccessGrant SSOT check", () 
 
     expect(response.status).toBe(200);
     expect(body.videoUrl).toBe(VIDEO_URL);
-    // Admin bypass is inline — resolver MUST NOT have been called.
-    expect(mockResolveProductAccess).not.toHaveBeenCalled();
+    expect(mockResolveProductAccess).toHaveBeenCalledWith({
+      userId: ADMIN_ID,
+      userRole: "admin",
+      productId: PRODUCT_ID,
+    });
   });
 
   // ── Customer with active grant (sourceType='order'): 200 ─────────────────
@@ -243,6 +249,7 @@ describe("GET /api/videos/stream — admin bypass + AccessGrant SSOT check", () 
     expect(body.videoUrl).toBe(VIDEO_URL);
     expect(mockResolveProductAccess).toHaveBeenCalledWith({
       userId: USER_ID,
+      userRole: "student",
       productId: PRODUCT_ID,
     });
   });
