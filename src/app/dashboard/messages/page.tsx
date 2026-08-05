@@ -52,10 +52,11 @@ export interface ConversationPreview {
  *
  * Scoping:
  * - Lo studente NON può scrivere a chiunque (rimossa `UserSearchBar`).
- * - Vede SOLO le conversazioni dei prodotti che ha effettivamente
- *   acquistato (Order.status = "completed"). È la "single source of
- *   truth": se gli viene revocato l'accesso (refund, chargeback),
- *   la chat scompare automaticamente dalla inbox list.
+ * - Vede SOLO le conversazioni dei prodotti a cui ha accesso via
+ *   AccessGrant attivo (il read canonico che il resolver usa). È la
+ *   "single source of truth": se gli viene revocato l'accesso
+ *   (refund, chargeback), la chat scompare automaticamente dalla
+ *   inbox list.
  * - Le conversation di prodotti poi rimborsati restano nel DB
  *   (orfane lato ordine). Il read-side guard su
  *   `/dashboard/messages/[userId]` chiude anche il vettore URL
@@ -86,17 +87,22 @@ export default async function MessagesPage() {
     redirect("/login");
   }
 
-  // ── 1. Recupera i prodotti effettivamente acquistati (snapshot) ──
-  // Single source of truth: solo gli ordini `completed` danno diritto
-  // a chat con il creator di quel prodotto. Dedup via Set perché
-  // uno studente potrebbe aver comprato lo stesso prodotto più volte
-  // (raro).
-  const completedOrders = await prisma.order.findMany({
-    where: { userId: dbUser.id, status: "completed" },
+  // ── 1. Recupera i prodotti con accesso attivo (snapshot) ──
+  // Single source of truth: gli AccessGrant `active` non-expired danno
+  // diritto a chat con il creator di quel prodotto — lo stesso criterio
+  // canonico di `resolveProductAccess` (mai query dirette a
+  // Order.status). Dedup via Set perché più grant (order, bundle,
+  // free_enrollment) possono puntare allo stesso prodotto.
+  const activeGrants = await prisma.accessGrant.findMany({
+    where: {
+      userId: dbUser.id,
+      status: "active",
+      OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+    },
     select: { productId: true },
   });
   const purchasedProductIds = Array.from(
-    new Set(completedOrders.map((o) => o.productId)),
+    new Set(activeGrants.map((g) => g.productId)),
   );
 
   // ── Early-return empty state: nessun acquisto ancora ─────────
