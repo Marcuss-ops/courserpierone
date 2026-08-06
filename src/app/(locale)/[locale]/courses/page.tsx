@@ -3,7 +3,7 @@ import { CoursesCatalog } from "@/components/courses-catalog";
 import {
   ACTIVE_COURSES,
   type CourseMeta,
-} from "@/lib/courses/registry";
+} from "@course-registry";
 
 /**
  * /[locale]/courses — Locale-prefixed marketing catalog.

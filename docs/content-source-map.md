@@ -47,7 +47,8 @@ This document traces 4 distinct **data sources**, 6 **templates**, and 3 **publi
 > + `public/courses/<slug>/config.json`). Full migration path recorded in
 > `docs/adr/0011-course-plugin-decoupling.md`. The canonical registry of
 > available courses lives at `courses.config.ts` (single source of truth) and
-> is re-exported typed via `src/lib/courses/registry.ts`. PDF lesson assets
+> is owned by `courses.config.ts`; the legacy `src/lib/courses/registry.ts`
+path is a temporary typed compatibility shim. PDF lesson assets
 > remain under `public/courses/<slug>/*.pdf` because Next.js serves them via
 > the static edge CDN — they are *assets*, not configuration.
 

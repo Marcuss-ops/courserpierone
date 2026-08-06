@@ -28,17 +28,15 @@ import {
   DEFAULT_LOCALE,
 } from "./_generated/locale-data";
 import { getCurrencyFromLocale } from "./currency-map";
+import { localeToLanguage } from "./locale-language";
 
 export { getCurrencyFromLocale };
+export { localeToLanguage } from "./locale-language";
 
 export { LANG_TO_DEFAULT_LOCALE, DEFAULT_LOCALE };
 
 export function isKnownLocale(code: string): boolean {
   return ALL_KNOWN_LOCALES.has(code.toLowerCase());
-}
-
-export function localeToLanguage(locale: string): string {
-  return locale.split("-")[0]?.toLowerCase() ?? locale;
 }
 
 // ─── Normalize: "en-US" → "en-us", "FR_fr" → "fr-fr" ─

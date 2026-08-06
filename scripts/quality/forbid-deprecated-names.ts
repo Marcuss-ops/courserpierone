@@ -14,7 +14,7 @@
 // Allowlist (deprecated name is intentional in these files):
 //   1. docs/adr/0015-coursy-naming-decision.md (the decision itself)
 //   2. docs/adr/0016-coursy-monolith-modular.md (parent ADR)
-//   3. scripts/_inline-disable-react-hooks.mjs (Windows path string)
+//
 //   4. scripts/quality/forbid-deprecated-names.ts (this script body)
 
 import { readFileSync } from "node:fs";
@@ -23,7 +23,6 @@ import { execSync } from "node:child_process";
 const ALLOWED_PATHS: ReadonlySet<string> = new Set([
   "docs/adr/0015-coursy-naming-decision.md",
   "docs/adr/0016-coursy-monolith-modular.md",
-  "scripts/_inline-disable-react-hooks.mjs",
   "scripts/quality/forbid-deprecated-names.ts",
   "scripts/quality/forbid-deprecated-names.test.ts",
   // Legacy migration-window keys intentionally keep the old brand name

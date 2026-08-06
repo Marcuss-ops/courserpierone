@@ -30,6 +30,9 @@ export const BOOST_SAME_TOPIC = 20;
 export const rankBySameTopic: BoostPolicy = {
   kind: "boost",
   name: "rank-by-same-topic",
+  file: "./rank-by-same-topic",
+  description: "Boosts items whose topics intersect observedTopics (+20 +5/cardinality, cap +30)",
+  scoreHint: 20,
   score(item, ctx) {
     // Graceful no-op if item lacks topics field (current MVP variants).
     if ("topics" in item) {

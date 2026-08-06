@@ -16,12 +16,17 @@
  * CheckoutService assume a one-time registration at boot).
  */
 
-import type { PaymentProvider, PaymentProviderSlug } from "./types";
-import { PAYMENT_PROVIDER_SLUGS } from "./types";
+import type { PaymentProvider } from "./types";
+import {
+  PAYMENT_PROVIDER_SLUGS,
+  type PaymentProviderSlug,
+} from "@/domains/commerce";
 
-// Step 7 collapser: derive the runtime list from `PAYMENT_PROVIDER_SLUGS`
-// so the type alias + the runtime warning stay in sync without manual
-// duplication. New provider = 1-line edit on the array in types.ts.
+export { PAYMENT_PROVIDER_SLUGS } from "@/domains/commerce";
+
+// Derive the runtime list from the canonical Commerce catalog so the type
+// alias + runtime warning stay in sync without manual duplication. New
+// provider = one edit to the domain catalog.
 const KNOWN_PROVIDER_SLUGS: readonly PaymentProviderSlug[] = PAYMENT_PROVIDER_SLUGS;
 
 /**
@@ -54,7 +59,7 @@ class PaymentProviderRegistry {
     // registration-time, not lazily at first `.get()`. A typo'd slug
     // here would 500 on the next webhook call — better to log a one-
     // liner at boot. NOT a throw: adding Stripe later means a one-line
-    // addition to `PAYMENT_PROVIDER_SLUGS` in types.ts — both the type
+    // addition to the canonical Commerce payment-provider catalog — both the type
     // union and the runtime list are auto-derived. Test stubs (alpha/
     // beta/test-only slugs in registry.test.ts) are exempted via
     // `isTestRuntime()` so vitest CI runs don't false-positive.
@@ -64,7 +69,7 @@ class PaymentProviderRegistry {
     ) {
       console.warn(
         `[paymentProviderRegistry] registering unknown slug "${provider.slug}". ` +
-          `Add it to PAYMENT_PROVIDER_SLUGS in src/lib/commerce/payments/types.ts ` +
+          `Add it to the canonical Commerce payment-provider catalog ` +
           `if this is intentional.`,
       );
     }

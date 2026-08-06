@@ -85,10 +85,11 @@ The 6 gates are enforced at three levels:
 
 2. **CI gate** (`scripts/quality/check-deps.ts`): scans `package.json`
    + `package-lock.json` + `src/` import usages. Flags deps with
-   ≤ 1 usage point as "candidate-to-remove". Wired into the
-   `quality-gate` CI job as step (i), informational only (does
-   NOT block the merge on first land — gives the team a clear
-   signal without the cost of a failed CI on every V2 day 1).
+   ≤ 1 usage point as "candidate-to-remove". It is registered in
+   `scripts/quality/quality-gates.ts` and therefore runs in every
+   `check:static`/`check` invocation. Registry drift and reviewed
+   `eslint-disable` directives are enforced by sibling gates in the
+   same registry.
 
 3. **Quarterly audit** (process): once per quarter, run
    `npm run check:deps` and review the output. Deps flagged for
@@ -144,4 +145,7 @@ master plan §7:
 - ADR-0016 §1 (architectural dependency direction UI → UseCase → Domain → Port → Adapter)
 - `docs/checklist/dod.md` (DoD §5 "caso d'uso applicativo" — applies to deps too)
 - `scripts/quality/check-deps.ts` (the enforcement script)
+- `scripts/quality/quality-gates.ts` (the canonical quality suite registry)
+- `scripts/quality/check-registry-drift.ts` (registry anti-drift gate)
+- `scripts/quality/check-eslint-disables.ts` (reviewed ESLint exception gate)
 - `package.json` (the canonical dep list, governed by this policy)

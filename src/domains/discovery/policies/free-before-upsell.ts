@@ -29,6 +29,8 @@ import type { SortPolicy } from "./policy-types";
 export const freeBeforeUpsell: SortPolicy = {
   kind: "sort",
   name: "free-before-upsell",
+  file: "./free-before-upsell",
+  description: "Sort tie-break: free_course precedes premium_course",
   compare(a, _b, _ctx) {
     // Comparator asymmetry: only `a` matters here because Array.sort
     // invokes compare(a,b) and compare(b,a) — we WANT free_course to

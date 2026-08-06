@@ -31,6 +31,9 @@ export const BOOST_SAME_CREATOR = 30;
 export const rankBySameCreator: BoostPolicy = {
   kind: "boost",
   name: "rank-by-same-creator",
+  file: "./rank-by-same-creator",
+  description: "Boosts items from followed creators (+30)",
+  scoreHint: 30,
   score(item, ctx) {
     // Type-narrowed per item.kind — only variants with explicit
     // `creatorId` field can boost.

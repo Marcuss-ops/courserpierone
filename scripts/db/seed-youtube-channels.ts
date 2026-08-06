@@ -31,11 +31,11 @@
  * Cross-script reference (consistency):
  *   - scripts/db/seed-locales.ts        — sibling DB-seed convention.
  *   - courses.config.ts                 — COURSES[] source-of-truth.
- *   - src/lib/courses/registry.ts       — typed mirror.
+ *   - courses.config.ts                 — canonical bundled-course registry.
  */
 
 import { prisma } from "../../src/lib/db/prisma";
-import { ACTIVE_COURSES, type CourseMeta } from "../../courses.config";
+import { ACTIVE_COURSES } from "../../courses.config";
 
 interface PlatformLocale {
   locale: string;
@@ -177,6 +177,8 @@ async function main(): Promise<void> {
 
 main().catch((err) => {
   console.error("\n❌ Seed failed:", err);
-  prisma.$disconnect().catch(() => {});
+  prisma.$disconnect().catch((disconnectError) => {
+    console.warn("⚠️ Failed to disconnect Prisma after seed error:", disconnectError);
+  });
   process.exit(1);
 });

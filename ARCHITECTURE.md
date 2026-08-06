@@ -149,9 +149,28 @@ Pubblica ──── generateCourseConfig(slug) → CourseConfigCache DB row
 
 - **Dev server**: `npm run dev` (Next.js alone — la real-time chat passa via SSE in `/api/conversations/[id]/stream`, polling server-driven interno al route handler). Vedi `docs/production.md` per la topologia di produzione.
   - **Edge proxy (Next.js 16+)**: il file convenzione globale è `src/proxy.ts` che esporta la funzione `proxy` (era `middleware` in Next.js ≤15). `config.matcher` invariato. `updateSession` da `@/lib/supabase/middleware` (helper internal, NON rinominato) continua a girare come Step 1 della catena: `proxy → updateSession (Supabase session refresh) → checkProtectedAccess → handleFullLocale → handleShortLang → handleLangParam → handleRootLocale → handleNoPrefix → fallback response`. Il vecchio `src/middleware.ts` è stato rimosso (deprecation Next 16).
-- **Typecheck + lint**: `npm run check` (typecheck + eslint + vitest). È un controllo locale: la readiness della release richiede anche una run GitHub Actions verde sul commit candidato.
+- **Quality registry**: `scripts/quality/quality-gates.ts` è la fonte unica per le suite `static`, `repo`, `check` e `full`. `npm run check` esegue static + unit + repository; `npm run check:full` è un superset che aggiunge build, integration, migration deploy test ed E2E/SSE.
+- **Typecheck + lint**: sono inclusi nella suite `static`. Il gate `check:eslint-disables` applica l'allowlist revisionata in `scripts/quality/eslint-disable-allowlist.ts`; `check:registry-drift` confronta provider, content, agent e discovery policy registry. È un controllo locale: la readiness della release richiede anche una run GitHub Actions verde sul commit candidato.
 - **Release verification:** l'ultima verifica locale del candidato `c2e0f87` ha superato typecheck, lint, unit test, quality gate, build, audit dipendenze, migration safety scan e deploy-gate shape; integration PostgreSQL, migration deploy reale, audit database, E2E/SSE e Gitleaks non sono stati completati. Vedi `docs/roadmap-current.md` e `DEPLOY-CHECKLIST.md` per lo stato evidence-based.
 - **DB locale**: `docker compose up -d db redis` (Postgres 16 + Redis). Lo stack include `pgbackups` per i backup automatici (PITR per Supabase prod). Senza il daemon Docker attivo non dichiarare superati i gate che richiedono PostgreSQL/Redis.
+
+## Registry ownership e anti-drift
+
+Ogni elenco estendibile ha un solo proprietario runtime:
+
+- `PAYMENT_PROVIDER_SLUGS` + `paymentProviderRegistry` per i provider di pagamento;
+- `CONTENT_KINDS` e `CONTENT_STATUSES` per i tipi/stati di contenuto;
+- `AGENT_ACTIONS`, `AGENT_PROVIDERS` e `APPROVAL_REQUIREMENTS` per Automation;
+- `RANKING_POLICIES` per Discovery; `POLICY_CATALOG` è solo una facciata derivata
+  per compatibilità con consumer legacy;
+- `COURSES`/`BUNDLED_COURSES` in `courses.config.ts` per il catalogo bundled.
+
+`OUTBOX_HANDLER_REGISTRY` possiede gli handler e deriva `OUTBOX_EVENT_TYPES`,
+mentre il catalogo content possiede i valori e gli schemi dei tipi/stati.
+`scripts/quality/check-registry-drift.ts` verifica duplicati, adapter e registrazioni
+provider, membership/ordine delle policy, valori runtime degli agenti e slug bundled.
+Un nuovo valore deve aggiornare il registry canonico e i test associati; non si
+aggiungono union o array paralleli nei consumer.
 
 ## Architecture Decision Records (cross-cutting)
 

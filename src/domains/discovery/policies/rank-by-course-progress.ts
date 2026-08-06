@@ -25,6 +25,9 @@ export const BOOST_COURSE_PROGRESS = 100;
 export const rankByCourseProgress: BoostPolicy = {
   kind: "boost",
   name: "rank-by-course-progress",
+  file: "./rank-by-course-progress",
+  description: "Boosts in-progress lessons for owned products (+100)",
+  scoreHint: 100,
   score(item, ctx) {
     // Type-narrowed switch — only items with productId can participate.
     switch (item.kind) {

@@ -31,8 +31,9 @@
  * When a second provider (e.g. Stripe) is added:
  *   1. Implement `class StripePaymentProvider implements PaymentProvider` in
  *      `src/lib/commerce/payments/providers/stripe/index.ts`.
- *   2. Extend `PaymentProviderSlug` in `types.ts` (currently `"lemonsqueezy"`)
- *      to include `"stripe"`.
+ *   2. Extend the canonical payment-provider catalog in
+ *      `src/domains/commerce/payment-provider-catalog.ts` to include
+ *      `"stripe"`.
  *   3. Add `paymentProviderRegistry.register(new StripePaymentProvider())` here.
  *   4. No changes to consumer code (webhooks/processor, orders/*, etc.) —
  *      they pick the provider via `event.provider` already.

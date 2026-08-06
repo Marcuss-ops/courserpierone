@@ -148,6 +148,39 @@ export const ACTIVE_BUNDLED_COURSES: CourseMeta[] = BUNDLED_COURSES.filter(
  */
 export const ACTIVE_COURSES: CourseMeta[] = ACTIVE_BUNDLED_COURSES;
 
+export interface CourseRegistration {
+  kind: "bundled";
+  meta: CourseMeta;
+}
+
+/** Resolve bundled metadata; null means DB-owned or unknown. */
+export function resolveCourseRegistration(slug: string): CourseRegistration | null {
+  const meta = findCourseMeta(slug);
+  if (!meta || !isBundledCourse(slug)) return null;
+  return { kind: "bundled", meta };
+}
+
+export function getAllSlugs(): string[] {
+  return COURSES.map((course) => course.slug);
+}
+
+export function getBundledSlugs(): string[] {
+  return BUNDLED_COURSES.map((course) => course.slug);
+}
+
+export function getActiveSlugs(): string[] {
+  return ACTIVE_BUNDLED_COURSES.map((course) => course.slug);
+}
+
+export function getCoursesByStatus(): Record<string, CourseMeta["status"]> {
+  return Object.fromEntries(COURSES.map((course) => [course.slug, course.status]));
+}
+
+const COURSE_SLUGS = new Set(COURSES.map((course) => course.slug));
+export function isRegisteredCourse(slug: string): boolean {
+  return COURSE_SLUGS.has(slug);
+}
+
 /** Lookup helper used by loaders + scripts. Returns null if not registered. */
 export function findCourseMeta(slug: string): CourseMeta | null {
   return COURSES.find((c) => c.slug === slug) ?? null;

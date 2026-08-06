@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { PAYMENT_PROVIDER_SLUGS } from "@/domains/commerce";
+export { PAYMENT_PROVIDER_SLUGS } from "@/domains/commerce";
 import { ValidationError } from "@/lib/errors";
 import {
   asCurrencyCode,
@@ -110,21 +112,20 @@ export interface ProviderPayment {
 
 /**
  * Slug tuple of every payment provider registered with this app.
- * Lives in types.ts (and not registry.ts) so consumers can import it
- * WITHOUT triggering the registry's module-load side-effects.
+ * Lives in the domain Commerce catalog (and not registry.ts) so consumers
+ * can import it WITHOUT triggering the registry's module-load side-effects.
  *
  * Step 7 uses the **const-as-type** pattern: the runtime array IS the
  * source of truth, and the type is DERIVED from it. Adding a provider
  * is a one-line change to the array — the type, the registry's
  * runtime warning, and the call-site autocomplete all stay in sync
- * automatically. To extend: add `"stripe"` to `PAYMENT_PROVIDER_SLUGS`.
+ * automatically. To extend: add `"stripe"` to the canonical
+ * `src/domains/commerce/payment-provider-catalog.ts` catalog.
  *
  * Phase 1: LS-only MoR. The array currently has a single element.
  */
 // Public runtime surface — registry.ts imports this for the unknown-slug
-// warning check. Don't move it to a runtime config file without breaking
-// the cycle cleanly (init.ts → registry.ts → types.ts).
-export const PAYMENT_PROVIDER_SLUGS = ["lemonsqueezy"] as const;
+// warning check. The canonical value lives in the domain Commerce catalog.
 export type PaymentProviderSlug = (typeof PAYMENT_PROVIDER_SLUGS)[number];
 const paymentProviderSchema = z.enum(PAYMENT_PROVIDER_SLUGS);
 

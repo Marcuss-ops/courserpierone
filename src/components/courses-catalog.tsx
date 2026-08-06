@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
-import type { CourseMeta } from "@/lib/courses/registry";
+import type { CourseMeta } from "@course-registry";
 
 /**
  * CoursesCatalog — Registry-driven catalog grid for the /courses page.

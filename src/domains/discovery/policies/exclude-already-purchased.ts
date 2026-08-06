@@ -31,6 +31,8 @@ import type { FilterPolicy } from "./policy-types";
 export const excludeAlreadyPurchased: FilterPolicy = {
   kind: "filter",
   name: "exclude-already-purchased",
+  file: "./exclude-already-purchased",
+  description: "Removes items the user has already purchased",
   predicate(item, ctx) {
     switch (item.kind) {
       case "free_course":

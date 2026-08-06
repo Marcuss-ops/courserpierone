@@ -41,7 +41,7 @@ courses/                                 # NEW — course plugin folders
     config.json                          # Was: public/courses/<slug>/config.json
 public/courses/<slug>/*.pdf              # UNCHANGED — served lesson assets
 courses.config.ts                        # NEW at root — static COURSES[] registry
-src/lib/courses/registry.ts              # NEW — typed adapter (re-exports + lookup)
+src/lib/courses/registry.ts              # DEPRECATED — temporary typed compatibility shim
 src/app/courses/page.tsx                 # NEW — registry-driven /courses catalog
 ```
 
@@ -72,12 +72,15 @@ export const COURSES: CourseMeta[] = [
 Landing targets must always be supplied explicitly by the caller. An empty registry has no fallback landing slug.
 ```
 
-The registry is the single source of truth for:
+The registry in `courses.config.ts` is the single source of truth for:
 
 - **Marketing catalog** (`/courses` page iterates `ACTIVE_COURSES`).
 - **YouTube attribution defaults** (`scripts/db/seed-youtube-channels.ts` iterates `COURSES[]` to generate one channel per `(course, locale)`.
 - **Performance-script defaults** (`scripts/products/sync-local-config.ts <slug>` throws if slug ∉ registry)
 - **DB seeding** (`sync-local-config.ts` upserts both `Product` and `CourseConfigCache` rows from the on-disk `courses/<slug>/config.json` and `COURSES[]` metadata).
+
+`src/lib/courses/registry.ts` remains only as a temporary compatibility shim for
+legacy imports; new consumers must import the canonical root registry directly.
 
 ### "Drop a new course" recipe (the success criterion)
 

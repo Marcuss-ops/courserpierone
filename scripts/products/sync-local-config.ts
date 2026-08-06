@@ -40,7 +40,7 @@ import {
   BUNDLED_COURSES,
   findCourseMeta,
   resolveCourseRegistration,
-} from "../../src/lib/courses/registry";
+} from "../../courses.config";
 import { parseCourseConfig, type CourseConfig } from "../../src/lib/config/course-config-schema";
 import { syncCourseConfigRecords } from "../../src/lib/config/sync-course-config";
 

@@ -10,7 +10,7 @@
 //   - src/app/api/checkout/route.ts (checkout API)
 
 import { LOCALE_CURRENCY } from "./_generated/locale-data";
-import { localeToLanguage } from "./locale-resolver";
+import { localeToLanguage } from "./locale-language";
 
 /**
  * Returns the currency code (ISO 4217) for a given locale string.

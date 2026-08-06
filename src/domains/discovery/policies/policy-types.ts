@@ -38,10 +38,22 @@
 
 import type { FeedItem, FeedContext } from "../feed/feed-types";
 
+export const POLICY_KINDS = ["boost", "filter", "sort"] as const;
+export type PolicyKind = (typeof POLICY_KINDS)[number];
+
 // ─── Policy variant discriminated unions ───────────────────────────
 
 /** Boost policy — returns numeric score contribution (>= 0). */
-export interface BoostPolicy {
+export interface PolicyMetadata {
+  /** Human-readable description used by dashboards and audits. */
+  description: string;
+  /** Source module path relative to the policy registry. */
+  file: string;
+  /** Advisory score hint for boost policies. */
+  scoreHint?: number;
+}
+
+export interface BoostPolicy extends PolicyMetadata {
   kind: "boost";
   /** Static registry key. */
   name: PolicyName;
@@ -50,14 +62,14 @@ export interface BoostPolicy {
 }
 
 /** Filter policy — predicate. true = keep, false = drop. */
-export interface FilterPolicy {
+export interface FilterPolicy extends PolicyMetadata {
   kind: "filter";
   name: PolicyName;
   predicate(item: FeedItem, ctx: FeedContext): boolean;
 }
 
 /** Sort policy — pairwise comparator (used for tie-break). */
-export interface SortPolicy {
+export interface SortPolicy extends PolicyMetadata {
   kind: "sort";
   name: PolicyName;
   /** Returns -1 | 0 | 1 (Array.sort-compatible). */
@@ -71,13 +83,8 @@ export type RankingPolicy = BoostPolicy | FilterPolicy | SortPolicy;
 // Adding a new policy = extend this union + register in RANKING_POLICIES
 // + add a new file. No other file needs to change (per ADR-0016 §2
 // "no anticipatory folders" — registry is data + composition only).
-export type PolicyName =
-  | "rank-by-course-progress"
-  | "rank-by-language-compat"
-  | "rank-by-same-creator"
-  | "rank-by-same-topic"
-  | "exclude-already-purchased"
-  | "free-before-upsell";
+/** Policy keys are owned by the runtime RANKING_POLICIES map. */
+export type PolicyName = string;
 
 // ─── Internal: scored item for applyPolicies composition ───────────
 export interface ScoredItem {

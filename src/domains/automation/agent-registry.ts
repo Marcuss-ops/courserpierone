@@ -30,9 +30,59 @@
  * Domain layer: imports zod only. NO Prisma.
  */
 
-import type { z } from "zod";
+import { z } from "zod";
 
 import type { AgentErrorReason } from "./agent-run-retry-policy";
+
+// Canonical agent value registry. Schemas, types and runtime manifests all
+// derive from these values; `agent-catalog.ts` is a compatibility facade.
+export const AGENT_ACTIONS = [
+  "generate_post",
+  "generate_lesson_outline",
+  "translate_content",
+  "summarize_lesson",
+  "draft_email",
+  "generate_quiz",
+] as const;
+export const agentActionSchema = z.enum(AGENT_ACTIONS);
+export type AgentAction = z.infer<typeof agentActionSchema>;
+
+export const AGENT_PROVIDERS = ["openai", "anthropic", "inhouse", "noop"] as const;
+export const agentProviderSchema = z.enum(AGENT_PROVIDERS);
+export type AgentProvider = z.infer<typeof agentProviderSchema>;
+
+export const APPROVAL_REQUIREMENTS = ["always", "never", "configurable"] as const;
+export const approvalRequirementSchema = z.enum(APPROVAL_REQUIREMENTS);
+export type ApprovalRequirement = z.infer<typeof approvalRequirementSchema>;
+
+export const DEFAULT_RETRY_POLICY = {
+  maxAttempts: 3,
+  defaultDelayMs: 5_000,
+} as const;
+export const defaultRetryPolicySchema = z.object({
+  maxAttempts: z.number().int().positive(),
+  defaultDelayMs: z.number().int().nonnegative(),
+});
+
+defaultRetryPolicySchema.parse(DEFAULT_RETRY_POLICY);
+
+if (new Set(AGENT_ACTIONS).size !== AGENT_ACTIONS.length) throw new Error("Duplicate AGENT_ACTIONS value");
+if (new Set(AGENT_PROVIDERS).size !== AGENT_PROVIDERS.length) throw new Error("Duplicate AGENT_PROVIDERS value");
+if (new Set(APPROVAL_REQUIREMENTS).size !== APPROVAL_REQUIREMENTS.length) throw new Error("Duplicate APPROVAL_REQUIREMENTS value");
+
+export const AGENT_ACTION_COUNT = AGENT_ACTIONS.length;
+export const AGENT_PROVIDER_COUNT = AGENT_PROVIDERS.length;
+export const APPROVAL_REQUIREMENT_COUNT = APPROVAL_REQUIREMENTS.length;
+
+export function isAgentAction(value: unknown): value is AgentAction {
+  return agentActionSchema.safeParse(value).success;
+}
+export function isAgentProvider(value: unknown): value is AgentProvider {
+  return agentProviderSchema.safeParse(value).success;
+}
+export function isApprovalRequirement(value: unknown): value is ApprovalRequirement {
+  return approvalRequirementSchema.safeParse(value).success;
+}
 
 // ─── Branded AgentId ────────────────────────────────────────────────
 
@@ -49,25 +99,6 @@ export function asAgentId(value: string): AgentId {
 }
 
 // ─── Agent enum types ───────────────────────────────────────────────
-
-/** What the agent does — typed enum for UI/route filter. */
-export type AgentAction =
-  | "generate_post"
-  | "generate_lesson_outline"
-  | "translate_content"
-  | "summarize_lesson"
-  | "draft_email"
-  | "generate_quiz";
-
-/** Which provider executes the agent. "noop" is for tests + deterministic flows. */
-export type AgentProvider =
-  | "openai"
-  | "anthropic"
-  | "inhouse"
-  | "noop";
-
-/** Whether the agent requires human approval before publishing. */
-export type ApprovalRequirement = "always" | "never" | "configurable";
 
 // ─── Retry policy ────────────────────────────────────────────────────
 

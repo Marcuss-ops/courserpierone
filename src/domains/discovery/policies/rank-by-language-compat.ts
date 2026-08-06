@@ -27,6 +27,9 @@ export const BOOST_LANGUAGE_COMPAT = 50;
 export const rankByLanguageCompat: BoostPolicy = {
   kind: "boost",
   name: "rank-by-language-compat",
+  file: "./rank-by-language-compat",
+  description: "Boosts items whose lang matches ctx.lang (+50)",
+  scoreHint: 50,
   score(item, ctx) {
     // `'lang' in item` is the canonical narrowing for our MVP items
     // (none of the 6 variants declare `lang`; future builder populates

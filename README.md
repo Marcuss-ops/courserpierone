@@ -216,7 +216,10 @@ courssy/
 | `npm run lint:fix` | ESLint con autofix |
 | `npm run test` | Vitest unit + integration |
 | `npm run test:e2e` | Playwright E2E |
-| `npm run check` | typecheck + lint + test (quality gate) |
+| `npm run check:static` | Static quality suite from `scripts/quality/quality-gates.ts` |
+| `npm run check:repo` | Repository/migration quality suite from the same registry |
+| `npm run check` | Static + unit + repository quality suites |
+| `npm run check:full` | Full superset: build, check, integration, migration and E2E/SSE |
 | `npm run check:messaging` | Diagnostica DMs (`scripts/diagnose-messaging-extended.ts`) |
 | `npm run validate:locales` | Validazione i18n JSON |
 | `npm run generate:locales` | Rigenera locale resolver statico |
@@ -226,6 +229,19 @@ courssy/
 | `npx tsx scripts/audit-v1-readiness.ts` | Verifica V1 blockers |
 
 ---
+
+## Quality gate e registri canonici
+
+Le suite di qualità sono definite una sola volta in
+`scripts/quality/quality-gates.ts`; gli script npm sono entrypoint sottili
+per eseguire le suite o un singolo controllo. `check:full` è verificato come
+superset di `check` dai test del registry. Lo stesso gate controlla inoltre
+che i direttivi `eslint-disable` siano presenti nell'allowlist revisionata e
+che i registry payment, content, agent e discovery non divergano.
+
+I registry sono i proprietari delle stringhe estendibili: aggiungere un nuovo
+provider, tipo contenuto, agente o policy richiede aggiornare il registry
+canonico e i test anti-drift, non una union o array parallelo.
 
 ## Documentazione
 

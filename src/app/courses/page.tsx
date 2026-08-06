@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { CoursesCatalog } from "@/components/courses-catalog";
-import { ACTIVE_COURSES } from "@/lib/courses/registry";
+import { ACTIVE_COURSES } from "@course-registry";
 
 export const metadata: Metadata = {
   title: "Scopri i Corsi · Courssy",

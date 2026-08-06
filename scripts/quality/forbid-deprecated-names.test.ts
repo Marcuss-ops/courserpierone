@@ -91,15 +91,13 @@ describe("forbid-deprecated-names — allowList stability", () => {
   const ALLOWED = new Set([
     "docs/adr/0015-coursy-naming-decision.md",
     "docs/adr/0016-coursy-monolith-modular.md",
-    "scripts/_inline-disable-react-hooks.mjs", // Windows path string legacy
     "scripts/quality/forbid-deprecated-names.ts", // guardrail body itself
   ]);
 
-  it("includes the canonical 4 exemptions", () => {
-    expect(ALLOWED.size).toBe(4);
+  it("includes the canonical 3 exemptions", () => {
+    expect(ALLOWED.size).toBe(3);
     expect(ALLOWED.has("docs/adr/0015-coursy-naming-decision.md")).toBe(true);
     expect(ALLOWED.has("docs/adr/0016-coursy-monolith-modular.md")).toBe(true);
-    expect(ALLOWED.has("scripts/_inline-disable-react-hooks.mjs")).toBe(true);
     expect(ALLOWED.has("scripts/quality/forbid-deprecated-names.ts")).toBe(true);
   });
 

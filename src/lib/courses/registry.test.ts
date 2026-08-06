@@ -75,6 +75,16 @@ vi.mock("../../../courses.config", () => {
   const ACTIVE_COURSES = ACTIVE_BUNDLED_COURSES; // back-compat alias
   const findCourseMeta = (slug: string) =>
     COURSES.find((c) => c.slug === slug) ?? null;
+  const getAllSlugs = () => COURSES.map((course) => course.slug);
+  const getBundledSlugs = () => BUNDLED_COURSES.map((course) => course.slug);
+  const getActiveSlugs = () => ACTIVE_BUNDLED_COURSES.map((course) => course.slug);
+  const getCoursesByStatus = () =>
+    Object.fromEntries(COURSES.map((course) => [course.slug, course.status]));
+  const isRegisteredCourse = (slug: string) => getAllSlugs().includes(slug);
+  const resolveCourseRegistration = (slug: string) => {
+    const meta = findCourseMeta(slug);
+    return meta && isBundledCourse(slug) ? { kind: "bundled" as const, meta } : null;
+  };
 
   return {
     COURSES,
@@ -83,6 +93,12 @@ vi.mock("../../../courses.config", () => {
     ACTIVE_COURSES,
     findCourseMeta,
     isBundledCourse,
+    getAllSlugs,
+    getBundledSlugs,
+    getActiveSlugs,
+    getCoursesByStatus,
+    isRegisteredCourse,
+    resolveCourseRegistration,
   };
 });
 
