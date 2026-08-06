@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { Prisma } from "@prisma/client";
 
 // ─── Mock dependencies BEFORE importing the service ─────────
 // Pattern established by src/app/api/products/products.test.ts
@@ -6,6 +7,7 @@ vi.mock("@/lib/db/prisma", () => {
   const mockPrisma = {
     user: {
       findUnique: vi.fn(),
+      upsert: vi.fn(),
       create: vi.fn(),
     },
     product: {
@@ -70,8 +72,8 @@ function resetMocks() {
     async (cb) => (cb as (client: typeof prisma) => Promise<unknown>)(prisma),
   );
 
-  // Default: user resolved by email
-  vi.mocked(prisma.user.findUnique).mockResolvedValue({
+  // Default: user resolved atomically by email
+  vi.mocked(prisma.user.upsert).mockResolvedValue({
     id: "user_123",
     email: "buyer@example.com",
     name: "Buyer",
@@ -125,6 +127,17 @@ function resetMocks() {
     sourceId: "order_test_id",
     status: "active",
   } as never);
+}
+
+function uniqueViolation(target: string[] | string) {
+  return new Prisma.PrismaClientKnownRequestError(
+    "Unique constraint failed",
+    {
+      code: "P2002",
+      clientVersion: "5.22.0",
+      meta: { target },
+    },
+  );
 }
 
 function outboxEvents() {
@@ -250,9 +263,8 @@ describe("processOrder — success path", () => {
     });
   });
 
-  it("calls find-or-create user by email and falls back name to email local-part", async () => {
-    vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
-    vi.mocked(prisma.user.create).mockResolvedValue({
+  it("upserts a user by email and falls back name to email local-part", async () => {
+    vi.mocked(prisma.user.upsert).mockResolvedValue({
       id: "user_new",
       email: "newbuyer@example.com",
       name: "newbuyer",
@@ -272,19 +284,19 @@ describe("processOrder — success path", () => {
       customer: { email: "newbuyer@example.com" },
     });
 
-    expect(prisma.user.findUnique).toHaveBeenCalledWith({
+    expect(prisma.user.upsert).toHaveBeenCalledWith({
       where: { email: "newbuyer@example.com" },
-    });
-    // Phase 1.2 addendum: preferredLocale backfill al signup — guest
-    // checkout valorizza User.preferredLocale dal parametro `locale`
-    // dell'ordine. Input default: locale="en-us" → preferredLocale="en".
-    expect(prisma.user.create).toHaveBeenCalledWith({
-      data: {
+      create: {
         email: "newbuyer@example.com",
         name: "newbuyer",
         preferredLocale: "en",
       },
+      update: {},
     });
+    // Phase 1.2 addendum: preferredLocale backfill al signup — guest
+    // checkout valorizza User.preferredLocale dal parametro `locale`
+    // dell'ordine. Input default: locale="en-us" → preferredLocale="en".
+    expect(prisma.user.create).not.toHaveBeenCalled();
   });
 
   it("persists localized purchase email details in the outbox", async () => {
@@ -311,7 +323,39 @@ describe("processOrder — success path", () => {
 describe("processOrder — MCR Phase 2 AccessGrant dual-write", () => {
   beforeEach(resetMocks);
 
-  it("upserts an active AccessGrant alongside the Order on success", async () => {
+  it("falls back to reading the user when an upsert loses an email race", async () => {
+    const existingUser = {
+      id: "user_race_winner",
+      email: "buyer@example.com",
+      name: "Winner",
+    };
+    vi.mocked(prisma.user.upsert).mockRejectedValueOnce(
+      uniqueViolation(["email"]),
+    );
+    vi.mocked(prisma.user.findUnique).mockResolvedValueOnce(existingUser as never);
+
+    await processOrder(buildInput());
+
+    expect(prisma.user.findUnique).toHaveBeenCalledWith({
+      where: { email: "buyer@example.com" },
+    });
+    expect(prisma.order.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ userId: "user_race_winner" }),
+      }),
+    );
+  });
+
+  it("does not treat an unrelated user unique violation as an email race", async () => {
+    vi.mocked(prisma.user.upsert).mockRejectedValueOnce(
+      uniqueViolation(["username"]),
+    );
+
+    await expect(processOrder(buildInput())).rejects.toThrow("Unique constraint failed");
+    expect(prisma.user.findUnique).not.toHaveBeenCalled();
+  });
+
+  it("upserts an active AccessGrant alongside the Order on success, without duplicating effects", async () => {
     vi.mocked(prisma.order.create).mockResolvedValue({
       id: "order_dual_write",
       userId: "user_123",
@@ -419,6 +463,56 @@ describe("processOrder — idempotency (scenario 3)", () => {
     expect(prisma.abandonedCheckout.updateMany).not.toHaveBeenCalled();
     expect(prisma.analyticEvent.create).not.toHaveBeenCalled();
     expect(prisma.accessGrant.upsert).not.toHaveBeenCalled();
+  });
+
+  it("acknowledges concurrent duplicate webhooks after the order unique race", async () => {
+    const providerOrderId = "ls_concurrent_order";
+    let releaseFirstOrder: (() => void) | undefined;
+    const firstOrderStarted = new Promise<void>((resolve) => {
+      releaseFirstOrder = resolve;
+    });
+    let orderCreateCalls = 0;
+    vi.mocked(prisma.order.findFirst).mockImplementation(
+      (() => Promise.resolve(null)) as never,
+    );
+    vi.mocked(prisma.order.create).mockImplementation(
+      ((args: { data: unknown }) => {
+        orderCreateCalls += 1;
+        if (orderCreateCalls === 1) {
+          releaseFirstOrder?.();
+          return Promise.resolve({
+            id: "order_concurrent_winner",
+            userId: "user_123",
+            productId: "prod_abc",
+            paymentProvider: "lemonsqueezy",
+            providerOrderId,
+            status: "completed",
+            ...(args.data as object),
+          });
+        }
+        return firstOrderStarted.then(() =>
+          Promise.reject(uniqueViolation(["paymentProvider", "providerOrderId"])),
+        );
+      }) as never,
+    );
+
+    const input = buildInput({ providerOrderId });
+    await expect(Promise.all([processOrder(input), processOrder(input)])).resolves.toEqual([
+      undefined,
+      undefined,
+    ]);
+
+    expect(prisma.order.create).toHaveBeenCalledTimes(2);
+    expect(prisma.accessGrant.upsert).toHaveBeenCalledOnce();
+    expect(prisma.outboxEvent.createMany).toHaveBeenCalledOnce();
+  });
+
+  it("does not swallow an unrelated order unique constraint error", async () => {
+    vi.mocked(prisma.order.create).mockRejectedValueOnce(
+      uniqueViolation(["someOtherOrderConstraint"]),
+    );
+
+    await expect(processOrder(buildInput())).rejects.toThrow("Unique constraint failed");
   });
 });
 
