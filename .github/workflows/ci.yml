@@ -352,6 +352,11 @@ jobs:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/courssy_migration_check
       DIRECT_URL: postgresql://postgres:postgres@localhost:5432/courssy_migration_check
       NODE_ENV: test
+      MIGRATION_TEST_MANAGED_DB: "1"
+      MIGRATION_TEST_DB_HOST: localhost
+      MIGRATION_TEST_DB_PORT: "5432"
+      MIGRATION_TEST_DB_USER: postgres
+      MIGRATION_TEST_DB_NAME: courssy_migration_check
 
     steps:
       - name: Checkout
@@ -367,7 +372,7 @@ jobs:
         run: npm ci --no-audit --no-fund
 
       - name: Apply every Prisma migration from scratch
-        run: npx prisma migrate deploy
+        run: bash scripts/ci/migration-test.sh
 
       - name: Scan migration SQL for destructive operations
         run: npm run check:migrations

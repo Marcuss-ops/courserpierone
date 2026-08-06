@@ -26,7 +26,7 @@
     "check:hotspots": "npx tsx scripts/quality/hotspot-score.ts",
     "check:dod": "npx tsx scripts/quality/check-dod.ts",
     "check:deploy-gate-shape": "npx tsx scripts/quality/check-deploy-gate-shape.ts",
-    "check:full": "npm run check && npm run test:integration && npm run build && npm run check:migration && npm run test:e2e && npm run check:e2e:sse",
+    "check:full": "npm run build && npm run check && npm run test:integration && npm run check:migration && npm run test:e2e && npm run check:e2e:sse",
     "check:messaging": "npx tsx scripts/diagnose-messaging-extended.ts",
     "db:push": "npx prisma db push",
     "db:studio": "npx prisma studio",
