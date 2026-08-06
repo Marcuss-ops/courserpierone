@@ -149,6 +149,25 @@ jobs:
       - name: Detect circular dependencies
         run: npx madge --circular src/ --ts-config ./tsconfig.json
 
+      # ── Architecture boundaries (fail-closed, diff-aware) ─────────────
+      # Check committed, staged-equivalent, unstaged-equivalent, and untracked
+      # TypeScript changes against the actual push/PR base. The checker fails
+      # closed when the base ref cannot be resolved.
+      - name: Check modular architecture boundaries
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          if [ -n "${PR_BASE_SHA:-}" ]; then
+            BASE_REF="$PR_BASE_SHA"
+          elif [ -n "${PUSH_BEFORE_SHA:-}" ] && [ "$PUSH_BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
+            BASE_REF="$PUSH_BEFORE_SHA"
+          else
+            BASE_REF="HEAD^"
+          fi
+          echo "Architecture base: $BASE_REF"
+          ARCHITECTURE_BASE_REF="$BASE_REF" npm run check:architecture
+
       # ── Schema migration safety (fail gate on DROP/RENAME in prisma/migrations/) ──
       # Per ADR 001 (docs/architecture/001-db-migrations.md), DROP and RENAME
       # of columns read/written by the LS webhook processor are FORBIDDEN

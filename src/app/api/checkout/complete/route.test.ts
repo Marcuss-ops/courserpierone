@@ -1,43 +1,39 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockRequest } from "@/app/api/__test-helpers__/mock-request";
 
-const mockProductFindUnique = vi.fn();
-const mockOrderFindFirst = vi.fn();
+const mockResolveProductReference = vi.fn();
+const mockFindCompletedProviderOrder = vi.fn();
 const mockIssueCheckoutToken = vi.fn();
-const mockConsumeCheckoutToken = vi.fn();
+const mockRegisterCheckoutToken = vi.fn();
 const mockSetCheckoutSessionCookie = vi.fn();
-const mockRedisSet = vi.fn();
-const mockGetRedis = vi.fn();
 
-vi.mock("@/lib/redis", () => ({
-  getRedis: mockGetRedis,
-}));
+class MockCheckoutTokenError extends Error {
+  code: string;
+  status: number;
 
-vi.mock("@/lib/db/prisma", () => ({
-  prisma: {
-    product: { findUnique: mockProductFindUnique },
-    order: { findFirst: mockOrderFindFirst },
-  },
-}));
+  constructor(code: string, status: number) {
+    super(code);
+    this.code = code;
+    this.status = status;
+  }
+}
 
-vi.mock("@/lib/commerce/access/checkout-token", () => ({
-  CheckoutTokenError: class CheckoutTokenError extends Error {
-    code = "CHECKOUT_TOKEN_INVALID";
-    status = 401;
-  },
+vi.mock("@/domains/identity", () => ({
+  CheckoutTokenError: MockCheckoutTokenError,
+  resolveProductReference: mockResolveProductReference,
+  findCompletedProviderOrder: mockFindCompletedProviderOrder,
   issueCheckoutToken: mockIssueCheckoutToken,
-  consumeCheckoutToken: mockConsumeCheckoutToken,
+  deriveCheckoutJti: vi.fn((provider: string, orderId: string, productId: string) => `${provider}:${orderId}:${productId}`),
+  registerCheckoutToken: mockRegisterCheckoutToken,
   setCheckoutSessionCookie: mockSetCheckoutSessionCookie,
 }));
 
 beforeEach(() => {
   vi.resetAllMocks();
-  mockProductFindUnique.mockResolvedValue({ id: "product-1", slug: "course-one" });
-  mockOrderFindFirst.mockResolvedValue({ id: "order-internal-1" });
+  mockResolveProductReference.mockResolvedValue({ id: "product-1", slug: "course-one" });
+  mockFindCompletedProviderOrder.mockResolvedValue({ id: "order-internal-1", status: "completed", userId: null });
   mockIssueCheckoutToken.mockReturnValue("signed-token");
-  mockConsumeCheckoutToken.mockResolvedValue({ jti: "jti-1" });
-  mockGetRedis.mockReturnValue({ set: mockRedisSet });
-  mockRedisSet.mockResolvedValue("OK");
+  mockRegisterCheckoutToken.mockResolvedValue({ jti: "jti-1" });
 });
 
 describe("GET /api/checkout/complete", () => {
@@ -45,11 +41,11 @@ describe("GET /api/checkout/complete", () => {
     const { GET } = await import("./route");
     const response = await GET(createMockRequest("/api/checkout/complete"));
     expect(response.status).toBe(400);
-    expect(mockProductFindUnique).not.toHaveBeenCalled();
+    expect(mockResolveProductReference).not.toHaveBeenCalled();
   });
 
   it("returns 404 for an unknown product", async () => {
-    mockProductFindUnique.mockResolvedValueOnce(null);
+    mockResolveProductReference.mockResolvedValueOnce(null);
     const { GET } = await import("./route");
     const response = await GET(createMockRequest("/api/checkout/complete", {
       query: { productSlug: "missing", providerOrderId: "ls-1" },
@@ -58,7 +54,7 @@ describe("GET /api/checkout/complete", () => {
   });
 
   it("returns 409 until the verified completed order exists", async () => {
-    mockOrderFindFirst.mockResolvedValue(null);
+    mockFindCompletedProviderOrder.mockResolvedValue(null);
     const { GET } = await import("./route");
     const response = await GET(createMockRequest("/api/checkout/complete", {
       query: { productSlug: "course-one", providerOrderId: "ls-1" },
@@ -67,7 +63,7 @@ describe("GET /api/checkout/complete", () => {
     expect(mockIssueCheckoutToken).not.toHaveBeenCalled();
   });
 
-  it("issues and atomically consumes a product-bound token, then redirects with an HttpOnly session", async () => {
+  it("registers a product-bound token, then redirects with an HttpOnly session", async () => {
     const { GET } = await import("./route");
     const response = await GET(createMockRequest("/api/checkout/complete", {
       query: {
@@ -81,41 +77,39 @@ describe("GET /api/checkout/complete", () => {
     expect(response.headers.get("location")).toBe(
       "http://localhost:3000/en-us/course-one/download?lang=en-us",
     );
-    expect(mockRedisSet).toHaveBeenCalledWith(
-      "checkout-callback:lemonsqueezy:product-1:ls-1",
-      "1",
-      { ex: 600, nx: true },
-    );
+    expect(mockRegisterCheckoutToken).toHaveBeenCalledWith("signed-token", {
+      productId: "product-1",
+      productSlug: "course-one",
+    });
     expect(mockIssueCheckoutToken).toHaveBeenCalledWith({
       productId: "product-1",
       productSlug: "course-one",
       provider: "lemonsqueezy",
       providerOrderId: "ls-1",
-    });
-    expect(mockConsumeCheckoutToken).toHaveBeenCalledWith("signed-token", {
-      productId: "product-1",
-      productSlug: "course-one",
+      jti: "lemonsqueezy:ls-1:product-1",
     });
     expect(mockSetCheckoutSessionCookie).toHaveBeenCalledWith(response, "jti-1");
   });
 
   it("rejects a replayed callback before issuing another token", async () => {
-    mockRedisSet.mockResolvedValueOnce(null);
+    mockRegisterCheckoutToken.mockRejectedValueOnce(new MockCheckoutTokenError("CHECKOUT_TOKEN_REPLAYED", 409));
     const { GET } = await import("./route");
     const response = await GET(createMockRequest("/api/checkout/complete", {
       query: { productSlug: "course-one", providerOrderId: "ls-1" },
     }));
     expect(response.status).toBe(409);
-    expect(mockIssueCheckoutToken).not.toHaveBeenCalled();
+    expect(mockIssueCheckoutToken).toHaveBeenCalledOnce();
+    expect(mockSetCheckoutSessionCookie).not.toHaveBeenCalled();
   });
 
-  it("fails closed when callback replay storage is unavailable", async () => {
-    mockGetRedis.mockReturnValue(null);
+  it("fails closed when callback jti storage is unavailable", async () => {
+    mockRegisterCheckoutToken.mockRejectedValueOnce(new MockCheckoutTokenError("CHECKOUT_TOKEN_REDIS_UNAVAILABLE", 503));
     const { GET } = await import("./route");
     const response = await GET(createMockRequest("/api/checkout/complete", {
       query: { productSlug: "course-one", providerOrderId: "ls-1" },
     }));
     expect(response.status).toBe(503);
-    expect(mockIssueCheckoutToken).not.toHaveBeenCalled();
+    expect(mockIssueCheckoutToken).toHaveBeenCalledOnce();
+    expect(mockSetCheckoutSessionCookie).not.toHaveBeenCalled();
   });
 });

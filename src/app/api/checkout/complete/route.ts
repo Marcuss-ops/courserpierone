@@ -1,41 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { prisma } from "@/lib/db/prisma";
-import { getRedis } from "@/lib/redis";
 import {
   CheckoutTokenError,
-  consumeCheckoutToken,
+  findCompletedProviderOrder,
+  resolveProductReference,
+  deriveCheckoutJti,
   issueCheckoutToken,
+  registerCheckoutToken,
   setCheckoutSessionCookie,
-} from "@/lib/commerce/access/checkout-token";
-
-const ORDER_LOOKUP_ATTEMPTS = 5;
-const ORDER_LOOKUP_DELAY_MS = 500;
-const CALLBACK_REPLAY_TTL_SECONDS = 10 * 60;
+} from "@/domains/identity";
 
 function redirectToDownload(request: NextRequest, locale: string, productSlug: string): NextResponse {
   const target = new URL(`/${locale}/${productSlug}/download`, request.nextUrl.origin);
   target.searchParams.set("lang", locale);
   return NextResponse.redirect(target);
-}
-
-async function findCompletedOrder(productId: string, providerOrderId: string) {
-  for (let attempt = 0; attempt < ORDER_LOOKUP_ATTEMPTS; attempt++) {
-    const order = await prisma.order.findFirst({
-      where: {
-        productId,
-        paymentProvider: "lemonsqueezy",
-        providerOrderId,
-        status: "completed",
-      },
-      select: { id: true },
-    });
-    if (order) return order;
-    if (attempt < ORDER_LOOKUP_ATTEMPTS - 1) {
-      await new Promise((resolve) => setTimeout(resolve, ORDER_LOOKUP_DELAY_MS));
-    }
-  }
-  return null;
 }
 
 /**
@@ -60,46 +38,29 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const product = await prisma.product.findUnique({
-      where: { slug: productSlug },
-      select: { id: true, slug: true },
-    });
+    const product = await resolveProductReference(productSlug);
     if (!product) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    const order = await findCompletedOrder(product.id, providerOrderId);
+    const order = await findCompletedProviderOrder(product.id, providerOrderId);
     if (!order) {
       return NextResponse.json({ error: "Payment is still being verified" }, { status: 409 });
     }
 
     // The token is created only after the completed order was confirmed.
-    // The provider order id never appears in the browser redirect.
-    const redis = getRedis();
-    const callbackKey = `checkout-callback:lemonsqueezy:${product.id}:${providerOrderId}`;
-    if (!redis) {
-      return NextResponse.json({ error: "Checkout access is temporarily unavailable" }, { status: 503 });
-    }
-    let callbackClaimed: string | null;
-    try {
-      callbackClaimed = await redis.set(callbackKey, "1", {
-        ex: CALLBACK_REPLAY_TTL_SECONDS,
-        nx: true,
-      });
-    } catch {
-      return NextResponse.json({ error: "Checkout access is temporarily unavailable" }, { status: 503 });
-    }
-    if (callbackClaimed !== "OK" && callbackClaimed !== "1") {
-      return NextResponse.json({ error: "Checkout callback has already been used" }, { status: 409 });
-    }
-
+    // Its deterministic jti makes repeated provider callbacks collide in the
+    // durable Redis registry instead of minting fresh anonymous credentials.
+    // Registration is deliberately separate from consumption: the browser
+    // must still be able to exchange this token exactly once at /api/access.
     const token = issueCheckoutToken({
       productId: product.id,
       productSlug: product.slug,
       provider: "lemonsqueezy",
       providerOrderId,
+      jti: deriveCheckoutJti("lemonsqueezy", providerOrderId, product.id),
     });
-    const payload = await consumeCheckoutToken(token, {
+    const payload = await registerCheckoutToken(token, {
       productId: product.id,
       productSlug: product.slug,
     });
