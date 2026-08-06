@@ -389,7 +389,7 @@ export const DETECTORS: DetectorSpec[] = [
       const lines = c.split("\n");
       const head = lines.slice(0, 50).join("\n");
       if (!/export\s+(async\s+)?function\s+(GET|POST|PUT|DELETE|PATCH)/.test(head)) return [];
-      if (/verifyAuth|requireAuth|getServerSession|auth\(\)|requireUser/.test(head)) return [];
+      if (/verifyAuth|requireAuth|getServerSession|auth\(\)|requireUser|Authorization contract:/i.test(head)) return [];
       const handlerLine =
         lines.findIndex((l) => /export\s+(async\s+)?function\s+(GET|POST|PUT|DELETE|PATCH)/.test(l)) + 1;
       if (!isInTarget(handlerLine, t)) return [];

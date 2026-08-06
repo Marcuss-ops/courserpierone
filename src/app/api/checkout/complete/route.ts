@@ -39,6 +39,12 @@ async function findCompletedOrder(productId: string, providerOrderId: string) {
 }
 
 /**
+ * Authorization contract: this is a public provider callback exchange. The
+ * server authenticates the payment by requiring a product-scoped completed
+ * Lemon Squeezy order, then consumes a one-time Redis claim before issuing
+ * the HttpOnly session. No browser-supplied order identifier is trusted as
+ * access on its own.
+ *
  * Lemon Squeezy redirects here after payment. The provider order id is
  * accepted only at this server-side exchange boundary; it is never copied
  * to the browser redirect. The resulting HttpOnly session is the only

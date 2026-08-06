@@ -6,6 +6,7 @@ import {
   isInTarget,
   findCatchBlocks,
   checkAdr,
+  DETECTORS,
   collectAudit,
   collectDiff,
   type DiffData,
@@ -147,6 +148,19 @@ describe("checkNPlusOne (D-9 / AP-F, SOFT WARN)", () => {
 });
 
 // ─── D-14 — ADR cross-file check (HARD FAIL) ────────────────────────────────
+
+describe("D-3 authorization contract", () => {
+  it("accepts an explicit public authorization contract", () => {
+    const detector = DETECTORS.find((item) => item.id === "D-3");
+    expect(detector).toBeDefined();
+    const violations = detector?.check(
+      "src/app/api/example/route.ts",
+      "// Authorization contract: public provider callback verification.\nexport async function GET() { return new Response(); }",
+      new Set(),
+    );
+    expect(violations).toHaveLength(0);
+  });
+});
 
 describe("checkAdr (D-14, HARD FAIL, cross-file)", () => {
   it("flags new domain without ADR", () => {
