@@ -64,10 +64,13 @@ Stack di supporto: **PostgreSQL** + **Prisma 5**, **Upstash Redis** + **ioredis*
 ### 3. Checkout & Pagamenti (LS-only)
 
 - **Lemon Squeezy**: Merchant of Record unico. Gestisce checkout hosted, valuta, tasse (VAT/sales tax) e fatturazione.
-- **Webhook → Order**: `src/app/api/webhooks/lemonsqueezy/route.ts` riceve `order_created` + `subscription_*` events, scrive `Order` row + `AccessGrant` row (MCR Phase 2).
-- **Variant ID**: `Product.lemonVariantId` è il campo canonico per il checkout Lemon Squeezy.
+- **Webhook → fulfillment**: `src/app/api/webhooks/lemonsqueezy/route.ts` verifica e riserva la delivery in `ProcessedWebhook`, poi traduce l'evento in `CompletePaidOrderCommand` e invoca `processOrder`.
+- **Atomicità**: `processOrder` usa `prisma.$transaction` per creare `Order(status='completed')`, upsertare `AccessGrant(status='active')` e creare quattro `OutboxEvent` durabili. Il vincolo `(paymentProvider, providerOrderId)` deduplica gli ordini concorrenti.
+- **Idempotenza utente**: `User.upsert` su email elimina la race `findUnique → create`; un `P2002` email è recuperato rileggendo il vincitore.
+- **Variant ID**: `Product.lemonVariantId` è il campo canonico per il checkout Lemon Squeezy; il comando accetta un solo locator discriminato (`product_id`, `product_slug` o `variant_id`).
 - **Valuta dinamica**: Rilevamento automatico dal browser/posizione utente (`src/lib/i18n/locale-resolver.ts`) → `Product.pricesByCurrency` lookup → override per paese (`Product.countryOverrides`).
-- **Consegna automatica**: Webhook LS → `processOrder` happy path → `AccessGrant.status='active'` → `AccessGate` autorizza accesso al contenuto.
+- **Consegna automatica**: gli `OutboxEvent` vengono processati dal `OUTBOX_HANDLER_REGISTRY` con validazione Zod e retry policy infrastrutturale. L'email usa `OutboxDeliveryAttempt` con chiave unica `(outboxEventId, channel)`; stati `sent`, `failed` e `uncertain` impediscono reinvii ciechi dopo crash SMTP.
+- **Accesso finale**: `AccessGate` legge l'`AccessGrant` attivo; l'ordine non è una credenziale pubblica e non concede accesso direttamente.
 
 ### 4. Accesso & Utenti
 
@@ -104,13 +107,19 @@ Landing Page (i18n) ──── Prezzo localizzato
 LS Checkout ──── Valuta + Tasse automatiche (MoR)
     │
     ▼
-Webhook LS → processOrder
+Webhook LS → ProcessedWebhook reservation
     │
     ▼
-Email Benvenuto + Credenziali Supabase
+CompletePaidOrderCommand
     │
     ▼
-AccessGate (AccessGrant check) ──── Accesso corsi, PDF, download
+Transaction: Order + AccessGrant + 4 OutboxEvent
+    │
+    ├── Outbox registry → email / analytics / notification / recovery
+    │       └── email: OutboxDeliveryAttempt(event, channel=email)
+    │
+    ▼
+AccessGate (active AccessGrant) ──── Accesso corsi, PDF, download
 ```
 
 ## Flusso Contenuto (Creator)

@@ -31,11 +31,12 @@
 > **Source-of-truth code paths (read in order when investigating a fail):**
 > 1. `src/lib/commerce/payments/providers/lemonsqueezy/index.ts` — `createCheckout`
 >    sets `customData: { courseSlug, locale, email?, channelId? }`.
-> 2. `src/app/api/webhooks/lemonsqueezy/route.ts` — webhook handler:
->    HMAC verify → idempotency gate → `processOrder()` for `order_created`
->    → dual-write `Order` + `AccessGrant` → `order_refunded` flips BOTH
->    atomically.
-> 3. `src/lib/services/order-service.ts` — `processOrder(...)`:
+>  2. `src/app/api/webhooks/lemonsqueezy/route.ts` — webhook handler:
+>    HMAC verify → `ProcessedWebhook` reservation → webhook processor →
+>    `processOrder()` for `order_created`; the order, `AccessGrant`, and four
+>    durable `OutboxEvent` rows are committed atomically. `order_refunded`
+>    revokes the order grant through the refund path.
+> 3. `src/lib/commerce/orders/complete-order.ts` — `processOrder(...)`:
 >    resolves `productSlug` → `Product.id`, writes `Order` (status='completed'),
 >    creates `AccessGrant(sourceType='order', sourceId=order.id, status='active')`.
 > 4. `src/lib/messaging/resolve-message-permission.ts` — DM gate:
@@ -115,7 +116,7 @@ ops-1 runs, ops-2 verifies. Stop the runbook and abort if ANY box unchecked.
 
 ### Step 4 — Checkout reale (real corporate card × 3 locales)
 
-- [ ] **ops-1**: ALL 3 buyers MUST arrive via UTM-tagged URLs: `https://<prod-domain>/<locale>/amish-secrets?utm_source=youtube&utm_campaign=<channel-name>`. This is the channel-attribution hook required for Step 15 — `customData.channelId` is set on the LS checkout by `createCheckout()` in `src/lib/commerce/payments/providers/lemonsqueezy/index.ts`, and flows to the webhook → `processOrder()` → `AnalyticEvent.channelId`.
+- [ ] **ops-1**: ALL 3 buyers MUST arrive via UTM-tagged URLs: `https://<prod-domain>/<locale>/amish-secrets?utm_source=youtube&utm_campaign=<channel-name>`. This is the channel-attribution hook required for Step 15 — `customData.channelId` is set on the LS checkout by `createCheckout()` in `src/lib/commerce/payments/providers/lemonsqueezy/index.ts`, and flows to the webhook → `processOrder()` → `purchase_analytics` outbox payload → `AnalyticEvent.channelId`.
 - [ ] **ops-1**: Log in as the Step 1 user (Supabase magic-link user from Step 1). Visit `/it-it/amish-secrets` (with UTM), click the CTA. LS checkout opens in a new tab.
 - [ ] **ops-1**: Complete payment with the IT real card. LS shows order confirmation.
 - [ ] **ops-1**: Log out. Log in as the Step 2 user (Google OAuth user from Step 2). Repeat for `/en-us/amish-secrets` (EN card, with UTM).
@@ -128,14 +129,14 @@ ops-1 runs, ops-2 verifies. Stop the runbook and abort if ANY box unchecked.
 
 - [ ] **ops-1**: After each charge, wait ≤30 seconds. Tail Vercel logs (filter: `/api/webhooks/lemonsqueezy`).
 - [ ] **ops-1**: Expect log line: `[LS Webhook] order_created: <providerOrderId>, email: <buyer-email>`.
-- [ ] **ops-2**: Assert HTTP 200 returned to LS (the handler's `200 received:true` response). NO 4xx/5xx.
+- [ ] **ops-2**: Assert HTTP 200 returned to LS (the handler's `200 received:true` response). NO 4xx/5xx. This confirms signature verification and `ProcessedWebhook` reservation; order/grant/outbox completion is verified separately in Steps 6–8.
 - [ ] **ops-2**: If 4xx: signature mismatch — verify Vercel `LEMONSQUEEZY_WEBHOOK_SECRET` matches the live webhook's signing secret per `lemon-squeezy-live-setup.md` §5.4.
 - [ ] **ops-2**: If 5xx: check Vercel logs for stack trace; transient → wait + retry; persistent → §4 Failure Recovery.
 - [ ] **REQUIRES VERIFICATION**: all 3 webhooks return HTTP 200 within ≤30s of charge. Vercel logs show `[LS Webhook] order_created` for each.
 
 ### Step 6 — Order (DB row created)
 
-- [ ] **ops-2**: Run `psql "$DIRECT_URL" -c "SELECT id, \"userId\", \"productId\", \"paymentProvider\", \"providerOrderId\", amount, currency, locale, status, \"channelId\" FROM \"Order\" WHERE \"providerOrderId\" IN ('<id1>', '<id2>', '<id3>');"`.
+- [ ] **ops-2**: Run `psql "$DIRECT_URL" -c "SELECT id, \"userId\", \"productId\", \"paymentProvider\", \"providerOrderId\", amount, currency, locale, status FROM \"Order\" WHERE \"providerOrderId\" IN ('<id1>', '<id2>', '<id3>');"`.
 - [ ] **ops-2**: Assert 3 rows, one per charge. Each row: `paymentProvider='lemonsqueezy'`, `status='completed'`, `amount > 0`, `currency` matches the locale's tier, `locale IN ('it-it','en-us','es-es')`.
 - [ ] **ops-2**: Assert `userId` matches the Step 1/Step 2 user (the buyer was logged in at checkout, so LS customData.email = buyer's email → handler's `processOrder` resolves the `User` by email).
 - [ ] **REQUIRES VERIFICATION**: 3 `Order` rows, all `status='completed'`, all amounts match the corresponding LS charge, all linked to the correct user (Step 1 for IT, Step 2 for EN, repeat for ES if a third user is needed).
@@ -151,8 +152,8 @@ ops-1 runs, ops-2 verifies. Stop the runbook and abort if ANY box unchecked.
 
 - [ ] **ops-1**: Check the Step 1 buyer's inbox for the purchase confirmation email. Subject contains the product name + order ID.
 - [ ] **ops-1**: Email body contains: localized greeting, product name, download/access link (`/dashboard` or `/portal`).
-- [ ] **ops-2**: Tail Vercel logs for `email-service` / `sendEmail` calls — expect 3 successful sends (one per Order from Step 6).
-- [ ] **ops-2**: If email is missing: check SMTP env (`EMAIL_SERVER_*` per `src/lib/env.ts`). Per `lemon-squeezy-live-setup.md` §6.1 the buyer email flows from LS → `processOrder` → email service.
+- [ ] **ops-2**: Verify the outbox worker processed the three `purchase_email` events and tail Vercel logs for the email handler/SMTP calls — expect 3 successful sends (one per Order from Step 6).
+- [ ] **ops-2**: If email is missing: check the outbox event and its delivery attempt first, then SMTP env (`EMAIL_SERVER_*` per `src/lib/env.ts`). The buyer email flows from LS → `processOrder` → durable `purchase_email` outbox event → `OUTBOX_HANDLER_REGISTRY` → SMTP. Confirm `OutboxDeliveryAttempt.channel='email'` is `sent`; `failed` is retryable and `uncertain` requires reconciliation, not a blind resend.
 - [ ] **REQUIRES VERIFICATION**: 3 purchase confirmation emails delivered (one per buyer, matching the locale's language). No emails in spam.
 
 ### Step 9 — Corso (course access granted)
@@ -213,11 +214,11 @@ ops-1 runs, ops-2 verifies. Stop the runbook and abort if ANY box unchecked.
 ### Step 15 — Attribuzione canale (channel attribution)
 
 - [ ] **ops-1**: For this step, the buyer MUST have arrived at the landing page via a YouTube channel link (e.g. `https://<prod-domain>/it-it/amish-secrets?utm_source=youtube&utm_campaign=<channel-name>`). Repeat the purchase with a fresh buyer using such a URL. (If the 3 purchases from Step 4 already had UTMs, use those — otherwise fire a 4th purchase with a UTM-tagged URL.)
-- [ ] **ops-2** (PRE-FLIGHT, before Step 4 charges): Run `psql "$DIRECT_URL" -c "SELECT count(*) FROM \"AnalyticEvent\" WHERE \"eventType\"='purchase' AND \"createdAt\" > NOW() - INTERVAL '1 hour';"` — assert **0** (baseline; no purchases yet). Re-run AFTER Step 5 fires all 3 webhooks — assert **3**. The `purchase` eventType is in the `AnalyticEvent.eventType` enum (`pageview | scroll_deep | click_buy | checkout_open | checkout_complete | purchase | refund | checkout_abandoned | lesson_start | lesson_complete`), but the actual emission happens inside `processOrder()` at `src/lib/services/order-service.ts`. If 0 post-Step 5, the emission is missing — open P1 incident, do NOT proceed.
-- [ ] **ops-2**: Run `psql "$DIRECT_URL" -c "SELECT ae.\"eventType\", ae.locale, ae.\"channelId\", ae.\"revenueCents\", ae.\"sessionId\", vs.\"utmSource\", vs.\"utmCampaign\" FROM \"AnalyticEvent\" ae LEFT JOIN \"VisitorSession\" vs ON ae.\"sessionId\" = vs.id WHERE ae.\"eventType\"='purchase' AND vs.\"utmSource\"='youtube' ORDER BY ae.\"createdAt\" DESC LIMIT 5;"` — assert the row exists, `channelId` is populated, `revenueCents` matches the order amount, `utmCampaign` is non-null (on `VisitorSession`, NOT on `AnalyticEvent` — verified at runbook-write time against `prisma/schema.prisma` `model AnalyticEvent` and `model VisitorSession`; byte-verify before each major release), `sessionId` is shared with the matching `landing_view` event.
-- [ ] **ops-2**: Run the same query with `eventType='pageview'` (the pre-purchase landing view) — assert the same `sessionId` ties the pre-purchase and post-purchase events together.
+- [ ] **ops-2** (PRE-FLIGHT, before Step 4 charges): Run `psql "$DIRECT_URL" -c "SELECT count(*) FROM \"AnalyticEvent\" WHERE \"eventType\"='purchase' AND \"createdAt\" > NOW() - INTERVAL '1 hour';"` — assert **0** (baseline; no purchases yet). Re-run AFTER the outbox worker has processed the three `purchase_analytics` events — assert **3**. The `purchase` event is created by `OUTBOX_HANDLER_REGISTRY` in `src/lib/commerce/outbox/registry.ts`, after `processOrder()` durably creates the outbox row. If 0 after the worker is green, open a P1 incident, do NOT proceed.
+- [ ] **ops-2**: Run `psql "$DIRECT_URL" -c "SELECT ae.\"eventType\", ae.locale, ae.\"channelId\", ae.\"revenueCents\", ae.metadata, ae.\"createdAt\" FROM \"AnalyticEvent\" ae WHERE ae.\"eventType\"='purchase' ORDER BY ae.\"createdAt\" DESC LIMIT 5;"` — assert the row exists, `channelId` is populated, `revenueCents` matches the order amount, the serialized metadata contains the expected provider/currency/order context. Do not join this purchase query through `VisitorSession`: the current `purchase_analytics` outbox payload does not carry `sessionId` or UTM fields.
+- [ ] **ops-2**: Run the corresponding `pageview` query separately to verify the landing-page UTM capture. Treat pageview-to-purchase session correlation as future work until the purchase outbox payload carries a session identifier.
 - [ ] **ops-1**: Visit `/admin/analytics` (V1.0 schema is ready per commit `714d66e`; the queries are deferred to V1.1 per `roadmap-current.md` §1.5 — so this UI may not exist yet; ops-2 verifies via SQL only).
-- [ ] **REQUIRES VERIFICATION**: the `AnalyticEvent` table captures the YouTube channel attribution end-to-end (landing view → purchase). `channelId`, `revenueCents`, and `utmCampaign` are all populated. The same `sessionId` ties pre-purchase and post-purchase events.
+- [ ] **REQUIRES VERIFICATION**: after outbox processing, `AnalyticEvent` contains the purchase attribution fields currently supported by the code: `channelId`, `revenueCents`, locale, and provider/order metadata. The separate pageview query confirms UTM capture; shared purchase/pageview session correlation is future work.
 
 ### Step 16 — Verifica finale (sign-off)
 
@@ -317,13 +318,13 @@ ops-1 runs, ops-2 verifies. Stop the runbook and abort if ANY box unchecked.
 | Step 5 webhook 5xx | Transient app error (DB/SMTP timeout) | LS retries 16× over 24h. Wait + monitor Vercel logs. If persistent, rollback per `production.md` §2.2. |
 | Step 6 no `Order` row | LS webhook fired but `processOrder` failed silently (e.g. `Product.countryOverrides` drift per `lemon-squeezy-live-setup.md` §3.3) | Inspect Vercel logs for stack trace. Check `Product.lemonVariantId` matches the LS live variant. Replay via LS Dashboard → Webhooks → "Resend". |
 | Step 7 no `AccessGrant` | MCR Phase 2 backfill not yet applied | Run `scripts/migrate-grants-from-orders.ts` per `audit-log.md` §Staging runbook. Replay the `order_created` events. |
-| Step 8 email missing | SMTP env misconfigured or `EMAIL_SERVER_PASSWORD` rotated | Check `EMAIL_SERVER_*` env. Check spam folder. If env is correct, the email is queued — re-run triggers a re-send (idempotent). |
+| Step 8 email missing | Outbox worker has not processed the event, SMTP env is misconfigured, or delivery is `failed`/`uncertain` | Inspect the matching `OutboxEvent` and `OutboxDeliveryAttempt`. Fix SMTP/configuration and allow infrastructure retry for `failed`; do not blindly resend `processing` or `uncertain`, because the provider may already have accepted the message. Reconcile ambiguous deliveries operationally. |
 | Step 9 paywall on buyer | `AccessGrant` not created (Step 7 fail) or `USE_ACCESS_GRANT_RESOLVER=true` not flipped | See Step 7 recovery. If MCR is fully cut over, verify the flag. |
 | Step 11 `LessonProgress` not persisted | `progress` API call failed (likely auth or grant check) | Check `src/app/api/progress/route.ts` logs. The route checks access (admin bypass \| findCompletedOrder). |
 | Step 12 DM denied | `resolve-message-permission` returns `NoValidAccessGrant` (or legacy `NoCompletedOrderForStudent`) | Check the `AccessGrant` from Step 7. If grant is `active` and still denied, the resolver has a bug — open P1 incident. |
 | Step 13 refund webhook not firing | LS not subscribed to `order_refunded` event | Re-configure per `lemon-squeezy-live-setup.md` §4.2. Re-fire the refund from LS Dashboard. |
 | Step 14 grant not revoked | The `order_refunded` handler in `src/app/api/webhooks/lemonsqueezy/route.ts` ran but `AccessGrant` was already revoked (defensive) or MCR Phase 2 dual-write isn't on | Verify `prisma.accessGrant.findFirst({ where: { sourceId, status: 'revoked' } })` returns the row. If not, run the revoke manually: `prisma.accessGrant.updateMany({ where: { sourceId }, data: { status: 'revoked', revokedAt: new Date() } })`. |
-| Step 15 no `AnalyticEvent` | `channelId` was not passed in `customData` at checkout OR the `purchase` event is not emitted | Check `src/lib/commerce/payments/providers/lemonsqueezy/index.ts` — `channelId` is set when the buyer arrives with `?utm_campaign=*` matched to a `YouTubeChannel`. The `purchase` event emission is in `processOrder` (verify per `order-service.ts`). |
+| Step 15 no `AnalyticEvent` | `channelId` was not passed in `customData` at checkout OR the `purchase` event is not emitted | Check `src/lib/commerce/payments/providers/lemonsqueezy/index.ts` — `channelId` is set when the buyer arrives with `?utm_campaign=*` matched to a `YouTubeChannel`. `processOrder` creates the `purchase_analytics` outbox event; `src/lib/commerce/outbox/registry.ts` writes the `AnalyticEvent` when the worker dispatches it. |
 | Multiple P0/P1 alerts | Something fundamental is broken — treat as incident | Per `production.md` §3.1: P0 = P0 incident, public status comms. P1 = status page. Pause the soft launch; do not patch in prod. |
 
 > **General rule**: when a step fails, identify the failed step's
@@ -335,11 +336,13 @@ ops-1 runs, ops-2 verifies. Stop the runbook and abort if ANY box unchecked.
 >   the same card 3 times (LS fraud-rules may flag the repeated BINs).
 >   If the failure is in Step 4, use a different card OR re-fire the
 >   webhook from the LS Dashboard (the handler is idempotent via
->   the `processedWebhook` table — see `POST` handler in
->   `src/app/api/webhooks/lemonsqueezy/route.ts`).
+>   the `ProcessedWebhook` reservation and the unique
+>   `(paymentProvider, providerOrderId)` order key — see the webhook
+>   handler and `complete-order.ts`.
 > - **Step 5** (webhook): use the LS Dashboard "Resend" feature
 >   instead of triggering a new charge. The handler is idempotent
->   (`processedWebhook.findUnique` gate prevents re-processing).
+>   (`reserveWebhookEvent` prevents duplicate processing; a replay is safe
+>   for order, grant, and outbox creation).
 > - **Steps 6-15** (DB-state verification): re-run from the failed
 >   step. All updates are upsert/conditional; no duplicate side effects.
 
@@ -356,7 +359,7 @@ ops-1 runs, ops-2 verifies. Stop the runbook and abort if ANY box unchecked.
 | Roadmap + V1 blockers | [`../roadmap-current.md`](../roadmap-current.md) |
 | LS webhook handler (canonical contract) | `src/app/api/webhooks/lemonsqueezy/route.ts` |
 | LS provider (canonical customData) | `src/lib/commerce/payments/providers/lemonsqueezy/index.ts` |
-| OrderService (processOrder + AccessGrant dual-write) | `src/lib/services/order-service.ts` |
+| OrderService (processOrder + AccessGrant dual-write) | `src/lib/commerce/orders/complete-order.ts` |
 | DM permission resolver (AccessGrant-based post-cutover) | `src/lib/messaging/resolve-message-permission.ts` |
 | Lesson progress API | `src/app/api/progress/route.ts` |
 | Staging env provisioning (for the 4 Prisma-touching scripts) | `scripts/ops/staging-env.sh` |

@@ -20,7 +20,7 @@ Courssy è una piattaforma single-creator per la vendita di corsi digitali con f
 |---|---|---|
 | API pubbliche senza auth | Enumerazione utenti/corsi | Rate limiting, UUID non incrementali |
 | API autenticate (studente) | Accesso a dati di altri utenti | Verifica ownership su ogni query |
-| Webhook (LemonSqueezy) | Ordini falsi, replay attack | Firma crittografica, idempotency su `ProcessedWebhook` |
+| Webhook (LemonSqueezy) | Ordini falsi, replay attack | Firma HMAC, reservation/idempotency su `ProcessedWebhook`, unique provider-order key e atomic Order+AccessGrant+Outbox |
 | Input utente (DM, profili) | XSS, HTML injection | DOMPurify server-side |
 | Upload avatar | File malevoli, path traversal | Validazione tipo/dimensione, path ownership check |
 | Supabase Storage | Accesso non autorizzato a file | RLS policies, presigned URLs |
@@ -69,7 +69,9 @@ Courssy è una piattaforma single-creator per la vendita di corsi digitali con f
 ### 6. Webhook e Pagamenti
 
 - **Verifica firma**: LemonSqueezy usa HMAC-SHA256 con `LEMONSQUEEZY_WEBHOOK_SECRET`.
-- **Transazioni atomiche**: l'ordine viene creato in una singola operazione Prisma. Lo stato dell'ordine (`pending` → `completed`) viene aggiornato solo dopo verifica firma webhook.
+- **Confine atomico**: dopo la verifica HMAC e la validazione di `CompletePaidOrderCommand`, una singola transazione Prisma crea `Order(status='completed')`, `AccessGrant(status='active')` e gli `OutboxEvent` durabili.
+- **Idempotenza**: `User.upsert` protegge la creazione per email; `@@unique([paymentProvider, providerOrderId])` protegge l'ordine; `ProcessedWebhook.deliveryId` protegge la delivery; `OutboxDeliveryAttempt(outboxEventId, channel)` protegge gli effetti esterni.
+- **Email**: l'invio SMTP è fuori dalla transazione DB. Gli stati `sent`, `failed` e `uncertain` impediscono il reinvio automatico dopo un crash con esito provider ambiguo; esattamente-once non è garantibile senza idempotency key lato provider.
 
 ### 7. Sicurezza File Upload (Avatar)
 
@@ -94,15 +96,15 @@ I seguenti gap sono riconosciuti e prioritizzati. Pull request sono benvenute.
 
 | Gap | Rischio | Priorità | Remediation |
 |---|---|---|---|
-| **Webhook idempotency** | Webhook duplicati possono creare ordini doppi | P0 | Tabella `processed_webhooks` con `delivery_id` unico; check prima del processing |
+| **Webhook idempotency** | Replay o concorrenza possono duplicare effetti | ✅ | `ProcessedWebhook.deliveryId` unique, `Order(paymentProvider, providerOrderId)` unique, transaction atomica e `OutboxDeliveryAttempt(outboxEventId, channel)` unique |
 | **Signed URLs per video** | I link video (YouTube) sono embed pubblici senza protezione | P0 | Supabase Storage signed URLs con TTL breve; proxy lato server per i video privati |
-| **Pagamento fallito** | Nessun handler per eventi LS di pagamento fallito — l'accesso non viene revocato su mancato rinnovo | P0 | Aggiungere handler webhook LS per `subscription_payment_failed` → `Order.status = "failed"` → revoca accesso |
+| **Pagamento fallito** | Revoca accesso su mancato rinnovo | ✅ | `subscription_payment_failed` → `revokeOrder(orderStatus="failed")` → revoca `AccessGrant` |
 
 ### 🟡 Medi
 
 | Gap | Rischio | Priorità | Remediation |
 |---|---|---|---|
-| **Refund auto-revoke** | Rimborso registrato ma i permessi non vengono revocati automaticamente | P1 | Webhook `charge.refunded` → `Order.status = "refunded"` → revoca accesso corso |
+| **Refund auto-revoke** | Revoca accesso dopo rimborso | ✅ | `order_refunded` → `revokeOrder(orderStatus="refunded")` → revoca `AccessGrant` |
 | **Cursor pagination** | Paginazione offset su feed/lista utenti admin; lenta con tanti dati | P1 | Sostituire `skip`/`take` con cursor-based (`where: { id: { lt: cursor } }`) |
 | **Logging strutturato** | Solo `console.error`; difficile tracciare errori in produzione | P1 | Integrare un logger strutturato (Pino, Winston) con contesto (userId, requestId) |
 
@@ -154,4 +156,4 @@ Eseguire `npm audit` regolarmente e mantenere le dipendenze aggiornate.
 
 ---
 
-Ultimo aggiornamento: 10 Luglio 2026
+Ultimo aggiornamento: 6 Agosto 2026

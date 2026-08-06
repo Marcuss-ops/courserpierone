@@ -1,6 +1,6 @@
 # Phase 2 — Webhook inbox + transactional outbox + PG listener worker
 
-> **Status:** design — not yet implemented.
+> **Status:** partially implemented — the current production path is documented below; the `PaymentWebhookEvent` inbox and PG listener design remain future work.
 > **Owner:** TBD.
 > **Goal:** provider webhooks (Stripe + Lemon Squeezy) and internal
 > application events both flow through a single durable, retry-aware,
@@ -16,18 +16,22 @@
 > reconciliation routes manual "missing event" repairs through the
 > same inbox so observability + retry semantics are uniform.
 >
-> **Source-of-truth refactor:** the current webhook handlers
+> **Current implementation (2026-08-06):** the Lemon Squeezy route verifies the provider signature, reserves `(provider, deliveryId)` in `ProcessedWebhook`, and invokes the webhook processor. For a completed payment, the processor translates the payload to `CompletePaidOrderCommand` and `processOrder` commits `Order(status='completed')`, an active `AccessGrant`, and four durable `OutboxEvent` rows in one Prisma transaction. `OUTBOX_HANDLER_REGISTRY` validates each payload with Zod before dispatch. The email handler creates one `OutboxDeliveryAttempt` per `(outboxEventId, channel='email')`; SMTP is outside the database transaction. `failed` attempts may retry, while `processing`/`uncertain` outcomes are not blindly resent after an ambiguous provider boundary.
+>
+> **Design target (not current runtime):** the `PaymentWebhookEvent` inbox, `applyPaymentEvent`, `drainDueEvents`, admin reconciliation route, and PG `LISTEN`/`NOTIFY` worker described in the sections below are the proposed next-stage architecture. Do not use their example schemas or routes as a description of the current deployed contract.
+>
+> **Historical design context (pre-2026-08-06):** the former webhook handlers
 > (`src/app/api/webhooks/lemonsqueezy/route.ts`,
 > `src/app/api/webhooks/stripe/route.ts`) parse, verify, and
-> process events inline. The receipt path returns a 200 only
-> after `processOrder` (a 200+ line function) has fully succeeded
-> — a Vercel timeout mid-process leaves a half-applied Order
-> with no retry. The current `ProcessedWebhook` table provides
-> basic idempotency on `deliveryId` but no retry/backoff.
-> `prisma.analyticEvent.create` and `sendPurchaseConfirmation`
-> are best-effort `.catch()` calls — failures are logged but
-> lost. Phase 2 replaces the inline path with a durable
-> inbox + worker + outbox.
+> processed events inline. The former receipt path returned a 200 only
+> after the former `processOrder` path (a 200+ line function) had fully succeeded
+> — a Vercel timeout mid-process could leave a half-applied Order
+> with no retry. Before the current transaction boundary, `ProcessedWebhook` provided
+> basic idempotency on `deliveryId` but no retry/backoff; the current path now retries the webhook reservation on processing failures.
+> `prisma.analyticEvent.create` and `sendPurchaseConfirmation` were
+> previously best-effort `.catch()` calls — failures were logged but lost.
+> The implemented path now persists these effects as durable outbox events;
+> the inbox + worker described below remains a future extension.
 >
 > **Migration strategy:** per-record, no break. The webhook
 > handlers are extended to **dual-write** to `ProcessedWebhook`
@@ -40,7 +44,7 @@
 
 ## 1. Motivation
 
-The current webhook handling has six problems:
+The following six problems are the historical baseline that motivated this design; the current Order/AccessGrant/outbox transaction and delivery registry close the order-fulfillment and post-purchase gaps described above.
 
 1. **Inline processing is fragile.** A Vercel timeout (10s
    default) or OOM mid-`processOrder` leaves a half-applied
@@ -675,7 +679,7 @@ refunded / subscription state changed." Called by:
 // src/lib/commerce/payments/apply-payment-event.ts (new)
 import { prisma } from "@/lib/db/prisma";
 import { NotFoundError, ValidationError, AppError } from "@/lib/errors";
-import { processOrder } from "@/lib/services/order-service";
+import { processOrder } from "@/lib/commerce/orders/complete-order";
 import type { PaymentEvent } from "./types";
 
 export interface ApplyPaymentEventInput {
@@ -755,7 +759,7 @@ handlers would duplicate this glue. A switch keeps the
 shared logic visible.
 
 **Why `processOrder` is called with an adapter, not inlined:**
-the existing `processOrder` function (src/lib/services/order-service.ts)
+the existing `processOrder` function (src/lib/commerce/orders/complete-order.ts)
 already has 8+ steps with battle-tested error handling. Inlining
 its body into `applyPaymentEvent` would duplicate 200+ lines
 and create two paths to drift. The adapter is ~30 lines and
@@ -772,7 +776,7 @@ the gap visible to ops.
 ```typescript
 // src/lib/commerce/payments/event-to-process-order.ts (new)
 import type { PaymentEvent } from "./types";
-import type { ProcessOrderInput } from "@/lib/services/order-service";
+import type { CompletePaidOrderCommand } from "@/lib/commerce/payments/types";
 
 export function adaptPaymentEventToProcessOrder(
   event: PaymentEvent
@@ -1644,11 +1648,7 @@ In order of dependency:
 - **Phase 6 `applyPaymentEvent` extension** (the
   PrivateOffer.purchased loop). Phase 6 extends in its
   own PR.
-- **The `ProcessedWebhook` table drop.** Phase 7 cleanup.
-- **The inline `sendPurchaseConfirmation` and
-  `prisma.analyticEvent.create` calls in `processOrder`.**
-  These are still inline in V1.5; a future V2 may move
-  them to outbox consumers (`email.send` + `analytics.event`).
+- **The `ProcessedWebhook` table drop.** Phase 7 cleanup.- **The `PaymentWebhookEvent` inbox and shared worker.** These remain future work. The current `sendPurchaseConfirmation` and `prisma.analyticEvent.create` effects are dispatched through `OUTBOX_HANDLER_REGISTRY`; email delivery is guarded by `OutboxDeliveryAttempt`.
 - **A real LISTEN dispatcher** on Vercel. The polling cron
   is the V1.5 implementation. The PG trigger is in place
   for V2.
@@ -1664,7 +1664,7 @@ In order of dependency:
   `Order`, `AccessGrant`, `User`, `Product`, `Coupon`,
   `AbandonedCheckout`, `AnalyticEvent` models that Phase 2
   extends (FKs, indexes).
-- `src/lib/services/order-service.ts` — the
+- `src/lib/commerce/orders/complete-order.ts` — the
   `processOrder` function that `applyPaymentEvent`'s
   adapter translates to (PR 2's `AccessGrant` dual-write
   stays; the inline email + analytics stay for V1.5).

@@ -31,8 +31,9 @@ After v2 launches, this ADR is marked `Status: Superseded` and the migration
 audit in the **Cutover plan (v2)** section is executed.
 
 Until that milestone: Regola 1 + Regola 2 bind **all** migration PRs touching
-`Order` / `AccessGrant` / `ProcessedWebhook` / `Product` / `User` (the strict
-addictive zone declared below).
+`Order` / `AccessGrant` / `ProcessedWebhook` / `OutboxEvent` /
+`OutboxDeliveryAttempt` / `Product` / `User` (the strict addictive zone
+declared below).
 
 ## Decision
 
@@ -91,11 +92,13 @@ The following columns are read or written by the LS webhook path
 adapter `translateEvent`). All are locked by Regola 1 from any DROP or RENAME
 until v2:
 
-- **`ProcessedWebhook`**: `provider`, `deliveryId`, `eventType`, `payload`, `createdAt`
+- **`ProcessedWebhook`**: `provider`, `deliveryId`, `eventType`, `payloadHash`, `status`, `attemptCount`, `createdAt`
 - **`Order`**: `paymentProvider`, `providerOrderId`, `status`, `userId`, `productId`, `amount`, `currency`, `locale`, `customerCountry`, `channelId`
 - **`AccessGrant`**: `sourceType`, `sourceId`, `productId`, `userId`, `status`, `revokedAt`
 - **`Product`**: `id`, `slug`, `lemonVariantId`, `price`
 - **`User`**: `email`, `name`, `preferredLocale`
+- **`OutboxEvent`**: `eventKey`, `type`, `payload`, `status`, `attemptCount`, `nextAttemptAt`, `lockedAt`
+- **`OutboxDeliveryAttempt`**: `outboxEventId`, `channel`, `status`, `attemptCount`, `lockedAt`, `sentAt`, `lastError`; unique `(outboxEventId, channel)`
 
 ### LS payload ↔ Prisma schema "collar" points
 
@@ -111,7 +114,7 @@ drift vector if the Prisma column changes:
 | `attributes.first_order_item.variant_id` (with fallbacks `variant_id` / `product_variant_id`) | `Product.lemonVariantId` | Match key |
 | `meta.custom_data.locale` | `Order.locale` | BCP-47 for email routing |
 | `meta.custom_data.courseSlug` / `productSlug` | `Product.slug` | Lookup key |
-| `meta.custom_data.channelId` | `Order.channelId`, `AnalyticEvent.channelId` | YouTube attribution |
+| `meta.custom_data.channelId` | `purchase_analytics` outbox payload → `AnalyticEvent.channelId` | YouTube attribution; not persisted on `Order` by the current fulfillment path |
 | `meta.event_name` | `ProcessedWebhook.eventType` | Cache discriminator |
 | `data.id` (LS order_id or subscription_id) | `Order.providerOrderId` | Idempotency key |
 

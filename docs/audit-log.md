@@ -266,5 +266,5 @@ PR 3's `USE_ACCESS_GRANT_RESOLVER=true` flag-flip can proceed after
 - `prisma/migrations/20260712230000_add_access_grants/migration.sql`
   — the migration applied to staging
 - `scripts/migrate-grants-from-orders.ts` — the backfill script
-- `src/lib/services/order-service.ts` — the dual-write site
+- `src/lib/commerce/orders/complete-order.ts` — the dual-write site
   (PR 2 + PR 3 cutover target)

@@ -477,7 +477,7 @@ because the LTV must reflect the purchase before the inbox
 re-renders.
 
 ```typescript
-// src/lib/services/order-service.ts — after the existing PR 2 dual-write
+// src/lib/commerce/orders/complete-order.ts — after the existing PR 2 dual-write
 const orderAmount = order.amount;
 
 // Phase 5: upsert CustomerProductInsight for LTV
@@ -801,7 +801,7 @@ In order of dependency:
    `src/lib/services/get-creator-conversation-previews.ts`
    (per § 3.1).
 4. **Wire up `processOrder` LTV upsert** in
-   `src/lib/services/order-service.ts` (per § 4.1).
+   `src/lib/commerce/orders/complete-order.ts` (per § 4.1).
 5. **Wire up `/api/progress` engagement upsert** in
    `src/app/api/progress/route.ts` (per § 4.2).
 6. **Phase 2 outbox consumers** for `order.completed` +
@@ -873,7 +873,7 @@ In order of dependency:
 - `src/app/dashboard/creator/messages/page.tsx` — the
   inbox page that Phase 5 refactors to call
   `getCreatorConversationPreviews`.
-- `src/lib/services/order-service.ts` — the `processOrder`
+- `src/lib/commerce/orders/complete-order.ts` — the `processOrder`
   function that § 4.1 extends with the LTV upsert.
 - `src/app/api/progress/route.ts` — the lesson progress
   endpoint that § 4.2 extends with the engagement upsert.

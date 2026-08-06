@@ -207,9 +207,10 @@ Path critico (DEVE FUNZIONARE al 100%):
 2. LS checkout hosted → completa pagamento con carta test
 3. Webhook ricevuto in `https://www.courssy.com/api/webhooks/lemonsqueezy`
 4. `Order.status='completed'` in DB
-5. `AccessGrant.status='active'` creato
-6. Email magic-link inviata all'utente
-7. Login con quella email → accesso al corso
+5. `AccessGrant.status='active'` creato nella stessa transazione dell'ordine
+6. Quattro `OutboxEvent` durabili presenti con chiavi deterministiche
+7. Il worker outbox processa `purchase_email`; `OutboxDeliveryAttempt(channel='email')` termina in `sent` (oppure `uncertain` e viene riconciliato, mai reinviato alla cieca)
+8. Login con quella email → accesso al corso
 
 Tool: usa [LS test mode](https://docs.lemonsqueezy.com/help/franchise-models/test-mode) prima di andare Live.
 
@@ -327,6 +328,8 @@ npx vercel --prod --yes              # Force deploy
 
 # === DATABASE ===
 npx prisma migrate deploy           # ⚠️ locale, mai da Vercel
+# Include la migration OutboxDeliveryAttempt: verifica la tabella e il vincolo
+# UNIQUE (outboxEventId, channel) prima dello smoke test email.
 npx prisma studio                   # GUI inspect
 
 # === SMTP ===

@@ -211,7 +211,7 @@ After saving, LS shows the **Variant ID** at the bottom of the variant page (a n
 
 ### 3.3 Critical: variant ID drift on Copy-to-Live
 
-**The most common operator pitfall on LS live-mode setup**: after using "Copy to Live Mode" on a test-mode product, **every variant gets a NEW ID**, but the DB still has the OLD ID. The codebase's `OrderService.resolveProduct({ variantId })` lookup will silently miss (returning `null`), and the LS webhook will fire `no_completed_order_for_student` denials.
+**The most common operator pitfall on LS live-mode setup**: after using "Copy to Live Mode" on a test-mode product, **every variant gets a NEW ID**, but the DB still has the OLD ID. The codebase's the product locator resolver in `processOrder` (`product.kind='variant_id'`) lookup will silently miss (returning `null`), and the LS webhook will fire `no_completed_order_for_student` denials.
 
 Mitigation procedure (run after every Copy-to-Live):
 
@@ -246,7 +246,7 @@ psql "$DIRECT_URL" -c "
 # Expected: zero rows (i.e., no product has a CountryCode without a lemonVariantId).
 ```
 
-If variant IDs drift, the webhook handler's `OrderService.resolveProduct` throws `NotFoundError`, and the handler responds `200 OK` (acknowledged-but-not-processed) per [`../../src/app/api/webhooks/lemonsqueezy/route.ts` 200/404 contract](../../src/app/api/webhooks/lemonsqueezy/route.ts) — **silently swallowing the order**. Operators won't see the failure unless they tail Vercel logs for `[LS Webhook] order_created received id=…` followed by NO DB write.
+If variant IDs drift, product resolution throws `NotFoundError`; the webhook processor records the failed `ProcessedWebhook` reservation and returns the classified webhook error. Operators should inspect the webhook reservation/logs and correct the product mapping before replaying the provider delivery — the handler no longer silently acknowledges an unprocessed order.
 
 ### 3.4 Default fallback (`Product.lemonVariantId` column)
 
@@ -280,8 +280,8 @@ The handler in [`../../src/app/api/webhooks/lemonsqueezy/route.ts`](../../src/ap
 
 | Event | Handler behavior | DB side effect |
 | --- | --- | --- |
-| `order_created` | `processOrder(...)` (one-time purchase) | INSERT `Order { status: 'completed' }` + create `AccessGrant` + send purchase email |
-| `subscription_created` | `processOrder(...)` (recurring billing treated as single Order per period) | INSERT `Order { status: 'completed' }` per billing period |
+| `order_created` | `processOrder(...)` (one-time purchase) | In one Prisma transaction: INSERT `Order { status: 'completed' }` + upsert `AccessGrant { status: 'active' }` + create four durable `OutboxEvent` rows; `purchase_email` is delivered later by the outbox registry |
+| `subscription_created` | `processOrder(...)` (recurring billing treated as single Order per period) | Same atomic Order + AccessGrant + durable outbox path for each completed period |
 | `order_refunded` | `prisma.order.updateMany({ ... status: 'refunded' })` (only completed orders) | UPDATE `Order.status = 'refunded'` → auto-revoke access (Phase 7+) |
 | `subscription_cancelled` | `prisma.order.updateMany({ ... status: 'failed' })` (only completed orders) | UPDATE `Order.status = 'failed'` → auto-revoke access |
 | `subscription_payment_failed` | `prisma.order.updateMany({ ... status: 'failed' })` (only completed orders) | UPDATE `Order.status = 'failed'` → auto-revoke access |
@@ -382,7 +382,7 @@ if (channelId) customData.channelId = channelId;
 
 → **`courseSlug`** (canonical string), **`locale`** (canonical string), **`email`** (optional, only if pre-checkout captured), **`channelId`** (optional, only if YouTube attribution).
 
-These are the **only** fields the codebase sets **inside `customData`** (the application-controlled bucket LS echoes back on the webhook). The provider ALSO sets `checkoutData.discountCode` (LS's own vendor-controlled discount-code field, distinct from `customData` — see [`../../src/lib/commerce/payments/providers/lemonsqueezy/index.ts` L65-67](../../src/lib/commerce/payments/providers/lemonsqueezy/index.ts)). Operators should NOT add new fields inside `customData` without coordinating with the team that owns `processOrder` ([`../../src/lib/services/order-service.ts` L13-39](../../src/lib/services/order-service.ts)) to read them — fields that are sent-but-not-consumed are harmless but waste LS payload bytes.
+These are the **only** fields the codebase sets **inside `customData`** (the application-controlled bucket LS echoes back on the webhook). The provider ALSO sets `checkoutData.discountCode` (LS's own vendor-controlled discount-code field, distinct from `customData` — see [`../../src/lib/commerce/payments/providers/lemonsqueezy/index.ts` L65-67](../../src/lib/commerce/payments/providers/lemonsqueezy/index.ts)). Operators should NOT add new fields inside `customData` without coordinating with the team that owns `processOrder` ([`../../src/lib/commerce/orders/complete-order.ts` L13-39](../../src/lib/commerce/orders/complete-order.ts)) to read them — fields that are sent-but-not-consumed are harmless but waste LS payload bytes. `processOrder` persists the order, grant, and outbox rows atomically; it does not send SMTP inline.
 
 ### 6.2 One-time items vs subscriptions
 
@@ -401,15 +401,15 @@ Field name in customData → field name in webhook payload → DB column read by
 
 | customData key | Webhook payload path | DB read |
 | --- | --- | --- |
-| `courseSlug` | `attributes.first_order_item.product_options.custom_data.courseSlug` OR `attributes.custom_data.courseSlug` (subscriptions) | `OrderService.resolveProduct({ productSlug })` → `Product.slug` × `Order.productId` FK |
+| `courseSlug` | `attributes.first_order_item.product_options.custom_data.courseSlug` OR `attributes.custom_data.courseSlug` (subscriptions) | the product locator resolver in `processOrder` (`product.kind='product_slug'`) → `Product.slug` × `Order.productId` FK |
 | `locale` | same path as `courseSlug` | `processOrder({ locale })` → `Order.locale` |
 | `email` | (only sent if pre-checkout captured; LS overrides with buyer's actual email in the webhook payload anyway) | `processOrder({ email })` → `Order.user.email` (or fallback to direct email if user doesn't exist) |
-| `channelId` | same path as `courseSlug` | `processOrder({ channelId })` → `Order.channelId` |
+| `channelId` | same path as `courseSlug` | `processOrder({ channelId })` → `purchase_analytics` outbox payload → `AnalyticEvent.channelId` |
 
 > ⚠️ **Symmetry invariant:** if you rename `courseSlug` in the
 > provider (line 57), you MUST also rename the read in `processOrder`
-> ([order-service.ts consumer](../../src/lib/services/order-service.ts)
-> at L13+). Asymmetric renames cause `OrderService.resolveProduct` to
+> ([order-service.ts consumer](../../src/lib/commerce/orders/complete-order.ts)
+> at L13+). Asymmetric renames cause the product locator resolver in `processOrder` to
 > receive `productSlug=undefined` and fall back to `slug→variantId`
 > lookups — silently different code paths, hard to diagnose.
 
@@ -511,7 +511,7 @@ curl -sS 'https://<production-domain>/api/health' | jq
 | --- | --- | --- |
 | Product creates checkout URL in test mode but not in live | Test-mode store is fine, but the LIVE product is "Draft" (not "Published") | §2.3 — toggle product status to "Published" in the LIVE store |
 | Buyer pays, but DB never shows the order | LS webhook is firing to the staging URL (or vice versa). Alternatively: webhook signing secret mismatch. | §4.3 — verify webhook URL is byte-exact. §5.4 — verify Vercel Production env's `LEMONSQUEEZY_WEBHOOK_SECRET` matches the LS webhook's secret. |
-| `OrderService.resolveProduct` throws `NotFoundError` for an order that LS clearly fired | **`Product.lemonVariantId` not updated after Copy-to-Live (§3.3)**. The TEST variant ID is still in the DB. | §3.3 — Update `Product.countryOverrides.*.lemonVariantId` → live variant IDs. Plus update top-level `Product.lemonVariantId` fallback (§3.4). |
+| the product locator resolver in `processOrder` throws `NotFoundError` for an order that LS clearly fired | **`Product.lemonVariantId` not updated after Copy-to-Live (§3.3)**. The TEST variant ID is still in the DB. | §3.3 — Update `Product.countryOverrides.*.lemonVariantId` → live variant IDs. Plus update top-level `Product.lemonVariantId` fallback (§3.4). |
 | Vercel logs show `[LS Webhook] order_created` followed by NO DB row | The `processOrder(...)` call threw → handler returned `200` due to NotFoundError/ValidationError acknowledgement at route.ts L173-176. **Silent business error.** | Inspect Vercel logs for `[LS Webhook]` stack traces; most common cause is `Product.countryOverrides` drift (see row above) or `courseSlug` mismatch (rare). |
 | `createCheckout` returns 400 from `LemonSqueezyPaymentProvider` | Either: (a) `pricing.lemonVariantId` is null, or (b) the variant ID is parseInt-failing (NaN) | (a) §3.3 — wire variant ID. (b) verify the column type — should be `String?`, not `String`. |
 | LS charges the buyer twice | Duplicate LS-side checkout session because the LS redirect URL got hit twice (e.g., buyer refreshes the page). | Add a single-flight guard in the page that initiates checkout (not in this runbook's scope). LS-side checkout-with-existing-cart isn't idempotent. Log this for the frontend team. |
@@ -597,7 +597,7 @@ curl -sS 'https://<production-domain>/api/health' | jq
 | Source-of-truth env schema | [`../../src/lib/env.ts` `LEMONSQUEEZY_*`](../../src/lib/env.ts) |
 | LS webhook handler (canonical contract) | [`../../src/app/api/webhooks/lemonsqueezy/route.ts`](../../src/app/api/webhooks/lemonsqueezy/route.ts) |
 | LS provider implementation (canonical customData set) | [`../../src/lib/commerce/payments/providers/lemonsqueezy/index.ts`](../../src/lib/commerce/payments/providers/lemonsqueezy/index.ts) |
-| OrderService contract (consumes LS customData → writes Order/AccessGrant) | [`../../src/lib/services/order-service.ts`](../../src/lib/services/order-service.ts) |
+| OrderService contract (consumes LS customData → writes Order/AccessGrant) | [`../../src/lib/commerce/orders/complete-order.ts`](../../src/lib/commerce/orders/complete-order.ts) |
 | Threat model + RBAC + secret rotation tier | [`../../SECURITY.md`](../../SECURITY.md) |
 | Test mode → Live mode flip (route map) | [`../../docs/v1-acceptance-test.md` §1.5](../../docs/v1-acceptance-test.md) |
 | LS Copy-to-Live product UX documentation (vendor) | [Lemon Squeezy — Copy to Live Mode](https://docs.lemonsqueezy.com/help/products/copy-to-live-mode) |
@@ -612,6 +612,6 @@ curl -sS 'https://<production-domain>/api/health' | jq
 | --- | --- |
 | First written | FASE 3.2 (this runbook) |
 | Source of truth for each vertical | Lemon Squeezy Dashboard (live mode) — this runbook is the **procedural mirror** |
-| Cross-checked against | [`../../scripts/ops/staging-bootstrap.md`](../../scripts/ops/staging-bootstrap.md) (test-mode counterpart), [`../../docs/production.md`](../../docs/production.md) (deploy/rollback), [`../../docs/production-hardening.md`](../../docs/production-hardening.md) (HMAC contract), [`../../src/lib/env.ts`](../../src/lib/env.ts) (env schema), [`../../src/app/api/webhooks/lemonsqueezy/route.ts`](../../src/app/api/webhooks/lemonsqueezy/route.ts) (handler contract), [`../../src/lib/commerce/payments/providers/lemonsqueezy/index.ts`](../../src/lib/commerce/payments/providers/lemonsqueezy/index.ts) (customData set), [`../../src/lib/services/order-service.ts`](../../src/lib/services/order-service.ts) (customData consumer), [`../../SECURITY.md`](../../SECURITY.md) (rotation tier) |
+| Cross-checked against | [`../../scripts/ops/staging-bootstrap.md`](../../scripts/ops/staging-bootstrap.md) (test-mode counterpart), [`../../docs/production.md`](../../docs/production.md) (deploy/rollback), [`../../docs/production-hardening.md`](../../docs/production-hardening.md) (HMAC contract), [`../../src/lib/env.ts`](../../src/lib/env.ts) (env schema), [`../../src/app/api/webhooks/lemonsqueezy/route.ts`](../../src/app/api/webhooks/lemonsqueezy/route.ts) (handler contract), [`../../src/lib/commerce/payments/providers/lemonsqueezy/index.ts`](../../src/lib/commerce/payments/providers/lemonsqueezy/index.ts) (customData set), [`../../src/lib/commerce/orders/complete-order.ts`](../../src/lib/commerce/orders/complete-order.ts) (customData consumer), [`../../SECURITY.md`](../../SECURITY.md) (rotation tier) |
 | Maintainer | payments-lead (TBD) |
 | Review cadence | quarterly audit (per §9.3); immediate update on any LS vendor change (new event types, dashboard overhaul, KYC flow changes); tight coupling to staging-bootstrap.md §3 — keep both in sync |
