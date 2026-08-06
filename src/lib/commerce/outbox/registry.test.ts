@@ -8,6 +8,9 @@ const {
   mockCreateNotification,
   mockOutboxFindFirst,
   mockOutboxUpdateMany,
+  mockDeliveryCreate,
+  mockDeliveryFindUnique,
+  mockDeliveryUpdateMany,
 } = vi.hoisted(() => ({
   mockAnalyticCreate: vi.fn(),
   mockAbandonedUpdateMany: vi.fn(),
@@ -15,6 +18,9 @@ const {
   mockCreateNotification: vi.fn(),
   mockOutboxFindFirst: vi.fn(),
   mockOutboxUpdateMany: vi.fn(),
+  mockDeliveryCreate: vi.fn(),
+  mockDeliveryFindUnique: vi.fn(),
+  mockDeliveryUpdateMany: vi.fn(),
 }));
 
 vi.mock("@/lib/db/prisma", () => ({
@@ -24,6 +30,11 @@ vi.mock("@/lib/db/prisma", () => ({
     outboxEvent: {
       findFirst: mockOutboxFindFirst,
       updateMany: mockOutboxUpdateMany,
+    },
+    outboxDeliveryAttempt: {
+      create: mockDeliveryCreate,
+      findUnique: mockDeliveryFindUnique,
+      updateMany: mockDeliveryUpdateMany,
     },
   },
 }));
@@ -57,6 +68,12 @@ beforeEach(() => {
   mockCreateNotification.mockResolvedValue({ id: "notification-1" });
   mockOutboxFindFirst.mockReset().mockResolvedValue(null);
   mockOutboxUpdateMany.mockReset().mockResolvedValue({ count: 1 });
+  mockDeliveryCreate.mockReset().mockResolvedValue({ id: "attempt-email" });
+  mockDeliveryFindUnique.mockReset().mockResolvedValue({
+    id: "attempt-email",
+    status: "processing",
+  });
+  mockDeliveryUpdateMany.mockReset().mockResolvedValue({ count: 1 });
 });
 
 describe("OUTBOX_HANDLER_REGISTRY", () => {
@@ -82,6 +99,15 @@ describe("OUTBOX_HANDLER_REGISTRY", () => {
       "event-email",
     );
 
+    expect(mockDeliveryCreate).toHaveBeenCalledWith({
+      data: {
+        outboxEventId: "event-email",
+        channel: "email",
+        status: "processing",
+        attemptCount: 1,
+        lockedAt: expect.any(Date),
+      },
+    });
     expect(mockSendPurchaseConfirmation).toHaveBeenCalledWith(
       "buyer@example.com",
       "course-1",
@@ -89,6 +115,161 @@ describe("OUTBOX_HANDLER_REGISTRY", () => {
       "en-US",
       "https://example.test/dashboard",
     );
+    expect(mockDeliveryUpdateMany).toHaveBeenCalledWith({
+      where: { id: "attempt-email", status: "processing" },
+      data: {
+        status: "sent",
+        sentAt: expect.any(Date),
+        lockedAt: null,
+        lastError: null,
+      },
+    });
+  });
+
+  it("skips an email already marked sent for the same event and channel", async () => {
+    mockDeliveryCreate.mockRejectedValueOnce(
+      new Prisma.PrismaClientKnownRequestError("Unique constraint failed", {
+        code: "P2002",
+        clientVersion: "5.22.0",
+        meta: { target: ["outboxEventId", "channel"] },
+      }),
+    );
+    mockDeliveryFindUnique.mockResolvedValueOnce({
+      id: "attempt-email",
+      status: "sent",
+    });
+
+    await OUTBOX_HANDLER_REGISTRY.purchase_email.handle(
+      {
+        email: "buyer@example.com",
+        productSlug: "course-1",
+        courseUrl: "https://example.test/course-1",
+        locale: "en-US",
+        ebookDownloadUrl: "https://example.test/dashboard",
+      },
+      "event-email",
+    );
+
+    expect(mockSendPurchaseConfirmation).not.toHaveBeenCalled();
+  });
+
+  it("does not absorb an unrelated delivery-attempt unique violation", async () => {
+    mockDeliveryCreate.mockRejectedValueOnce(
+      new Prisma.PrismaClientKnownRequestError("Unique constraint failed", {
+        code: "P2002",
+        clientVersion: "5.22.0",
+        meta: { target: ["channel"] },
+      }),
+    );
+
+    await expect(
+      OUTBOX_HANDLER_REGISTRY.purchase_email.handle(
+        {
+          email: "buyer@example.com",
+          productSlug: "course-1",
+          courseUrl: "https://example.test/course-1",
+          locale: "en-US",
+          ebookDownloadUrl: "https://example.test/dashboard",
+        },
+        "event-email",
+      ),
+    ).rejects.toThrow("Unique constraint failed");
+    expect(mockSendPurchaseConfirmation).not.toHaveBeenCalled();
+  });
+
+  it("marks stale processing attempts uncertain without resending", async () => {
+    mockDeliveryCreate.mockRejectedValueOnce(
+      new Prisma.PrismaClientKnownRequestError("Unique constraint failed", {
+        code: "P2002",
+        clientVersion: "5.22.0",
+        meta: { target: ["outboxEventId", "channel"] },
+      }),
+    );
+    mockDeliveryFindUnique.mockResolvedValueOnce({
+      id: "attempt-email",
+      status: "processing",
+      lockedAt: new Date(Date.now() - 10 * 60 * 1000),
+    });
+
+    await OUTBOX_HANDLER_REGISTRY.purchase_email.handle(
+      {
+        email: "buyer@example.com",
+        productSlug: "course-1",
+        courseUrl: "https://example.test/course-1",
+        locale: "en-US",
+        ebookDownloadUrl: "https://example.test/dashboard",
+      },
+      "event-email",
+    );
+
+    expect(mockSendPurchaseConfirmation).not.toHaveBeenCalled();
+    expect(mockDeliveryUpdateMany).toHaveBeenCalledWith({
+      where: { id: "attempt-email", status: "processing" },
+      data: {
+        status: "uncertain",
+        lockedAt: null,
+        lastError: "Delivery outcome unknown after processing lease expired",
+      },
+    });
+  });
+
+  it("marks failed email attempts retryable without duplicating the unique record", async () => {
+    mockSendPurchaseConfirmation.mockRejectedValueOnce(new Error("SMTP timeout"));
+
+    await expect(
+      OUTBOX_HANDLER_REGISTRY.purchase_email.handle(
+        {
+          email: "buyer@example.com",
+          productSlug: "course-1",
+          courseUrl: "https://example.test/course-1",
+          locale: "en-US",
+          ebookDownloadUrl: "https://example.test/dashboard",
+        },
+        "event-email",
+      ),
+    ).rejects.toThrow("SMTP timeout");
+
+    expect(mockDeliveryUpdateMany).toHaveBeenCalledWith({
+      where: { id: "attempt-email", status: "processing" },
+      data: {
+        status: "failed",
+        lockedAt: null,
+        lastError: "SMTP timeout",
+      },
+    });
+  });
+
+  it("does not resend after a crash following provider acceptance", async () => {
+    mockDeliveryCreate
+      .mockResolvedValueOnce({ id: "attempt-email" })
+      .mockRejectedValueOnce(
+        new Prisma.PrismaClientKnownRequestError("Unique constraint failed", {
+          code: "P2002",
+          clientVersion: "5.22.0",
+          meta: { target: ["outboxEventId", "channel"] },
+        }),
+      );
+    mockDeliveryFindUnique
+      .mockResolvedValueOnce({ id: "attempt-email", status: "processing" })
+      .mockResolvedValueOnce({ id: "attempt-email", status: "processing" });
+    mockDeliveryUpdateMany.mockRejectedValueOnce(new Error("crash after send"));
+
+    const payload = {
+      email: "buyer@example.com",
+      productSlug: "course-1",
+      courseUrl: "https://example.test/course-1",
+      locale: "en-US",
+      ebookDownloadUrl: "https://example.test/dashboard",
+    };
+
+    await expect(
+      OUTBOX_HANDLER_REGISTRY.purchase_email.handle(payload, "event-email"),
+    ).rejects.toThrow("crash after send");
+    await expect(
+      OUTBOX_HANDLER_REGISTRY.purchase_email.handle(payload, "event-email"),
+    ).resolves.toBeUndefined();
+
+    expect(mockSendPurchaseConfirmation).toHaveBeenCalledOnce();
   });
 
   it("dispatches analytics with the outbox event id", async () => {

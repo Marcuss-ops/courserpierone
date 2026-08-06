@@ -9,6 +9,11 @@ const { mockPrisma, mockSendPurchaseConfirmation, mockCreateNotification } =
       },
       analyticEvent: { create: vi.fn() },
       abandonedCheckout: { updateMany: vi.fn() },
+      outboxDeliveryAttempt: {
+        create: vi.fn(),
+        findUnique: vi.fn(),
+        updateMany: vi.fn(),
+      },
     },
     mockSendPurchaseConfirmation: vi.fn(),
     mockCreateNotification: vi.fn(),
@@ -57,6 +62,12 @@ beforeEach(() => {
   mockPrisma.outboxEvent.updateMany.mockReset();
   mockPrisma.outboxEvent.findFirst.mockResolvedValue(null);
   mockPrisma.outboxEvent.updateMany.mockResolvedValue({ count: 1 });
+  mockPrisma.outboxDeliveryAttempt.create.mockReset().mockResolvedValue({ id: "attempt-1" });
+  mockPrisma.outboxDeliveryAttempt.findUnique.mockReset().mockResolvedValue({
+    id: "attempt-1",
+    status: "processing",
+  });
+  mockPrisma.outboxDeliveryAttempt.updateMany.mockReset().mockResolvedValue({ count: 1 });
   mockSendPurchaseConfirmation.mockResolvedValue(true);
 });
 

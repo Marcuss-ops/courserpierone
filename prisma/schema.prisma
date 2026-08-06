@@ -335,10 +335,12 @@ model LessonAsset {
 
 // ─── Analytics Eventi ───────────────────────────────────────
 model AnalyticEvent {
-  id        String   @id @default(cuid())
-  sessionId String? // ID unico del visitatore (cookie-based)
-  productId String?
-  eventType    String // pageview | scroll_deep | click_buy | checkout_open | checkout_complete | purchase | refund | checkout_abandoned | lesson_start | lesson_complete
+  id                String   @id @default(cuid())
+  sessionId         String? // ID unico del visitatore (cookie-based)
+  productId         String? // Product.id (internal Prisma identifier)
+  productSlug       String? // Product.slug (public URL identifier)
+  providerProductId String? // Provider product/variant identifier
+  eventType         String // pageview | scroll_deep | click_buy | checkout_open | checkout_complete | purchase | refund | checkout_abandoned | lesson_start | lesson_complete
   channelId    String? // YouTubeChannel.id (channel attribution)
   locale       String? // "it" | "en-us" | locale seen at event time
   revenueCents Int? // signed: +amount on purchase, -amount on refund
@@ -353,6 +355,8 @@ model AnalyticEvent {
 
   @@index([eventType, createdAt])
   @@index([productId])
+  @@index([productSlug])
+  @@index([providerProductId])
   @@index([sessionId])
 }
 
@@ -563,11 +567,13 @@ model ContentPage {
   updatedAt   DateTime  @updatedAt
 
   product      Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
-  parent       ContentPage?  @relation("ContentPageTree", fields: [parentId], references: [id], onDelete: Cascade)
+  parent       ContentPage?  @relation("ContentPageTree", fields: [parentId, productId], references: [id, productId], onDelete: Cascade)
   children     ContentPage[] @relation("ContentPageTree")
   translations ContentPageTranslation[]
 
   @@unique([productId, slug])
+  // Composite target for the self-FK: a page can only parent pages from the same product.
+  @@unique([id, productId])
   @@index([productId, parentId, position])
 }
 
@@ -721,6 +727,29 @@ model OutboxEvent {
   updatedAt     DateTime @updatedAt
 
   @@index([status, nextAttemptAt])
+  @@index([status, lockedAt])
+
+  deliveryAttempts OutboxDeliveryAttempt[]
+}
+
+// One durable delivery record per outbox event and delivery channel.
+// The unique composite key is the idempotency barrier for external effects
+// whose provider call cannot participate in the database transaction.
+model OutboxDeliveryAttempt {
+  id            String   @id @default(cuid())
+  outboxEventId String
+  channel       String   // email | analytics | notification | recovery
+  status        String   @default("processing") // processing | sent | failed | uncertain
+  attemptCount  Int      @default(1)
+  lockedAt      DateTime?
+  sentAt        DateTime?
+  lastError     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  outboxEvent OutboxEvent @relation(fields: [outboxEventId], references: [id], onDelete: Cascade)
+
+  @@unique([outboxEventId, channel])
   @@index([status, lockedAt])
 }
 

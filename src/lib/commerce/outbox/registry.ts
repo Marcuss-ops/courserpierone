@@ -62,6 +62,123 @@ function createHandler<T>(
   };
 }
 
+const EMAIL_CHANNEL = "email";
+const EMAIL_PROCESSING_LEASE_MS = 5 * 60 * 1000;
+
+function isDeliveryAttemptConflict(error: unknown): boolean {
+  if (
+    !(error instanceof Prisma.PrismaClientKnownRequestError) ||
+    error.code !== "P2002"
+  ) {
+    return false;
+  }
+
+  const target = error.meta?.target;
+  if (Array.isArray(target)) {
+    return target.length === 2 &&
+      target.includes("outboxEventId") &&
+      target.includes("channel");
+  }
+
+  return target === "outboxEventId_channel" ||
+    target === "OutboxDeliveryAttempt_outboxEventId_channel_key";
+}
+
+async function claimEmailDelivery(eventId: string): Promise<boolean> {
+  const now = new Date();
+  try {
+    await prisma.outboxDeliveryAttempt.create({
+      data: {
+        outboxEventId: eventId,
+        channel: EMAIL_CHANNEL,
+        status: "processing",
+        attemptCount: 1,
+        lockedAt: now,
+      },
+    });
+    return true;
+  } catch (error) {
+    if (!isDeliveryAttemptConflict(error)) throw error;
+  }
+
+  const existing = await prisma.outboxDeliveryAttempt.findUnique({
+    where: {
+      outboxEventId_channel: {
+        outboxEventId: eventId,
+        channel: EMAIL_CHANNEL,
+      },
+    },
+  });
+  if (!existing) return false;
+
+  // A sent or in-flight attempt is authoritative. In particular, do not
+  // resend a stale processing row: the worker may have crashed after SMTP
+  // accepted the message but before `sent` was committed.
+  if (existing.status === "sent" || existing.status === "uncertain") {
+    return false;
+  }
+
+  if (
+    existing.status === "processing" &&
+    existing.lockedAt &&
+    existing.lockedAt.getTime() > now.getTime() - EMAIL_PROCESSING_LEASE_MS
+  ) {
+    return false;
+  }
+
+  if (existing.status === "processing") {
+    // A stale processing attempt crossed an unknown provider boundary. Do not
+    // resend automatically; make the ambiguity explicit for reconciliation.
+    await prisma.outboxDeliveryAttempt.updateMany({
+      where: { id: existing.id, status: "processing" },
+      data: {
+        status: "uncertain",
+        lockedAt: null,
+        lastError: "Delivery outcome unknown after processing lease expired",
+      },
+    });
+    return false;
+  }
+
+  const reclaimed = await prisma.outboxDeliveryAttempt.updateMany({
+    where: {
+      id: existing.id,
+      status: "failed",
+    },
+    data: {
+      status: "processing",
+      attemptCount: { increment: 1 },
+      lockedAt: now,
+      lastError: null,
+    },
+  });
+  return reclaimed.count === 1;
+}
+
+async function markEmailSent(attemptId: string): Promise<void> {
+  await prisma.outboxDeliveryAttempt.updateMany({
+    where: { id: attemptId, status: "processing" },
+    data: {
+      status: "sent",
+      sentAt: new Date(),
+      lockedAt: null,
+      lastError: null,
+    },
+  });
+}
+
+async function markEmailFailed(attemptId: string, error: unknown): Promise<void> {
+  const message = error instanceof Error ? error.message : String(error);
+  await prisma.outboxDeliveryAttempt.updateMany({
+    where: { id: attemptId, status: "processing" },
+    data: {
+      status: "failed",
+      lockedAt: null,
+      lastError: message.slice(0, 2048),
+    },
+  });
+}
+
 const isOutboxEffectAlreadyDelivered = (error: unknown): boolean => {
   if (
     !(error instanceof Prisma.PrismaClientKnownRequestError) ||
@@ -90,18 +207,44 @@ const isOutboxEffectAlreadyDelivered = (error: unknown): boolean => {
 export const OUTBOX_HANDLER_REGISTRY = {
   purchase_email: createHandler(
     purchaseEmailPayloadSchema,
-    async (payload) => {
-      const sent = await sendPurchaseConfirmation(
-        payload.email,
-        payload.productSlug,
-        payload.courseUrl,
-        payload.locale,
-        payload.ebookDownloadUrl,
-      );
-      if (sent === false) {
-        const deliveryError = new Error("Purchase confirmation email was not delivered");
-        (deliveryError as Error & { code?: string }).code = "EMAIL_SEND_FAILED";
-        throw deliveryError;
+    async (payload, eventId) => {
+      const claimed = await claimEmailDelivery(eventId);
+      if (!claimed) return;
+
+      const attempt = await prisma.outboxDeliveryAttempt.findUnique({
+        where: {
+          outboxEventId_channel: {
+            outboxEventId: eventId,
+            channel: EMAIL_CHANNEL,
+          },
+        },
+        select: { id: true },
+      });
+      if (!attempt) return;
+
+      let sentToProvider = false;
+      try {
+        const sent = await sendPurchaseConfirmation(
+          payload.email,
+          payload.productSlug,
+          payload.courseUrl,
+          payload.locale,
+          payload.ebookDownloadUrl,
+        );
+        if (sent === false) {
+          const deliveryError = new Error("Purchase confirmation email was not delivered");
+          (deliveryError as Error & { code?: string }).code = "EMAIL_SEND_FAILED";
+          throw deliveryError;
+        }
+        sentToProvider = true;
+        await markEmailSent(attempt.id);
+      } catch (error) {
+        // Once the provider accepted the message, do not downgrade the
+        // attempt to failed if the worker crashes while persisting `sent`.
+        // A retry sees `processing` and skips the provider call, avoiding a
+        // duplicate email at the cost of an observable reconciliation row.
+        if (!sentToProvider) await markEmailFailed(attempt.id, error);
+        throw error;
       }
     },
   ),
