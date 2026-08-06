@@ -173,11 +173,14 @@ test.describe("E2E Full Customer Journey (DoD Scenario 1, LS primary)", () => {
         // strict toBeGreaterThanOrEqual) so real Prisma/DB errors still
         // propagate, and only the silent-analytics-drop case is annotated.
         const analyticsDeadline = Date.now() + 3_000;
+        const purchaser = await prisma.user.findUnique({ where: { email }, select: { id: true } });
         let analyticsCount = 0;
         while (Date.now() < analyticsDeadline) {
-          analyticsCount = await prisma.analyticEvent.count({
-            where: { user: { email }, eventType: "purchase" },
-          });
+          analyticsCount = purchaser
+            ? await prisma.analyticEvent.count({
+                where: { userId: purchaser.id, eventType: "purchase" },
+              })
+            : 0;
           if (analyticsCount >= 1) break;
           await new Promise((resolve) => setTimeout(resolve, 100));
         }

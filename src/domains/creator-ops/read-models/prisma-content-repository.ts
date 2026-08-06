@@ -61,7 +61,7 @@ export const prismaContentRepository: ContentRepository = {
   async fetchOwnedProducts(creatorId: string): Promise<MinimalProduct[]> {
     if (!creatorId) return [];
     return await prisma.product.findMany({
-      where: { creatorId, deletedAt: null },
+      where: { creatorId },
       select: { id: true, slug: true },
       orderBy: { createdAt: "asc" },
     });
