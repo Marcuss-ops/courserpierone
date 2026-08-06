@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { authorizeDmRequest } from "@/lib/messaging/api-authorize";
-import { getPartnerId } from "@/lib/messaging/get-partner-id";
+import { getPartnerId } from "@/domains/messaging";
 
 // Hoisted constants — single allocation lifetime per process. Avoids
 // re-allocating a fresh TextEncoder + UInt8Array on every per-tick
