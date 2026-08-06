@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { revalidatePath } from "next/cache";
 import { getServerUser } from "@/lib/supabase/get-user";
@@ -175,7 +176,14 @@ describe("POST /api/products", () => {
     expect(response.status).toBe(200);
     expect(body.success).toBe(true);
     expect(body.product.id).toBe("new-p1");
-    expect(mockPrisma.product.create).toHaveBeenCalledOnce();
+    expect(mockPrisma.product.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          pricesByCurrency: Prisma.DbNull,
+          countryOverrides: Prisma.DbNull,
+        }),
+      }),
+    );
     expect(mockPrisma.productTranslation.create).toHaveBeenCalledTimes(2);
     expect(revalidatePath).toHaveBeenCalledWith("/it-it/new-course", "page");
   });

@@ -37,9 +37,10 @@ model Product {
   currency         String   @default("eur")
   status           String   @default("draft") // draft | published | archived
   contentKind      String   @default("video_course") // video_course | document_course | ebook | post | lesson | (validated app-side, NOT a Prisma enum — see src/domains/catalog/content-type-registry.ts)
-  pricesByCurrency String? // JSON: { "USD": { "price": 5500, "symbol": "$", "lemonVariantId": "..." }, ... }
-  countryOverrides String? // JSON: { "BR": { "currency": "BRL", "price": 9900, "symbol": "R$", "lemonVariantId": "123456" }, ... }
+  pricesByCurrency Json? // JSONB: { "USD": { "price": 5500, "symbol": "$", "lemonVariantId": "..." }, ... }
+  countryOverrides Json? // JSONB: { "BR": { "currency": "BRL", "price": 9900, "symbol": "R$", "lemonVariantId": "123456" }, ... }
   defaultLanguage  String   @default("it") // Lingua default prodotto (per resume locale / content fallback)
+  deletedAt        DateTime? // Soft-delete marker; deleted products are never public/access-checkout targets.
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
   // MCR Phase 1 — publish gate (publishContentProduct use case). `publishedAt`
@@ -73,6 +74,7 @@ model Product {
   // era ridondante (leftmost-prefix rule PG copre la parte
   // ``creatorId``) ed è stato rimosso: il compound è sufficiente.
   @@index([creatorId, status])
+  @@index([deletedAt])
 }
 
 // ─── Traduzioni del Funnel (Problema, Storia, Recensioni, CTA) ─
@@ -502,13 +504,12 @@ model LandingTranslation {
 //   • Il campo productId è obbligatorio: viene garantito a monte
 //     dal permission resolver (Fase 1.5) e da Order conpleted.
 //
-// ⚠️ FK CASCADE su productId:
-//   Se un Product viene eliminato, TUTTE le Conversation (e i Message
-//   associati via Cascade) di quel prodotto vengono cancellati.
-//   Scelta consapevole per V1: una conversazione "orfana" di prodotto
-//   non ha più significato nel modello creator↔cliente↔prodotto.
-//   Per "soft archive" futuro del prodotto preservando la chat,
-//   valutare di migrare a ON DELETE RESTRICT + logic di archiviazione.
+// ⚠️ FK RESTRICT su productId:
+//   una Conversation mantiene il riferimento storico al prodotto e
+//   impedisce l'hard-delete. La normale operazione applicativa usa
+//   Product.deletedAt/status='archived', preservando la chat e i suoi
+//   messaggi; eventuale hard-delete richiede una procedura esplicita
+//   di retention e cleanup.
 model Conversation {
   id        String   @id @default(cuid())
   userOneId String   // uno dei due partecipanti
@@ -519,7 +520,7 @@ model Conversation {
 
   userOne  User      @relation("ConversationUserOne", fields: [userOneId], references: [id], onDelete: Cascade)
   userTwo  User      @relation("ConversationUserTwo", fields: [userTwoId], references: [id], onDelete: Cascade)
-  product  Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product  Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
   messages Message[]
   offerCards OfferCard[]
 
@@ -537,8 +538,8 @@ model Conversation {
 // NON un Prisma enum — coerente con la convenzione di Product.status.
 //
 // Cascades:
-//   - productId  → Cascade (cancellare un prodotto rimuove l'intero
-//     sotto-albero pagine; coerente con Conversation/CourseConfigCache)
+//   - productId  → Cascade (le pagine sono contenuto derivato; il
+//     prodotto normalmente viene soft-deleted e non viene hard-deleted)
 //   - parentId   → Cascade (cancellare una pagina rimuove silenziosamente
 //     il sotto-albero; standard CMS tree-delete semantics)
 //
@@ -757,7 +758,7 @@ model AccessGrant {
   id         String   @id @default(cuid())
   userId     String
   productId  String
-  sourceType String   // "order" | "free_enrollment" | "admin" | "bundle"
+  sourceType String   // "order" | "free_enrollment" | "admin" | "bundle" | "watchlist"
   sourceId   String
   status     String   @default("active") // active | revoked | expired
   grantedAt  DateTime @default(now())

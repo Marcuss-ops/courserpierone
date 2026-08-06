@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { apiErrorResponse } from "@/lib/errors";
 import { revalidateProduct } from "@/lib/admin/revalidate-product";
 import { withRateLimit } from "@/lib/utils/rate-limit";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { requireCreatorOrAdmin } from "@/lib/auth/require-creator-or-admin";
+import { countryOverridesSchema, pricesByCurrencySchema } from "@/lib/parsers/schemas";
 
 // GET — Lista tutti i prodotti (admin only)
 export const GET = withRateLimit(
@@ -13,6 +15,7 @@ export const GET = withRateLimit(
       const authError = await requireAdmin();
       if (authError) return authError;
       const products = await prisma.product.findMany({
+        where: { deletedAt: null },
         include: {
           translations: { select: { locale: true } },
           _count: { select: { lessons: true } },
@@ -75,6 +78,15 @@ export const POST = withRateLimit(async function POST(request: NextRequest) {
       );
     }
 
+    const parsedPrices = pricesByCurrencySchema.safeParse(pricesByCurrency ?? {});
+    const parsedCountryOverrides = countryOverridesSchema.safeParse(countryOverrides ?? {});
+    if (!parsedPrices.success || !parsedCountryOverrides.success) {
+      return NextResponse.json(
+        { error: "Invalid product pricing configuration" },
+        { status: 400 },
+      );
+    }
+
     // Crea prodotto + traduzioni in una transazione
     const product = await prisma.$transaction(async (tx) => {
       const p = await tx.product.create({
@@ -85,8 +97,8 @@ export const POST = withRateLimit(async function POST(request: NextRequest) {
           status: "draft",
           templateId: templateId ?? "lumio",
           lemonVariantId: lemonVariantId ?? null,
-          pricesByCurrency: pricesByCurrency ? JSON.stringify(pricesByCurrency) : null,
-          countryOverrides: countryOverrides ? JSON.stringify(countryOverrides) : null,
+          pricesByCurrency: pricesByCurrency == null ? Prisma.DbNull : parsedPrices.data,
+          countryOverrides: countryOverrides == null ? Prisma.DbNull : parsedCountryOverrides.data,
           // Phase 6: creatorId è REQUIRED. L'utente autorizzato diventa
           // il creator canonico del prodotto.
           creatorId: authorized.userId,
