@@ -35,7 +35,7 @@
     "generate:locales": "npx tsx scripts/generate/generate-locale-resolver.ts",
     "db:generate": "npx prisma generate",
     "test": "vitest run --exclude 'src/**/*.integration.test.ts'",
-    "test:integration": "vitest run 'src/**/*.integration.test.ts' --reporter=default",
+    "test:integration": "vitest run --config vitest.integration.config.ts --reporter=default",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
