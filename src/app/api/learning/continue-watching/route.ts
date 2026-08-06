@@ -37,8 +37,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { apiErrorResponse } from "@/lib/errors";
 import { getServerUser } from "@/lib/supabase/get-user";
-import { buildContinueWatchingHistory } from "@/lib/learning/continue-watching";
-import { prismaContinueWatchingRepository } from "@/lib/learning/prisma-continue-watching-repository";
+import { buildContinueWatchingHistory, prismaContinueWatchingRepository } from "@/domains/learning";
 
 /**
  * GET /api/learning/continue-watching
