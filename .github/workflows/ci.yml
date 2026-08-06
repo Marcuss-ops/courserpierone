@@ -2,7 +2,7 @@
 # CI — "main verde = deploy" gate
 # ═══════════════════════════════════════════════════════════════════════════════
 #
-# Eight independent quality jobs + one aggregator that posts to ALERT_WEBHOOK_URL
+# Nine independent quality jobs + one aggregator that posts to ALERT_WEBHOOK_URL
 # when ANY job is red. This is the deploy-gate:
 #
 #   ┌─ typecheck    ─┐
@@ -10,7 +10,8 @@
 #   ├─ unit-tests   ─┤
 #   ├─ integration  ─┤
 #   ├─ migration    ─┤
-#   ├─ e2e-journey  ─┤─► deploy-gate ─► deploy-production
+#   ├─ e2e-journey  ─┤
+#   ├─ build        ─┤─► deploy-gate ─► deploy-production
 #   ├─ quality-gate ─┤      (aggregator)
 #   └─ security-scan ┘
 #
@@ -18,13 +19,25 @@
 # combine it with every quality result. Otherwise a red `quality-gate`
 # (or any other required job) with the remaining jobs green produces a green
 # `deploy-gate`, which would
-# unblock branch protection and re-introduce the P0 bypass.
+# undermine any configured required-check policy and re-introduce the P0 bypass.
 #
-# Required-status-check setup is applied through repository branch protection:
+# Repository policy (main-only workflow):
+#   - Direct pushes to `main` are permitted; this workflow does not require a
+#     pull request and does not create or enforce branch-based development.
+#   - `main` must not be force-pushed or deleted. These repository controls are
+#     configured in GitHub branch protection/rulesets, not in this YAML.
+#   - At the time of the latest repository check, GitHub reported `main` as
+#     unprotected with no active rulesets; the two controls are therefore
+#     documented policy, not yet enforced repository settings.
+#
+# Deploy policy (enforced by this workflow): deploy-production runs only when
+# deploy-gate succeeds. A failed gate therefore blocks production deployment,
+# including after a direct push. If required status checks are configured later,
+# they must include deploy-gate and the underlying quality/security jobs:
 #   deploy-gate, typecheck, lint, vitest, integration-tests (postgres),
 #   migration-check (prisma deploy), build (production), e2e-journey (chrome),
 #   quality-gate (build + size + migration + sse + dead-exports), and
-#   security-scan (gitleaks) must all pass. Direct pushes are blocked.
+#   security-scan (gitleaks).
 #
 # Alert setup (manual, one-time):
 #   GitHub → Settings → Secrets and variables → Actions → New secret:
@@ -34,7 +47,7 @@
 #
 # Idempotency + Concurrency:
 #   - `cancel-in-progress: false` on main — preserves a clean history even
-#     when multiple pushes race. Old PR runs CAN be cancelled.
+#     when multiple direct pushes race. Old PR runs CAN be cancelled.
 #   - All quality jobs run in parallel; deploy-gate waits on all of them
 #     then aggregates via `needs.*.result`.
 #
@@ -132,7 +145,7 @@ jobs:
       # Static, type-aware cycle detection via madge v8. Runs after the
       # typecheck step so a new cycle introduced by a refactor is caught
       # before merge. Exits non-zero on any cycle → typecheck job red →
-      # deploy-gate red → branch protection blocks the merge.
+      # deploy-gate red → the deploy policy blocks production deployment.
       - name: Detect circular dependencies
         run: npx madge --circular src/ --ts-config ./tsconfig.json
 
@@ -141,7 +154,7 @@ jobs:
       # of columns read/written by the LS webhook processor are FORBIDDEN
       # until v2. PRs that introduce such destructive keywords in migration
       # files fail this check → typecheck job red → deploy-gate red →
-      # branch protection blocks the merge.
+      # the deploy policy blocks production deployment.
       # Relies on the `fetch-depth: 0` Checkout above so that origin/main
       # is resolvable in `git diff origin/main...HEAD`.
       #
@@ -753,9 +766,11 @@ jobs:
 
   # ════════════════════════════════════════════════════════════════════════
   # Job 10 — deploy-gate (aggregator)
-  # This is the required aggregate status check on main. Every underlying
-  # job is also required through branch protection; the aggregator provides a
+  # This is the aggregate status check on main. The aggregator provides a
   # single fail-closed deployment signal and alerts via ALERT_WEBHOOK_URL.
+  # It protects production deployment even though direct pushes to main are
+  # permitted; GitHub branch protection/rulesets may additionally require this
+  # check when those repository controls are enabled.
   # ════════════════════════════════════════════════════════════════════════
   deploy-gate:
     name: 🚦 deploy-gate
@@ -769,7 +784,8 @@ jobs:
     steps:
       # ── 1. Aggregate quality-job results ────────────────────────────
       # MUST exit 0 here so subsequent steps (alert, notice) can run.
-      # We delegate the "make the deploy-gate red in branch protection"
+      # We delegate the "make the deploy-gate red for any configured
+      # required-check policy"
       # to a dedicated final step (gate-fail). This is the canonical
       # GitHub Actions pattern: aggregator writes outputs + exits 0,
       # then post-aggregation steps react to those outputs without being
@@ -810,7 +826,7 @@ jobs:
             exit 0
           else
             echo "gate=red" >> "$GITHUB_OUTPUT"
-            echo "❌ deploy-gate RED — one or more jobs failed. Branch protection must remain BLOCKED."
+            echo "❌ deploy-gate RED — one or more jobs failed. Production deployment remains BLOCKED."
             exit 0  # CRITICAL: do NOT propagate failure here. gate-fail handles it AFTER alerts run.
           fi
 
@@ -899,16 +915,16 @@ jobs:
           echo "::warning::deploy-gate is RED, but ALERT_WEBHOOK_URL is not configured."
           echo "::warning::Set it at: GitHub → Settings → Secrets and variables → Actions"
           echo "::warning::to receive Slack/Discord alerts on future red gates."
-          echo "(Gate itself remains RED regardless — branch protection blocks the merge.)"
+          echo "(Gate itself remains RED regardless — the deploy policy blocks production deployment.)"
 
       # ── 4. Fail-the-gate (LAST step so the deploy-gate job status is RED) ─
-      # This is what makes the deploy-gate status check red in branch
-      # protection. Runs only when gate=red. Separate from aggregate so
+      # This is what makes the deploy-gate status check red for any configured
+      # required-check policy. Runs only when gate=red. Separate from aggregate so
       # alert step (above) actually executes before the job fails out.
       - name: Fail the gate (set status RED)
         if: steps.aggregate.outputs.gate == 'red'
         run: |
-          echo "::error::deploy-gate is RED. Branch protection blocks merge/deploy."
+          echo "::error::deploy-gate is RED. The deploy policy blocks production deployment."
           echo "::error::Inspect the failed jobs above and re-run after fixes."
           exit 1
 
