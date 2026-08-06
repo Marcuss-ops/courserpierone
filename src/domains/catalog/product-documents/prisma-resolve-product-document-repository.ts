@@ -78,7 +78,7 @@ export function prismaResolveProductDocumentRepository(
       // no need to call and then filter downstream. This is the
       // mechanical implementation of the no-info-leak collapse.
       const product = await prisma.product.findFirst({
-        where: { slug, status: "published" },
+        where: { slug, status: "published", deletedAt: null },
         select: { id: true, defaultLanguage: true },
       });
       if (!product) return null;

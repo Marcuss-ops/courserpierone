@@ -54,6 +54,9 @@ describe("prismaCreateContentPageRepository", () => {
     expect(result).toEqual({ created: true, page: FIXED_PAGE });
     expect(mockPrisma.$transaction).toHaveBeenCalledOnce();
     expect(mockTx.$executeRaw).toHaveBeenCalledOnce();
+    const [lockTemplate, ...lockValues] = mockTx.$executeRaw.mock.calls[0] ?? [];
+    expect(Array.from(lockTemplate ?? []).join(" ")).toContain("pg_advisory_xact_lock");
+    expect(lockValues).toContain("product-1:root");
     expect(mockTx.contentPage.aggregate).toHaveBeenCalledWith({
       where: { productId: "product-1", parentId: null },
       _max: { position: true },
@@ -77,6 +80,23 @@ describe("prismaCreateContentPageRepository", () => {
         createdAt: true,
         updatedAt: true,
       },
+    });
+  });
+
+  it("uses a parent-scoped advisory lock key for child pages", async () => {
+    await prismaCreateContentPageRepository.createContentPage({
+      productId: "product-1",
+      parentId: "parent-1",
+      slug: "child",
+      status: "draft",
+    });
+
+    const [lockTemplate, ...lockValues] = mockTx.$executeRaw.mock.calls[0] ?? [];
+    expect(Array.from(lockTemplate ?? []).join(" ")).toContain("pg_advisory_xact_lock");
+    expect(lockValues).toContain("product-1:parent-1");
+    expect(mockTx.contentPage.findFirst).toHaveBeenCalledWith({
+      where: { id: "parent-1", productId: "product-1" },
+      select: { id: true },
     });
   });
 

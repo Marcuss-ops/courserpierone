@@ -40,6 +40,7 @@ const { mockPrisma } = vi.hoisted(() => ({
   mockPrisma: {
     product: {
       findUnique: vi.fn(),
+      findFirst: vi.fn(),
     },
     contentPage: {
       findUnique: vi.fn(),
@@ -66,23 +67,23 @@ describe("prismaRenameContentPageRepository — findProductLocaleAndOwner", () =
       { productId: "" },
     );
     expect(result).toBeNull();
-    expect(mockPrisma.product.findUnique).not.toHaveBeenCalled();
+    expect(mockPrisma.product.findFirst).not.toHaveBeenCalled();
   });
 
   it("returns null when the product row is missing", async () => {
-    mockPrisma.product.findUnique.mockResolvedValue(null);
+    mockPrisma.product.findFirst.mockResolvedValue(null);
     const result = await prismaRenameContentPageRepository.findProductLocaleAndOwner(
       { productId: "p-missing" },
     );
     expect(result).toBeNull();
-    expect(mockPrisma.product.findUnique).toHaveBeenCalledWith({
-      where: { id: "p-missing" },
+    expect(mockPrisma.product.findFirst).toHaveBeenCalledWith({
+      where: { id: "p-missing", deletedAt: null },
       select: { defaultLanguage: true, creatorId: true },
     });
   });
 
   it("returns { defaultLanguage, creatorId } on a hit", async () => {
-    mockPrisma.product.findUnique.mockResolvedValue({
+    mockPrisma.product.findFirst.mockResolvedValue({
       defaultLanguage: "en",
       creatorId: "u-creator-1",
     });
@@ -93,7 +94,7 @@ describe("prismaRenameContentPageRepository — findProductLocaleAndOwner", () =
   });
 
   it("forwards arbitrary errors (e.g. connection) to the caller", async () => {
-    mockPrisma.product.findUnique.mockRejectedValue(new Error("DB down"));
+    mockPrisma.product.findFirst.mockRejectedValue(new Error("DB down"));
     await expect(
       prismaRenameContentPageRepository.findProductLocaleAndOwner({
         productId: "p-1",

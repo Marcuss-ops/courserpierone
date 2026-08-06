@@ -58,7 +58,7 @@ export default async function DashboardPage() {
   let userOrders: DisplayOrder[];
   if (dbUser.role === "admin") {
     const publishedProducts = await prisma.product.findMany({
-      where: { status: "published" },
+      where: { status: "published", deletedAt: null },
       select: {
         id: true,
         slug: true,
@@ -84,6 +84,7 @@ export default async function DashboardPage() {
         userId: dbUser.id,
         status: "active",
         OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+        product: { deletedAt: null },
       },
       include: {
         product: {

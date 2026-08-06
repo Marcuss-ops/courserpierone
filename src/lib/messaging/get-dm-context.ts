@@ -91,7 +91,7 @@ export async function getDmContext(
       select: { id: true, name: true, image: true, role: true },
     }),
     prisma.product.findUnique({
-      where: { slug: domainSlug },
+      where: { slug: domainSlug, deletedAt: null },
       // V1.x: also exposed for the NEXT_PUBLIC_FREE_COURSE_SLUGS bypass in
       // /curso/[lessonId]/page.tsx + /portal/page.tsx (isFreeCourse helper).
       // V2.x will rewrite this whole helper via product.creator join

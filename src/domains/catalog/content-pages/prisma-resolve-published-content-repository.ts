@@ -125,7 +125,7 @@ export const prismaResolvePublishedContentRepository: ResolvePublishedContentPor
     async findPublishedProductBySlug({ slug }) {
       if (!slug) return null;
       const row = await prisma.product.findFirst({
-        where: { slug, status: "published" },
+        where: { slug, status: "published", deletedAt: null },
         select: {
           id: true,
           slug: true,

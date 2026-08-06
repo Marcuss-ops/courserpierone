@@ -93,8 +93,8 @@ export default async function CourseCorsoTab({
   // checkmarks / accent-filled ring on each lesson card. Empty for admins.
   const completedLessonIds = new Set<string>();
   if (dbUser) {
-    const productRow = await prisma.product.findUnique({
-      where: { slug: domain },
+    const productRow = await prisma.product.findFirst({
+      where: { slug: domain, deletedAt: null },
       select: { id: true },
     });
     if (productRow) {

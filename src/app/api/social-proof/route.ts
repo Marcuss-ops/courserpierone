@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     }
 
     const product = await prisma.product.findUnique({
-      where: { slug: productSlug },
+      where: { slug: productSlug, deletedAt: null },
       include: {
         lessons: {
           include: {

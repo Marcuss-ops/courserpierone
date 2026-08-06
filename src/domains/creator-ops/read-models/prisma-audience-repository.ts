@@ -47,7 +47,7 @@ import type {
 export const prismaAudienceRepository: AudienceRepository = {
   async fetchCreatorProducts(creatorId) {
     const products = await prisma.product.findMany({
-      where: { creatorId },
+      where: { creatorId, deletedAt: null },
       select: {
         id: true,
         slug: true,

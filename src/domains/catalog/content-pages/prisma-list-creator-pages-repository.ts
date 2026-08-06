@@ -115,8 +115,8 @@ export const prismaListCreatorPagesRepository: ListCreatorPagesPort = {
   // we don't pay a second roundtrip per request.
   async findProductOwner({ productId }) {
     if (!productId) return null;
-    const row = await prisma.product.findUnique({
-      where: { id: productId },
+  const row = await prisma.product.findFirst({
+    where: { id: productId, deletedAt: null },
       select: {
         creatorId: true,
         defaultLanguage: true,

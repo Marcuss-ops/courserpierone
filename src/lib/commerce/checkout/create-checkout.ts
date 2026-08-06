@@ -68,8 +68,8 @@ export class CheckoutService {
     // Race-condition-safe: between the route's product load and this
     // call, the product could have been archived. We trust our own
     // single source of truth (the DB column), not the caller's claim.
-    const dbProduct = await prisma.product.findUnique({
-      where: { id: input.product.id },
+    const dbProduct = await prisma.product.findFirst({
+      where: { id: input.product.id, deletedAt: null },
       select: { status: true },
     });
 

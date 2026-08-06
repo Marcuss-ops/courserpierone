@@ -49,11 +49,12 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
  * Valuta un oggetto countryOverrides (può essere string JSON o oggetto già parsato)
  */
 export function parseCountryOverrides(
-  overrides: string | Record<string, CountryPriceOverrideInput> | null | undefined
+  overrides: unknown
 ): Record<string, CountryPriceOverride> | null {
   if (!overrides) return null;
   try {
     const parsed = typeof overrides === "string" ? JSON.parse(overrides) : overrides;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
     const result: Record<string, CountryPriceOverride> = {};
     for (const [code, val] of Object.entries(parsed)) {
       const v = val as CountryPriceOverrideInput;
@@ -75,7 +76,7 @@ export function parseCountryOverrides(
  * Trova il prezzo specifico per un paese (se presente negli overrides)
  */
 export function getCountryPriceOverride(
-  data: { countryOverrides?: Record<string, CountryPriceOverrideInput> | string | null },
+  data: { countryOverrides?: unknown },
   country: string | null | undefined
 ): CountryPriceOverride | null {
   if (!country || !data.countryOverrides) return null;
@@ -90,7 +91,7 @@ export function getCountryPriceOverride(
  * Ottiene il prezzo e la valuta giusti per un locale + paese
  */
 export function getPriceString(
-  data: { prices?: Record<string, PriceByLocale>; price?: number; countryOverrides?: string | Record<string, CountryPriceOverrideInput> | null },
+  data: { prices?: Record<string, PriceByLocale>; price?: number; countryOverrides?: unknown },
   locale: string,
   country?: string | null
 ): { price: string; currency: string } {
@@ -119,7 +120,7 @@ export function getPriceString(
  * Ottiene l'importo corrente e il simbolo per un dato locale/paese
  */
 export function getCurrentAmountAndSymbol(
-  data: { prices?: Record<string, PriceByLocale>; price?: number; countryOverrides?: string | Record<string, CountryPriceOverrideInput> | null },
+  data: { prices?: Record<string, PriceByLocale>; price?: number; countryOverrides?: unknown },
   locale: string,
   country?: string | null
 ): { currentAmount: number; symbol: string; currency: string; baseAmount: number } {
@@ -145,10 +146,13 @@ export function getCurrentAmountAndSymbol(
 /**
  * Helper per parsare pricesByCurrency JSON
  */
-export function parsePricesByCurrency(raw: string | null | undefined): Record<string, { price: number; symbol?: string; lemonVariantId?: string | null }> | null {
+export function parsePricesByCurrency(
+  raw: unknown,
+): Record<string, { price: number; symbol?: string; lemonVariantId?: string | null }> | null {
   if (!raw) return null;
   try {
-    return JSON.parse(raw);
+    const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
   } catch {
     return null;
   }

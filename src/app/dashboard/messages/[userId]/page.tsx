@@ -59,8 +59,8 @@ export default async function ConversationPage({ params, searchParams }: ChatPag
   // creatorId dipende da questa query); resolveProductAccess e
   // User.findUnique sono invece indipendenti e le eseguiamo in
   // parallelo via Promise.all per risparmiare ~10-20ms di round-trip.
-  const product = await prisma.product.findUnique({
-    where: { id: productId },
+  const product = await prisma.product.findFirst({
+    where: { id: productId, deletedAt: null },
     select: { id: true, slug: true, creatorId: true },
   });
   const isLegitimateCreator = product?.creatorId === userId;

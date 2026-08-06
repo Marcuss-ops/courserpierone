@@ -73,6 +73,7 @@ export async function AccessGate({
   // Resolve product from slug (or UUID)
   const product = await prisma.product.findFirst({
     where: {
+      deletedAt: null,
       OR: [{ slug: productSlug }, { id: productSlug }],
     },
     select: { id: true, slug: true, defaultLanguage: true, price: true },

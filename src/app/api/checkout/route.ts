@@ -29,7 +29,7 @@ export const POST = withRateLimit(async function POST(request: NextRequest) {
     const { productId, locale = "it", channelId, couponCode } = parsed.data;
     const currency = parsed.data.currency ?? getCurrencyFromLocale(locale);
 
-    const product = await prisma.product.findUnique({ where: { id: productId } });
+    const product = await prisma.product.findFirst({ where: { id: productId, deletedAt: null } });
     if (!product) {
       throw new NotFoundError("Product not found");
     }

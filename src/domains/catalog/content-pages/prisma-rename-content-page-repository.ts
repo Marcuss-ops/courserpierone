@@ -89,8 +89,8 @@ export const prismaRenameContentPageRepository: RenameContentPagePort = {
   // both NOT NULL columns in the schema.
   async findProductLocaleAndOwner({ productId }) {
     if (!productId) return null;
-    const row = await prisma.product.findUnique({
-      where: { id: productId },
+  const row = await prisma.product.findFirst({
+    where: { id: productId, deletedAt: null },
       select: {
         defaultLanguage: true,
         creatorId: true,

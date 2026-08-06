@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       resolvedProductId = productId;
     } else if (productSlug) {
       const product = await prisma.product.findUnique({
-        where: { slug: productSlug },
+        where: { slug: productSlug, deletedAt: null },
         select: { id: true },
       });
       if (product) {

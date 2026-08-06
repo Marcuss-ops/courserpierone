@@ -103,8 +103,8 @@ export const prismaReorderContentPagesRepository: ReorderContentPagesPort = {
   // resolution is a rename-only concern).
   async findProductOwner({ productId }) {
     if (!productId) return null;
-    const row = await prisma.product.findUnique({
-      where: { id: productId },
+  const row = await prisma.product.findFirst({
+    where: { id: productId, deletedAt: null },
       select: { creatorId: true },
     });
     if (!row) return null;

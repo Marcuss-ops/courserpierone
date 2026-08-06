@@ -7,8 +7,8 @@ import { CheckoutError } from "@/lib/errors";
  */
 export interface PricingProduct {
   lemonVariantId?: string | null;
-  pricesByCurrency?: string | null;
-  countryOverrides?: string | null;
+  pricesByCurrency?: unknown;
+  countryOverrides?: unknown;
 }
 
 export interface ResolvedPricing {

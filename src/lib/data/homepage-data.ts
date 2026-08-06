@@ -20,7 +20,7 @@ export interface HomepageDataResult {
  */
 export async function fetchPublishedProducts(): Promise<HomepageDataResult> {
   const products = await prisma.product.findMany({
-    where: { status: "published" },
+    where: { status: "published", deletedAt: null },
     include: {
       translations: true,
       _count: { select: { lessons: true, orders: true } },

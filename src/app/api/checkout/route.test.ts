@@ -8,7 +8,7 @@
  *   - 400 with code "PRODUCT_NOT_PUBLISHED" when orchestrator denies
  *     (draft, archived — same code path exposed).
  *   - 200 with `{ url }` on the published success path.
- *   - 404 NOT_FOUND when the route's pre-check `findUnique` misses
+ *   - 404 NOT_FOUND when the route's pre-check `findFirst` misses
  *     (race: the route catches this BEFORE the orchestrator runs).
  *   - 400 with code "CHECKOUT_ERROR" for the unchanged fallthrough
  *     (e.g. published but no lemonVariantId — regression guard).
@@ -17,7 +17,7 @@
  *     call) when body does not carry an email.
  *
  * Mocking architecture:
- *   - `prisma.product.findUnique` → mock the route's pre-check.
+ *   - `prisma.product.findFirst` → mock the route's pre-check.
  *   - `PricingService`/`CheckoutService` mocked as classes whose
  *     methods are pre-set mock functions (so the `new` instance inside
  *     the route module picks them up).
@@ -30,13 +30,13 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createMockRequest } from "@/app/api/__test-helpers__/mock-request";
 
 const {
-  mockPrismaFindUnique,
+  mockPrismaFindFirst,
   mockPricingResolve,
   mockPricingValidate,
   mockCreateCheckout,
   mockGetServerUser,
 } = vi.hoisted(() => ({
-  mockPrismaFindUnique: vi.fn(),
+  mockPrismaFindFirst: vi.fn(),
   mockPricingResolve: vi.fn(),
   mockPricingValidate: vi.fn(),
   mockCreateCheckout: vi.fn(),
@@ -44,7 +44,7 @@ const {
 }));
 
 vi.mock("@/lib/db/prisma", () => ({
-  prisma: { product: { findUnique: mockPrismaFindUnique } },
+  prisma: { product: { findFirst: mockPrismaFindFirst } },
 }));
 
 vi.mock("@/lib/supabase/get-user", () => ({
@@ -82,7 +82,7 @@ function setAuthenticatedUser(email = "buyer@test.com") {
 }
 
 function setProductFoundInRoute() {
-  mockPrismaFindUnique.mockResolvedValue({
+  mockPrismaFindFirst.mockResolvedValue({
     id: PRODUCT_ID,
     slug: "course-a",
     lemonVariantId: "var-1",
@@ -162,11 +162,11 @@ describe("POST /api/checkout — product.status SSOT gate", () => {
   });
 
   it("returns 404 when route's pre-check `product.findUnique` returns null", async () => {
-    // Race / never-existed: the route's initial `findUnique` fails
+    // Race / never-existed: the route's initial `findFirst` fails
     // BEFORE reaching the orchestrator. Both NotFoundError thrown by
     // the route and the orchestrator's defensive re-read converge to 404
     // via apiErrorResponse.
-    mockPrismaFindUnique.mockResolvedValueOnce(null);
+    mockPrismaFindFirst.mockResolvedValueOnce(null);
 
     const { POST } = await import("./route");
     const res = await POST(
@@ -225,7 +225,7 @@ describe("POST /api/checkout — product.status SSOT gate", () => {
     expect(res.status).toBe(400);
     // prisma.findUnique MUST NOT have been called — invalid input is
     // caught by zod before any DB hit.
-    expect(mockPrismaFindUnique).not.toHaveBeenCalled();
+    expect(mockPrismaFindFirst).not.toHaveBeenCalled();
     expect(mockCreateCheckout).not.toHaveBeenCalled();
     // The validation helper shape is `error` (string) + `details` (array)
     expect(body.error).toBeTruthy();
@@ -289,7 +289,7 @@ describe("POST /api/checkout — product.status SSOT gate", () => {
   });
 
   it("passes the resolved product + pricing + session context to the orchestrator", async () => {
-    // The route reads `prisma.product.findUnique` and feeds the
+    // The route reads `prisma.product.findFirst` and feeds the
     // orchestrator the full product via `createCheckout({product})`.
     // Assert the full set of forwarded fields so future refactors that
     // accidentally drop the `createCheckout` spread are caught: locale
@@ -331,7 +331,7 @@ describe("POST /api/checkout — apiErrorResponse error mapping", () => {
     // defensive re-read fails (product deleted meanwhile). The
     // orchestrator's NotFoundError must surface as 404 via
     // apiErrorResponse.
-    mockPrismaFindUnique.mockResolvedValueOnce({
+    mockPrismaFindFirst.mockResolvedValueOnce({
       id: PRODUCT_ID,
       slug: "course-a",
       lemonVariantId: "var-1",

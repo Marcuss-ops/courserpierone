@@ -50,8 +50,8 @@ function isSlugUniqueViolation(error: unknown): boolean {
 export const prismaCreateContentPageRepository: ContentPageRepository = {
   async findProductOwner({ productId }) {
     if (!productId) return null;
-    const product = await prisma.product.findUnique({
-      where: { id: productId },
+    const product = await prisma.product.findFirst({
+      where: { id: productId, deletedAt: null },
       select: { creatorId: true },
     });
     return product ? { creatorId: product.creatorId } : null;

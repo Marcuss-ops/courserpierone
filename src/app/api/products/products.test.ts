@@ -7,10 +7,9 @@ import { createMockRequest } from "@/app/api/__test-helpers__/mock-request";
 const mockPrisma = {
   product: {
     findMany: vi.fn(),
-    findUnique: vi.fn(),
+    findFirst: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
-    delete: vi.fn(),
   },
   productTranslation: {
     create: vi.fn(),
@@ -321,7 +320,7 @@ describe("GET /api/products/[id]", () => {
         },
       ],
     };
-    mockPrisma.product.findUnique.mockResolvedValue(fakeProduct);
+    mockPrisma.product.findFirst.mockResolvedValue(fakeProduct);
 
     const { GET } = await import("./[id]/route");
     const params = Promise.resolve({ id: "p1" });
@@ -335,7 +334,7 @@ describe("GET /api/products/[id]", () => {
   });
 
   it("returns 404 when product not found", async () => {
-    mockPrisma.product.findUnique.mockResolvedValue(null);
+    mockPrisma.product.findFirst.mockResolvedValue(null);
 
     const { GET } = await import("./[id]/route");
     const params = Promise.resolve({ id: "nonexistent" });
@@ -353,7 +352,7 @@ describe("PUT /api/products/[id]", () => {
     mockPrisma.$transaction.mockImplementation(<T>(fn: (tx: typeof mockPrisma) => Promise<T>) =>
       fn(mockPrisma),
     );
-    mockPrisma.product.findUnique.mockResolvedValue({ id: "p1", slug: "test", creatorId: "user-1" });
+    mockPrisma.product.findFirst.mockResolvedValue({ id: "p1", slug: "test", creatorId: "user-1" });
     mockPrisma.product.update.mockResolvedValue({ id: "p1", slug: "test" });
   });
 
@@ -441,8 +440,12 @@ describe("DELETE /api/products/[id]", () => {
     vi.clearAllMocks();
   });
 
-  it("deletes a product", async () => {
-    mockPrisma.product.delete.mockResolvedValue({ id: "p1" });
+  it("soft-deletes a product", async () => {
+    mockPrisma.product.update.mockResolvedValue({
+      id: "p1",
+      deletedAt: new Date("2026-08-06T12:00:00.000Z"),
+      status: "archived",
+    });
 
     const { DELETE } = await import("./[id]/route");
     const params = Promise.resolve({ id: "p1" });
@@ -451,11 +454,16 @@ describe("DELETE /api/products/[id]", () => {
 
     expect(response.status).toBe(200);
     expect(body.success).toBe(true);
-    expect(mockPrisma.product.delete).toHaveBeenCalledWith({ where: { id: "p1" } });
+    expect(mockPrisma.product.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "p1" },
+        data: expect.objectContaining({ status: "archived", deletedAt: expect.any(Date) }),
+      }),
+    );
   });
 
-  it("returns 500 on delete error", async () => {
-    mockPrisma.product.delete.mockRejectedValue(new Error("Delete failed"));
+  it("returns 500 on soft-delete error", async () => {
+    mockPrisma.product.update.mockRejectedValue(new Error("Delete failed"));
 
     const { DELETE } = await import("./[id]/route");
     const params = Promise.resolve({ id: "p1" });

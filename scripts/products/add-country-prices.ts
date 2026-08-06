@@ -12,7 +12,9 @@
  *   COUNTRY=BR PRICE=9900 CURRENCY=BRL SYMBOL="R$" npx tsx scripts/products/add-country-prices.ts <slug>
  */
 
+import { Prisma } from "@prisma/client";
 import { prisma } from "../../src/lib/db/prisma";
+import { countryOverridesSchema } from "../../src/lib/parsers/schemas";
 
 interface CountryPrice {
   currency: string;
@@ -59,7 +61,9 @@ async function main() {
   }
 
   // Parse existing overrides or start fresh
-  const existing = product.countryOverrides ? JSON.parse(product.countryOverrides) as CountryOverrides : {};
+  const existing = product.countryOverrides && typeof product.countryOverrides === "object" && !Array.isArray(product.countryOverrides)
+    ? product.countryOverrides as unknown as CountryOverrides
+    : {};
 
   let overrides: CountryOverrides;
 
@@ -89,9 +93,27 @@ async function main() {
     overrides = { ...DEFAULT_COUNTRY_PRICES, ...existing };
   }
 
+  const parsedCountryOverrides = countryOverridesSchema.safeParse(overrides);
+  if (!parsedCountryOverrides.success) {
+    console.error("Invalid countryOverrides configuration:", parsedCountryOverrides.error.flatten());
+    process.exit(1);
+  }
+
+  const countryOverridesJson = Object.fromEntries(
+    Object.entries(parsedCountryOverrides.data).map(([country, value]) => [
+      country,
+      {
+        currency: value.currency,
+        price: value.price,
+        ...(value.symbol ? { symbol: value.symbol } : {}),
+        lemonVariantId: value.lemonVariantId ?? null,
+      },
+    ]),
+  ) as Prisma.InputJsonObject;
+
   await prisma.product.update({
     where: { slug },
-    data: { countryOverrides: JSON.stringify(overrides) },
+    data: { countryOverrides: countryOverridesJson },
   });
 
   console.log(`✅ Country price overrides saved for "${slug}":\n`);

@@ -73,6 +73,7 @@ const skipIfNoDb = () => !process.env.DATABASE_URL;
 const UNIQUE = `itest${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
 let userId = "";
+let secondUserId = "";
 let productId = "";
 const pageIds: string[] = [];
 const translationIds: string[] = [];
@@ -89,6 +90,15 @@ beforeAll(async () => {
     },
   });
   userId = user.id;
+
+  const secondUser = await realPrisma.user.create({
+    data: {
+      email: `itest-second-${UNIQUE}@example.com`,
+      name: `Integration Test Second User ${UNIQUE}`,
+      role: "student",
+    },
+  });
+  secondUserId = secondUser.id;
 
   // ─── Seed product (draft, document_course) ─────────────────
   const product = await realPrisma.product.create({
@@ -145,6 +155,9 @@ afterAll(async () => {
         where: { id: { in: translationIds } },
       });
       await realPrisma.product.delete({ where: { id: productId } });
+    }
+    if (secondUserId) {
+      await realPrisma.user.delete({ where: { id: secondUserId } });
     }
     if (userId) {
       await realPrisma.user.delete({ where: { id: userId } });
@@ -305,6 +318,24 @@ describeIfDb("prismaCreateContentPageRepository — real DB", () => {
       ).rejects.toMatchObject({ code: "P2003" });
     } finally {
       await realPrisma.product.delete({ where: { id: otherProduct.id } });
+    }
+  });
+
+  it("prevents hard deletion while a conversation references the product", async () => {
+    const conversation = await realPrisma.conversation.create({
+      data: {
+        userOneId: userId,
+        userTwoId: secondUserId,
+        productId,
+      },
+    });
+
+    try {
+      await expect(
+        realPrisma.product.delete({ where: { id: productId } }),
+      ).rejects.toMatchObject({ code: "P2003" });
+    } finally {
+      await realPrisma.conversation.delete({ where: { id: conversation.id } });
     }
   });
 });

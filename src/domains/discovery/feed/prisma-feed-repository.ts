@@ -59,7 +59,10 @@ class PrismaFeedRepository implements FeedRepository {
         select: { lesson: { select: { productId: true } } },
       }),
       prisma.product.findMany({
-        where: { accessGrants: { some: { userId, status: "active" } } },
+        where: {
+          deletedAt: null,
+          accessGrants: { some: { userId, status: "active" } },
+        },
         take: CONTEXT_LIMIT,
         select: { creatorId: true },
       }),
@@ -106,6 +109,7 @@ class PrismaFeedRepository implements FeedRepository {
         lastWatchedAt: cursorDate ? { lt: cursorDate } : { not: null },
         lesson: {
           productId: { in: ctx.ownedProductIds },
+          product: { deletedAt: null },
         },
       },
       orderBy: { lastWatchedAt: "desc" },
@@ -151,6 +155,7 @@ class PrismaFeedRepository implements FeedRepository {
       where: {
         product: {
           creatorId: { in: ctx.followedCreatorIds },
+          deletedAt: null,
         },
         ...(cursorDate ? { createdAt: { lt: cursorDate } } : {}),
       },

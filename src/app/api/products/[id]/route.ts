@@ -5,6 +5,7 @@ import { revalidateProduct } from "@/lib/admin/revalidate-product";
 import { withRateLimit } from "@/lib/utils/rate-limit";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { requireCreatorOrAdmin } from "@/lib/auth/require-creator-or-admin";
+import { countryOverridesSchema, pricesByCurrencySchema } from "@/lib/parsers/schemas";
 
 // GET — Dettaglio singolo prodotto
 export const GET = withRateLimit(async function GET(
@@ -17,8 +18,8 @@ export const GET = withRateLimit(async function GET(
     const authError = await requireAdmin();
     if (authError) return authError;
 
-    const product = await prisma.product.findUnique({
-      where: { id },
+    const product = await prisma.product.findFirst({
+      where: { id, deletedAt: null },
       include: {
         translations: true,
         lessons: {
@@ -52,7 +53,7 @@ export const PUT = withRateLimit(async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const existingProduct = await prisma.product.findUnique({ where: { id } });
+    const existingProduct = await prisma.product.findFirst({ where: { id, deletedAt: null } });
     if (!existingProduct) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
@@ -62,6 +63,15 @@ export const PUT = withRateLimit(async function PUT(
 
     const body = await request.json();
     const { slug, price, coverUrl, status, templateId, lemonVariantId, translations, lessons, sourceLocale, translationsByLocale, pricesByCurrency, countryOverrides } = body;
+
+    const parsedPrices = pricesByCurrencySchema.safeParse(pricesByCurrency ?? {});
+    const parsedCountryOverrides = countryOverridesSchema.safeParse(countryOverrides ?? {});
+    if (!parsedPrices.success || !parsedCountryOverrides.success) {
+      return NextResponse.json(
+        { error: "Invalid product pricing configuration" },
+        { status: 400 },
+      );
+    }
 
     const product = await prisma.$transaction(async (tx) => {
       // Aggiorna il prodotto
@@ -74,8 +84,12 @@ export const PUT = withRateLimit(async function PUT(
           ...(status && { status }),
           ...(templateId && { templateId }),
           ...(lemonVariantId !== undefined && { lemonVariantId }),
-          ...(pricesByCurrency !== undefined && { pricesByCurrency: pricesByCurrency ? JSON.stringify(pricesByCurrency) : null }),
-          ...(countryOverrides !== undefined && { countryOverrides: countryOverrides ? JSON.stringify(countryOverrides) : null }),
+          ...(pricesByCurrency !== undefined && {
+            pricesByCurrency: pricesByCurrency == null ? null : parsedPrices.data,
+          }),
+          ...(countryOverrides !== undefined && {
+            countryOverrides: countryOverrides == null ? null : parsedCountryOverrides.data,
+          }),
         },
       });
 
@@ -249,7 +263,7 @@ export const PUT = withRateLimit(async function PUT(
   }
 }, "AUTH");
 
-// DELETE — Elimina un prodotto
+// DELETE — Soft-delete un prodotto; gli ordini, grant e conversazioni storici restano intatti
 export const DELETE = withRateLimit(async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -260,8 +274,12 @@ export const DELETE = withRateLimit(async function DELETE(
     const authError = await requireAdmin();
     if (authError) return authError;
 
-    await prisma.product.delete({ where: { id } });
-    return NextResponse.json({ success: true });
+    const product = await prisma.product.update({
+      where: { id },
+      data: { deletedAt: new Date(), status: "archived" },
+      select: { id: true, deletedAt: true, status: true },
+    });
+    return NextResponse.json({ success: true, product });
   } catch (error) {
     return apiErrorResponse(error, "Failed to delete product");
   }

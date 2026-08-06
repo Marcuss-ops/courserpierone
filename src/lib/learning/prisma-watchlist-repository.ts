@@ -69,8 +69,8 @@ export const prismaWatchlistRepository: WatchlistRepository = {
     // if it needs the locale-specific title.
     //
     // Defensive: cast locale to optional (the type accepts undefined).
-    const product = await prisma.product.findUnique({
-      where: { id: productId },
+    const product = await prisma.product.findFirst({
+      where: { id: productId, deletedAt: null },
       select: {
         id: true,
         slug: true,

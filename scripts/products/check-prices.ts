@@ -28,7 +28,7 @@ async function main() {
 
   console.log(`\n📦 ${product.slug} (${product.id})`);
   console.log(`   PricesByCurrency:\n`);
-  console.log(JSON.stringify(product.pricesByCurrency ? JSON.parse(product.pricesByCurrency) : null, null, 2));
+  console.log(JSON.stringify(product.pricesByCurrency ?? null, null, 2));
 
   await prisma.$disconnect();
 }

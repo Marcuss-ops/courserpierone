@@ -47,7 +47,7 @@ export const prismaInboxRepository: InboxRepository = {
   async fetchOwnedProducts({ userId, role }) {
     if (role === "admin") {
       const products = await prisma.product.findMany({
-        where: { status: "published" },
+        where: { status: "published", deletedAt: null },
         select: { id: true, slug: true, coverUrl: true },
       });
       return products.map(
@@ -60,7 +60,7 @@ export const prismaInboxRepository: InboxRepository = {
     }
     // role === 'creator' (use case filters other roles before this call)
     const products = await prisma.product.findMany({
-      where: { creatorId: userId },
+      where: { creatorId: userId, deletedAt: null },
       select: { id: true, slug: true, coverUrl: true },
     });
     return products.map(

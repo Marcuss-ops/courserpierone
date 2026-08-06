@@ -104,8 +104,8 @@ export default async function CommunityTab({
   };
 
   // Resolve productId from slug
-  const product = await prisma.product.findUnique({
-    where: { slug: domain },
+  const product = await prisma.product.findFirst({
+    where: { slug: domain, deletedAt: null },
     select: { id: true },
   });
   if (!product) return notFound();

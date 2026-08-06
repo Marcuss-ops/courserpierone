@@ -79,19 +79,9 @@ export default function EditProductPage() {
       setLemonVariantId(data.lemonVariantId ?? "");
       setCoverPreview(data.coverUrl || null);
 
-      // Parse pricesByCurrency
-      if (data.pricesByCurrency) {
-        try {
-          setPricesByCurrency(JSON.parse(data.pricesByCurrency));
-        } catch {}
-      }
-
-      // Parse countryOverrides
-      if (data.countryOverrides) {
-        try {
-          setCountryOverrides(JSON.parse(data.countryOverrides));
-        } catch {}
-      }
+      // Prisma Json columns are returned as already-parsed objects.
+      if (data.pricesByCurrency) setPricesByCurrency(data.pricesByCurrency);
+      if (data.countryOverrides) setCountryOverrides(data.countryOverrides);
 
       // Build texts from translations
       const byLocale: Record<string, Record<string, string>> = {};

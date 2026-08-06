@@ -78,8 +78,8 @@ export async function GET(
     const userLocale = localeToLanguage(dbUser.preferredLocale ?? "it");
 
     // Verify all lessons are completed
-    const product = await prisma.product.findUnique({
-      where: { id: productId },
+  const product = await prisma.product.findFirst({
+    where: { id: productId, deletedAt: null },
       include: {
         lessons: { select: { id: true } },
         translations: {

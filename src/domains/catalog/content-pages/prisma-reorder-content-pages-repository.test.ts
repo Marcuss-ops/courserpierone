@@ -38,6 +38,7 @@ const { mockPrisma } = vi.hoisted(() => ({
   mockPrisma: {
     product: {
       findUnique: vi.fn(),
+      findFirst: vi.fn(),
     },
     contentPage: {
       findMany: vi.fn(),
@@ -64,23 +65,23 @@ describe("prismaReorderContentPagesRepository — findProductOwner", () => {
       productId: "",
     });
     expect(result).toBeNull();
-    expect(mockPrisma.product.findUnique).not.toHaveBeenCalled();
+    expect(mockPrisma.product.findFirst).not.toHaveBeenCalled();
   });
 
   it("returns null when the product row is missing", async () => {
-    mockPrisma.product.findUnique.mockResolvedValue(null);
+    mockPrisma.product.findFirst.mockResolvedValue(null);
     const result = await prismaReorderContentPagesRepository.findProductOwner({
       productId: "p-missing",
     });
     expect(result).toBeNull();
-    expect(mockPrisma.product.findUnique).toHaveBeenCalledWith({
-      where: { id: "p-missing" },
+    expect(mockPrisma.product.findFirst).toHaveBeenCalledWith({
+      where: { id: "p-missing", deletedAt: null },
       select: { creatorId: true },
     });
   });
 
   it("returns { creatorId } on a hit", async () => {
-    mockPrisma.product.findUnique.mockResolvedValue({ creatorId: "u-creator-1" });
+    mockPrisma.product.findFirst.mockResolvedValue({ creatorId: "u-creator-1" });
     const result = await prismaReorderContentPagesRepository.findProductOwner({
       productId: "p-1",
     });
@@ -88,7 +89,7 @@ describe("prismaReorderContentPagesRepository — findProductOwner", () => {
   });
 
   it("forwards arbitrary errors to the caller", async () => {
-    mockPrisma.product.findUnique.mockRejectedValue(new Error("DB down"));
+    mockPrisma.product.findFirst.mockRejectedValue(new Error("DB down"));
     await expect(
       prismaReorderContentPagesRepository.findProductOwner({ productId: "p-1" }),
     ).rejects.toThrow("DB down");

@@ -83,11 +83,11 @@ export async function processOrder(
 
   const resolvedProduct =
     product.kind === "product_id"
-      ? await prisma.product.findUnique({ where: { id: product.value } })
+      ? await prisma.product.findFirst({ where: { id: product.value, deletedAt: null } })
       : product.kind === "product_slug"
-        ? await prisma.product.findUnique({ where: { slug: product.value } })
+        ? await prisma.product.findFirst({ where: { slug: product.value, deletedAt: null } })
         : await prisma.product.findFirst({
-            where: { lemonVariantId: product.value },
+            where: { lemonVariantId: product.value, deletedAt: null },
           });
 
   if (!resolvedProduct) {

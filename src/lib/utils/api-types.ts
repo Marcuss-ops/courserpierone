@@ -4,7 +4,7 @@ export interface ProductApiItem {
   slug: string;
   price: number;
   currency: string;
-  pricesByCurrency: string | null;
+  pricesByCurrency: Record<string, { price: number; symbol?: string; currency?: string; lemonVariantId?: string | null }> | null;
   status: string;
   coverUrl: string | null;
   templateId: string;
@@ -77,8 +77,8 @@ export interface ProductApiDetail {
   templateId: string;
   status: string;
   lemonVariantId: string | null;
-  pricesByCurrency: string | null;
-  countryOverrides: string | null;
+  pricesByCurrency: Record<string, { price: number; symbol?: string; currency?: string; lemonVariantId?: string | null }> | null;
+  countryOverrides: Record<string, { currency: string; price: number; symbol?: string; lemonVariantId?: string | null }> | null;
   createdAt: string;
   translations: ProductApiTranslation[];
   lessons: ProductApiLesson[];

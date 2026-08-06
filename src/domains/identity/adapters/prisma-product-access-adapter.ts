@@ -15,15 +15,18 @@ export function createPrismaAccessRepository(
   return {
     async resolveProductId(productIdOrSlug) {
       const product = await prisma.product.findFirst({
-        where: { OR: [{ id: productIdOrSlug }, { slug: productIdOrSlug }] },
+        where: {
+          deletedAt: null,
+          OR: [{ id: productIdOrSlug }, { slug: productIdOrSlug }],
+        },
         select: { id: true },
       });
       return product?.id ?? null;
     },
 
     async findProductCreator(productId) {
-      const product = await prisma.product.findUnique({
-        where: { id: productId },
+      const product = await prisma.product.findFirst({
+        where: { id: productId, deletedAt: null },
         select: { creatorId: true },
       });
       return product?.creatorId ?? null;

@@ -116,6 +116,7 @@ export async function enrollFreeCourse(
   // ── Resolve product (slug is the canonical accession key) ───
   const product = await prisma.product.findFirst({
     where: {
+      deletedAt: null,
       OR: [{ slug: productSlug }, { id: productSlug }],
     },
     select: { id: true, slug: true, price: true },

@@ -1,4 +1,5 @@
 import { prisma } from "../../src/lib/db/prisma";
+import { pricesByCurrencySchema } from "../../src/lib/parsers/schemas";
 
 async function main() {
   const slug = process.argv[2];
@@ -14,7 +15,9 @@ async function main() {
   }
 
   // Parse existing prices or start fresh
-  const existing = product.pricesByCurrency ? JSON.parse(product.pricesByCurrency) : {};
+  const existing = product.pricesByCurrency && typeof product.pricesByCurrency === "object" && !Array.isArray(product.pricesByCurrency)
+    ? product.pricesByCurrency as Record<string, unknown>
+    : {};
 
   // Merge with new currencies
   // EUR 1900 = €19.00 is the base price
@@ -44,9 +47,15 @@ async function main() {
     IDR: { price: 7900000, symbol: "Rp", currency: "IDR" }
   };
 
+  const parsedPrices = pricesByCurrencySchema.safeParse(prices);
+  if (!parsedPrices.success) {
+    console.error("Invalid pricesByCurrency configuration:", parsedPrices.error.flatten());
+    process.exit(1);
+  }
+
   await prisma.product.update({
     where: { slug },
-    data: { pricesByCurrency: JSON.stringify(prices) },
+    data: { pricesByCurrency: parsedPrices.data },
   });
 
   console.log("✅ Prices updated with new currencies:");

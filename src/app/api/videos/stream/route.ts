@@ -55,7 +55,7 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
     // matching the AccessGate + middleware + /api/ebook/download bypass
     // for the same slug. See src/lib/courses/is-free-course.ts.
     const product = await prisma.product.findUnique({
-      where: { slug: productSlug },
+      where: { slug: productSlug, deletedAt: null },
       select: { id: true, slug: true, price: true },
     });
 

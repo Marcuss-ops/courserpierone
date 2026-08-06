@@ -13,8 +13,8 @@ export async function POST(
 
     const { id } = await params;
 
-    const original = await prisma.product.findUnique({
-      where: { id },
+    const original = await prisma.product.findFirst({
+      where: { id, deletedAt: null },
       include: {
         translations: true,
         lessons: {
@@ -34,7 +34,7 @@ export async function POST(
     let newSlug = baseSlug;
     let suffix = 0;
 
-    while (await prisma.product.findUnique({ where: { slug: newSlug } })) {
+    while (await prisma.product.findFirst({ where: { slug: newSlug, deletedAt: null } })) {
       suffix += 1;
       newSlug = `${baseSlug}-${suffix}`;
     }
@@ -49,8 +49,8 @@ export async function POST(
         price: original.price,
         currency: original.currency,
         status: "draft",
-        pricesByCurrency: original.pricesByCurrency,
-        countryOverrides: original.countryOverrides,
+        pricesByCurrency: original.pricesByCurrency ?? undefined,
+        countryOverrides: original.countryOverrides ?? undefined,
         defaultLanguage: original.defaultLanguage,
         // Phase 4 hardening: preserva l'identità del creator originale.
         creatorId: original.creatorId,

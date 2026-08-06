@@ -34,7 +34,7 @@ export async function GET(
   // The single round-trip below replaces 2 separate reads (price +
   // slug→id lookup) with one `select: {id, price}` query.
   const downloadProduct = await prisma.product.findUnique({
-    where: { slug },
+    where: { slug, deletedAt: null },
     select: { id: true, price: true },
   });
   const checkoutSessionId = request.cookies?.get(CHECKOUT_SESSION_COOKIE)?.value;

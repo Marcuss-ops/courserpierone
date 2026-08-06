@@ -10,8 +10,8 @@ export const prismaResolveCreatorProductAccessPort: ResolveCreatorProductAccessP
         where: { id: actorId },
         select: { id: true, role: true },
       }),
-      prisma.product.findUnique({
-        where: { id: productId },
+      prisma.product.findFirst({
+        where: { id: productId, deletedAt: null },
         select: { creatorId: true },
       }),
       prisma.creatorApplication.findUnique({
