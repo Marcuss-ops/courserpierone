@@ -49,7 +49,11 @@ vi.mock("@/lib/commerce/shared/email", () => ({
 // Analytics helper uses real COUNTRY_LOCALE — import as-is
 import { prisma } from "@/lib/db/prisma";
 import { sendPurchaseConfirmation } from "@/lib/commerce/shared/email";
-import { processOrder, type ProcessOrderInput } from "./complete-order";
+import { processOrder } from "./complete-order";
+import {
+  createCompletePaidOrderCommand,
+  type CompletePaidOrderCommand,
+} from "@/lib/commerce/payments/types";
 import { NotFoundError } from "@/lib/errors";
 
 // ─── Helpers ───────────────────────────────────────────────
@@ -133,21 +137,94 @@ function outboxEvents() {
   }[];
 }
 
-function buildInput(overrides: Partial<ProcessOrderInput> = {}): ProcessOrderInput {
-  return {
-    email: "buyer@example.com",
-    customerName: "Buyer",
-    productSlug: "test-course",
-    variantId: "12345",
+function buildInput(
+  overrides: Record<string, unknown> = {},
+): CompletePaidOrderCommand {
+  return createCompletePaidOrderCommand({
     paymentProvider: "lemonsqueezy",
     providerOrderId: `ls_order_${Math.random().toString(36).slice(2)}`,
+    product: { kind: "product_slug", value: "test-course" },
+    customer: { email: "buyer@example.com", name: "Buyer" },
     amount: 4900,
-    currency: "usd",
-    locale: "en-us",
+    currency: "USD",
+    locale: "en-US",
     customerCountry: "US",
     ...overrides,
-  };
+  });
 }
+
+describe("createCompletePaidOrderCommand — contract", () => {
+  it("requires providerOrderId and exactly one discriminated product locator", () => {
+    expect(() =>
+      createCompletePaidOrderCommand({
+        paymentProvider: "lemonsqueezy",
+        product: { kind: "product_slug", value: "test-course" },
+        customer: { email: "buyer@example.com" },
+        amount: 4900,
+        currency: "USD",
+        locale: "en-US",
+      }),
+    ).toThrow(/providerOrderId/);
+
+    expect(() =>
+      createCompletePaidOrderCommand({
+        paymentProvider: "lemonsqueezy",
+        providerOrderId: "",
+        product: { kind: "product_slug", value: "test-course" },
+        customer: { email: "buyer@example.com" },
+        amount: 4900,
+        currency: "USD",
+        locale: "en-US",
+      }),
+    ).toThrow(/providerOrderId/);
+
+    expect(() =>
+      createCompletePaidOrderCommand({
+        paymentProvider: "lemonsqueezy",
+        providerOrderId: "ls-1",
+        customer: { email: "buyer@example.com" },
+        amount: 4900,
+        currency: "USD",
+        locale: "en-US",
+      }),
+    ).toThrow(/product/);
+
+    expect(() =>
+      createCompletePaidOrderCommand({
+        paymentProvider: "lemonsqueezy",
+        providerOrderId: "ls-1",
+        product: {
+          kind: "product_slug",
+          value: "test-course",
+          variantId: "v-1",
+        },
+        customer: { email: "buyer@example.com" },
+        amount: 4900,
+        currency: "USD",
+        locale: "en-US",
+      }),
+    ).toThrow(/product/);
+  });
+
+  it("normalizes currency and locale while preserving the selected locator", () => {
+    expect(
+      createCompletePaidOrderCommand({
+        paymentProvider: "lemonsqueezy",
+        providerOrderId: "ls-1",
+        product: { kind: "variant_id", value: "v-1" },
+        customer: { email: "buyer@example.com" },
+        amount: 4900,
+        currency: "usd",
+        locale: "en-us",
+      }),
+    ).toMatchObject({
+      providerOrderId: "ls-1",
+      product: { kind: "variant_id", value: "v-1" },
+      currency: "USD",
+      locale: "en-US",
+    });
+  });
+});
 
 // ─── Tests ─────────────────────────────────────────────────
 // ─── Order success path ───────────────────────────────────
@@ -165,12 +242,11 @@ describe("processOrder — success path", () => {
     const createArg = vi.mocked(prisma.order.create).mock.calls[0][0];
     expect(createArg.data).toMatchObject({
       userId: "user_123",
-      productId: "prod_abc",
-      paymentProvider: "lemonsqueezy",
+      productId: "prod_abc",      paymentProvider: "lemonsqueezy",
       status: "completed",
       amount: 4900,
-      currency: "usd",
-      locale: "en-us",
+      currency: "USD",
+      locale: "en-US",
     });
   });
 
@@ -190,11 +266,10 @@ describe("processOrder — success path", () => {
       status: "completed",
     } as never);
 
-    // Override customerName to undefined so production code falls back to email.split('@')[0]
+    // Omit customer name so production code falls back to email.split('@')[0].
     await processOrder({
       ...buildInput(),
-      email: "newbuyer@example.com",
-      customerName: undefined,
+      customer: { email: "newbuyer@example.com" },
     });
 
     expect(prisma.user.findUnique).toHaveBeenCalledWith({
@@ -223,8 +298,8 @@ describe("processOrder — success path", () => {
       payload: {
         email: "buyer@example.com",
         productSlug: "test-course",
-        courseUrl: expect.stringContaining("/it-it/test-course/portal"),
-        locale: "it-it",
+        courseUrl: expect.stringContaining("/it-IT/test-course/portal"),
+        locale: "it-IT",
         ebookDownloadUrl: expect.stringContaining("/dashboard"),
       },
     });
@@ -373,11 +448,13 @@ describe("processOrder — email failure tolerance (scenario 9)", () => {
     expect(analyticsEvent).toMatchObject({
       type: "purchase_analytics",
       payload: expect.objectContaining({
+        productId: "prod_abc",
         productSlug: "test-course",
+        providerProductId: null,
         userId: "user_123",
         provider: "lemonsqueezy",
         amount: 4900,
-        currency: "usd",
+        currency: "USD",
       }),
     });
   });
@@ -429,7 +506,9 @@ describe("processOrder — product resolution", () => {
       status: "completed",
     } as never);
 
-    await processOrder(buildInput({ productId: "prod_direct" }));
+    await processOrder(
+      buildInput({ product: { kind: "product_id", value: "prod_direct" } }),
+    );
 
     expect(prisma.product.findUnique).toHaveBeenCalledWith({
       where: { id: "prod_direct" },
@@ -453,9 +532,7 @@ describe("processOrder — product resolution", () => {
     });
   });
 
-  it("falls back to variantId lookup when productId AND slug both miss (LS path)", async () => {
-    // Override: provide an explicit (but missing) productId and a missing slug.
-    // The chain: id miss -> slug miss -> variantId match.
+  it("resolves product via the provider variant locator", async () => {
     vi.mocked(prisma.product.findUnique).mockResolvedValue(null); // default: null
     vi.mocked(prisma.product.findFirst).mockResolvedValueOnce({
       id: "prod_abc",
@@ -470,13 +547,10 @@ describe("processOrder — product resolution", () => {
     } as never);
 
     await processOrder(
-      buildInput({
-        productId: "prod_unknown",
-        productSlug: "unknown-slug",
-      })
+      buildInput({ product: { kind: "variant_id", value: "12345" } }),
     );
 
-    expect(prisma.product.findUnique).toHaveBeenCalledTimes(2);
+    expect(prisma.product.findUnique).not.toHaveBeenCalled();
     expect(prisma.product.findFirst).toHaveBeenCalledWith({
       where: { lemonVariantId: "12345" },
     });
@@ -487,11 +561,7 @@ describe("processOrder — product resolution", () => {
     vi.mocked(prisma.product.findFirst).mockResolvedValue(null);
 
     const promise = processOrder(
-      buildInput({
-        productId: "prod_unknown",
-        productSlug: "unknown-slug",
-        variantId: "unknown_variant",
-      })
+      buildInput({ product: { kind: "product_slug", value: "unknown-slug" } }),
     );
 
     await expect(promise).rejects.toThrow(/not resolvable/i);
@@ -500,12 +570,8 @@ describe("processOrder — product resolution", () => {
     // src/app/api/webhooks/lemonsqueezy/route.ts).
     await expect(
       processOrder(
-        buildInput({
-          productId: "prod_unknown",
-          productSlug: "unknown-slug",
-          variantId: "unknown_variant",
-        })
-      )
+        buildInput({ product: { kind: "product_slug", value: "unknown-slug" } }),
+      ),
     ).rejects.toBeInstanceOf(NotFoundError);
 
     expect(prisma.order.create).not.toHaveBeenCalled();
@@ -523,8 +589,8 @@ describe("processOrder — analytics & metadata", () => {
       buildInput({
         providerOrderId: "ls_metadata_test",
         amount: 9900,
-        currency: "usd",
-      })
+        currency: "USD",
+      }),
     );
 
     const events = outboxEvents();
@@ -533,7 +599,7 @@ describe("processOrder — analytics & metadata", () => {
     expect(payload).toMatchObject({
       provider: "lemonsqueezy",
       amount: 9900,
-      currency: "usd",
+      currency: "USD",
       providerOrderId: "ls_metadata_test",
     });
   });

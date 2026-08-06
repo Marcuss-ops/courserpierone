@@ -1,3 +1,14 @@
+import { z } from "zod";
+import { ValidationError } from "@/lib/errors";
+import {
+  asCurrencyCode,
+  asLocale,
+  asMoneyMinorUnits,
+  type CurrencyCode,
+  type Locale,
+  type MoneyMinorUnits,
+} from "@/lib/domain-types";
+
 /**
  * src/lib/commerce/payments/types.ts
  *
@@ -115,32 +126,108 @@ export interface ProviderPayment {
 // the cycle cleanly (init.ts → registry.ts → types.ts).
 export const PAYMENT_PROVIDER_SLUGS = ["lemonsqueezy"] as const;
 export type PaymentProviderSlug = (typeof PAYMENT_PROVIDER_SLUGS)[number];
+const paymentProviderSchema = z.enum(PAYMENT_PROVIDER_SLUGS);
 
 /**
- * Provider-agnostic DTO describing one completed order.
+ * The only product references accepted by the paid-order use case.
  *
- * Built by `PaymentProvider.translateEvent` after HMAC verification +
- * payload normalization. Callers in orders/* / webhooks/* work ONLY
- * against this shape — never against provider-specific raw payloads.
- *
- * `variantId` is the per-provider variant (LS `variant_id`) used for
- * fallback product resolution in complete-order.ts when neither slug
- * nor productId is supplied.
+ * The discriminator makes it impossible for a caller to provide an
+ * ambiguous combination of product id, public slug and provider variant.
+ * Resolution is performed exactly once from the selected branch.
  */
-export interface OrderCreatedEvent {
+export type ProductLocator =
+  | { kind: "product_id"; value: string }
+  | { kind: "product_slug"; value: string }
+  | { kind: "variant_id"; value: string };
+
+/**
+ * Canonical command for the verified payment → order → grant flow.
+ *
+ * This command is deliberately stricter than provider payloads: it can only
+ * be created after a provider has supplied a non-empty order id and exactly
+ * one product locator. `createCompletePaidOrderCommand` is the runtime gate
+ * at the provider/process boundary.
+ */
+export interface CompletePaidOrderCommand {
   paymentProvider: PaymentProviderSlug;
   providerOrderId: string;
-  email: string;
-  customerName: string;
-  /** Product slug (canonical): set from LS customData.courseSlug, NOT productId. */
-  productSlug: string;
-  variantId: string;
-  amount: number;
-  currency: string;
-  locale: string;
-  customerCountry: string | null;
-  channelId: string | null;
+  product: ProductLocator;
+  customer: {
+    email: string;
+    name?: string;
+  };
+  amount: MoneyMinorUnits;
+  currency: CurrencyCode;
+  locale: Locale;
+  customerCountry?: string | null;
+  channelId?: string | null;
 }
+
+const productLocatorSchema = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("product_id"), value: z.string().min(1) }).strict(),
+  z.object({ kind: z.literal("product_slug"), value: z.string().min(1) }).strict(),
+  z.object({ kind: z.literal("variant_id"), value: z.string().min(1) }).strict(),
+]);
+
+const completePaidOrderCommandSchema = z
+  .object({
+    paymentProvider: paymentProviderSchema,
+    providerOrderId: z.string().min(1),
+    product: productLocatorSchema,
+    customer: z
+      .object({
+        email: z.string().email(),
+        name: z.string().optional(),
+      })
+      .strict(),
+    amount: z.number().int().nonnegative(),
+    currency: z.string().min(1),
+    locale: z.string().min(1),
+    customerCountry: z.string().nullable().optional(),
+    channelId: z.string().nullable().optional(),
+  })
+  .strict();
+
+function normalizeLocaleForCommand(value: string): Locale {
+  const [language, region] = value.split("-");
+  return asLocale(
+    region
+      ? `${language.toLowerCase()}-${region.toUpperCase()}`
+      : language.toLowerCase(),
+  );
+}
+
+/**
+ * Runtime boundary for the paid-order command. Provider adapters call this
+ * after signature verification; processOrder calls it again defensively so
+ * untyped queue/replay callers cannot bypass the contract.
+ */
+export function createCompletePaidOrderCommand(
+  input: unknown,
+): CompletePaidOrderCommand {
+  const parsed = completePaidOrderCommandSchema.safeParse(input);
+  if (!parsed.success) {
+    throw new ValidationError(
+      `Invalid CompletePaidOrderCommand: ${parsed.error.issues
+        .map((issue) => `${issue.path.join(".") || "command"} ${issue.message}`)
+        .join(", ")}`,
+    );
+  }
+
+  return {
+    ...parsed.data,
+    amount: asMoneyMinorUnits(parsed.data.amount),
+    currency: asCurrencyCode(parsed.data.currency.toUpperCase()),
+    locale: normalizeLocaleForCommand(parsed.data.locale),
+  };
+}
+
+/**
+ * Provider-agnostic action payload for a completed order. Kept as a named
+ * alias so webhook adapters/tests can describe the domain action without
+ * reintroducing the old multi-locator DTO.
+ */
+export type OrderCreatedEvent = CompletePaidOrderCommand;
 
 /**
  * Provider-agnostic DTO for order- or subscription-revocation events.

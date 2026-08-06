@@ -104,10 +104,8 @@ beforeEach(() => {
     data: {
       paymentProvider: "lemonsqueezy",
       providerOrderId: sampleEvent.correlationKey,
-      email: "test@example.com",
-      customerName: "Test User",
-      productSlug: "test-course",
-      variantId: "variant-1",
+      product: { kind: "product_slug", value: "test-course" },
+      customer: { email: "test@example.com", name: "Test User" },
       amount: 9900,
       currency: "USD",
       locale: "it",

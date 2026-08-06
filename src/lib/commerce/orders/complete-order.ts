@@ -1,22 +1,10 @@
 import { prisma } from "@/lib/db/prisma";
 import { localeToLanguage } from "@/lib/i18n/locale-resolver";
 import { NotFoundError } from "@/lib/errors";
-import type { PaymentProviderSlug } from "@/lib/commerce/payments/types";
-
-export interface ProcessOrderInput {
-  email: string;
-  customerName?: string;
-  productId?: string;
-  productSlug?: string;
-  variantId?: string;
-  providerOrderId?: string;
-  paymentProvider: PaymentProviderSlug;
-  amount: number;
-  currency: string;
-  locale: string;
-  customerCountry?: string | null;
-  channelId?: string | null;
-}
+import {
+  createCompletePaidOrderCommand,
+  type CompletePaidOrderCommand,
+} from "@/lib/commerce/payments/types";
 
 /**
  * Process a completed payment.
@@ -25,20 +13,23 @@ export interface ProcessOrderInput {
  * the outbox rows are durable even when SMTP, analytics or notification
  * providers are unavailable immediately after checkout.
  */
-export async function processOrder(input: ProcessOrderInput): Promise<void> {
+export async function processOrder(
+  input: CompletePaidOrderCommand,
+): Promise<void> {
+  // Keep a runtime guard here because replay workers and JavaScript callers
+  // can bypass TypeScript. The provider adapter performs the same validation
+  // before dispatch, while this protects the order/grant write boundary.
+  const command = createCompletePaidOrderCommand(input);
   const {
-    email,
-    customerName,
-    productId: directProductId,
-    productSlug,
-    variantId,
+    customer: { email, name: customerName },
+    product,
     providerOrderId,
     paymentProvider,
     amount,
     currency,
     locale,
     channelId,
-  } = input;
+  } = command;
 
   let user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
@@ -51,45 +42,41 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
     });
   }
 
-  let product = directProductId
-    ? await prisma.product.findUnique({ where: { id: directProductId } })
-    : null;
-  if (!product && productSlug) {
-    product = await prisma.product.findUnique({ where: { slug: productSlug } });
-  }
-  if (!product && variantId) {
-    product = await prisma.product.findFirst({
-      where: { lemonVariantId: variantId },
-    });
-  }
-  if (!product) {
+  const resolvedProduct =
+    product.kind === "product_id"
+      ? await prisma.product.findUnique({ where: { id: product.value } })
+      : product.kind === "product_slug"
+        ? await prisma.product.findUnique({ where: { slug: product.value } })
+        : await prisma.product.findFirst({
+            where: { lemonVariantId: product.value },
+          });
+
+  if (!resolvedProduct) {
     console.error(
-      `[OrderService] Product not found — directId: ${directProductId ?? "—"}, slug: ${productSlug ?? "—"}, variantId: ${variantId ?? "—"}`,
+      `[OrderService] Product not found — locator: ${product.kind}:${product.value}`,
     );
-    throw new NotFoundError("Product not resolvable from provided identifiers");
+    throw new NotFoundError("Product not resolvable from provided product locator");
   }
 
-  if (providerOrderId) {
-    const existing = await prisma.order.findFirst({
-      where: { paymentProvider, providerOrderId },
-    });
-    if (existing) {
-      console.log(`[OrderService] Order ${providerOrderId} already exists, skipping`);
-      return;
-    }
+  const existing = await prisma.order.findFirst({
+    where: { paymentProvider, providerOrderId },
+  });
+  if (existing) {
+    console.log(`[OrderService] Order ${providerOrderId} already exists, skipping`);
+    return;
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const courseUrl = `${appUrl}/${locale}/${product.slug}/portal`;
+  const courseUrl = `${appUrl}/${locale}/${resolvedProduct.slug}/portal`;
   const ebookDownloadUrl = `${appUrl}/dashboard`;
 
   await prisma.$transaction(async (tx) => {
     const order = await tx.order.create({
       data: {
         userId: user.id,
-        productId: product.id,
+        productId: resolvedProduct.id,
         paymentProvider,
-        providerOrderId: providerOrderId ?? null,
+        providerOrderId,
         amount,
         currency,
         locale,
@@ -123,7 +110,7 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
           type: "purchase_email",
           payload: {
             email,
-            productSlug: product.slug,
+            productSlug: resolvedProduct.slug,
             courseUrl,
             locale,
             ebookDownloadUrl,
@@ -133,13 +120,15 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
           eventKey: `${eventKey}:analytics`,
           type: "purchase_analytics",
           payload: {
-            productSlug: product.slug,
+            productId: resolvedProduct.id,
+            productSlug: resolvedProduct.slug,
+            providerProductId: resolvedProduct.lemonVariantId ?? null,
             userId: user.id,
             channelId: channelId ?? null,
             provider: paymentProvider,
             amount,
             currency,
-            ...(providerOrderId ? { providerOrderId } : {}),
+            providerOrderId,
           },
         },
         {
@@ -150,7 +139,7 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
             entityId: order.id,
             type: "new_course",
             title: "Purchase confirmed",
-            body: `Your access to ${product.slug} is ready.`,
+            body: `Your access to ${resolvedProduct.slug} is ready.`,
             link: courseUrl,
           },
         },
@@ -159,7 +148,7 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
           type: "purchase_abandoned_recovery",
           payload: {
             email,
-            productId: product.id,
+            productId: resolvedProduct.id,
           },
         },
       ],
@@ -167,6 +156,6 @@ export async function processOrder(input: ProcessOrderInput): Promise<void> {
   });
 
   console.log(
-    `[OrderService] Order created: user=${user.id}, product=${product.slug}, provider=${paymentProvider}`,
+    `[OrderService] Order created: user=${user.id}, product=${resolvedProduct.slug}, provider=${paymentProvider}`,
   );
 }

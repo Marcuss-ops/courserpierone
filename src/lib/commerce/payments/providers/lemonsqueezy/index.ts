@@ -30,14 +30,15 @@ import {
   InvalidJsonError,
   WebhookAckError,
 } from "@/lib/commerce/webhooks/error-classifier";
-import type {
-  CheckoutSession,
-  CreateCheckoutInput,
-  PaymentDomainAction,
-  PaymentEvent,
-  PaymentProvider,
-  ProviderPayment,
-  RawWebhook,
+import {
+  createCompletePaidOrderCommand,
+  type CheckoutSession,
+  type CreateCheckoutInput,
+  type PaymentDomainAction,
+  type PaymentEvent,
+  type PaymentProvider,
+  type ProviderPayment,
+  type RawWebhook,
 } from "../../types";
 
 // ===== LS provider-private shape (Step 7) =====
@@ -289,29 +290,52 @@ function translateOrderCreated(event: PaymentEvent): PaymentDomainAction {
     attributes.custom_data ??
     {};
 
+  const productSlug = customData.courseSlug ?? customData.productSlug;
   const variantId = String(
     attributes.first_order_item?.variant_id ??
       attributes.variant_id ??
       attributes.product_variant_id ??
       "",
   );
+  // The signed checkout custom data is the canonical locator. Variant ID is
+  // only a fallback for older payloads that predate courseSlug.
+  const product = productSlug
+    ? { kind: "product_slug" as const, value: productSlug }
+    : variantId
+      ? { kind: "variant_id" as const, value: variantId }
+      : null;
+
+  if (attributes.total === undefined || !attributes.currency) {
+    return {
+      type: "ignored_unsupported",
+      reason: `LS order_created payload missing amount or currency (deliveryId=${event.deliveryId})`,
+    };
+  }
+
+  if (!product) {
+    return {
+      type: "ignored_unsupported",
+      reason: `LS order_created payload has no product locator (deliveryId=${event.deliveryId})`,
+    };
+  }
 
   return {
     type: "order_created",
-    data: {
+    data: createCompletePaidOrderCommand({
       paymentProvider: "lemonsqueezy",
       providerOrderId: correlationKey,
-      email: customerEmail,
-      customerName: attributes.user_name ?? "",
-      productSlug: customData.courseSlug ?? customData.productSlug ?? "",
-      variantId,
-      amount: attributes.total ?? 0,
-      currency: attributes.currency ?? "usd",
+      product,
+      customer: {
+        email: customerEmail,
+        ...(attributes.user_name ? { name: attributes.user_name } : {}),
+      },
+      amount: attributes.total,
+      currency: attributes.currency,
       locale: customData.locale ?? "it",
       customerCountry:
         attributes.customer_country ?? attributes.country ?? null,
       channelId: customData.channelId ?? null,
-    },
+    }),
   };
 }
 

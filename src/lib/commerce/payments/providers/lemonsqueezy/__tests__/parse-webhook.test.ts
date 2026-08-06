@@ -83,6 +83,65 @@ describe("LemonSqueezyPaymentProvider.parseWebhook — supported and audit-only 
   });
 });
 
+describe("LemonSqueezyPaymentProvider.translateEvent — paid-order command", () => {
+  it("emits one canonical locator inside CompletePaidOrderCommand", () => {
+    const action = provider.translateEvent({
+      provider: "lemonsqueezy",
+      eventType: "order_created",
+      deliveryId: "LS-99-order_created",
+      correlationKey: "99",
+      payload: {
+        meta: {
+          custom_data: { courseSlug: "test-course", locale: "en-us" },
+        },
+        data: {
+          id: "99",
+          attributes: {
+            user_email: "test@example.com",
+            total: 9900,
+            currency: "USD",
+            variant_id: 12345,
+          },
+        },
+      },
+    });
+
+    expect(action).toMatchObject({
+      type: "order_created",
+      data: {
+        providerOrderId: "99",
+        product: { kind: "product_slug", value: "test-course" },
+        customer: { email: "test@example.com" },
+        amount: 9900,
+        currency: "USD",
+        locale: "en-US",
+      },
+    });
+  });
+
+  it("marks incomplete paid payloads unsupported instead of completing them", () => {
+    const action = provider.translateEvent({
+      provider: "lemonsqueezy",
+      eventType: "order_created",
+      deliveryId: "LS-99-order_created",
+      correlationKey: "99",
+      payload: {
+        data: {
+          attributes: {
+            user_email: "test@example.com",
+            variant_id: 12345,
+          },
+        },
+      },
+    });
+
+    expect(action).toMatchObject({
+      type: "ignored_unsupported",
+      reason: expect.stringContaining("amount or currency"),
+    });
+  });
+});
+
 describe("LemonSqueezyPaymentProvider.parseWebhook — error paths", () => {
   it("throws on malformed JSON", async () => {
     await expect(
