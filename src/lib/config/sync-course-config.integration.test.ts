@@ -21,7 +21,26 @@ const input: SyncCourseConfigInput = {
   coverUrl: "/cover.jpg",
   templateId: "lumio",
   defaultLanguage: "it",
-  configJson: JSON.stringify({ slug: uniqueSlug }),
+  configJson: JSON.stringify({
+    slug: uniqueSlug,
+    defaultLanguage: "it",
+    cover: "/cover.jpg",
+    checkoutUrl: "#",
+    author: "Test",
+    languages: {
+      it: {
+        title: "Test",
+        problem: "",
+        story: "",
+        cta: "Start",
+        description: "",
+        ebookTitle: "Test",
+        ebookContent: "",
+      },
+    },
+    lessons: [],
+    ebookChapters: [],
+  }),
 };
 
 afterAll(async () => {

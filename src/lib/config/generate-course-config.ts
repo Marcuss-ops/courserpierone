@@ -18,8 +18,8 @@ export async function generateCourseConfig(slug: string): Promise<CourseConfig> 
     existingConfig = parsed;
   }
 
-  const product = await prisma.product.findUnique({
-    where: { slug },
+  const product = await prisma.product.findFirst({
+    where: { slug, deletedAt: null },
     include: {
       translations: true,
       lessons: { orderBy: { position: "asc" }, include: { translations: true } },
@@ -101,14 +101,14 @@ export async function generateCourseConfig(slug: string): Promise<CourseConfig> 
 
   const prices = product.pricesByCurrency
     ? Object.fromEntries(
-        Object.entries(JSON.parse(product.pricesByCurrency) as Record<string, { price: number; symbol?: string }>).map(
+        Object.entries(product.pricesByCurrency as Record<string, { price: number; symbol?: string }>).map(
           ([code, value]) => [code, { amount: value.price / 100, currency: code, symbol: value.symbol ?? currencySymbols[code] ?? code }],
         ),
       )
     : undefined;
 
   const countryOverrides = product.countryOverrides
-    ? JSON.parse(product.countryOverrides) as CourseConfig["countryOverrides"]
+    ? product.countryOverrides as CourseConfig["countryOverrides"]
     : undefined;
 
   const config = parseCourseConfig({

@@ -69,7 +69,7 @@ src/app/courses/page.tsx                 # NEW — registry-driven /courses cata
 export const COURSES: CourseMeta[] = [
   { slug: "amish-secrets", ... }
 ];
-export const DEFAULT_LANDING_SLUG: string = COURSES[0].slug;
+Landing targets must always be supplied explicitly by the caller. An empty registry has no fallback landing slug.
 ```
 
 The registry is the single source of truth for:
