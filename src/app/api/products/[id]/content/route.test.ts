@@ -1,5 +1,5 @@
 /**
- * src/app/api/products/[slug]/content/route.test.ts
+ * src/app/api/products/[id]/content/route.test.ts
  *
  * Unit-level tests for the public read endpoint
  * `GET /api/products/:slug/content` — the student-facing
@@ -54,7 +54,7 @@ import {
   vi,
 } from "vitest";
 
-import { __setRouteDeps, GET } from "@/app/api/products/[slug]/content/route";
+import { __setRouteDeps, GET } from "@/app/api/products/[id]/content/route";
 import type {
   PublishedPageRow,
   ResolvePublishedContentPort,
@@ -164,7 +164,7 @@ function extractSlug(rawUrl: string): string {
 /** Compose a Request + ctx pair the way Next.js App Router does. */
 function mkRequest(url: string): {
   req: Request;
-  ctx: { params: Promise<{ slug: string }> };
+  ctx: { params: Promise<{ id: string }> };
 } {
   // The route reads req.url via `new URL(req.url)`, so the
   // Request must be a fully-formed string URL.
@@ -172,7 +172,7 @@ function mkRequest(url: string): {
     req: new Request(url, { method: "GET" }),
     // Extract slug from the URL too so the test's ctx matches.
     ctx: {
-      params: Promise.resolve({ slug: extractSlug(url) }),
+      params: Promise.resolve({ id: extractSlug(url) }),
     },
   };
 }
@@ -434,7 +434,7 @@ describe("GET .../content — 400 invalid input", () => {
       "http://localhost/api/products/InvalidSlug/content",
       { method: "GET" },
     );
-    const ctx = { params: Promise.resolve({ slug: "InvalidSlug" }) };
+    const ctx = { params: Promise.resolve({ id: "InvalidSlug" }) };
     const res = await GET(req, ctx);
 
     expect(res.status).toBe(400);
@@ -482,7 +482,7 @@ describe("GET .../content — 500 route_misconfigured", () => {
     // vi.resetModules and skip __setRouteDeps.
     vi.resetModules();
     const { GET: FreshGET } = await import(
-      "@/app/api/products/[slug]/content/route"
+      "@/app/api/products/[id]/content/route"
     );
 
     const { req, ctx } = mkRequest(

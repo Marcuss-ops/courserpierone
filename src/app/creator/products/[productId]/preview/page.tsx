@@ -1,5 +1,5 @@
 /**
- * src/app/creator/products/[slug]/preview/page.tsx
+ * src/app/creator/products/[productId]/preview/page.tsx
  *
  * Demo page for the `ContentBlockRenderer` primitive.
  *
@@ -170,13 +170,13 @@ const FIXTURE_DOCUMENT: ContentDocumentV1 = {
 // ─── Props ──────────────────────────────────────────────────────
 
 export interface PreviewPageProps {
-  params: { slug: string };
+  params: { productId: string };
 }
 
 // ─── Server Component ──────────────────────────────────────────
 
 export default function PreviewPage({ params }: PreviewPageProps) {
-  // `slug` is surfaced as page context only — the demo fixture
+  // `productId` is surfaced as page context only — the demo fixture
   // does not depend on the URL. When the real preview lands,
   // this file resolves `slug → productId` via the catalog use
   // case and fetches the draft translation instead.
@@ -189,7 +189,7 @@ export default function PreviewPage({ params }: PreviewPageProps) {
         <p className="text-xs uppercase tracking-wider text-cream-text-soft dark:text-cream-dark-text-soft">
           Preview demo · slug:{" "}
           <code className="font-mono text-cream-text dark:text-cream-dark-text">
-            {params.slug}
+            {params.productId}
           </code>
         </p>
         <h1 className="mt-2 font-serif text-2xl font-semibold tracking-tight text-cream-espresso dark:text-cream-dark-text">

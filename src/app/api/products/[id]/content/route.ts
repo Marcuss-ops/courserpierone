@@ -69,7 +69,7 @@
  *
  * ─── URL params ────────────────────────────────────────────────
  *
- * `[slug]` is the dynamic segment from the route directory.
+ * `[id]` is the dynamic segment from the route directory; its value is the public product slug.
  * The Next.js App Router hands us `ctx.params.slug` as a
  * plain URL-decoded string. We validate non-empty + slug-shaped
  * (defensive pattern from `[a-z0-9][a-z0-9-]{1,62}[a-z0-9]`).
@@ -156,7 +156,7 @@ function isValidLocale(locale: string): boolean {
 
 export async function GET(
   req: Request,
-  ctx: { params: Promise<{ slug: string }> },
+  ctx: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
   // ─── 0. Misconfig guard ──────────────────────────────────────
   if (!cachedPort) {
@@ -167,7 +167,7 @@ export async function GET(
   }
 
   // ─── 1. URL + QUERY validation ──────────────────────────────
-  const { slug } = await ctx.params;
+  const { id: slug } = await ctx.params;
   if (!isValidSlug(slug)) {
     return NextResponse.json(
       { ok: false, reason: "invalid_slug" },

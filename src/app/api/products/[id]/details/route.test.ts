@@ -1,7 +1,7 @@
 // @vitest-environment node
 
 /**
- * src/app/api/products/[slug]/details/route.test.ts
+ * src/app/api/products/[id]/details/route.test.ts
  *
  * Route-level smoke + correctness tests for the
  * `GET /api/products/:slug/details` handler. Mirrors the
@@ -95,7 +95,7 @@ function mkReq(url: string): NextRequest {
   return new NextRequest(new URL(url));
 }
 
-const params = (slug: string) => ({ params: Promise.resolve({ slug }) });
+const params = (id: string) => ({ params: Promise.resolve({ id }) });
 
 beforeEach(() => {
   fetchProductDocumentMock.mockReset();

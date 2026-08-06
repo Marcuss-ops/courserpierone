@@ -5,7 +5,7 @@
  * `ProductDocument` use case (the canonical "Product.details
  * resolver" referenced in the MCR plan §3.4).
  *
- *   GET /api/products/:slug/details?locale=<locale>
+ *   GET /api/products/:id/details?locale=<locale> (the value is a public product slug)
  *
  * On success: returns the resolved ContentDocumentV1 + locale
  * metadata as a JSON payload (the success-branch of the
@@ -17,7 +17,7 @@
  *
  * ─── Why this route shape ────────────────────────────────────────
  *
- *   - `slug` is the URL parameter (canonical public identifier;
+ *   - `id` is the physical URL parameter carrying the public product slug (canonical public identifier;
  *     no internal product.id leaks).
  *   - `locale` is read from the optional `?locale=` query param
  *     (BCP-47 short tag, e.g. "en"). Not the Accept-Language
@@ -42,9 +42,9 @@ import { fetchProductDocument } from "@/lib/data/product-document-data";
 
 export async function GET(
   req: NextRequest,
-  context: { params: Promise<{ slug: string }> },
+  context: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
-  const { slug } = await context.params;
+  const { id: slug } = await context.params;
 
   // `?locale=` query param (optional). The defensive trim at
   // the route boundary normalises a `?locale=%20%20` (whitespace
