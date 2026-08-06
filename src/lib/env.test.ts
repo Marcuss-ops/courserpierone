@@ -81,6 +81,7 @@ describe("ENV_DEFINITIONS", () => {
   it("contains all major service keys", () => {
     const allKeys = ENV_DEFINITIONS.map((d) => d.key);
     expect(allKeys).toContain("OPENAI_API_KEY");
+    expect(allKeys).toContain("CHECKOUT_TOKEN_SECRET");
     expect(allKeys).toContain("LEMONSQUEEZY_API_KEY");
     expect(allKeys).toContain("SUPABASE_URL");
     // After C2 cleanup: GOOGLE_CLIENT_ID/SECRET moved to Supabase Dashboard

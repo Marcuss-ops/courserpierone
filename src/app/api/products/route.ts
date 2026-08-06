@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db/prisma";
 import { apiErrorResponse } from "@/lib/errors";
 import { revalidateProduct } from "@/lib/admin/revalidate-product";
 import { withRateLimit } from "@/lib/utils/rate-limit";
-import { requireAdmin } from "@/lib/auth/require-admin";
+import { requireAdmin } from "@/domains/identity";
 import { requireCreatorOrAdmin } from "@/lib/auth/require-creator-or-admin";
 import { countryOverridesSchema, pricesByCurrencySchema } from "@/lib/parsers/schemas";
 
@@ -28,7 +28,10 @@ export const GET = withRateLimit(
       const formatted = await Promise.all(
         products.map(async (p) => {
           const pageviews = await prisma.analyticEvent.count({
-            where: { productId: p.slug, eventType: "pageview" },
+            where: {
+              OR: [{ productSlug: p.slug }, { productId: p.id }, { productId: p.slug }],
+              eventType: "pageview",
+            },
           });
           const purchases = p.orders.length;
           const conversion = pageviews > 0 ? ((purchases / pageviews) * 100).toFixed(1) + "%" : "0%";

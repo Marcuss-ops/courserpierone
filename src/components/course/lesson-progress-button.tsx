@@ -72,7 +72,7 @@ export function LessonProgressButton({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               eventType: "lesson_complete",
-              productId: productSlug,
+              productSlug,
               metadata: { lessonId },
             }),
           }).catch((e) => console.warn("[Analytics] Failed to track lesson complete:", e));

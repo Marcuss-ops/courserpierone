@@ -454,7 +454,10 @@ export default function AdminDashboard() {
         </section>
         </>
         ) : (
-        <FunnelVisualization />
+        <FunnelVisualization
+          productId={data.products.length === 1 ? data.products[0]?.id : undefined}
+          productSlug={data.products.length === 1 ? data.products[0]?.slug : undefined}
+        />
         )}
       </div>
 

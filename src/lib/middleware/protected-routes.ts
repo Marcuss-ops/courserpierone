@@ -7,7 +7,7 @@ import {
   evaluateAccess,
   type AccessPolicy,
   type AccessContext,
-} from "@/lib/access/policies";
+} from "@/domains/identity";
 
 // IMPORTANT: This middleware runs in Vercel Edge runtime. Free-course
 // slug lookups use `getFreeCourseSlugs()` from src/lib/env.ts — the single

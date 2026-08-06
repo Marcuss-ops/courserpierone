@@ -15,10 +15,12 @@ describe("analyticsEventSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("accepts a valid purchase event with all fields", () => {
+  it("accepts a valid purchase event with normalized identity fields", () => {
     const result = analyticsEventSchema.safeParse({
       eventType: "purchase",
-      productId: "corso-foto",
+      productId: "clxyz1234567890abcdefghij",
+      productSlug: "corso-foto",
+      providerProductId: "variant-42",
       metadata: { amount: 4900, currency: "EUR" },
       userId: "user_123",
       sessionId: "session_456",
@@ -31,6 +33,14 @@ describe("analyticsEventSchema", () => {
       eventType: "invalid_event",
     });
     expect(result.success).toBe(false);
+  });
+
+  it("accepts a legacy slug in productId for backward compatibility", () => {
+    const result = analyticsEventSchema.safeParse({
+      eventType: "pageview",
+      productId: "legacy-course",
+    });
+    expect(result.success).toBe(true);
   });
 
   it("accepts minimal valid data", () => {

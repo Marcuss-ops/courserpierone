@@ -13,12 +13,12 @@ import {
 import {
   CHECKOUT_SESSION_COOKIE,
   readCheckoutSession,
-} from "@/lib/commerce/access/checkout-token";
+} from "@/domains/identity";
 import {
   evaluateAccess,
   type AccessPolicy,
   type AccessContext,
-} from "@/lib/access/policies";
+} from "@/domains/identity";
 
 interface AccessGateProps {
   productSlug: string;

@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { withRateLimit } from "@/lib/utils/rate-limit";
-import { resolveProductAccess } from "@/domains/identity";
-import { prisma } from "@/lib/db/prisma";
+import { resolveProductAccess, resolveProductReference } from "@/domains/identity";
 import {
   CheckoutTokenError,
   CHECKOUT_SESSION_COOKIE,
   consumeCheckoutToken,
   readCheckoutSession,
   setCheckoutSessionCookie,
-} from "@/lib/commerce/access/checkout-token";
+} from "@/domains/identity";
 
 /**
  * GET /api/access?productId=<slug-or-id>
@@ -25,13 +24,7 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
     const productInput = searchParams.get("productId");
     if (!productInput) return NextResponse.json({ hasAccess: false });
 
-    const product = await prisma.product.findFirst({
-      where: {
-        deletedAt: null,
-        OR: [{ id: productInput }, { slug: productInput }],
-      },
-      select: { id: true, slug: true },
-    });
+    const product = await resolveProductReference(productInput);
     if (!product) return NextResponse.json({ hasAccess: false });
 
     const checkoutToken = searchParams.get("checkoutToken");

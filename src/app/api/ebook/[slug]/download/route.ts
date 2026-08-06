@@ -10,7 +10,7 @@ import { resolveProductAccess } from "@/domains/identity";
 import {
   CHECKOUT_SESSION_COOKIE,
   readCheckoutSession,
-} from "@/lib/commerce/access/checkout-token";
+} from "@/domains/identity";
 
 export async function GET(
   request: NextRequest,

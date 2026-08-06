@@ -8,7 +8,7 @@ interface AnalyticsStats {
   [key: string]: unknown;
 }
 
-export function useAnalytics(productId?: string) {
+export function useAnalytics(productSlug?: string) {
   const [stats, setStats] = useState<AnalyticsStats | null>(null);
 
   async function track(eventType: string, metadata?: object) {
@@ -18,7 +18,7 @@ export function useAnalytics(productId?: string) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           eventType,
-          productId,
+          productSlug,
           metadata: metadata ?? {},
         }),
       });
@@ -48,12 +48,12 @@ export function useAnalytics(productId?: string) {
   }
 
   useEffect(() => {
-    if (!productId) return;
-    fetch(`/api/analytics/dashboard?productId=${productId}`)
+    if (!productSlug) return;
+    fetch(`/api/analytics/dashboard?productSlug=${encodeURIComponent(productSlug)}`)
       .then((r) => r.json())
       .then((d) => setStats(d))
       .catch((e) => console.warn("[Analytics] Failed to load stats:", e));
-  }, [productId]);
+  }, [productSlug]);
 
   return { stats, track, trackPageView, trackClickBuy, trackCheckoutStart, trackPurchase, trackLessonComplete };
 }

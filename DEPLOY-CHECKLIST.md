@@ -391,7 +391,7 @@ curl -H "Authorization: Bearer $CRON_SECRET" https://www.courssy.com/api/diagnos
 
 La condizione **online ready non è soddisfatta** nello stato documentato: i gate PostgreSQL/Redis, migration deploy reale, audit database, E2E/SSE, Gitleaks e CI remoto sono ancora non eseguiti o bloccati.
 
-### Esito verifica release locale (2026-08-06 — candidato `c2e0f87`)
+### Esito verifica release locale (2026-08-06 — audit su `main`, baseline `6f107e9`)
 
 Questa è una verifica **locale**. Non equivale a una run GitHub Actions e non abilita il deploy da sola.
 
@@ -400,24 +400,24 @@ Questa è una verifica **locale**. Non equivale a una run GitHub Actions e non a
 | `npm ci` | ✅ PASS | Lockfile installato senza errori |
 | `npm run typecheck` | ✅ PASS | Exit 0 |
 | `npm run lint` | ✅ PASS | Exit 0 |
-| `npm test` | ✅ PASS | 2.041 test superati |
+| `npm test` | ✅ PASS | 2.089 test superati in 144 file |
 | `npm run check` | ✅ PASS | Quality gate e DoD: 0 failure, 7 warning |
 | `npm run build` | ✅ PASS | Build produzione completata |
-| `npm audit --audit-level=high` | ✅ PASS | 0 vulnerabilità |
+| `npm audit --audit-level=high` | 📋 STORICO | 0 vulnerabilità nel precedente candidato; rieseguire sul commit corrente |
 | `npm run check:deploy-gate-shape` | ✅ PASS | Verificata la forma, non l'esecuzione GitHub |
 | Migration safety scan | ✅ PASS | Controllo statico completato |
-| Integration PostgreSQL | ⏸ NON ESEGUITO | Docker daemon non disponibile |
+| Integration PostgreSQL | ⚠️ SKIPPED | 13 test skipped dal guard di ambiente; Docker/DB non disponibili |
 | `prisma migrate deploy` reale | ⏸ NON ESEGUITO | PostgreSQL non raggiungibile |
 | `audit-v1-readiness` su DB | ⏸ NON ESEGUITO | Nessun DB vuoto, copia o staging raggiungibile |
-| E2E / SSE | ⚠️ BLOCCATO | Playwright/webserver avviati, fixture Prisma bloccate dal DB assente |
+| E2E / SSE | ⚠️ BLOCCATO | Chromium setup bloccato: `TEST_DATABASE_URL`/`DATABASE_URL` assenti nella fixture Prisma |
 | Gitleaks CLI | ⏸ NON ESEGUITO | CLI non installata localmente |
-| CI remota / deploy-gate | ⏸ NON VERIFICATO | Il candidato non è stato pubblicato |
+| CI remota / deploy-gate | ⏸ NON VERIFICATO | Il commit corrente non è ancora pubblicato; il push richiede scope `workflow` |
 
 **Stato release:** **bloccata**. Non dichiarare `online ready`: mancano la verifica PostgreSQL/Redis, migration deploy, audit database, E2E/SSE, Gitleaks e una run CI remota verde con deploy-gate.
 
-- **Commit candidato verificato localmente:** `c2e0f87` (`main` locale); il successivo commit documentale non è incluso in questa verifica.
+- **Baseline verificata localmente:** `6f107e9` (`main` locale), con correzioni di fixture/documentazione ancora da committare in questo audit.
 - **Push:** tentato verso `origin/main`, rifiutato da GitHub perché il token OAuth non ha lo scope `workflow` (`refusing to allow an OAuth App to create or update workflow`).
-- **Stato remoto:** il branch locale resta avanti di 18 commit; il candidato non è certificato dal CI remoto.
+- **Stato remoto:** il branch locale è avanti rispetto a `origin/main`; il push richiede un OAuth/PAT con scope `workflow` perché il range contiene `.github/workflows/ci.yml`.
 - **Ultima CI remota disponibile:** run `#31040206880` sul commit `a49b8601...`: security scan passata, build/typecheck/unit/integration/migration/E2E/deploy-gate falliti, deploy-production skipped. Vedi `docs/roadmap-current.md` per il dettaglio.
 
 ---

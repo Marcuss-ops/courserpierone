@@ -257,7 +257,7 @@ describe("enrollFreeCourse", () => {
     // Verify findFirst was called with the OR clause containing
     // both slug and id, allowing slug-or-id resolution.
     expect(mockPrisma.product.findFirst).toHaveBeenCalledWith({
-      where: { OR: [{ slug: PRODUCT_CUID }, { id: PRODUCT_CUID }] },
+      where: { deletedAt: null, OR: [{ slug: PRODUCT_CUID }, { id: PRODUCT_CUID }] },
       select: { id: true, slug: true, price: true },
     });
   });

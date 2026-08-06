@@ -14,6 +14,8 @@ import { createMockRequest } from "@/app/api/__test-helpers__/mock-request";
 const mockResolveProductAccess = vi.fn();
 
 vi.mock("@/domains/identity", () => ({
+  CHECKOUT_SESSION_COOKIE: "courssy_checkout_session",
+  readCheckoutSession: vi.fn(),
   resolveProductAccess: mockResolveProductAccess,
 }));
 

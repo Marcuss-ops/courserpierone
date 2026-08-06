@@ -9,6 +9,7 @@ const STUDENT_ID = "student-1";
 
 function createRepository(): AccessRepository {
   return {
+    findProduct: vi.fn(),
     resolveProductId: vi.fn(),
     findProductCreator: vi.fn().mockResolvedValue(CREATOR_ID),
     isAdminUser: vi.fn().mockResolvedValue(false),

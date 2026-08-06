@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db/prisma";
 import { analyticsEventSchema } from "@/lib/utils/validations";
 import { rateLimit, rateLimitResponse } from "@/lib/utils/rate-limit";
 import { apiErrorResponse } from "@/lib/errors";
+import { isCuidShape } from "@/lib/analytics/ssot-identifier";
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +15,25 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid event data" }, { status: 400 });
     }
-    const { eventType, productId, metadata, userId, sessionId } = parsed.data;
+    const {
+      eventType,
+      productId: legacyProductId,
+      productSlug,
+      providerProductId,
+      metadata,
+      userId,
+      sessionId,
+    } = parsed.data;
+
+    // Legacy clients sent the public slug as `productId`. Preserve those
+    // events by routing non-cuid values to the explicit productSlug column;
+    // internal cuid values remain productId.
+    const productId = legacyProductId && isCuidShape(legacyProductId)
+      ? legacyProductId
+      : null;
+    const resolvedProductSlug = productSlug ?? (
+      legacyProductId && !isCuidShape(legacyProductId) ? legacyProductId : null
+    );
 
     if (!eventType) {
       return NextResponse.json({ error: "Missing eventType" }, { status: 400 });
@@ -55,7 +74,9 @@ export async function POST(request: NextRequest) {
       data: {
         sessionId: resolvedSessionId,
         eventType,
-        productId: productId ?? null,
+        productId,
+        productSlug: resolvedProductSlug,
+        providerProductId: providerProductId ?? null,
         metadata: metadata ? JSON.stringify(metadata) : null,
         userId: userId ?? null,
         ip,

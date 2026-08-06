@@ -13,7 +13,11 @@ export const analyticsEventSchema = z.object({
     "lesson_start",
     "lesson_complete",
   ]),
+  // `productId` remains accepted for legacy clients. New producers must send
+  // the explicit productSlug/productId/providerProductId fields.
   productId: z.string().optional(),
+  productSlug: z.string().optional(),
+  providerProductId: z.string().optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
   userId: z.string().optional(),
   sessionId: z.string().optional(),

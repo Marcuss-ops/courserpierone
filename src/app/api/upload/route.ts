@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/db/supabase";
 import { apiErrorResponse } from "@/lib/errors";
-import { requireAdmin } from "@/lib/auth/require-admin";
+import { requireAdmin } from "@/domains/identity";
 import { getUploadMaxBytes } from "@/lib/env";
 import { withRateLimit } from "@/lib/utils/rate-limit";
 

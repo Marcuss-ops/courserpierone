@@ -80,8 +80,8 @@ function resetMocks() {
     role: "student",
   } as never);
 
-  // Default: product resolved by id
-  vi.mocked(prisma.product.findUnique).mockResolvedValue({
+  // Default: product resolved by the canonical soft-delete-aware lookup.
+  vi.mocked(prisma.product.findFirst).mockResolvedValue({
     id: "prod_abc",
     slug: "test-course",
     price: 4900,
@@ -604,8 +604,8 @@ describe("processOrder — product resolution", () => {
       buildInput({ product: { kind: "product_id", value: "prod_direct" } }),
     );
 
-    expect(prisma.product.findUnique).toHaveBeenCalledWith({
-      where: { id: "prod_direct" },
+    expect(prisma.product.findFirst).toHaveBeenCalledWith({
+      where: { id: "prod_direct", deletedAt: null },
     });
   });
 
@@ -621,13 +621,13 @@ describe("processOrder — product resolution", () => {
     // LS path defaults: no productId, productSlug="test-course"
     await processOrder(buildInput());
 
-    expect(prisma.product.findUnique).toHaveBeenCalledWith({
-      where: { slug: "test-course" },
+    expect(prisma.product.findFirst).toHaveBeenCalledWith({
+      where: { slug: "test-course", deletedAt: null },
     });
   });
 
   it("resolves product via the provider variant locator", async () => {
-    vi.mocked(prisma.product.findUnique).mockResolvedValue(null); // default: null
+    vi.mocked(prisma.product.findFirst).mockResolvedValue(null); // default: null
     vi.mocked(prisma.product.findFirst).mockResolvedValueOnce({
       id: "prod_abc",
       slug: "test-course",
@@ -646,12 +646,11 @@ describe("processOrder — product resolution", () => {
 
     expect(prisma.product.findUnique).not.toHaveBeenCalled();
     expect(prisma.product.findFirst).toHaveBeenCalledWith({
-      where: { lemonVariantId: "12345" },
+      where: { lemonVariantId: "12345", deletedAt: null },
     });
   });
 
   it("throws NotFoundError when no product is resolvable via any identifier", async () => {
-    vi.mocked(prisma.product.findUnique).mockResolvedValue(null);
     vi.mocked(prisma.product.findFirst).mockResolvedValue(null);
 
     const promise = processOrder(

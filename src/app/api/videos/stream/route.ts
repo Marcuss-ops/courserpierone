@@ -8,7 +8,7 @@ import { isFreeCourse } from "@/lib/courses/is-free-course";
 import {
   CHECKOUT_SESSION_COOKIE,
   readCheckoutSession,
-} from "@/lib/commerce/access/checkout-token";
+} from "@/domains/identity";
 
 /**
  * GET /api/videos/stream?lessonId=xxx&productSlug=xxx&lang=it

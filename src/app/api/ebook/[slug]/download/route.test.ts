@@ -29,6 +29,8 @@ vi.mock("@/lib/db/prisma", () => ({
 const mockResolveProductAccess = vi.fn();
 
 vi.mock("@/domains/identity", () => ({
+  CHECKOUT_SESSION_COOKIE: "courssy_checkout_session",
+  readCheckoutSession: vi.fn(),
   resolveProductAccess: mockResolveProductAccess,
 }));
 

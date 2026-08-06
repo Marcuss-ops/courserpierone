@@ -17,10 +17,10 @@ vi.mock("@/domains/identity", () => ({
   resolveProductAccess: mockResolveProductAccess,
 }));
 
-// ─── Mock Prisma (product.findUnique + lessonProgress.count) ───
+// ─── Mock Prisma (product.findFirst + lessonProgress.count) ───
 const mockPrisma = {
   product: {
-    findUnique: vi.fn(),
+    findFirst: vi.fn(),
   },
   lessonProgress: {
     count: vi.fn(),
@@ -188,7 +188,7 @@ describe("GET /api/certificate/[productId] — auth + completion-gate (AccessGra
   it("customer with active grant but product UUID missing: returns 404", async () => {
     mockCustomer();
     mockAllowedGrant("order");
-    mockPrisma.product.findUnique.mockResolvedValueOnce(null);
+    mockPrisma.product.findFirst.mockResolvedValueOnce(null);
     const { GET } = await import("./route");
     const response = await GET(createMockRequest("/api/certificate/" + PRODUCT_ID), { params });
     const body = await response.json();
@@ -201,7 +201,7 @@ describe("GET /api/certificate/[productId] — auth + completion-gate (AccessGra
   it("customer with active grant but product has zero lessons: returns 400 with localized message", async () => {
     mockCustomer();
     mockAllowedGrant("order");
-    mockPrisma.product.findUnique.mockResolvedValueOnce({
+    mockPrisma.product.findFirst.mockResolvedValueOnce({
       id: PRODUCT_ID,
       slug: PRODUCT_SLUG,
       lessons: [], // empty!
@@ -221,7 +221,7 @@ describe("GET /api/certificate/[productId] — auth + completion-gate (AccessGra
   it("customer with active grant but lessons incomplete: returns 400 with {completed}/{total}", async () => {
     mockCustomer();
     mockAllowedGrant("order");
-    mockPrisma.product.findUnique.mockResolvedValueOnce({
+    mockPrisma.product.findFirst.mockResolvedValueOnce({
       id: PRODUCT_ID,
       slug: PRODUCT_SLUG,
       lessons: [{ id: "l1" }, { id: "l2" }, { id: "l3" }], // 3 lessons
@@ -241,7 +241,7 @@ describe("GET /api/certificate/[productId] — auth + completion-gate (AccessGra
   it("customer with active grant + all lessons done: returns 200 with PDF", async () => {
     mockCustomer();
     mockAllowedGrant("order");
-    mockPrisma.product.findUnique.mockResolvedValueOnce({
+    mockPrisma.product.findFirst.mockResolvedValueOnce({
       id: PRODUCT_ID,
       slug: PRODUCT_SLUG,
       lessons: [{ id: "l1" }],

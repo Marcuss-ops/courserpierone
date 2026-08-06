@@ -27,7 +27,7 @@ import { createMockRequest } from "@/app/api/__test-helpers__/mock-request";
 import {
   CHECKOUT_SESSION_COOKIE,
   issueCheckoutToken,
-} from "@/lib/commerce/access/checkout-token";
+} from "@/domains/identity";
 
 const { mockGetServerUser, mockSendPurchaseConfirmation } = vi.hoisted(() => ({
   mockGetServerUser: vi.fn(),

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getOpenAI, type Locale } from "@/lib/openai";
 import { apiErrorResponse } from "@/lib/errors";
-import { requireAdmin } from "@/lib/auth/require-admin";
+import { requireAdmin } from "@/domains/identity";
 import { withRateLimit } from "@/lib/utils/rate-limit";
 
 /**

@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════════
 //
 // Generato da: scripts/generate/generate-locale-resolver.ts
-// Data: 2026-07-14
+// Data: 2026-08-06
 // Fonte: Database Prisma (tabelle Locale + CountryLocaleRule)
 //
 // Per rigenerare: npx tsx scripts/generate/generate-locale-resolver.ts

@@ -142,7 +142,7 @@ describe("GET /api/progress — auth-only (no access gate)", () => {
     expect(response.status).toBe(200);
     expect(body.progress).toEqual([]);
     expect(mockPrisma.product.findUnique).toHaveBeenCalledWith({
-      where: { slug: SLUG },
+      where: { slug: SLUG, deletedAt: null },
       select: { id: true },
     });
   });

@@ -25,7 +25,7 @@ import type { NextRequest } from "next/server";
 // ─── Module mocks (Vitest auto-hoisted) ─────────────────────
 
 const mockRequireAdmin = vi.fn();
-vi.mock("@/lib/auth/require-admin", () => ({
+vi.mock("@/domains/identity", () => ({
   requireAdmin: mockRequireAdmin,
 }));
 

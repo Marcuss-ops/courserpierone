@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db/prisma";
 import { apiErrorResponse } from "@/lib/errors";
 import { revalidateProduct } from "@/lib/admin/revalidate-product";
 import { withRateLimit } from "@/lib/utils/rate-limit";
-import { requireAdmin } from "@/lib/auth/require-admin";
+import { requireAdmin } from "@/domains/identity";
 import { requireCreatorOrAdmin } from "@/lib/auth/require-creator-or-admin";
 import { countryOverridesSchema, pricesByCurrencySchema } from "@/lib/parsers/schemas";
 

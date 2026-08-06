@@ -8,31 +8,31 @@
 
 ## Status verificato
 
-Questa sezione separa le evidenze locali dalla CI remota. L'ultimo candidato verificato localmente è `c2e0f87` (`main` locale, suite release del 2026-08-06); il branch non è stato pubblicato perché il push è stato rifiutato dal token OAuth privo dello scope `workflow`. Un controllo non eseguito o bloccato non viene interpretato come pass implicito.
+Questa sezione separa le evidenze locali dalla CI remota. L'ultimo audit locale è stato eseguito su `main` con baseline `6f107e9` il 2026-08-06. Il push del range resta soggetto a un token OAuth/PAT con scope `workflow`; un controllo non eseguito o bloccato non viene interpretato come pass implicito. Un controllo non eseguito o bloccato non viene interpretato come pass implicito.
 
-### Verifica locale del candidato `c2e0f87`
+### Verifica locale dell'audit su `main` (baseline `6f107e9`)
 
 | Controllo | Stato verificato | Evidenza / limite |
 |---|---|---|
 | `npm ci` | **PASS** | Installazione dal lockfile completata |
 | Typecheck | **PASS** | `npm run typecheck` exit 0 |
 | Lint | **PASS** | `npm run lint` exit 0 |
-| Unit test | **PASS** | 2.041 test superati |
+| Unit test | **PASS** | 2.089 test superati in 144 file |
 | `npm run check` / DoD | **PASS** | Quality gate 0 failure, 7 warning |
 | Build produzione | **PASS** | `npm run build` exit 0 |
-| Audit dipendenze | **PASS** | `npm audit --audit-level=high`: 0 vulnerabilità |
+| Audit dipendenze | **STORICO** | 0 vulnerabilità nel precedente candidato; rieseguire sul commit corrente |
 | Deploy-gate shape | **PASS** | Verificata solo la forma/configurazione del gate |
 | Migration safety scan | **PASS** | Scanner distruttività eseguito |
-| Integration test PostgreSQL | **NON ESEGUITO** | Docker/PostgreSQL non disponibili: daemon Docker non raggiungibile |
+| Integration test PostgreSQL | **SKIPPED** | 13 test skipped dal guard di ambiente; Docker/PostgreSQL non disponibili |
 | Migration deploy reale | **NON ESEGUITO** | Richiede PostgreSQL disponibile |
 | Audit v1 su database | **NON ESEGUITO** | Richiede database vuoto/copia/staging raggiungibili |
-| E2E browser e SSE | **BLOCCATO** | Playwright/webserver avviati; fixture Prisma bloccate da PostgreSQL non raggiungibile |
+| E2E browser e SSE | **BLOCCATO** | Fixture Prisma senza `TEST_DATABASE_URL`/`DATABASE_URL`; DB non disponibile |
 | Gitleaks | **NON ESEGUITO** | CLI non installata localmente; nessuna conclusione sul secret scan |
 | CI remota / deploy-gate del candidato | **NON VERIFICATO** | Il candidato non è stato pubblicato su GitHub |
 
 ### Ultima evidenza CI remota disponibile
 
-La run [CI — deploy-gate #31040206880](https://github.com/Marcuss-ops/courserpierone/actions/runs/31040206880), sul commit remoto `a49b8601f6113afb960a8722eed909943e7858ef`, ha riportato:
+**Evidenza CI storica:** la run [CI — deploy-gate #31040206880](https://github.com/Marcuss-ops/courserpierone/actions/runs/31040206880), sul commit remoto `a49b8601f6113afb960a8722eed909943e7858ef`, ha riportato:
 
 - **PASS:** security scan Gitleaks;
 - **FAIL:** build, typecheck, unit test, integration PostgreSQL, migration check, E2E e deploy-gate;
@@ -76,7 +76,7 @@ Questi item sono **gate strict** che impediscono il release V1.x GA. Le evidenze
 
 ### 1.5 TypeScript baseline
 
-- **Stato:** **storicamente fallito nella CI remota del commit `a49b8601...`; superato localmente dal commit candidato `c2e0f87`** con `npm run typecheck` exit 0.
+- **Stato:** superato localmente nell'audit corrente con `npm run typecheck` exit 0; resta da verificare in una nuova run CI sul commit pubblicato.
 - **Perché conta:** errori in strict mode bloccano la build e possono nascondere regressioni.
 - **Verify gate:** `npm run typecheck` deve terminare con exit code `0` in una run CI verde sul commit candidato.
 - **Drain path:** pubblicare il candidato con un token autorizzato e verificare il job [typecheck](https://github.com/Marcuss-ops/courserpierone/actions/runs/31040206880/job/92422388119) in una nuova run, senza abbassare il livello strict.
@@ -130,7 +130,7 @@ Feature **deliberatamente non pianificate** in V1.x. Se richieste, refer to thes
 
 ## Update log
 
-- `c2e0f87` — commit candidato verificato localmente: gate statici, unit, build, audit dipendenze e migration safety scan passati; PostgreSQL/Redis, migration deploy reale, audit database, E2E/SSE, Gitleaks e CI remoto non eseguiti o bloccati; push rifiutato per scope OAuth `workflow`.
+- `6f107e9` — baseline dell'audit corrente: typecheck, lint, build, quality suite e 2.089 unit test passati; integration/migration deploy/E2E restano bloccati o skipped senza Docker, DB ed env; le correzioni di fixture/documentazione sono in attesa del commit dell'audit.
 - `a49b8601f6113afb960a8722eed909943e7858ef` — status verificato su [CI — deploy-gate #31040206880](https://github.com/Marcuss-ops/courserpierone/actions/runs/31040206880): security scan passata; build, typecheck, unit, integration, migration, E2E e deploy-gate falliti; deploy-production skipped.
 - `cfb2d12` — `chore(dm): delete legacy /api/messages routes + shim, consolidate on /api/conversations`
 - `e85c65c` — `refactor(dm): migrate ChatView to canonical /api/conversations endpoints`

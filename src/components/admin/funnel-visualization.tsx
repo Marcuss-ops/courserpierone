@@ -62,7 +62,15 @@ const STEP_COLORS: Record<string, string> = {
   lesson_complete: "from-emerald-500 to-emerald-600",
 };
 
-export default function FunnelVisualization({ productId }: { productId?: string }) {
+interface FunnelVisualizationProps {
+  productId?: string;
+  productSlug?: string;
+}
+
+export default function FunnelVisualization({
+  productId,
+  productSlug,
+}: FunnelVisualizationProps) {
   const [data, setData] = useState<FunnelData | null>(null);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(30);
@@ -73,6 +81,7 @@ export default function FunnelVisualization({ productId }: { productId?: string 
       try {
         const params = new URLSearchParams({ days: String(days) });
         if (productId) params.set("productId", productId);
+        if (productSlug) params.set("productSlug", productSlug);
         const res = await fetch(`/api/analytics/funnel?${params}`);
         const json = await res.json();
         setData(json);
@@ -83,7 +92,7 @@ export default function FunnelVisualization({ productId }: { productId?: string 
       }
     }
     void fetchFunnel();
-  }, [productId, days]);
+  }, [productId, productSlug, days]);
 
   if (loading) {
     return (

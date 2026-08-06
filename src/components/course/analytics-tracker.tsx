@@ -18,7 +18,7 @@ function sendEvent(eventType: string, productSlug: string, extra?: Record<string
     body: JSON.stringify({
       eventType,
       sessionId,
-      productId: productSlug,
+      productSlug,
       metadata: {
         ...extra,
         url: window.location.href,

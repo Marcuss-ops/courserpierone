@@ -1,20 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { NextRequest } from "next/server";
 
-const mockPrisma = { product: { findFirst: vi.fn() } };
+const mockResolveProductReference = vi.fn();
 const mockResolveProductAccess = vi.fn();
 const mockGetServerUser = vi.fn();
 const mockConsumeCheckoutToken = vi.fn();
 const mockReadCheckoutSession = vi.fn();
 const mockSetCheckoutSessionCookie = vi.fn();
 
-vi.mock("@/lib/db/prisma", () => ({ prisma: mockPrisma }));
 vi.mock("@/domains/identity", () => ({
   resolveProductAccess: mockResolveProductAccess,
-}));
-vi.mock("@/lib/supabase/get-user", () => ({ getServerUser: mockGetServerUser }));
-vi.mock("@/lib/utils/rate-limit", () => ({ withRateLimit: <T,>(fn: T) => fn }));
-vi.mock("@/lib/commerce/access/checkout-token", () => ({
+  resolveProductReference: mockResolveProductReference,
   CHECKOUT_SESSION_COOKIE: "courssy_checkout_session",
   consumeCheckoutToken: mockConsumeCheckoutToken,
   readCheckoutSession: mockReadCheckoutSession,
@@ -24,6 +20,8 @@ vi.mock("@/lib/commerce/access/checkout-token", () => ({
     status = 401;
   },
 }));
+vi.mock("@/lib/supabase/get-user", () => ({ getServerUser: mockGetServerUser }));
+vi.mock("@/lib/utils/rate-limit", () => ({ withRateLimit: <T,>(fn: T) => fn }));
 
 const PRODUCT_ID = "cp-product-1";
 const PRODUCT_SLUG = "test-course";
@@ -68,7 +66,7 @@ function deny() {
 
 beforeEach(() => {
   vi.resetAllMocks();
-  mockPrisma.product.findFirst.mockResolvedValue({ id: PRODUCT_ID, slug: PRODUCT_SLUG });
+  mockResolveProductReference.mockResolvedValue({ id: PRODUCT_ID, slug: PRODUCT_SLUG });
 });
 
 describe("GET /api/access — checkout token contract", () => {

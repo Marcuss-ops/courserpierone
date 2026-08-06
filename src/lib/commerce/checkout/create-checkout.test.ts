@@ -21,7 +21,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const { mockPrisma, mockRegistryCreate } = vi.hoisted(() => {
   const mockPrisma = {
-    product: { findUnique: vi.fn() },
+    product: { findUnique: vi.fn(), findFirst: vi.fn() },
     abandonedCheckout: {
       findFirst: vi.fn(),
       update: vi.fn(),
@@ -66,7 +66,7 @@ beforeEach(() => {
 
 describe("CheckoutService.createCheckout — product.status SSOT gate", () => {
   it("denies with ProductNotPublishedError when status='draft'", async () => {
-    mockPrisma.product.findUnique.mockResolvedValue({ status: "draft" });
+    mockPrisma.product.findFirst.mockResolvedValue({ status: "draft" });
 
     const svc = new CheckoutService();
     await expect(svc.createCheckout(baseInput)).rejects.toThrow(
@@ -81,7 +81,7 @@ describe("CheckoutService.createCheckout — product.status SSOT gate", () => {
   });
 
   it("denies with ProductNotPublishedError when status='archived'", async () => {
-    mockPrisma.product.findUnique.mockResolvedValue({ status: "archived" });
+    mockPrisma.product.findFirst.mockResolvedValue({ status: "archived" });
 
     const svc = new CheckoutService();
     await expect(svc.createCheckout(baseInput)).rejects.toThrow(
@@ -94,7 +94,7 @@ describe("CheckoutService.createCheckout — product.status SSOT gate", () => {
     // Re-read returns null: product was deleted between the route's
     // load and the orchestrator's defensive re-read. Fail closed —
     // never invoke provider or write abandoned-cart row.
-    mockPrisma.product.findUnique.mockResolvedValue(null);
+    mockPrisma.product.findFirst.mockResolvedValue(null);
 
     const svc = new CheckoutService();
     await expect(svc.createCheckout(baseInput)).rejects.toThrow(NotFoundError);
@@ -103,7 +103,7 @@ describe("CheckoutService.createCheckout — product.status SSOT gate", () => {
   });
 
   it("queries only the status field (minimal select projection)", async () => {
-    mockPrisma.product.findUnique.mockResolvedValue({ status: "published" });
+    mockPrisma.product.findFirst.mockResolvedValue({ status: "published" });
     mockRegistryCreate.mockResolvedValue({
       url: "https://ls.test/checkout/abc",
       provider: "lemonsqueezy",
@@ -114,15 +114,15 @@ describe("CheckoutService.createCheckout — product.status SSOT gate", () => {
     const svc = new CheckoutService();
     await svc.createCheckout(baseInput);
 
-    expect(mockPrisma.product.findUnique).toHaveBeenCalledWith({
-      where: { id: PRODUCT_ID },
+    expect(mockPrisma.product.findFirst).toHaveBeenCalledWith({
+      where: { id: PRODUCT_ID, deletedAt: null },
       select: { status: true },
     });
-    expect(mockPrisma.product.findUnique).toHaveBeenCalledTimes(1);
+    expect(mockPrisma.product.findFirst).toHaveBeenCalledTimes(1);
   });
 
   it("succeeds and returns the session when product.status='published'", async () => {
-    mockPrisma.product.findUnique.mockResolvedValue({ status: "published" });
+    mockPrisma.product.findFirst.mockResolvedValue({ status: "published" });
     mockRegistryCreate.mockResolvedValue({
       url: "https://ls.test/checkout/abc",
       provider: "lemonsqueezy",
@@ -147,7 +147,7 @@ describe("CheckoutService.createCheckout — product.status SSOT gate", () => {
     // Regression guard: the previous orchestrator wrote AbandonedCheckout
     // rows even for unpublished products. Stress-test the new ordering:
     // guard fires → throw → NO side-effect row.
-    mockPrisma.product.findUnique.mockResolvedValue({ status: "draft" });
+    mockPrisma.product.findFirst.mockResolvedValue({ status: "draft" });
 
     const svc = new CheckoutService();
     await expect(svc.createCheckout(baseInput)).rejects.toThrow(
@@ -162,7 +162,7 @@ describe("CheckoutService.createCheckout — product.status SSOT gate", () => {
     // Pre-Step-10 fallthrough branch unchanged: published product
     // without an LS variant still throws CheckoutError with the
     // "nessun metodo di pagamento" diagnostic.
-    mockPrisma.product.findUnique.mockResolvedValue({ status: "published" });
+    mockPrisma.product.findFirst.mockResolvedValue({ status: "published" });
 
     const svc = new CheckoutService();
     await expect(
@@ -172,7 +172,7 @@ describe("CheckoutService.createCheckout — product.status SSOT gate", () => {
   });
 
   it("does not call abandonedCart.* when userEmail is undefined (existing fast-path)", async () => {
-    mockPrisma.product.findUnique.mockResolvedValue({ status: "published" });
+    mockPrisma.product.findFirst.mockResolvedValue({ status: "published" });
     mockRegistryCreate.mockResolvedValue({
       url: "https://ls.test/checkout/abc",
       provider: "lemonsqueezy",

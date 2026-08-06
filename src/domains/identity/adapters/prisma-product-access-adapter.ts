@@ -13,6 +13,16 @@ export function createPrismaAccessRepository(
   resolvePostCheckoutSession: PostCheckoutSessionResolver,
 ): AccessRepository {
   return {
+    async findProduct(productIdOrSlug) {
+      return prisma.product.findFirst({
+        where: {
+          deletedAt: null,
+          OR: [{ id: productIdOrSlug }, { slug: productIdOrSlug }],
+        },
+        select: { id: true, slug: true },
+      });
+    },
+
     async resolveProductId(productIdOrSlug) {
       const product = await prisma.product.findFirst({
         where: {

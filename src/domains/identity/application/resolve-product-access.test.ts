@@ -13,6 +13,7 @@ const ORDER_ID = "order-1";
 
 function createPort(): AccessRepository {
   return {
+    findProduct: vi.fn().mockResolvedValue(null),
     resolveProductId: vi.fn().mockResolvedValue(PRODUCT_ID),
     findProductCreator: vi.fn().mockResolvedValue(null),
     isAdminUser: vi.fn().mockResolvedValue(false),

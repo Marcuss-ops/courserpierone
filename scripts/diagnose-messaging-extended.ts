@@ -163,6 +163,7 @@ const ALLOWLIST_DM_AUTH_BYPASS: readonly { file: string; rationale: string }[] =
 const HAND_CURATED_ORDER_STATUS_RAW: readonly { file: string; rationale: string }[] = [
   // ── (b) Write-side: order creation from payment provider ──
   { file: "src/lib/commerce/orders/complete-order.ts", rationale: "WRITES Order.status='completed' from LemonSqueezy webhook payload (write-side; opposite direction of the SSOT reader; post-refactor `commerce/` consolidation commit, the $transaction with accessGrant.upsert runs atomically inside this file)." },
+  { file: "src/lib/commerce/orders/revoke-order.ts", rationale: "Payment lifecycle write-side: selects currently completed provider orders before atomically transitioning Order and AccessGrant to revoked/refunded/failed; this is not a user-facing AccessGate read." },
 
   // ── (c) Refund handlers (write-side, LS-only post V1.x C1a) ──
   //   - The Stripe webhook entry that lived here was removed as part of

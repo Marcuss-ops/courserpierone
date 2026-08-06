@@ -49,7 +49,7 @@ describe("POST /api/analytics", () => {
 
     const { POST } = await import("./route");
     const req = createMockRequest({
-      body: { eventType: "pageview", productId: "p1" },
+      body: { eventType: "pageview", productSlug: "course-1" },
     });
     const response = await POST(req);
     const body = await response.json();
@@ -60,7 +60,9 @@ describe("POST /api/analytics", () => {
       expect.objectContaining({
         data: expect.objectContaining({
           eventType: "pageview",
-          productId: "p1",
+          productId: null,
+          productSlug: "course-1",
+          providerProductId: null,
         }),
       }),
     );
@@ -73,7 +75,9 @@ describe("POST /api/analytics", () => {
     const req = createMockRequest({
       body: {
         eventType: "purchase",
-        productId: "p1",
+        productId: "clxyz1234567890abcdefghij",
+        productSlug: "course-1",
+        providerProductId: "variant-1",
         userId: "u1",
         metadata: { amount: 4900, currency: "eur" },
       },
@@ -85,6 +89,9 @@ describe("POST /api/analytics", () => {
       expect.objectContaining({
         data: expect.objectContaining({
           userId: "u1",
+          productId: "clxyz1234567890abcdefghij",
+          productSlug: "course-1",
+          providerProductId: "variant-1",
           metadata: expect.stringContaining("4900"),
         }),
       }),
@@ -158,6 +165,33 @@ describe("POST /api/analytics", () => {
     expect(response.status).toBe(500);
     const body = await response.json();
     expect(body.error).toBe("Failed to record event");
+  });
+});
+
+describe("GET /api/analytics/funnel", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("counts anonymous events alongside identified visitors", async () => {
+    mockPrisma.analyticEvent.findMany.mockResolvedValue([
+      { eventType: "pageview", sessionId: "session-1", metadata: null, createdAt: new Date() },
+      { eventType: "pageview", sessionId: null, metadata: null, createdAt: new Date() },
+      { eventType: "pageview", sessionId: "session-2", metadata: null, createdAt: new Date() },
+    ]);
+
+    const { GET } = await import("./funnel/route");
+    const req = createMockRequest({ searchParams: { productSlug: "course-1" } });
+    const response = await GET(req);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.funnelSteps[0]).toMatchObject({
+      step: "pageview",
+      uniqueVisitors: 3,
+      totalEvents: 3,
+    });
+    expect(body.summary.totalVisitors).toBe(3);
   });
 });
 

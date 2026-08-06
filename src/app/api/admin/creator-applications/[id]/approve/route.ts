@@ -7,7 +7,7 @@
 import { NextResponse } from "next/server";
 import { apiErrorResponse } from "@/lib/errors";
 import { withRateLimit } from "@/lib/utils/rate-limit";
-import { requireAdmin } from "@/lib/auth/require-admin";
+import { requireAdmin } from "@/domains/identity";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { approveCreatorApplication } from "@/domains/creator-ops/onboarding/usecases/review-creator-application.usecase";
 import { prismaCreatorApplicationRepository } from "@/domains/creator-ops/onboarding/adapters/prisma-creator-application-repository";

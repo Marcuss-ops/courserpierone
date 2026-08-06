@@ -1,5 +1,10 @@
 import type { ProductAccessReason } from "./access-reasons";
 
+export interface ProductReference {
+  id: string;
+  slug: string;
+}
+
 export interface ProductAccessResult {
   hasAccess: boolean;
   reason: ProductAccessReason;

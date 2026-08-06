@@ -15,6 +15,7 @@ export interface PostCheckoutSessionRecord {
  * post-checkout session storage are composed at the outer adapter boundary.
  */
 export interface AccessRepository {
+  findProduct(productIdOrSlug: string): Promise<import("../domain/access-decision").ProductReference | null>;
   resolveProductId(productIdOrSlug: string): Promise<string | null>;
   findProductCreator(productId: string): Promise<string | null>;
   isAdminUser(userId: string): Promise<boolean>;

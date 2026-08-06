@@ -18,7 +18,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { apiErrorResponse } from "@/lib/errors";
-import { requireAdmin } from "@/lib/auth/require-admin";
+import { requireAdmin } from "@/domains/identity";
 import { notifyProductSubscribers } from "@/lib/notifications/notify-product-subscribers";
 import type { NotifyProductSubscribersInput } from "@/lib/notifications/notify-product-subscribers";
 import type { NotificationType } from "@/lib/notifications/create-notification";
