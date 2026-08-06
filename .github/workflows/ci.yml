@@ -299,6 +299,7 @@ jobs:
       NEXT_PUBLIC_APP_URL: http://localhost:3000
       NODE_ENV: test
       LEMONSQUEEZY_WEBHOOK_SECRET: integration-test-secret
+      CHECKOUT_TOKEN_SECRET: integration-checkout-token-secret-at-least-32-chars
 
     steps:
       - name: Checkout
@@ -317,7 +318,7 @@ jobs:
         run: npx prisma migrate deploy
 
       - name: Run real-database integration suite
-        run: npx vitest run 'src/**/*.integration.test.ts' --reporter=default
+        run: npm run test:integration
 
   # ════════════════════════════════════════════════════════════════════════
   # Job 5 — Migration check
@@ -449,6 +450,7 @@ jobs:
       LEMONSQUEEZY_API_KEY: ${{ secrets.LEMONSQUEEZY_API_KEY }}
       LEMONSQUEEZY_STORE_ID: ${{ secrets.LEMONSQUEEZY_STORE_ID }}
       LEMONSQUEEZY_WEBHOOK_SECRET: ${{ secrets.LEMONSQUEEZY_WEBHOOK_SECRET }}
+      CHECKOUT_TOKEN_SECRET: ${{ secrets.CHECKOUT_TOKEN_SECRET }}
       TEST_LEMON_VARIANT_ID: ${{ secrets.TEST_LEMON_VARIANT_ID }}
 
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}

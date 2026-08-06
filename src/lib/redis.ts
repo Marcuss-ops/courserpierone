@@ -26,7 +26,11 @@ import IORedis from "ioredis";
 
 interface RedisAdapter {
   get<T = string>(key: string): Promise<T | null>;
-  set(key: string, value: string | number, opts?: { ex?: number }): Promise<"OK" | null>;
+  set(
+    key: string,
+    value: string | number,
+    opts?: { ex?: number; nx?: boolean },
+  ): Promise<"OK" | null>;
   del(key: string): Promise<number>;
   incr(key: string): Promise<number>;
   expire(key: string, seconds: number): Promise<number>;
@@ -57,11 +61,14 @@ function createIORedisAdapter(redisUrl: string): RedisAdapter | null {
         const val = await io.get(key);
         return val as T | null;
       },
-      async set(key: string, value: string | number, opts?: { ex?: number }): Promise<"OK" | null> {
+      async set(
+        key: string,
+        value: string | number,
+        opts?: { ex?: number; nx?: boolean },
+      ): Promise<"OK" | null> {
         if (typeof value === "number") value = String(value);
-        if (opts?.ex) {
-          return io.set(key, value, "EX", opts.ex);
-        }
+        if (opts?.ex && opts.nx) return io.set(key, value, "EX", opts.ex, "NX");
+        if (opts?.ex) return io.set(key, value, "EX", opts.ex);
         return io.set(key, value);
       },
       async del(key: string): Promise<number> {
@@ -189,5 +196,19 @@ export async function cacheSet(key: string, value: unknown, ttlSeconds: number =
   } catch {
     // Silently fail — the app works without cache
   }
+}
+
+/**
+ * Atomically create a key only when it does not already exist.
+ * Returns false when another request won the race.
+ */
+export async function setIfAbsent(
+  key: string,
+  value: string,
+  ttlSeconds: number,
+): Promise<boolean> {
+  const r = getRedis();
+  if (!r) return false;
+  return (await r.set(key, value, { ex: ttlSeconds, nx: true })) === "OK";
 }
 

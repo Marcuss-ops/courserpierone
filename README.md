@@ -61,6 +61,7 @@ Riepilogo (`.env.example` contiene i default completi):
 | `LEMONSQUEEZY_API_KEY` | ✅ | Lemon Squeezy API key |
 | `LEMONSQUEEZY_STORE_ID` | ✅ | Lemon Squeezy Store ID |
 | `LEMONSQUEEZY_WEBHOOK_SECRET` | ✅ | Webhook secret LS |
+| `CHECKOUT_TOKEN_SECRET` | ✅ | HMAC secret (minimum 32 characters) for one-time post-checkout access sessions |
 | `OPENAI_API_KEY` | ❌ | Traduzioni automatiche (opzionale) |
 | `EMAIL_SERVER_HOST` / `EMAIL_SERVER_PORT` / `EMAIL_SERVER_USER` / `EMAIL_SERVER_PASSWORD` / `EMAIL_FROM` | ❌ | Required per send email — vedi sezione "Email (Transazionali)" sotto |
 
@@ -116,7 +117,8 @@ Auth gestita interamente da **Supabase Auth**. Niente NextAuth.
 2. Settings → API → copia `LEMONSQUEEZY_API_KEY`
 3. Settings → Stores → copia `LEMONSQUEEZY_STORE_ID`
 4. Settings → Webhooks → crea endpoint `https://your-domain.com/api/webhooks/lemonsqueezy`, copia `LEMONSQUEEZY_WEBHOOK_SECRET`
-5. Per ogni prodotto: crea una variante su LS Dashboard e copia il `Variant ID` nel campo `Product.lemonVariantId` (vedi admin panel)
+5. Genera `CHECKOUT_TOKEN_SECRET` con `openssl rand -hex 32` e configuralo nello stesso ambiente del checkout e Redis
+6. Per ogni prodotto: crea una variante su LS Dashboard e copia il `Variant ID` nel campo `Product.lemonVariantId` (vedi admin panel)
 
 ---
 

@@ -124,6 +124,11 @@ export const ENV_DEFINITIONS: EnvVarDef[] = [
     optional: true,
   },
   {
+    key: "CHECKOUT_TOKEN_SECRET",
+    category: "required",
+    description: "HMAC secret for short-lived one-time post-checkout access tokens (minimum 32 characters)",
+  },
+  {
     key: "ALERT_WEBHOOK_URL",
     category: "optional",
     description: "Webhook URL (Slack/Discord) per alert errori di produzione",

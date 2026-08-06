@@ -55,6 +55,7 @@ nslookup www.courssy.com
 | `LEMONSQUEEZY_API_KEY` | ✅ | Live key |
 | `LEMONSQUEEZY_STORE_ID` | ✅ | Store UUID |
 | `LEMONSQUEEZY_WEBHOOK_SECRET` | ✅ | `openssl rand -hex 16` |
+| `CHECKOUT_TOKEN_SECRET` | ✅ | `openssl rand -hex 32` — HMAC secret for one-time checkout sessions |
 
 | `EMAIL_SERVER_HOST` | ✅ | Es. `smtp.resend.com` |
 | `EMAIL_SERVER_PORT` | ✅ | Es. `587` (o `2525` se Resend/Vercel lo blocca) |
