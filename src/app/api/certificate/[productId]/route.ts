@@ -6,7 +6,7 @@ import { apiErrorResponse } from "@/lib/errors";
 import { getCertificateTranslations } from "@/lib/i18n/certificate-translations";
 import { localeToLanguage } from "@/lib/i18n/locale-resolver";
 import { getUiTranslations, interpolate } from "@/lib/i18n/ui-translations";
-import { resolveProductAccess } from "@/lib/commerce/access/resolve-product-access";
+import { resolveProductAccess } from "@/domains/identity";
 
 export async function GET(
   request: NextRequest,

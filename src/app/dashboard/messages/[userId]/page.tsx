@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/db/prisma";
 import { getServerUser } from "@/lib/supabase/get-user";
-import { resolveProductAccess } from "@/lib/commerce/access/resolve-product-access";
+import { resolveProductAccess } from "@/domains/identity";
 import { ChatView } from "@/components/chat/chat-view";
 import { findOrCreateConversation } from "@/lib/messaging/find-or-create-conversation";
 

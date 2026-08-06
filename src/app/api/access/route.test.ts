@@ -9,7 +9,7 @@ const mockReadCheckoutSession = vi.fn();
 const mockSetCheckoutSessionCookie = vi.fn();
 
 vi.mock("@/lib/db/prisma", () => ({ prisma: mockPrisma }));
-vi.mock("@/lib/commerce/access/resolve-product-access", () => ({
+vi.mock("@/domains/identity", () => ({
   resolveProductAccess: mockResolveProductAccess,
 }));
 vi.mock("@/lib/supabase/get-user", () => ({ getServerUser: mockGetServerUser }));

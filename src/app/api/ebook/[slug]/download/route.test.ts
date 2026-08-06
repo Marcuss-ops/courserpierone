@@ -28,7 +28,7 @@ vi.mock("@/lib/db/prisma", () => ({
 // to download. The post-cutover contract preserves this behavior.
 const mockResolveProductAccess = vi.fn();
 
-vi.mock("@/lib/commerce/access/resolve-product-access", () => ({
+vi.mock("@/domains/identity", () => ({
   resolveProductAccess: mockResolveProductAccess,
 }));
 

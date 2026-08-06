@@ -4,7 +4,7 @@ import { getServerUser } from "@/lib/supabase/get-user";
 import { progressSchema } from "@/lib/utils/validations";
 import { apiErrorResponse } from "@/lib/errors";
 import type { Prisma } from "@prisma/client";
-import { resolveProductAccess } from "@/lib/commerce/access/resolve-product-access";
+import { resolveProductAccess } from "@/domains/identity";
 
 export async function GET(request: NextRequest) {
   try {

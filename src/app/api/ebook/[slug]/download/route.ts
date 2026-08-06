@@ -6,7 +6,7 @@ import { isFreeCourse } from "@/lib/courses/is-free-course";
 import { prisma } from "@/lib/db/prisma";
 import fs from "fs";
 import path from "path";
-import { resolveProductAccess } from "@/lib/commerce/access/resolve-product-access";
+import { resolveProductAccess } from "@/domains/identity";
 import {
   CHECKOUT_SESSION_COOKIE,
   readCheckoutSession,

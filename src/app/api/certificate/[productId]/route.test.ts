@@ -13,7 +13,7 @@ import { createMockRequest } from "@/app/api/__test-helpers__/mock-request";
 // a certificate.
 const mockResolveProductAccess = vi.fn();
 
-vi.mock("@/lib/commerce/access/resolve-product-access", () => ({
+vi.mock("@/domains/identity", () => ({
   resolveProductAccess: mockResolveProductAccess,
 }));
 

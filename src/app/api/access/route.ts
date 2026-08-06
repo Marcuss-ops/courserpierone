@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { withRateLimit } from "@/lib/utils/rate-limit";
-import { resolveProductAccess } from "@/lib/commerce/access/resolve-product-access";
+import { resolveProductAccess } from "@/domains/identity";
 import { prisma } from "@/lib/db/prisma";
 import {
   CheckoutTokenError,

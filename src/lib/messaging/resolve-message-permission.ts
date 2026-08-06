@@ -56,7 +56,7 @@
  */
 
 import { prisma } from "@/lib/db/prisma";
-import { resolveProductAccess } from "@/lib/commerce/access/resolve-product-access";
+import { resolveProductAccess } from "@/domains/identity";
 
 /**
  * Esito del permission resolver.

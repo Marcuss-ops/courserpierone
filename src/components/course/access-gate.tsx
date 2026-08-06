@@ -9,7 +9,7 @@ import { isFreeCourse } from "@/lib/courses/is-free-course";
 import { PendingOrderScreen } from "./pending-order-screen";
 import {
   resolveProductAccess,
-} from "@/lib/commerce/access/resolve-product-access";
+} from "@/domains/identity";
 import {
   CHECKOUT_SESSION_COOKIE,
   readCheckoutSession,
