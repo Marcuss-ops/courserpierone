@@ -1,17 +1,17 @@
 import { prisma } from "@/lib/db/prisma";
-import { sendPurchaseConfirmation } from "@/lib/commerce/shared/email";
-import { createNotification, type NotificationType } from "@/lib/notifications/create-notification";
-import { classifyAgentError } from "@/domains/automation/agent-run-retry-policy";
-import { Prisma } from "@prisma/client";
+import {
+  OUTBOX_HANDLER_REGISTRY,
+  type OutboxEventType,
+} from "@/lib/commerce/outbox/registry";
+import {
+  classifyOutboxError,
+  outboxBackoffMs,
+} from "@/lib/commerce/outbox/retry-policy";
 
-export const OUTBOX_EVENT_TYPES = [
-  "purchase_email",
-  "purchase_analytics",
-  "purchase_notification",
-  "purchase_abandoned_recovery",
-] as const;
+export { OUTBOX_EVENT_TYPES } from "@/lib/commerce/outbox/registry";
+export { OUTBOX_BASE_BACKOFF_MS } from "@/lib/commerce/outbox/retry-policy";
+export type { OutboxEventType } from "@/lib/commerce/outbox/registry";
 
-export type OutboxEventType = (typeof OUTBOX_EVENT_TYPES)[number];
 export type OutboxEventStatus =
   | "pending"
   | "processing"
@@ -19,46 +19,7 @@ export type OutboxEventStatus =
   | "retryable"
   | "dead_letter";
 
-export const OUTBOX_BASE_BACKOFF_MS = 5_000;
 export const OUTBOX_PROCESSING_LEASE_MS = 5 * 60 * 1000;
-
-interface PurchaseEmailPayload {
-  email: string;
-  productSlug: string;
-  courseUrl: string;
-  locale: string;
-  ebookDownloadUrl: string;
-}
-
-interface PurchaseAnalyticsPayload {
-  productSlug: string;
-  userId: string;
-  channelId?: string | null;
-  provider: string;
-  amount: number;
-  currency: string;
-  providerOrderId?: string;
-}
-
-interface PurchaseNotificationPayload {
-  recipientId: string;
-  entityId: string;
-  type: NotificationType;
-  title: string;
-  body: string;
-  link: string;
-}
-
-interface PurchaseAbandonedRecoveryPayload {
-  email: string;
-  productId: string;
-}
-
-type OutboxPayload =
-  | PurchaseEmailPayload
-  | PurchaseAnalyticsPayload
-  | PurchaseNotificationPayload
-  | PurchaseAbandonedRecoveryPayload;
 
 interface ClaimedOutboxEvent {
   id: string;
@@ -80,22 +41,11 @@ export interface ProcessOutboxBatchResult {
   deadLettered: number;
 }
 
-function asPayload(value: unknown): OutboxPayload {
-  if (!value || typeof value !== "object") {
-    throw new Error("Outbox payload must be an object");
-  }
-  return value as OutboxPayload;
-}
-
-function backoffMs(attemptCount: number): number {
-  return OUTBOX_BASE_BACKOFF_MS * 2 ** Math.max(0, attemptCount - 1);
-}
-
 function isKnownType(type: string): type is OutboxEventType {
-  return (OUTBOX_EVENT_TYPES as readonly string[]).includes(type);
+  return Object.prototype.hasOwnProperty.call(OUTBOX_HANDLER_REGISTRY, type);
 }
 
-/** Execute one durable effect. Handlers are deliberately at-least-once safe. */
+/** Execute one durable effect through its registered validated handler. */
 export async function dispatchOutboxEvent(
   event: Pick<ClaimedOutboxEvent, "id" | "type" | "payload">,
 ): Promise<void> {
@@ -103,79 +53,7 @@ export async function dispatchOutboxEvent(
     throw new Error(`Unknown outbox event type: ${event.type}`);
   }
 
-  const payload = asPayload(event.payload);
-  switch (event.type) {
-    case "purchase_email": {
-      const input = payload as PurchaseEmailPayload;
-      const sent = await sendPurchaseConfirmation(
-        input.email,
-        input.productSlug,
-        input.courseUrl,
-        input.locale,
-        input.ebookDownloadUrl,
-      );
-      if (sent === false) {
-        const deliveryError = new Error("Purchase confirmation email was not delivered");
-        (deliveryError as Error & { code?: string }).code = "EMAIL_SEND_FAILED";
-        throw deliveryError;
-      }
-      return;
-    }
-    case "purchase_analytics": {
-      const input = payload as PurchaseAnalyticsPayload;
-      try {
-        await prisma.analyticEvent.create({
-          data: {
-            productId: input.productSlug,
-            eventType: "purchase",
-            outboxEventId: event.id,
-            ...(input.channelId ? { channelId: input.channelId } : {}),
-            metadata: JSON.stringify({
-            provider: input.provider,
-            amount: input.amount,
-            currency: input.currency,
-            ...(input.providerOrderId
-              ? { providerOrderId: input.providerOrderId }
-              : {}),
-          }),
-            userId: input.userId,
-          },
-        });
-      } catch (error) {
-        if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") {
-          throw error;
-        }
-      }
-      return;
-    }
-    case "purchase_notification": {
-      const input = payload as PurchaseNotificationPayload;
-      try {
-        await createNotification({
-          ...input,
-          outboxEventId: event.id,
-          throwOnError: true,
-        });
-      } catch (error) {
-        if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") {
-          throw error;
-        }
-      }
-      return;
-    }
-    case "purchase_abandoned_recovery": {
-      const input = payload as PurchaseAbandonedRecoveryPayload;
-      await prisma.abandonedCheckout.updateMany({
-        where: {
-          email: input.email,
-          productId: input.productId,
-          status: "pending",
-        },
-        data: { status: "recovered" },
-      });
-      return;
-    }
-  }
+  await OUTBOX_HANDLER_REGISTRY[event.type].handle(event.payload, event.id);
 }
 
 async function claimNextOutboxEvent(
@@ -271,7 +149,7 @@ export async function processOutboxBatch(
       });
       result.completed += 1;
     } catch (error) {
-      const classification = classifyAgentError(error);
+      const classification = classifyOutboxError(error);
       const permanentlyFailed =
         !classification.retryable || event.attemptCount >= event.maxAttempts;
       const status: OutboxEventStatus = permanentlyFailed
@@ -279,7 +157,7 @@ export async function processOutboxBatch(
         : "retryable";
       const nextAttemptAt = permanentlyFailed
         ? null
-        : new Date(now.getTime() + backoffMs(event.attemptCount));
+        : new Date(now.getTime() + outboxBackoffMs(event.attemptCount));
       const message = error instanceof Error ? error.message : String(error);
 
       await prisma.outboxEvent.updateMany({

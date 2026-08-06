@@ -19,6 +19,15 @@ vi.mock("@/lib/commerce/shared/email", () => ({
   sendPurchaseConfirmation: mockSendPurchaseConfirmation,
 }));
 vi.mock("@/lib/notifications/create-notification", () => ({
+  NOTIFICATION_TYPES: [
+    "chat_reply",
+    "new_lesson",
+    "new_course",
+    "lesson_update",
+    "course_update",
+    "system_admin",
+    "community_reply",
+  ],
   createNotification: mockCreateNotification,
 }));
 
