@@ -14,4 +14,3 @@ export type {
   ProductAccessResult,
   ResolveProductAccessInput,
 } from "./application/resolve-product-access";
-export type { ProductAccessPort } from "./ports/product-access-port";
