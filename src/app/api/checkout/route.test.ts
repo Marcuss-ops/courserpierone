@@ -55,7 +55,7 @@ vi.mock("@/lib/utils/rate-limit", () => ({
   withRateLimit: (fn: (...args: unknown[]) => unknown) => fn,
 }));
 
-vi.mock("@/lib/commerce/checkout/pricing", () => ({
+vi.mock("@/domains/commerce", () => ({
   PricingService: class {
     resolve = mockPricingResolve;
     validateProvider = mockPricingValidate;

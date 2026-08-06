@@ -4,7 +4,7 @@ import { getServerUser } from "@/lib/supabase/get-user";
 import { checkoutSchema, validationErrorResponse } from "@/lib/utils/validations";
 import { getCurrencyFromLocale } from "@/lib/i18n/locale-resolver";
 import { withRateLimit } from "@/lib/utils/rate-limit";
-import { PricingService } from "@/lib/commerce/checkout/pricing";
+import { PricingService } from "@/domains/commerce";
 import { CheckoutService } from "@/lib/commerce/checkout/create-checkout";
 import { NotFoundError, apiErrorResponse } from "@/lib/errors";
 
