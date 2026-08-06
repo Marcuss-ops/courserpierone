@@ -1,14 +1,14 @@
 /**
- * src/app/api/products/[slug]/content/route.ts
+ * src/app/api/products/[id]/content/route.ts
  *
  * Next.js App Router route handler —
- * `GET /api/products/:slug/content?locale=<locale>`.
+ * `GET /api/products/:id/content?locale=<locale>` (the id segment carries a public slug).
  *
  * Public read endpoint (MCR Phase 1 — content-pages feature,
  * student-facing mirror of the creator's `POST .../publish`).
  *
  * Wraps the existing `resolvePublishedContent` use case with:
- *   1. URL path validation (`[slug]`).
+ *   1. URL path validation (`[id]`, carrying the public slug).
  *   2. Query-string validation (`?locale=` is optional;
  *      when absent the use case falls back to the product's
  *      defaultLanguage).
@@ -70,7 +70,7 @@
  * ─── URL params ────────────────────────────────────────────────
  *
  * `[id]` is the dynamic segment from the route directory; its value is the public product slug.
- * The Next.js App Router hands us `ctx.params.slug` as a
+ * The Next.js App Router hands us `ctx.params.id` as a
  * plain URL-decoded string. We validate non-empty + slug-shaped
  * (defensive pattern from `[a-z0-9][a-z0-9-]{1,62}[a-z0-9]`).
  *

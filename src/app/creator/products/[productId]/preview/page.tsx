@@ -11,13 +11,12 @@
  * by contributors to eyeball the registry, and by tests as the
  * real-world snapshot target.
  *
- * ─── Why slug in the URL ────────────────────────────────────────
+ * ─── Why productId in the URL ─────────────────────────────────
  *
- * The route uses `[slug]` (mirroring the public reader at
- * `/[locale]/products/[slug]/...`) instead of `[productId]` so
- * the demo URL is human-readable. The page does NOT resolve the
- * slug against the database — it's a fixture demo, not a real
- * product preview. The slug is surfaced as page context only.
+ * The route uses `[productId]` to share the creator product route
+ * namespace. The value is surfaced as page context only; this demo
+ * does NOT resolve it against the database and is not a real
+ * product preview.
  *
  * When the real "preview a draft" feature ships, this page is
  * replaced by a use-case-driven server component that fetches
@@ -187,7 +186,7 @@ export default function PreviewPage({ params }: PreviewPageProps) {
     >
       <header className="mb-8 border-b border-cream-border pb-6 dark:border-cream-dark-border">
         <p className="text-xs uppercase tracking-wider text-cream-text-soft dark:text-cream-dark-text-soft">
-          Preview demo · slug:{" "}
+          Preview demo · product:{" "}
           <code className="font-mono text-cream-text dark:text-cream-dark-text">
             {params.productId}
           </code>

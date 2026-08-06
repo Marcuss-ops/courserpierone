@@ -1,5 +1,5 @@
 /**
- * src/app/api/products/[slug]/details/route.ts
+ * src/app/api/products/[id]/details/route.ts
  *
  * MCR Phase 2 — Public-read API route for the
  * `ProductDocument` use case (the canonical "Product.details
@@ -29,7 +29,7 @@
  * Domain use case + Domain port + Prisma adapter. The Domain
  * stays pure (no `@/lib/db/prisma` import in Domain files).
  *
- * The handler is THIN: it URL-decodes `slug`, parses the
+ * The handler is THIN: it URL-decodes the public slug carried by `id`, parses the
  * `?locale=`, delegates to `fetchProductDocument`, and maps the
  * discriminated union to HTTP. No business logic lives here.
  */

@@ -155,7 +155,7 @@ describe("D-3 authorization contract", () => {
     expect(detector).toBeDefined();
     const violations = detector?.check(
       "src/app/api/example/route.ts",
-      "// Authorization contract: public provider callback verification.\nexport async function GET() { return new Response(); }",
+      "// Authorization contract: public provider callback exchange.\nfunction findCompletedOrder() {}\nfunction consumeCheckoutToken() {}\nfunction setCheckoutSessionCookie() {}\nexport async function GET() { return new Response(); }",
       new Set(),
     );
     expect(violations).toHaveLength(0);
@@ -175,13 +175,29 @@ describe("checkAdr (D-14, HARD FAIL, cross-file)", () => {
     expect(v[0].detector).toBe("D-14");
     expect(v[0].message).toContain("messaging");
   });
-  it("does NOT flag when ADR is also in diff", () => {
+  it("does NOT flag when a matching ADR is also in diff", () => {
     const diff: DiffData = {
       modified: new Map(),
       added: ["src/domains/messaging/dm.ts", "docs/adr/0019-messaging.md"],
       allFiles: ["src/domains/messaging/dm.ts", "docs/adr/0019-messaging.md"],
     };
     expect(checkAdr(diff)).toHaveLength(0);
+  });
+  it("accepts the Identity ADR for the identity domain", () => {
+    const diff: DiffData = {
+      modified: new Map(),
+      added: ["src/domains/identity/index.ts", "docs/adr/0020-identity-access-vertical-slice.md"],
+      allFiles: ["src/domains/identity/index.ts", "docs/adr/0020-identity-access-vertical-slice.md"],
+    };
+    expect(checkAdr(diff)).toHaveLength(0);
+  });
+  it("flags a new domain when only an unrelated ADR is added", () => {
+    const diff: DiffData = {
+      modified: new Map(),
+      added: ["src/domains/messaging/dm.ts", "docs/adr/0019-automation.md"],
+      allFiles: ["src/domains/messaging/dm.ts", "docs/adr/0019-automation.md"],
+    };
+    expect(checkAdr(diff)).toHaveLength(1);
   });
   it("flags multiple new domains in one diff", () => {
     const diff: DiffData = {

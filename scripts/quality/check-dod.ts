@@ -387,9 +387,15 @@ export const DETECTORS: DetectorSpec[] = [
     scope: (f) => /\/app\/api\/.+\/route\.(ts|tsx)$/.test(f) && !/\/webhook\//.test(f),
     check: (f, c, t) => {
       const lines = c.split("\n");
-      const head = lines.slice(0, 50).join("\n");
-      if (!/export\s+(async\s+)?function\s+(GET|POST|PUT|DELETE|PATCH)/.test(head)) return [];
-      if (/verifyAuth|requireAuth|getServerSession|auth\(\)|requireUser|Authorization contract:/i.test(head)) return [];
+      const source = lines.join("\n");
+      if (!/export\s+(async\s+)?function\s+(GET|POST|PUT|DELETE|PATCH)/.test(source)) return [];
+      if (/verifyAuth|requireAuth|getServerSession|auth\(\)|requireUser/i.test(source)) return [];
+      // Public callback routes must document and implement the exact
+      // server-side exchange posture; a standalone comment must not silence
+      // this release-blocking detector.
+      const hasPublicCallbackContract = /Authorization contract:\s*public provider callback exchange\b/i.test(source);
+      const hasCallbackExchange = /findCompletedOrder|consumeCheckoutToken|setCheckoutSessionCookie/.test(source);
+      if (hasPublicCallbackContract && hasCallbackExchange) return [];
       const handlerLine =
         lines.findIndex((l) => /export\s+(async\s+)?function\s+(GET|POST|PUT|DELETE|PATCH)/.test(l)) + 1;
       if (!isInTarget(handlerLine, t)) return [];
@@ -773,9 +779,16 @@ export function checkAdr(diff: DiffData): Violation[] {
     const m = f.match(/^src\/domains\/([^/]+)\//);
     if (m) newDomains.add(m[1]);
   }
-  const hasAdrChange = diff.allFiles.some((f) => f.startsWith("docs/adr/"));
-  if (newDomains.size === 0 || hasAdrChange) return [];
-  return Array.from(newDomains).map((domain) => ({
+  if (newDomains.size === 0) return [];
+
+  const adrFiles = diff.allFiles.filter((f) => f.startsWith("docs/adr/"));
+  const missingAdrDomains = Array.from(newDomains).filter((domain) => {
+    const escapedDomain = domain.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const domainPattern = new RegExp(`(?:^|[-_])${escapedDomain}(?:[-_.]|$)`, "i");
+    return !adrFiles.some((file) => domainPattern.test(path.basename(file)));
+  });
+
+  return missingAdrDomains.map((domain) => ({
     detector: "D-14",
     file: `src/domains/${domain}/`,
     line: 1,
