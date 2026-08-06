@@ -49,6 +49,7 @@ const PROJECT_ROOT = process.cwd();
 const SRC_SCOPE = "src/";
 const PACKAGE_JSON = "package.json";
 const PACKAGE_LOCK_JSON = "package-lock.json";
+const INFRASTRUCTURE_DEPS = new Set(["react-dom"]);
 
 interface PackageJson {
   dependencies?: Record<string, string>;
@@ -91,11 +92,10 @@ function* walk(dir: string): Generator<string> {
   }
 }
 
-function stripCommentsAndStrings(content: string): string {
+function stripComments(content: string): string {
   return content
     .replace(/\/\*[\s\S]*?\*\//g, (m) => " ".repeat(m.length))
-    .replace(/\/\/[^\n]*/g, (m) => " ".repeat(m.length))
-    .replace(/(['"`])(?:\\.|(?!\1).)*\1/g, (m) => m.replace(/[^\n]/g, " "));
+    .replace(/\/\/[^\n]*/g, (m) => " ".repeat(m.length));
 }
 
 // Extract the package name from an import path.
@@ -120,9 +120,13 @@ function collectImportUsages(): Map<string, ImportUsage> {
   const usages = new Map<string, ImportUsage>();
   for (const file of walk(SRC_SCOPE)) {
     const raw = fs.readFileSync(file, "utf-8");
-    const stripped = stripCommentsAndStrings(raw);
-    // Match `from "..."`, `require("...")`, `import("...")`, `import x = require("...")`.
-    const importRegex = /(?:from\s+|require\s*\(\s*|import\s*\(\s*)["']([^"']+)["']/g;
+    // Keep quoted module specifiers intact: the import regex below needs
+    // to read `from "next/..."` and `import("zod")`. Only comments are
+    // blanked so examples in documentation do not count as real usage.
+    const stripped = stripComments(raw);
+    // Match `import "..."`, `from "..."`, `require("...")`, and
+    // `import("...")` module specifiers.
+    const importRegex = /(?:from\s+|require\s*\(\s*|import\s*(?:\(\s*|\s+))["']([^"']+)["']/g;
     let m: RegExpExecArray | null;
     while ((m = importRegex.exec(stripped)) !== null) {
       const pkg = packageFromImportPath(m[1]!);
@@ -169,14 +173,13 @@ function buildReport(
   // The lockfile root key is "" (empty) and contains the resolved
   // versions of all DIRECT deps (deps in package.json). Subdeps are
   // nested under "node_modules/<name>" keys.
-  const lockRoot = lockfile.packages?.[""] ?? {};
   const lockfileKeys = new Set(Object.keys(lockfile.packages ?? {}));
-  const depNames = new Set(Object.keys(all));
   const inLockfile = (name: string): boolean => {
     if (lockfileKeys.has(`node_modules/${name}`)) return true;
-    // Hoisted deps in lockfileVersion 3 may live at "" if they're direct.
-    // The root's dependencies field also works.
-    return depNames.has(name) && Object.keys(lockRoot).length > 0;
+    // Every declared direct dependency must have its own resolved package
+    // entry. A non-empty lockfile root alone is not evidence that this
+    // particular dependency is installed.
+    return false;
   };
 
   for (const [name, meta] of all) {
@@ -184,9 +187,10 @@ function buildReport(
     const usageCount = usage ? usage.files.size : 0;
     // Dynamic infra detection: devDep + zero imports + not in runtime deps.
     const isAutoInfra =
-      meta.kind === "devDependency" &&
-      usageCount === 0 &&
-      !(pkg.dependencies && name in pkg.dependencies);
+      INFRASTRUCTURE_DEPS.has(name) ||
+      (meta.kind === "devDependency" &&
+        usageCount === 0 &&
+        !(pkg.dependencies && name in pkg.dependencies));
 
     reports.push({
       name,
@@ -242,8 +246,8 @@ function main(): void {
   const reports = buildReport(pkg, usages, lockfile);
 
   // Auto-excluded from "candidate-to-remove": devDeps with zero imports
-  // (dynamic infra detection). Pure runtime deps with count == 0 are
-  // still flagged.
+  // (dynamic infra detection) and core peer/runtime infrastructure explicitly
+  // listed above. Other runtime deps with count == 0 remain fatal.
   const candidateReports = reports.filter(
     (r) => r.usageCount === 1 && !r.isAutoInfra,
   );
