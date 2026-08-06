@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { apiErrorResponse } from "@/lib/errors";
-import { isCuidShape } from "@/lib/analytics/ssot-identifier";
+import { buildAnalyticsProductWhere } from "@/domains/analytics";
 
 const FUNNEL_STEPS = [
   "pageview",
@@ -15,34 +15,28 @@ const FUNNEL_STEPS = [
 
 const FUNNEL_STEP_VALUES: string[] = [...FUNNEL_STEPS];
 
-// ── MCR Step 11: SSOT analytics identifier ─────────────────────
-// Same guard as dashboard/route: reject cuid-shaped productId
-// (the column stores Product.slug). See the SSOT predicate at
-// `@/lib/analytics/ssot-identifier` for the kebab-case-slug
-// trust assumption.
+// Analytics filters use explicit productId/productSlug/providerProductId
+// fields and retain a fallback for historical slug-in-productId rows.
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl;
     const productId = searchParams.get("productId");
+    const productSlug = searchParams.get("productSlug");
+    const providerProductId = searchParams.get("providerProductId");
     const days = parseInt(searchParams.get("days") ?? "30");
 
-    // ── SSOT guard: reject cuid-shaped productId ────────────────
-    if (isCuidShape(productId)) {
-      return NextResponse.json(
-        {
-          error:
-            "Expected Product slug, got cuid. AnalyticEvent.productId is the Product.slug string; pass /<locale>/<slug> or just <slug>.",
-        },
-        { status: 400 },
-      );
-    }
+    const identityWhere = buildAnalyticsProductWhere({
+      productId,
+      productSlug,
+      providerProductId,
+    });
 
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
     const baseWhere = {
       createdAt: { gte: since },
-      ...(productId ? { productId } : {}),
+      ...identityWhere,
     };
 
     // OPTIMIZED: Single query instead of N+1 — fetch all events at once
@@ -52,22 +46,23 @@ export async function GET(request: NextRequest) {
     });
 
     // 1. Funnel step counts — compute from single query results
-    const stepBuckets: Record<string, { sessionIds: Set<string | null>; total: number }> = {};
+    const stepBuckets: Record<string, { sessionIds: Set<string>; anonymous: number; total: number }> = {};
     for (const step of FUNNEL_STEPS) {
-      stepBuckets[step] = { sessionIds: new Set(), total: 0 };
+      stepBuckets[step] = { sessionIds: new Set(), anonymous: 0, total: 0 };
     }
 
     for (const event of allEvents) {
       const bucket = stepBuckets[event.eventType];
       if (bucket) {
         bucket.total++;
-        bucket.sessionIds.add(event.sessionId);
+        if (event.sessionId) bucket.sessionIds.add(event.sessionId);
+        else bucket.anonymous++;
       }
     }
 
     const funnelSteps = FUNNEL_STEPS.map((step) => {
       const bucket = stepBuckets[step];
-      const uniqueVisitors = bucket.sessionIds.size || bucket.total;
+      const uniqueVisitors = bucket.sessionIds.size + bucket.anonymous;
       return {
         step,
         uniqueVisitors,
@@ -105,7 +100,7 @@ export async function GET(request: NextRequest) {
       .map(([source, count]) => ({ source, count }));
 
     // 4. UTM campaign performance — from pageview events
-    const campaignStats: Record<string, { visitors: Set<string | null>; purchases: number }> = {};
+    const campaignStats: Record<string, { visitors: Set<string>; purchases: number }> = {};
     for (const e of allEvents) {
       try {
         const meta = typeof e.metadata === "string" ? JSON.parse(e.metadata) : (e.metadata ?? {});

@@ -1,42 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { apiErrorResponse } from "@/lib/errors";
-import { isCuidShape } from "@/lib/analytics/ssot-identifier";
+import { buildAnalyticsProductWhere } from "@/domains/analytics";
 
-// ── MCR Step 11: SSOT analytics identifier ─────────────────────
-// `AnalyticEvent.productId` is a Product.slug string (NOT a cuid).
-// The pageview writer and admin/products WHERE clause already use
-// slug. The funnel/dashboard query-string readers used to accept
-// ANY value verbatim, which silently passed cids and missed
-// pageview rows. We reject cuid-shaped values loudly (400) so the
-// caller learns the contract instead of silently seeing empty
-// aggregations.
-//
-// Predicate lives at `@/lib/analytics/ssot-identifier` — see its
-// docstring for the kebab-case-slug trust assumption.
+// Analytics filters use explicit productId/productSlug/providerProductId
+// fields and retain a fallback for historical slug-in-productId rows.
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl;
     const productId = searchParams.get("productId");
+    const productSlug = searchParams.get("productSlug");
+    const providerProductId = searchParams.get("providerProductId");
     const days = parseInt(searchParams.get("days") ?? "30");
 
-    // ── SSOT guard: reject cuid-shaped productId ────────────────
-    if (isCuidShape(productId)) {
-      return NextResponse.json(
-        {
-          error:
-            "Expected Product slug, got cuid. AnalyticEvent.productId is the Product.slug string; pass /<locale>/<slug> or just <slug>.",
-        },
-        { status: 400 },
-      );
-    }
+    const identityWhere = buildAnalyticsProductWhere({
+      productId,
+      productSlug,
+      providerProductId,
+    });
 
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
     const where = {
       createdAt: { gte: since },
-      ...(productId ? { productId } : {}),
+      ...identityWhere,
     };
 
     // Aggregate stats
