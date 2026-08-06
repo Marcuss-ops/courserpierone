@@ -1,63 +1,22 @@
 import fs from "fs";
 import path from "path";
 import { prisma } from "../db/prisma";
+import { parseCourseConfig, type CourseConfig, type CourseConfigOverrides } from "./course-config-schema";
 
 const IS_VERCEL = process.env.VERCEL === "1";
 
-export interface CourseConfig {
-  slug: string;
-  productId: string;
-  template: "lumio" | "h612" | "horizon";
-  defaultLanguage: string;
-  cover: string;
-  authorImageUrl?: string;
-  storyImages?: string[];
-  accentColor?: string;
-  checkoutUrl: string;
-  author: string;
-  price: number;
-  prices?: Record<string, { amount: number; currency: string; symbol: string }>;
-  countryOverrides?: Record<string, { currency: string; price: number; symbol?: string; lemonVariantId?: string | null }>;
-  lemonVariantId?: string;
-  languages: Record<string, {
-    title: string;
-    problem: string;
-    story: string;
-    cta: string;
-    description: string;
-    ebookTitle: string;
-    ebookContent: string;
-    /** SEO metadata per questa lingua */
-    seo?: {
-      title: string;
-      description: string;
-      ogImage?: string;
-    };
-    ui?: {
-      labels: Record<string, string>;
-      benefits: { title: string; desc: string }[];
-      faq: { q: string; a: string }[];
-    };
-  }>;
-  lessons: {
-    number: number;
-    id: string;
-    titles: Record<string, string>;
-    descriptions: Record<string, string>;
-    videos: Record<string, string>;
-    duration: string;
-  }[];
-  ebookChapters: { page: number; [locale: string]: string | number }[];
-}
+export type { CourseConfig } from "./course-config-schema";
 
-export async function generateCourseConfig(slug: string) {
-  let existingConfig: Partial<CourseConfig> = {};
-  try {
-    const configPath = path.join(process.cwd(), "public", "courses", slug, "config.json");
-    if (fs.existsSync(configPath)) {
-      existingConfig = JSON.parse(fs.readFileSync(configPath, "utf8"));
+export async function generateCourseConfig(slug: string): Promise<CourseConfig> {
+  let existingConfig: CourseConfigOverrides = {};
+  const configPath = path.join(process.cwd(), "courses", slug, "config.json");
+  if (fs.existsSync(configPath)) {
+    const parsed = parseCourseConfig(JSON.parse(fs.readFileSync(configPath, "utf8")));
+    if (parsed.slug !== slug) {
+      throw new Error(`Course config slug mismatch: expected ${slug}, got ${parsed.slug}`);
     }
-  } catch {}
+    existingConfig = parsed;
+  }
 
   const product = await prisma.product.findUnique({
     where: { slug },
@@ -66,72 +25,63 @@ export async function generateCourseConfig(slug: string) {
       lessons: { orderBy: { position: "asc" }, include: { translations: true } },
     },
   });
-
   if (!product) throw new Error(`Product ${slug} not found`);
 
-  // Group translations by locale and section
   const translationsByLocale: Record<string, Record<string, string>> = {};
-  for (const t of product.translations) {
-    if (!translationsByLocale[t.locale]) translationsByLocale[t.locale] = {};
-    translationsByLocale[t.locale][t.section] = t.content;
+  for (const translation of product.translations) {
+    translationsByLocale[translation.locale] ??= {};
+    translationsByLocale[translation.locale][translation.section] = translation.content;
   }
 
-  // Build languages object
-  const languages: CourseConfig["languages"] = {};
   const locales = Object.keys(translationsByLocale).length > 0 ? Object.keys(translationsByLocale) : ["it"];
-    function safeParseUi(raw: string | undefined) {
-      if (!raw) return undefined;
-      try { return JSON.parse(raw); } catch { return undefined; }
+  const languages: CourseConfig["languages"] = {};
+
+  function safeParseUi(raw: string | undefined): CourseConfig["languages"][string]["ui"] {
+    if (!raw) return undefined;
+    try {
+      return JSON.parse(raw) as CourseConfig["languages"][string]["ui"];
+    } catch {
+      return undefined;
     }
+  }
 
-    for (const locale of locales) {
-      const t = translationsByLocale[locale] || {};
-      // UI fallback: se la lingua non ha ui_all, usa quella inglese
-      const ui = safeParseUi(t.ui_all) ?? safeParseUi(translationsByLocale.en?.ui_all) ?? undefined;
+  for (const locale of locales) {
+    const translation = translationsByLocale[locale] ?? {};
+    const ui = safeParseUi(translation.ui_all) ?? safeParseUi(translationsByLocale.en?.ui_all);
+    const seoTitle = translation.seo_title || `${translation.titolo ?? product.slug} — Courssy`;
+    const seoDescription = translation.seo_description || (translation.sottotitolo || translation.problema || "").slice(0, 160);
+    const ogImage = translation.og_image || product.coverUrl || undefined;
 
-      // SEO metadata: usa sezioni dedicate se presenti, altrimenti costruiscile dal contenuto
-      const seoTitle = t.seo_title || `${t.titolo ?? product.slug} — Courssy`;
-      const seoDescription = t.seo_description || (t.sottotitolo || t.problema || "").slice(0, 160);
-      const ogImage = t.og_image || product.coverUrl || undefined;
+    languages[locale] = {
+      title: translation.titolo ?? product.slug,
+      problem: translation.problema ?? "",
+      story: translation.storia ?? "",
+      cta: translation.cta ?? "Inizia Ora",
+      description: translation.sottotitolo ?? "",
+      ebookTitle: translation.titolo ?? product.slug,
+      ebookContent: translation.storia ?? "",
+      seo: { title: seoTitle, description: seoDescription, ...(ogImage ? { ogImage } : {}) },
+      ui,
+    };
+  }
 
-      languages[locale] = {
-        title: t.titolo ?? product.slug,
-        problem: t.problema ?? "",
-        story: t.storia ?? "",
-        cta: t.cta ?? "Inizia Ora",
-        description: t.sottotitolo ?? "",
-        ebookTitle: t.titolo ?? product.slug,
-        ebookContent: t.storia ?? "",
-        seo: {
-          title: seoTitle,
-          description: seoDescription,
-          ...(ogImage ? { ogImage } : {}),
-        },
-        ui,
+  const lessons: CourseConfig["lessons"] = product.lessons.map((lesson) => {
+    const byLocale: Record<string, { title: string; description: string; videoUrl: string }> = {};
+    for (const translation of lesson.translations) {
+      byLocale[translation.locale] = {
+        title: translation.title,
+        description: translation.description || "",
+        videoUrl: translation.videoUrl || "",
       };
     }
-
-  // Build lessons
-  const lessons: CourseConfig["lessons"] = product.lessons.map((lesson, _i) => {
-    const ltByLocale: Record<string, { title: string; description: string; videoUrl: string }> = {};
-    for (const lt of lesson.translations) {
-      ltByLocale[lt.locale] = {
-        title: lt.title,
-        description: lt.description || "",
-        videoUrl: lt.videoUrl || "",
-      };
-    }
-
     const titles: Record<string, string> = {};
     const descriptions: Record<string, string> = {};
     const videos: Record<string, string> = {};
-
     for (const locale of locales) {
-      titles[locale] = ltByLocale[locale]?.title || ltByLocale.it?.title || "Lezione";
-      descriptions[locale] = ltByLocale[locale]?.description || "";
-      videos[locale] = ltByLocale[locale]?.videoUrl || "";
+      titles[locale] = byLocale[locale]?.title || byLocale.it?.title || "Lezione";
+      descriptions[locale] = byLocale[locale]?.description || "";
+      videos[locale] = byLocale[locale]?.videoUrl || "";
     }
-
     return {
       number: lesson.position,
       id: `lesson-${lesson.position}`,
@@ -142,54 +92,51 @@ export async function generateCourseConfig(slug: string) {
     };
   });
 
-  const config: CourseConfig = {
+  const currencySymbols: Record<string, string> = {
+    EUR: "€", USD: "$", GBP: "£", JPY: "¥", BRL: "R$", CAD: "CA$", AUD: "A$",
+    CHF: "CHF", SEK: "kr", NOK: "kr", DKK: "kr", PLN: "zł", MXN: "MX$", INR: "₹",
+    CNY: "¥", KRW: "₩", RUB: "₽", TRY: "₺", ZAR: "R", SGD: "S$", HKD: "HK$",
+    TWD: "NT$", AED: "د.إ", SAR: "﷼",
+  };
+
+  const prices = product.pricesByCurrency
+    ? Object.fromEntries(
+        Object.entries(JSON.parse(product.pricesByCurrency) as Record<string, { price: number; symbol?: string }>).map(
+          ([code, value]) => [code, { amount: value.price / 100, currency: code, symbol: value.symbol ?? currencySymbols[code] ?? code }],
+        ),
+      )
+    : undefined;
+
+  const countryOverrides = product.countryOverrides
+    ? JSON.parse(product.countryOverrides) as CourseConfig["countryOverrides"]
+    : undefined;
+
+  const config = parseCourseConfig({
     slug: product.slug,
     productId: product.id,
-    template: (product.templateId as "lumio" | "h612" | "horizon") || "lumio",
+    template: product.templateId || "lumio",
     defaultLanguage: existingConfig.defaultLanguage || "it",
     cover: product.coverUrl || existingConfig.cover || "/placeholder-cover.jpg",
-    authorImageUrl: existingConfig.authorImageUrl || undefined,
-    storyImages: existingConfig.storyImages || undefined,
-    accentColor: existingConfig.accentColor || undefined,
+    authorImageUrl: existingConfig.authorImageUrl,
+    storyImages: existingConfig.storyImages,
+    accentColor: existingConfig.accentColor,
     checkoutUrl: existingConfig.checkoutUrl || "#",
     author: existingConfig.author || "Brand",
     price: product.price / 100,
-    prices: product.pricesByCurrency ? (() => {
-      const raw = JSON.parse(product.pricesByCurrency) as Record<string, { price: number; symbol?: string }>;
-      const CURRENCY_SYMBOLS: Record<string, string> = {
-        EUR: "€", USD: "$", GBP: "£", JPY: "¥", BRL: "R$",
-        CAD: "CA$", AUD: "A$", CHF: "CHF", SEK: "kr", NOK: "kr",
-        DKK: "kr", PLN: "zł", MXN: "MX$", INR: "₹", CNY: "¥",
-        KRW: "₩", RUB: "₽", TRY: "₺", ZAR: "R", SGD: "S$",
-        HKD: "HK$", TWD: "NT$", AED: "د.إ", SAR: "﷼",
-      };
-      return Object.fromEntries(
-        Object.entries(raw).map(([code, p]) => [code, {
-          amount: p.price / 100,
-          currency: code,
-          symbol: p.symbol ?? CURRENCY_SYMBOLS[code] ?? code,
-        }])
-      );
-    })() : undefined,
-    countryOverrides: product.countryOverrides ? (() => {
-      try { return JSON.parse(product.countryOverrides); } catch { return undefined; }
-    })() : undefined,
+    prices,
+    countryOverrides,
     lemonVariantId: product.lemonVariantId || undefined,
     languages,
     lessons,
     ebookChapters: existingConfig.ebookChapters || [],
-  };
+  });
 
-  // Salva su disco (solo se non siamo su Vercel)
   if (!IS_VERCEL) {
-    const courseDir = path.join(process.cwd(), "public", "courses", slug);
-    if (!fs.existsSync(courseDir)) {
-      fs.mkdirSync(courseDir, { recursive: true });
-    }
+    const courseDir = path.join(process.cwd(), "courses", slug);
+    if (!fs.existsSync(courseDir)) fs.mkdirSync(courseDir, { recursive: true });
     fs.writeFileSync(path.join(courseDir, "config.json"), JSON.stringify(config, null, 2), "utf8");
   }
 
-  // Salva su DB come cache (funziona ovunque, incluso Vercel)
   await prisma.courseConfigCache.upsert({
     where: { slug },
     update: { config: JSON.stringify(config), version: { increment: 1 } },

@@ -39,17 +39,10 @@ import { prisma } from "../../src/lib/db/prisma";
 import {
   BUNDLED_COURSES,
   findCourseMeta,
-  isBundledCourse,
-  type CourseMeta,
-} from "../../courses.config";
-
-interface ConfigShape {
-  slug: string;
-  author: string;
-  cover?: string;
-  template?: string;
-  defaultLanguage?: string;
-}
+  resolveCourseRegistration,
+} from "../../src/lib/courses/registry";
+import { parseCourseConfig, type CourseConfig } from "../../src/lib/config/course-config-schema";
+import { syncCourseConfigRecords } from "../../src/lib/config/sync-course-config";
 
 /**
  * Resolve the `creatorId` for a brand-new Product row.
@@ -133,42 +126,38 @@ async function main() {
   }
 
   // ─── 2. Registry gate: refuse unknown slugs ──────────────────────
-  const meta: CourseMeta | null = findCourseMeta(slug);
+  const registration = resolveCourseRegistration(slug);
+  const meta = registration?.meta;
   if (!meta) {
-    console.error(
-      `❌ Slug "${slug}" is NOT in the courses.config.ts registry.\n` +
-        `   Add an entry to COURSES[] first, then re-run this script.\n` +
-        `   Bundled slugs: ${bundledSlugsList}`,
-    );
+    const rawMeta = findCourseMeta(slug);
+    if (!rawMeta) {
+      console.error(
+        `❌ Slug "${slug}" is NOT in the courses.config.ts registry.\n` +
+          `   Add an entry to COURSES[] first, then re-run this script.\n` +
+          `   Bundled slugs: ${bundledSlugsList}`,
+      );
+    } else {
+      console.error(
+        `❌ Slug "${slug}" is declared kind="user-published" in the registry.\n` +
+          `   This sync script is BUNDLED-ONLY — it does not touch creator-driven products.\n` +
+          `\n` +
+          `   Creator-driven products are managed exclusively in the ` +
+          `Product table:\n` +
+          `     • They are authored + published via the studio UI / direct DB writes.\n` +
+          `     • Their data is read via src/lib/data/... resolvers (ProductDocument,\n` +
+          `       resolvePublishedContent, etc.), not through this registry.\n` +
+          `\n` +
+          `   Action: either remove the entry from COURSES[] (let it be DB-only),\n` +
+          `   or change ` +
+          `kind` +
+          ` to "bundled" if you DO want this script to manage it.\n`,
+      );
+    }
     process.exit(1);
   }
 
-  // ─── 2b. BUNDLED-ONLY GATE (Phase 3 split) ───────────────────────
-  //
-  // The sync script exists to promote BUNDLED config-on-disk to the
-  // DB (Product + CourseConfigCache). Creator-driven products
-  // (kind: "user-published") live exclusively in `Product` and are
-  // surfaced through the studio/UI publish flow — they MUST NOT be
-  // written via this script. Loud refusal (exit 1) is intentional:
-  // silent skip would mask accidental ops against a creator's slug.
-  if (!isBundledCourse(slug)) {
-    console.error(
-      `❌ Slug "${slug}" is declared kind="user-published" in the registry.\n` +
-        `   This sync script is BUNDLED-ONLY — it does not touch creator-driven products.\n` +
-        `\n` +
-        `   Creator-driven products are managed exclusively in the ` +
-        `Product table:\n` +
-        `     • They are authored + published via the studio UI / direct DB writes.\n` +
-        `     • Their data is read via src/lib/data/... resolvers (ProductDocument,\n` +
-        `       resolvePublishedContent, etc.), not through this registry.\n` +
-        `\n` +
-        `   Action: either remove the entry from COURSES[] (let it be DB-only),\n` +
-        `   or change ` +
-        `kind` +
-        ` to "bundled" if you DO want this script to manage it.\n`,
-    );
-    process.exit(1);
-  }
+  // The resolver above intentionally returns null for both unknown and
+  // user-published slugs; explicit diagnostics are handled above.
 
   if (meta.status !== "active") {
     console.log(
@@ -191,77 +180,51 @@ async function main() {
   console.log(
     `📖 Reading courses/${slug}/config.json (template=${meta.templateId}, status=${meta.status})...`,
   );
-  let localConfig: ConfigShape;
+  let localConfig: CourseConfig;
   try {
-    localConfig = JSON.parse(readFileSync(configPath, "utf-8")) as ConfigShape;
+    localConfig = parseCourseConfig(JSON.parse(readFileSync(configPath, "utf-8")));
+    if (localConfig.slug !== slug) {
+      throw new Error(`config.slug must equal the requested slug "${slug}"`);
+    }
   } catch (e) {
-    console.error(`❌ Failed to parse config.json:`, e);
+    console.error(`❌ Invalid config.json:`, e);
     process.exit(1);
   }
   console.log(`   Author: ${localConfig.author}`);
+  if (localConfig.template && localConfig.template !== meta.templateId) {
+    console.error(
+      `❌ config.template "${localConfig.template}" does not match registry templateId "${meta.templateId}".`,
+    );
+    process.exit(1);
+  }
   console.log(`   Template: ${localConfig.template ?? meta.templateId}`);
-  console.log(`   Cover: ${localConfig.cover ?? "(none)"}`);
+  console.log(`   Cover: ${localConfig.cover}`);
 
-  // ─── 4. Upsert Product row (marketing/access metadata) ───────────
-  console.log(`\n🔄 Upserting Product row for "${slug}"...`);
+  // ─── 4. Atomically synchronize Product + CourseConfigCache ─────────
+  console.log(`\n🔄 Atomically syncing Product + CourseConfigCache for "${slug}"...`);
   try {
     const existingProduct = await prisma.product.findUnique({
       where: { slug },
       select: { id: true, creatorId: true },
     });
-
-    if (existingProduct) {
-      // Refresh metadata only — hand off creatorId from existing row.
-      await prisma.product.update({
-        where: { slug },
-        data: {
-          coverUrl: localConfig.cover ?? null,
-          templateId: localConfig.template ?? meta.templateId,
-          status: "published",
-          defaultLanguage: localConfig.defaultLanguage ?? "it",
-        },
-      });
-      console.log(`   ✓ Product refreshed (id=${existingProduct.id}).`);
-    } else {
-      // Brand-new course: resolve creatorId (throws loud on multi-admin —
-      // see resolveCreatorId). Failure exits 2 with explicit message.
-      const creatorId = await resolveCreatorId();
-      const created = await prisma.product.create({
-        data: {
-          slug,
-          coverUrl: localConfig.cover ?? null,
-          templateId: localConfig.template ?? meta.templateId,
-          status: "published",
-          defaultLanguage: localConfig.defaultLanguage ?? "it",
-          creatorId,
-        },
-      });
-      console.log(`   ✓ Product created (id=${created.id}, creatorId=${creatorId}).`);
-    }
-  } catch (e) {
-    console.error(`❌ Product upsert failed:`, e);
-    process.exit(2);
-  }
-
-  // ─── 5. Upsert CourseConfigCache (precomputed JSON snapshot) ─────
-  console.log(`🔄 Upserting CourseConfigCache row for "${slug}"...`);
-  try {
-    const cached = await prisma.courseConfigCache.upsert({
-      where: { slug },
-      update: {
-        config: JSON.stringify(localConfig),
-        version: { increment: 1 },
-      },
-      create: { slug, config: JSON.stringify(localConfig) },
+    const creatorId = existingProduct?.creatorId ?? (await resolveCreatorId());
+    const result = await syncCourseConfigRecords(prisma, {
+      slug,
+      creatorId,
+      coverUrl: localConfig.cover,
+      templateId: localConfig.template ?? meta.templateId,
+      defaultLanguage: localConfig.defaultLanguage,
+      configJson: JSON.stringify(localConfig),
     });
-    console.log(`   ✓ CourseConfigCache updated. Version: ${cached.version}`);
+    console.log(`   ✓ Product ${result.createdProduct ? "created" : "refreshed"} (id=${result.productId}).`);
+    console.log(`   ✓ CourseConfigCache updated. Version: ${result.cacheVersion}`);
   } catch (e) {
-    console.error(`❌ CourseConfigCache upsert failed:`, e);
+    console.error(`❌ Atomic Product + CourseConfigCache sync failed:`, e);
     process.exit(2);
   }
 
   console.log(
-    `\n✅ Done! "${slug}" (template=${meta.templateId}) synced → Product + CourseConfigCache.`,
+    `\n✅ Done! "${slug}" (template=${meta.templateId}) synced atomically → Product + CourseConfigCache.`,
   );
 
   await prisma.$disconnect();
@@ -269,6 +232,8 @@ async function main() {
 
 main().catch((err) => {
   console.error("\n❌ Sync failed with unexpected error:", err);
-  prisma.$disconnect().catch(() => {});
+  prisma.$disconnect().catch((disconnectError) => {
+    console.warn("⚠️ Failed to disconnect Prisma after sync error:", disconnectError);
+  });
   process.exit(2);
 });

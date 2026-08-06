@@ -1,148 +1,87 @@
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 import { prisma } from "../db/prisma";
 import { cacheGet, cacheSet } from "../redis";
-import type { CourseTemplateId } from "@/lib/courses/templates";
+import { safeParseCourseConfig, type CourseConfig } from "./course-config-schema";
 
-export interface LessonConfig {
-  number: number;
-  id: string;
-  titles: Record<string, string>;
-  descriptions: Record<string, string>;
-  videos: Record<string, string>;
-  duration: string;
-}
+export type { CourseConfig, LanguageEntry, LessonConfig, PriceByLocale } from "./course-config-schema";
 
-export interface PriceByLocale {
-  amount: number;
-  currency: string;
-  symbol: string;
-}
-
-export interface CourseConfig {
-  slug: string;
-  productId?: string;
-  /**
-   * Rendering template — selects the components/ folder at runtime.
-   * Optional because smoke-test / non-custom courses omit it.
-   * See `src/lib/courses/templates.ts` for the canonical 6-value union.
-   */
-  template?: CourseTemplateId;
-  defaultLanguage: string;
-  cover: string;
-  authorImageUrl?: string;
-  storyImages?: string[];
-  accentColor?: string;
-  checkoutUrl: string;
-  author: string;
-  price?: number;
-  prices?: Record<string, PriceByLocale>;
-  lemonVariantId?: string;
-  languages: Record<string, LanguageEntry>;
-  lessons: LessonConfig[];
-  /** Locale-keyed chapter titles + page number. Access titles via `chapter[lang]`. */
-  ebookChapters: { page: number; [locale: string]: string | number }[];
-  /** Country-specific price overrides: { "BR": { currency: "BRL", price: 9900, symbol: "R$", ... } } */
-  countryOverrides?: Record<string, { currency: string; price: number; symbol?: string; lemonVariantId?: string }> | string;
-}
-
-export interface LanguageEntry {
-  title: string;
-  problem: string;
-  story: string;
-  cta: string;
-  description: string;
-  ebookTitle: string;
-  ebookContent: string;
-  /** SEO metadata per questa lingua */
-  seo?: {
-    title: string;
-    description: string;
-    ogImage?: string;
-  };
-  /** Traduzioni UI (labels, benefits, faq) */
-  ui?: {
-    labels: Record<string, string>;
-    benefits: { title: string; desc: string }[];
-    faq: { q: string; a: string }[];
-  };
-}
-
-/**
- * Cache in-memory per ridurre letture disco/DB durante il lifecycle
- * di una stessa richiesta. Azzerata ad ogni deploy su Vercel.
- */
 const _memoryCache = new Map<string, { config: CourseConfig; cachedAt: number }>();
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minuti
+const CACHE_TTL_MS = 5 * 60 * 1000;
 
-/**
- * Carica la configurazione di un corso con read-through cache.
- *
- * Strategy:
- *   1. Memory cache (per la durata della richiesta)
- *   2. File system (sviluppo locale)
- *   3. Database cache (CourseConfigCache — funziona su Vercel)
- *   4. null
- */
-export async function getCourseConfig(slug: string): Promise<CourseConfig | null> {
-  // 1. Redis cache (cross-instance, 5 min TTL)
-  const redisKey = `config:${slug}`;
-  const redisCached = await cacheGet<CourseConfig>(redisKey);
-  if (redisCached) return redisCached;
-
-  // 2. Memory cache (per-request lifecycle)
-  const cached = _memoryCache.get(slug);
-  if (cached && Date.now() - cached.cachedAt < CACHE_TTL_MS) {
-    return cached.config;
+function parseConfigAtBoundary(value: unknown, source: string): CourseConfig | null {
+  const parsed = safeParseCourseConfig(value);
+  if (!parsed.success) {
+    console.error(`Invalid course config from ${source}:`, parsed.error.issues);
+    return null;
   }
+  return parsed.data;
+}
+
+/** Load a course config from Redis, disk, DB cache, or generated DB content. */
+export async function getCourseConfig(slug: string): Promise<CourseConfig | null> {
+  const ensureSlug = (config: CourseConfig | null, source: string): CourseConfig | null => {
+    if (config && config.slug !== slug) {
+      console.error(`Course config slug mismatch from ${source}: expected ${slug}, got ${config.slug}`);
+      return null;
+    }
+    return config;
+  };
+  const redisKey = `config:${slug}`;
+  const redisCached = await cacheGet<unknown>(redisKey);
+  if (redisCached) {
+    const config = parseConfigAtBoundary(redisCached, `Redis:${slug}`);
+    if (config) return ensureSlug(config, `Redis:${slug}`);
+  }
+
+  const cached = _memoryCache.get(slug);
+  if (cached && Date.now() - cached.cachedAt < CACHE_TTL_MS) return cached.config;
 
   let config: CourseConfig | null = null;
+  const configPath = path.join(process.cwd(), "courses", slug, "config.json");
 
-  // 2. File system (sviluppo locale + Vercel Lambda).
-  // ADR-0011: reads `courses/<slug>/config.json` directly. There is no
-  // `public/courses/<slug>/config.json` mirror anymore — the course
-  // plugin folder under `courses/` is the SINGLE source-of-truth, and
-  // `next.config.mjs` `outputFileTracingIncludes` (`./courses/**/*.json`)
-  // bundles these into the serverless Lambda image so the `fs.readFileSync`
-  // works at runtime on Vercel.
   try {
-    const configPath = path.join(process.cwd(), 'courses', slug, 'config.json');
     if (fs.existsSync(configPath)) {
-      const fileContent = fs.readFileSync(configPath, 'utf8');
-      config = JSON.parse(fileContent) as CourseConfig;
+      config = ensureSlug(
+        parseConfigAtBoundary(
+          JSON.parse(fs.readFileSync(configPath, "utf8")),
+          configPath,
+        ),
+        configPath,
+      );
     }
-  } catch {
-    // Fallback al DB
+  } catch (error) {
+    console.error(`Error reading course config ${configPath}:`, error);
   }
 
-  // 3. Database cache (funziona su Vercel)
   if (!config) {
     try {
-      const cached = await prisma.courseConfigCache.findUnique({ where: { slug } });
-      if (cached) {
-        config = JSON.parse(cached.config) as CourseConfig;
+      const cachedRow = await prisma.courseConfigCache.findUnique({ where: { slug } });
+      if (cachedRow) {
+        config = ensureSlug(
+          parseConfigAtBoundary(JSON.parse(cachedRow.config), `CourseConfigCache:${slug}`),
+          `CourseConfigCache:${slug}`,
+        );
       }
     } catch (error) {
       console.error(`Error reading config from DB for ${slug}:`, error);
     }
   }
 
-  // 4. Auto-generate from DB if cache is empty (first visit after deploy)
   if (!config) {
     try {
       const { generateCourseConfig } = await import("./generate-course-config");
-      config = (await generateCourseConfig(slug)) as CourseConfig;
+      const generated = await generateCourseConfig(slug);
+      config = ensureSlug(parseConfigAtBoundary(generated, `generated:${slug}`), `generated:${slug}`);
     } catch {
-      // Product might not exist — that's fine, return null
+      // Product might not exist — return null.
     }
   }
 
-  // Popola memory cache
   if (config) {
     _memoryCache.set(slug, { config, cachedAt: Date.now() });
-    // Popola anche Redis (fire-and-forget — non blocca il return)
-    cacheSet(redisKey, config).catch((err) => {
-      console.warn(`[cache] fire-and-forget write failed for key ${redisKey}`, err);
+    cacheSet(redisKey, config).catch((error) => {
+      console.warn(`[cache] fire-and-forget write failed for key ${redisKey}`, error);
     });
   }
 

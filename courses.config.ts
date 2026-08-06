@@ -99,8 +99,9 @@ export interface CourseMeta {
 
 /**
  * All courses on this platform. Order = display order in /courses catalog.
- * First entry is the canonical incoming-traffic landing (used for YouTube
- * default URL when no channel specifies otherwise).
+ * Display order is explicit registry order. Consumers that need a landing
+ * target must choose an explicit slug or query the Product registry; there is
+ * no implicit first-course/default-slug fallback.
  *
  * Note: this array is INTENTIONALLY mixed — it accepts both bundled and
  * user-published entries. Downstream consumers must filter on
@@ -111,16 +112,14 @@ export const COURSES: CourseMeta[] = [];
 
 /** Predicate — returns true iff the slug is a bundled course. */
 export function isBundledCourse(slug: string): boolean {
-  return COURSES.find((c) => c.slug === slug)?.kind !== "user-published";
+  const course = COURSES.find((c) => c.slug === slug);
+  return course?.kind === "bundled" || (course?.kind === undefined && course !== undefined);
 }
 
 /** All bundled courses (status-agnostic). Convenience for sync script + audit. */
 export const BUNDLED_COURSES: CourseMeta[] = COURSES.filter(
   (c) => c.kind !== "user-published",
 );
-
-/** The canonical landing slug for incoming traffic attribution (YouTube defaults, etc). */
-export const DEFAULT_LANDING_SLUG: string = COURSES[0]?.slug ?? "default-slug";
 
 /**
  * All ACTIVE bundled courses — convenience export for the marketing

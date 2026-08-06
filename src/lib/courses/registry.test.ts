@@ -13,11 +13,10 @@
  *   2. ACTIVE_BUNDLED_COURSES excludes user-published + inactive.
  *   3. ACTIVE_COURSES alias == ACTIVE_BUNDLED_COURSES (legacy compat).
  *   4. isBundledCourse(slug) — true for bundled, false for user-published.
- *   5. isBundledCourse(slug) — true for unknown slug (treat as bundled
- *      to preserve the "absent = bundled" default behavior).
+ *   5. isBundledCourse(slug) — false for unknown slugs.
  *   6. getBundledSlugs() returns bundled-only slug list.
  *   7. findCourseMeta returns the entry regardless of kind (raw catalog view).
- *   8. DEFAULT_LANDING_SLUG uses COURSES[0] (legacy behavior).
+ *   8. resolveCourseRegistration distinguishes bundled from unknown/DB-owned.
  *   9. ACTIVE_BUNDLED_COURSES preserves insertion order.
  */
 
@@ -67,12 +66,13 @@ vi.mock("../../../courses.config", () => {
     },
   ];
 
-  const isBundledCourse = (slug: string) =>
-    COURSES.find((c) => c.slug === slug)?.kind !== "user-published";
+  const isBundledCourse = (slug: string) => {
+    const course = COURSES.find((c) => c.slug === slug);
+    return course?.kind === "bundled" || (course?.kind === undefined && course !== undefined);
+  };
   const BUNDLED_COURSES = COURSES.filter((c) => c.kind !== "user-published");
   const ACTIVE_BUNDLED_COURSES = BUNDLED_COURSES.filter((c) => c.status === "active");
   const ACTIVE_COURSES = ACTIVE_BUNDLED_COURSES; // back-compat alias
-  const DEFAULT_LANDING_SLUG = COURSES[0]?.slug ?? "default-slug";
   const findCourseMeta = (slug: string) =>
     COURSES.find((c) => c.slug === slug) ?? null;
 
@@ -81,7 +81,6 @@ vi.mock("../../../courses.config", () => {
     BUNDLED_COURSES,
     ACTIVE_BUNDLED_COURSES,
     ACTIVE_COURSES,
-    DEFAULT_LANDING_SLUG,
     findCourseMeta,
     isBundledCourse,
   };
@@ -94,7 +93,6 @@ const {
   BUNDLED_COURSES,
   ACTIVE_BUNDLED_COURSES,
   ACTIVE_COURSES,
-  DEFAULT_LANDING_SLUG,
   findCourseMeta,
   isBundledCourse,
   getBundledSlugs,
@@ -102,6 +100,7 @@ const {
   getAllSlugs,
   getCoursesByStatus,
   isRegisteredCourse,
+  resolveCourseRegistration,
 } = await import("./registry");
 
 afterEach(() => {
@@ -135,12 +134,8 @@ describe("registry — bundled-only filtering (Phase 3 split)", () => {
     expect(isBundledCourse("delta")).toBe(true);
   });
 
-  it("5. isBundledCourse returns true for unknown slugs (absent = bundled default)", () => {
-    // The Phase 3 split treats absence as bundled: a slug that is
-    // not registered at all is NOT user-published, so it falls through
-    // as bundled. This preserves the "absent entry kind" default
-    // behavior for backward-compat callers.
-    expect(isBundledCourse("not-registered")).toBe(true);
+  it("5. isBundledCourse returns false for unknown slugs", () => {
+    expect(isBundledCourse("not-registered")).toBe(false);
   });
 });
 
@@ -185,9 +180,10 @@ describe("registry — raw catalog lookups (kind-agnostic)", () => {
     expect(charlie?.kind).toBe("user-published");
   });
 
-  it("8. DEFAULT_LANDING_SLUG uses COURSES[0] (legacy behavior, regardless of kind)", () => {
-    expect(DEFAULT_LANDING_SLUG).toBe(COURSES[0]?.slug);
-    expect(DEFAULT_LANDING_SLUG).toBe("alpha");
+  it("8. resolveCourseRegistration returns bundled metadata and null otherwise", () => {
+    expect(resolveCourseRegistration("alpha")).toEqual({ kind: "bundled", meta: COURSES[0] });
+    expect(resolveCourseRegistration("charlie")).toBeNull();
+    expect(resolveCourseRegistration("not-registered")).toBeNull();
   });
 
   it("9. ACTIVE_BUNDLED_COURSES preserves insertion order (not re-sorted by status)", () => {

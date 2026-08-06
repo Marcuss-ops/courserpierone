@@ -17,7 +17,7 @@ import type { CourseConfig } from "@/lib/config/white-label-data";
 
 interface CourseConfig {
   slug: string;
-  template: "lumio" | "h612" | "horizon" | "book-claude";
+  template?: "lumio" | "h612" | "horizon" | "default";
   defaultLanguage: string;
   cover: string;                          // URL copertina
   price: number;
@@ -47,8 +47,8 @@ interface LanguageEntry {
 // Da API route o script
 import { generateCourseConfig } from "@/lib/config/generate-course-config";
 const config = await generateCourseConfig("amish-secrets");
-// Salva su: public/courses/{slug}/config.json
-//          + DB: CourseConfigCache
+// Source locale: courses/{slug}/config.json
+//          + DB projection: CourseConfigCache (validated and synchronized atomically)
 ```
 
 ## Leggere una config (consigliato)
@@ -62,8 +62,8 @@ const config = await getCourseConfig("amish-secrets"); // null se non esiste
 ## Struttura su disco
 
 ```
-public/courses/{slug}/
-├── config.json       # Cache locale (generato da generate-course-config.ts)
+courses/{slug}/
+├── config.json       # Bundled source config (validated with courseConfigSchema)
 └── cover.*           # Copertina del corso
 ```
 

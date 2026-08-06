@@ -2,9 +2,14 @@
 /**
  * Audit: Course plugin drift gate.
  *
- * Cross-checks 3 sources of truth for the course plugin architecture
+ * Cross-checks the bundled registry and its on-disk/DB projections for the
+ * course plugin architecture. Creator-driven products are DB-only and are
+ * intentionally not expected in this registry or folder layout.
+ *
+ * There are no implicit/default course slugs: an absent registry entry is
+ * unknown, never bundled.
  * (per ADR-0011 + smoke-test proof):
- *   1. `courses.config.ts` `BUNDLED_COURSES[]` — registry source-of-truth
+ *   1. `courses.config.ts` `BUNDLED_COURSES[]` — bundled registry source
  *      (post-Phase 3 split: user-published entries are excluded from
  *      these drift checks since they live ONLY in `Product`, not in
  *      this registry's plugin folder layout).
@@ -41,7 +46,6 @@ import { existsSync, readdirSync, statSync } from "fs";
 import { resolve } from "path";
 import process from "process";
 import type { CourseMeta } from "../courses.config";
-import type { CourseTemplateId } from "../src/lib/courses/templates";
 
 // ─── Step 1: load registry via tsx ───────────────────────────────
 async function loadRegistry(): Promise<{ bundled: CourseMeta[]; all: CourseMeta[] }> {

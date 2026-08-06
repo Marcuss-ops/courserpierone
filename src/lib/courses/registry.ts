@@ -23,6 +23,8 @@
  *     bundled-only view (user-published entries are filtered out).
  *   - For creator-driven product reads, use `Product` directly via
  *     `src/lib/data/...` — never through this registry.
+ *   - `resolveCourseRegistration` is the single public lookup for bundled
+ *     registration metadata; unknown slugs resolve to null.
  */
 
 import {
@@ -30,7 +32,6 @@ import {
   ACTIVE_BUNDLED_COURSES,
   ACTIVE_COURSES,
   COURSES,
-  DEFAULT_LANDING_SLUG,
   findCourseMeta,
   isBundledCourse,
   type CourseKind,
@@ -47,10 +48,21 @@ export {
   ACTIVE_BUNDLED_COURSES,
   ACTIVE_COURSES,
   COURSES,
-  DEFAULT_LANDING_SLUG,
   findCourseMeta,
   isBundledCourse,
 };
+
+export interface CourseRegistration {
+  kind: "bundled";
+  meta: CourseMeta;
+}
+
+/** Resolve a bundled course registration; null means DB-owned or unknown. */
+export function resolveCourseRegistration(slug: string): CourseRegistration | null {
+  const meta = findCourseMeta(slug);
+  if (!meta || !isBundledCourse(slug)) return null;
+  return { kind: "bundled", meta };
+}
 
 /** All known slugs (bundled + user-published, regardless of status). */
 export function getAllSlugs(): string[] {
