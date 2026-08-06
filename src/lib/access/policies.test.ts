@@ -174,7 +174,7 @@ describe("evaluatePolicy — pending_order (Node-only, requiresDb)", () => {
         {
           ...baseCtx,
           userId: "user-1",
-          pendingOrderId: "order-1",
+          hasPendingOrder: true,
           pendingOrderOwnerId: "user-1",
           productDefaultLanguage: "it",
         },
@@ -182,7 +182,6 @@ describe("evaluatePolicy — pending_order (Node-only, requiresDb)", () => {
     ).toEqual({
       action: "pending",
       reason: "verifying_order",
-      orderId: "order-1",
       productDefaultLanguage: "it",
     });
   });
@@ -194,7 +193,7 @@ describe("evaluatePolicy — pending_order (Node-only, requiresDb)", () => {
         {
           ...baseCtx,
           userId: "user-1",
-          pendingOrderId: "order-2",
+          hasPendingOrder: true,
           pendingOrderOwnerId: "user-2",
         },
       ),
@@ -210,14 +209,14 @@ describe("evaluatePolicy — pending_order (Node-only, requiresDb)", () => {
     ).toBeNull();
   });
 
-  it("returns null when pendingOrderId is null (defense-in-depth: no Order.id available)", () => {
+  it("returns null when the pending flag is false", () => {
     expect(
       evaluatePolicy(
         { kind: "pending_order", requiresDb: true },
         {
           ...baseCtx,
           userId: "user-1",
-          pendingOrderId: null,
+          hasPendingOrder: false,
           pendingOrderOwnerId: "user-1",
         },
       ),

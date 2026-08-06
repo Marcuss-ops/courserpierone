@@ -100,7 +100,6 @@ const mockAllowedGrant = (_sourceType: "order" | "free_enrollment" | "admin" | "
     hasAccess: true,
     reason: "active_purchase",
     productId: PRODUCT_ID,
-    orderId: "ord-1",
   });
 
 const mockDeniedGrant = () =>
@@ -108,7 +107,6 @@ const mockDeniedGrant = () =>
     hasAccess: false,
     reason: "not_purchased",
     productId: PRODUCT_ID,
-    orderId: null,
   });
 
 // Paid-course product lookup fixture. V2 route reads `{ id, price }`
@@ -156,11 +154,9 @@ describe("GET /api/ebook/[slug]/download — user-keyed AccessGrant SSOT (NO adm
 
     expect(response.status).toBe(401);
     expect(mockResolveProductAccess).toHaveBeenCalledWith({
-      userId: ADMIN_ID,
-      userRole: "admin",
+      kind: "admin",
+      adminId: ADMIN_ID,
       productId: PRODUCT_ID,
-      provider: undefined,
-      providerOrderId: undefined,
     });
   });
 

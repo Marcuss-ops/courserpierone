@@ -69,8 +69,6 @@ export type AccessDecision =
   | {
       action: "pending";
       reason: "verifying_order";
-      /** Prisma `Order.id` — passed to `<PendingOrderScreen orderId=... />` */
-      orderId: string;
       productDefaultLanguage?: string | null;
     };
 
@@ -113,15 +111,10 @@ export interface AccessContext {
    * remains pure (no DB).
    */
   hasActiveAccessGrant?: boolean;
-  /**
-   * User.id that owns a `Order.status === "pending"` row matching the
-   * `orderId` query-param at the request URL. Compared against
-   * `ctx.userId` inside `pending_order` policy — only the owner sees
-   * the verifying screen.
-   */
+  /** User.id that owns a pending payment for this product. */
   pendingOrderOwnerId?: string | null;
-  /** Prisma `Order.id` for the pending_order case. Used to render PendingOrderScreen. */
-  pendingOrderId?: string | null;
+  /** Whether the authenticated owner has a payment currently being verified. */
+  hasPendingOrder?: boolean;
   /** `Product.defaultLanguage` — locale for the verifying screen + paywall links. */
   productDefaultLanguage?: string | null;
 }
@@ -198,12 +191,11 @@ export function evaluatePolicy(
         ctx.pendingOrderOwnerId &&
         ctx.userId &&
         ctx.pendingOrderOwnerId === ctx.userId &&
-        ctx.pendingOrderId
+        ctx.hasPendingOrder === true
       ) {
         return {
           action: "pending",
           reason: "verifying_order",
-          orderId: ctx.pendingOrderId,
           productDefaultLanguage: ctx.productDefaultLanguage,
         };
       }

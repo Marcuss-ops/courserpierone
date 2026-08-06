@@ -80,11 +80,11 @@ export async function POST(request: NextRequest) {
     // — the inline `dbUser.role === "admin"` short-circuit is GONE. The
     // resolver owns the admin rule (userRole === "admin" → allow) and
     // honors all grant sourceTypes with status="active" + non-expired.
-    const granted = await resolveProductAccess({
-      userId: dbUser.id,
-      userRole: dbUser.role,
-      productId: lesson.productId,
-    });
+    const granted = await resolveProductAccess(
+      dbUser.role === "admin"
+        ? { kind: "admin", adminId: dbUser.id, productId: lesson.productId }
+        : { kind: "authenticated", userId: dbUser.id, productId: lesson.productId },
+    );
     if (!granted.hasAccess) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }

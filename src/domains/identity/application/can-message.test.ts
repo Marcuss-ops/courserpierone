@@ -11,13 +11,15 @@ function createRepository(): AccessRepository {
   return {
     resolveProductId: vi.fn(),
     findProductCreator: vi.fn().mockResolvedValue(CREATOR_ID),
+    isAdminUser: vi.fn().mockResolvedValue(false),
     findActiveGrant: vi.fn().mockResolvedValue({
       id: "grant-1",
       sourceType: "order",
       sourceId: "order-1",
     }),
     findLatestUserOrder: vi.fn(),
-    findAnonymousOrder: vi.fn(),
+    resolvePostCheckoutSession: vi.fn(),
+    findPostCheckoutOrder: vi.fn(),
   };
 }
 

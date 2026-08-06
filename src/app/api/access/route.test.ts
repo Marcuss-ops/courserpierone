@@ -55,7 +55,6 @@ function allow() {
     hasAccess: true,
     reason: "active_purchase",
     productId: PRODUCT_ID,
-    orderId: "grant-1",
   });
 }
 
@@ -64,7 +63,6 @@ function deny() {
     hasAccess: false,
     reason: "not_purchased",
     productId: PRODUCT_ID,
-    orderId: null,
   });
 }
 
@@ -106,11 +104,9 @@ describe("GET /api/access — checkout token contract", () => {
     });
     expect(mockSetCheckoutSessionCookie).toHaveBeenCalled();
     expect(mockResolveProductAccess).toHaveBeenCalledWith({
-      userId: undefined,
-      userRole: undefined,
+      kind: "post_checkout",
+      token: "jti-1",
       productId: PRODUCT_ID,
-      provider: "lemonsqueezy",
-      providerOrderId: PROVIDER_ORDER_ID,
     });
   });
 
@@ -131,10 +127,11 @@ describe("GET /api/access — checkout token contract", () => {
       productId: PRODUCT_ID,
       productSlug: PRODUCT_SLUG,
     });
-    expect(mockResolveProductAccess).toHaveBeenCalledWith(expect.objectContaining({
-      provider: "lemonsqueezy",
-      providerOrderId: PROVIDER_ORDER_ID,
-    }));
+    expect(mockResolveProductAccess).toHaveBeenCalledWith({
+      kind: "post_checkout",
+      token: "jti-1",
+      productId: PRODUCT_ID,
+    });
   });
 
   it("ignores public providerOrderId and orderId parameters", async () => {
@@ -152,13 +149,7 @@ describe("GET /api/access — checkout token contract", () => {
     expect(response.status).toBe(200);
     expect((await response.json()).hasAccess).toBe(false);
     expect(mockReadCheckoutSession).not.toHaveBeenCalled();
-    expect(mockResolveProductAccess).toHaveBeenCalledWith({
-      userId: undefined,
-      userRole: undefined,
-      productId: PRODUCT_ID,
-      provider: undefined,
-      providerOrderId: undefined,
-    });
+    expect(mockResolveProductAccess).not.toHaveBeenCalled();
   });
 
   it("keeps authenticated session access independent of checkout tokens", async () => {
@@ -171,11 +162,9 @@ describe("GET /api/access — checkout token contract", () => {
     expect(response.status).toBe(200);
     expect((await response.json()).userId).toBe(USER_ID);
     expect(mockResolveProductAccess).toHaveBeenCalledWith({
+      kind: "authenticated",
       userId: USER_ID,
-      userRole: "student",
       productId: PRODUCT_ID,
-      provider: undefined,
-      providerOrderId: undefined,
     });
   });
 });

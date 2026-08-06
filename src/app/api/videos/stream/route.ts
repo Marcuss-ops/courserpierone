@@ -86,13 +86,16 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
     let hasAccess = isFree;
 
     if (!hasAccess && (dbUser || checkoutSession)) {
-      const granted = await resolveProductAccess({
-        userId: dbUser?.id,
-        userRole: dbUser?.role,
-        productId: product.id,
-        provider: checkoutSession?.provider,
-        providerOrderId: checkoutSession?.providerOrderId,
-      });
+      const accessRequest = dbUser
+        ? dbUser.role === "admin"
+          ? { kind: "admin" as const, adminId: dbUser.id, productId: product.id }
+          : { kind: "authenticated" as const, userId: dbUser.id, productId: product.id }
+        : checkoutSession
+          ? { kind: "post_checkout" as const, token: checkoutSession.jti, productId: product.id }
+          : null;
+      const granted = accessRequest
+        ? await resolveProductAccess(accessRequest)
+        : { hasAccess: false };
       hasAccess = granted.hasAccess;
     }
 

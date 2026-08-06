@@ -69,11 +69,11 @@ export default async function ConversationPage({ params, searchParams }: ChatPag
   }
 
   const [accessResult, otherUser] = await Promise.all([
-    resolveProductAccess({
-      userId: dbUser.id,
-      userRole: dbUser.role,
-      productId,
-    }),
+    resolveProductAccess(
+      dbUser.role === "admin"
+        ? { kind: "admin", adminId: dbUser.id, productId }
+        : { kind: "authenticated", userId: dbUser.id, productId },
+    ),
     prisma.user.findUnique({
       where: { id: userId },
       select: { id: true, name: true, image: true, role: true },

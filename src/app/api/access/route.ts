@@ -26,7 +26,10 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
     if (!productInput) return NextResponse.json({ hasAccess: false });
 
     const product = await prisma.product.findFirst({
-      where: { OR: [{ id: productInput }, { slug: productInput }] },
+      where: {
+        deletedAt: null,
+        OR: [{ id: productInput }, { slug: productInput }],
+      },
       select: { id: true, slug: true },
     });
     if (!product) return NextResponse.json({ hasAccess: false });
@@ -49,13 +52,17 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
       });
     }
 
-    const granted = await resolveProductAccess({
-      userId: dbUser?.id,
-      userRole: dbUser?.role,
-      productId: product.id,
-      provider: checkoutSession?.provider,
-      providerOrderId: checkoutSession?.providerOrderId,
-    });
+    const accessRequest = dbUser
+      ? dbUser.role === "admin"
+        ? { kind: "admin" as const, adminId: dbUser.id, productId: product.id }
+        : { kind: "authenticated" as const, userId: dbUser.id, productId: product.id }
+      : checkoutSession
+        ? { kind: "post_checkout" as const, token: checkoutSession.jti, productId: product.id }
+        : null;
+
+    const granted = accessRequest
+      ? await resolveProductAccess(accessRequest)
+      : { hasAccess: false, reason: "not_purchased" as const, productId: product.id };
 
     const result = {
       hasAccess: granted.hasAccess,

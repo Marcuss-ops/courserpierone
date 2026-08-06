@@ -76,7 +76,6 @@ const mockAllowedGrant = (_sourceType: "order" | "free_enrollment" | "admin" | "
     hasAccess: true,
     reason: "active_purchase",
     productId: PRODUCT_ID,
-    orderId: "ord-1",
   });
 
 const mockDeniedGrant = () =>
@@ -84,7 +83,6 @@ const mockDeniedGrant = () =>
     hasAccess: false,
     reason: "not_purchased",
     productId: PRODUCT_ID,
-    orderId: null,
   });
 
 // ─── fakeOrder factory → @/app/api/__test-helpers__/fake-order (V3.3.2) ─────
@@ -260,8 +258,8 @@ describe("POST /api/progress — admin bypass + customer AccessGrant gate", () =
     const body = await response.json();
     expect(body.error).toBe("Forbidden");
     expect(mockResolveProductAccess).toHaveBeenCalledWith({
+      kind: "authenticated",
       userId: USER_ID,
-      userRole: "student",
       productId: PRODUCT_ID,
     });
     expect(mockPrisma.lessonProgress.upsert).not.toHaveBeenCalled();
@@ -292,8 +290,7 @@ describe("POST /api/progress — admin bypass + customer AccessGrant gate", () =
       hasAccess: true,
       reason: "active_purchase",
       productId: PRODUCT_ID,
-      orderId: null,
-    });
+      });
     mockPrisma.lessonProgress.upsert.mockResolvedValueOnce({
       id: "lp1", userId: ADMIN_ID, lessonId: LESSON_ID, completed: true,
     });
@@ -306,8 +303,8 @@ describe("POST /api/progress — admin bypass + customer AccessGrant gate", () =
     expect(response.status).toBe(200);
     expect(body.success).toBe(true);
     expect(mockResolveProductAccess).toHaveBeenCalledWith({
-      userId: ADMIN_ID,
-      userRole: "admin",
+      kind: "admin",
+      adminId: ADMIN_ID,
       productId: PRODUCT_ID,
     });
     expect(mockPrisma.lessonProgress.upsert).toHaveBeenCalledOnce();
@@ -330,8 +327,8 @@ describe("POST /api/progress — admin bypass + customer AccessGrant gate", () =
     expect(response.status).toBe(200);
     expect(body.success).toBe(true);
     expect(mockResolveProductAccess).toHaveBeenCalledWith({
+      kind: "authenticated",
       userId: USER_ID,
-      userRole: "student",
       productId: PRODUCT_ID,
     });
     expect(mockPrisma.lessonProgress.upsert).toHaveBeenCalledOnce();

@@ -32,10 +32,11 @@ export async function GET(
     // The certificate route does NOT
     // have an inline admin bypass (mirrors the prior in-test contract)
     // — admin must hold an explicit grant to download a certificate.
-    const granted = await resolveProductAccess({
-      userId: dbUser.id,
-      productId,
-    });
+    const granted = await resolveProductAccess(
+      dbUser.role === "admin"
+        ? { kind: "admin", adminId: dbUser.id, productId }
+        : { kind: "authenticated", userId: dbUser.id, productId },
+    );
     if (!granted.hasAccess) {
       // Localized "you haven't purchased yet" error. Falls back to English
       // automatically when errLang isn't a registered key.

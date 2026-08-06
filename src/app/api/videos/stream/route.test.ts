@@ -91,7 +91,6 @@ const mockAllowedGrant = (_sourceType: "order" | "free_enrollment" | "admin" | "
     hasAccess: true,
     reason: "active_purchase",
     productId: PRODUCT_ID,
-    orderId: "ord-1",
   });
 
 const mockDeniedGrant = () =>
@@ -99,7 +98,6 @@ const mockDeniedGrant = () =>
     hasAccess: false,
     reason: "not_purchased",
     productId: PRODUCT_ID,
-    orderId: null,
   });
 
 // ─── fakeOrder factory → @/app/api/__test-helpers__/fake-order (V3.3.2) ─────
@@ -226,8 +224,8 @@ describe("GET /api/videos/stream — admin bypass + AccessGrant SSOT check", () 
     expect(response.status).toBe(200);
     expect(body.videoUrl).toBe(VIDEO_URL);
     expect(mockResolveProductAccess).toHaveBeenCalledWith({
-      userId: ADMIN_ID,
-      userRole: "admin",
+      kind: "admin",
+      adminId: ADMIN_ID,
       productId: PRODUCT_ID,
     });
   });
@@ -248,8 +246,8 @@ describe("GET /api/videos/stream — admin bypass + AccessGrant SSOT check", () 
     expect(response.status).toBe(200);
     expect(body.videoUrl).toBe(VIDEO_URL);
     expect(mockResolveProductAccess).toHaveBeenCalledWith({
+      kind: "authenticated",
       userId: USER_ID,
-      userRole: "student",
       productId: PRODUCT_ID,
     });
   });

@@ -3,8 +3,8 @@ import {
   allowFromGrant,
   deny,
   denyForOrder,
+  type AccessRequest,
   type ProductAccessResult,
-  type ResolveProductAccessInput,
 } from "../domain/access-decision";
 import type { AccessRepository } from "../ports/access-repository";
 
@@ -15,14 +15,15 @@ export interface ResolveProductAccessDeps {
 }
 
 /**
- * Identity & Access use case.
+ * Resolve access from one explicit authorization context.
  *
- * Route/application code calls this use case; persistence is supplied through
- * AccessRepository. The ordering is deliberately the same as the legacy
- * resolver so this first vertical slice is behavior-preserving.
+ * The request discriminator prevents callers from mixing authenticated,
+ * admin, and anonymous checkout credentials. Raw provider/internal order IDs
+ * are not part of this contract; the post-checkout adapter resolves them from
+ * a verified short-lived session before the use case queries the order.
  */
 export async function resolveProductAccess(
-  input: ResolveProductAccessInput,
+  input: AccessRequest,
   deps: ResolveProductAccessDeps,
 ): Promise<ProductAccessResult> {
   if (!input.productId) return deny("not_purchased", input.productId);
@@ -32,9 +33,15 @@ export async function resolveProductAccess(
     : await deps.port.resolveProductId(input.productId);
 
   if (!productId) return deny("not_purchased", input.productId);
-  if (input.userRole === "admin") return allowAsAdmin(productId);
 
-  if (input.userId) {
+  if (input.kind === "admin") {
+    if (!(await deps.port.isAdminUser(input.adminId))) {
+      return deny("not_purchased", productId);
+    }
+    return allowAsAdmin(productId);
+  }
+
+  if (input.kind === "authenticated") {
     const grant = await deps.port.findActiveGrant({
       userId: input.userId,
       productId,
@@ -48,28 +55,29 @@ export async function resolveProductAccess(
     return order ? denyForOrder(productId, order) : deny("not_purchased", productId);
   }
 
-  if (input.providerOrderId || input.internalOrderId) {
-    const order = await deps.port.findAnonymousOrder({
-      productId,
-      provider: input.provider,
-      providerOrderId: input.providerOrderId,
-      internalOrderId: input.internalOrderId,
-    });
-    if (!order) return deny("order_not_found", productId);
+  const session = await deps.port.resolvePostCheckoutSession(input.token, productId);
+  if (!session) return deny("order_not_found", productId);
 
-    const grant = await deps.port.findActiveGrant({
-      sourceType: "order",
-      sourceId: order.id,
-      productId,
-    });
-    return grant ? allowFromGrant(productId, grant) : denyForOrder(productId, order);
-  }
+  const order = await deps.port.findPostCheckoutOrder({
+    provider: session.provider,
+    providerOrderId: session.providerOrderId,
+    productId,
+  });
+  if (!order) return deny("order_not_found", productId);
 
-  return deny("not_purchased", productId);
+  const grant = await deps.port.findActiveGrant({
+    sourceType: "order",
+    sourceId: order.id,
+    productId,
+  });
+  return grant ? allowFromGrant(productId, grant) : denyForOrder(productId, order);
 }
 
 export type { ProductAccessReason } from "../domain/access-reasons";
 export type {
+  AccessRequest,
+  AdminAccessRequest,
+  AuthenticatedAccessRequest,
+  PostCheckoutAccessRequest,
   ProductAccessResult,
-  ResolveProductAccessInput,
 } from "../domain/access-decision";

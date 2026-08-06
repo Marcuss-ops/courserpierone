@@ -4,18 +4,32 @@ export interface ProductAccessResult {
   hasAccess: boolean;
   reason: ProductAccessReason;
   productId: string;
-  orderId: string | null;
   pendingOrderOwnerId?: string | null;
 }
 
-export interface ResolveProductAccessInput {
-  userId?: string;
-  userRole?: string;
+export interface AuthenticatedAccessRequest {
+  kind: "authenticated";
+  userId: string;
   productId: string;
-  provider?: string;
-  providerOrderId?: string;
-  internalOrderId?: string;
 }
+
+export interface AdminAccessRequest {
+  kind: "admin";
+  adminId: string;
+  productId: string;
+}
+
+export interface PostCheckoutAccessRequest {
+  kind: "post_checkout";
+  /** Opaque short-lived checkout-session identifier, never an order ID. */
+  token: string;
+  productId: string;
+}
+
+export type AccessRequest =
+  | AuthenticatedAccessRequest
+  | AdminAccessRequest
+  | PostCheckoutAccessRequest;
 
 export interface ActiveGrantRecord {
   id: string;
@@ -31,25 +45,24 @@ export interface OrderAccessRecord {
 
 export function allowFromGrant(
   productId: string,
-  grant: ActiveGrantRecord,
+  _grant: ActiveGrantRecord,
 ): ProductAccessResult {
   return {
     hasAccess: true,
     reason: "active_purchase",
     productId,
-    orderId: grant.sourceType === "order" ? grant.sourceId : null,
   };
 }
 
 export function allowAsAdmin(productId: string): ProductAccessResult {
-  return { hasAccess: true, reason: "active_purchase", productId, orderId: null };
+  return { hasAccess: true, reason: "active_purchase", productId };
 }
 
 export function deny(
   reason: ProductAccessReason,
   productId: string,
 ): ProductAccessResult {
-  return { hasAccess: false, reason, productId, orderId: null };
+  return { hasAccess: false, reason, productId };
 }
 
 export function denyForOrder(
@@ -61,12 +74,11 @@ export function denyForOrder(
       hasAccess: false,
       reason: "payment_pending",
       productId,
-      orderId: order.id,
       pendingOrderOwnerId: order.userId,
     };
   }
   if (order.status === "refunded") {
-    return { hasAccess: false, reason: "refunded", productId, orderId: order.id };
+    return { hasAccess: false, reason: "refunded", productId };
   }
   return deny("not_purchased", productId);
 }

@@ -1,5 +1,3 @@
-import type { ActiveGrantRecord, OrderAccessRecord, ProductAccessResult } from "./access-decision";
-
 export const AccessPolicyReason = {
   SelfMessage: "self_message_blocked",
   ProductNotFound: "product_not_found",
@@ -21,48 +19,6 @@ export interface CanMessageResult {
   customerId?: string;
   productId: string;
   reason?: AccessPolicyReason;
-}
-
-export function allowFromGrant(
-  productId: string,
-  grant: ActiveGrantRecord,
-): ProductAccessResult {
-  return {
-    hasAccess: true,
-    reason: "active_purchase",
-    productId,
-    orderId: grant.sourceType === "order" ? grant.sourceId : null,
-  };
-}
-
-export function allowAsAdmin(productId: string): ProductAccessResult {
-  return { hasAccess: true, reason: "active_purchase", productId, orderId: null };
-}
-
-export function deny(
-  reason: ProductAccessResult["reason"],
-  productId: string,
-): ProductAccessResult {
-  return { hasAccess: false, reason, productId, orderId: null };
-}
-
-export function denyForOrder(
-  productId: string,
-  order: OrderAccessRecord,
-): ProductAccessResult {
-  if (order.status === "pending") {
-    return {
-      hasAccess: false,
-      reason: "payment_pending",
-      productId,
-      orderId: order.id,
-      pendingOrderOwnerId: order.userId,
-    };
-  }
-  if (order.status === "refunded") {
-    return { hasAccess: false, reason: "refunded", productId, orderId: order.id };
-  }
-  return deny("not_purchased", productId);
 }
 
 /**

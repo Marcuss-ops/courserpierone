@@ -51,9 +51,9 @@ interface AccessGateProps {
  *
  * Step 10 - frontend migration: the parallel `prisma.order.findFirst`
  * pending-order lookup is ALSO gone. The resolver returns
- * `payment_pending` with `orderId` + `pendingOrderOwnerId` (the
+ * `payment_pending` with only a pending-owner signal (the
  * buyer's verifying screen reads it from the single canonical result,
- * never from a duplicate Order query).
+ * never from a duplicate Order query or exposed order identifier).
  *
  * Side effects preserved:
  *   - On free-course bypass for an authenticated user, upsert a
@@ -101,22 +101,22 @@ export async function AccessGate({
   }
 
   // Step 9: AccessGrant SSOT cutover
-  const hasCheckoutSession = Boolean(checkoutSession);
-  const granted = dbUser || hasCheckoutSession
-    ? await resolveProductAccess({
-        userId: dbUser?.id,
-        userRole: dbUser?.role,
-        productId: product.id,
-        provider: checkoutSession?.provider,
-        providerOrderId: checkoutSession?.providerOrderId,
-      })
+  const accessRequest = dbUser
+    ? dbUser.role === "admin"
+      ? { kind: "admin" as const, adminId: dbUser.id, productId: product.id }
+      : { kind: "authenticated" as const, userId: dbUser.id, productId: product.id }
+    : checkoutSession
+      ? { kind: "post_checkout" as const, token: checkoutSession.jti, productId: product.id }
+      : null;
+  const granted = accessRequest
+    ? await resolveProductAccess(accessRequest)
     : null;
 
   // Hoist DB lookups (Step 8 invariant: policies are pure, data
   // fetching happens BEFORE evaluateAccess).
   //
   // Step 10: the pending-order signal comes from the resolver's
-  // `payment_pending` verdict (orderId + pendingOrderOwnerId) — the
+  // `payment_pending` verdict (pending-owner signal only) — the
   // parallel `prisma.order.findFirst` is removed. Payment lifecycle is
   // still read ONLY inside `resolveProductAccess`, which stays the
   // single canonical place that touches Order.
@@ -124,7 +124,7 @@ export async function AccessGate({
   const pendingOrderOwnerId = isPendingVerdict
     ? (granted?.pendingOrderOwnerId ?? null)
     : null;
-  const pendingOrderId = isPendingVerdict ? (granted?.orderId ?? null) : null;
+  const hasPendingOrder = isPendingVerdict;
 
   // Defensive coalescing: the AccessContext fields are optional, but
   // their semantics are null-vs-undefined-aware in evaluatePolicy.
@@ -145,7 +145,7 @@ export async function AccessGate({
     userRole: dbUser?.role ?? null,
     hasActiveAccessGrant: granted?.hasAccess === true,
     pendingOrderOwnerId,
-    pendingOrderId,
+    hasPendingOrder,
     productDefaultLanguage: product.defaultLanguage,
   };
 
@@ -209,7 +209,6 @@ export async function AccessGate({
     }
     return (
       <PendingOrderScreen
-        orderId={decision.orderId}
         locale={decision.productDefaultLanguage ?? product.defaultLanguage ?? "it"}
       />
     );

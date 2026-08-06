@@ -53,13 +53,16 @@ export async function GET(
     // V2 AccessGrant cutover: `resolveProductAccess` is the canonical
     // resolver. Anonymous post-checkout access uses only the HttpOnly
     // checkout session; no order identifier is accepted from the URL.
-    const granted = await resolveProductAccess({
-      userId: dbUser?.id,
-      userRole: dbUser?.role,
-      productId: downloadProduct.id,
-      provider: checkoutSession?.provider,
-      providerOrderId: checkoutSession?.providerOrderId,
-    });
+    const accessRequest = dbUser
+      ? dbUser.role === "admin"
+        ? { kind: "admin" as const, adminId: dbUser.id, productId: downloadProduct.id }
+        : { kind: "authenticated" as const, userId: dbUser.id, productId: downloadProduct.id }
+      : checkoutSession
+        ? { kind: "post_checkout" as const, token: checkoutSession.jti, productId: downloadProduct.id }
+        : null;
+    const granted = accessRequest
+      ? await resolveProductAccess(accessRequest)
+      : { hasAccess: false };
     if (granted.hasAccess) {
       hasAccess = true;
     }

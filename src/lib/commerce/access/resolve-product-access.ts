@@ -9,5 +9,8 @@ export {
   resolveProductAccess,
   type ProductAccessReason,
   type ProductAccessResult,
-  type ResolveProductAccessInput,
+  type AccessRequest,
+  type AdminAccessRequest,
+  type AuthenticatedAccessRequest,
+  type PostCheckoutAccessRequest,
 } from "@/domains/identity";

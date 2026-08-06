@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
 interface PendingOrderScreenProps {
-  orderId: string;
   locale?: string;
 }
 
@@ -36,7 +35,7 @@ const TRANSLATIONS: Record<string, { title: string; description: string }> = {
   },
 };
 
-export function PendingOrderScreen({ orderId, locale = "it" }: PendingOrderScreenProps) {
+export function PendingOrderScreen({ locale = "it" }: PendingOrderScreenProps) {
   const router = useRouter();
   const lang = locale.split("-")[0];
   const t = TRANSLATIONS[lang] ?? TRANSLATIONS.it;
@@ -46,7 +45,7 @@ export function PendingOrderScreen({ orderId, locale = "it" }: PendingOrderScree
       router.refresh();
     }, 3000);
     return () => clearTimeout(timer);
-  }, [router, orderId]);
+  }, [router]);
 
   return (
     <div className="min-h-screen bg-[#070709] text-zinc-100 font-sans flex items-center justify-center p-6 relative overflow-hidden">
