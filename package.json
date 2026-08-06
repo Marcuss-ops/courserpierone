@@ -13,7 +13,7 @@
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "typecheck": "tsc --noEmit",
-    "check:static": "npm run typecheck && npm run lint && npm run check:size && npm run check:complexity && npm run check:circular && npm run check:naming && npm run check:deps && npm run check:dead-exports",
+    "check:static": "npm run typecheck && npm run lint && npm run check:size && npm run check:complexity && npm run check:circular && npm run check:architecture && npm run check:naming && npm run check:deps && npm run check:dead-exports",
     "check:repo": "npm run audit:courses-drift && npm run check:dod && npm run check:deploy-gate-shape && npm run check:hotspots && npm run check:migrations",
     "check": "npm run check:static && npm run test && npm run check:repo",
     "check:size": "npx tsx scripts/quality/check-file-size.ts",
@@ -41,6 +41,7 @@
     "test:e2e:ui": "playwright test --ui",
     "postinstall": "prisma generate && npx tsx scripts/generate/generate-locale-resolver.ts",
     "check:deps": "npx tsx scripts/quality/check-deps.ts",
+    "check:architecture": "npx tsx scripts/quality/check-architecture.ts",
     "check:naming": "npx tsx scripts/quality/forbid-deprecated-names.ts"
   },
   "dependencies": {
