@@ -84,7 +84,9 @@ import {
   contentPageStatusSchema,
   type ContentPageRepository,
 } from "@/domains/catalog/content-pages/create-content-page-types";
+import { prismaCreateContentPageRepository } from "@/domains/catalog/content-pages/prisma-create-content-page-repository";
 import { resolveCreatorProductAccess } from "@/domains/creator-ops/access/resolve-creator-product-access";
+import { prismaResolveCreatorProductAccessPort } from "@/domains/creator-ops/access/prisma-resolve-creator-product-access";
 import type {
   ResolveCreatorProductAccessPort,
 } from "@/domains/creator-ops/access/resolve-creator-product-access-types";
@@ -98,8 +100,8 @@ import { getServerUser } from "@/lib/supabase/get-user";
  * routes. `__setRouteDeps` enables in-memory stub wiring in unit
  * tests without restructuring the route module.
  */
-let cachedAccessPort: ResolveCreatorProductAccessPort | undefined;
-let cachedPageRepoPort: ContentPageRepository | undefined;
+let cachedAccessPort: ResolveCreatorProductAccessPort = prismaResolveCreatorProductAccessPort;
+let cachedPageRepoPort: ContentPageRepository = prismaCreateContentPageRepository;
 
 /**
  * Visible to integration tests so they can swap in in-memory
@@ -185,7 +187,7 @@ export async function POST(
   ctx: { params: Promise<{ productId: string }> },
 ): Promise<NextResponse> {
   // ─── 0. Misconfig guard ──────────────────────────────────────
-  if (!cachedAccessPort || !cachedPageRepoPort) {
+  if (!cachedAccessPort) {
     return NextResponse.json(
       {
         ok: false,

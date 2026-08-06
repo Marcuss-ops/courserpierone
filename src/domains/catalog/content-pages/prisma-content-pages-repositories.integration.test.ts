@@ -10,9 +10,9 @@
 /**
  * src/domains/catalog/content-pages/prisma-content-pages-repositories.integration.test.ts
  *
- * Real-DB integration test for the two content-page adapters:
+ * Real-DB integration test for the content-page adapters:
+ *   - `prismaCreateContentPageRepository`
  *   - `prismaRenameContentPageRepository`
- *   - `prismaReorderContentPagesRepository`
  *
  * ─── Why a separate integration suite ───────────────────────────
  *
@@ -235,6 +235,77 @@ describeIfDb("prismaRenameContentPageRepository — real DB", () => {
       pageId: pageIds[0],
     });
     expect(result).toEqual({ productId });
+  });
+});
+
+describeIfDb("prismaCreateContentPageRepository — real DB", () => {
+  it("allocates 20 concurrent sibling positions uniquely and consecutively", async () => {
+    const { prismaCreateContentPageRepository } = await import(
+      "./prisma-create-content-page-repository"
+    );
+    const prefix = `concurrent-page-${UNIQUE}`;
+
+    const results = await Promise.all(
+      Array.from({ length: 20 }, (_, index) =>
+        prismaCreateContentPageRepository.createContentPage({
+          productId,
+          parentId: null,
+          slug: `${prefix}-${index + 1}`,
+          status: "draft",
+        }),
+      ),
+    );
+
+    expect(results.every((result) => result.created)).toBe(true);
+
+    const rows = await realPrisma.contentPage.findMany({
+      where: { productId, slug: { startsWith: prefix } },
+      orderBy: { position: "asc" },
+      select: { position: true },
+    });
+    expect(rows).toHaveLength(20);
+    const positions = rows.map((row) => row.position);
+    expect(new Set(positions).size).toBe(20);
+    expect(positions).toEqual(
+      Array.from({ length: 20 }, (_, index) => positions[0] + index),
+    );
+  });
+
+  it("database rejects a parent belonging to a different product", async () => {
+    const otherProduct = await realPrisma.product.create({
+      data: {
+        slug: `itest-parent-owner-${UNIQUE}`,
+        creatorId: userId,
+        contentKind: "document_course",
+        status: "draft",
+        templateId: "lumio",
+        defaultLanguage: "it",
+      },
+    });
+    try {
+      const parent = await realPrisma.contentPage.create({
+        data: {
+          productId: otherProduct.id,
+          slug: `cross-product-parent-${UNIQUE}`,
+          position: 1,
+          status: "draft",
+        },
+      });
+
+      await expect(
+        realPrisma.contentPage.create({
+          data: {
+            productId,
+            parentId: parent.id,
+            slug: `cross-product-child-${UNIQUE}`,
+            position: 99,
+            status: "draft",
+          },
+        }),
+      ).rejects.toMatchObject({ code: "P2003" });
+    } finally {
+      await realPrisma.product.delete({ where: { id: otherProduct.id } });
+    }
   });
 });
 

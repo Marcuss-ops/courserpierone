@@ -43,6 +43,7 @@ const { mockPrisma } = vi.hoisted(() => ({
       findMany: vi.fn(),
       update: vi.fn(),
     },
+    $executeRaw: vi.fn(),
     $transaction: vi.fn(),
   },
 }));
@@ -159,7 +160,8 @@ describe("prismaReorderContentPagesRepository — applyReorder", () => {
 
   it("issues one update per entry inside a single $transaction with the shared clock", async () => {
     const FIXED = new Date("2026-07-19T12:00:00.000Z");
-    mockPrisma.$transaction.mockResolvedValue([{}, {}, {}]);
+    mockPrisma.$executeRaw.mockResolvedValue(1);
+  mockPrisma.$transaction.mockImplementation(async (callback: (tx: typeof mockPrisma) => unknown) => callback(mockPrisma));
 
     const result = await prismaReorderContentPagesRepository.applyReorder({
       productId: "p-1",
@@ -174,18 +176,16 @@ describe("prismaReorderContentPagesRepository — applyReorder", () => {
 
     expect(result).toEqual({ applied: true });
 
-    // $transaction called once with an array of 3 promises.
+    // The transaction is callback-based and includes a scope advisory lock.
     expect(mockPrisma.$transaction).toHaveBeenCalledTimes(1);
-    const txArg = mockPrisma.$transaction.mock.calls[0]?.[0] as unknown[];
-    expect(Array.isArray(txArg)).toBe(true);
-    expect(txArg).toHaveLength(3);
+    expect(mockPrisma.$executeRaw).toHaveBeenCalledOnce();
 
-    // Each entry produced one update call against the right
-    // pageId + position + the shared clock.
-    expect(mockPrisma.contentPage.update).toHaveBeenCalledTimes(3);
+    // Each entry is updated twice: temporary negative position, then final.
+    expect(mockPrisma.contentPage.update).toHaveBeenCalledTimes(6);
     const calls = mockPrisma.contentPage.update.mock.calls;
+    const finalCalls = calls.slice(3);
     const mapping = new Map(
-      calls.map((c) => {
+      finalCalls.map((c) => {
         const arg = c[0] as { where: { id: string }; data: { position: number; updatedAt: Date } };
         return [arg.where.id, arg.data.position];
       }),
@@ -193,7 +193,6 @@ describe("prismaReorderContentPagesRepository — applyReorder", () => {
     expect(mapping.get("pg-1")).toBe(3);
     expect(mapping.get("pg-2")).toBe(1);
     expect(mapping.get("pg-3")).toBe(2);
-    // Same `now` for every row — batch-internal consistency.
     for (const c of calls) {
       const arg = c[0] as { data: { updatedAt: Date } };
       expect(arg.data.updatedAt).toBe(FIXED);

@@ -68,7 +68,9 @@ import { reorderContentPages } from "@/domains/catalog/content-pages/reorder-con
 import type {
   ReorderContentPagesPort,
 } from "@/domains/catalog/content-pages/reorder-content-pages-types";
+import { prismaReorderContentPagesRepository } from "@/domains/catalog/content-pages/prisma-reorder-content-pages-repository";
 import { resolveCreatorProductAccess } from "@/domains/creator-ops/access/resolve-creator-product-access";
+import { prismaResolveCreatorProductAccessPort } from "@/domains/creator-ops/access/prisma-resolve-creator-product-access";
 import type {
   ResolveCreatorProductAccessPort,
 } from "@/domains/creator-ops/access/resolve-creator-product-access-types";
@@ -77,8 +79,8 @@ import { z } from "zod";
 
 // ─── Module-level deps (route composition root) ─────────────────
 
-let cachedAccessPort: ResolveCreatorProductAccessPort | undefined;
-let cachedReorderPort: ReorderContentPagesPort | undefined;
+let cachedAccessPort: ResolveCreatorProductAccessPort = prismaResolveCreatorProductAccessPort;
+let cachedReorderPort: ReorderContentPagesPort = prismaReorderContentPagesRepository;
 
 export function __setRouteDeps(deps: {
   accessPort: ResolveCreatorProductAccessPort;

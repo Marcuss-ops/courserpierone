@@ -47,11 +47,12 @@
  * follow-up if telemetry ever flags the round-trip count.
  *
  * Concurrency safety:
- *   - PG's row locks (acquired by each UPDATE on the matching
- *     ContentPage row) serialize concurrent renumbers of the
- *     SAME scope.
- *   - The transaction's all-or-nothing semantics guarantee the
- *     renumber is either fully applied or fully rolled back.
+ *   - A transaction-scoped advisory lock serializes reorder and create
+ *     operations for the same `(productId, parentId)` scope.
+ *   - Temporary negative positions avoid collisions with the unique
+ *     sibling-position indexes during a permutation.
+ *   - The transaction's all-or-nothing semantics guarantee the renumber
+ *     is either fully applied or fully rolled back.
  *
  * ─── Error mapping ──────────────────────────────────────────────
  *
@@ -132,14 +133,11 @@ export const prismaReorderContentPagesRepository: ReorderContentPagesPort = {
 
   // ─── applyReorder ───────────────────────────────────────────
   //
-  // $transaction with N `UPDATE ... SET position = X,
-  // updatedAt = now` statements, one per entry. See file header
-  // for the chosen strategy vs. CASE-WHEN bulk.
-  //
-  // The same `now` Date is applied to every row in the batch —
-  // batch-internal consistency for the editor's "last edited"
-  // indicator.
-  async applyReorder({ entries, now }) {
+  // The unique sibling-position indexes make a direct permutation unsafe:
+  // updating 1 → 3 fails while the old row at 3 still exists. We therefore
+  // use one transaction with a scope advisory lock and two phases:
+  // temporary negative positions, then the requested final positions.
+  async applyReorder({ productId, parentId, entries, now }) {
     if (entries.length === 0) {
       // Defensive: the use case rejects empty batches at
       // reorderEntriesSchema (REORDER_BATCH_MIN = 1). If a
@@ -147,17 +145,37 @@ export const prismaReorderContentPagesRepository: ReorderContentPagesPort = {
       // for an empty batch is the safe no-op.
       return { applied: true };
     }
-    await prisma.$transaction(
-      entries.map((entry) =>
-        prisma.contentPage.update({
-          where: { id: entry.pageId },
-          data: {
-            position: entry.newPosition,
-            updatedAt: now,
-          },
-        }),
-      ),
-    );
+
+    await prisma.$transaction(async (tx) => {
+      const lockKey = `${productId}:${parentId ?? "root"}`;
+      await tx.$executeRaw`
+        SELECT pg_advisory_xact_lock(hashtextextended(${lockKey}, 0))
+      `;
+
+      await Promise.all(
+        entries.map((entry, index) =>
+          tx.contentPage.update({
+            where: { id: entry.pageId },
+            data: {
+              position: -(index + 1),
+              updatedAt: now,
+            },
+          }),
+        ),
+      );
+
+      await Promise.all(
+        entries.map((entry) =>
+          tx.contentPage.update({
+            where: { id: entry.pageId },
+            data: {
+              position: entry.newPosition,
+              updatedAt: now,
+            },
+          }),
+        ),
+      );
+    });
     return { applied: true };
   },
 };
