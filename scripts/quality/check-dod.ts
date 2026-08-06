@@ -190,7 +190,11 @@ export function collectDiff(base: string): DiffData {
 
 export function collectAudit(): DiffData {
   const allFiles: string[] = [];
-  for (const file of walk("src")) allFiles.push(file);
+  for (const file of walk("src")) {
+    // Keep repository-relative paths stable across Windows and POSIX runners.
+    // Git paths and detector scopes use `/`, while path.join uses `\\` on Windows.
+    allFiles.push(file.split(path.sep).join("/"));
+  }
   return {
     modified: new Map(allFiles.map((f) => [f, new Set<number>()])),
     added: allFiles,
