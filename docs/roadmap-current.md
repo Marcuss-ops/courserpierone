@@ -8,23 +8,41 @@
 
 ## Status verificato
 
-Questa sezione è la fonte operativa per lo stato corrente. I risultati sono riferiti al commit remoto `a49b8601f6113afb960a8722eed909943e7858ef` (`main`), verificato nella run [CI — deploy-gate #31040206880](https://github.com/Marcuss-ops/courserpierone/actions/runs/31040206880). Un risultato `failure` o `skipped` non viene interpretato come pass implicito.
+Questa sezione separa le evidenze locali dalla CI remota. L'ultimo candidato verificato localmente è `c2e0f87` (`main` locale, suite release del 2026-08-06); il branch non è stato pubblicato perché il push è stato rifiutato dal token OAuth privo dello scope `workflow`. Un controllo non eseguito o bloccato non viene interpretato come pass implicito.
 
-| Controllo | Stato verificato | Evidenza |
+### Verifica locale del candidato `c2e0f87`
+
+| Controllo | Stato verificato | Evidenza / limite |
 |---|---|---|
-| Build produzione | **FAIL** | [build (production)](https://github.com/Marcuss-ops/courserpierone/actions/runs/31040206880/job/92422388177) |
-| Typecheck | **FAIL** | [typecheck](https://github.com/Marcuss-ops/courserpierone/actions/runs/31040206880/job/92422388119) |
-| Unit test | **FAIL** | [vitest](https://github.com/Marcuss-ops/courserpierone/actions/runs/31040206880/job/92422388160) |
-| Integration test PostgreSQL | **FAIL** | [integration-tests (postgres)](https://github.com/Marcuss-ops/courserpierone/actions/runs/31040206880/job/92422388111) |
-| E2E browser | **FAIL** | [e2e-journey (chrome)](https://github.com/Marcuss-ops/courserpierone/actions/runs/31040206880/job/92422388194) |
-| Migration check | **FAIL** | [migration-check (prisma deploy)](https://github.com/Marcuss-ops/courserpierone/actions/runs/31040206880/job/92422388167) |
-| Security scan | **PASS** | [security-scan (gitleaks)](https://github.com/Marcuss-ops/courserpierone/actions/runs/31040206880/job/92422388030) |
-| Quality gate aggregato | **FAIL** | [deploy-gate](https://github.com/Marcuss-ops/courserpierone/actions/runs/31040206880/job/92422445230) |
-| Deploy produzione | **SKIPPED** | [deploy-production](https://github.com/Marcuss-ops/courserpierone/actions/runs/31040206880/job/92422488521) |
+| `npm ci` | **PASS** | Installazione dal lockfile completata |
+| Typecheck | **PASS** | `npm run typecheck` exit 0 |
+| Lint | **PASS** | `npm run lint` exit 0 |
+| Unit test | **PASS** | 2.041 test superati |
+| `npm run check` / DoD | **PASS** | Quality gate 0 failure, 7 warning |
+| Build produzione | **PASS** | `npm run build` exit 0 |
+| Audit dipendenze | **PASS** | `npm audit --audit-level=high`: 0 vulnerabilità |
+| Deploy-gate shape | **PASS** | Verificata solo la forma/configurazione del gate |
+| Migration safety scan | **PASS** | Scanner distruttività eseguito |
+| Integration test PostgreSQL | **NON ESEGUITO** | Docker/PostgreSQL non disponibili: daemon Docker non raggiungibile |
+| Migration deploy reale | **NON ESEGUITO** | Richiede PostgreSQL disponibile |
+| Audit v1 su database | **NON ESEGUITO** | Richiede database vuoto/copia/staging raggiungibili |
+| E2E browser e SSE | **BLOCCATO** | Playwright/webserver avviati; fixture Prisma bloccate da PostgreSQL non raggiungibile |
+| Gitleaks | **NON ESEGUITO** | CLI non installata localmente; nessuna conclusione sul secret scan |
+| CI remota / deploy-gate del candidato | **NON VERIFICATO** | Il candidato non è stato pubblicato su GitHub |
 
-**Verdetto:** `main` non è verde e il deploy è correttamente rimasto bloccato. Non sono disponibili, per questo commit, evidenze CI sufficienti per dichiarare build, test, migrazioni o E2E riusciti. La security scan è l'unico controllo della tabella con esito positivo.
+### Ultima evidenza CI remota disponibile
 
-Per considerare la release sbloccata servono una nuova run CI verde sul commit candidato e la verifica esplicita dei job sopra indicati. Questa tabella deve essere aggiornata quando cambia il commit verificato; non sostituisce i log GitHub Actions.
+La run [CI — deploy-gate #31040206880](https://github.com/Marcuss-ops/courserpierone/actions/runs/31040206880), sul commit remoto `a49b8601f6113afb960a8722eed909943e7858ef`, ha riportato:
+
+- **PASS:** security scan Gitleaks;
+- **FAIL:** build, typecheck, unit test, integration PostgreSQL, migration check, E2E e deploy-gate;
+- **SKIPPED:** deploy-production.
+
+Questi risultati appartengono a quel commit remoto e non certificano né invalidano automaticamente il candidato locale `c2e0f87`. Non esiste ancora una run GitHub Actions verde per il candidato documentato qui.
+
+**Verdetto:** la release resta **bloccata**. I gate locali superati non sostituiscono integration test, migration deploy, audit database, E2E/SSE, Gitleaks e deploy-gate remoto non eseguiti. Il deploy non deve essere dichiarato pronto finché una nuova run CI sul commit candidato non verifica esplicitamente tutti i job richiesti.
+
+Questa tabella deve essere aggiornata quando cambia il commit verificato; non sostituisce i log GitHub Actions.
 
 ---
 
@@ -58,10 +76,10 @@ Questi item sono **gate strict** che impediscono il release V1.x GA. Le evidenze
 
 ### 1.5 TypeScript baseline
 
-- **Stato:** **aperto**: il job `typecheck` della run verificata è fallito.
+- **Stato:** **storicamente fallito nella CI remota del commit `a49b8601...`; superato localmente dal commit candidato `c2e0f87`** con `npm run typecheck` exit 0.
 - **Perché conta:** errori in strict mode bloccano la build e possono nascondere regressioni.
-- **Verify gate:** `npm run typecheck` deve terminare con exit code `0` in una run CI verde.
-- **Drain path:** analizzare i log del job [typecheck](https://github.com/Marcuss-ops/courserpierone/actions/runs/31040206880/job/92422388119) e correggere gli errori residui senza abbassare il livello strict.
+- **Verify gate:** `npm run typecheck` deve terminare con exit code `0` in una run CI verde sul commit candidato.
+- **Drain path:** pubblicare il candidato con un token autorizzato e verificare il job [typecheck](https://github.com/Marcuss-ops/courserpierone/actions/runs/31040206880/job/92422388119) in una nuova run, senza abbassare il livello strict.
 
 ---
 
@@ -112,6 +130,7 @@ Feature **deliberatamente non pianificate** in V1.x. Se richieste, refer to thes
 
 ## Update log
 
+- `c2e0f87` — commit candidato verificato localmente: gate statici, unit, build, audit dipendenze e migration safety scan passati; PostgreSQL/Redis, migration deploy reale, audit database, E2E/SSE, Gitleaks e CI remoto non eseguiti o bloccati; push rifiutato per scope OAuth `workflow`.
 - `a49b8601f6113afb960a8722eed909943e7858ef` — status verificato su [CI — deploy-gate #31040206880](https://github.com/Marcuss-ops/courserpierone/actions/runs/31040206880): security scan passata; build, typecheck, unit, integration, migration, E2E e deploy-gate falliti; deploy-production skipped.
 - `cfb2d12` — `chore(dm): delete legacy /api/messages routes + shim, consolidate on /api/conversations`
 - `e85c65c` — `refactor(dm): migrate ChatView to canonical /api/conversations endpoints`

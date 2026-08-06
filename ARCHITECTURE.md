@@ -73,7 +73,7 @@ Stack di supporto: **PostgreSQL** + **Prisma 5**, **Upstash Redis** + **ioredis*
 
 - **Auth**: Supabase Auth (Google OAuth + Magic Link). Vedi `docs/OAUTH-SETUP.md` per il setup.
 - **Ruoli**: `admin`, `creator`, `student` (string columns, check inline in route handlers).
-- **Canonical (V2/V3)**: `AccessGrant` table è la single source of truth per "l'utente X ha accesso al prodotto Y". Ha sostituito i direct reads su `Order.status='completed'` (legacy path, rimosso insieme al feature flag `USE_ACCESS_GRANT_RESOLVER`).
+- **Canonical (V2/V3)**: `AccessGrant` table è la single source of truth per l'accesso concesso — "l'utente X ha accesso al prodotto Y". Ha sostituito i direct reads su `Order.status='completed'` come decisione di accesso (legacy path, rimosso insieme al feature flag `USE_ACCESS_GRANT_RESOLVER`). Gli ordini restano consultabili solo per la verifica server-side del checkout anonimo e per classificare un diniego, mai per concedere accesso direttamente.
 - **Dashboard utente**: Lista acquisti, download PDF, progresso corsi
 - **Area admin**: Gestione prodotti, ordini, utenti (in `src/app/admin/*`)
 
@@ -86,10 +86,11 @@ Identità degli ordini — regola architetturale vincolante. Ogni riferimento a 
 
 Regole vincolanti:
 
-- **L'autorizzazione al prodotto passa SEMPRE da `resolveProductAccess`** (`src/lib/commerce/access/resolve-product-access.ts`). Ogni consumer — player, portal, download, dashboard, certificate, ebook, progress, messaging, `GET /api/access` — delega la decisione al resolver canonico (AccessGrant SSOT).
+- **L'autorizzazione al prodotto passa SEMPRE da `resolveProductAccess`** (`src/domains/identity/index.ts`). Ogni consumer — player, portal, download, dashboard, certificate, ebook, progress, messaging, `GET /api/access` — delega la decisione al resolver canonico (AccessGrant SSOT). `src/lib/commerce/access/resolve-product-access.ts` resta temporaneamente un re-export compatibile.
 - **Le route UI/content NON devono inferire accesso dai campi di pagamento**: niente query dirette a `Order.status`, niente check inline su `payment_status`/`paid`/`completed` nei player o nelle route che concedono accesso.
-- **Wire contract esplicito** di `GET /api/access`: `{ productId, providerOrderId }` (provider esplicito), oppure `{ productId, orderId }` (ID interno), oppure il solo `productId` con sessione autenticata. Gli alias legacy (`order_id`, `provider_order_id`, adapter `LegacyAccessInput`) sono stati rimossi.
-- **Le query dirette agli ordini restano SOLO nei servizi amministrativi/account**: `api/admin/*`, history pagamenti (`account/payments`, `api/user/orders`), social-proof, e il lato scrittura webhook (`processOrder`/`revoke-order`).
+- **Wire contract esplicito** di `GET /api/access`: `{ productId, checkoutToken }` solo per lo scambio una tantum, oppure `{ productId }` con sessione autenticata/checkout-session HttpOnly. Il `checkoutToken` è breve, firmato e monouso; la credenziale anonima persistente è esclusivamente il cookie HttpOnly. `orderId` e `providerOrderId` non sono più credenziali pubbliche accettate da questa route.
+- **Checkout post-pagamento:** `/api/checkout/complete` verifica server-side un ordine Lemon Squeezy completato e vincolato al prodotto, applica un claim Redis monouso, genera il checkout token firmato e lo converte in una sessione HttpOnly a breve durata. Il provider order id resta confinato al confine di verifica server-side.
+- **Le query dirette agli ordini restano SOLO nei servizi amministrativi/account e nel callback server-side di checkout**: `api/admin/*`, history pagamenti (`account/payments`, `api/user/orders`), social-proof, lato scrittura webhook (`processOrder`/`revoke-order`) e verifica del callback Lemon Squeezy.
 
 ## Flusso Utente (Funnel)
 
@@ -139,8 +140,9 @@ Pubblica ──── generateCourseConfig(slug) → CourseConfigCache DB row
 
 - **Dev server**: `npm run dev` (Next.js alone — la real-time chat passa via SSE in `/api/conversations/[id]/stream`, polling server-driven interno al route handler). Vedi `docs/production.md` per la topologia di produzione.
   - **Edge proxy (Next.js 16+)**: il file convenzione globale è `src/proxy.ts` che esporta la funzione `proxy` (era `middleware` in Next.js ≤15). `config.matcher` invariato. `updateSession` da `@/lib/supabase/middleware` (helper internal, NON rinominato) continua a girare come Step 1 della catena: `proxy → updateSession (Supabase session refresh) → checkProtectedAccess → handleFullLocale → handleShortLang → handleLangParam → handleRootLocale → handleNoPrefix → fallback response`. Il vecchio `src/middleware.ts` è stato rimosso (deprecation Next 16).
-- **Typecheck + lint**: `npm run check` (typecheck + eslint + vitest). Vedi `docs/roadmap-current.md` §1.5 per il baseline degli errori pre-esistenti.
-- **DB locale**: `docker compose up -d db redis` (Postgres 16 + Redis). Lo stack include `pgbackups` per i backup automatici (PITR per Supabase prod).
+- **Typecheck + lint**: `npm run check` (typecheck + eslint + vitest). È un controllo locale: la readiness della release richiede anche una run GitHub Actions verde sul commit candidato.
+- **Release verification:** l'ultima verifica locale del candidato `c2e0f87` ha superato typecheck, lint, unit test, quality gate, build, audit dipendenze, migration safety scan e deploy-gate shape; integration PostgreSQL, migration deploy reale, audit database, E2E/SSE e Gitleaks non sono stati completati. Vedi `docs/roadmap-current.md` e `DEPLOY-CHECKLIST.md` per lo stato evidence-based.
+- **DB locale**: `docker compose up -d db redis` (Postgres 16 + Redis). Lo stack include `pgbackups` per i backup automatici (PITR per Supabase prod). Senza il daemon Docker attivo non dichiarare superati i gate che richiedono PostgreSQL/Redis.
 
 ## Architecture Decision Records (cross-cutting)
 
