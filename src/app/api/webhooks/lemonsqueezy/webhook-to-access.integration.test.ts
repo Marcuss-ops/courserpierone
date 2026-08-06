@@ -7,9 +7,9 @@
  *     → provider.parseWebhook + translateEvent
  *     → processOrder
  *     → Order + AccessGrant transaction
- *   GET /api/access?provider&providerOrderId
- *     → hasAccess: true
- *   GET /api/access?orderId=<internal Order.id>
+ *   GET /api/access?checkoutToken=<signed-token>
+ *     → hasAccess: true and an HttpOnly checkout session
+ *   GET /api/access with the session cookie
  *     → hasAccess: true
  *
  * The test uses the repository's TEST_DATABASE_URL/DATABASE_URL harness.
@@ -24,6 +24,10 @@ import crypto from "node:crypto";
 import { PrismaClient } from "@prisma/client";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockRequest } from "@/app/api/__test-helpers__/mock-request";
+import {
+  CHECKOUT_SESSION_COOKIE,
+  issueCheckoutToken,
+} from "@/lib/commerce/access/checkout-token";
 
 const { mockGetServerUser, mockSendPurchaseConfirmation } = vi.hoisted(() => ({
   mockGetServerUser: vi.fn(),
@@ -97,19 +101,6 @@ function createOrderCreatedPayload() {
         customer_country: "US",
       },
     },
-  };
-}
-
-async function accessResponse(query: Record<string, string>) {
-  const { GET } = await import("@/app/api/access/route");
-  const response = await GET(
-    createMockRequest("/api/access", {
-      query: { productId, ...query },
-    }),
-  );
-  return {
-    status: response.status,
-    body: await response.json(),
   };
 }
 
@@ -232,15 +223,28 @@ describeIfDb("webhook → Order → AccessGrant → GET /api/access", () => {
     });
     expect(processed?.provider).toBe("lemonsqueezy");
 
-    const externalAccess = await accessResponse({
+    const checkoutToken = issueCheckoutToken({
+      productId,
+      productSlug,
       provider: "lemonsqueezy",
       providerOrderId,
     });
-    expect(externalAccess.status).toBe(200);
-    expect(externalAccess.body).toEqual({ hasAccess: true });
+    const { GET: accessGet } = await import("@/app/api/access/route");
+    const tokenRequest = createMockRequest("/api/access", {
+      query: { productId, checkoutToken },
+    });
+    const externalResponse = await accessGet(tokenRequest);
+    expect(externalResponse.status).toBe(200);
+    expect(await externalResponse.json()).toEqual({ hasAccess: true });
+    const setCookie = externalResponse.headers.get("set-cookie");
+    expect(setCookie).toContain(`${CHECKOUT_SESSION_COOKIE}=`);
 
-    const internalAccess = await accessResponse({ orderId: internalOrderId });
-    expect(internalAccess.status).toBe(200);
-    expect(internalAccess.body).toEqual({ hasAccess: true });
+    const sessionId = setCookie?.match(new RegExp(`${CHECKOUT_SESSION_COOKIE}=([^;]+)`))?.[1];
+    const sessionResponse = await accessGet(createMockRequest("/api/access", {
+      query: { productId },
+      headers: { cookie: `${CHECKOUT_SESSION_COOKIE}=${sessionId ?? ""}` },
+    }));
+    expect(sessionResponse.status).toBe(200);
+    expect(await sessionResponse.json()).toEqual({ hasAccess: true });
   });
 });

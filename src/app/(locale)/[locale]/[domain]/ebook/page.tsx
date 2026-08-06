@@ -66,10 +66,10 @@ export default async function EbookPage({
   searchParams,
 }: {
   params: Promise<{ locale: string; domain: string }>;
-  searchParams: Promise<{ lang?: string; token?: string }>;
+  searchParams: Promise<{ lang?: string }>;
 }) {
   const { locale, domain } = await params;
-  const { lang, token } = await searchParams;
+  const { lang } = await searchParams;
   const data = await getCourseConfig(domain);
 
   if (!data) return notFound();
@@ -81,9 +81,10 @@ export default async function EbookPage({
 
   const localeContent = loadLocaleContentSafe(domain, currentLang);
   const activeBook = availableBooks.find((book) => book.code === currentLang) || availableBooks[0];
-  const staticBookUrl = activeBook ? `/courses/${data.slug}/${encodeURIComponent(activeBook.fileName)}` : null;
-  const viewerUrl = staticBookUrl || `/api/ebook/${data.slug}/download?lang=${encodeURIComponent(currentLang)}&disposition=inline${token ? `&token=${encodeURIComponent(token)}` : ""}`;
-  const downloadUrl = staticBookUrl || `/api/ebook/${data.slug}/download?lang=${encodeURIComponent(currentLang)}&disposition=attachment${token ? `&token=${encodeURIComponent(token)}` : ""}`;
+  // Keep paid ebook bytes behind the server-side access route. Static public
+  // files are not used as a bypass for paid products.
+  const viewerUrl = `/api/ebook/${data.slug}/download?lang=${encodeURIComponent(currentLang)}&disposition=inline`;
+  const downloadUrl = `/api/ebook/${data.slug}/download?lang=${encodeURIComponent(currentLang)}&disposition=attachment`;
 
   return (
     <EbookReader
@@ -91,7 +92,6 @@ export default async function EbookPage({
       locale={locale}
       domain={domain}
       currentLang={currentLang}
-      token={token}
       content={content}
       localeContent={localeContent}
       availableBooks={availableBooks}

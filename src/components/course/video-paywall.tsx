@@ -47,7 +47,7 @@ export function VideoPaywall({
 }: VideoPaywallProps) {
   const router = useRouter();
   const [hasAccess, setHasAccess] = useState<boolean | null>(
-    isFreeCourse ? true : isAuthenticated ? null : false
+    isFreeCourse ? true : isAuthenticated ? null : null
   );
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [timeElapsed, setTimeElapsed] = useState(0);
@@ -84,11 +84,8 @@ export function VideoPaywall({
       setChecking(false);
       return;
     }
-    if (!isAuthenticated) {
-      setHasAccess(false);  
-      setChecking(false);
-      return;
-    }
+    // The server decides whether an HttpOnly post-checkout session exists;
+    // do not short-circuit guests before asking the API.
     void checkAccess();
   }, [productSlug, isAuthenticated, isFreeCourse]);
 

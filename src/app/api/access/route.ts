@@ -2,63 +2,78 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerUser } from "@/lib/supabase/get-user";
 import { withRateLimit } from "@/lib/utils/rate-limit";
 import { resolveProductAccess } from "@/lib/commerce/access/resolve-product-access";
+import { prisma } from "@/lib/db/prisma";
+import {
+  CheckoutTokenError,
+  CHECKOUT_SESSION_COOKIE,
+  consumeCheckoutToken,
+  readCheckoutSession,
+  setCheckoutSessionCookie,
+} from "@/lib/commerce/access/checkout-token";
 
 /**
- * GET /api/access — auth semantics probe.
+ * GET /api/access?productId=<slug-or-id>
  *
- * Post-consolidation contract: the route ONLY parses the request,
- * delegates the ENTIRE access decision to `resolveProductAccess`
- * (the canonical AccessGrant SSOT resolver), and maps the result to
- * the public `{ hasAccess }` shape. No direct prisma queries, no
- * Order reads, no legacy tables, no parallel access logic inside
- * this file.
- *
- * Canonical order identity (explicit wire contract — the legacy
- * `order_id` / `provider_order_id` aliases are GONE):
- *   - `providerOrderId`  → forwarded explicitly (provider-scoped
- *     anonymous post-checkout path; requires `provider`).
- *   - `orderId`          → internal `Order.id`, forwarded as
- *     `internalOrderId` (strict internal PK — a provider id passed
- *     here fails closed with `order_not_found`).
- *   - neither            → session-keyed path only.
- *
- * The resolver owns:
- *   - productId resolution (slug OR cuid)
- *   - session-keyed grants (userId)
- *   - admin bypass (userRole)
- *   - anonymous post-checkout access (provider + providerOrderId,
- *     translated to the internal Order.id before the grant lookup)
+ * Anonymous post-checkout access uses only the short-lived HttpOnly
+ * checkout-session cookie. A raw `checkoutToken` may be exchanged once at
+ * this endpoint; providerOrderId and orderId are intentionally rejected.
  */
 export const GET = withRateLimit(async function GET(request: NextRequest) {
   try {
     const { dbUser } = await getServerUser();
     const { searchParams } = request.nextUrl;
-    const productId = searchParams.get("productId");
-    if (!productId) return NextResponse.json({ hasAccess: false });
+    const productInput = searchParams.get("productId");
+    if (!productInput) return NextResponse.json({ hasAccess: false });
 
-    const providerOrderId = searchParams.get("providerOrderId") || undefined;
-    const internalOrderId = searchParams.get("orderId") || undefined;
+    const product = await prisma.product.findFirst({
+      where: { OR: [{ id: productInput }, { slug: productInput }] },
+      select: { id: true, slug: true },
+    });
+    if (!product) return NextResponse.json({ hasAccess: false });
+
+    const checkoutToken = searchParams.get("checkoutToken");
+    const sessionId = request.cookies?.get(CHECKOUT_SESSION_COOKIE)?.value;
+    let checkoutSession: Awaited<ReturnType<typeof readCheckoutSession>> = null;
+    let exchanged = false;
+
+    if (checkoutToken) {
+      checkoutSession = await consumeCheckoutToken(checkoutToken, {
+        productId: product.id,
+        productSlug: product.slug,
+      });
+      exchanged = true;
+    } else if (sessionId) {
+      checkoutSession = await readCheckoutSession(sessionId, {
+        productId: product.id,
+        productSlug: product.slug,
+      });
+    }
 
     const granted = await resolveProductAccess({
       userId: dbUser?.id,
       userRole: dbUser?.role,
-      productId,
-      // Explicit providerOrderId values must include their provider —
-      // a missing provider never triggers an unscoped lookup.
-      provider: providerOrderId
-        ? searchParams.get("provider") || undefined
-        : undefined,
-      providerOrderId,
-      internalOrderId,
+      productId: product.id,
+      provider: checkoutSession?.provider,
+      providerOrderId: checkoutSession?.providerOrderId,
     });
 
-    return NextResponse.json({
+    const result = {
       hasAccess: granted.hasAccess,
-      // Session-keyed grants (and admin bypass) expose the userId in
-      // the response; anonymous orderId-keyed grants do not.
       ...(granted.hasAccess && dbUser ? { userId: dbUser.id } : {}),
-    });
+    };
+    if (exchanged && checkoutSession) {
+      const response = NextResponse.json(result);
+      setCheckoutSessionCookie(response, checkoutSession.jti);
+      return response;
+    }
+    return NextResponse.json(result);
   } catch (error) {
+    if (error instanceof CheckoutTokenError) {
+      return NextResponse.json(
+        { hasAccess: false, error: error.message, code: error.code },
+        { status: error.status },
+      );
+    }
     console.error("GET /api/access error:", error);
     return NextResponse.json({ hasAccess: false });
   }

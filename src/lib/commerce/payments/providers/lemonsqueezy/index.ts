@@ -147,7 +147,7 @@ export class LemonSqueezyPaymentProvider implements PaymentProvider {
     if (channelId) customData.channelId = channelId;
 
     const appUrl = env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-    const redirectUrl = `${appUrl}/${locale}/${product.slug}/download?lang=${locale}&provider=lemonsqueezy&providerOrderId=[order_id]`;
+    const redirectUrl = `${appUrl}/api/checkout/complete?lang=${encodeURIComponent(locale)}&productSlug=${encodeURIComponent(product.slug)}&providerOrderId=[order_id]`;
 
     // Localize Lemon Squeezy hosted-checkout receipt button text so ES/FR
     // buyers see "Descargar tu libro" / "Téléchargez votre livre" instead

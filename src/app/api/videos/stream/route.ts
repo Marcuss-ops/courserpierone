@@ -5,6 +5,10 @@ import { withRateLimit } from "@/lib/utils/rate-limit";
 import { apiErrorResponse } from "@/lib/errors";
 import { resolveProductAccess } from "@/lib/commerce/access/resolve-product-access";
 import { isFreeCourse } from "@/lib/courses/is-free-course";
+import {
+  CHECKOUT_SESSION_COOKIE,
+  readCheckoutSession,
+} from "@/lib/commerce/access/checkout-token";
 
 /**
  * GET /api/videos/stream?lessonId=xxx&productSlug=xxx&lang=it
@@ -60,8 +64,15 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
     }
 
     const isFree = isFreeCourse(productSlug, product.price);
+    const checkoutSessionId = request.cookies?.get(CHECKOUT_SESSION_COOKIE)?.value;
+    const checkoutSession = checkoutSessionId
+      ? await readCheckoutSession(checkoutSessionId, {
+          productId: product.id,
+          productSlug: product.slug,
+        })
+      : null;
 
-    if (!isFree && (!user?.email || !dbUser)) {
+    if (!isFree && (!user?.email || !dbUser) && !checkoutSession) {
       return NextResponse.json({ error: "Non autenticato" }, { status: 401 });
     }
 
@@ -74,11 +85,13 @@ export const GET = withRateLimit(async function GET(request: NextRequest) {
     // the `?.` on the resolver guard.
     let hasAccess = isFree;
 
-    if (!hasAccess && dbUser) {
+    if (!hasAccess && (dbUser || checkoutSession)) {
       const granted = await resolveProductAccess({
-        userId: dbUser.id,
-        userRole: dbUser.role,
+        userId: dbUser?.id,
+        userRole: dbUser?.role,
         productId: product.id,
+        provider: checkoutSession?.provider,
+        providerOrderId: checkoutSession?.providerOrderId,
       });
       hasAccess = granted.hasAccess;
     }

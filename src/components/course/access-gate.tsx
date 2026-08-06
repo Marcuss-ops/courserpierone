@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { getServerUser } from "@/lib/supabase/get-user";
@@ -10,6 +11,10 @@ import {
   resolveProductAccess,
 } from "@/lib/commerce/access/resolve-product-access";
 import {
+  CHECKOUT_SESSION_COOKIE,
+  readCheckoutSession,
+} from "@/lib/commerce/access/checkout-token";
+import {
   evaluateAccess,
   type AccessPolicy,
   type AccessContext,
@@ -19,9 +24,6 @@ interface AccessGateProps {
   productSlug: string;
   courseTitle?: string;
   callbackUrl: string;
-  provider?: string;
-  providerOrderId?: string;
-  orderId?: string;
   children: ReactNode;
 }
 
@@ -64,9 +66,6 @@ export async function AccessGate({
   productSlug,
   courseTitle,
   callbackUrl,
-  provider,
-  providerOrderId,
-  orderId,
   children,
 }: AccessGateProps) {
   const { user, dbUser } = await getServerUser();
@@ -84,21 +83,32 @@ export async function AccessGate({
     return <>{children}</>;
   }
 
+  // Anonymous post-checkout access is read only from the server-set
+  // HttpOnly session cookie. Raw providerOrderId/orderId query params are
+  // intentionally not part of this component's public contract.
+  const cookieStore = await cookies();
+  const sessionId = cookieStore.get(CHECKOUT_SESSION_COOKIE)?.value;
+  let checkoutSession = null;
+  if (sessionId) {
+    try {
+      checkoutSession = await readCheckoutSession(sessionId, {
+        productId: product.id,
+        productSlug: product.slug,
+      });
+    } catch (error) {
+      console.warn("[AccessGate] Invalid checkout session:", error);
+    }
+  }
+
   // Step 9: AccessGrant SSOT cutover
-  // Single canonical resolver read for the "owned" verdict. Honors
-  // any sourceType (order, free_enrollment, admin, bundle, watchlist)
-  // with status="active" + non-expired. The BOOLEAN verdict is the
-  // only signal the policy engine needs - the evaluator itself
-  // remains pure (no Prisma inside).
-  const hasOrderIdentifier = Boolean(providerOrderId || orderId);
-  const granted = dbUser || hasOrderIdentifier
+  const hasCheckoutSession = Boolean(checkoutSession);
+  const granted = dbUser || hasCheckoutSession
     ? await resolveProductAccess({
         userId: dbUser?.id,
         userRole: dbUser?.role,
         productId: product.id,
-        provider: providerOrderId ? provider : undefined,
-        providerOrderId,
-        internalOrderId: orderId,
+        provider: checkoutSession?.provider,
+        providerOrderId: checkoutSession?.providerOrderId,
       })
     : null;
 

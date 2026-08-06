@@ -7,12 +7,9 @@ import type { Metadata } from "next";
 import { Download, BookOpen, ArrowLeft, CheckCircle } from "lucide-react";
 import { getCourseConfig } from "@/lib/config/white-label-data";
 import { AccessGate } from "@/components/course/access-gate";
-import { isFreeCourse } from "@/lib/courses/is-free-course";
 import { loadLocaleContentSafe } from "@/lib/i18n/load-locale-content";
 import { getAvailableEbookBooks } from "@/lib/books/ebook-catalog";
-import { SaveAccess } from "@/components/course/save-access";
 import { getUiTranslations } from "@/lib/i18n/ui-translations";
-import { prisma } from "@/lib/db/prisma";
 
 const LANGUAGE_NAMES: Record<string, string> = {
   it: "Italiano",
@@ -102,28 +99,13 @@ export default async function DownloadPage({
   params: Promise<{ locale: string; domain: string }>;
   searchParams: Promise<{
     lang?: string;
-    token?: string;
-    provider?: string;
-    providerOrderId?: string;
-    orderId?: string;
   }>;
 }) {
   const { domain, locale } = await params;
-  const { lang, token, provider, providerOrderId, orderId } = await searchParams;
+  const { lang } = await searchParams;
 
   const course = await getCourseConfig(domain);
   if (!course) return notFound();
-
-  // Defense-in-depth: same logic as access-gate.tsx. Pass to <SaveAccess>
-  // for consistency with other pages + use to bypass the auth requirement
-  // on the /api/ebook/[slug]/download endpoint for free-course guests.
-  // Lightweight product lookup (only `price` field) — the full course
-  // config is already loaded above.
-  const downloadProduct = await prisma.product.findUnique({
-    where: { slug: domain },
-    select: { price: true },
-  });
-  const freeCourse = isFreeCourse(domain, downloadProduct?.price);
 
   const availableBooks = getAvailableEbookBooks(domain);
   const currentLang = lang || availableBooks[0]?.code || locale.split("-")[0] || course.defaultLanguage || "en";
@@ -138,36 +120,21 @@ export default async function DownloadPage({
   const ebookTitle = content.ebookTitle || content.title;
 
   const availableLanguages = availableBooks;
-  const activeBook = availableBooks.find((book) => book.code === currentLang) || availableBooks[0];
-  const staticBookUrl = activeBook ? `/courses/${domain}/${encodeURIComponent(activeBook.fileName)}` : null;
+  // Never expose a static PDF URL for a gated product. The API route is
+  // the server-side access boundary and reads the HttpOnly checkout session.
+  const downloadUrl = `/api/ebook/${domain}/download?lang=${encodeURIComponent(currentLang)}&disposition=attachment`;
 
-  const downloadUrl = staticBookUrl || `/api/ebook/${domain}/download?lang=${currentLang}&disposition=attachment${token ? `&token=${token}` : ""}`;
-
-  const activeProviderOrderId = providerOrderId;
-  const activeOrderId = orderId;
   const downloadQs = new URLSearchParams();
   downloadQs.set("lang", currentLang);
-  if (activeProviderOrderId) {
-    // Provider is explicit from the post-checkout redirect (e.g.
-    // provider=lemonsqueezy&providerOrderId=[order_id]) — no silent
-    // default here.
-    if (provider) downloadQs.set("provider", provider);
-    downloadQs.set("providerOrderId", activeProviderOrderId);
-  }
-  if (activeOrderId) downloadQs.set("orderId", activeOrderId);
   
   return (
     <AccessGate
       productSlug={domain}
       courseTitle={ebookTitle}
       callbackUrl={`/${locale}/${domain}/download?${downloadQs.toString()}`}
-      provider={provider}
-      providerOrderId={activeProviderOrderId}
-      orderId={activeOrderId}
     >
 
     <div className="min-h-screen bg-[#070709] text-zinc-100 font-sans relative overflow-x-hidden flex flex-col justify-between">
-      <SaveAccess productSlug={domain} isFreeCourse={freeCourse} />
       {/* Background radial glows */}
       <div
         className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full blur-[120px] -z-10 opacity-30"
@@ -259,7 +226,7 @@ export default async function DownloadPage({
                     return (
                       <Link
                         key={book.code}
-                        href={`/${locale}/${domain}/download?lang=${book.code}${token ? `&token=${token}` : ""}`}
+                        href={`/${locale}/${domain}/download?lang=${book.code}`}
                         className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all border ${
                           isActive
                             ? "text-white border-transparent"

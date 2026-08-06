@@ -18,7 +18,6 @@ interface EbookReaderProps {
   locale: string;
   domain: string;
   currentLang: string;
-  token?: string;
   content: LanguageEntry;
   localeContent: LocaleContent;
   availableBooks: EbookBook[];
@@ -32,7 +31,6 @@ export function EbookReader({
   locale,
   domain,
   currentLang,
-  token,
   content,
   localeContent,
   availableBooks,
@@ -250,7 +248,7 @@ export function EbookReader({
                   {availableBooks.map((book) => (
                     <Link
                       key={book.code}
-                      href={`?lang=${book.code}${token ? `&token=${encodeURIComponent(token)}` : ""}`}
+                      href={`?lang=${book.code}`}
                       className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border text-center transition-colors ${
                         currentLang === book.code
                           ? "bg-zinc-900 text-white border-zinc-900"

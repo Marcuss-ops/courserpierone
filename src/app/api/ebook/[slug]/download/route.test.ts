@@ -157,7 +157,10 @@ describe("GET /api/ebook/[slug]/download — user-keyed AccessGrant SSOT (NO adm
     expect(response.status).toBe(401);
     expect(mockResolveProductAccess).toHaveBeenCalledWith({
       userId: ADMIN_ID,
+      userRole: "admin",
       productId: PRODUCT_ID,
+      provider: undefined,
+      providerOrderId: undefined,
     });
   });
 

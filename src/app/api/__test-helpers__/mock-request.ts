@@ -199,8 +199,22 @@ export function createMockRequest(
   // consumes a stream — overriding prevents the "body stream already read"
   // error when tests call .json() multiple times or in branches that
   // wouldn't reach the original.
+  const cookieValues = new Map<string, string>();
+  for (const part of (rawHeaders.get("cookie") ?? "").split(";")) {
+    const separator = part.indexOf("=");
+    if (separator > 0) {
+      cookieValues.set(part.slice(0, separator).trim(), part.slice(separator + 1).trim());
+    }
+  }
+
   return Object.assign(request, {
     nextUrl: url,
+    cookies: {
+      get: (name: string) => {
+        const value = cookieValues.get(name);
+        return value === undefined ? undefined : { name, value };
+      },
+    },
     json: () => Promise.resolve(body),
     text: () => Promise.resolve(bodyString ?? ""),
   }) as unknown as NextRequest;

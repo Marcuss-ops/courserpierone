@@ -7,6 +7,10 @@ import { prisma } from "@/lib/db/prisma";
 import fs from "fs";
 import path from "path";
 import { resolveProductAccess } from "@/lib/commerce/access/resolve-product-access";
+import {
+  CHECKOUT_SESSION_COOKIE,
+  readCheckoutSession,
+} from "@/lib/commerce/access/checkout-token";
 
 export async function GET(
   request: NextRequest,
@@ -33,17 +37,28 @@ export async function GET(
     where: { slug },
     select: { id: true, price: true },
   });
+  const checkoutSessionId = request.cookies?.get(CHECKOUT_SESSION_COOKIE)?.value;
+  const checkoutSession = checkoutSessionId && downloadProduct
+    ? await readCheckoutSession(checkoutSessionId, {
+        productId: downloadProduct.id,
+        productSlug: slug,
+      })
+    : null;
+
   if (isFreeCourse(slug, downloadProduct?.price)) {
     hasAccess = true;
   }
 
-  if (!hasAccess && user?.email && dbUser && downloadProduct) {
+  if (!hasAccess && (user?.email || checkoutSession) && downloadProduct) {
     // V2 AccessGrant cutover: `resolveProductAccess` is the canonical
-    // resolver. Honors all sourceTypes (order, free_enrollment, admin,
-    // bundle, watchlist) uniformly with status="active" + non-expired.
+    // resolver. Anonymous post-checkout access uses only the HttpOnly
+    // checkout session; no order identifier is accepted from the URL.
     const granted = await resolveProductAccess({
-      userId: dbUser.id,
+      userId: dbUser?.id,
+      userRole: dbUser?.role,
       productId: downloadProduct.id,
+      provider: checkoutSession?.provider,
+      providerOrderId: checkoutSession?.providerOrderId,
     });
     if (granted.hasAccess) {
       hasAccess = true;
@@ -70,9 +85,11 @@ export async function GET(
     return NextResponse.json({ error: "Language not found" }, { status: 404 });
   }
 
-  // Check if a pre-compiled PDF exists in the course folder
+  // Public pre-compiled PDFs are safe only for verified free courses.
+  // Paid products must use the generated response below so the access
+  // decision remains the server-side boundary.
   const staticPdfPath = path.join(process.cwd(), "public", "courses", slug, `${lang}.pdf`);
-  if (fs.existsSync(staticPdfPath)) {
+  if (isFreeCourse(slug, downloadProduct?.price) && fs.existsSync(staticPdfPath)) {
     try {
       const pdfBuffer = fs.readFileSync(staticPdfPath);
       const filename = `${slug}-${lang}-${content.ebookTitle.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase().slice(0, 40)}.pdf`;

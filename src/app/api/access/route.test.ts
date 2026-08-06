@@ -1,283 +1,181 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { NextRequest } from "next/server";
 
-// ─── Mock helpers (SSOT seam) ──────────────────────────────
-// Post-consolidation contract: the route contains ZERO access logic
-// and ZERO prisma queries. It only parses the request, delegates to
-// `resolveProductAccess`, and maps the verdict to `{ hasAccess }`.
-// Product resolution (slug|id), admin bypass, session grants and the
-// anonymous orderId path all live in the resolver — tested in
-// `resolve-product-access.test.ts`. This suite pins the thin route
-// contract: input parsing, parameter forwarding, response mapping,
-// crash safety.
+const mockPrisma = { product: { findFirst: vi.fn() } };
 const mockResolveProductAccess = vi.fn();
+const mockGetServerUser = vi.fn();
+const mockConsumeCheckoutToken = vi.fn();
+const mockReadCheckoutSession = vi.fn();
+const mockSetCheckoutSessionCookie = vi.fn();
 
+vi.mock("@/lib/db/prisma", () => ({ prisma: mockPrisma }));
 vi.mock("@/lib/commerce/access/resolve-product-access", () => ({
   resolveProductAccess: mockResolveProductAccess,
 }));
-
-// ─── Mock Supabase user ────────────────────────────────────
-const mockGetServerUser = vi.fn();
-
-vi.mock("@/lib/supabase/get-user", () => ({
-  getServerUser: mockGetServerUser,
+vi.mock("@/lib/supabase/get-user", () => ({ getServerUser: mockGetServerUser }));
+vi.mock("@/lib/utils/rate-limit", () => ({ withRateLimit: <T,>(fn: T) => fn }));
+vi.mock("@/lib/commerce/access/checkout-token", () => ({
+  CHECKOUT_SESSION_COOKIE: "courssy_checkout_session",
+  consumeCheckoutToken: mockConsumeCheckoutToken,
+  readCheckoutSession: mockReadCheckoutSession,
+  setCheckoutSessionCookie: mockSetCheckoutSessionCookie,
+  CheckoutTokenError: class CheckoutTokenError extends Error {
+    code = "CHECKOUT_TOKEN_INVALID";
+    status = 401;
+  },
 }));
 
-// ─── Mock rate limit (no-op wrapper) ─────────────────────────
-vi.mock("@/lib/utils/rate-limit", () => ({
-  withRateLimit: <T,>(fn: T) => fn,
-}));
+const PRODUCT_ID = "cp-product-1";
+const PRODUCT_SLUG = "test-course";
+const USER_ID = "cu-user-1";
+const PROVIDER_ORDER_ID = "ls-order-1";
 
-// ─── Helpers ─────────────────────────────────────────────────
-const FAKE_PRODUCT_SLUG = "test-course";
-const FAKE_USER_ID = "cu-user-1";
-const FAKE_PROVIDER = "lemonsqueezy";
-const FAKE_PROVIDER_ORDER_ID = "cs_test_aBc123";
-const FAKE_GRANT_ID = "grant-1";
-
-function createMockRequest(query: Record<string, string> = {}) {
+function createMockRequest(query: Record<string, string> = {}, sessionId?: string) {
   const url = new URL("http://localhost:3000/api/access");
-  for (const [k, v] of Object.entries(query)) {
-    url.searchParams.set(k, v);
-  }
+  for (const [key, value] of Object.entries(query)) url.searchParams.set(key, value);
   return {
     nextUrl: { searchParams: url.searchParams },
-    url: url.toString(),
-    headers: new Map(),
+    cookies: { get: vi.fn(() => sessionId ? { name: "courssy_checkout_session", value: sessionId } : undefined) },
   } as unknown as NextRequest;
 }
 
-// ─── Test fixtures ──────────────────────────────────────────
+function anonymous() {
+  mockGetServerUser.mockResolvedValueOnce({ user: null, dbUser: null });
+}
 
-const mockAdmin = () =>
+function customer() {
   mockGetServerUser.mockResolvedValueOnce({
-    supabase: null,
-    user: { email: "admin@test.com" },
-    dbUser: { id: FAKE_USER_ID, role: "admin" },
+    user: { email: "customer@example.com" },
+    dbUser: { id: USER_ID, role: "student" },
   });
+}
 
-const mockLoggedInCustomer = () =>
-  mockGetServerUser.mockResolvedValueOnce({
-    supabase: null,
-    user: { email: "customer@test.com" },
-    dbUser: { id: FAKE_USER_ID, role: "student" },
-  });
-
-const mockAnonymous = () =>
-  mockGetServerUser.mockResolvedValueOnce({
-    supabase: null,
-    user: null,
-    dbUser: null,
-  });
-
-// Post-contract-change shape: the resolver returns a uniform
-// `{ hasAccess, reason, productId, orderId }`. The route only maps
-// `hasAccess` (and exposes `userId` for session-keyed allows).
-const mockAllowed = (overrides: Partial<{ orderId: string | null }> = {}) =>
+function allow() {
   mockResolveProductAccess.mockResolvedValueOnce({
     hasAccess: true,
     reason: "active_purchase",
-    productId: FAKE_PRODUCT_SLUG,
-    orderId: overrides.orderId ?? FAKE_GRANT_ID,
+    productId: PRODUCT_ID,
+    orderId: "grant-1",
   });
+}
 
-const mockDenied = () =>
+function deny() {
   mockResolveProductAccess.mockResolvedValueOnce({
     hasAccess: false,
     reason: "not_purchased",
-    productId: FAKE_PRODUCT_SLUG,
+    productId: PRODUCT_ID,
     orderId: null,
   });
+}
 
-// ─── Tests ───────────────────────────────────────────────────
-describe("GET /api/access — thin auth semantics probe", () => {
-  beforeEach(() => {
-    vi.resetAllMocks();
-  });
+beforeEach(() => {
+  vi.resetAllMocks();
+  mockPrisma.product.findFirst.mockResolvedValue({ id: PRODUCT_ID, slug: PRODUCT_SLUG });
+});
 
-  it("returns hasAccess:false when productId query param is missing (resolver not called)", async () => {
-    mockAnonymous();
+describe("GET /api/access — checkout token contract", () => {
+  it("denies when productId is missing without any resolver call", async () => {
+    anonymous();
     const { GET } = await import("./route");
-    const response = await GET(createMockRequest({}));
-    const body = await response.json();
-
+    const response = await GET(createMockRequest());
     expect(response.status).toBe(200);
-    expect(body.hasAccess).toBe(false);
-    // Early return BEFORE any delegation — no resolver hit.
+    expect((await response.json()).hasAccess).toBe(false);
     expect(mockResolveProductAccess).not.toHaveBeenCalled();
   });
 
-  it("forwards productId (slug) + anonymous identity to the resolver and maps deny", async () => {
-    mockAnonymous();
-    mockDenied();
+  it("exchanges a signed checkoutToken once and sets the session cookie", async () => {
+    anonymous();
+    mockConsumeCheckoutToken.mockResolvedValueOnce({
+      jti: "jti-1",
+      provider: "lemonsqueezy",
+      providerOrderId: PROVIDER_ORDER_ID,
+    });
+    allow();
 
     const { GET } = await import("./route");
-    const response = await GET(createMockRequest({ productId: FAKE_PRODUCT_SLUG }));
-    const body = await response.json();
+    const response = await GET(createMockRequest({
+      productId: PRODUCT_SLUG,
+      checkoutToken: "signed-token",
+    }));
 
     expect(response.status).toBe(200);
-    expect(body.hasAccess).toBe(false);
-    expect(body.userId).toBeUndefined();
-    // The route passes the raw slug — product resolution is the
-    // resolver's job now.
+    expect((await response.json()).hasAccess).toBe(true);
+    expect(mockConsumeCheckoutToken).toHaveBeenCalledWith("signed-token", {
+      productId: PRODUCT_ID,
+      productSlug: PRODUCT_SLUG,
+    });
+    expect(mockSetCheckoutSessionCookie).toHaveBeenCalled();
     expect(mockResolveProductAccess).toHaveBeenCalledWith({
       userId: undefined,
       userRole: undefined,
-      productId: FAKE_PRODUCT_SLUG,
-      internalOrderId: undefined,
+      productId: PRODUCT_ID,
+      provider: "lemonsqueezy",
+      providerOrderId: PROVIDER_ORDER_ID,
     });
   });
 
-  it("forwards provider + providerOrderId (Pattern B guest) and maps allow WITHOUT userId", async () => {
-    mockAnonymous();
-    mockAllowed();
+  it("uses the HttpOnly session for subsequent access checks", async () => {
+    anonymous();
+    mockReadCheckoutSession.mockResolvedValueOnce({
+      jti: "jti-1",
+      provider: "lemonsqueezy",
+      providerOrderId: PROVIDER_ORDER_ID,
+    });
+    allow();
 
     const { GET } = await import("./route");
-    const response = await GET(
-      createMockRequest({
-        productId: FAKE_PRODUCT_SLUG,
-        provider: FAKE_PROVIDER,
-        providerOrderId: FAKE_PROVIDER_ORDER_ID,
-      })
-    );
-    const body = await response.json();
+    const response = await GET(createMockRequest({ productId: PRODUCT_SLUG }, "jti-1"));
 
     expect(response.status).toBe(200);
-    expect(body.hasAccess).toBe(true);
-    // Guest (orderId-keyed) does NOT receive userId in the response.
-    expect(body.userId).toBeUndefined();
+    expect(mockReadCheckoutSession).toHaveBeenCalledWith("jti-1", {
+      productId: PRODUCT_ID,
+      productSlug: PRODUCT_SLUG,
+    });
+    expect(mockResolveProductAccess).toHaveBeenCalledWith(expect.objectContaining({
+      provider: "lemonsqueezy",
+      providerOrderId: PROVIDER_ORDER_ID,
+    }));
+  });
+
+  it("ignores public providerOrderId and orderId parameters", async () => {
+    anonymous();
+    deny();
+
+    const { GET } = await import("./route");
+    const response = await GET(createMockRequest({
+      productId: PRODUCT_SLUG,
+      provider: "lemonsqueezy",
+      providerOrderId: PROVIDER_ORDER_ID,
+      orderId: "internal-order-1",
+    }));
+
+    expect(response.status).toBe(200);
+    expect((await response.json()).hasAccess).toBe(false);
+    expect(mockReadCheckoutSession).not.toHaveBeenCalled();
     expect(mockResolveProductAccess).toHaveBeenCalledWith({
       userId: undefined,
       userRole: undefined,
-      productId: FAKE_PRODUCT_SLUG,
-      provider: FAKE_PROVIDER,
-      providerOrderId: FAKE_PROVIDER_ORDER_ID,
-      internalOrderId: undefined,
+      productId: PRODUCT_ID,
+      provider: undefined,
+      providerOrderId: undefined,
     });
   });
 
-  it("forwards explicit providerOrderId WITHOUT provider param — provider undefined (resolver fails closed)", async () => {
-    mockAnonymous();
-    mockDenied();
+  it("keeps authenticated session access independent of checkout tokens", async () => {
+    customer();
+    allow();
 
     const { GET } = await import("./route");
-    const response = await GET(
-      createMockRequest({ productId: FAKE_PRODUCT_SLUG, providerOrderId: FAKE_PROVIDER_ORDER_ID })
-    );
+    const response = await GET(createMockRequest({ productId: PRODUCT_SLUG }));
 
     expect(response.status).toBe(200);
-    expect((await response.json()).hasAccess).toBe(false);
-    expect(mockResolveProductAccess).toHaveBeenCalledWith(
-      expect.objectContaining({
-        providerOrderId: FAKE_PROVIDER_ORDER_ID,
-        provider: undefined,
-        internalOrderId: undefined,
-      }),
-    );
-  });
-
-  it("forwards orderId as the internal Order.id — never warns (canonical wire contract)", async () => {
-    mockAnonymous();
-    mockDenied();
-    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
-
-    const { GET } = await import("./route");
-    const response = await GET(
-      createMockRequest({ productId: FAKE_PRODUCT_SLUG, orderId: "c123456789012345678901234" })
-    );
-
-    expect(response.status).toBe(200);
-    // The legacy warn-on-misuse adapter is gone: orderId is the explicit
-    // internal Order.id wire contract now.
-    expect(warnSpy).not.toHaveBeenCalled();
-    expect(mockResolveProductAccess).toHaveBeenCalledWith(
-      expect.objectContaining({
-        internalOrderId: "c123456789012345678901234",
-        providerOrderId: undefined,
-        provider: undefined,
-      }),
-    );
-    warnSpy.mockRestore();
-  });
-
-  it("maps resolver deny (anonymous + wrong providerOrderId) to hasAccess:false", async () => {
-    mockAnonymous();
-    mockDenied();
-
-    const { GET } = await import("./route");
-    const response = await GET(
-      createMockRequest({
-        productId: FAKE_PRODUCT_SLUG,
-        provider: FAKE_PROVIDER,
-        providerOrderId: FAKE_PROVIDER_ORDER_ID,
-      })
-    );
-
-    expect(response.status).toBe(200);
-    expect((await response.json()).hasAccess).toBe(false);
-  });
-
-  it("forwards userId + userRole (customer) and maps allow WITH userId", async () => {
-    mockLoggedInCustomer();
-    mockAllowed();
-
-    const { GET } = await import("./route");
-    const response = await GET(createMockRequest({ productId: FAKE_PRODUCT_SLUG }));
-    const body = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(body.hasAccess).toBe(true);
-    expect(body.userId).toBe(FAKE_USER_ID);
+    expect((await response.json()).userId).toBe(USER_ID);
     expect(mockResolveProductAccess).toHaveBeenCalledWith({
-      userId: FAKE_USER_ID,
+      userId: USER_ID,
       userRole: "student",
-      productId: FAKE_PRODUCT_SLUG,
-      internalOrderId: undefined,
+      productId: PRODUCT_ID,
+      provider: undefined,
+      providerOrderId: undefined,
     });
-  });
-
-  it("maps resolver deny (customer without grant) to hasAccess:false, no userId", async () => {
-    mockLoggedInCustomer();
-    mockDenied();
-
-    const { GET } = await import("./route");
-    const response = await GET(createMockRequest({ productId: FAKE_PRODUCT_SLUG }));
-    const body = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(body.hasAccess).toBe(false);
-    expect(body.userId).toBeUndefined();
-  });
-
-  it("maps admin allow (delegated admin bypass) to hasAccess:true WITH userId", async () => {
-    mockAdmin();
-    mockAllowed();
-
-    const { GET } = await import("./route");
-    const response = await GET(createMockRequest({ productId: FAKE_PRODUCT_SLUG }));
-    const body = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(body.hasAccess).toBe(true);
-    expect(body.userId).toBe(FAKE_USER_ID);
-    // The admin verdict now comes from the resolver (delegated), not
-    // from an inline role check in the route.
-    expect(mockResolveProductAccess).toHaveBeenCalledWith(
-      expect.objectContaining({ userId: FAKE_USER_ID, userRole: "admin" }),
-    );
-  });
-
-  // ── Crash safety: unhandled error returns hasAccess:false (NOT 500) ──
-
-  it("returns hasAccess:false when getServerUser throws unhandled error", async () => {
-    mockGetServerUser.mockRejectedValueOnce(new Error("supabase down"));
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
-    const { GET } = await import("./route");
-    const response = await GET(createMockRequest({ productId: FAKE_PRODUCT_SLUG }));
-    const body = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(body.hasAccess).toBe(false);
-    consoleSpy.mockRestore();
   });
 });
