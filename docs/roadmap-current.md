@@ -8,7 +8,7 @@
 
 ## Status verificato
 
-Questa sezione separa le evidenze locali dalla CI remota. L'ultimo audit locale è stato eseguito su `main` con baseline `6f107e9` il 2026-08-06. Il push del range resta soggetto a un token OAuth/PAT con scope `workflow`; un controllo non eseguito o bloccato non viene interpretato come pass implicito. Un controllo non eseguito o bloccato non viene interpretato come pass implicito.
+Questa sezione separa le evidenze locali dalla CI remota. L'ultimo audit locale è stato eseguito su `main` con baseline `6f107e9` il 2026-08-06. Il push del range resta soggetto a un token OAuth/PAT con scope `workflow`; un controllo non eseguito o bloccato non viene interpretato come pass implicito.
 
 ### Verifica locale dell'audit su `main` (baseline `6f107e9`)
 
@@ -130,7 +130,7 @@ Feature **deliberatamente non pianificate** in V1.x. Se richieste, refer to thes
 
 ## Update log
 
-- `6f107e9` — baseline dell'audit corrente: typecheck, lint, build, quality suite e 2.089 unit test passati; integration/migration deploy/E2E restano bloccati o skipped senza Docker, DB ed env; le correzioni di fixture/documentazione sono in attesa del commit dell'audit.
+- `6f107e9` — baseline dell'audit corrente: typecheck, lint, build, quality suite e 2.089 unit test passati; integration/migration deploy/E2E restano bloccati o skipped senza Docker, DB ed env; le correzioni di fixture/documentazione sono incluse nel commit `b79f9d2`.
 - `a49b8601f6113afb960a8722eed909943e7858ef` — status verificato su [CI — deploy-gate #31040206880](https://github.com/Marcuss-ops/courserpierone/actions/runs/31040206880): security scan passata; build, typecheck, unit, integration, migration, E2E e deploy-gate falliti; deploy-production skipped.
 - `cfb2d12` — `chore(dm): delete legacy /api/messages routes + shim, consolidate on /api/conversations`
 - `e85c65c` — `refactor(dm): migrate ChatView to canonical /api/conversations endpoints`
