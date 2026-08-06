@@ -12,7 +12,7 @@ analytics, protezione accessi e gestione progressi.
 
 ## Requisiti
 
-- **Node.js 20 LTS**
+- **Node.js 22** (see `.nvmrc`; npm `11.4.2`)
 - **PostgreSQL 15+** (Supabase, Neon, o locale via Docker)
 - **Account Supabase** (Auth + Postgres + Storage)
 - **Account Lemon Squeezy** (provider pagamenti unico in V1.x)
