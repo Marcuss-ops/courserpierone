@@ -1,18 +1,26 @@
 import { prisma } from "@/lib/db/prisma";
 
-import type { ProductAccessPort } from "../ports/product-access-port";
+import type { AccessRepository } from "../ports/access-repository";
 
 /**
  * Prisma is intentionally isolated here. The use case and domain modules
  * depend only on ProductAccessPort and never import persistence code.
  */
-export const prismaProductAccessAdapter: ProductAccessPort = {
+export const prismaAccessRepository: AccessRepository = {
   async resolveProductId(productIdOrSlug) {
     const product = await prisma.product.findFirst({
       where: { OR: [{ id: productIdOrSlug }, { slug: productIdOrSlug }] },
       select: { id: true },
     });
     return product?.id ?? null;
+  },
+
+  async findProductCreator(productId) {
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+      select: { creatorId: true },
+    });
+    return product?.creatorId ?? null;
   },
 
   async findActiveGrant(where) {

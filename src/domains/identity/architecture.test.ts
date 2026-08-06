@@ -38,6 +38,16 @@ describe("Identity & Access architecture", () => {
     }
   });
 
+  it("keeps the messaging authorization shim on the Identity contract", () => {
+    const messagingResolver = readFileSync(
+      join(SRC_ROOT, "lib", "messaging", "resolve-message-permission.ts"),
+      "utf8",
+    );
+    expect(messagingResolver).toContain("accessPolicy.canMessage");
+    expect(messagingResolver).not.toContain("@/lib/commerce");
+    expect(messagingResolver).not.toContain("@/lib/db/prisma");
+  });
+
   it("keeps persistence composition in the adapter layer", () => {
     const adapter = readFileSync(
       join(DOMAIN_ROOT, "adapters", "prisma-product-access-adapter.ts"),

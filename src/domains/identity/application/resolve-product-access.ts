@@ -6,19 +6,19 @@ import {
   type ProductAccessResult,
   type ResolveProductAccessInput,
 } from "../domain/access-decision";
-import type { ProductAccessPort } from "../ports/product-access-port";
+import type { AccessRepository } from "../ports/access-repository";
 
 const CUID_RE = /^c[0-9a-z]{24}$/;
 
 export interface ResolveProductAccessDeps {
-  port: ProductAccessPort;
+  port: AccessRepository;
 }
 
 /**
  * Identity & Access use case.
  *
  * Route/application code calls this use case; persistence is supplied through
- * ProductAccessPort. The ordering is deliberately the same as the legacy
+ * AccessRepository. The ordering is deliberately the same as the legacy
  * resolver so this first vertical slice is behavior-preserving.
  */
 export async function resolveProductAccess(

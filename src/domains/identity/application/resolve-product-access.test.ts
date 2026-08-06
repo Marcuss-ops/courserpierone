@@ -14,6 +14,7 @@ const ORDER_ID = "order-1";
 function createPort(): ProductAccessPort {
   return {
     resolveProductId: vi.fn().mockResolvedValue(PRODUCT_ID),
+    findProductCreator: vi.fn().mockResolvedValue(null),
     findActiveGrant: vi.fn().mockResolvedValue(null),
     findLatestUserOrder: vi.fn().mockResolvedValue(null),
     findAnonymousOrder: vi.fn().mockResolvedValue(null),
